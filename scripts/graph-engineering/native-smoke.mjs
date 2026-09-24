@@ -4,6 +4,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import path from "node:path";
 import { createIsolation, instruction } from "./isolation.mjs";
+import { approveNativePermissionOnce } from "./native-permission.mjs";
 import {
   COMPANION_COMPLETION,
   COMPANION_INSTRUCTION,
@@ -275,7 +276,7 @@ try {
     await window.getByRole("option", { name: "Allow", exact: true }).waitFor({ timeout: 45000 });
     await capture(`${mode}-native-permission`);
     // 明确批准此合成 Edit 一次；不授予项目/会话全权，不修改权限模式。
-    await window.getByRole("option", { name: "Allow", exact: true }).press("Enter");
+    await approveNativePermissionOnce(window);
     await window
       .getByText("node --test fixture.test.mjs", { exact: true })
       .first()
@@ -289,7 +290,7 @@ try {
       { timeout: 30000 },
     );
     const allow = window.getByRole("option", { name: "Allow", exact: true });
-    if (await allow.isVisible()) await allow.press("Enter");
+    if (await allow.isVisible()) await approveNativePermissionOnce(window);
     await window
       .getByText("Controlled provider finished the native Read, Edit, and Bash sequence.", {
         exact: false,

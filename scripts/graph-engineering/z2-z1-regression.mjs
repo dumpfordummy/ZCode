@@ -4,6 +4,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import path from "node:path";
 import { createIsolation, instruction } from "./isolation.mjs";
+import { approveNativePermissionOnce } from "./native-permission.mjs";
 import {
   captureNative,
   readGraphRecord,
@@ -49,7 +50,7 @@ try {
     waiting.sessionId,
   );
   await window.getByTestId("graph-input-owned").waitFor();
-  await window.getByRole("option", { name: "Allow", exact: true }).press("Enter");
+  await approveNativePermissionOnce(window);
   await window.waitForFunction(
     () =>
       document.body.innerText.includes("Controlled provider finished") ||
@@ -58,7 +59,7 @@ try {
     { timeout: 45000 },
   );
   const allow = window.getByRole("option", { name: "Allow", exact: true });
-  if (await allow.isVisible()) await allow.press("Enter");
+  if (await allow.isVisible()) await approveNativePermissionOnce(window);
   await window
     .getByText("Controlled provider finished the native Read, Edit, and Bash sequence.", {
       exact: false,

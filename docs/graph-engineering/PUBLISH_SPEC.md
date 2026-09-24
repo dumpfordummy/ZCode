@@ -39,6 +39,8 @@ The workflow retains manual artifact-only builds. Tag builds publish prereleases
 
 Use the existing detached executable launcher and controlled loopback provider. Z2 cases cover completion with multiple sessions/bindings, native questions, cancellation, interrupted restarts and conservative inactive release; retain literal Z1 and ordinary Chat/no-provider regression cases. Read Graph records/native ledger from the isolated packaged profile when present and the development profile otherwise. Never inspect an installed profile. Keep the packaged entry unmodified. Fault-injection acceptance remains explicitly labelled and does not establish uninstrumented recovery in every environment.
 
+Consecutive synthetic Edit/Bash permission approvals must await removal of the specific first dialog before observing the next permission. The native interaction component keys dialogs by interaction ID; its old Allow element detaching is the UI acknowledgement boundary. Merely finding an Allow button again can match the still-pending Edit response and miss the later Bash prompt. Do not add a fixed delay, grant full access, change product permission defaults or infer approval from a click.
+
 ## Acceptance
 
 - Unit tests cover invalid versions/arguments, wrong or multiple remotes, dirty worktrees, no-write dry-run, tag collisions, resume and push failure, workflow correlation/failure/timeout, release collision, missing assets and success.
