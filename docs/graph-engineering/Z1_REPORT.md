@@ -2,9 +2,13 @@
 
 Date/timezone: 2026-09-24, Asia/Kuala_Lumpur. Checkout: `C:\Users\USER\Desktop\Personal\ZCode`. Repository: `https://github.com/dumpfordummy/ZCode.git`. Branch: `main`. Starting HEAD: `328c1a0c0ffaa5a4f65e8fa199af5e4c20706e5f` (commit subject `feat: update v3.14.3`; package version is 3.14.0). This report records the native implementation phase. Subsequent Windows packaging, detached executable checks and user-authorized Git publication are recorded in [WINDOWS_DISTRIBUTION_REPORT.md](WINDOWS_DISTRIBUTION_REPORT.md).
 
-Status: **IMPLEMENTED — READY FOR USER AGENT CHECK**, with the verification failures and unavailable checks qualified below. User-operated real-provider acceptance is **NOT RUN**.
+Status at Z1 handoff: **IMPLEMENTED — READY FOR USER AGENT CHECK**, with the verification failures and unavailable checks qualified below. User-operated real-provider acceptance was **NOT RUN**. See the subsequent user-evidence/progression addendum below; historical automated results are unchanged.
 
-The initial worktree contained untracked `README_Z1_HANDOFF.md` and `docs/`, including the supplied assignment documents. They were preserved. The old standalone prototype was not accessed. No M4 work was started or cancelled. At the end of this implementation phase, no migration, staging, commit, push, merge or Z2 work had been performed. The user's later distribution request explicitly authorized Git publication; Z2 remains excluded.
+## Subsequent user evidence and Z2 progression
+
+The lead's 2026-09-24 review accepts native Z1 integration for development progression and authorizes Z2. The user-supplied screenshots establish a greeting and native Chat navigation. They do not independently establish matching Chat session IDs, real project Read/Edit/test, permission behavior, cancellation or completed-history restart. Those live user-operated checks remain **NOT RUN / unconfirmed** and are carried into [Z2_MANUAL_CHECK.md](Z2_MANUAL_CHECK.md). Current native development status is tracked in [PROGRESS.md](PROGRESS.md) and [Z2_REPORT.md](Z2_REPORT.md). Z1's subsequent authorized Windows publication is preserved.
+
+The initial worktree contained untracked `README_Z1_HANDOFF.md` and `docs/`, including the supplied assignment documents. They were preserved. The old standalone prototype was not accessed. No M4 work was started or cancelled. At the end of this implementation phase, no migration, staging, commit, push, merge or Z2 work had been performed. The user's later distribution request explicitly authorized Git publication; Z2 was excluded from that distribution assignment and is now separately authorized by the new Z2 assignment.
 
 ## Baseline and isolation
 
@@ -248,4 +252,4 @@ Only profiles created by this launcher below this checkout's `.tmp` are accepted
 
 ## Gate
 
-Native controlled-provider execution, ordinary Chat regression, same-session identity, permission/question handling, cancellation with a surviving unrelated session, completed restart and interrupted restart are evidenced. User real-provider proof and final acceptance remain **NOT RUN** / the lead's decision. Z2 remains unauthorized.
+Native controlled-provider execution, ordinary Chat regression, same-session identity, permission/question handling, cancellation with a surviving unrelated session, completed restart and interrupted restart are evidenced. User real-provider proof and final acceptance remain **NOT RUN** / the lead's decision. Z2 was unauthorized at this historical handoff; the subsequent lead/user assignment now authorizes Z2 development only.

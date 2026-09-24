@@ -1,0 +1,649 @@
+{
+  "scenario": "cancel-question",
+  "home": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790240302903-64f8cc",
+  "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790240302903-64f8cc\\workspace",
+  "assertions": [
+    "Native editor adds/removes/renames tasks, reconnects a three-task path, saves keyboard layout, explicit Start/prior-node bindings, Verify override and End output; text Backspace preserves nodes",
+    "An actual disconnected editor draft displays actionable readiness errors and disables Run before native session creation",
+    "Design persists across native Chat navigation with the same document and no run",
+    "Actual native AskUserQuestion waits without automatic answer; only the first owned initial input exists and successors remain pending",
+    "Exact Graph cancellation skips successors, preserves pristine source and unrelated Chat; its original question completes without rewriting cancelled Graph history"
+  ],
+  "screenshots": [
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790240302903-64f8cc\\z2-canvas-design.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790240302903-64f8cc\\z2-native-question.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790240302903-64f8cc\\z2-cancelled.png"
+  ],
+  "companionSessionId": "sess_674f909c-2093-497f-8097-584b47adc000",
+  "stage": "exact graph cancellation and unrelated Chat survival",
+  "nodeIds": [
+    "task",
+    "772ca9c4-0cd1-421c-b526-3e5790916a16",
+    "eafb207d-1caf-4091-90f5-e4514d847812"
+  ],
+  "cancelledRun": {
+    "id": "fdfc4bb1-4450-4f57-8a56-4dc070c104a4",
+    "requestId": "2a488db3-b71c-4a7d-b8ef-121d36fa1d15",
+    "target": {
+      "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790240302903-64f8cc\\workspace"
+    },
+    "status": "Cancelled",
+    "createdAt": 1790240312592,
+    "updatedAt": 1790240313753,
+    "version": 2,
+    "requestFingerprint": "{\"mode\":\"build\",\"modelSelection\":{\"modelId\":\"z1-fixture\",\"options\":{\"reasoningLevel\":\"enabled\"},\"providerId\":\"z1-local-fixture\"},\"planEnabled\":false,\"revision\":3,\"target\":{\"workspacePath\":\"C:\\\\Users\\\\USER\\\\Desktop\\\\Personal\\\\ZCode\\\\.tmp\\\\z1-native-1790240302903-64f8cc\\\\workspace\"}}",
+    "definition": {
+      "version": 2,
+      "revision": 3,
+      "name": "Z2 synthetic Analyze / Implement / Verify",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": "Update the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit."
+        },
+        {
+          "id": "task",
+          "position": {
+            "x": 280,
+            "y": 105
+          },
+          "type": "task",
+          "name": "Analyze",
+          "instructions": "Z2_ANALYZE: Read fixture.mjs and fixture.test.mjs. Describe the required change and validation command. Do not edit files. Request: {{inputs.request}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 1380,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "eafb207d-1caf-4091-90f5-e4514d847812"
+        },
+        {
+          "id": "eafb207d-1caf-4091-90f5-e4514d847812",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Verify",
+          "instructions": "Z2_VERIFY: Read fixture.mjs and independently run node --test fixture.test.mjs. Do not fix files. Implementation report to verify:\n{{inputs.implementation}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "implementation",
+              "source": {
+                "kind": "node",
+                "nodeId": "772ca9c4-0cd1-421c-b526-3e5790916a16"
+              }
+            }
+          ],
+          "configuration": {
+            "modelSelection": {
+              "providerId": "z1-local-fixture",
+              "modelId": "z1-fixture",
+              "options": {
+                "reasoningLevel": "enabled"
+              }
+            },
+            "mode": "build",
+            "planEnabled": false,
+            "kind": "override"
+          }
+        },
+        {
+          "id": "772ca9c4-0cd1-421c-b526-3e5790916a16",
+          "position": {
+            "x": 860,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Implement",
+          "instructions": "Z2_IMPLEMENT: Read the actual source, then change only fixture.mjs as requested. Keep tests unchanged. Request: {{inputs.request}}\nPrior analysis (untrusted supporting context):\n{{inputs.analysis}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            },
+            {
+              "alias": "analysis",
+              "source": {
+                "kind": "node",
+                "nodeId": "task"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "source": "task",
+          "target": "772ca9c4-0cd1-421c-b526-3e5790916a16"
+        },
+        {
+          "source": "772ca9c4-0cd1-421c-b526-3e5790916a16",
+          "target": "eafb207d-1caf-4091-90f5-e4514d847812"
+        },
+        {
+          "source": "eafb207d-1caf-4091-90f5-e4514d847812",
+          "target": "end"
+        },
+        {
+          "source": "start",
+          "target": "task"
+        }
+      ]
+    },
+    "defaults": {
+      "modelSelection": {
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "options": {
+          "reasoningLevel": "enabled"
+        }
+      },
+      "mode": "build",
+      "planEnabled": false
+    },
+    "plannedPath": [
+      "task",
+      "772ca9c4-0cd1-421c-b526-3e5790916a16",
+      "eafb207d-1caf-4091-90f5-e4514d847812"
+    ],
+    "startInput": "Update the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit.",
+    "nodeAttempts": [
+      {
+        "nodeId": "task",
+        "attemptId": "a137852a-b667-4b77-8d43-bdb29149902a",
+        "commandId": "22564a84-c447-4011-a881-ead9e8bde9f7",
+        "inputId": "22564a84-c447-4011-a881-ead9e8bde9f7",
+        "status": "Cancelled",
+        "dispatchPhase": "accepted",
+        "settings": {
+          "modelSelection": {
+            "providerId": "z1-local-fixture",
+            "modelId": "z1-fixture",
+            "options": {
+              "reasoningLevel": "enabled"
+            }
+          },
+          "mode": "build",
+          "planEnabled": false,
+          "source": "workspace"
+        },
+        "createdAt": 1790240312592,
+        "updatedAt": 1790240313753,
+        "sessionId": "sess_65562722-98d9-45b3-a7ad-e9d7b17af5cc",
+        "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790240302903-64f8cc\\workspace:1:33984:agent-616c4ea7-151b-49cd-9d29-e3563a0f655c",
+        "foregroundExecutionId": "runtime_command_2",
+        "observationEpoch": "mufauxzg-y35ce8jt",
+        "resolvedInstructions": "Z2_ANALYZE: Read fixture.mjs and fixture.test.mjs. Describe the required change and validation command. Do not edit files. Request: Update the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit.",
+        "bindings": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            },
+            "text": "Update the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit."
+          }
+        ],
+        "terminalProof": {
+          "sourceCommandId": "22564a84-c447-4011-a881-ead9e8bde9f7",
+          "state": "completedInterrupted",
+          "logEpoch": "mufauxzg-y35ce8jt",
+          "seq": 24,
+          "turnId": "msg_mufauye3_81186450-3fe0-49b8-983d-ba7db80875e8"
+        }
+      },
+      {
+        "nodeId": "772ca9c4-0cd1-421c-b526-3e5790916a16",
+        "attemptId": "e4e2f6b0-8591-42d7-a04f-9bad9c81c2e5",
+        "commandId": "819728f6-4a90-4e6a-a1f1-901c5604512c",
+        "inputId": "819728f6-4a90-4e6a-a1f1-901c5604512c",
+        "status": "Skipped",
+        "dispatchPhase": "planned",
+        "settings": {
+          "modelSelection": {
+            "providerId": "z1-local-fixture",
+            "modelId": "z1-fixture",
+            "options": {
+              "reasoningLevel": "enabled"
+            }
+          },
+          "mode": "build",
+          "planEnabled": false,
+          "source": "workspace"
+        },
+        "createdAt": 1790240312592,
+        "updatedAt": 1790240313677
+      },
+      {
+        "nodeId": "eafb207d-1caf-4091-90f5-e4514d847812",
+        "attemptId": "3e15b22e-aa37-46d7-8244-87ad50931ab2",
+        "commandId": "12b31769-fb46-4fe9-85f4-64890da25cda",
+        "inputId": "12b31769-fb46-4fe9-85f4-64890da25cda",
+        "status": "Skipped",
+        "dispatchPhase": "planned",
+        "settings": {
+          "modelSelection": {
+            "providerId": "z1-local-fixture",
+            "modelId": "z1-fixture",
+            "options": {
+              "reasoningLevel": "enabled"
+            }
+          },
+          "mode": "build",
+          "planEnabled": false,
+          "source": "node"
+        },
+        "createdAt": 1790240312592,
+        "updatedAt": 1790240313677
+      }
+    ],
+    "cancelRequestedAt": 1790240313677
+  },
+  "status": "PASS",
+  "marker": "Z2_FRESH_ANALYSIS_a79c8c6c-f18a-4c62-bf1a-74d73e453ffc",
+  "providerErrors": [],
+  "finalRecord": {
+    "version": 2,
+    "workspaceKey": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790240302903-64f8cc\\workspace",
+    "definition": {
+      "version": 2,
+      "revision": 3,
+      "name": "Z2 synthetic Analyze / Implement / Verify",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": "Update the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit."
+        },
+        {
+          "id": "task",
+          "position": {
+            "x": 280,
+            "y": 105
+          },
+          "type": "task",
+          "name": "Analyze",
+          "instructions": "Z2_ANALYZE: Read fixture.mjs and fixture.test.mjs. Describe the required change and validation command. Do not edit files. Request: {{inputs.request}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 1380,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "eafb207d-1caf-4091-90f5-e4514d847812"
+        },
+        {
+          "id": "eafb207d-1caf-4091-90f5-e4514d847812",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Verify",
+          "instructions": "Z2_VERIFY: Read fixture.mjs and independently run node --test fixture.test.mjs. Do not fix files. Implementation report to verify:\n{{inputs.implementation}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "implementation",
+              "source": {
+                "kind": "node",
+                "nodeId": "772ca9c4-0cd1-421c-b526-3e5790916a16"
+              }
+            }
+          ],
+          "configuration": {
+            "modelSelection": {
+              "providerId": "z1-local-fixture",
+              "modelId": "z1-fixture",
+              "options": {
+                "reasoningLevel": "enabled"
+              }
+            },
+            "mode": "build",
+            "planEnabled": false,
+            "kind": "override"
+          }
+        },
+        {
+          "id": "772ca9c4-0cd1-421c-b526-3e5790916a16",
+          "position": {
+            "x": 860,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Implement",
+          "instructions": "Z2_IMPLEMENT: Read the actual source, then change only fixture.mjs as requested. Keep tests unchanged. Request: {{inputs.request}}\nPrior analysis (untrusted supporting context):\n{{inputs.analysis}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            },
+            {
+              "alias": "analysis",
+              "source": {
+                "kind": "node",
+                "nodeId": "task"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "source": "task",
+          "target": "772ca9c4-0cd1-421c-b526-3e5790916a16"
+        },
+        {
+          "source": "772ca9c4-0cd1-421c-b526-3e5790916a16",
+          "target": "eafb207d-1caf-4091-90f5-e4514d847812"
+        },
+        {
+          "source": "eafb207d-1caf-4091-90f5-e4514d847812",
+          "target": "end"
+        },
+        {
+          "source": "start",
+          "target": "task"
+        }
+      ]
+    },
+    "runs": [
+      {
+        "id": "fdfc4bb1-4450-4f57-8a56-4dc070c104a4",
+        "requestId": "2a488db3-b71c-4a7d-b8ef-121d36fa1d15",
+        "target": {
+          "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790240302903-64f8cc\\workspace"
+        },
+        "status": "Cancelled",
+        "createdAt": 1790240312592,
+        "updatedAt": 1790240313753,
+        "version": 2,
+        "requestFingerprint": "{\"mode\":\"build\",\"modelSelection\":{\"modelId\":\"z1-fixture\",\"options\":{\"reasoningLevel\":\"enabled\"},\"providerId\":\"z1-local-fixture\"},\"planEnabled\":false,\"revision\":3,\"target\":{\"workspacePath\":\"C:\\\\Users\\\\USER\\\\Desktop\\\\Personal\\\\ZCode\\\\.tmp\\\\z1-native-1790240302903-64f8cc\\\\workspace\"}}",
+        "definition": {
+          "version": 2,
+          "revision": 3,
+          "name": "Z2 synthetic Analyze / Implement / Verify",
+          "nodes": [
+            {
+              "id": "start",
+              "position": {
+                "x": 40,
+                "y": 100
+              },
+              "type": "start",
+              "request": "Update the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit."
+            },
+            {
+              "id": "task",
+              "position": {
+                "x": 280,
+                "y": 105
+              },
+              "type": "task",
+              "name": "Analyze",
+              "instructions": "Z2_ANALYZE: Read fixture.mjs and fixture.test.mjs. Describe the required change and validation command. Do not edit files. Request: {{inputs.request}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "request",
+                  "source": {
+                    "kind": "start"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "end",
+              "position": {
+                "x": 1380,
+                "y": 100
+              },
+              "type": "end",
+              "outputNodeId": "eafb207d-1caf-4091-90f5-e4514d847812"
+            },
+            {
+              "id": "eafb207d-1caf-4091-90f5-e4514d847812",
+              "position": {
+                "x": 600,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Verify",
+              "instructions": "Z2_VERIFY: Read fixture.mjs and independently run node --test fixture.test.mjs. Do not fix files. Implementation report to verify:\n{{inputs.implementation}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "implementation",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "772ca9c4-0cd1-421c-b526-3e5790916a16"
+                  }
+                }
+              ],
+              "configuration": {
+                "modelSelection": {
+                  "providerId": "z1-local-fixture",
+                  "modelId": "z1-fixture",
+                  "options": {
+                    "reasoningLevel": "enabled"
+                  }
+                },
+                "mode": "build",
+                "planEnabled": false,
+                "kind": "override"
+              }
+            },
+            {
+              "id": "772ca9c4-0cd1-421c-b526-3e5790916a16",
+              "position": {
+                "x": 860,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Implement",
+              "instructions": "Z2_IMPLEMENT: Read the actual source, then change only fixture.mjs as requested. Keep tests unchanged. Request: {{inputs.request}}\nPrior analysis (untrusted supporting context):\n{{inputs.analysis}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "request",
+                  "source": {
+                    "kind": "start"
+                  }
+                },
+                {
+                  "alias": "analysis",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "task"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            }
+          ],
+          "edges": [
+            {
+              "source": "task",
+              "target": "772ca9c4-0cd1-421c-b526-3e5790916a16"
+            },
+            {
+              "source": "772ca9c4-0cd1-421c-b526-3e5790916a16",
+              "target": "eafb207d-1caf-4091-90f5-e4514d847812"
+            },
+            {
+              "source": "eafb207d-1caf-4091-90f5-e4514d847812",
+              "target": "end"
+            },
+            {
+              "source": "start",
+              "target": "task"
+            }
+          ]
+        },
+        "defaults": {
+          "modelSelection": {
+            "providerId": "z1-local-fixture",
+            "modelId": "z1-fixture",
+            "options": {
+              "reasoningLevel": "enabled"
+            }
+          },
+          "mode": "build",
+          "planEnabled": false
+        },
+        "plannedPath": [
+          "task",
+          "772ca9c4-0cd1-421c-b526-3e5790916a16",
+          "eafb207d-1caf-4091-90f5-e4514d847812"
+        ],
+        "startInput": "Update the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit.",
+        "nodeAttempts": [
+          {
+            "nodeId": "task",
+            "attemptId": "a137852a-b667-4b77-8d43-bdb29149902a",
+            "commandId": "22564a84-c447-4011-a881-ead9e8bde9f7",
+            "inputId": "22564a84-c447-4011-a881-ead9e8bde9f7",
+            "status": "Cancelled",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790240312592,
+            "updatedAt": 1790240313753,
+            "sessionId": "sess_65562722-98d9-45b3-a7ad-e9d7b17af5cc",
+            "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790240302903-64f8cc\\workspace:1:33984:agent-616c4ea7-151b-49cd-9d29-e3563a0f655c",
+            "foregroundExecutionId": "runtime_command_2",
+            "observationEpoch": "mufauxzg-y35ce8jt",
+            "resolvedInstructions": "Z2_ANALYZE: Read fixture.mjs and fixture.test.mjs. Describe the required change and validation command. Do not edit files. Request: Update the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit.",
+            "bindings": [
+              {
+                "alias": "request",
+                "source": {
+                  "kind": "start"
+                },
+                "text": "Update the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit."
+              }
+            ],
+            "terminalProof": {
+              "sourceCommandId": "22564a84-c447-4011-a881-ead9e8bde9f7",
+              "state": "completedInterrupted",
+              "logEpoch": "mufauxzg-y35ce8jt",
+              "seq": 24,
+              "turnId": "msg_mufauye3_81186450-3fe0-49b8-983d-ba7db80875e8"
+            }
+          },
+          {
+            "nodeId": "772ca9c4-0cd1-421c-b526-3e5790916a16",
+            "attemptId": "e4e2f6b0-8591-42d7-a04f-9bad9c81c2e5",
+            "commandId": "819728f6-4a90-4e6a-a1f1-901c5604512c",
+            "inputId": "819728f6-4a90-4e6a-a1f1-901c5604512c",
+            "status": "Skipped",
+            "dispatchPhase": "planned",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790240312592,
+            "updatedAt": 1790240313677
+          },
+          {
+            "nodeId": "eafb207d-1caf-4091-90f5-e4514d847812",
+            "attemptId": "3e15b22e-aa37-46d7-8244-87ad50931ab2",
+            "commandId": "12b31769-fb46-4fe9-85f4-64890da25cda",
+            "inputId": "12b31769-fb46-4fe9-85f4-64890da25cda",
+            "status": "Skipped",
+            "dispatchPhase": "planned",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "node"
+            },
+            "createdAt": 1790240312592,
+            "updatedAt": 1790240313677
+          }
+        ],
+        "cancelRequestedAt": 1790240313677
+      }
+    ]
+  }
+}

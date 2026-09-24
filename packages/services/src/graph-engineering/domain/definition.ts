@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { isRemoteWorkspaceIdentity } from "@zcode/shared";
-import type { GraphDefinition, GraphRun, GraphWorkspaceTarget } from "../contract.js";
+import type {
+  GraphDefinition,
+  GraphLegacyDefinition,
+  GraphReadiness,
+  GraphRun,
+  GraphWorkspaceTarget,
+} from "../contract.js";
+import { sequentialDefinitionSchema, sequentialReadiness } from "./sequential.js";
 
 export const targetSchema = z
   .object({
@@ -15,11 +22,12 @@ export function workspaceKey(target: GraphWorkspaceTarget): string {
 export function localTarget(value: unknown): GraphWorkspaceTarget {
   const target = targetSchema.parse(value);
   if (target.remoteSessionId || isRemoteWorkspaceIdentity(target.workspaceIdentity?.trim() ?? ""))
-    throw new Error("Z1 supports local workspaces only.");
+    throw new Error("Graph Engineering supports local workspaces only.");
   return target;
 }
-export const definitionSchema = z
+export const legacyDefinitionSchema = z
   .object({
+    version: z.undefined().optional(),
     revision: z.number().int().nonnegative(),
     name: z.string().trim().min(1).max(200),
     taskName: z.string().trim().min(1).max(200),
@@ -38,9 +46,12 @@ export const definitionSchema = z
     edges: z.array(z.object({ source: z.string(), target: z.string() }).strict()).length(2),
   })
   .strict();
+export const definitionSchema = z.union([legacyDefinitionSchema, sequentialDefinitionSchema]);
 
 export function validateDefinition(value: unknown): GraphDefinition {
-  const parsed = definitionSchema.safeParse(value);
+  if (value && typeof value === "object" && "version" in value)
+    return sequentialDefinitionSchema.parse(value);
+  const parsed = legacyDefinitionSchema.safeParse(value);
   if (!parsed.success)
     throw new Error("Z1 requires Start -> Agent Task -> End with valid names and positions.");
   const definition = parsed.data;
@@ -63,7 +74,7 @@ export function validateDefinition(value: unknown): GraphDefinition {
   return definition;
 }
 
-export function defaultDefinition(): GraphDefinition {
+export function defaultDefinition(): GraphLegacyDefinition {
   return {
     revision: 0,
     name: "Graph Engineering",
@@ -82,5 +93,26 @@ export function defaultDefinition(): GraphDefinition {
 }
 
 export function isConfirmedTerminal(run: GraphRun): boolean {
-  return run.status === "Completed" || run.status === "Failed" || run.status === "Cancelled";
+  return (
+    Boolean(run.release) ||
+    run.status === "Completed" ||
+    run.status === "Failed" ||
+    run.status === "Cancelled"
+  );
+}
+
+export function validateReadiness(value: unknown): GraphReadiness {
+  try {
+    const definition = validateDefinition(value);
+    if (definition.version === 2) return sequentialReadiness(definition);
+    return {
+      errors: definition.instructions.trim() ? [] : ["Agent Task instructions are required."],
+      path: definition.nodes.filter((n) => n.type === "task").map((n) => n.id),
+    };
+  } catch (error) {
+    return {
+      errors: [error instanceof Error ? error.message : "Invalid graph document."],
+      path: [],
+    };
+  }
 }

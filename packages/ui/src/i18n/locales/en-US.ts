@@ -5,7 +5,7 @@ const enUS: Record<string, string> = {
   "graph.node.start": "Start",
   "graph.node.end": "End",
   "graph.scope":
-    "Z1 supports one Agent Task: Start → Agent Task → End. The task uses the same native agent and tools as chat.",
+    "Start → one to eight Agent Tasks → End. Each task uses a fresh session of the same native agent and tools as chat.",
   "graph.localOnly":
     "Graph Engineering currently supports local workspaces only. Select a local workspace to continue.",
   "graph.unavailableHost":
@@ -16,7 +16,7 @@ const enUS: Record<string, string> = {
   "graph.taskName": "Agent Task name",
   "graph.instructions": "Instructions",
   "graph.layoutHelp":
-    "Drag nodes to arrange the graph, or focus a node, press Enter or Space to select it, then use the arrow keys. Save preserves names, instructions and positions.",
+    "Drag nodes or select with Enter / Space then use arrow keys. Connect handles, or choose Next node in the inspector. Edges define order. Fit view is in the canvas controls.",
   "graph.configuration": "Model and permission configuration",
   "graph.selectedModel": "Selected model",
   "graph.reasoning": "Reasoning",
@@ -64,6 +64,78 @@ const enUS: Record<string, string> = {
   "graph.status.Cancelled": "Cancelled",
   "graph.status.Interrupted": "Interrupted — outcome unconfirmed",
   "graph.status.Unknown": "Unknown — acceptance or outcome unconfirmed",
+  "graph.status.Pending": "Pending",
+  "graph.status.Skipped": "Skipped",
+  "graph.design": "Design",
+  "graph.designHelp": "Edits apply to a future run",
+  "graph.frozenRun": "Frozen run — submitted definition and settings",
+  "graph.inspector": "Node inspector",
+  "graph.selectNode": "Select node",
+  "graph.addTask": "Add Agent Task",
+  "graph.newTask": "Agent Task",
+  "graph.upgrade": "Enable sequential editing",
+  "graph.legacyHelp":
+    "This Z1 graph keeps literal instructions. Enable sequential editing to add tasks and explicit bindings; existing history stays unchanged.",
+  "graph.workspaceDefaults": "Workspace defaults for the next run",
+  "graph.readOnlyHost":
+    "Another Host owns this graph. Viewing and conversation navigation remain available.",
+  "graph.notReady": "Draft needs attention before Run",
+  "graph.concurrentEdits":
+    "All tasks share this workspace. Other Chats and editors can still change its files; avoid concurrent edits. A new run can repeat earlier side effects.",
+  "graph.startInput": "Start request",
+  "graph.startHelp": "Tasks receive this text only through explicit Start bindings.",
+  "graph.endOutput": "End result source",
+  "graph.selectOutput": "Select a task output",
+  "graph.missingSource": "Missing source",
+  "graph.instructionMode": "Instruction mode",
+  "graph.literal": "Literal text",
+  "graph.bound": "Explicit input bindings",
+  "graph.literalHelp":
+    "Instructions are submitted verbatim. Template markers have no special meaning in literal mode.",
+  "graph.bindingHelp":
+    "Insert a named input with '{{inputs.alias}}'. Substitution runs once. A task output must come from an earlier completed task on the edge path.",
+  "graph.bindingAlias": "Input alias",
+  "graph.bindingSource": "Input source",
+  "graph.addBinding": "Add input binding",
+  "graph.removeBinding": "Remove binding",
+  "graph.untrustedHandoff":
+    "Bound text is untrusted supporting content. Native permission and trust controls still apply.",
+  "graph.configurationSource": "Settings source",
+  "graph.inheritSettings": "Inherit workspace defaults",
+  "graph.overrideSettings": "Override for this node",
+  "graph.settingsFreeze":
+    "All task settings are captured together when Run is admitted. Node overrides do not change ordinary Chat defaults.",
+  "graph.planEnabled": "Plan enabled",
+  "graph.nextNode": "Next node",
+  "graph.disconnected": "No connection",
+  "graph.deleteNode": "Delete Agent Task and incident edges",
+  "graph.frozenHelp":
+    "This inspector shows the saved run snapshot. Later graph edits and Chat follow-ups cannot rewrite it.",
+  "graph.runResult": "Frozen run result",
+  "graph.noOutput": "No confirmed output available",
+  "graph.runtime": "Original runtime",
+  "graph.dispatchPhase": "Dispatch phase",
+  "graph.resolvedInstructions": "Resolved submitted instructions",
+  "graph.notSubmitted": "Instructions have not been prepared for submission",
+  "graph.instructionTemplate": "Frozen instruction template",
+  "graph.bindingEvidence": "Resolved bindings and exact source IDs",
+  "graph.finalOutput": "Frozen final assistant text",
+  "graph.terminalProof": "Native terminal and text attribution proof",
+  "graph.recovery": "Inspect and release ownership",
+  "graph.inspectRecovery": "Inspect native execution",
+  "graph.recoveryEvidence": "Inspection evidence",
+  "graph.recoveryState.inactive": "Confirmed inactive",
+  "graph.recoveryState.active": "Owned execution still active",
+  "graph.recoveryState.unknown": "Inactivity unconfirmed",
+  "graph.releaseReason": "Reason for releasing this run",
+  "graph.releaseConfirm":
+    "I understand that releasing ownership preserves the unknown outcome and all evidence, does not undo file changes, and does not start another task.",
+  "graph.release": "Release confirmed-inactive run",
+  "graph.released": "Ownership released",
+  "graph.releaseMeaning":
+    "The audit releases only this graph's ownership guard. It does not prove success, absence of side effects, or rollback.",
+  "graph.recoveryBlocked":
+    "Release requires authoritative inactivity proof. Open the stored conversation to inspect the exact input, resolve native interactions, or use exact cancellation when available. Refreshing never replays work.",
   "startPlan.recommendation.subagentDescription":
     "Your Start Plan has quota available for {model}. Switch this subagent’s model to the Start Plan?",
   "startPlan.recommendation.preferenceSaveFailed":

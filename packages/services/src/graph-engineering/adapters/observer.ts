@@ -10,6 +10,34 @@ import {
 } from "@zcode/shared/zcode-protocol-v4";
 import type { GraphNativeFact } from "../app/ports.js";
 
+const MAX_FINAL_OUTPUT_LENGTH = 100_000;
+
+function finalOutput(
+  snapshot: ConversationSnapshot,
+  turnId: string,
+): Pick<GraphNativeFact, "finalOutput" | "outputIssue"> {
+  const row = snapshot.rows.window.findLast(
+    (item) => item.kind === "assistantText" && item.turnId === turnId,
+  );
+  if (!row || row.kind !== "assistantText" || row.state !== "complete" || !row.text.trim()) {
+    return { outputIssue: "The exact completed native input has no usable final assistant text." };
+  }
+  if (row.text.length > MAX_FINAL_OUTPUT_LENGTH) {
+    return {
+      outputIssue: `The final assistant text exceeds the ${MAX_FINAL_OUTPUT_LENGTH}-character handoff limit.`,
+    };
+  }
+  return {
+    finalOutput: {
+      text: row.text,
+      turnId: row.turnId,
+      rowId: row.rowId,
+      ...(row.entityId ? { entityId: row.entityId } : {}),
+      ...(row.assistantResponseId ? { assistantResponseId: row.assistantResponseId } : {}),
+    },
+  };
+}
+
 interface ObserverOptions {
   sessionId: string;
   commandId: string;
@@ -66,6 +94,8 @@ export function createGraphConversationObserver(options: ObserverOptions) {
     currentFact = {
       sourceCommandId: options.commandId,
       state: own?.state ?? "running",
+      ...(own ? { turnId: own.turnId } : {}),
+      ...(own?.state === "completedSuccess" ? finalOutput(snapshot, own.turnId) : {}),
       ...(interaction
         ? { waiting: interaction.kind === "userInput" ? "userInput" : "permission" }
         : {}),

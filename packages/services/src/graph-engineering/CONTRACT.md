@@ -1,4 +1,6 @@
-# Graph Engineering Z1
+# Graph Engineering
+
+Z2 extends this contract under `docs/graph-engineering/Z2_SPEC.md`. Version-2 definitions/runs are explicit unions with the unchanged unversioned Z1 formats. Save accepts shaped incomplete Z2 drafts; `validateDefinition` supplies authoritative readiness/path diagnostics. Run freezes every node's native settings and Start text, resolves explicit one-pass bindings, and serializes fresh native sessions. All unresolved run sessions remain guarded. Node outputs and terminal proof persist before any successor dispatch. Inspect/release are explicit, read-only reconciliation followed by audited inactive-only release; neither replays work. The sections below document retained Z1 integration invariants; Z2 now supplies the previously deferred reconciliation surface.
 
 The window Host owns saved graph metadata and immutable attempts. The native Agent remains the only owner of sessions, input admission, tools, permissions and runtime state. See `docs/graph-engineering/Z1_SPEC.md` for product acceptance and event ordering.
 

@@ -35,6 +35,7 @@ import type { ZCodeAgentPresentationSurface } from "./zcodeAgentPresentationSurf
 import { shouldSpawnInDetachedProcessGroup } from "../process/processTreeTerminator.js";
 import type { RuntimeProcessLifecycleReporter } from "../process/runtimeProcessLifecycle.js";
 import { buildAgentWorkspaceIdentityEnv } from "../runtime-tools/agentProxyEnv.js";
+import { RuntimeRetirementLedger, runtimeIdentityWithInstance } from "./runtimeRetirement.js";
 
 export interface ZCodeAgentCommand {
   /** 本地配套 CLI bundle 的存储专用 Worker 入口；远端/自定义命令不推断能力。 */
@@ -576,6 +577,7 @@ export class ZCodeAgentProcessManager {
   private readonly idleTimeoutMs: number | undefined;
   private readonly runtimeRestartedEmitter = new Emitter<ZCodeAgentRuntimeRestartedEvent>();
   private readonly runtimeLifecycleEmitter = new Emitter<ZCodeAgentRuntimeLifecycleEvent>();
+  private readonly retirements = new RuntimeRetirementLedger();
   private disposeAllInFlight: Promise<void> | undefined;
   private disposed = false;
 
@@ -746,8 +748,8 @@ export class ZCodeAgentProcessManager {
     // OS 进程已退出。将回收 Promise 绑在 managed process 上，timeout、restart 和
     // app quit 可以共用同一次幂等回收，Host 也不会丢失已退休进程的所有权。
     let cleanupCompleted = false;
-    const cleanupPromise = managed.client
-      .disposeAndWait()
+    const cleanupPromise = this.retirements
+      .afterCleanup(managed.runtimeIdentity, managed.client.disposeAndWait())
       .then(() => {
         cleanupCompleted = true;
         log("ZCode agent process cleanup completed", {
@@ -1092,9 +1094,13 @@ export class ZCodeAgentProcessManager {
     const runtimeInstanceId = `agent-${randomUUID()}`;
     const runtimeIdentity: ZCodeAgentRuntimeIdentity = {
       generation: runtimeGeneration,
-      identity: this.lane
-        ? `${workspaceKey}:${runtimeGeneration}:${child.pid ?? "unknown"}:${this.lane}`
-        : `${workspaceKey}:${runtimeGeneration}:${child.pid ?? "unknown"}`,
+      identity: runtimeIdentityWithInstance({
+        workspaceKey,
+        generation: runtimeGeneration,
+        processId: child.pid,
+        runtimeInstanceId,
+        lane: this.lane,
+      }),
       ...(typeof child.pid === "number" ? { processId: child.pid } : {}),
       ...(this.lane ? { lane: this.lane } : {}),
       workspaceKey,
@@ -1347,6 +1353,14 @@ export class ZCodeAgentProcessManager {
       throw new Error("ZCode agent runtime identity is unavailable.");
     }
     return managed.runtimeIdentity;
+  }
+
+  getRuntimeRetirement(params: {
+    workspacePath: string;
+    workspaceIdentity?: string;
+    expectedRuntimeIdentity: string;
+  }) {
+    return this.retirements.get(resolveWorkspaceKey(params), params.expectedRuntimeIdentity);
   }
 
   async canStart(params: {

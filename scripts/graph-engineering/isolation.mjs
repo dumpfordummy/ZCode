@@ -12,7 +12,12 @@ import { createGraphProfile } from "../../packages/desktop/scripts/graph-profile
 export const root = path.resolve(fileURLToPath(new URL("../..", import.meta.url)));
 export const instruction =
   "Z1_SYNTHETIC_TASK: Read fixture.mjs, replace Z1_BEFORE_7391 with Z1_AFTER_7391, and run node --test fixture.test.mjs. Work only in this synthetic workspace.";
-export async function createIsolation({ manual = false, noProvider = false, profile } = {}) {
+export async function createIsolation({
+  manual = false,
+  noProvider = false,
+  profile,
+  fixtureFactory = startFixture,
+} = {}) {
   const packagedExe = process.env.Z1_PACKAGED_EXE;
   if (packagedExe && (manual || profile))
     throw new Error("Packaged acceptance requires a fresh automated profile.");
@@ -74,7 +79,7 @@ export async function createIsolation({ manual = false, noProvider = false, prof
         JSON.stringify({ kind: "z1-isolated-manual", version: 1 }),
       );
   }
-  const fixture = await startFixture(workspace);
+  const fixture = await fixtureFactory(workspace);
   const graphProfile = packagedExe ? createGraphProfile(path.join(home, "home")) : undefined;
   const settingsHome = graphProfile?.env.HOME ?? path.join(home, "home");
   const dataHome = graphProfile?.env.ZCODE_DATA_BASE_DIR ?? path.join(home, "data");
@@ -145,13 +150,15 @@ export async function createIsolation({ manual = false, noProvider = false, prof
     });
   const lines = [];
   let app;
-  const launch = async () => {
+  const launch = async ({ bootstrapEntry } = {}) => {
+    if (packagedExe && bootstrapEntry)
+      throw new Error("Packaged acceptance cannot replace the application entry point.");
     app = await electron.launch({
       executablePath: packagedExe ?? path.join(root, "node_modules/electron/dist/electron.exe"),
       args: [
         ...(packagedExe
           ? [`--proxy-server=${fixture.origin}`, "--proxy-bypass-list=127.0.0.1;localhost"]
-          : [path.join(root, "scripts/graph-engineering/native-bootstrap.cjs")]),
+          : [bootstrapEntry ?? path.join(root, "scripts/graph-engineering/native-bootstrap.cjs")]),
         "--open-workspace",
         workspace,
       ],
@@ -169,8 +176,9 @@ export async function createIsolation({ manual = false, noProvider = false, prof
     }
     const window = await app.firstWindow({ timeout: 30000 });
     await window.waitForLoadState("domcontentloaded");
-    const onboarding = window.getByRole("button", { name: "Exit onboarding", exact: true });
-    const useApiKey = window.getByRole("button", { name: "Use API key", exact: true });
+    // 手动 profile 会保留中文设置；以已有 test id 和两种已发布的引导标签识别启动页，不能强制改回英文。
+    const onboarding = window.getByRole("button", { name: /^(Exit onboarding|退出引导)$/ });
+    const useApiKey = window.getByTestId("login-use-api-key-button");
     await onboarding
       .or(window.getByTestId("v4-composer-input"))
       .or(window.getByTestId("graph-engineering-panel"))
@@ -187,8 +195,7 @@ export async function createIsolation({ manual = false, noProvider = false, prof
     if (await useApiKey.isVisible()) {
       await useApiKey.click();
       if (manual) return window;
-      if (noProvider)
-        await window.getByRole("button", { name: "Skip for now", exact: true }).click();
+      if (noProvider) await window.getByTestId("login-api-key-skip-button").click();
       await onboarding
         .or(window.getByTestId("graph-engineering-open"))
         .first()

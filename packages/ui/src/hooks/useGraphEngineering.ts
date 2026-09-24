@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { GraphDefinition, GraphWorkspaceView } from "@zcode/services";
+import type { GraphDefinition, GraphReadiness, GraphWorkspaceView } from "@zcode/services";
 import type { ModelSelection } from "@zcode/shared";
 import type { SubmissionMode } from "@zcode/shared/zcode-protocol-v4";
 import { useWorkspaceServicesResolution } from "@/hooks/useWorkspaceServices.js";
@@ -7,6 +7,10 @@ import {
   graphWorkspaceTarget,
   isLocalGraphTarget,
 } from "@/graph-engineering/graphEngineeringView.js";
+import {
+  captureGraphSubmission,
+  type GraphSubmission,
+} from "@/graph-engineering/graphSubmission.js";
 
 interface GraphScope {
   workspacePath: string;
@@ -39,7 +43,7 @@ export function useGraphEngineering(scope: GraphScope) {
   const [loading, setLoading] = useState(true);
   const [pending, setPending] = useState(false);
   const flight = useRef<number | null>(null);
-  const requestId = useRef<string | null>(null);
+  const submission = useRef<GraphSubmission | null>(null);
   const generation = useRef(0);
   const readSequence = useRef(0);
   const reload = useCallback(async () => {
@@ -51,6 +55,12 @@ export function useGraphEngineering(scope: GraphScope) {
       if (owner === generation.current && sequence === readSequence.current) {
         setView(next);
         setLoading(false);
+        // Host 已返回该 request 的持久化事实，丢失的 ACK 已得到对账；后续 Run 才是新意图。
+        if (
+          submission.current &&
+          next.runs.some((run) => run.requestId === submission.current?.requestId)
+        )
+          submission.current = null;
       }
     } catch (cause) {
       if (owner === generation.current && sequence === readSequence.current) {
@@ -66,7 +76,7 @@ export function useGraphEngineering(scope: GraphScope) {
     setError(null);
     setLoading(Boolean(service));
     setPending(false);
-    requestId.current = null;
+    submission.current = null;
     if (!service) return;
     const subscription = service.onDidChange(({ workspaceKey }) => {
       if (workspaceKey === targetKey) void reload();
@@ -79,14 +89,14 @@ export function useGraphEngineering(scope: GraphScope) {
   }, [service, target, targetKey, reload]);
 
   const act = useCallback(
-    async (operation: () => Promise<void>) => {
+    async <T>(operation: () => Promise<T>): Promise<T | undefined> => {
       const owner = generation.current;
       if (flight.current === owner) return;
       flight.current = owner;
       setPending(true);
       setError(null);
       try {
-        await operation();
+        return await operation();
       } catch (cause) {
         if (owner === generation.current)
           setError(cause instanceof Error ? cause.message : String(cause));
@@ -121,23 +131,20 @@ export function useGraphEngineering(scope: GraphScope) {
       act(async () => {
         if (!service) return;
         const owner = generation.current;
-        const dispatchId = requestId.current ?? crypto.randomUUID();
-        requestId.current = dispatchId;
-        const saved = await service.saveDefinition({
-          target,
+        const request = await captureGraphSubmission({
+          retained: submission.current,
           definition,
-          expectedRevision: definition.revision,
+          intent: { target, requestId: crypto.randomUUID(), modelSelection, mode, planEnabled },
+          save: (draft) =>
+            service.saveDefinition({ target, definition: draft, expectedRevision: draft.revision }),
         });
-        // 丢失 ACK 后保留同一 requestId；刷新只对账，不能盲目创建新输入。
-        await service.run({
-          target,
-          revision: saved.revision,
-          requestId: dispatchId,
-          modelSelection,
-          mode,
-          planEnabled,
-        });
-        if (owner === generation.current) requestId.current = null;
+        // 保存期间切工作区后不再派发；丢失 Run ACK 时保留同一 revision/config/request，禁止重新保存后重试。
+        if (owner !== generation.current) return;
+        submission.current = request;
+        const run = await service.run(request);
+        if (owner === generation.current && submission.current === request)
+          submission.current = null;
+        return owner === generation.current ? run.id : undefined;
       }),
     [act, service, target],
   );
@@ -160,8 +167,62 @@ export function useGraphEngineering(scope: GraphScope) {
     save,
     run,
     cancel,
+    inspectRecovery: useCallback(
+      (runId: string) =>
+        act(async () => {
+          await service?.inspectRecovery({ target, runId });
+        }),
+      [act, service, target],
+    ),
+    releaseInterrupted: useCallback(
+      (runId: string, reason: string) =>
+        act(async () => {
+          await service?.releaseInterrupted({ target, runId, reason, confirmed: true });
+        }),
+      [act, service, target],
+    ),
+    validate: useCallback(
+      async (definition: GraphDefinition): Promise<GraphReadiness> =>
+        service
+          ? service.validateDefinition({ definition })
+          : { errors: ["Graph service is unavailable."], path: [] },
+      [service],
+    ),
     reload,
   };
+}
+
+/** Validation reads are disposable projections; a stale reply cannot enable a newer draft. */
+export function useGraphReadiness(
+  definition: GraphDefinition,
+  validate: (definition: GraphDefinition) => Promise<GraphReadiness>,
+) {
+  const [result, setResult] = useState<{
+    definition: GraphDefinition;
+    value: GraphReadiness;
+  } | null>(null);
+  useEffect(() => {
+    let live = true;
+    void validate(definition).then(
+      (value) => {
+        if (live) setResult({ definition, value });
+      },
+      (error: unknown) => {
+        if (live)
+          setResult({
+            definition,
+            value: {
+              path: [],
+              errors: [error instanceof Error ? error.message : String(error)],
+            },
+          });
+      },
+    );
+    return () => {
+      live = false;
+    };
+  }, [definition, validate]);
+  return result?.definition === definition ? result.value : null;
 }
 
 /** UI indication only; the native Host guard remains authoritative, including other attachments. */

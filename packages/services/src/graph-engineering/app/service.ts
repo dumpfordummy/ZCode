@@ -1,117 +1,59 @@
-import { Emitter, type IDisposable } from "@zcode/rpc";
 import { modelSelectionSchema } from "@zcode/shared";
 import { submissionModeSchema } from "@zcode/shared/zcode-protocol-v4";
-import type { GraphRun, GraphWorkspaceTarget, IGraphEngineeringService } from "../contract.js";
+import type {
+  GraphLegacyRun,
+  GraphNativeSettings,
+  GraphNodeAttempt,
+  GraphRun,
+  GraphSequentialRun,
+  GraphTaskNode,
+  GraphWorkspaceTarget,
+  IGraphEngineeringService,
+} from "../contract.js";
 import {
   defaultDefinition,
   isConfirmedTerminal,
   localTarget,
   validateDefinition,
+  validateReadiness,
   workspaceKey,
 } from "../domain/definition.js";
-import type { GraphNativeFact, GraphNativePort, GraphRecord, GraphRepository } from "./ports.js";
+import { runFingerprint } from "./attempts.js";
+import { GraphRecovery } from "./recovery.js";
+import { GraphSequencer } from "./sequencer.js";
+import { GraphState, MetadataOwnedElsewhere, type GraphOptions } from "./state.js";
 
-interface Options {
-  repository: GraphRepository;
-  native: GraphNativePort;
-  id(): string;
-  now(): number;
-}
 export interface GraphInputGuardRequest extends GraphWorkspaceTarget {
   sessionId: string;
   commandId?: string;
   commandType: string;
 }
-class MetadataOwnedElsewhere extends Error {
-  constructor() {
-    super(
-      "This graph is owned by another ZCode window. Close that window before editing or running here.",
-    );
-  }
-}
-
 export class GraphEngineeringService implements IGraphEngineeringService {
-  private readonly changed = new Emitter<{ workspaceKey: string }>();
-  readonly onDidChange = this.changed.event;
-  private readonly records = new Map<string, GraphRecord>();
-  private readonly flights = new Map<string, Promise<unknown>>();
-  private readonly observers = new Map<string, IDisposable>();
-  private readonly cursors = new Map<string, { logEpoch: string; seq: number }>();
-  private disposed = false;
-  private shutdown?: Promise<void>;
-  constructor(private readonly options: Options) {}
-
-  private serial<T>(target: GraphWorkspaceTarget, action: () => Promise<T>): Promise<T> {
-    const key = workspaceKey(target);
-    const next = (this.flights.get(key) ?? Promise.resolve())
-      .catch(() => {})
-      .then(() => {
-        if (this.disposed) throw new Error("Graph Engineering is closed.");
-        return action();
-      });
-    this.flights.set(key, next);
-    void next
-      .finally(() => {
-        if (this.flights.get(key) === next) this.flights.delete(key);
-      })
-      .catch(() => {});
-    return next;
+  private readonly state: GraphState;
+  private readonly sequencer: GraphSequencer;
+  private readonly recovery: GraphRecovery;
+  readonly onDidChange;
+  constructor(options: GraphOptions) {
+    this.state = new GraphState(options);
+    this.sequencer = new GraphSequencer(this.state);
+    this.recovery = new GraphRecovery(this.state, this.sequencer);
+    this.onDidChange = this.state.changed.event;
   }
-
-  private async load(target: GraphWorkspaceTarget): Promise<GraphRecord> {
-    const key = workspaceKey(target);
-    const existing = this.records.get(key);
-    if (existing) return existing;
-    if (this.disposed) throw new Error("Graph Engineering is closed.");
-    if (
-      this.options.repository.acquireOwnership &&
-      !(await this.options.repository.acquireOwnership(target))
-    )
-      throw new MetadataOwnedElsewhere();
-    const record = (await this.options.repository.read(target)) ?? {
-      definition: defaultDefinition(),
-      runs: [],
-    };
-    this.records.set(key, record);
-    for (const run of record.runs) {
-      if (isConfirmedTerminal(run)) continue;
-      // 冷历史会合成成功终态；缺少同代运行证据时只保留中断，绝不重发。
-      const sameRuntime =
-        run.sessionId &&
-        run.runtimeIdentity &&
-        (await this.options.native.reconcile(run).catch(() => "interrupted")) === "same-runtime";
-      if (sameRuntime)
-        await this.observe(run).catch(() =>
-          this.interrupt(run, "Native observation could not be restored."),
-        );
-      else
-        this.interrupt(
-          run,
-          "The original native runtime is unavailable. Review the same conversation; Z1 will not resend this input.",
-        );
-    }
-    if (record.runs.some((run) => !isConfirmedTerminal(run))) await this.persist(target, record);
-    return record;
+  async validateDefinition(params: Parameters<IGraphEngineeringService["validateDefinition"]>[0]) {
+    return validateReadiness(params.definition);
   }
-
-  private async persist(target: GraphWorkspaceTarget, record: GraphRecord): Promise<void> {
-    if (this.disposed) throw new Error("Graph Engineering is closed.");
-    await this.options.repository.write(target, record);
-    this.changed.fire({ workspaceKey: workspaceKey(target) });
-  }
-
-  async getWorkspace(targetValue: GraphWorkspaceTarget) {
-    const target = localTarget(targetValue);
-    return this.serial(target, async () => {
+  async getWorkspace(value: GraphWorkspaceTarget) {
+    const target = localTarget(value);
+    return this.state.serial(target, async () => {
       try {
         return {
-          ...structuredClone(await this.load(target)),
-          availability: await this.options.native.available(),
+          ...structuredClone(await this.state.load(target)),
+          availability: await this.state.options.native.available(),
         };
       } catch (error) {
         if (!(error instanceof MetadataOwnedElsewhere)) throw error;
         return {
-          ...((await this.options.repository.read(target)) ?? {
+          ...((await this.state.options.repository.read(target)) ?? {
             definition: defaultDefinition(),
             runs: [],
           }),
@@ -121,235 +63,202 @@ export class GraphEngineeringService implements IGraphEngineeringService {
       }
     });
   }
-
   async saveDefinition(params: Parameters<IGraphEngineeringService["saveDefinition"]>[0]) {
     const target = localTarget(params.target);
     const definition = validateDefinition(params.definition);
-    return this.serial(target, async () => {
-      const record = await this.load(target);
+    return this.state.serial(target, async () => {
+      const record = await this.state.load(target);
       if (record.definition.revision !== params.expectedRevision)
         throw new Error("Graph revision changed; reload before saving.");
-      const savedDefinition = { ...definition, revision: record.definition.revision + 1 };
-      await this.persist(target, { ...record, definition: savedDefinition });
-      record.definition = savedDefinition;
-      return structuredClone(record.definition);
+      if (record.definition.version === 2 && definition.version !== 2)
+        throw new Error("A sequential graph cannot be silently downgraded to Z1.");
+      const saved = { ...definition, revision: record.definition.revision + 1 };
+      await this.state.commit(target, { ...record, definition: saved });
+      return structuredClone(saved);
     });
   }
-
   async run(params: Parameters<IGraphEngineeringService["run"]>[0]): Promise<GraphRun> {
     const target = localTarget(params.target);
-    if (!params.requestId?.trim()) throw new Error("A stable request ID is required.");
-    return this.serial(target, async () => {
-      const record = await this.load(target);
+    if (!params.requestId?.trim() || params.requestId.length > 200)
+      throw new Error("A stable request ID is required (at most 200 characters).");
+    return this.state.serial(target, async () => {
+      const record = await this.state.load(target);
+      const defaults: GraphNativeSettings = {
+        modelSelection: modelSelectionSchema.parse(params.modelSelection),
+        mode: submissionModeSchema.parse(params.mode),
+        planEnabled: params.planEnabled ?? false,
+      };
+      if (typeof defaults.planEnabled !== "boolean")
+        throw new Error("Plan mode must be a boolean.");
+      const fingerprint = runFingerprint({ target, revision: params.revision, ...defaults });
       const duplicate = record.runs.find((run) => run.requestId === params.requestId);
-      if (duplicate) return structuredClone(duplicate);
+      if (duplicate) {
+        const old =
+          duplicate.version === 2
+            ? duplicate.requestFingerprint
+            : runFingerprint({
+                target: duplicate.target,
+                revision: duplicate.definition.revision,
+                modelSelection: duplicate.modelSelection,
+                mode: duplicate.mode,
+                planEnabled: duplicate.planEnabled ?? false,
+              });
+        if (old !== fingerprint)
+          throw new Error(
+            "The same Run request ID was reused with different configuration or revision.",
+          );
+        return structuredClone(duplicate);
+      }
       if (record.runs.some((run) => !isConfirmedTerminal(run)))
         throw new Error(
-          "This workspace has an unresolved Graph Engineering attempt. Open its conversation before starting additional work.",
+          "This workspace has an unresolved Graph Engineering attempt. Inspect or safely release it before starting additional work.",
         );
       if (record.definition.revision !== params.revision)
         throw new Error("Graph revision changed; save and reload before running.");
       const definition = validateDefinition(record.definition);
-      if (!definition.instructions.trim()) throw new Error("Agent Task instructions are required.");
-      const availability = await this.options.native.available();
+      const ready = validateReadiness(definition);
+      if (ready.errors.length) throw new Error(ready.errors.join("\n"));
+      const availability = await this.state.options.native.available();
       if (!availability.available)
         throw new Error(availability.reason ?? "Native agent unavailable.");
-      const modelSelection = modelSelectionSchema.parse(params.modelSelection);
-      const mode = submissionModeSchema.parse(params.mode);
-      if (params.planEnabled !== undefined && typeof params.planEnabled !== "boolean")
-        throw new Error("Plan mode must be a boolean.");
-      await this.options.native.validateSelection({ modelSelection, mode });
-      const commandId = this.options.id();
-      const run: GraphRun = {
-        id: this.options.id(),
-        attemptId: this.options.id(),
-        requestId: params.requestId,
-        target: structuredClone(target),
-        definition: structuredClone(definition),
-        modelSelection,
-        mode,
-        planEnabled: params.planEnabled ?? false,
-        commandId,
-        inputId: commandId,
-        status: "Starting",
-        createdAt: this.options.now(),
-        updatedAt: this.options.now(),
-      };
-      // 首次落盘失败时还未调用 native，不能留下内存中的 Starting 占位阻止安全重试。
-      await this.persist(target, { ...record, runs: [...record.runs, run] });
-      record.runs.push(run);
-      try {
-        const created = await this.options.native.create(run);
-        if (!created.sessionId.trim() || !created.runtimeIdentity.trim())
-          throw new Error(
-            "Native session creation did not return its session and runtime identity.",
-          );
-        Object.assign(run, created);
-        await this.persist(target, record);
-        await this.observe(run);
-        const receipt = await this.options.native.send(run);
-        // ACK 只证明准入；拒绝或失联也不能证明执行没有发生，不允许换 ID 重试。
-        run.status = receipt.accepted ? "Running" : "Unknown";
-        if (!receipt.accepted)
-          run.message =
-            receipt.reason ?? "Native admission was not confirmed. No automatic retry will occur.";
-      } catch (error) {
-        run.status = "Unknown";
-        run.message = error instanceof Error ? error.message : "Native dispatch result is unknown.";
+      let run: GraphRun;
+      const now = this.state.options.now();
+      if (definition.version === 2) {
+        const nodeAttempts: GraphNodeAttempt[] = [];
+        for (const nodeId of ready.path) {
+          const node = definition.nodes.find((n) => n.id === nodeId) as GraphTaskNode;
+          const settings =
+            node.configuration.kind === "inherit"
+              ? { ...structuredClone(defaults), source: "workspace" as const }
+              : {
+                  modelSelection: structuredClone(node.configuration.modelSelection),
+                  mode: node.configuration.mode,
+                  planEnabled: node.configuration.planEnabled,
+                  source: "node" as const,
+                };
+          await this.state.options.native.validateSelection(settings);
+          const commandId = this.state.options.id();
+          nodeAttempts.push({
+            nodeId,
+            attemptId: this.state.options.id(),
+            commandId,
+            inputId: commandId,
+            status: "Pending",
+            dispatchPhase: "planned",
+            settings,
+            createdAt: now,
+            updatedAt: now,
+          });
+        }
+        const start = definition.nodes.find((n) => n.type === "start")!;
+        run = {
+          version: 2,
+          id: this.state.options.id(),
+          requestId: params.requestId,
+          requestFingerprint: fingerprint,
+          target: structuredClone(target),
+          definition: structuredClone(definition),
+          defaults,
+          plannedPath: ready.path,
+          startInput: start.type === "start" ? start.request : "",
+          nodeAttempts,
+          status: "Starting",
+          createdAt: now,
+          updatedAt: now,
+        } satisfies GraphSequentialRun;
+      } else {
+        await this.state.options.native.validateSelection(defaults);
+        const commandId = this.state.options.id();
+        run = {
+          id: this.state.options.id(),
+          attemptId: this.state.options.id(),
+          requestId: params.requestId,
+          target: structuredClone(target),
+          definition: structuredClone(definition),
+          ...defaults,
+          commandId,
+          inputId: commandId,
+          status: "Starting",
+          createdAt: now,
+          updatedAt: now,
+        } satisfies GraphLegacyRun;
       }
-      run.updatedAt = this.options.now();
-      await this.persist(target, record);
-      return structuredClone(run);
-    });
-  }
-
-  private async observe(run: GraphRun): Promise<void> {
-    this.observers.get(run.id)?.dispose();
-    const observer = await this.options.native.observe(
-      run,
-      (fact) => {
-        void this.serial(run.target, async () => this.acceptFact(run, fact)).catch(() =>
-          this.interrupt(
-            run,
-            "Graph metadata could not be persisted; review the native conversation.",
-          ),
+      // 首次持久化成功才发布占位；失败时零 native 调用，同 request 可安全重试。
+      await this.state.commit(target, { ...record, runs: [...record.runs, run] });
+      this.state.liveRuns.add(run.id);
+      try {
+        await this.sequencer.dispatch(target, run.id);
+      } catch (error) {
+        // ACK 后落盘失败也必须立即关闭推进许可，否则已排队终态会错误启动后继。
+        this.state.interrupt(
+          target,
+          run.id,
+          "Graph dispatch metadata could not be persisted. Inspect the owned input; no successor will be submitted.",
         );
-      },
-      (reason) => {
-        void this.serial(run.target, async () => {
-          if (!isConfirmedTerminal(run)) {
-            this.interrupt(run, reason);
-            await this.persist(run.target, await this.load(run.target));
-          }
-        }).catch(() => {});
-      },
-    );
-    if (this.disposed || isConfirmedTerminal(run)) observer.dispose();
-    else this.observers.set(run.id, observer);
-  }
-
-  private async acceptFact(run: GraphRun, fact: GraphNativeFact): Promise<void> {
-    if (this.disposed || isConfirmedTerminal(run) || fact.sourceCommandId !== run.commandId) return;
-    const cursor = this.cursors.get(run.id);
-    if (cursor && (cursor.logEpoch !== fact.logEpoch || fact.seq <= cursor.seq)) return;
-    const next = structuredClone(run);
-    if (fact.foregroundExecutionId) next.foregroundExecutionId = fact.foregroundExecutionId;
-    if (fact.state !== "running") {
-      next.status =
-        fact.state === "completedSuccess"
-          ? "Completed"
-          : fact.state === "completedInterrupted"
-            ? "Cancelled"
-            : "Failed";
-      next.terminalProof = {
-        sourceCommandId: fact.sourceCommandId,
-        state: fact.state,
-        logEpoch: fact.logEpoch,
-        seq: fact.seq,
-      };
-      next.message =
-        next.status === "Completed"
-          ? "The native input completed. Inspect the conversation, files and tests to verify the task outcome."
-          : undefined;
-    } else if (run.status !== "CancelRequested") {
-      next.status =
-        fact.waiting === "permission"
-          ? "WaitingForPermission"
-          : fact.waiting === "userInput"
-            ? "WaitingForUser"
-            : "Running";
-      next.message = undefined;
-    }
-    next.updatedAt = this.options.now();
-    const record = await this.load(run.target);
-    // 终态只有成功持久化后才释放所有权；磁盘失败不能把未保存的成功暴露给下一次输入。
-    await this.persist(run.target, {
-      ...record,
-      runs: record.runs.map((item) => (item === run ? next : item)),
+        throw error;
+      }
+      return structuredClone(await this.state.get(target, run.id));
     });
-    Object.assign(run, next);
-    this.cursors.set(run.id, { logEpoch: fact.logEpoch, seq: fact.seq });
-    if (isConfirmedTerminal(run)) {
-      this.observers.get(run.id)?.dispose();
-      this.observers.delete(run.id);
-    }
   }
-
-  private interrupt(run: GraphRun, reason: string): void {
-    run.status = "Interrupted";
-    run.message = reason;
-    run.updatedAt = this.options.now();
-    this.observers.get(run.id)?.dispose();
-    this.observers.delete(run.id);
-  }
-
-  async cancel(params: { target: GraphWorkspaceTarget; runId: string }): Promise<GraphRun> {
+  async cancel(params: Parameters<IGraphEngineeringService["cancel"]>[0]) {
     const target = localTarget(params.target);
-    return this.serial(target, async () => {
-      const record = await this.load(target);
-      const run = record.runs.find((item) => item.id === params.runId);
-      if (!run) throw new Error("Graph attempt not found.");
-      if (isConfirmedTerminal(run)) return structuredClone(run);
-      if (!run.foregroundExecutionId)
-        throw new Error(
-          "No exact active native execution is confirmed; open the conversation to inspect its state.",
-        );
-      if ((await this.options.native.reconcile(run)) !== "same-runtime")
-        throw new Error("The original native execution is unavailable; cancellation was not sent.");
-      run.status = "CancelRequested";
-      run.updatedAt = this.options.now();
-      await this.persist(target, record);
-      await this.options.native.cancel(run);
-      return structuredClone(run);
-    });
+    return this.state.serial(target, () => this.recovery.cancel(target, params.runId));
   }
-
+  async inspectRecovery(params: Parameters<IGraphEngineeringService["inspectRecovery"]>[0]) {
+    const target = localTarget(params.target);
+    return this.state.serial(target, () => this.recovery.inspectRecovery(target, params.runId));
+  }
+  async releaseInterrupted(params: Parameters<IGraphEngineeringService["releaseInterrupted"]>[0]) {
+    const target = localTarget(params.target);
+    return this.state.serial(target, () =>
+      this.recovery.release(target, params.runId, params.reason, params.confirmed),
+    );
+  }
+  private async guardedRuns(target: GraphWorkspaceTarget): Promise<GraphRun[]> {
+    // Guard 不能等待同 workspace 的 run flight，否则 sendText 会与自己的准入死锁。
+    const record =
+      this.state.records.get(workspaceKey(target)) ??
+      (await this.state.options.repository.read(target));
+    return record?.runs.filter((run) => !isConfirmedTerminal(run)) ?? [];
+  }
   async isSessionOwned(params: GraphWorkspaceTarget & { sessionId: string }): Promise<boolean> {
-    // Guard 内部不能等待同 workspace 的 run flight，否则 sendText 会与自己的准入死锁。
-    const record =
-      this.records.get(workspaceKey(params)) ?? (await this.options.repository.read(params));
-    return (
-      record?.runs.some((run) => run.sessionId === params.sessionId && !isConfirmedTerminal(run)) ??
-      false
-    );
+    return (await this.protectedSessionIds(params)).includes(params.sessionId);
   }
-
   async protectedSessionIds(target: GraphWorkspaceTarget): Promise<string[]> {
-    const record =
-      this.records.get(workspaceKey(target)) ?? (await this.options.repository.read(target));
-    return (
-      record?.runs.flatMap((run) =>
-        run.sessionId && !isConfirmedTerminal(run) ? [run.sessionId] : [],
-      ) ?? []
+    return (await this.guardedRuns(target)).flatMap((run) =>
+      run.version === 2
+        ? run.nodeAttempts.flatMap((n) => (n.sessionId ? [n.sessionId] : []))
+        : run.sessionId
+          ? [run.sessionId]
+          : [],
     );
   }
-
   async assertInputAllowed(params: GraphInputGuardRequest): Promise<void> {
-    const record =
-      this.records.get(workspaceKey(params)) ?? (await this.options.repository.read(params));
-    const owner = record?.runs.find(
-      (run) => run.sessionId === params.sessionId && !isConfirmedTerminal(run),
-    );
-    if (owner && !(params.commandType === "sendText" && params.commandId === owner.commandId))
-      throw new Error(
-        "Graph Engineering owns this input. Additional prompts and model/mode changes are blocked until its native attempt completes; permission and question responses remain available.",
-      );
+    for (const run of await this.guardedRuns(params)) {
+      const node =
+        run.version === 2
+          ? run.nodeAttempts.find((n) => n.sessionId === params.sessionId)
+          : run.sessionId === params.sessionId
+            ? run
+            : undefined;
+      if (!node) continue;
+      const sending =
+        run.version === 2
+          ? "dispatchPhase" in node &&
+            node.dispatchPhase === "sending" &&
+            !node.terminalProof &&
+            run.cancelRequestedAt === undefined
+          : run.status === "Starting";
+      if (!(sending && params.commandType === "sendText" && params.commandId === node.commandId))
+        throw new Error(
+          "Graph Engineering owns this run. Additional prompts and model/mode changes are blocked until completion or confirmed-inactive release; native permission and question responses remain available.",
+        );
+    }
   }
-
   dispose(): void {
-    if (this.disposed) return;
-    this.disposed = true;
-    for (const observer of this.observers.values()) observer.dispose();
-    this.observers.clear();
-    this.changed.dispose();
-    this.shutdown = Promise.allSettled(this.flights.values()).then(async () => {
-      await this.options.repository.dispose?.();
-    });
-    void this.shutdown.catch(() => {});
+    this.state.dispose();
   }
-
   async disposeAndWait(): Promise<void> {
-    this.dispose();
-    await this.shutdown;
+    await this.state.disposeAndWait();
   }
 }

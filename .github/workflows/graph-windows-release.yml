@@ -7,9 +7,13 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Z1 prerelease version (e.g. 3.14.0-z1.1); manual runs build artifacts only"
+        description: "Graph prerelease version (e.g. 3.14.0-z2.1); manual runs build artifacts only"
         required: true
-        default: "3.14.0-z1.2"
+        default: "3.14.0-z2.1"
+
+concurrency:
+  group: graph-windows-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -31,15 +35,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24.14.0
+      - name: Validate release version
+        id: release
+        env:
+          MANUAL_VERSION: ${{ inputs.version }}
+        run: |
+          $releaseVersion = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME -replace '^graph-v', '' } else { $env:MANUAL_VERSION }
+          $env:ZCODE_GRAPH_VERSION = $releaseVersion
+          node --input-type=module -e "import { resolveGraphDistributionVersion } from './packages/desktop/scripts/desktop-product-identity.mjs'; resolveGraphDistributionVersion({ ZCODE_GRAPH_DISTRIBUTION: '1', ZCODE_GRAPH_VERSION: process.env.ZCODE_GRAPH_VERSION }, '');"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          "version=$releaseVersion" >> $env:GITHUB_OUTPUT
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Prepare Electron
         run: node node_modules/electron/install.js
       - name: Verify source
         run: |
-          node --test scripts/graph-engineering/distribution.test.mjs
+          node --test scripts/graph-engineering/distribution.test.mjs scripts/graph-engineering/publish.test.mjs scripts/graph-engineering/publish-git.test.mjs scripts/graph-engineering/acceptance-paths.test.mjs scripts/graph-engineering/z2-provider-fixture.test.mjs
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
-          node node_modules/tsx/dist/cli.mjs --test packages/services/src/graph-engineering/app/service.test.ts packages/services/src/graph-engineering/adapters/repository.test.ts packages/services/src/graph-engineering/adapters/native.test.ts packages/services/src/graph-engineering/adapters/observer.test.ts packages/services/src/zcode-agent/expectedRuntimeClient.test.ts
+          node --import tsx --test packages/services/src/graph-engineering/app/*.test.ts packages/services/src/graph-engineering/adapters/*.test.ts packages/services/src/zcode-agent/expectedRuntimeClient.test.ts packages/services/src/zcode-agent/runtimeRetirement.test.ts
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           node --import tsx --test packages/services/test/*.test.ts apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/interaction-registry.test.ts
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
@@ -52,28 +66,55 @@ jobs:
           pnpm lint
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           pnpm architecture:check --changed
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Record supplemental CLI lint baseline exceptions
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          New-Item -ItemType Directory -Force .tmp/graph-release-checks | Out-Null
+          $env:PATH = "$PWD/node_modules/.bin;$env:PATH"
+          pnpm --dir apps/zcode-cli lint *> .tmp/graph-release-checks/cli-lint.txt
+          $checkExit = $LASTEXITCODE
+          "CLI lint exit: $checkExit. Supplemental baseline exceptions; inspect artifact diagnostics and Z2_REPORT.md." >> $env:GITHUB_STEP_SUMMARY
+          exit $checkExit
+      - name: Record whole-repository formatting baseline exceptions
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          New-Item -ItemType Directory -Force .tmp/graph-release-checks | Out-Null
+          pnpm fmt:check *> .tmp/graph-release-checks/format.txt
+          $checkExit = $LASTEXITCODE
+          "Full formatting exit: $checkExit. Supplemental baseline exceptions; inspect artifact diagnostics and Z2_REPORT.md." >> $env:GITHUB_STEP_SUMMARY
+          exit $checkExit
       - name: Build Windows x64 installer
         env:
-          MANUAL_VERSION: ${{ inputs.version }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
         run: |
-          $releaseVersion = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME -replace '^graph-v', '' } else { $env:MANUAL_VERSION }
-          node scripts/graph-engineering/build-windows.mjs $releaseVersion
+          node scripts/graph-engineering/build-windows.mjs $env:RELEASE_VERSION
       - name: Test detached packaged application with local provider
-        run: node scripts/graph-engineering/packaged-smoke.mjs
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: node scripts/graph-engineering/packaged-smoke.mjs $env:RELEASE_VERSION
       - name: Preserve installer and acceptance evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: zcode-graph-windows-x64
+          include-hidden-files: true
           path: |
             packages/desktop/dist-graph/*.exe
             packages/desktop/dist-graph/SHA256SUMS.txt
             packages/desktop/dist-graph/packaged-smoke.json
             packages/desktop/dist-graph/smoke-evidence/
+            .tmp/graph-release-checks/
       - name: Publish verified prerelease
         if: startsWith(github.ref, 'refs/tags/graph-v')
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
         run: |
-          $installer = (Get-ChildItem packages/desktop/dist-graph/*.exe).FullName
-          gh release create $env:GITHUB_REF_NAME $installer packages/desktop/dist-graph/SHA256SUMS.txt --verify-tag --prerelease --title "ZCode Graph $env:GITHUB_REF_NAME (Windows x64)" --notes-file docs/graph-engineering/WINDOWS_RELEASE_NOTES.md
+          $installer = "packages/desktop/dist-graph/ZCode Graph-$env:RELEASE_VERSION-win-x64.exe"
+          if (!(Test-Path -LiteralPath $installer)) { throw "Expected versioned Graph installer is missing" }
+          $notes = Get-Content -LiteralPath docs/graph-engineering/WINDOWS_RELEASE_NOTES.md -Raw
+          $notes.Replace('/blob/main/', "/blob/$($env:GITHUB_REF_NAME)/") | Set-Content -LiteralPath packages/desktop/dist-graph/release-notes.md -Encoding utf8
+          gh release create $env:GITHUB_REF_NAME $installer packages/desktop/dist-graph/SHA256SUMS.txt --repo $env:GITHUB_REPOSITORY --verify-tag --prerelease --title "ZCode Graph $env:RELEASE_VERSION (Windows x64)" --notes-file packages/desktop/dist-graph/release-notes.md

@@ -1,101 +1,13 @@
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { z } from "zod";
-import { modelSelectionSchema, isZCodeFileLockTimeoutError } from "@zcode/shared";
+import { recordSchema } from "../domain/record.js";
+import { isZCodeFileLockTimeoutError } from "@zcode/shared";
 import { acquireFileLock } from "@zcode/shared/node";
-import { submissionModeSchema } from "@zcode/shared/zcode-protocol-v4";
+
 import type { GraphWorkspaceTarget } from "../contract.js";
 import type { GraphRecord, GraphRepository } from "../app/ports.js";
-import {
-  definitionSchema,
-  targetSchema,
-  validateDefinition,
-  workspaceKey,
-} from "../domain/definition.js";
-
-const runSchema = z
-  .object({
-    id: z.string().min(1),
-    attemptId: z.string().min(1),
-    requestId: z.string().min(1),
-    target: targetSchema,
-    definition: definitionSchema,
-    modelSelection: modelSelectionSchema,
-    mode: submissionModeSchema,
-    planEnabled: z.boolean().optional(),
-    commandId: z.string().min(1),
-    inputId: z.string().min(1),
-    sessionId: z.string().min(1).optional(),
-    runtimeIdentity: z.string().min(1).optional(),
-    foregroundExecutionId: z.string().min(1).optional(),
-    status: z.enum([
-      "Starting",
-      "Running",
-      "WaitingForPermission",
-      "WaitingForUser",
-      "CancelRequested",
-      "Completed",
-      "Failed",
-      "Cancelled",
-      "Interrupted",
-      "Unknown",
-    ]),
-    createdAt: z.number().finite().nonnegative(),
-    updatedAt: z.number().finite().nonnegative(),
-    message: z.string().optional(),
-    terminalProof: z
-      .object({
-        sourceCommandId: z.string().min(1),
-        state: z.enum(["completedSuccess", "completedInterrupted", "failed"]),
-        logEpoch: z.string().min(1),
-        seq: z.number().int().nonnegative(),
-      })
-      .strict()
-      .optional(),
-  })
-  .strict()
-  .superRefine((run, context) => {
-    const state =
-      run.status === "Completed"
-        ? "completedSuccess"
-        : run.status === "Cancelled"
-          ? "completedInterrupted"
-          : run.status === "Failed"
-            ? "failed"
-            : undefined;
-    if (
-      run.updatedAt < run.createdAt ||
-      run.inputId !== run.commandId ||
-      (state && (!run.sessionId || !run.runtimeIdentity || run.terminalProof?.state !== state)) ||
-      (run.terminalProof && (!state || run.terminalProof.sourceCommandId !== run.commandId))
-    ) {
-      context.addIssue({
-        code: "custom",
-        message: "Graph attempt terminal proof or correlation is invalid.",
-      });
-    }
-  });
-const recordSchema = z
-  .object({
-    version: z.literal(1),
-    workspaceKey: z.string(),
-    definition: definitionSchema,
-    runs: z.array(runSchema),
-  })
-  .strict()
-  .superRefine((record, context) => {
-    for (const key of ["id", "attemptId", "requestId", "sessionId", "commandId"] as const) {
-      const ids = record.runs.flatMap((run) => (run[key] ? [run[key]] : []));
-      if (new Set(ids).size !== ids.length)
-        context.addIssue({ code: "custom", message: `Duplicate graph ${key}.` });
-    }
-    if (record.runs.some((run) => run.definition.revision > record.definition.revision))
-      context.addIssue({
-        code: "custom",
-        message: "Graph run references an unavailable revision.",
-      });
-  });
+import { validateDefinition, workspaceKey } from "../domain/definition.js";
 
 export function createGraphRepository(directory: string): GraphRepository {
   const pathFor = (target: GraphWorkspaceTarget) =>
@@ -162,8 +74,10 @@ export function createGraphRepository(directory: string): GraphRepository {
         validateDefinition(run.definition);
         if (
           workspaceKey(run.target) !== parsed.workspaceKey ||
-          run.inputId !== run.commandId ||
-          (run.terminalProof && run.terminalProof.sourceCommandId !== run.commandId)
+          (run.version !== 2 && run.inputId !== run.commandId) ||
+          (run.version !== 2 &&
+            run.terminalProof &&
+            run.terminalProof.sourceCommandId !== run.commandId)
         )
           throw new Error("Graph attempt correlation is invalid.");
       }
@@ -174,7 +88,8 @@ export function createGraphRepository(directory: string): GraphRepository {
         if (!(await acquireOwnership(target)))
           throw new Error("Graph metadata ownership belongs to another Host.");
         const value = recordSchema.parse({
-          version: 1,
+          version:
+            record.definition.version === 2 || record.runs.some((run) => run.version === 2) ? 2 : 1,
           workspaceKey: workspaceKey(target),
           ...record,
         });

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import type { GraphSequentialDefinition } from "@zcode/services";
 import {
   isLocalGraphTarget,
   graphWorkspaceTarget,
@@ -60,4 +61,62 @@ test("conversation navigation retains the frozen attempt target and native sessi
   assert.deepEqual(graphConversationTarget(scoped), scoped);
   assert.equal(graphConversationTarget({ ...attempt, sessionId: null }), null);
   assert.equal(graphConversationTarget(null), null);
+});
+
+test("schema-normalized property order acknowledges a sequential save without a false conflict", () => {
+  const base = {
+    revision: 0,
+    name: "Saved",
+    taskName: "Task",
+    instructions: "original",
+    nodes: [],
+    edges: [],
+  };
+  const draft: GraphSequentialDefinition = {
+    version: 2,
+    revision: 0,
+    name: "Sequential",
+    nodes: [
+      {
+        id: "task",
+        type: "task",
+        position: { x: 2, y: 1 },
+        name: "Analyze",
+        instructions: "Keep {{inputs.request}} exact",
+        instructionMode: "bound",
+        inputs: [{ alias: "request", source: { kind: "start" } }],
+        configuration: {
+          kind: "override",
+          modelSelection: {
+            providerId: "fixture",
+            modelId: "model",
+            options: { reasoningLevel: "enabled" },
+          },
+          mode: "build",
+          planEnabled: false,
+        },
+      },
+    ],
+    edges: [{ source: "start", target: "task" }],
+  };
+  // Host schema rebuilds fields in its declaration order, including nested node/config keys.
+  const reverseKeys = (value: unknown): unknown =>
+    Array.isArray(value)
+      ? value.map(reverseKeys)
+      : value && typeof value === "object"
+        ? Object.fromEntries(
+            Object.entries(value)
+              .reverse()
+              .map(([key, entry]) => [key, reverseKeys(entry)]),
+          )
+        : value;
+  const incoming = { ...(reverseKeys(draft) as GraphSequentialDefinition), revision: 1 };
+  assert.notEqual(JSON.stringify({ ...draft, revision: 1 }), JSON.stringify(incoming));
+  assert.deepEqual(reconcileGraphDraft({ base, draft }, incoming), {
+    base: incoming,
+    draft: incoming,
+  });
+  const locallyChanged: GraphSequentialDefinition = { ...draft, name: "Unsubmitted local edit" };
+  const state = { base, draft: locallyChanged };
+  assert.equal(reconcileGraphDraft(state, incoming), state);
 });

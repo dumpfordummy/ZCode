@@ -46,8 +46,10 @@ function isGraphDistribution(env) {
 export function resolveGraphDistributionVersion(env, fallback) {
   if (!isGraphDistribution(env)) return fallback;
   const version = env.ZCODE_GRAPH_VERSION;
-  if (!version || !/^\d+\.\d+\.\d+-z1\.\d+$/.test(version)) {
-    throw new Error("ZCODE_GRAPH_VERSION must be an explicit Z1 prerelease, e.g. 3.14.0-z1.1");
+  if (!version || !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-z[12]\.(0|[1-9]\d*)$/.test(version)) {
+    throw new Error(
+      "ZCODE_GRAPH_VERSION must be an explicit Z1 or Z2 prerelease, e.g. 3.14.0-z2.1",
+    );
   }
   return version;
 }

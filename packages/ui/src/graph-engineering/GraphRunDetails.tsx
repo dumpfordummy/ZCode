@@ -1,4 +1,4 @@
-import type { GraphRun } from "@zcode/services";
+import type { GraphLegacyRun } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { graphConversationTarget } from "./graphEngineeringView.js";
@@ -9,7 +9,7 @@ export function GraphRunDetails({
   onCancel,
   onOpenConversation,
 }: {
-  run: GraphRun;
+  run: GraphLegacyRun;
   disabled: boolean;
   onCancel: (runId: string) => void;
   onOpenConversation: (
@@ -31,7 +31,7 @@ export function GraphRunDetails({
   return (
     <article
       className="space-y-3 rounded-xl border border-border bg-surface p-4"
-      data-testid="graph-run"
+      data-testid="graph-legacy-run-details"
       data-session-id={run.sessionId ?? ""}
       data-input-id={run.inputId}
     >

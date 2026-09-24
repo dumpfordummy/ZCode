@@ -176,6 +176,13 @@ export interface ZCodeAgentWorkspaceRuntimeIdentity {
   workspaceKey: string;
 }
 
+/** Host-lifetime proof, recorded only after original client and owned process-tree cleanup. */
+export interface ZCodeAgentRuntimeRetirement {
+  runtimeIdentity: string;
+  workspaceKey: string;
+  retiredAt: number;
+}
+
 export const ZCODE_AGENT_RUNTIME_UNAVAILABLE_CODE = "ZCODE_AGENT_RUNTIME_UNAVAILABLE";
 
 export type ZCodeAgentRuntimePolicy = "start-if-needed" | "existing-only";
@@ -587,6 +594,10 @@ export interface IZCodeAgentService {
   getWorkspaceRuntimeIdentity(
     params: ZCodeAgentWorkspaceTarget,
   ): Promise<ZCodeAgentWorkspaceRuntimeIdentity>;
+  /** Read-only exact-identity query. Null means unproven, never permission to replay or release. */
+  getWorkspaceRuntimeRetirement(
+    params: ZCodeAgentWorkspaceTarget & { expectedRuntimeIdentity: string },
+  ): Promise<ZCodeAgentRuntimeRetirement | null>;
   createSession(params: ZCodeAgentCreateSessionParams): Promise<ZCodeSessionStateSnapshot>;
   resumeSession(params: ZCodeAgentResumeSessionParams): Promise<ZCodeSessionStateSnapshot>;
   listSessions(params: ZCodeAgentListSessionsParams): Promise<ZCodeSessionInfo[]>;

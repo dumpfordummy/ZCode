@@ -1,5 +1,13 @@
 import type { IDisposable } from "@zcode/rpc";
-import type { GraphRun, GraphWorkspaceTarget, GraphDefinition } from "../contract.js";
+import type {
+  GraphRun,
+  GraphWorkspaceTarget,
+  GraphDefinition,
+  GraphFinalOutput,
+  GraphInactivityProof,
+} from "../contract.js";
+import type { ModelSelection } from "@zcode/shared";
+import type { SubmissionMode } from "@zcode/shared/zcode-protocol-v4";
 
 export interface GraphRecord {
   definition: GraphDefinition;
@@ -18,17 +26,42 @@ export interface GraphNativeFact {
   foregroundExecutionId?: string;
   logEpoch: string;
   seq: number;
+  turnId?: string;
+  finalOutput?: GraphFinalOutput;
+  outputIssue?: string;
 }
+/** One native attempt; this is a call DTO, never a second state owner. */
+export interface GraphNativeExecution {
+  id: string;
+  attemptId: string;
+  target: GraphWorkspaceTarget;
+  instructions: string;
+  modelSelection: ModelSelection;
+  mode: SubmissionMode;
+  planEnabled?: boolean;
+  commandId: string;
+  inputId: string;
+  createdAt: number;
+  sessionId?: string;
+  runtimeIdentity?: string;
+  foregroundExecutionId?: string;
+  observationEpoch?: string;
+}
+export type GraphNativeInspection =
+  | { kind: "inactive"; proof: GraphInactivityProof; fact?: GraphNativeFact }
+  | { kind: "active"; fact: GraphNativeFact }
+  | { kind: "unknown"; reason: string };
 export interface GraphNativePort {
   available(): Promise<{ available: boolean; reason?: string }>;
-  validateSelection(run: Pick<GraphRun, "modelSelection" | "mode">): Promise<void>;
-  create(run: GraphRun): Promise<{ sessionId: string; runtimeIdentity: string }>;
+  validateSelection(run: Pick<GraphNativeExecution, "modelSelection" | "mode">): Promise<void>;
+  create(run: GraphNativeExecution): Promise<{ sessionId: string; runtimeIdentity: string }>;
   observe(
-    run: GraphRun,
+    run: GraphNativeExecution,
     fact: (value: GraphNativeFact) => void,
     lost: (reason: string) => void,
   ): Promise<IDisposable>;
-  send(run: GraphRun): Promise<{ accepted: boolean; reason?: string }>;
-  cancel(run: GraphRun): Promise<void>;
-  reconcile(run: GraphRun): Promise<"same-runtime" | "interrupted">;
+  send(run: GraphNativeExecution): Promise<{ accepted: boolean; reason?: string }>;
+  cancel(run: GraphNativeExecution): Promise<void>;
+  reconcile(run: GraphNativeExecution): Promise<"same-runtime" | "interrupted">;
+  inspect(run: GraphNativeExecution): Promise<GraphNativeInspection>;
 }

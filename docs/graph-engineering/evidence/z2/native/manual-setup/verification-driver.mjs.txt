@@ -1,0 +1,99 @@
+import assert from 'node:assert/strict';
+import { readFile, writeFile, access, mkdir } from 'node:fs/promises';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { _electron as electron } from 'playwright-core';
+import { DatabaseSync } from 'node:sqlite';
+
+const root=process.cwd();
+const out=path.join(root,'.tmp','z2-final');
+await mkdir(out,{recursive:true});
+const summary={kind:'manual-launcher-setup-only',status:'RUNNING',assertions:[],screenshots:[],launches:[]};
+const originalLaunch=electron.launch.bind(electron);
+const originalLog=console.log;
+const logs=[];
+let launched;
+let announce;
+electron.launch=async(...args)=>{launched=await originalLaunch(...args);return launched;};
+console.log=(...args)=>{
+  const text=args.map(String).join(' ');
+  logs.push(text);
+  if(text.startsWith('Isolated profile: '))announce?.(text);
+};
+let activeImport;
+try {
+  let profile;
+  let fixture;
+  let initialTest;
+  for(const phase of ['fresh','reopen']){
+    let timer;
+    const ready=new Promise((resolve,reject)=>{
+      announce=resolve;
+      timer=setTimeout(()=>reject(new Error(`Manual launcher ${phase} did not announce setup within 60 seconds.`)),60000);
+    });
+    process.argv=[process.execPath,path.join(root,'scripts/graph-engineering/z2-launch-manual.mjs'),...(profile?['--profile',profile]:[])];
+    activeImport=import(`${pathToFileURL(process.argv[1]).href}?verification=${phase}-${Date.now()}`);
+    activeImport.catch(()=>{});
+    const output=await Promise.race([ready,activeImport.then(()=>{throw new Error('Launcher exited before announcing setup.');})]);
+    clearTimeout(timer);
+    const printedProfile=output.match(/^Isolated profile: (.+)$/m)?.[1];
+    const workspace=output.match(/^Synthetic workspace: (.+)$/m)?.[1];
+    assert.ok(printedProfile&&workspace);
+    if(profile)assert.equal(printedProfile,profile);else profile=printedProfile;
+    assert.ok(profile.startsWith(path.join(root,'.tmp','z1-manual-')));
+    assert.equal(workspace,path.join(profile,'workspace'));
+    assert.ok(output.includes('Start -> Analyze -> Implement -> Verify -> End'));
+    assert.ok(output.includes('bind request to Start and analysis to Analyze'));
+    assert.ok(output.includes('End output: Verify'));
+    assert.ok(output.includes(`node scripts/graph-engineering/z2-launch-manual.mjs --profile "${profile}"`));
+    assert.ok(output.includes('node --test fixture.test.mjs'));
+    const window=await launched.firstWindow();
+    await window.waitForLoadState('domcontentloaded');
+    await window.getByTestId('login-api-key-skip-button').waitFor({state:'visible'});
+    await window.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+    const body=await window.locator('body').innerText();
+    assert.ok(body.includes('API')||body.includes('模型')||body.includes('Model'),`Expected native setup screen: ${body}`);
+    const paths=await launched.evaluate(({app})=>({home:app.getPath('home'),userData:app.getPath('userData'),sessionData:app.getPath('sessionData')}));
+    assert.equal(paths.home,path.join(profile,'home'));
+    assert.equal(paths.userData,path.join(profile,'userData'));
+    assert.equal(paths.sessionData,path.join(profile,'sessionData'));
+    const screenshot=path.join(out,`z2-manual-setup-${phase}.png`);
+    const nativeWindow=await launched.browserWindow(window);
+    try{const encoded=await nativeWindow.evaluate(async win=>(await win.capturePage()).toPNG().toString('base64'));await writeFile(screenshot,Buffer.from(encoded,'base64'));}finally{await nativeWindow.dispose();}
+    summary.screenshots.push(screenshot);
+    await writeFile(path.join(out,`z2-manual-setup-${phase}-body.txt`),body);
+    summary.launches.push({phase,profile,workspace,paths,screen:screenshot,printedInstructions:output});
+    await launched.evaluate(({app})=>app.exit(0));
+    await activeImport;
+    launched=undefined;
+    const settingsPath=path.join(profile,'home/.zcode/v2/setting.json');
+    const fixturePath=path.join(workspace,'fixture.mjs');
+    const testPath=path.join(workspace,'fixture.test.mjs');
+    if(phase==='fresh'){
+      fixture=(await readFile(fixturePath,'utf8'))+'// Z2_MANUAL_REOPEN_SENTINEL_20260924\n';
+      initialTest=await readFile(testPath,'utf8');
+      await writeFile(fixturePath,fixture);
+      const settings=JSON.parse(await readFile(settingsPath,'utf8'));
+      settings.localePreference='zh-CN';
+      await writeFile(settingsPath,JSON.stringify(settings));
+      summary.assertions.push('Actual fresh launcher printed profile/workspace, complete Z2 graph recipe, independent test and exact reopen command.');
+    }else{
+      assert.equal(await readFile(fixturePath,'utf8'),fixture);
+      assert.equal(await readFile(testPath,'utf8'),initialTest);
+      assert.equal(JSON.parse(await readFile(settingsPath,'utf8')).localePreference,'zh-CN');
+      summary.assertions.push('Actual --profile reopen retained synthetic fixture sentinel, unchanged test, and zh-CN settings sentinel.');
+    }
+    const dbPath=path.join(profile,'home/.zcode/cli/db/db.sqlite');
+    try{await access(dbPath);const db=new DatabaseSync(dbPath,{readOnly:true});try{const count=db.prepare('select count(*) as count from session_input').get().count;assert.equal(count,0);summary.launches.at(-1).initialInputCount=count;}finally{db.close();}}catch(error){if(error.code==='ENOENT'){summary.launches.at(-1).initialInputCount=0;summary.launches.at(-1).nativeLedger='Not created (no native task started).';}else throw error;}
+  }
+  summary.assertions.push('Both actual app launches used fresh private home/userData/sessionData and submitted no native input. No provider was configured.');
+  summary.userOperatedChecks='U01 and U02 NOT RUN; this verifies setup/reopen only.';
+  summary.status='PASS';
+}catch(error){summary.status='FAIL';summary.error=String(error.stack??error);if(launched){await launched.evaluate(({app})=>app.exit(0)).catch(()=>{});await launched.close().catch(()=>{});}if(activeImport)await activeImport.catch(()=>{});process.exitCode=1;
+}finally{
+  electron.launch=originalLaunch;console.log=originalLog;
+  await writeFile(path.join(out,'z2-manual-setup-launcher-output.txt'),logs.join('\n\n'));
+  await writeFile(path.join(out,'z2-manual-setup-summary.json'),JSON.stringify(summary,null,2));
+  originalLog(JSON.stringify(summary,null,2));
+}
+

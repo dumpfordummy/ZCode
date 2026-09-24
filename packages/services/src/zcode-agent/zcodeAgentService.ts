@@ -3431,6 +3431,10 @@ export function createZCodeAgentService(
       return await processManager.getRuntimeIdentity(params);
     },
 
+    async getWorkspaceRuntimeRetirement(params) {
+      return processManager.getRuntimeRetirement(params);
+    },
+
     async createSession(params: ZCodeAgentCreateSessionParams) {
       const startedAt = Date.now();
       const client = await getClient(params);

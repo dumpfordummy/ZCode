@@ -7,6 +7,7 @@ import {
   type ConversationSnapshot,
   type ConversationTopicWireCandidate,
   type TurnHeaderRow,
+  type AssistantTextRow,
 } from "@zcode/shared/zcode-protocol-v4";
 import { createGraphConversationObserver } from "./observer.js";
 import type { GraphNativeFact } from "../app/ports.js";
@@ -197,4 +198,81 @@ test("verified warm original-runtime snapshot can reconcile original input", () 
   });
   assert.equal(warm.facts[0]?.state, "completedInterrupted");
   assert.equal(warm.facts[0]?.seq, 7);
+});
+
+function assistant(
+  text: string,
+  rowId: number,
+  turnId = "turn",
+  state: AssistantTextRow["state"] = "complete",
+): AssistantTextRow {
+  return {
+    kind: "assistantText",
+    text,
+    rowId,
+    turnId,
+    state,
+    createdAt: 1,
+    createdAtSeq: rowId,
+    entityId: `entity-${rowId}`,
+    assistantResponseId: `response-${rowId}`,
+  };
+}
+
+test("terminal output freezes only the last complete assistant text in the exactly owned turn", () => {
+  const f = harness();
+  f.start();
+  f.delta(
+    [
+      { op: "row.appended", row: turn("running") },
+      { op: "row.appended", row: assistant("earlier tool-call prose", 2) },
+      { op: "row.appended", row: assistant("owned final {{inputs.neverRecurse}}", 3) },
+      { op: "row.appended", row: assistant("foreign later response", 4, "other-turn") },
+    ],
+    0,
+    1,
+  );
+  assert.equal(f.facts.at(-1)?.finalOutput, undefined);
+  f.delta([{ op: "row.upserted", row: turn("completedSuccess") }], 1, 2);
+  assert.deepEqual(f.facts.at(-1)?.finalOutput, {
+    text: "owned final {{inputs.neverRecurse}}",
+    turnId: "turn",
+    rowId: 3,
+    entityId: "entity-3",
+    assistantResponseId: "response-3",
+  });
+  f.delta([{ op: "row.upserted", row: assistant("late rewrite", 3) }], 2, 3);
+  assert.equal(f.facts.at(-1)?.finalOutput?.text, "owned final {{inputs.neverRecurse}}");
+});
+
+test("missing, blank, incomplete and oversized final text never falls back to earlier prose", () => {
+  for (const row of [
+    undefined,
+    assistant("   ", 3),
+    assistant("partial", 3, "turn", "streaming"),
+    assistant("x".repeat(100_001), 3),
+  ]) {
+    const f = harness(true);
+    const rows = [turn("completedSuccess"), ...(row ? [assistant("earlier", 2), row] : [])];
+    f.start({
+      ...snapshot(),
+      seq: 8,
+      rows: { window: rows, totalCount: rows.length, firstRowId: 1 },
+    });
+    assert.equal(f.facts.at(-1)?.state, "completedSuccess");
+    assert.equal(f.facts.at(-1)?.finalOutput, undefined);
+    assert.ok(f.facts.at(-1)?.outputIssue);
+  }
+});
+
+test("failed or interrupted owned input exposes no handoff text", () => {
+  for (const state of ["failed", "completedInterrupted"] as const) {
+    const f = harness(true);
+    f.start({
+      ...snapshot(),
+      seq: 8,
+      rows: { window: [turn(state), assistant("not successful", 2)], totalCount: 2, firstRowId: 1 },
+    });
+    assert.equal(f.facts.at(-1)?.finalOutput, undefined);
+  }
 });

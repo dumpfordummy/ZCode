@@ -7,9 +7,34 @@ interface GraphTarget {
   remoteTarget?: unknown;
 }
 
+export interface GraphPanelProps extends GraphTarget {
+  readOnlyReason?: string;
+  onBack: () => void;
+  onOpenConversation: (
+    workspacePath: string,
+    sessionId: string,
+    workspaceIdentity?: string,
+  ) => void;
+}
+
 export interface GraphDraftState {
   base: GraphDefinition;
   draft: GraphDefinition;
+}
+
+function canonicalValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalValue);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, entry]) => [key, canonicalValue(entry)]),
+  );
+}
+
+export function graphDefinitionContent(definition: GraphDefinition): string {
+  // Z2 schema 会按声明顺序重建节点与配置字段；对象键顺序不代表编辑内容，数组顺序仍保留。
+  return JSON.stringify(canonicalValue({ ...definition, revision: 0 }));
 }
 
 export function reconcileGraphDraft(
@@ -17,11 +42,10 @@ export function reconcileGraphDraft(
   incoming: GraphDefinition,
 ): GraphDraftState {
   if (current.base.revision === incoming.revision) return current;
-  const content = (definition: GraphDefinition) => JSON.stringify({ ...definition, revision: 0 });
   // 本地保存的确认可以推进 revision；其他编辑器保存不能抹去尚未提交的本地指令。
   if (
-    content(current.draft) === content(current.base) ||
-    content(current.draft) === content(incoming)
+    graphDefinitionContent(current.draft) === graphDefinitionContent(current.base) ||
+    graphDefinitionContent(current.draft) === graphDefinitionContent(incoming)
   ) {
     return { base: incoming, draft: incoming };
   }

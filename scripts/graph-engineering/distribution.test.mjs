@@ -55,6 +55,27 @@ test("private profile overrides inherited ZCode paths and remains stable across 
 test("Graph release version is explicit and cannot change ordinary package versions", () => {
   assert.equal(
     resolveGraphDistributionVersion(
+      { ZCODE_GRAPH_DISTRIBUTION: "1", ZCODE_GRAPH_VERSION: "3.14.0-z2.1" },
+      "3.14.0",
+    ),
+    "3.14.0-z2.1",
+  );
+  for (const version of [
+    "3.14.0-z3.1",
+    "03.14.0-z2.1",
+    "3.14.0-z2.01",
+    "3.14.0-z2.1;echo",
+    "3.14.0",
+  ]) {
+    assert.throws(() =>
+      resolveGraphDistributionVersion(
+        { ZCODE_GRAPH_DISTRIBUTION: "1", ZCODE_GRAPH_VERSION: version },
+        "3.14.0",
+      ),
+    );
+  }
+  assert.equal(
+    resolveGraphDistributionVersion(
       { ZCODE_GRAPH_DISTRIBUTION: "1", ZCODE_GRAPH_VERSION: "3.14.0-z1.1" },
       "3.14.0",
     ),

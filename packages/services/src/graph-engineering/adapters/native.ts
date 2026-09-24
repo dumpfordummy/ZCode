@@ -1,26 +1,13 @@
-import { randomUUID } from "node:crypto";
-import type { IDisposable } from "@zcode/rpc";
 import {
-  createZCodeAgentConnectionScope,
   type IModelSelectionService,
   type ISettingService,
   type IZCodeAgentService,
   type IZCodeSessionService,
 } from "@zcode/services";
-import { ZCODE_VERSION } from "@zcode/shared";
-import {
-  helloMessageSchema,
-  V4_WIRE_PROTOCOL_VERSION,
-  type CommandPayloadMap,
-  type ConversationTopicWireCandidate,
-} from "@zcode/shared/zcode-protocol-v4";
-import type { GraphRun } from "../contract.js";
-import type { GraphNativePort } from "../app/ports.js";
-import { createGraphConversationObserver } from "./observer.js";
+import type { CommandPayloadMap } from "@zcode/shared/zcode-protocol-v4";
+import type { GraphNativePort, GraphNativeExecution } from "../app/ports.js";
+import { observeGraphExecution, type ActiveObserver } from "./observation.js";
 
-const INITIAL_SNAPSHOT_TIMEOUT_MS = 15_000;
-const MAX_PENDING_FRAMES = 1_024;
-const MAX_PENDING_BYTES = 32 * 1024 * 1024;
 const MAX_NATIVE_DIAGNOSTIC_LENGTH = 2_000;
 
 interface NativeOptions {
@@ -29,28 +16,19 @@ interface NativeOptions {
   modelSelectionService: IModelSelectionService;
   settingService: ISettingService;
 }
-interface ActiveObserver {
-  service: IZCodeAgentService;
-  observer: ReturnType<typeof createGraphConversationObserver>;
-  valid(): boolean;
-  dispose(): void;
-}
 
-function requireSession(run: GraphRun): string {
+function requireSession(run: GraphNativeExecution): string {
   if (!run.sessionId) throw new Error("Graph attempt has no persisted native session identity.");
   return run.sessionId;
 }
-function clientId(run: GraphRun) {
+function clientId(run: GraphNativeExecution) {
   return `graph:${run.attemptId}`;
-}
-function message(error: unknown) {
-  return error instanceof Error ? error.message : String(error);
 }
 
 export function createGraphNativePort(options: NativeOptions): GraphNativePort {
   const active = new Map<string, ActiveObserver>();
 
-  async function sameRuntime(run: GraphRun): Promise<boolean> {
+  async function sameRuntime(run: GraphNativeExecution): Promise<boolean> {
     if (!run.runtimeIdentity) return false;
     try {
       const identity = await options.agentService.getWorkspaceRuntimeIdentity(run.target);
@@ -59,7 +37,7 @@ export function createGraphNativePort(options: NativeOptions): GraphNativePort {
       return false;
     }
   }
-  async function requireCurrent(run: GraphRun): Promise<ActiveObserver> {
+  async function requireCurrent(run: GraphNativeExecution): Promise<ActiveObserver> {
     const entry = active.get(run.id);
     if (!entry?.valid() || !(await sameRuntime(run))) {
       throw new Error("The original graph runtime is unavailable; work was not resubmitted.");
@@ -124,154 +102,17 @@ export function createGraphNativePort(options: NativeOptions): GraphNativePort {
       return { sessionId: snapshot.session.sessionId, runtimeIdentity: after.identity };
     },
     async observe(run, fact, lost) {
-      const sessionId = requireSession(run);
-      if (!(await sameRuntime(run)))
-        throw new Error("The original graph runtime no longer exists.");
       active.get(run.id)?.dispose();
-      const scope = createZCodeAgentConnectionScope(options.agentService, {
-        connectionId: `graph:${run.attemptId}:${randomUUID()}`,
-        clientMode: "desktop-continuous",
-      });
-      let invalid = false;
-      let disposed = false;
-      let observer: ReturnType<typeof createGraphConversationObserver> | undefined;
-      let initialTimer: ReturnType<typeof setTimeout> | undefined;
-      let fragmentTimer: ReturnType<typeof setTimeout> | undefined;
-      let pendingBytes = 0;
-      const pending: ConversationTopicWireCandidate[] = [];
-      const subscriptions: IDisposable[] = [];
-      const initial = Promise.withResolvers<void>();
-      // subscribe 与初帧使用两个通道；先挂接 rejection，避免 early disconnect 产生未处理拒绝。
-      void initial.promise.catch(() => {});
-      const fail = (reason: string) => {
-        if (invalid || disposed) return;
-        invalid = true;
-        clearTimeout(initialTimer);
-        clearTimeout(fragmentTimer);
-        observer?.dispose();
-        initial.reject(new Error(reason));
-        lost(reason);
-      };
-      const dispose = () => {
-        if (disposed) return;
-        disposed = true;
-        clearTimeout(initialTimer);
-        clearTimeout(fragmentTimer);
-        for (const subscription of subscriptions) subscription.dispose();
-        observer?.dispose();
-        pending.length = 0;
-        active.delete(run.id);
-        void scope
-          .dispose()
-          .catch((error: unknown) => lost(`Graph observation cleanup failed: ${message(error)}`));
-      };
-      const scheduleExpiry = () => {
-        clearTimeout(fragmentTimer);
-        const at = observer?.nextExpiryAt;
-        if (at != null) {
-          fragmentTimer = setTimeout(() => observer?.expire(), Math.max(1, at - Date.now()));
-          fragmentTimer.unref();
-        }
-      };
-      try {
-        const hello = helloMessageSchema.parse(await scope.service.helloConversationV4());
-        await scope.service.initializeConversationV4({
-          kind: "clientHello",
-          protocolVersion: V4_WIRE_PROTOCOL_VERSION,
-          clientId: clientId(run),
-          clientKind: "desktop",
-          appVersion: ZCODE_VERSION,
-          capabilities: {
-            workspaceHookReviewUi: true,
-            ...(hello.capabilities.workflowRunDeltas ? { workflowRunDeltas: true } : {}),
-          },
-        });
-        const workspaceKey = run.target.workspaceIdentity?.trim() || run.target.workspacePath;
-        subscriptions.push(
-          options.agentService.onAgentRuntimeRestarted((event) => {
-            if (event.workspaceKey === workspaceKey)
-              fail("The native graph runtime restarted; input outcome is unknown.");
-          }),
-        );
-        const lifecycle = options.agentService.onAgentRuntimeLifecycle?.((event) => {
-          if (
-            event.workspaceKey === workspaceKey &&
-            (event.state === "unavailable" ||
-              event.runtimeIdentity.identity !== run.runtimeIdentity)
-          ) {
-            fail("The native graph runtime disconnected; input outcome is unknown.");
-          }
-        });
-        if (lifecycle) subscriptions.push(lifecycle);
-        subscriptions.push(
-          scope.service.onDynamicConversationFrame(run.target)((wire) => {
-            if (invalid || disposed) return;
-            if (observer) {
-              observer.accept(wire);
-              scheduleExpiry();
-              return;
-            }
-            pendingBytes += Buffer.byteLength(JSON.stringify(wire));
-            if (pending.length >= MAX_PENDING_FRAMES || pendingBytes > MAX_PENDING_BYTES) {
-              fail("Graph subscription initial frame buffer exceeded its limit.");
-              return;
-            }
-            pending.push(wire);
-          }),
-        );
-        const result = await scope.service.subscribeConversationV4({
-          ...run.target,
-          sessionId,
-          visibility: "background",
-          expectedRuntimeIdentity: run.runtimeIdentity,
-        });
-        if (invalid || !(await sameRuntime(run)))
-          throw new Error("Graph runtime changed while subscribing.");
-        if (
-          result.ack.mode !== "snapshot" ||
-          result.ack.openTiming?.sessionRuntimeState === "cold"
-        ) {
-          throw new Error("Cold native session history cannot verify an active graph attempt.");
-        }
-        observer = createGraphConversationObserver({
-          sessionId,
-          commandId: run.commandId,
-          subscriptionId: result.ack.subscriptionId,
-          logEpoch: result.ack.logEpoch,
-          allowInitialTerminal: result.ack.openTiming?.sessionRuntimeState === "warm",
-          fact,
-          lost: fail,
-          initial: () => {
-            clearTimeout(initialTimer);
-            initial.resolve();
-          },
-        });
-        initialTimer = setTimeout(
-          () => fail("Native graph initial snapshot did not arrive; no input was resubmitted."),
-          INITIAL_SNAPSHOT_TIMEOUT_MS,
-        );
-        initialTimer.unref();
-        for (const wire of pending.splice(0)) observer.accept(wire);
-        scheduleExpiry();
-        await initial.promise;
-        if (invalid || !(await sameRuntime(run)))
-          throw new Error("Graph runtime changed before observation was ready.");
-        active.set(run.id, {
-          service: scope.service,
-          observer,
-          valid: () => !invalid && !disposed,
-          dispose,
-        });
-        return { dispose };
-      } catch (error) {
-        dispose();
-        throw error;
-      }
+      const entry = await observeGraphExecution(options, run, fact, lost, sameRuntime, () =>
+        active.delete(run.id),
+      );
+      active.set(run.id, entry);
+      return { dispose: () => entry.dispose() };
     },
     async send(run) {
       const entry = await requireCurrent(run);
       const payload: CommandPayloadMap["sendText"] = {
-        text: run.definition.instructions,
+        text: run.instructions,
         modelSelection: run.modelSelection,
         mode: run.mode,
         ...(run.planEnabled === undefined ? {} : { planEnabled: run.planEnabled }),
@@ -340,6 +181,99 @@ export function createGraphNativePort(options: NativeOptions): GraphNativePort {
     },
     async reconcile(run) {
       return (await sameRuntime(run)) ? "same-runtime" : "interrupted";
+    },
+    async inspect(run) {
+      if (!run.runtimeIdentity || !run.sessionId || run.inputId !== run.commandId) {
+        return {
+          kind: "unknown",
+          reason: "The original native session, input or runtime identity is unproven.",
+        };
+      }
+      if (!(await sameRuntime(run))) {
+        try {
+          const receipt = await options.agentService.getWorkspaceRuntimeRetirement({
+            ...run.target,
+            expectedRuntimeIdentity: run.runtimeIdentity,
+          });
+          const workspaceKey = run.target.workspaceIdentity?.trim() || run.target.workspacePath;
+          if (
+            receipt?.runtimeIdentity === run.runtimeIdentity &&
+            receipt.workspaceKey === workspaceKey &&
+            Number.isFinite(receipt.retiredAt)
+          ) {
+            return { kind: "inactive", proof: { kind: "runtime-retired", ...receipt } };
+          }
+        } catch {
+          // 读取失败不是退出证明；原始进程清理尚未确认时必须继续保护输入。
+        }
+        return {
+          kind: "unknown",
+          reason:
+            "The original runtime is unavailable and this Host has no confirmed retirement receipt. A replacement runtime or cold conversation cannot prove inactivity.",
+        };
+      }
+      let inspection: ActiveObserver | undefined;
+      let lostReason: string | undefined;
+      try {
+        // 检查使用独立订阅，不能替换运行中的观察者或顺带恢复顺序调度。
+        inspection = await observeGraphExecution(
+          options,
+          run,
+          () => {},
+          (reason) => {
+            lostReason = reason;
+          },
+          sameRuntime,
+        );
+        if (lostReason || !inspection.valid() || !(await sameRuntime(run))) {
+          return {
+            kind: "unknown",
+            reason: lostReason ?? "The original runtime changed during inspection.",
+          };
+        }
+        const fact = inspection.observer.currentFact;
+        if (!fact || fact.sourceCommandId !== run.commandId || !fact.turnId) {
+          return {
+            kind: "unknown",
+            reason:
+              "The warm original runtime does not contain exact owned-input evidence in its visible snapshot. Pending admission or idle alone cannot prove inactivity.",
+          };
+        }
+        if (fact.state === "running") {
+          return fact.foregroundExecutionId
+            ? { kind: "active", fact }
+            : {
+                kind: "unknown",
+                reason:
+                  "The owned input has no authoritative current foreground execution for targeted cancellation.",
+              };
+        }
+        return {
+          kind: "inactive",
+          proof: {
+            kind: "input-terminal",
+            runtimeIdentity: run.runtimeIdentity,
+            sessionId: run.sessionId,
+            inputId: run.inputId,
+            commandId: run.commandId,
+            terminalProof: {
+              sourceCommandId: fact.sourceCommandId,
+              state: fact.state,
+              turnId: fact.turnId,
+              logEpoch: fact.logEpoch,
+              seq: fact.seq,
+            },
+          },
+          fact,
+        };
+      } catch (error) {
+        return {
+          kind: "unknown",
+          reason: error instanceof Error ? error.message : "Native recovery inspection failed.",
+        };
+      } finally {
+        inspection?.dispose();
+      }
     },
   };
   return port;

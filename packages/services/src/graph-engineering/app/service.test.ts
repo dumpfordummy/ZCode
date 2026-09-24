@@ -1,84 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { GraphEngineeringService } from "./service.js";
-import type { GraphNativeFact, GraphNativePort, GraphRecord, GraphRepository } from "./ports.js";
-import type { GraphRun } from "../contract.js";
-
-const target = { workspacePath: "C:/synthetic/z1" };
-const selection = { providerId: "fixture", modelId: "controlled" };
-function fixture(initial?: GraphRecord) {
-  let saved = initial ? structuredClone(initial) : null;
-  let sequence = 0;
-  let creates = 0;
-  let sends = 0;
-  let cancelled: GraphRun | undefined;
-  let listener: ((fact: GraphNativeFact) => void) | undefined;
-  const repository: GraphRepository = {
-    async read() {
-      return saved ? structuredClone(saved) : null;
-    },
-    async write(_target, record) {
-      saved = structuredClone(record);
-    },
-  };
-  const native: GraphNativePort = {
-    async available() {
-      return { available: true };
-    },
-    async validateSelection() {},
-    async create(run) {
-      creates++;
-      assert.ok(saved?.runs.some((item) => item.id === run.id));
-      assert.equal(run.sessionId, undefined);
-      assert.equal(saved!.runs.find((item) => item.id === run.id)!.sessionId, undefined);
-      return { sessionId: `native-session-${creates}`, runtimeIdentity: "runtime-1" };
-    },
-    async observe(_run, callback) {
-      assert.ok(_run.sessionId);
-      assert.equal(saved!.runs.find((item) => item.id === _run.id)!.sessionId, _run.sessionId);
-      listener = callback;
-      return { dispose() {} };
-    },
-    async send() {
-      sends++;
-      return { accepted: true };
-    },
-    async cancel(run) {
-      cancelled = run;
-    },
-    async reconcile() {
-      return initial ? "interrupted" : "same-runtime";
-    },
-  };
-  const service = new GraphEngineeringService({
-    repository,
-    native,
-    id: () => `id-${++sequence}`,
-    now: () => sequence + 100,
-  });
-  const prepare = async () => {
-    const view = await service.getWorkspace(target);
-    return service.saveDefinition({
-      target,
-      expectedRevision: view.definition.revision,
-      definition: { ...view.definition, instructions: "Inspect fixture and run its test" },
-    });
-  };
-  const run = async (requestId = "request-1") =>
-    service.run({ target, requestId, revision: 1, modelSelection: selection, mode: "build" });
-  return {
-    service,
-    prepare,
-    run,
-    native,
-    repository,
-    emit: (fact: GraphNativeFact) => listener?.(fact),
-    saved: () => saved!,
-    counts: () => ({ creates, sends }),
-    cancelled: () => cancelled,
-  };
-}
-
+import { fixture, selection, target } from "./legacy.fixture.js";
 test("question protection follows unresolved native session ownership without waiting on dispatch", async () => {
   const f = fixture();
   await f.prepare();
@@ -214,12 +136,15 @@ test("double run persists correlation first and only creates / dispatches once",
     }),
     /Graph Engineering/,
   );
-  await f.service.assertInputAllowed({
-    ...target,
-    sessionId: a.sessionId!,
-    commandId: a.commandId,
-    commandType: "sendText",
-  });
+  await assert.rejects(
+    f.service.assertInputAllowed({
+      ...target,
+      sessionId: a.sessionId!,
+      commandId: a.commandId,
+      commandType: "sendText",
+    }),
+    /Graph Engineering/,
+  );
   for (const commandType of [
     "switchModelConfig",
     "switchCollaborationMode",
