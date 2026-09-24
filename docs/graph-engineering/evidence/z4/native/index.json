@@ -1,0 +1,515 @@
+[
+  {
+    "scenario": "build-only",
+    "status": "FAIL",
+    "log": ".tmp/z4-native-checks/native-build-configured-persistence-failure.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 0,
+    "modelRequests": 0,
+    "files": ["z4-failure.png"],
+    "error": "Error: Expected persisted Graph state was not reached: {\"id\":\"d73a3208-7aed-472f-8938-d4412c58745d\",\"requestId\":\"17a2aebc-c2a1-44ea-9e4c-1dccd2be9355\",\"target\":{\"workspacePath\":\"<isolated-profile>\\\\workspace\"},\"status\":\"Starting\",\"createdAt\":1790253707315,\"updatedAt\":1790253707344,\"version\":4,\"requestFingerprint\":\"{\\\"mode\\\":\\\"build\\\",\\\"modelSelection\\\":{\\\"modelId\\\":\\\"graph-tool-only\\\",\\\"providerId\\\":\\\"graph-tool-only\\\"},\\\"planEnabled\\\":false,\\\"revision\\\":2,\\\"target\\\":{\\\"workspacePath\\\":\\\"<isolated-profile>\\\\\\\\workspace\\\"}}\",\"definition\":{\"version\":4,\"revision\":2,\"name\":\"Z4 isolated C# build-only\",\"nodes\":[{\"id\":\"start\",\"position\":{\"x\":40,\"y\":100},\"type\":\"start\",\"request\":\"\"},{\"id\":\"end\",\"position\":{\"x\":860,\"y\":100},\"type\":\"end\",\"outputNodeId\":\"9fb55a36-c5c7-4fd4-ab89-72a2abc4500f\"},{\"id\":\"9fb55a36-c5c7-4fd4-ab89-72a2abc4500f\",\"position\":{\"x\":600,\"y\":100},\"type\":\"tool\",\"name\":\"Build\",\"recipeId\":\"fixture-build\"}],\"edges\":[{\"source\":\"9fb55a36-c5c7-4fd4-ab89-72a2abc4500f\",\"target\":\"end\"},{\"source\":\"start\",\"target\":\"9fb55a36-c5c7-4fd4-ab89-72a2abc4500f\"}]},\"defaults\":{\"modelSelection\":{\"providerId\":\"graph-tool-only\",\"modelId\":\"graph-tool-only\"},\"mode\":\"build\",\"planEnabled\":false},\"plannedPath\":[\"9fb55a36-c5c7-4fd4-ab89-72a2abc4500f\"],\"startInput\":\"\",\"nodeAttempts\":[],\"approvalAttempts\":[],\"toolAttempts\":[{\"nodeId\":\"9fb55a36-c5c7-4fd4-ab89-72a2abc4500f\",\"attemptId\":\"52693ef5-c74d-4b5f-bb95-c88a18cd7f95\",\"operationId\":\"e92e28a7-0a55-44ad-b1fe-8be1a40a03fc\",\"recipe\":{\"id\":\"fixture-build\",\"name\":\"Build C# fixture\",\"executable\":\"dotnet\",\"args\":[\"build\",\"Z4Fixture.csproj\",\"--configuration\",\"Release\",\"--nologo\",\"--no-incremental\",\"--disable-build-servers\",\"-p:RestoreConfigFile=NuGet.Config\",\"-p:NuGetAudit=false\",\"-p:UseSharedCompilation=false\",\"-p:ImportDirectoryBuildProps=false\",\"-p:ImportDirectoryBuildTargets=false\",\"-p:ImportDirectoryPackagesProps=false\",\"-nodeReuse:false\"],\"cwd\":\".\",\"timeoutMs\":60000,\"sourcePaths\":[\"Z4Fixture.csproj\",\"MathOps.cs\",\"Runner.cs\",\"global.json\",\"NuGet.Config\",\"Directory.Build.props\",\"Directory.Build.targets\",\"Directory.Packages.props\"],\"expectedOutputs\":[\"bin/Release/net8.0/Z4Fixture.dll\",\"bin/Release/net8.0/Z4Fixture.deps.json\",\"bin/Release/net8.0/Z4Fixture.runtimeconfig.json\"],\"verifier\":{\"kind\":\"build\"}},\"recipeDigest\":\"eb2960224cf63fca86773a89ca7b1fff0ed5fc6012fd4b81b996614e4aec695e\",\"status\":\"Starting\",\"dispatchPhase\":\"created\",\"createdAt\":1790253707315,\"updatedAt\":1790253707344,\"sessionId\":\"sess_7d5f0161-143b-4040-8b50-01390895e259\",\"runtimeIdentity\":\"<isolated-profile>\\\\workspace:1:30928:agent-48641ebd-2178-4631-9626-881de04ec5b4\",\"sourceDigest\":\"295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe\",\"resolvedArgs\":[\"build\",\"Z4Fixture.csproj\",\"--configuration\",\"Release\",\"--nologo\",\"--no-incremental\",\"--disable-build-servers\",\"-p:RestoreConfigFile=NuGet.Config\",\"-p:NuGetAudit=false\",\"-p:UseSharedCompilation=false\",\"-p:ImportDirectoryBuildProps=false\",\"-p:ImportDirectoryBuildTargets=false\",\"-p:ImportDirectoryPackagesProps=false\",\"-nodeReuse:false\"],\"outputsBefore\":[{\"path\":\"bin/Release/net8.0/Z4Fixture.deps.json\",\"exists\":false},{\"path\":\"bin/Release/net8.0/Z4Fixture.dll\",\"exists\":false},{\"path\":\"bin/Release/net8.0/Z4Fixture.runtimeconfig.json\",\"exists\":false}]}],\"artifacts\":[],\"artifactBindings\":[]}\n    at waitForRecord (file:///<checkout>/scripts/graph-engineering/z2-native-helpers.mjs:102:9)\n    at async waitTool (file:///<checkout>/scripts/graph-engineering/z4-native-helpers.mjs:23:18)\n    at async openToolPermission (file:///<checkout>/scripts/graph-engineering/z4-native-helpers.mjs:42:19)\n    at async file:///<checkout>/scripts/graph-engineering/z4-native-smoke.mjs:172:26"
+  },
+  {
+    "scenario": "build-only",
+    "status": "FAIL",
+    "log": ".tmp/z4-native-checks/native-build-configured-persistence-repeat.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 0,
+    "modelRequests": 0,
+    "files": ["z4-failure.png"],
+    "error": "Error: Expected persisted Graph state was not reached: {\"id\":\"767d7f9b-8115-46bc-9245-9ff695634cd0\",\"requestId\":\"24f3750a-834b-4a24-89c8-467ac87d464a\",\"target\":{\"workspacePath\":\"<isolated-profile>\\\\workspace\"},\"status\":\"Starting\",\"createdAt\":1790253861265,\"updatedAt\":1790253861299,\"version\":4,\"requestFingerprint\":\"{\\\"mode\\\":\\\"build\\\",\\\"modelSelection\\\":{\\\"modelId\\\":\\\"graph-tool-only\\\",\\\"providerId\\\":\\\"graph-tool-only\\\"},\\\"planEnabled\\\":false,\\\"revision\\\":2,\\\"target\\\":{\\\"workspacePath\\\":\\\"<isolated-profile>\\\\\\\\workspace\\\"}}\",\"definition\":{\"version\":4,\"revision\":2,\"name\":\"Z4 isolated C# build-only\",\"nodes\":[{\"id\":\"start\",\"position\":{\"x\":40,\"y\":100},\"type\":\"start\",\"request\":\"\"},{\"id\":\"end\",\"position\":{\"x\":860,\"y\":100},\"type\":\"end\",\"outputNodeId\":\"25bd0188-5bb0-4fdb-bb59-3def62460a0f\"},{\"id\":\"25bd0188-5bb0-4fdb-bb59-3def62460a0f\",\"position\":{\"x\":600,\"y\":100},\"type\":\"tool\",\"name\":\"Build\",\"recipeId\":\"fixture-build\"}],\"edges\":[{\"source\":\"25bd0188-5bb0-4fdb-bb59-3def62460a0f\",\"target\":\"end\"},{\"source\":\"start\",\"target\":\"25bd0188-5bb0-4fdb-bb59-3def62460a0f\"}]},\"defaults\":{\"modelSelection\":{\"providerId\":\"graph-tool-only\",\"modelId\":\"graph-tool-only\"},\"mode\":\"build\",\"planEnabled\":false},\"plannedPath\":[\"25bd0188-5bb0-4fdb-bb59-3def62460a0f\"],\"startInput\":\"\",\"nodeAttempts\":[],\"approvalAttempts\":[],\"toolAttempts\":[{\"nodeId\":\"25bd0188-5bb0-4fdb-bb59-3def62460a0f\",\"attemptId\":\"0ac4fb76-babc-4c21-b8c5-4eaf3669a629\",\"operationId\":\"ef01db03-1bf2-48c6-a322-0288e3e5cecd\",\"recipe\":{\"id\":\"fixture-build\",\"name\":\"Build C# fixture\",\"executable\":\"dotnet\",\"args\":[\"build\",\"Z4Fixture.csproj\",\"--configuration\",\"Release\",\"--nologo\",\"--no-incremental\",\"--disable-build-servers\",\"-p:RestoreConfigFile=NuGet.Config\",\"-p:NuGetAudit=false\",\"-p:UseSharedCompilation=false\",\"-p:ImportDirectoryBuildProps=false\",\"-p:ImportDirectoryBuildTargets=false\",\"-p:ImportDirectoryPackagesProps=false\",\"-nodeReuse:false\"],\"cwd\":\".\",\"timeoutMs\":60000,\"sourcePaths\":[\"Z4Fixture.csproj\",\"MathOps.cs\",\"Runner.cs\",\"global.json\",\"NuGet.Config\",\"Directory.Build.props\",\"Directory.Build.targets\",\"Directory.Packages.props\"],\"expectedOutputs\":[\"bin/Release/net8.0/Z4Fixture.dll\",\"bin/Release/net8.0/Z4Fixture.deps.json\",\"bin/Release/net8.0/Z4Fixture.runtimeconfig.json\"],\"verifier\":{\"kind\":\"build\"}},\"recipeDigest\":\"eb2960224cf63fca86773a89ca7b1fff0ed5fc6012fd4b81b996614e4aec695e\",\"status\":\"Starting\",\"dispatchPhase\":\"created\",\"createdAt\":1790253861265,\"updatedAt\":1790253861299,\"sessionId\":\"sess_c3fe9958-db1e-47da-a79a-ed440fe12e09\",\"runtimeIdentity\":\"<isolated-profile>\\\\workspace:1:32624:agent-264b7638-be4f-420a-9a7b-6012fbba8436\",\"sourceDigest\":\"295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe\",\"resolvedArgs\":[\"build\",\"Z4Fixture.csproj\",\"--configuration\",\"Release\",\"--nologo\",\"--no-incremental\",\"--disable-build-servers\",\"-p:RestoreConfigFile=NuGet.Config\",\"-p:NuGetAudit=false\",\"-p:UseSharedCompilation=false\",\"-p:ImportDirectoryBuildProps=false\",\"-p:ImportDirectoryBuildTargets=false\",\"-p:ImportDirectoryPackagesProps=false\",\"-nodeReuse:false\"],\"outputsBefore\":[{\"path\":\"bin/Release/net8.0/Z4Fixture.deps.json\",\"exists\":false},{\"path\":\"bin/Release/net8.0/Z4Fixture.dll\",\"exists\":false},{\"path\":\"bin/Release/net8.0/Z4Fixture.runtimeconfig.json\",\"exists\":false}]}],\"artifacts\":[],\"artifactBindings\":[]}\n    at waitForRecord (file:///<checkout>/scripts/graph-engineering/z2-native-helpers.mjs:102:9)\n    at async waitTool (file:///<checkout>/scripts/graph-engineering/z4-native-helpers.mjs:23:18)\n    at async openToolPermission (file:///<checkout>/scripts/graph-engineering/z4-native-helpers.mjs:42:19)\n    at async file:///<checkout>/scripts/graph-engineering/z4-native-smoke.mjs:172:26"
+  },
+  {
+    "scenario": "build-only",
+    "status": "FAIL",
+    "log": ".tmp/z4-native-checks/native-build-configured-ui-first.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 0,
+    "modelRequests": 0,
+    "files": ["z4-failure.png"],
+    "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Allow', exact: true }) to be visible\u001b[22m\n\n    at openToolPermission (<checkout>\\scripts\\graph-engineering\\z4-native-helpers.mjs:82:68)\n    at async file:///<checkout>/scripts/graph-engineering/z4-native-smoke.mjs:176:26"
+  },
+  {
+    "scenario": "build-only",
+    "status": "FAIL",
+    "log": ".tmp/z4-native-checks/native-build-only-initial-harness-failure.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 0,
+    "modelRequests": 0,
+    "files": ["z4-failure.png"],
+    "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('graph-run-button')\u001b[22m\n\u001b[2m    - locator resolved to <button disabled data-size=\"sm\" data-slot=\"button\" data-variant=\"default\" data-testid=\"graph-run-button\" class=\"group/button inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding whitespace-nowrap transition-colors outline-none select-none disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg…>…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    59 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not enabled\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at <checkout>\\scripts\\graph-engineering\\z4-native-smoke.mjs:107:48"
+  },
+  {
+    "scenario": "build-only",
+    "status": "FAIL",
+    "log": ".tmp/z4-native-checks/native-build-only-no-provider-failure.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 0,
+    "modelRequests": 0,
+    "files": ["z4-failure.png"],
+    "error": "Error: Expected persisted Graph state was not reached: {\"id\":\"d8512906-ea6b-4d26-bf16-2d3d1325de63\",\"requestId\":\"533b97d7-efaf-4739-80d7-6dd1f9f0051e\",\"target\":{\"workspacePath\":\"<isolated-profile>\\\\workspace\"},\"status\":\"Unknown\",\"createdAt\":1790253561467,\"updatedAt\":1790253561499,\"message\":\"当前没有可用的模型供应商和模型，请先登录或配置 API Key。\",\"version\":4,\"requestFingerprint\":\"{\\\"mode\\\":\\\"build\\\",\\\"modelSelection\\\":{\\\"modelId\\\":\\\"graph-tool-only\\\",\\\"providerId\\\":\\\"graph-tool-only\\\"},\\\"planEnabled\\\":false,\\\"revision\\\":2,\\\"target\\\":{\\\"workspacePath\\\":\\\"<isolated-profile>\\\\\\\\workspace\\\"}}\",\"definition\":{\"version\":4,\"revision\":2,\"name\":\"Z4 isolated C# build-only\",\"nodes\":[{\"id\":\"start\",\"position\":{\"x\":40,\"y\":100},\"type\":\"start\",\"request\":\"\"},{\"id\":\"end\",\"position\":{\"x\":860,\"y\":100},\"type\":\"end\",\"outputNodeId\":\"1479a399-477e-4a50-8874-5969c08d2ede\"},{\"id\":\"1479a399-477e-4a50-8874-5969c08d2ede\",\"position\":{\"x\":600,\"y\":100},\"type\":\"tool\",\"name\":\"Build\",\"recipeId\":\"fixture-build\"}],\"edges\":[{\"source\":\"1479a399-477e-4a50-8874-5969c08d2ede\",\"target\":\"end\"},{\"source\":\"start\",\"target\":\"1479a399-477e-4a50-8874-5969c08d2ede\"}]},\"defaults\":{\"modelSelection\":{\"providerId\":\"graph-tool-only\",\"modelId\":\"graph-tool-only\"},\"mode\":\"build\",\"planEnabled\":false},\"plannedPath\":[\"1479a399-477e-4a50-8874-5969c08d2ede\"],\"startInput\":\"\",\"nodeAttempts\":[],\"approvalAttempts\":[],\"toolAttempts\":[{\"nodeId\":\"1479a399-477e-4a50-8874-5969c08d2ede\",\"attemptId\":\"f120c700-1719-4626-b6e5-2b4d6d8c3a6f\",\"operationId\":\"7b022d10-c245-4967-aebe-149c3c2ce123\",\"recipe\":{\"id\":\"fixture-build\",\"name\":\"Build C# fixture\",\"executable\":\"dotnet\",\"args\":[\"build\",\"Z4Fixture.csproj\",\"--configuration\",\"Release\",\"--nologo\",\"--no-incremental\",\"--disable-build-servers\",\"-p:RestoreConfigFile=NuGet.Config\",\"-p:NuGetAudit=false\",\"-p:UseSharedCompilation=false\",\"-p:ImportDirectoryBuildProps=false\",\"-p:ImportDirectoryBuildTargets=false\",\"-p:ImportDirectoryPackagesProps=false\",\"-nodeReuse:false\"],\"cwd\":\".\",\"timeoutMs\":60000,\"sourcePaths\":[\"Z4Fixture.csproj\",\"MathOps.cs\",\"Runner.cs\",\"global.json\",\"NuGet.Config\",\"Directory.Build.props\",\"Directory.Build.targets\",\"Directory.Packages.props\"],\"expectedOutputs\":[\"bin/Release/net8.0/Z4Fixture.dll\",\"bin/Release/net8.0/Z4Fixture.deps.json\",\"bin/Release/net8.0/Z4Fixture.runtimeconfig.json\"],\"verifier\":{\"kind\":\"build\"}},\"recipeDigest\":\"eb2960224cf63fca86773a89ca7b1fff0ed5fc6012fd4b81b996614e4aec695e\",\"status\":\"Unknown\",\"dispatchPhase\":\"creating\",\"createdAt\":1790253561467,\"updatedAt\":1790253561499,\"sourceDigest\":\"295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe\",\"resolvedArgs\":[\"build\",\"Z4Fixture.csproj\",\"--configuration\",\"Release\",\"--nologo\",\"--no-incremental\",\"--disable-build-servers\",\"-p:RestoreConfigFile=NuGet.Config\",\"-p:NuGetAudit=false\",\"-p:UseSharedCompilation=false\",\"-p:ImportDirectoryBuildProps=false\",\"-p:ImportDirectoryBuildTargets=false\",\"-p:ImportDirectoryPackagesProps=false\",\"-nodeReuse:false\"],\"outputsBefore\":[{\"path\":\"bin/Release/net8.0/Z4Fixture.deps.json\",\"exists\":false},{\"path\":\"bin/Release/net8.0/Z4Fixture.dll\",\"exists\":false},{\"path\":\"bin/Release/net8.0/Z4Fixture.runtimeconfig.json\",\"exists\":false}],\"message\":\"当前没有可用的模型供应商和模型，请先登录或配置 API Key。\"}],\"artifacts\":[],\"artifactBindings\":[]}\n    at waitForRecord (file:///<checkout>/scripts/graph-engineering/z2-native-helpers.mjs:102:9)\n    at async waitTool (file:///<checkout>/scripts/graph-engineering/z4-native-helpers.mjs:23:18)\n    at async openToolPermission (file:///<checkout>/scripts/graph-engineering/z4-native-helpers.mjs:35:19)\n    at async file:///<checkout>/scripts/graph-engineering/z4-native-smoke.mjs:169:26"
+  },
+  {
+    "scenario": "build-only",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-build-only.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 1,
+    "modelRequests": 0,
+    "files": ["z4-build-native-permission.png", "z4-native-command-result.png"]
+  },
+  {
+    "scenario": "cancel",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-cancel.log",
+    "nativeInputs": 1,
+    "nativeProcesses": 2,
+    "modelRequests": 3,
+    "verification": {
+      "processKnown": true,
+      "exitSuccessful": false,
+      "reportFresh": false,
+      "reportParsed": false,
+      "acceptancePassed": false,
+      "classification": "test",
+      "issues": [
+        "The native command did not exit successfully.",
+        "The native command did not exit successfully.",
+        "ENOENT: no such file or directory, lstat '<isolated-profile>\\workspace\\results\\test-report.json'"
+      ]
+    },
+    "files": [
+      "z4-build-native-permission.png",
+      "z4-test-native-permission.png",
+      "z4-native-command-result.png"
+    ]
+  },
+  {
+    "scenario": "complete",
+    "status": "FAIL",
+    "log": ".tmp/z4-native-checks/native-complete-json-normalization-failure.log",
+    "nativeInputs": 1,
+    "nativeProcesses": 2,
+    "modelRequests": 5,
+    "verification": {
+      "processKnown": true,
+      "exitSuccessful": true,
+      "reportFresh": false,
+      "reportParsed": false,
+      "acceptancePassed": false,
+      "classification": "test",
+      "issues": [
+        "Native redaction changed retained evidence; it is not an unmodified validation input."
+      ]
+    },
+    "files": [
+      "z4-graph-design.png",
+      "z4-code-review.png",
+      "z4-build-native-permission.png",
+      "z4-test-native-permission.png",
+      "z4-failure.png"
+    ],
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\nfalse !== true\n\n    at file:///<checkout>/scripts/graph-engineering/z4-native-smoke.mjs:224:16"
+  },
+  {
+    "scenario": "complete",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-complete.log",
+    "nativeInputs": 1,
+    "nativeProcesses": 2,
+    "modelRequests": 5,
+    "verification": {
+      "processKnown": true,
+      "exitSuccessful": true,
+      "reportFresh": true,
+      "reportParsed": true,
+      "acceptancePassed": true,
+      "classification": "test",
+      "testCount": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "issues": []
+    },
+    "files": [
+      "z4-graph-design.png",
+      "z4-code-review.png",
+      "z4-build-native-permission.png",
+      "z4-test-native-permission.png",
+      "z4-positive-native-test-report.png",
+      "z4-native-command-result.png",
+      "z4-completed-reopened.png",
+      "z4-artifact-tamper-refused.png",
+      "MathOps-before.cs.txt",
+      "Z4Fixture.csproj.txt",
+      "MathOps.cs.txt",
+      "Runner.cs.txt",
+      "NuGet.Config.txt",
+      "test-report.json.txt"
+    ]
+  },
+  {
+    "scenario": "crash",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-crash.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 2,
+    "modelRequests": 0,
+    "files": [
+      "z4-build-native-permission.png",
+      "z4-test-native-permission.png",
+      "z4-uncertain-operation-reopened.png"
+    ]
+  },
+  {
+    "scenario": "json-field",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-json-field.log",
+    "nativeInputs": 2,
+    "nativeProcesses": 0,
+    "modelRequests": 6,
+    "files": ["z4-structured-output-result.png"]
+  },
+  {
+    "scenario": "json-html",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-json-html.log",
+    "nativeInputs": 2,
+    "nativeProcesses": 0,
+    "modelRequests": 6,
+    "files": ["z4-structured-output-result.png"]
+  },
+  {
+    "scenario": "json-invalid",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-json-invalid.log",
+    "nativeInputs": 1,
+    "nativeProcesses": 0,
+    "modelRequests": 3,
+    "files": ["z4-structured-output-result.png"]
+  },
+  {
+    "scenario": "json-oversized",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-json-oversized.log",
+    "nativeInputs": 1,
+    "nativeProcesses": 0,
+    "modelRequests": 3,
+    "files": ["z4-structured-output-result.png"]
+  },
+  {
+    "scenario": "json-whole",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-json-whole.log",
+    "nativeInputs": 2,
+    "nativeProcesses": 0,
+    "modelRequests": 6,
+    "files": ["z4-structured-output-result.png"]
+  },
+  {
+    "scenario": "lost-ack",
+    "status": "FAIL",
+    "log": ".tmp/z4-native-checks/native-lost-ack-navigation-failure.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 1,
+    "modelRequests": 0,
+    "files": ["z4-build-native-permission.png", "z4-failure.png"],
+    "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('graph-open-conversation')\u001b[22m\n\n    at openRunNode (<checkout>\\scripts\\graph-engineering\\z2-native-helpers.mjs:268:55)\n    at async file:///<checkout>/scripts/graph-engineering/z4-native-boundaries.mjs:73:18"
+  },
+  {
+    "scenario": "lost-ack",
+    "status": "FAIL",
+    "log": ".tmp/z4-native-checks/native-lost-ack-search-failure.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 1,
+    "modelRequests": 0,
+    "files": ["z4-build-native-permission.png", "z4-failure.png"],
+    "error": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('option').filter({ hasText: 'Recipe: fixture-test' })\u001b[22m\n\n    at <checkout>\\scripts\\graph-engineering\\z4-native-boundaries.mjs:79:8"
+  },
+  {
+    "scenario": "lost-ack",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-lost-ack.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 2,
+    "modelRequests": 0,
+    "files": [
+      "z4-build-native-permission.png",
+      "z4-unpersisted-ack-native-permission.png",
+      "z4-uncertain-operation-reopened.png"
+    ]
+  },
+  {
+    "scenario": "missing",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-missing.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 2,
+    "modelRequests": 0,
+    "verification": {
+      "processKnown": true,
+      "exitSuccessful": true,
+      "reportFresh": false,
+      "reportParsed": false,
+      "acceptancePassed": false,
+      "classification": "test",
+      "issues": [
+        "ENOENT: no such file or directory, lstat '<isolated-profile>\\workspace\\results\\test-report.json'"
+      ]
+    },
+    "files": [
+      "z4-build-native-permission.png",
+      "z4-test-native-permission.png",
+      "z4-native-command-result.png"
+    ]
+  },
+  {
+    "scenario": "model-pass",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-model-pass.log",
+    "nativeInputs": 1,
+    "nativeProcesses": 2,
+    "modelRequests": 3,
+    "verification": {
+      "processKnown": true,
+      "exitSuccessful": false,
+      "reportFresh": true,
+      "reportParsed": true,
+      "acceptancePassed": false,
+      "classification": "test",
+      "testCount": 3,
+      "passed": 0,
+      "failed": 3,
+      "skipped": 0,
+      "issues": [
+        "The native command did not exit successfully.",
+        "The native command did not exit successfully.",
+        "The native test report contains failures.",
+        "No executed test passed; all-skipped reports cannot pass.",
+        "Required test add-positive is missing, failed or skipped.",
+        "Required test add-negative is missing, failed or skipped.",
+        "Required test add-zero is missing, failed or skipped."
+      ]
+    },
+    "files": [
+      "z4-build-native-permission.png",
+      "z4-test-native-permission.png",
+      "z4-native-command-result.png",
+      "MathOps-before.cs.txt",
+      "Z4Fixture.csproj.txt",
+      "MathOps.cs.txt",
+      "Runner.cs.txt",
+      "NuGet.Config.txt",
+      "test-report.json.txt"
+    ]
+  },
+  {
+    "log": ".tmp/z4-native-checks/native-recipe-tests.log",
+    "status": "NO_SUMMARY",
+    "note": "Read the retained log; no native result is inferred."
+  },
+  {
+    "scenario": "redaction",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-redaction.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 2,
+    "modelRequests": 0,
+    "verification": {
+      "processKnown": true,
+      "exitSuccessful": true,
+      "reportFresh": true,
+      "reportParsed": true,
+      "acceptancePassed": true,
+      "classification": "test",
+      "testCount": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "issues": []
+    },
+    "files": [
+      "z4-build-native-permission.png",
+      "z4-test-native-permission.png",
+      "z4-native-command-result.png"
+    ]
+  },
+  {
+    "log": ".tmp/z4-native-checks/native-review-regression-before.log",
+    "status": "NO_SUMMARY",
+    "note": "Read the retained log; no native result is inferred."
+  },
+  {
+    "log": ".tmp/z4-native-checks/native-session-create-tests.log",
+    "status": "NO_SUMMARY",
+    "note": "Read the retained log; no native result is inferred."
+  },
+  {
+    "scenario": "stale",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-stale.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 2,
+    "modelRequests": 0,
+    "verification": {
+      "processKnown": true,
+      "exitSuccessful": true,
+      "reportFresh": false,
+      "reportParsed": true,
+      "acceptancePassed": false,
+      "classification": "test",
+      "testCount": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "issues": [
+        "Test report is unchanged from before this invocation.",
+        "Report operationId does not match this exact invocation.",
+        "Report sourceDigest does not match this exact invocation.",
+        "Report buildDigest does not match this exact invocation."
+      ]
+    },
+    "files": [
+      "z4-build-native-permission.png",
+      "z4-test-native-permission.png",
+      "z4-native-command-result.png"
+    ]
+  },
+  {
+    "scenario": "tool-agent",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-tool-agent.log",
+    "nativeInputs": 1,
+    "nativeProcesses": 2,
+    "modelRequests": 3,
+    "verification": {
+      "processKnown": true,
+      "exitSuccessful": true,
+      "reportFresh": true,
+      "reportParsed": true,
+      "acceptancePassed": true,
+      "classification": "test",
+      "testCount": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "issues": []
+    },
+    "files": [
+      "z4-build-native-permission.png",
+      "z4-test-native-permission.png",
+      "z4-native-command-result.png"
+    ]
+  },
+  {
+    "scenario": "wrong-build",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-wrong-build.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 2,
+    "modelRequests": 0,
+    "verification": {
+      "processKnown": true,
+      "exitSuccessful": false,
+      "reportFresh": true,
+      "reportParsed": true,
+      "acceptancePassed": false,
+      "classification": "test",
+      "testCount": 3,
+      "passed": 0,
+      "failed": 3,
+      "skipped": 0,
+      "issues": [
+        "The native command did not exit successfully.",
+        "The native command did not exit successfully.",
+        "Build outputs changed during the test.",
+        "The native test report contains failures.",
+        "No executed test passed; all-skipped reports cannot pass.",
+        "Required test add-positive is missing, failed or skipped.",
+        "Required test add-negative is missing, failed or skipped.",
+        "Required test add-zero is missing, failed or skipped."
+      ]
+    },
+    "files": [
+      "z4-build-native-permission.png",
+      "z4-test-native-permission.png",
+      "z4-native-command-result.png"
+    ]
+  },
+  {
+    "scenario": "wrong-source",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-wrong-source.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 2,
+    "modelRequests": 0,
+    "verification": {
+      "processKnown": true,
+      "exitSuccessful": true,
+      "reportFresh": true,
+      "reportParsed": true,
+      "acceptancePassed": false,
+      "classification": "test",
+      "testCount": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "issues": ["Declared source changed during command execution."]
+    },
+    "files": [
+      "z4-build-native-permission.png",
+      "z4-test-native-permission.png",
+      "z4-native-command-result.png"
+    ]
+  },
+  {
+    "scenario": "zero",
+    "status": "PASS",
+    "log": ".tmp/z4-native-checks/native-zero.log",
+    "nativeInputs": 0,
+    "nativeProcesses": 2,
+    "modelRequests": 0,
+    "verification": {
+      "processKnown": true,
+      "exitSuccessful": true,
+      "reportFresh": true,
+      "reportParsed": true,
+      "acceptancePassed": false,
+      "classification": "test",
+      "testCount": 0,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "issues": [
+        "Discovered tests do not match the configured positive count.",
+        "No executed test passed; all-skipped reports cannot pass.",
+        "Required test add-positive is missing, failed or skipped.",
+        "Required test add-negative is missing, failed or skipped.",
+        "Required test add-zero is missing, failed or skipped."
+      ]
+    },
+    "files": [
+      "z4-build-native-permission.png",
+      "z4-test-native-permission.png",
+      "z4-native-command-result.png"
+    ]
+  },
+  {
+    "scenario": "manual-setup",
+    "status": "PASS",
+    "nativeInputs": 0,
+    "nativeProcesses": 0,
+    "modelRequests": 0,
+    "userOperatedChecks": "NOT RUN",
+    "files": ["z4-manual-setup.png"]
+  },
+  {
+    "scenario": "manual-reopen",
+    "status": "PASS",
+    "nativeInputs": 0,
+    "nativeProcesses": 0,
+    "modelRequests": 0,
+    "userOperatedChecks": "NOT RUN",
+    "files": ["z4-manual-reopen.png"]
+  }
+]

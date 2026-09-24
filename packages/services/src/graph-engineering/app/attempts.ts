@@ -7,7 +7,7 @@ import type {
 import type { GraphNativeExecution } from "../app/ports.js";
 
 export function nativeExecution(run: GraphRun, attemptId: string): GraphNativeExecution {
-  if (run.version !== 2)
+  if (run.version === undefined)
     return {
       id: run.attemptId,
       attemptId: run.attemptId,
@@ -41,12 +41,27 @@ export function nativeExecution(run: GraphRun, attemptId: string): GraphNativeEx
   };
 }
 export function activeAttempt(run: GraphRun): GraphNodeAttempt | GraphLegacyRun | undefined {
-  if (run.version !== 2) return run;
+  if (run.version === undefined) return run;
   return run.nodeAttempts.find(
     (a) => a.dispatchPhase !== "planned" && !a.terminalProof && a.status !== "Skipped",
   );
 }
 export function skipPending(run: GraphSequentialRun, now: number): void {
+  for (const condition of run.routing?.conditionAttempts ?? [])
+    if (condition.status === "Pending") {
+      condition.status = "Skipped";
+      condition.updatedAt = now;
+    }
+  for (const tool of run.toolAttempts ?? [])
+    if (tool.status === "Pending") {
+      tool.status = "Skipped";
+      tool.updatedAt = now;
+    }
+  for (const gate of run.approvalAttempts ?? [])
+    if (gate.status === "Pending" || gate.status === "WaitingForApproval") {
+      gate.status = "Skipped";
+      gate.updatedAt = now;
+    }
   for (const node of run.nodeAttempts)
     if (node.status === "Pending") {
       node.status = "Skipped";

@@ -23,7 +23,7 @@ test("sequential native admission freezes all settings and exact dynamic handoff
   assert.equal(run.version, 2);
   assert.equal(f.sends.length, 1);
   const draft = (await f.view()).definition;
-  if (draft.version === 2) {
+  if (draft.version !== undefined) {
     const v = draft.nodes.find((n) => n.id === "verify")!;
     if (v.type === "task") v.instructions = "Changed later";
     await f.service.saveDefinition({ target, definition: draft, expectedRevision: 1 });
@@ -175,7 +175,7 @@ test("restart with successful predecessor and planned successor never continues"
     await write(t, record);
     const run = record.runs[0]!;
     if (
-      run.version === 2 &&
+      run.version !== undefined &&
       run.nodeAttempts[0]!.status === "Completed" &&
       run.nodeAttempts[1]!.status === "Pending"
     )

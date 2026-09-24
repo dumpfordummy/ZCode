@@ -25,11 +25,17 @@ import type {
   GitWorkspaceRepositoryInfo,
   GitFileChange,
   GitSwitchBranchRequest,
+  GitSourceSnapshot,
 } from "@zcode/shared";
 import { ServiceChannels } from "@zcode/shared";
 import { createServiceDescriptor } from "../descriptors.js";
+import type { GitGraphBase, GitGraphWorkspace, GitGraphWorkspaceCommand } from "@zcode/shared";
 
 export interface IGitService {
+  getGraphBase(params: GitRepositoryRequest): Promise<GitGraphBase>;
+  graphWorkspace(params: GitGraphWorkspaceCommand): Promise<GitGraphWorkspace>;
+  /** Bounded source evidence, including unsupported entries as incomplete results. */
+  getSourceSnapshot(params: GitRepositoryRequest): Promise<GitSourceSnapshot>;
   getRepositorySummary(params: GitRepositoryRequest): Promise<GitRepositorySummary>;
   getWorkspaceRepositoryInfo(params: GitRepositoryRequest): Promise<GitWorkspaceRepositoryInfo>;
   getLocalBranches(params: GitRepositoryRequest): Promise<GitLocalBranchListResult>;

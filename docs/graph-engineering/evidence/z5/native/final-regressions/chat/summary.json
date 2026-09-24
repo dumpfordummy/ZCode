@@ -1,0 +1,87 @@
+{
+  "mode": "chat",
+  "scenario": "complete",
+  "home": "<isolated-profile>",
+  "workspace": "<isolated-profile>\\workspace",
+  "assertions": [
+    "Real CLI Read/Edit/Bash events, changed synthetic file and independent node:test pass"
+  ],
+  "screenshots": [
+    "<isolated-profile>\\chat-native-permission.png",
+    "<isolated-profile>\\chat-native-result.png"
+  ],
+  "testOutput": "✔ synthetic marker (0.3243ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 46.565\n",
+  "nativeToolResults": [
+    {
+      "id": "z1_fixture_read",
+      "output": "1\texport const marker = 'Z1_BEFORE_7391';\n2\t"
+    },
+    {
+      "id": "z1_fixture_edit",
+      "output": "The file <isolated-profile>/workspace/fixture.mjs has been updated successfully. (file state is current in your context — no need to Read it back)"
+    },
+    {
+      "id": "z1_fixture_test",
+      "output": "✔ synthetic marker (0.3265ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 46.4888"
+    }
+  ],
+  "status": "PASS",
+  "collectorNativeLedger": [
+    {
+      "id": "queue_01a0d3d0-6edd-73e1-a053-57f959adeea1",
+      "session_id": "sess_678ecc03-9957-4739-bd73-6e760f7d29e0",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Z1_SYNTHETIC_TASK: Read fixture.mjs, replace Z1_BEFORE_7391 with Z1_AFTER_7391, and run node --test fixture.test.mjs. Work only in this synthetic workspace.",
+        "intent": {
+          "sourceCommandId": "01a0d3d0-6edd-73e1-a053-57f959adeea1",
+          "queueItemId": "queue_01a0d3d0-6edd-73e1-a053-57f959adeea1",
+          "clientId": "client-01a0d3d0-6e58-7d69-a82c-237e8f6328fe",
+          "kind": "sendText",
+          "admissionSeq": 2,
+          "admittedAt": 1790260048100,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "01a0d3d0-6edd-73e1-a053-57f959adeea1",
+          "queueItemId": "queue_01a0d3d0-6edd-73e1-a053-57f959adeea1",
+          "clientId": "client-01a0d3d0-6e58-7d69-a82c-237e8f6328fe",
+          "kind": "sendText",
+          "text": "Z1_SYNTHETIC_TASK: Read fixture.mjs, replace Z1_BEFORE_7391 with Z1_AFTER_7391, and run node --test fixture.test.mjs. Work only in this synthetic workspace.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 2
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790260048100
+        },
+        "attachments": [],
+        "sourceCommandType": "createSession"
+      },
+      "status": "promoted",
+      "time_created": 1790260048169,
+      "time_updated": 1790260048683
+    }
+  ],
+  "collectorNote": "Read-only input ledger collected from this exact synthetic profile after the predecessor Chat harness exited.",
+  "collectedModelRequestCounts": {
+    "total": 5,
+    "byStage": {
+      "unspecified": {
+        "unclassified": 5
+      }
+    }
+  }
+}

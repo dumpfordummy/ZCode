@@ -1,0 +1,536 @@
+{
+  "format": "zcode-workflow",
+  "version": 1,
+  "name": "Sequential slot refinement",
+  "description": "Refine only explicitly selected source-defined behaviors. Require interpretation approval, shared-state review, targeted real tests and final review; no certification or inferred game math.",
+  "graph": {
+    "version": 5,
+    "revision": 0,
+    "name": "Sequential slot refinement",
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 40,
+          "y": 100
+        },
+        "request": ""
+      },
+      {
+        "id": "analyze",
+        "type": "task",
+        "name": "Analyze authoritative game sources",
+        "position": {
+          "x": 300,
+          "y": 100
+        },
+        "instructions": "Workflow task: analyze.\nRead the selected authoritative GameDoc, optional math and source references, and the existing engine. Produce source-linked rules, unknowns and affected behavior IDs. Every rule must cite a source reference or be a labelled assumption/question. Do not infer retrigger, max-win or accumulated-win rules from example names. No target or sampling/acceptance rule means no RTP comparison. This workflow is not certification. Do not edit or execute commands.\nrequest:\n{{inputs.request}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "interpretation",
+        "type": "approval",
+        "name": "Approve source interpretation and edge cases",
+        "position": {
+          "x": 560,
+          "y": 100
+        },
+        "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+        "evidence": [
+          {
+            "alias": "evidence",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "analyze",
+              "selector": "final"
+            }
+          },
+          {
+            "alias": "source",
+            "source": {
+              "kind": "source"
+            }
+          }
+        ],
+        "commentPolicy": "required"
+      },
+      {
+        "id": "plan",
+        "type": "task",
+        "name": "Plan selected tasks and state ownership",
+        "position": {
+          "x": 820,
+          "y": 100
+        },
+        "instructions": "Workflow task: plan.\nUse the approved source interpretation and selected behaviors to plan sequential native implementation. Identify shared-state ownership, exact affected files and targeted edge cases. Explicitly record excluded behaviors and unresolved questions. Preserve source math unless its change was explicitly approved. Do not edit or execute commands.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
+          {
+            "alias": "analyze",
+            "source": {
+              "kind": "node",
+              "nodeId": "analyze"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "normal",
+        "type": "task",
+        "name": "Implement Normal",
+        "position": {
+          "x": 1080,
+          "y": 100
+        },
+        "instructions": "Workflow task: normal.\nImplement only the selected normal behavior from the supplied source-linked plan in the chosen existing engine. Read current source first; preserve other behaviors, shared-state ownership and independent tests. A missing rule is a question, not permission to invent one. Native tasks execute sequentially. Do not run Build/Test recipes here.\nrequest:\n{{inputs.request}}\n\nplan:\n{{inputs.plan}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
+          {
+            "alias": "plan",
+            "source": {
+              "kind": "node",
+              "nodeId": "plan"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "free",
+        "type": "task",
+        "name": "Implement Free",
+        "position": {
+          "x": 1340,
+          "y": 100
+        },
+        "instructions": "Workflow task: free.\nImplement only the selected free behavior from the supplied source-linked plan in the chosen existing engine. Read current source first; preserve other behaviors, shared-state ownership and independent tests. A missing rule is a question, not permission to invent one. Native tasks execute sequentially. Do not run Build/Test recipes here.\nrequest:\n{{inputs.request}}\n\nplan:\n{{inputs.plan}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
+          {
+            "alias": "plan",
+            "source": {
+              "kind": "node",
+              "nodeId": "plan"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "bonus",
+        "type": "task",
+        "name": "Implement Bonus",
+        "position": {
+          "x": 40,
+          "y": 320
+        },
+        "instructions": "Workflow task: bonus.\nImplement only the selected bonus behavior from the supplied source-linked plan in the chosen existing engine. Read current source first; preserve other behaviors, shared-state ownership and independent tests. A missing rule is a question, not permission to invent one. Native tasks execute sequentially. Do not run Build/Test recipes here.\nrequest:\n{{inputs.request}}\n\nplan:\n{{inputs.plan}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
+          {
+            "alias": "plan",
+            "source": {
+              "kind": "node",
+              "nodeId": "plan"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "respin",
+        "type": "task",
+        "name": "Implement Respin",
+        "position": {
+          "x": 300,
+          "y": 320
+        },
+        "instructions": "Workflow task: respin.\nImplement only the selected respin behavior from the supplied source-linked plan in the chosen existing engine. Read current source first; preserve other behaviors, shared-state ownership and independent tests. A missing rule is a question, not permission to invent one. Native tasks execute sequentially. Do not run Build/Test recipes here.\nrequest:\n{{inputs.request}}\n\nplan:\n{{inputs.plan}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
+          {
+            "alias": "plan",
+            "source": {
+              "kind": "node",
+              "nodeId": "plan"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "cross-review",
+        "type": "task",
+        "name": "Review cross-spin shared state",
+        "position": {
+          "x": 560,
+          "y": 320
+        },
+        "instructions": "Workflow task: cross-review.\nRead the actual sequential implementation and supplied authorities. Review shared state across selected behaviors, source-linked edge cases and explicit exclusions. Every finding cites a source reference or is labelled an assumption/question. Do not edit source or claim aggregate RTP establishes rule fidelity. Build/Test follows with the configured real harness.\nrequest:\n{{inputs.request}}\n\nplan:\n{{inputs.plan}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
+          {
+            "alias": "plan",
+            "source": {
+              "kind": "node",
+              "nodeId": "plan"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "build",
+        "type": "tool",
+        "name": "Build",
+        "position": {
+          "x": 820,
+          "y": 320
+        },
+        "recipeId": "build"
+      },
+      {
+        "id": "test",
+        "type": "tool",
+        "name": "Test configured criteria",
+        "position": {
+          "x": 1080,
+          "y": 320
+        },
+        "recipeId": "test"
+      },
+      {
+        "id": "reviewer",
+        "type": "task",
+        "name": "Review current verification",
+        "position": {
+          "x": 1340,
+          "y": 320
+        },
+        "instructions": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{{inputs.verification}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "verification",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "test",
+              "selector": "verification"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        },
+        "output": {
+          "kind": "json",
+          "schema": {
+            "type": "object",
+            "required": ["outcome", "findings", "evidenceReferences"],
+            "additionalProperties": false,
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "enum": ["pass", "needs_changes", "needs_human"]
+              },
+              "findings": {
+                "type": "array",
+                "maxItems": 10,
+                "items": {
+                  "type": "object",
+                  "required": ["code", "message"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  }
+                }
+              },
+              "evidenceReferences": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 8,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "final-gate",
+        "type": "approval",
+        "name": "Final diff, evidence and questions review",
+        "position": {
+          "x": 40,
+          "y": 540
+        },
+        "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+        "evidence": [
+          {
+            "alias": "evidence",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "test",
+              "selector": "test"
+            }
+          },
+          {
+            "alias": "review",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "reviewer",
+              "selector": "structured"
+            }
+          },
+          {
+            "alias": "source",
+            "source": {
+              "kind": "source"
+            }
+          }
+        ],
+        "commentPolicy": "required"
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 300,
+          "y": 540
+        },
+        "outputNodeId": "test"
+      }
+    ],
+    "edges": [
+      {
+        "source": "start",
+        "target": "analyze"
+      },
+      {
+        "source": "analyze",
+        "target": "interpretation"
+      },
+      {
+        "source": "interpretation",
+        "target": "plan"
+      },
+      {
+        "source": "plan",
+        "target": "normal"
+      },
+      {
+        "source": "normal",
+        "target": "free"
+      },
+      {
+        "source": "free",
+        "target": "bonus"
+      },
+      {
+        "source": "bonus",
+        "target": "respin"
+      },
+      {
+        "source": "respin",
+        "target": "cross-review"
+      },
+      {
+        "source": "cross-review",
+        "target": "build"
+      },
+      {
+        "source": "build",
+        "target": "test"
+      },
+      {
+        "source": "test",
+        "target": "reviewer"
+      },
+      {
+        "source": "reviewer",
+        "target": "final-gate"
+      },
+      {
+        "source": "final-gate",
+        "target": "end"
+      }
+    ],
+    "routing": {
+      "finalGateId": "final-gate",
+      "limits": {
+        "maxNodeAdmissions": 24,
+        "deadlineMs": 1800000
+      }
+    }
+  },
+  "parameters": [
+    {
+      "id": "request",
+      "label": "Explicit run request",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "targetEngine",
+      "label": "Target engine",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "criteria",
+      "label": "Source-linked test criteria",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "normal",
+      "label": "Include normal",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "id": "free",
+      "label": "Include free",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "id": "bonus",
+      "label": "Include bonus",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "id": "respin",
+      "label": "Include respin",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "id": "mathTarget",
+      "label": "Approved math/RTP target (optional)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "id": "samplingRule",
+      "label": "Sampling and acceptance rule (optional)",
+      "type": "string",
+      "required": false
+    }
+  ],
+  "references": [
+    {
+      "id": "gameDoc",
+      "label": "Authoritative GameDoc",
+      "kind": "document",
+      "required": true,
+      "nodeIds": ["analyze"]
+    },
+    {
+      "id": "math",
+      "label": "Authoritative math reference",
+      "kind": "document",
+      "required": false,
+      "nodeIds": ["analyze"]
+    },
+    {
+      "id": "source",
+      "label": "Source reference document",
+      "kind": "document",
+      "required": false,
+      "nodeIds": ["analyze"]
+    }
+  ],
+  "optionalNodes": [
+    {
+      "nodeId": "normal",
+      "parameterId": "normal"
+    },
+    {
+      "nodeId": "free",
+      "parameterId": "free"
+    },
+    {
+      "nodeId": "bonus",
+      "parameterId": "bonus"
+    },
+    {
+      "nodeId": "respin",
+      "parameterId": "respin"
+    }
+  ]
+}

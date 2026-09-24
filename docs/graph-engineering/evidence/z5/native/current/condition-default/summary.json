@@ -1,0 +1,1466 @@
+{
+  "scenario": "condition-default",
+  "home": "<isolated-profile>",
+  "workspace": "<isolated-profile>\\workspace",
+  "assertions": [
+    "Actual editor saves named exclusive branches and a common merge with a required final gate.",
+    "Typed actual native output selects one named route; skipped branches never gain sessions or block the merge. Missing/wrong-type operands stop without coercion or repair."
+  ],
+  "screenshots": [
+    "<isolated-profile>\\z5-saved-native-graph.png",
+    "<isolated-profile>\\z5-run-confirmation.png",
+    "<isolated-profile>\\z5-typed-condition-route.png"
+  ],
+  "fixture": {
+    "runnerDigest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79",
+    "source": {
+      "digest": "497750fe192e4531c18aff80ae796e04b25b130c00c69d784df8c7a53e3d9527",
+      "files": [
+        {
+          "path": "Directory.Build.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Build.targets",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Packages.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "MathOps.cs",
+          "length": 100,
+          "digest": "2cc9461517454ad8085486324e36939d54eea73c53454d7b64323dbac578fce9"
+        },
+        {
+          "path": "NuGet.Config",
+          "length": 112,
+          "digest": "7d59a339f0f6022f0710d690fe52e2a0f868519847651f6c10f6c9ff1bd7213a"
+        },
+        {
+          "path": "Runner.cs",
+          "length": 3700,
+          "digest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79"
+        },
+        {
+          "path": "Z4Fixture.csproj",
+          "length": 494,
+          "digest": "97413a96ff9fb4bfc78841548e1d11971590ce5d25a743e6a83b1a1b3fb910ff"
+        },
+        {
+          "path": "global.json",
+          "length": 54,
+          "digest": "9969992897aee36fbc62db0976390d87b1275dc0d7c6fcb937a7f81a316f97dc"
+        }
+      ]
+    }
+  },
+  "ids": {
+    "initial": "task",
+    "decision": "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+    "branches": {
+      "true": "6be20824-4258-4ca3-8a99-9e16305a9001",
+      "false": "a21af26e-ccd5-48b2-9705-3af9fe2bb008",
+      "default": "1c921dda-0bf2-4068-87da-9a0c5c4db83d"
+    },
+    "merge": "557073d7-d681-475f-a1ff-45c713739c5e",
+    "finalGate": "91f2a51a-0029-4582-b832-38aafc107cf3",
+    "admissions": 8,
+    "deadline": 600000
+  },
+  "confirmedSnapshot": {
+    "definition": {
+      "version": 5,
+      "revision": 2,
+      "name": "Z5 typed exclusive routes",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": ""
+        },
+        {
+          "id": "task",
+          "position": {
+            "x": 280,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Condition data",
+          "instructions": "Z5_CONDITION: Read MathOps.cs and return the exact controlled structured data.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          },
+          "output": {
+            "kind": "json",
+            "schema": {
+              "type": "object",
+              "required": [],
+              "additionalProperties": false,
+              "properties": {
+                "ready": {
+                  "type": "boolean"
+                },
+                "count": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 2160,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "557073d7-d681-475f-a1ff-45c713739c5e"
+        },
+        {
+          "id": "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "type": "condition",
+          "name": "Choose one route",
+          "inputs": [
+            {
+              "alias": "data",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "task",
+                "selector": "structured"
+              }
+            }
+          ],
+          "branches": [
+            {
+              "exit": "true",
+              "predicate": {
+                "op": "all",
+                "predicates": [
+                  {
+                    "op": "eq",
+                    "alias": "data",
+                    "pointer": "/ready",
+                    "value": true
+                  },
+                  {
+                    "op": "gte",
+                    "alias": "data",
+                    "pointer": "/count",
+                    "value": 3
+                  }
+                ]
+              }
+            },
+            {
+              "exit": "false",
+              "predicate": {
+                "op": "eq",
+                "alias": "data",
+                "pointer": "/ready",
+                "value": false
+              }
+            }
+          ],
+          "defaultExit": "default",
+          "errorPolicy": "needs-human"
+        },
+        {
+          "id": "6be20824-4258-4ca3-8a99-9e16305a9001",
+          "position": {
+            "x": 860,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Selected true route",
+          "instructions": "Z5_ROUTE: Read MathOps.cs; route=true.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "a21af26e-ccd5-48b2-9705-3af9fe2bb008",
+          "position": {
+            "x": 1120,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Selected false route",
+          "instructions": "Z5_ROUTE: Read MathOps.cs; route=false.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "1c921dda-0bf2-4068-87da-9a0c5c4db83d",
+          "position": {
+            "x": 1380,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Selected default route",
+          "instructions": "Z5_ROUTE: Read MathOps.cs; route=default.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "557073d7-d681-475f-a1ff-45c713739c5e",
+          "position": {
+            "x": 1640,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Exclusive merge",
+          "instructions": "Z5_ROUTE: Read MathOps.cs; route=merge.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "91f2a51a-0029-4582-b832-38aafc107cf3",
+          "position": {
+            "x": 1900,
+            "y": 100
+          },
+          "type": "approval",
+          "name": "Final route review",
+          "reviewInstructions": "Review this exact iteration's native evidence. This gate does not authorize publication or answer native permissions.",
+          "evidence": [
+            {
+              "alias": "evidence",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "557073d7-d681-475f-a1ff-45c713739c5e",
+                "selector": "final"
+              }
+            }
+          ],
+          "commentPolicy": "required"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "task"
+        },
+        {
+          "source": "task",
+          "target": "a15f72c7-5345-44bc-bc65-819d0fc305aa"
+        },
+        {
+          "source": "557073d7-d681-475f-a1ff-45c713739c5e",
+          "target": "91f2a51a-0029-4582-b832-38aafc107cf3"
+        },
+        {
+          "source": "91f2a51a-0029-4582-b832-38aafc107cf3",
+          "target": "end"
+        },
+        {
+          "source": "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+          "target": "6be20824-4258-4ca3-8a99-9e16305a9001",
+          "sourcePort": "true"
+        },
+        {
+          "source": "6be20824-4258-4ca3-8a99-9e16305a9001",
+          "target": "557073d7-d681-475f-a1ff-45c713739c5e"
+        },
+        {
+          "source": "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+          "target": "a21af26e-ccd5-48b2-9705-3af9fe2bb008",
+          "sourcePort": "false"
+        },
+        {
+          "source": "a21af26e-ccd5-48b2-9705-3af9fe2bb008",
+          "target": "557073d7-d681-475f-a1ff-45c713739c5e"
+        },
+        {
+          "source": "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+          "target": "1c921dda-0bf2-4068-87da-9a0c5c4db83d",
+          "sourcePort": "default"
+        },
+        {
+          "source": "1c921dda-0bf2-4068-87da-9a0c5c4db83d",
+          "target": "557073d7-d681-475f-a1ff-45c713739c5e"
+        }
+      ],
+      "routing": {
+        "finalGateId": "91f2a51a-0029-4582-b832-38aafc107cf3",
+        "limits": {
+          "maxNodeAdmissions": 8,
+          "deadlineMs": 600000
+        }
+      }
+    },
+    "settings": {
+      "modelSelection": {
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "options": {
+          "reasoningLevel": "enabled"
+        }
+      },
+      "mode": "build",
+      "planEnabled": false
+    }
+  },
+  "status": "PASS",
+  "finalRecord": {
+    "version": 5,
+    "workspaceKey": "<isolated-profile>\\workspace",
+    "definition": {
+      "version": 5,
+      "revision": 2,
+      "name": "Z5 typed exclusive routes",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": ""
+        },
+        {
+          "id": "task",
+          "position": {
+            "x": 280,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Condition data",
+          "instructions": "Z5_CONDITION: Read MathOps.cs and return the exact controlled structured data.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          },
+          "output": {
+            "kind": "json",
+            "schema": {
+              "type": "object",
+              "required": [],
+              "additionalProperties": false,
+              "properties": {
+                "ready": {
+                  "type": "boolean"
+                },
+                "count": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 2160,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "557073d7-d681-475f-a1ff-45c713739c5e"
+        },
+        {
+          "id": "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "type": "condition",
+          "name": "Choose one route",
+          "inputs": [
+            {
+              "alias": "data",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "task",
+                "selector": "structured"
+              }
+            }
+          ],
+          "branches": [
+            {
+              "exit": "true",
+              "predicate": {
+                "op": "all",
+                "predicates": [
+                  {
+                    "op": "eq",
+                    "alias": "data",
+                    "pointer": "/ready",
+                    "value": true
+                  },
+                  {
+                    "op": "gte",
+                    "alias": "data",
+                    "pointer": "/count",
+                    "value": 3
+                  }
+                ]
+              }
+            },
+            {
+              "exit": "false",
+              "predicate": {
+                "op": "eq",
+                "alias": "data",
+                "pointer": "/ready",
+                "value": false
+              }
+            }
+          ],
+          "defaultExit": "default",
+          "errorPolicy": "needs-human"
+        },
+        {
+          "id": "6be20824-4258-4ca3-8a99-9e16305a9001",
+          "position": {
+            "x": 860,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Selected true route",
+          "instructions": "Z5_ROUTE: Read MathOps.cs; route=true.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "a21af26e-ccd5-48b2-9705-3af9fe2bb008",
+          "position": {
+            "x": 1120,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Selected false route",
+          "instructions": "Z5_ROUTE: Read MathOps.cs; route=false.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "1c921dda-0bf2-4068-87da-9a0c5c4db83d",
+          "position": {
+            "x": 1380,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Selected default route",
+          "instructions": "Z5_ROUTE: Read MathOps.cs; route=default.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "557073d7-d681-475f-a1ff-45c713739c5e",
+          "position": {
+            "x": 1640,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Exclusive merge",
+          "instructions": "Z5_ROUTE: Read MathOps.cs; route=merge.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "91f2a51a-0029-4582-b832-38aafc107cf3",
+          "position": {
+            "x": 1900,
+            "y": 100
+          },
+          "type": "approval",
+          "name": "Final route review",
+          "reviewInstructions": "Review this exact iteration's native evidence. This gate does not authorize publication or answer native permissions.",
+          "evidence": [
+            {
+              "alias": "evidence",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "557073d7-d681-475f-a1ff-45c713739c5e",
+                "selector": "final"
+              }
+            }
+          ],
+          "commentPolicy": "required"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "task"
+        },
+        {
+          "source": "task",
+          "target": "a15f72c7-5345-44bc-bc65-819d0fc305aa"
+        },
+        {
+          "source": "557073d7-d681-475f-a1ff-45c713739c5e",
+          "target": "91f2a51a-0029-4582-b832-38aafc107cf3"
+        },
+        {
+          "source": "91f2a51a-0029-4582-b832-38aafc107cf3",
+          "target": "end"
+        },
+        {
+          "source": "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+          "target": "6be20824-4258-4ca3-8a99-9e16305a9001",
+          "sourcePort": "true"
+        },
+        {
+          "source": "6be20824-4258-4ca3-8a99-9e16305a9001",
+          "target": "557073d7-d681-475f-a1ff-45c713739c5e"
+        },
+        {
+          "source": "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+          "target": "a21af26e-ccd5-48b2-9705-3af9fe2bb008",
+          "sourcePort": "false"
+        },
+        {
+          "source": "a21af26e-ccd5-48b2-9705-3af9fe2bb008",
+          "target": "557073d7-d681-475f-a1ff-45c713739c5e"
+        },
+        {
+          "source": "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+          "target": "1c921dda-0bf2-4068-87da-9a0c5c4db83d",
+          "sourcePort": "default"
+        },
+        {
+          "source": "1c921dda-0bf2-4068-87da-9a0c5c4db83d",
+          "target": "557073d7-d681-475f-a1ff-45c713739c5e"
+        }
+      ],
+      "routing": {
+        "finalGateId": "91f2a51a-0029-4582-b832-38aafc107cf3",
+        "limits": {
+          "maxNodeAdmissions": 8,
+          "deadlineMs": 600000
+        }
+      }
+    },
+    "runs": [
+      {
+        "id": "4e33e026-cdde-4196-8c8e-f858fa3e8bff",
+        "requestId": "168f50cf-7408-4931-93ea-aef282d2cfa0",
+        "target": {
+          "workspacePath": "<isolated-profile>\\workspace"
+        },
+        "status": "Completed",
+        "createdAt": 1790259973535,
+        "updatedAt": 1790259976304,
+        "version": 5,
+        "routing": {
+          "configurationDigest": "e0ae2482b69b65facfc92eab18bedbc7e87eef2016ccbebb841d5d9c303f584b",
+          "recipeConfigurationDigest": "ffa63583dfa6706b87d284b86b0d693a161e4840aad2c5cf6b5d27c3b9621f7d",
+          "currentIterationId": "84a04bc5-9194-4b2c-9e58-40278c638d1b",
+          "cursorNodeId": "end",
+          "iterations": [
+            {
+              "id": "84a04bc5-9194-4b2c-9e58-40278c638d1b",
+              "index": 0,
+              "createdAt": 1790259973539,
+              "attemptIds": {
+                "task": "e063b52b-cdb3-4618-897e-1005a3132311",
+                "6be20824-4258-4ca3-8a99-9e16305a9001": "b823ae3e-6d75-41bd-acef-2af40b2b9d25",
+                "a21af26e-ccd5-48b2-9705-3af9fe2bb008": "bc8f0088-ea10-4d84-8e9f-34d3e272d388",
+                "1c921dda-0bf2-4068-87da-9a0c5c4db83d": "869d3324-cc7a-480d-991c-b630a0f9fc5b",
+                "557073d7-d681-475f-a1ff-45c713739c5e": "909be027-9491-42b8-8fbf-b826654f1f55",
+                "91f2a51a-0029-4582-b832-38aafc107cf3": "5271241a-f8c0-4c05-a05f-e5caa789f948",
+                "a15f72c7-5345-44bc-bc65-819d0fc305aa": "e22caa65-b8cc-46be-84b4-9eaa1632cd2a"
+              },
+              "visitedNodeIds": [
+                "task",
+                "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+                "1c921dda-0bf2-4068-87da-9a0c5c4db83d",
+                "557073d7-d681-475f-a1ff-45c713739c5e",
+                "91f2a51a-0029-4582-b832-38aafc107cf3"
+              ]
+            }
+          ],
+          "conditionAttempts": [
+            {
+              "nodeId": "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+              "attemptId": "e22caa65-b8cc-46be-84b4-9eaa1632cd2a",
+              "iterationId": "84a04bc5-9194-4b2c-9e58-40278c638d1b",
+              "iteration": 0,
+              "status": "Evaluated",
+              "createdAt": 1790259973539,
+              "updatedAt": 1790259974448,
+              "bindings": [
+                {
+                  "alias": "data",
+                  "artifactId": "88c42f2a-eff1-46c2-9ef1-1297c59cabaf",
+                  "digest": "2c9d254d9111431d22e30530278c367ec3a93e2560d338a5f2d383f6fffd67b3",
+                  "value": {
+                    "ready": true,
+                    "count": 1
+                  }
+                }
+              ],
+              "values": [
+                {
+                  "alias": "data",
+                  "pointer": "/ready",
+                  "present": true,
+                  "value": true
+                },
+                {
+                  "alias": "data",
+                  "pointer": "/count",
+                  "present": true,
+                  "value": 1
+                },
+                {
+                  "alias": "data",
+                  "pointer": "/ready",
+                  "present": true,
+                  "value": true
+                }
+              ],
+              "selectedExit": "default",
+              "decisionId": "73cc52a9-3ea8-48e3-922b-cc85312890ae",
+              "successorNodeId": "1c921dda-0bf2-4068-87da-9a0c5c4db83d"
+            }
+          ],
+          "admissions": 3,
+          "deadlineAt": 1790260573535,
+          "checkpoints": [
+            {
+              "id": "ec74dcbc-ec67-4cca-a64a-b34285106e9e",
+              "digest": "3c0d60ea5a4130d485636e83788a709d1c7b216764664cae9279e324e95617fa",
+              "decisionId": "73cc52a9-3ea8-48e3-922b-cc85312890ae",
+              "iterationId": "84a04bc5-9194-4b2c-9e58-40278c638d1b",
+              "successorNodeId": "1c921dda-0bf2-4068-87da-9a0c5c4db83d",
+              "createdAt": 1790259974448,
+              "consumedAt": 1790259974475
+            }
+          ],
+          "continuations": []
+        },
+        "requestFingerprint": "{\"mode\":\"build\",\"modelSelection\":{\"modelId\":\"z1-fixture\",\"options\":{\"reasoningLevel\":\"enabled\"},\"providerId\":\"z1-local-fixture\"},\"planEnabled\":false,\"revision\":2,\"target\":{\"workspacePath\":\"<isolated-profile>\\\\workspace\"}}",
+        "definition": {
+          "version": 5,
+          "revision": 2,
+          "name": "Z5 typed exclusive routes",
+          "nodes": [
+            {
+              "id": "start",
+              "position": {
+                "x": 40,
+                "y": 100
+              },
+              "type": "start",
+              "request": ""
+            },
+            {
+              "id": "task",
+              "position": {
+                "x": 280,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Condition data",
+              "instructions": "Z5_CONDITION: Read MathOps.cs and return the exact controlled structured data.",
+              "instructionMode": "literal",
+              "inputs": [],
+              "configuration": {
+                "kind": "inherit"
+              },
+              "output": {
+                "kind": "json",
+                "schema": {
+                  "type": "object",
+                  "required": [],
+                  "additionalProperties": false,
+                  "properties": {
+                    "ready": {
+                      "type": "boolean"
+                    },
+                    "count": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "end",
+              "position": {
+                "x": 2160,
+                "y": 100
+              },
+              "type": "end",
+              "outputNodeId": "557073d7-d681-475f-a1ff-45c713739c5e"
+            },
+            {
+              "id": "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+              "position": {
+                "x": 600,
+                "y": 100
+              },
+              "type": "condition",
+              "name": "Choose one route",
+              "inputs": [
+                {
+                  "alias": "data",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "task",
+                    "selector": "structured"
+                  }
+                }
+              ],
+              "branches": [
+                {
+                  "exit": "true",
+                  "predicate": {
+                    "op": "all",
+                    "predicates": [
+                      {
+                        "op": "eq",
+                        "alias": "data",
+                        "pointer": "/ready",
+                        "value": true
+                      },
+                      {
+                        "op": "gte",
+                        "alias": "data",
+                        "pointer": "/count",
+                        "value": 3
+                      }
+                    ]
+                  }
+                },
+                {
+                  "exit": "false",
+                  "predicate": {
+                    "op": "eq",
+                    "alias": "data",
+                    "pointer": "/ready",
+                    "value": false
+                  }
+                }
+              ],
+              "defaultExit": "default",
+              "errorPolicy": "needs-human"
+            },
+            {
+              "id": "6be20824-4258-4ca3-8a99-9e16305a9001",
+              "position": {
+                "x": 860,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Selected true route",
+              "instructions": "Z5_ROUTE: Read MathOps.cs; route=true.",
+              "instructionMode": "literal",
+              "inputs": [],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "a21af26e-ccd5-48b2-9705-3af9fe2bb008",
+              "position": {
+                "x": 1120,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Selected false route",
+              "instructions": "Z5_ROUTE: Read MathOps.cs; route=false.",
+              "instructionMode": "literal",
+              "inputs": [],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "1c921dda-0bf2-4068-87da-9a0c5c4db83d",
+              "position": {
+                "x": 1380,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Selected default route",
+              "instructions": "Z5_ROUTE: Read MathOps.cs; route=default.",
+              "instructionMode": "literal",
+              "inputs": [],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "557073d7-d681-475f-a1ff-45c713739c5e",
+              "position": {
+                "x": 1640,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Exclusive merge",
+              "instructions": "Z5_ROUTE: Read MathOps.cs; route=merge.",
+              "instructionMode": "literal",
+              "inputs": [],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "91f2a51a-0029-4582-b832-38aafc107cf3",
+              "position": {
+                "x": 1900,
+                "y": 100
+              },
+              "type": "approval",
+              "name": "Final route review",
+              "reviewInstructions": "Review this exact iteration's native evidence. This gate does not authorize publication or answer native permissions.",
+              "evidence": [
+                {
+                  "alias": "evidence",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "557073d7-d681-475f-a1ff-45c713739c5e",
+                    "selector": "final"
+                  }
+                }
+              ],
+              "commentPolicy": "required"
+            }
+          ],
+          "edges": [
+            {
+              "source": "start",
+              "target": "task"
+            },
+            {
+              "source": "task",
+              "target": "a15f72c7-5345-44bc-bc65-819d0fc305aa"
+            },
+            {
+              "source": "557073d7-d681-475f-a1ff-45c713739c5e",
+              "target": "91f2a51a-0029-4582-b832-38aafc107cf3"
+            },
+            {
+              "source": "91f2a51a-0029-4582-b832-38aafc107cf3",
+              "target": "end"
+            },
+            {
+              "source": "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+              "target": "6be20824-4258-4ca3-8a99-9e16305a9001",
+              "sourcePort": "true"
+            },
+            {
+              "source": "6be20824-4258-4ca3-8a99-9e16305a9001",
+              "target": "557073d7-d681-475f-a1ff-45c713739c5e"
+            },
+            {
+              "source": "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+              "target": "a21af26e-ccd5-48b2-9705-3af9fe2bb008",
+              "sourcePort": "false"
+            },
+            {
+              "source": "a21af26e-ccd5-48b2-9705-3af9fe2bb008",
+              "target": "557073d7-d681-475f-a1ff-45c713739c5e"
+            },
+            {
+              "source": "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+              "target": "1c921dda-0bf2-4068-87da-9a0c5c4db83d",
+              "sourcePort": "default"
+            },
+            {
+              "source": "1c921dda-0bf2-4068-87da-9a0c5c4db83d",
+              "target": "557073d7-d681-475f-a1ff-45c713739c5e"
+            }
+          ],
+          "routing": {
+            "finalGateId": "91f2a51a-0029-4582-b832-38aafc107cf3",
+            "limits": {
+              "maxNodeAdmissions": 8,
+              "deadlineMs": 600000
+            }
+          }
+        },
+        "defaults": {
+          "modelSelection": {
+            "providerId": "z1-local-fixture",
+            "modelId": "z1-fixture",
+            "options": {
+              "reasoningLevel": "enabled"
+            }
+          },
+          "mode": "build",
+          "planEnabled": false
+        },
+        "plannedPath": [
+          "task",
+          "a15f72c7-5345-44bc-bc65-819d0fc305aa",
+          "6be20824-4258-4ca3-8a99-9e16305a9001",
+          "a21af26e-ccd5-48b2-9705-3af9fe2bb008",
+          "1c921dda-0bf2-4068-87da-9a0c5c4db83d",
+          "557073d7-d681-475f-a1ff-45c713739c5e",
+          "91f2a51a-0029-4582-b832-38aafc107cf3"
+        ],
+        "startInput": "",
+        "nodeAttempts": [
+          {
+            "iterationId": "84a04bc5-9194-4b2c-9e58-40278c638d1b",
+            "iteration": 0,
+            "nodeId": "task",
+            "attemptId": "e063b52b-cdb3-4618-897e-1005a3132311",
+            "commandId": "9cb76a89-4b42-4deb-968b-11712ff954c5",
+            "inputId": "9cb76a89-4b42-4deb-968b-11712ff954c5",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790259973535,
+            "updatedAt": 1790259974418,
+            "sessionId": "sess_3a8cdf2e-0da8-4316-951a-640ac85e5047",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:29072:agent-199e4fc7-ad2c-4216-bfe8-1ac6b6125d72",
+            "foregroundExecutionId": "runtime_command_1",
+            "observationEpoch": "mufmkcg6-nivgwsri",
+            "resolvedInstructions": "Z5_CONDITION: Read MathOps.cs and return the exact controlled structured data.",
+            "bindings": [],
+            "terminalProof": {
+              "sourceCommandId": "9cb76a89-4b42-4deb-968b-11712ff954c5",
+              "state": "completedSuccess",
+              "logEpoch": "mufmkcg6-nivgwsri",
+              "seq": 35,
+              "turnId": "msg_mufmkcub_c6d30137-1144-4c47-af59-f9d1f0b01173"
+            },
+            "finalOutput": {
+              "text": "{\"ready\":true,\"count\":1}",
+              "turnId": "msg_mufmkcub_c6d30137-1144-4c47-af59-f9d1f0b01173",
+              "rowId": 4,
+              "entityId": "msg_mufmkcz7_cc5d4b4b-b3e8-4989-82a7-20de52b2ebe1",
+              "assistantResponseId": "msg_mufmkcz7_cc5d4b4b-b3e8-4989-82a7-20de52b2ebe1"
+            },
+            "outputValidation": {
+              "status": "valid",
+              "issues": []
+            }
+          },
+          {
+            "iterationId": "84a04bc5-9194-4b2c-9e58-40278c638d1b",
+            "iteration": 0,
+            "nodeId": "6be20824-4258-4ca3-8a99-9e16305a9001",
+            "attemptId": "b823ae3e-6d75-41bd-acef-2af40b2b9d25",
+            "commandId": "09894d38-c4bd-4642-b385-d2c67f4c20d4",
+            "inputId": "09894d38-c4bd-4642-b385-d2c67f4c20d4",
+            "status": "Skipped",
+            "dispatchPhase": "planned",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790259973535,
+            "updatedAt": 1790259974448
+          },
+          {
+            "iterationId": "84a04bc5-9194-4b2c-9e58-40278c638d1b",
+            "iteration": 0,
+            "nodeId": "a21af26e-ccd5-48b2-9705-3af9fe2bb008",
+            "attemptId": "bc8f0088-ea10-4d84-8e9f-34d3e272d388",
+            "commandId": "a4a89250-c603-4a5c-b9a3-5477da6a47dd",
+            "inputId": "a4a89250-c603-4a5c-b9a3-5477da6a47dd",
+            "status": "Skipped",
+            "dispatchPhase": "planned",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790259973535,
+            "updatedAt": 1790259974448
+          },
+          {
+            "iterationId": "84a04bc5-9194-4b2c-9e58-40278c638d1b",
+            "iteration": 0,
+            "nodeId": "1c921dda-0bf2-4068-87da-9a0c5c4db83d",
+            "attemptId": "869d3324-cc7a-480d-991c-b630a0f9fc5b",
+            "commandId": "b0657db6-ebea-460f-b231-67a2ecaa32eb",
+            "inputId": "b0657db6-ebea-460f-b231-67a2ecaa32eb",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790259973535,
+            "updatedAt": 1790259975182,
+            "sessionId": "sess_7143c781-1936-4494-a848-b418690b3f88",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:29072:agent-199e4fc7-ad2c-4216-bfe8-1ac6b6125d72",
+            "foregroundExecutionId": "runtime_command_2",
+            "observationEpoch": "mufmkd5a-z3pbrtek",
+            "resolvedInstructions": "Z5_ROUTE: Read MathOps.cs; route=default.",
+            "bindings": [],
+            "terminalProof": {
+              "sourceCommandId": "b0657db6-ebea-460f-b231-67a2ecaa32eb",
+              "state": "completedSuccess",
+              "logEpoch": "mufmkd5a-z3pbrtek",
+              "seq": 35,
+              "turnId": "msg_mufmkdhd_8833b177-5efb-47fe-a785-5b4301f170a9"
+            },
+            "finalOutput": {
+              "text": "Z5 selected native route Z5_NATIVE_49a8cf83-b481-4c00-a5da-caf3e0824634: default",
+              "turnId": "msg_mufmkdhd_8833b177-5efb-47fe-a785-5b4301f170a9",
+              "rowId": 4,
+              "entityId": "msg_mufmkdki_c2f1f76e-f6cc-41ea-a0f7-ff796cba3469",
+              "assistantResponseId": "msg_mufmkdki_c2f1f76e-f6cc-41ea-a0f7-ff796cba3469"
+            },
+            "outputValidation": {
+              "status": "valid",
+              "issues": []
+            }
+          },
+          {
+            "iterationId": "84a04bc5-9194-4b2c-9e58-40278c638d1b",
+            "iteration": 0,
+            "nodeId": "557073d7-d681-475f-a1ff-45c713739c5e",
+            "attemptId": "909be027-9491-42b8-8fbf-b826654f1f55",
+            "commandId": "d609f89d-f26d-486f-a267-192b0b803471",
+            "inputId": "d609f89d-f26d-486f-a267-192b0b803471",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790259973535,
+            "updatedAt": 1790259975896,
+            "sessionId": "sess_f5ba5bfb-898f-4a4c-a27d-5452a3fe2221",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:29072:agent-199e4fc7-ad2c-4216-bfe8-1ac6b6125d72",
+            "foregroundExecutionId": "runtime_command_3",
+            "observationEpoch": "mufmkdqa-6p24abpd",
+            "resolvedInstructions": "Z5_ROUTE: Read MathOps.cs; route=merge.",
+            "bindings": [],
+            "terminalProof": {
+              "sourceCommandId": "d609f89d-f26d-486f-a267-192b0b803471",
+              "state": "completedSuccess",
+              "logEpoch": "mufmkdqa-6p24abpd",
+              "seq": 35,
+              "turnId": "msg_mufmke21_d3503add-3467-4bec-a50f-750ad188548c"
+            },
+            "finalOutput": {
+              "text": "Z5 selected native route Z5_NATIVE_49a8cf83-b481-4c00-a5da-caf3e0824634: merge",
+              "turnId": "msg_mufmke21_d3503add-3467-4bec-a50f-750ad188548c",
+              "rowId": 4,
+              "entityId": "msg_mufmke4m_130a4bd5-6537-403c-bb8b-77749713574d",
+              "assistantResponseId": "msg_mufmke4m_130a4bd5-6537-403c-bb8b-77749713574d"
+            },
+            "outputValidation": {
+              "status": "valid",
+              "issues": []
+            }
+          }
+        ],
+        "approvalAttempts": [
+          {
+            "iterationId": "84a04bc5-9194-4b2c-9e58-40278c638d1b",
+            "iteration": 0,
+            "nodeId": "91f2a51a-0029-4582-b832-38aafc107cf3",
+            "attemptId": "5271241a-f8c0-4c05-a05f-e5caa789f948",
+            "status": "Approved",
+            "createdAt": 1790259973535,
+            "updatedAt": 1790259976304,
+            "request": {
+              "id": "0daa58f8-46aa-4890-9ec0-f5d0ece50935",
+              "version": 1,
+              "runId": "4e33e026-cdde-4196-8c8e-f858fa3e8bff",
+              "nodeId": "91f2a51a-0029-4582-b832-38aafc107cf3",
+              "attemptId": "5271241a-f8c0-4c05-a05f-e5caa789f948",
+              "target": {
+                "workspacePath": "<isolated-profile>\\workspace"
+              },
+              "graphDigest": "e0ae2482b69b65facfc92eab18bedbc7e87eef2016ccbebb841d5d9c303f584b",
+              "digest": "29a75a5c51f9305a780b02baa2b6c0ceee0ed2f4121dc8486100feeef4423fd3",
+              "title": "Final route review",
+              "reviewText": "Review this exact iteration's native evidence. This gate does not authorize publication or answer native permissions.",
+              "commentPolicy": "required",
+              "successorNodeId": "end",
+              "evidence": [
+                {
+                  "alias": "evidence",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "557073d7-d681-475f-a1ff-45c713739c5e",
+                    "selector": "final"
+                  },
+                  "digest": "aee7e8cdf0765607d80aa7eb18fc93fb3499cdab97bc088accc14d9ebaf1fd7a",
+                  "text": "Z5 selected native route Z5_NATIVE_49a8cf83-b481-4c00-a5da-caf3e0824634: merge",
+                  "sourceSessionId": "sess_f5ba5bfb-898f-4a4c-a27d-5452a3fe2221",
+                  "sourceInputId": "d609f89d-f26d-486f-a267-192b0b803471",
+                  "sourceCommandId": "d609f89d-f26d-486f-a267-192b0b803471",
+                  "artifactId": "b446c8b0-8c4e-481a-94b7-a390b2ef48e4"
+                }
+              ],
+              "complete": true,
+              "issues": [],
+              "createdAt": 1790259975911
+            },
+            "decision": {
+              "id": "dacbbe56-9112-4da3-a9e7-b699ec8649a8",
+              "requestId": "0daa58f8-46aa-4890-9ec0-f5d0ece50935",
+              "requestVersion": 1,
+              "requestDigest": "29a75a5c51f9305a780b02baa2b6c0ceee0ed2f4121dc8486100feeef4423fd3",
+              "value": "approve",
+              "comment": "Reviewed the actual selected exclusive route and merge.",
+              "decidedAt": 1790259976304,
+              "actor": {
+                "kind": "local-user",
+                "hostSessionId": "25337300-7c8a-4c5e-b183-05f658952b4d"
+              }
+            },
+            "successorIntent": {
+              "id": "419cb594-d5ef-4987-976a-3ad1b4e975e0",
+              "successorNodeId": "end"
+            }
+          }
+        ],
+        "toolAttempts": [],
+        "artifacts": [
+          {
+            "id": "0d15e562-bb01-408f-ae81-323a0f7552b2",
+            "runId": "4e33e026-cdde-4196-8c8e-f858fa3e8bff",
+            "nodeId": "task",
+            "attemptId": "e063b52b-cdb3-4618-897e-1005a3132311",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "text",
+            "provenance": "native-agent-final",
+            "bytes": 24,
+            "digest": "2c9d254d9111431d22e30530278c367ec3a93e2560d338a5f2d383f6fffd67b3",
+            "capturedAt": 1790259974418,
+            "validation": "valid",
+            "sessionId": "sess_3a8cdf2e-0da8-4316-951a-640ac85e5047",
+            "inputId": "9cb76a89-4b42-4deb-968b-11712ff954c5",
+            "commandId": "9cb76a89-4b42-4deb-968b-11712ff954c5"
+          },
+          {
+            "id": "88c42f2a-eff1-46c2-9ef1-1297c59cabaf",
+            "runId": "4e33e026-cdde-4196-8c8e-f858fa3e8bff",
+            "nodeId": "task",
+            "attemptId": "e063b52b-cdb3-4618-897e-1005a3132311",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "json",
+            "provenance": "native-agent-final",
+            "bytes": 24,
+            "digest": "2c9d254d9111431d22e30530278c367ec3a93e2560d338a5f2d383f6fffd67b3",
+            "capturedAt": 1790259974418,
+            "validation": "valid",
+            "sessionId": "sess_3a8cdf2e-0da8-4316-951a-640ac85e5047",
+            "inputId": "9cb76a89-4b42-4deb-968b-11712ff954c5",
+            "commandId": "9cb76a89-4b42-4deb-968b-11712ff954c5"
+          },
+          {
+            "id": "3ee26fc4-694b-4344-91f4-f10ce8c4c774",
+            "runId": "4e33e026-cdde-4196-8c8e-f858fa3e8bff",
+            "nodeId": "1c921dda-0bf2-4068-87da-9a0c5c4db83d",
+            "attemptId": "869d3324-cc7a-480d-991c-b630a0f9fc5b",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "text",
+            "provenance": "native-agent-final",
+            "bytes": 80,
+            "digest": "699aa3dfc9087500cca505d1b9dc113f7c9c0567325defd19b488ff14e2a5308",
+            "capturedAt": 1790259975182,
+            "validation": "valid",
+            "sessionId": "sess_7143c781-1936-4494-a848-b418690b3f88",
+            "inputId": "b0657db6-ebea-460f-b231-67a2ecaa32eb",
+            "commandId": "b0657db6-ebea-460f-b231-67a2ecaa32eb"
+          },
+          {
+            "id": "b446c8b0-8c4e-481a-94b7-a390b2ef48e4",
+            "runId": "4e33e026-cdde-4196-8c8e-f858fa3e8bff",
+            "nodeId": "557073d7-d681-475f-a1ff-45c713739c5e",
+            "attemptId": "909be027-9491-42b8-8fbf-b826654f1f55",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "text",
+            "provenance": "native-agent-final",
+            "bytes": 78,
+            "digest": "d067e5f271839ce452040c7dd869d73db6d68fbdb13843fe32a49ad4fbe70cf0",
+            "capturedAt": 1790259975896,
+            "validation": "valid",
+            "sessionId": "sess_f5ba5bfb-898f-4a4c-a27d-5452a3fe2221",
+            "inputId": "d609f89d-f26d-486f-a267-192b0b803471",
+            "commandId": "d609f89d-f26d-486f-a267-192b0b803471"
+          }
+        ],
+        "artifactBindings": [
+          {
+            "nodeId": "task",
+            "attemptId": "e063b52b-cdb3-4618-897e-1005a3132311",
+            "selector": "final",
+            "artifactId": "0d15e562-bb01-408f-ae81-323a0f7552b2"
+          },
+          {
+            "nodeId": "task",
+            "attemptId": "e063b52b-cdb3-4618-897e-1005a3132311",
+            "selector": "structured",
+            "artifactId": "88c42f2a-eff1-46c2-9ef1-1297c59cabaf"
+          },
+          {
+            "nodeId": "1c921dda-0bf2-4068-87da-9a0c5c4db83d",
+            "attemptId": "869d3324-cc7a-480d-991c-b630a0f9fc5b",
+            "selector": "final",
+            "artifactId": "3ee26fc4-694b-4344-91f4-f10ce8c4c774"
+          },
+          {
+            "nodeId": "557073d7-d681-475f-a1ff-45c713739c5e",
+            "attemptId": "909be027-9491-42b8-8fbf-b826654f1f55",
+            "selector": "final",
+            "artifactId": "b446c8b0-8c4e-481a-94b7-a390b2ef48e4"
+          }
+        ],
+        "result": {
+          "text": "Z5 selected native route Z5_NATIVE_49a8cf83-b481-4c00-a5da-caf3e0824634: merge",
+          "turnId": "msg_mufmke21_d3503add-3467-4bec-a50f-750ad188548c",
+          "rowId": 4,
+          "entityId": "msg_mufmke4m_130a4bd5-6537-403c-bb8b-77749713574d",
+          "assistantResponseId": "msg_mufmke4m_130a4bd5-6537-403c-bb8b-77749713574d"
+        }
+      }
+    ]
+  },
+  "nativeLedger": [
+    {
+      "id": "queue_9cb76a89-4b42-4deb-968b-11712ff954c5",
+      "session_id": "sess_3a8cdf2e-0da8-4316-951a-640ac85e5047",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Z5_CONDITION: Read MathOps.cs and return the exact controlled structured data.",
+        "intent": {
+          "sourceCommandId": "9cb76a89-4b42-4deb-968b-11712ff954c5",
+          "queueItemId": "queue_9cb76a89-4b42-4deb-968b-11712ff954c5",
+          "clientId": "graph:e063b52b-cdb3-4618-897e-1005a3132311",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790259973662,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "9cb76a89-4b42-4deb-968b-11712ff954c5",
+          "queueItemId": "queue_9cb76a89-4b42-4deb-968b-11712ff954c5",
+          "clientId": "graph:e063b52b-cdb3-4618-897e-1005a3132311",
+          "kind": "sendText",
+          "text": "Z5_CONDITION: Read MathOps.cs and return the exact controlled structured data.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790259973662
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790259973674,
+      "time_updated": 1790259974160
+    },
+    {
+      "id": "queue_b0657db6-ebea-460f-b231-67a2ecaa32eb",
+      "session_id": "sess_7143c781-1936-4494-a848-b418690b3f88",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Z5_ROUTE: Read MathOps.cs; route=default.",
+        "intent": {
+          "sourceCommandId": "b0657db6-ebea-460f-b231-67a2ecaa32eb",
+          "queueItemId": "queue_b0657db6-ebea-460f-b231-67a2ecaa32eb",
+          "clientId": "graph:869d3324-cc7a-480d-991c-b630a0f9fc5b",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790259974560,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "b0657db6-ebea-460f-b231-67a2ecaa32eb",
+          "queueItemId": "queue_b0657db6-ebea-460f-b231-67a2ecaa32eb",
+          "clientId": "graph:869d3324-cc7a-480d-991c-b630a0f9fc5b",
+          "kind": "sendText",
+          "text": "Z5_ROUTE: Read MathOps.cs; route=default.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790259974560
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790259974565,
+      "time_updated": 1790259974989
+    },
+    {
+      "id": "queue_d609f89d-f26d-486f-a267-192b0b803471",
+      "session_id": "sess_f5ba5bfb-898f-4a4c-a27d-5452a3fe2221",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Z5_ROUTE: Read MathOps.cs; route=merge.",
+        "intent": {
+          "sourceCommandId": "d609f89d-f26d-486f-a267-192b0b803471",
+          "queueItemId": "queue_d609f89d-f26d-486f-a267-192b0b803471",
+          "clientId": "graph:909be027-9491-42b8-8fbf-b826654f1f55",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790259975308,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "d609f89d-f26d-486f-a267-192b0b803471",
+          "queueItemId": "queue_d609f89d-f26d-486f-a267-192b0b803471",
+          "clientId": "graph:909be027-9491-42b8-8fbf-b826654f1f55",
+          "kind": "sendText",
+          "text": "Z5_ROUTE: Read MathOps.cs; route=merge.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790259975308
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790259975313,
+      "time_updated": 1790259975730
+    }
+  ],
+  "nativeToolResults": [
+    {
+      "id": "z5_condition_read_initial",
+      "output": "1\tpublic static class MathOps\n2\t{\n3\t    public static int Add(int left, int right) => left + right + 2;\n4\t}\n5\t",
+      "observedAt": 1790259974339
+    },
+    {
+      "id": "z5_route_read_initial",
+      "output": "1\tpublic static class MathOps\n2\t{\n3\t    public static int Add(int left, int right) => left + right + 2;\n4\t}\n5\t",
+      "observedAt": 1790259975109
+    }
+  ],
+  "providerErrors": [],
+  "modelRequests": 9,
+  "collectedModelRequestCounts": {
+    "total": 9,
+    "byStage": {
+      "condition": {
+        "nativeExecution": 2,
+        "auxiliary": 1
+      },
+      "route": {
+        "nativeExecution": 4,
+        "auxiliary": 2
+      }
+    }
+  }
+}

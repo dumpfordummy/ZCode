@@ -1,0 +1,73 @@
+✔ project recipe writes preserve unrelated keys and reject stale/concurrent revisions (110.2458ms)
+✖ recipe schema rejects shell recipes, unsafe paths, duplicated IDs, zero test contracts and unknown placeholders (2.0495ms)
+✔ missing output preflight checks existing ancestors and project config links (6.3092ms)
+✖ all-skipped discovered tests do not count as executed passing tests (2.8056ms)
+✖ persisted Agent artifact native input and command identities match its exact attempt (39.3352ms)
+✔ native owner failure cannot become Graph success merely because child process exited zero (21.2917ms)
+✔ successful-looking result with unobserved process exit never advances the graph (27.71ms)
+✔ source evidence changed while native Tool session is created makes the gate stale before process start (7.2967ms)
+✔ real file observations reject a no-op Build reusing stale output and accept refreshed identical bytes (78.2341ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 6
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1059.9808
+
+✖ failing tests:
+
+test at packages\services\src\graph-engineering\adapters\recipes.test.ts:1:1551
+✖ recipe schema rejects shell recipes, unsafe paths, duplicated IDs, zero test contracts and unknown placeholders (2.0495ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\adapters\recipes.test.ts:69:12)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at packages\services\src\graph-engineering\adapters\z4-review.test.ts:1:423
+✖ all-skipped discovered tests do not count as executed passing tests (2.8056ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /executed|passed|no.*test/i. Input:
+  
+  ''
+  
+      at TestContext.<anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\adapters\z4-review.test.ts:22:10)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.start (node:internal/test_runner/test:1015:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '',
+    expected: /executed|passed|no.*test/i,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at packages\services\src\graph-engineering\adapters\z4-review.test.ts:1:925
+✖ persisted Agent artifact native input and command identities match its exact attempt (39.3352ms)
+  AssertionError [ERR_ASSERTION]: inputId
+  
+  true !== false
+  
+      at TestContext.<anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\adapters\z4-review.test.ts:36:12)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

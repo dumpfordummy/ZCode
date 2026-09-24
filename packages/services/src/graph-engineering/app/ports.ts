@@ -5,13 +5,63 @@ import type {
   GraphDefinition,
   GraphFinalOutput,
   GraphInactivityProof,
+  GraphSourceSnapshot,
+} from "../contract.js";
+import type {
+  GraphArtifactStore,
+  GraphRecipeSnapshot,
+  GraphRecipe,
+  GraphToolAttempt,
+  GraphToolOperation,
+  GraphFileObservation,
 } from "../contract.js";
 import type { ModelSelection } from "@zcode/shared";
 import type { SubmissionMode } from "@zcode/shared/zcode-protocol-v4";
 
+export interface GraphEvidencePort {
+  captureSource(target: GraphWorkspaceTarget): Promise<GraphSourceSnapshot>;
+  digest(value: string): string;
+}
+export interface GraphRecipePort {
+  read(target: GraphWorkspaceTarget): Promise<GraphRecipeSnapshot>;
+  save(
+    target: GraphWorkspaceTarget,
+    recipes: GraphRecipe[],
+    expectedDigest: string,
+  ): Promise<GraphRecipeSnapshot>;
+  fingerprint(
+    target: GraphWorkspaceTarget,
+    paths: string[],
+  ): Promise<{ digest: string; files: Array<{ path: string; bytes: number; digest: string }> }>;
+  validatePaths(target: GraphWorkspaceTarget, paths: string[]): Promise<void>;
+  observeFiles(target: GraphWorkspaceTarget, paths: string[]): Promise<GraphFileObservation[]>;
+}
+export interface GraphToolPort {
+  available(): Promise<{ available: boolean; reason?: string }>;
+  create(target: GraphWorkspaceTarget): Promise<{ sessionId: string; runtimeIdentity: string }>;
+  start(target: GraphWorkspaceTarget, attempt: GraphToolAttempt): Promise<GraphToolOperation>;
+  inspect(target: GraphWorkspaceTarget, attempt: GraphToolAttempt): Promise<GraphToolOperation>;
+  cancel(target: GraphWorkspaceTarget, attempt: GraphToolAttempt): Promise<GraphToolOperation>;
+}
+export interface GraphArtifactOptions {
+  artifacts?: GraphArtifactStore;
+  recipes?: GraphRecipePort;
+  tools?: GraphToolPort;
+}
+
 export interface GraphRecord {
+  parallel?: import("../parallel-contract.js").GraphParallelRecord;
+  parallelParent?: { target: GraphWorkspaceTarget; runId: string; slot: string };
   definition: GraphDefinition;
   runs: GraphRun[];
+}
+export interface GraphInputGuardRequest extends GraphWorkspaceTarget {
+  sessionId: string;
+  commandId?: string;
+  commandType: string;
+  expectedRuntimeIdentity?: string;
+  envelope?: { clientId: string; payload: unknown };
+  request?: unknown;
 }
 export interface GraphRepository {
   acquireOwnership?(target: GraphWorkspaceTarget): Promise<boolean>;

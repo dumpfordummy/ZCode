@@ -1,0 +1,328 @@
+{
+  "format": "zcode-workflow",
+  "version": 1,
+  "name": "Bounded verified bug fix",
+  "description": "One declared finite repair region, current native machine evidence, fresh repair sessions and mandatory final approval. Bind real source paths and Build/Test recipes before running.",
+  "graph": {
+    "version": 5,
+    "revision": 0,
+    "name": "Bounded verified bug fix",
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 40,
+          "y": 100
+        },
+        "request": ""
+      },
+      {
+        "id": "implement",
+        "type": "task",
+        "name": "Implement requested fix",
+        "position": {
+          "x": 300,
+          "y": 100
+        },
+        "instructions": "Workflow task: implement.\nInspect the explicit defect request and current source, then implement the smallest justified change. Preserve unrelated work and independent test authority. The configured native Build/Test nodes verify the actual result. Do not run replacement verification commands.\nrequest:\n{{inputs.request}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "build",
+        "type": "tool",
+        "name": "Build",
+        "position": {
+          "x": 560,
+          "y": 100
+        },
+        "recipeId": "build"
+      },
+      {
+        "id": "test",
+        "type": "tool",
+        "name": "Test configured criteria",
+        "position": {
+          "x": 820,
+          "y": 100
+        },
+        "recipeId": "test"
+      },
+      {
+        "id": "reviewer",
+        "type": "task",
+        "name": "Review current verification",
+        "position": {
+          "x": 1080,
+          "y": 100
+        },
+        "instructions": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{{inputs.verification}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "verification",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "test",
+              "selector": "verification"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        },
+        "output": {
+          "kind": "json",
+          "schema": {
+            "type": "object",
+            "required": ["outcome", "findings", "evidenceReferences"],
+            "additionalProperties": false,
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "enum": ["pass", "needs_changes", "needs_human"]
+              },
+              "findings": {
+                "type": "array",
+                "maxItems": 10,
+                "items": {
+                  "type": "object",
+                  "required": ["code", "message"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  }
+                }
+              },
+              "evidenceReferences": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 8,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "repair",
+        "type": "task",
+        "name": "Repair from current evidence",
+        "position": {
+          "x": 1340,
+          "y": 100
+        },
+        "instructions": "Workflow task: repair.\nUse only the exact prior iteration findings and verification observations to make a bounded repair. Read current source before editing. Preserve tests and unrelated work. Do not fabricate results; separate native Build/Test nodes verify the change.\nfeedback:\n{{inputs.feedback}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "feedback",
+            "source": {
+              "kind": "repair-feedback"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "decision",
+        "type": "condition",
+        "name": "Classify current findings",
+        "position": {
+          "x": 40,
+          "y": 320
+        },
+        "inputs": [
+          {
+            "alias": "review",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "reviewer",
+              "selector": "structured"
+            }
+          },
+          {
+            "alias": "machine",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "test",
+              "selector": "verification"
+            }
+          }
+        ],
+        "branches": [
+          {
+            "exit": "pass",
+            "predicate": {
+              "op": "eq",
+              "alias": "review",
+              "pointer": "/outcome",
+              "value": "pass"
+            }
+          },
+          {
+            "exit": "needs_changes",
+            "predicate": {
+              "op": "eq",
+              "alias": "review",
+              "pointer": "/outcome",
+              "value": "needs_changes"
+            }
+          }
+        ],
+        "defaultExit": "needs_human",
+        "errorPolicy": "needs-human",
+        "verification": {
+          "testNodeIds": ["test"],
+          "reviewerNodeId": "reviewer",
+          "successExit": "pass"
+        }
+      },
+      {
+        "id": "final-gate",
+        "type": "approval",
+        "name": "Final human review",
+        "position": {
+          "x": 300,
+          "y": 320
+        },
+        "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+        "evidence": [
+          {
+            "alias": "evidence",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "test",
+              "selector": "test"
+            }
+          },
+          {
+            "alias": "review",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "reviewer",
+              "selector": "structured"
+            }
+          },
+          {
+            "alias": "source",
+            "source": {
+              "kind": "source"
+            }
+          }
+        ],
+        "commentPolicy": "required"
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 560,
+          "y": 320
+        },
+        "outputNodeId": "test"
+      }
+    ],
+    "edges": [
+      {
+        "source": "start",
+        "target": "implement"
+      },
+      {
+        "source": "implement",
+        "target": "build"
+      },
+      {
+        "source": "build",
+        "target": "test"
+      },
+      {
+        "source": "test",
+        "target": "reviewer"
+      },
+      {
+        "source": "reviewer",
+        "target": "decision"
+      },
+      {
+        "source": "final-gate",
+        "target": "end"
+      },
+      {
+        "source": "repair",
+        "target": "build"
+      },
+      {
+        "source": "decision",
+        "target": "final-gate",
+        "sourcePort": "pass"
+      },
+      {
+        "source": "decision",
+        "target": "repair",
+        "sourcePort": "needs_changes"
+      },
+      {
+        "source": "decision",
+        "target": "final-gate",
+        "sourcePort": "needs_human"
+      }
+    ],
+    "routing": {
+      "finalGateId": "final-gate",
+      "limits": {
+        "maxNodeAdmissions": 24,
+        "deadlineMs": 1800000
+      },
+      "region": {
+        "id": "bounded-repair",
+        "name": "Bounded verified repair",
+        "entryNodeId": "implement",
+        "repairEntryNodeId": "repair",
+        "decisionNodeId": "decision",
+        "bodyNodeIds": ["implement", "build", "test", "reviewer", "repair", "decision"],
+        "repairExit": "needs_changes",
+        "passExit": "pass",
+        "maxRepairIterations": 2,
+        "stopOnNoProgress": true,
+        "sourcePaths": ["source"]
+      }
+    }
+  },
+  "parameters": [
+    {
+      "id": "request",
+      "label": "Explicit run request",
+      "type": "string",
+      "required": true
+    }
+  ],
+  "references": [],
+  "optionalNodes": []
+}

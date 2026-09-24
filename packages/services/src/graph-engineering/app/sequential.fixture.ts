@@ -8,6 +8,7 @@ import type {
   GraphNativePort,
   GraphRecord,
   GraphRepository,
+  GraphEvidencePort,
 } from "./ports.js";
 import { GraphEngineeringService } from "./service.js";
 
@@ -53,9 +54,9 @@ export function sequenceDefinition(): GraphSequentialDefinition {
     ],
   };
 }
-export function sequentialServiceFixture(initial?: GraphRecord) {
+export function sequentialServiceFixture(initial?: GraphRecord, evidence?: GraphEvidencePort) {
   let saved = initial ? structuredClone(initial) : null;
-  let id = 0;
+  let id = initial ? 1000 : 0;
   let clock = 100;
   const creates: GraphNativeExecution[] = [];
   const sends: GraphNativeExecution[] = [];
@@ -69,7 +70,11 @@ export function sequentialServiceFixture(initial?: GraphRecord) {
       return saved ? structuredClone(saved) : null;
     },
     async write(_target, record) {
-      recordSchema.parse({ version: 2, workspaceKey: target.workspacePath, ...record });
+      recordSchema.parse({
+        version: record.definition.version === 3 ? 3 : 2,
+        workspaceKey: target.workspacePath,
+        ...record,
+      });
       saved = structuredClone(record);
     },
   };
@@ -85,7 +90,14 @@ export function sequentialServiceFixture(initial?: GraphRecord) {
       assert.equal(stored.dispatchPhase, "creating");
       assert.equal(stored.resolvedInstructions, execution.instructions);
       creates.push(structuredClone(execution));
-      return { sessionId: `native-${creates.length}`, runtimeIdentity: "runtime-original" };
+      const restoredSessions =
+        initial?.runs
+          .flatMap<{ sessionId?: string }>((r) => (r.version === undefined ? [r] : r.nodeAttempts))
+          .filter((a) => a.sessionId).length ?? 0;
+      return {
+        sessionId: `native-${creates.length + restoredSessions}`,
+        runtimeIdentity: "runtime-original",
+      };
     },
     async observe(execution, callback, onLost) {
       listeners.set(execution.attemptId, callback);
@@ -135,6 +147,7 @@ export function sequentialServiceFixture(initial?: GraphRecord) {
   const service = new GraphEngineeringService({
     repository,
     native,
+    evidence,
     id: () => `id-${++id}`,
     now: () => ++clock,
   });

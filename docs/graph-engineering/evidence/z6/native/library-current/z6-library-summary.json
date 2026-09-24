@@ -1,0 +1,1407 @@
+{
+  "scenario": "library",
+  "home": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e",
+  "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e\\workspace",
+  "screenshots": [
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e\\z6-explicit-template-bindings.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e\\z6-instantiated-native-template.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e\\z6-reviewed-portable-export.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e\\z6-immutable-version-history.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e\\z6-dry-preview-malformed-rejected.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e\\z6-dry-preview-unsupported-rejected.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e\\z6-dry-preview-secret-rejected.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e\\z6-dry-preview-private-path-rejected.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e\\z6-dirty-draft-explicit-replacement.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e\\z6-archived-library-retains-versions.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e\\z6-chinese-light-narrow-library.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e\\z6-chinese-light-narrow-bindings.png"
+  ],
+  "assertions": [
+    "Actual native library instantiation pins chosen version, explicit parameters and local bindings with zero native inputs/model requests.",
+    "Create from a reviewed current-design preview stores a portable immutable first version and strips local template bindings.",
+    "Duplicate/new version preserve version one bytes and the already instantiated graph pin; no live template mutation occurs.",
+    "Malformed, unsupported, secret and private-path packages stay dry errors; current saved and unsaved drafts are preserved. A selected newer version replaces the draft only after explicit acknowledgment.",
+    "Archive/restore retains immutable versions and the instantiated graph; built-in versions cannot be archived or edited directly.",
+    "An unset required boolean is visibly indeterminate/Not selected; explicit include and exclude choices become checked and unchecked without changing other unset choices.",
+    "All library, import/export, binding, archive, restart and Chinese/light narrow presentation actions produce zero native inputs, model requests or tool processes. These are desktop fixture checks, not mobile/company/live-provider acceptance."
+  ],
+  "dialogPresentation": [
+    {
+      "testId": "graph-library-dialog",
+      "opacity": "1",
+      "background": "rgb(43, 43, 43)",
+      "position": "fixed",
+      "zIndex": "50",
+      "x": 216,
+      "y": 40,
+      "width": 768,
+      "height": 720
+    }
+  ],
+  "instantiatedDefinition": {
+    "version": 5,
+    "revision": 1,
+    "name": "Sequential engineering",
+    "nodes": [
+      {
+        "id": "start",
+        "position": {
+          "x": 40,
+          "y": 100
+        },
+        "type": "start",
+        "request": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+      },
+      {
+        "id": "analyze",
+        "position": {
+          "x": 300,
+          "y": 100
+        },
+        "type": "task",
+        "name": "Analyze",
+        "instructions": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\n{{inputs.request}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "implement",
+        "position": {
+          "x": 560,
+          "y": 100
+        },
+        "type": "task",
+        "name": "Implement",
+        "instructions": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
+          {
+            "alias": "analyze",
+            "source": {
+              "kind": "node",
+              "nodeId": "analyze"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "build",
+        "position": {
+          "x": 820,
+          "y": 100
+        },
+        "type": "tool",
+        "name": "Build",
+        "recipeId": "fixture-build"
+      },
+      {
+        "id": "test",
+        "position": {
+          "x": 1080,
+          "y": 100
+        },
+        "type": "tool",
+        "name": "Test configured criteria",
+        "recipeId": "fixture-test"
+      },
+      {
+        "id": "reviewer",
+        "position": {
+          "x": 1340,
+          "y": 100
+        },
+        "type": "task",
+        "name": "Review current verification",
+        "instructions": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{{inputs.verification}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "verification",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "test",
+              "selector": "verification"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        },
+        "output": {
+          "kind": "json",
+          "schema": {
+            "type": "object",
+            "required": ["outcome", "findings", "evidenceReferences"],
+            "additionalProperties": false,
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "enum": ["pass", "needs_changes", "needs_human"]
+              },
+              "findings": {
+                "type": "array",
+                "maxItems": 10,
+                "items": {
+                  "type": "object",
+                  "required": ["code", "message"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  }
+                }
+              },
+              "evidenceReferences": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 8,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "final-gate",
+        "position": {
+          "x": 40,
+          "y": 320
+        },
+        "type": "approval",
+        "name": "Final human review",
+        "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+        "evidence": [
+          {
+            "alias": "evidence",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "test",
+              "selector": "test"
+            }
+          },
+          {
+            "alias": "review",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "reviewer",
+              "selector": "structured"
+            }
+          },
+          {
+            "alias": "source",
+            "source": {
+              "kind": "source"
+            }
+          }
+        ],
+        "commentPolicy": "required"
+      },
+      {
+        "id": "end",
+        "position": {
+          "x": 300,
+          "y": 320
+        },
+        "type": "end",
+        "outputNodeId": "test"
+      }
+    ],
+    "edges": [
+      {
+        "source": "start",
+        "target": "analyze"
+      },
+      {
+        "source": "analyze",
+        "target": "implement"
+      },
+      {
+        "source": "implement",
+        "target": "build"
+      },
+      {
+        "source": "build",
+        "target": "test"
+      },
+      {
+        "source": "test",
+        "target": "reviewer"
+      },
+      {
+        "source": "reviewer",
+        "target": "final-gate"
+      },
+      {
+        "source": "final-gate",
+        "target": "end"
+      }
+    ],
+    "routing": {
+      "finalGateId": "final-gate",
+      "limits": {
+        "maxNodeAdmissions": 24,
+        "deadlineMs": 1800000
+      }
+    },
+    "template": {
+      "id": "generic",
+      "name": "Sequential engineering",
+      "version": 1,
+      "digest": "bd856d719f8fd4fc05364222ea0e5ba27e4ee2cbecb565de4d7b9eddc3d96f34",
+      "parameters": {
+        "request": "Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required."
+      },
+      "bindings": {
+        "references": {
+          "instructions": "ExtraInstructions.md",
+          "skill": "glm:workspace:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e\\workspace\\.agents\\skills\\fixture-guidance\\SKILL.md"
+        },
+        "recipes": {
+          "build": "fixture-build",
+          "test": "fixture-test"
+        },
+        "sourcePaths": []
+      },
+      "references": [
+        {
+          "id": "instructions",
+          "kind": "instruction",
+          "nodeIds": ["analyze", "implement"]
+        },
+        {
+          "id": "skill",
+          "kind": "skill",
+          "nodeIds": ["implement"]
+        }
+      ],
+      "excluded": []
+    }
+  },
+  "viewport": {
+    "width": 760,
+    "scrollWidth": 760,
+    "clientWidth": 760,
+    "theme": "theme-zai-light platform-windows-desktop"
+  },
+  "library": {
+    "version": 1,
+    "revision": 5,
+    "entries": [
+      {
+        "id": "8223329e-bbaf-433e-b815-a5325c0bb31f",
+        "name": "Captured synthetic design",
+        "archived": false,
+        "builtin": false,
+        "versions": [
+          {
+            "version": 1,
+            "digest": "568dae9b6bf56fdf92633577ed3ee40cbcf1b08730893a9fdfb1a5a1bd2c4707",
+            "createdAt": 1790264075000,
+            "template": {
+              "format": "zcode-workflow",
+              "version": 1,
+              "name": "Captured synthetic design",
+              "description": "Reviewed portable design; local data excluded.",
+              "graph": {
+                "version": 5,
+                "revision": 0,
+                "name": "Captured synthetic design",
+                "nodes": [
+                  {
+                    "id": "start",
+                    "position": {
+                      "x": 40,
+                      "y": 100
+                    },
+                    "type": "start",
+                    "request": ""
+                  },
+                  {
+                    "id": "analyze",
+                    "position": {
+                      "x": 300,
+                      "y": 100
+                    },
+                    "type": "task",
+                    "name": "Analyze",
+                    "instructions": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\n{{inputs.request}}",
+                    "instructionMode": "bound",
+                    "inputs": [
+                      {
+                        "alias": "request",
+                        "source": {
+                          "kind": "start"
+                        }
+                      }
+                    ],
+                    "configuration": {
+                      "kind": "inherit"
+                    }
+                  },
+                  {
+                    "id": "implement",
+                    "position": {
+                      "x": 560,
+                      "y": 100
+                    },
+                    "type": "task",
+                    "name": "Implement",
+                    "instructions": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+                    "instructionMode": "bound",
+                    "inputs": [
+                      {
+                        "alias": "request",
+                        "source": {
+                          "kind": "start"
+                        }
+                      },
+                      {
+                        "alias": "analyze",
+                        "source": {
+                          "kind": "node",
+                          "nodeId": "analyze"
+                        }
+                      }
+                    ],
+                    "configuration": {
+                      "kind": "inherit"
+                    }
+                  },
+                  {
+                    "id": "build",
+                    "position": {
+                      "x": 820,
+                      "y": 100
+                    },
+                    "type": "tool",
+                    "name": "Build",
+                    "recipeId": "build"
+                  },
+                  {
+                    "id": "test",
+                    "position": {
+                      "x": 1080,
+                      "y": 100
+                    },
+                    "type": "tool",
+                    "name": "Test configured criteria",
+                    "recipeId": "test"
+                  },
+                  {
+                    "id": "reviewer",
+                    "position": {
+                      "x": 1340,
+                      "y": 100
+                    },
+                    "type": "task",
+                    "name": "Review current verification",
+                    "instructions": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{{inputs.verification}}",
+                    "instructionMode": "bound",
+                    "inputs": [
+                      {
+                        "alias": "verification",
+                        "source": {
+                          "kind": "artifact",
+                          "nodeId": "test",
+                          "selector": "verification"
+                        }
+                      }
+                    ],
+                    "configuration": {
+                      "kind": "inherit"
+                    },
+                    "output": {
+                      "kind": "json",
+                      "schema": {
+                        "type": "object",
+                        "required": ["outcome", "findings", "evidenceReferences"],
+                        "additionalProperties": false,
+                        "properties": {
+                          "outcome": {
+                            "type": "string",
+                            "enum": ["pass", "needs_changes", "needs_human"]
+                          },
+                          "findings": {
+                            "type": "array",
+                            "maxItems": 10,
+                            "items": {
+                              "type": "object",
+                              "required": ["code", "message"],
+                              "additionalProperties": false,
+                              "properties": {
+                                "code": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 100
+                                },
+                                "message": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 1000
+                                }
+                              }
+                            }
+                          },
+                          "evidenceReferences": {
+                            "type": "array",
+                            "minItems": 1,
+                            "maxItems": 8,
+                            "items": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 200
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "id": "final-gate",
+                    "position": {
+                      "x": 40,
+                      "y": 320
+                    },
+                    "type": "approval",
+                    "name": "Final human review",
+                    "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+                    "evidence": [
+                      {
+                        "alias": "evidence",
+                        "source": {
+                          "kind": "artifact",
+                          "nodeId": "test",
+                          "selector": "test"
+                        }
+                      },
+                      {
+                        "alias": "review",
+                        "source": {
+                          "kind": "artifact",
+                          "nodeId": "reviewer",
+                          "selector": "structured"
+                        }
+                      },
+                      {
+                        "alias": "source",
+                        "source": {
+                          "kind": "source"
+                        }
+                      }
+                    ],
+                    "commentPolicy": "required"
+                  },
+                  {
+                    "id": "end",
+                    "position": {
+                      "x": 300,
+                      "y": 320
+                    },
+                    "type": "end",
+                    "outputNodeId": "test"
+                  }
+                ],
+                "edges": [
+                  {
+                    "source": "start",
+                    "target": "analyze"
+                  },
+                  {
+                    "source": "analyze",
+                    "target": "implement"
+                  },
+                  {
+                    "source": "implement",
+                    "target": "build"
+                  },
+                  {
+                    "source": "build",
+                    "target": "test"
+                  },
+                  {
+                    "source": "test",
+                    "target": "reviewer"
+                  },
+                  {
+                    "source": "reviewer",
+                    "target": "final-gate"
+                  },
+                  {
+                    "source": "final-gate",
+                    "target": "end"
+                  }
+                ],
+                "routing": {
+                  "finalGateId": "final-gate",
+                  "limits": {
+                    "maxNodeAdmissions": 24,
+                    "deadlineMs": 1800000
+                  }
+                }
+              },
+              "parameters": [
+                {
+                  "id": "request",
+                  "label": "Run request",
+                  "type": "string",
+                  "required": true
+                }
+              ],
+              "references": [],
+              "optionalNodes": []
+            }
+          }
+        ]
+      },
+      {
+        "id": "b7cf413d-439a-41fb-8151-a0eab70b3732",
+        "name": "Saved synthetic engineering v2",
+        "archived": false,
+        "builtin": false,
+        "versions": [
+          {
+            "version": 1,
+            "digest": "54b075c74d1c3d050a3cd4519a431956b3a458eb7f316b6a07c5d3dee2d24caa",
+            "createdAt": 1790264075139,
+            "template": {
+              "format": "zcode-workflow",
+              "version": 1,
+              "name": "Saved synthetic engineering",
+              "description": "Analyze an explicit request, implement it, execute operator-selected Build/Test recipes, review current evidence and require final human approval.",
+              "graph": {
+                "version": 5,
+                "revision": 0,
+                "name": "Sequential engineering",
+                "nodes": [
+                  {
+                    "id": "start",
+                    "position": {
+                      "x": 40,
+                      "y": 100
+                    },
+                    "type": "start",
+                    "request": ""
+                  },
+                  {
+                    "id": "analyze",
+                    "position": {
+                      "x": 300,
+                      "y": 100
+                    },
+                    "type": "task",
+                    "name": "Analyze",
+                    "instructions": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\n{{inputs.request}}",
+                    "instructionMode": "bound",
+                    "inputs": [
+                      {
+                        "alias": "request",
+                        "source": {
+                          "kind": "start"
+                        }
+                      }
+                    ],
+                    "configuration": {
+                      "kind": "inherit"
+                    }
+                  },
+                  {
+                    "id": "implement",
+                    "position": {
+                      "x": 560,
+                      "y": 100
+                    },
+                    "type": "task",
+                    "name": "Implement",
+                    "instructions": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+                    "instructionMode": "bound",
+                    "inputs": [
+                      {
+                        "alias": "request",
+                        "source": {
+                          "kind": "start"
+                        }
+                      },
+                      {
+                        "alias": "analyze",
+                        "source": {
+                          "kind": "node",
+                          "nodeId": "analyze"
+                        }
+                      }
+                    ],
+                    "configuration": {
+                      "kind": "inherit"
+                    }
+                  },
+                  {
+                    "id": "build",
+                    "position": {
+                      "x": 820,
+                      "y": 100
+                    },
+                    "type": "tool",
+                    "name": "Build",
+                    "recipeId": "build"
+                  },
+                  {
+                    "id": "test",
+                    "position": {
+                      "x": 1080,
+                      "y": 100
+                    },
+                    "type": "tool",
+                    "name": "Test configured criteria",
+                    "recipeId": "test"
+                  },
+                  {
+                    "id": "reviewer",
+                    "position": {
+                      "x": 1340,
+                      "y": 100
+                    },
+                    "type": "task",
+                    "name": "Review current verification",
+                    "instructions": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{{inputs.verification}}",
+                    "instructionMode": "bound",
+                    "inputs": [
+                      {
+                        "alias": "verification",
+                        "source": {
+                          "kind": "artifact",
+                          "nodeId": "test",
+                          "selector": "verification"
+                        }
+                      }
+                    ],
+                    "configuration": {
+                      "kind": "inherit"
+                    },
+                    "output": {
+                      "kind": "json",
+                      "schema": {
+                        "type": "object",
+                        "required": ["outcome", "findings", "evidenceReferences"],
+                        "additionalProperties": false,
+                        "properties": {
+                          "outcome": {
+                            "type": "string",
+                            "enum": ["pass", "needs_changes", "needs_human"]
+                          },
+                          "findings": {
+                            "type": "array",
+                            "maxItems": 10,
+                            "items": {
+                              "type": "object",
+                              "required": ["code", "message"],
+                              "additionalProperties": false,
+                              "properties": {
+                                "code": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 100
+                                },
+                                "message": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 1000
+                                }
+                              }
+                            }
+                          },
+                          "evidenceReferences": {
+                            "type": "array",
+                            "minItems": 1,
+                            "maxItems": 8,
+                            "items": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 200
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "id": "final-gate",
+                    "position": {
+                      "x": 40,
+                      "y": 320
+                    },
+                    "type": "approval",
+                    "name": "Final human review",
+                    "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+                    "evidence": [
+                      {
+                        "alias": "evidence",
+                        "source": {
+                          "kind": "artifact",
+                          "nodeId": "test",
+                          "selector": "test"
+                        }
+                      },
+                      {
+                        "alias": "review",
+                        "source": {
+                          "kind": "artifact",
+                          "nodeId": "reviewer",
+                          "selector": "structured"
+                        }
+                      },
+                      {
+                        "alias": "source",
+                        "source": {
+                          "kind": "source"
+                        }
+                      }
+                    ],
+                    "commentPolicy": "required"
+                  },
+                  {
+                    "id": "end",
+                    "position": {
+                      "x": 300,
+                      "y": 320
+                    },
+                    "type": "end",
+                    "outputNodeId": "test"
+                  }
+                ],
+                "edges": [
+                  {
+                    "source": "start",
+                    "target": "analyze"
+                  },
+                  {
+                    "source": "analyze",
+                    "target": "implement"
+                  },
+                  {
+                    "source": "implement",
+                    "target": "build"
+                  },
+                  {
+                    "source": "build",
+                    "target": "test"
+                  },
+                  {
+                    "source": "test",
+                    "target": "reviewer"
+                  },
+                  {
+                    "source": "reviewer",
+                    "target": "final-gate"
+                  },
+                  {
+                    "source": "final-gate",
+                    "target": "end"
+                  }
+                ],
+                "routing": {
+                  "finalGateId": "final-gate",
+                  "limits": {
+                    "maxNodeAdmissions": 24,
+                    "deadlineMs": 1800000
+                  }
+                }
+              },
+              "parameters": [
+                {
+                  "id": "request",
+                  "label": "Explicit run request",
+                  "type": "string",
+                  "required": true
+                }
+              ],
+              "references": [
+                {
+                  "id": "instructions",
+                  "label": "Additional project instructions",
+                  "kind": "instruction",
+                  "required": false,
+                  "nodeIds": ["analyze", "implement"]
+                },
+                {
+                  "id": "skill",
+                  "label": "Existing native skill",
+                  "kind": "skill",
+                  "required": false,
+                  "nodeIds": ["implement"]
+                }
+              ],
+              "optionalNodes": []
+            }
+          },
+          {
+            "version": 2,
+            "digest": "3d5dec855ee58d46c21225038748a29cce232724732085ae4877d7e7b35ea18b",
+            "createdAt": 1790264076000,
+            "template": {
+              "format": "zcode-workflow",
+              "version": 1,
+              "name": "Saved synthetic engineering v2",
+              "description": "Analyze an explicit request, implement it, execute operator-selected Build/Test recipes, review current evidence and require final human approval.",
+              "graph": {
+                "version": 5,
+                "revision": 0,
+                "name": "Saved synthetic engineering v2",
+                "nodes": [
+                  {
+                    "id": "start",
+                    "position": {
+                      "x": 40,
+                      "y": 100
+                    },
+                    "type": "start",
+                    "request": ""
+                  },
+                  {
+                    "id": "analyze",
+                    "position": {
+                      "x": 300,
+                      "y": 100
+                    },
+                    "type": "task",
+                    "name": "Analyze",
+                    "instructions": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\n{{inputs.request}}\nVersion two explicitly reviewed note.",
+                    "instructionMode": "bound",
+                    "inputs": [
+                      {
+                        "alias": "request",
+                        "source": {
+                          "kind": "start"
+                        }
+                      }
+                    ],
+                    "configuration": {
+                      "kind": "inherit"
+                    }
+                  },
+                  {
+                    "id": "implement",
+                    "position": {
+                      "x": 560,
+                      "y": 100
+                    },
+                    "type": "task",
+                    "name": "Implement",
+                    "instructions": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+                    "instructionMode": "bound",
+                    "inputs": [
+                      {
+                        "alias": "request",
+                        "source": {
+                          "kind": "start"
+                        }
+                      },
+                      {
+                        "alias": "analyze",
+                        "source": {
+                          "kind": "node",
+                          "nodeId": "analyze"
+                        }
+                      }
+                    ],
+                    "configuration": {
+                      "kind": "inherit"
+                    }
+                  },
+                  {
+                    "id": "build",
+                    "position": {
+                      "x": 820,
+                      "y": 100
+                    },
+                    "type": "tool",
+                    "name": "Build",
+                    "recipeId": "build"
+                  },
+                  {
+                    "id": "test",
+                    "position": {
+                      "x": 1080,
+                      "y": 100
+                    },
+                    "type": "tool",
+                    "name": "Test configured criteria",
+                    "recipeId": "test"
+                  },
+                  {
+                    "id": "reviewer",
+                    "position": {
+                      "x": 1340,
+                      "y": 100
+                    },
+                    "type": "task",
+                    "name": "Review current verification",
+                    "instructions": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{{inputs.verification}}",
+                    "instructionMode": "bound",
+                    "inputs": [
+                      {
+                        "alias": "verification",
+                        "source": {
+                          "kind": "artifact",
+                          "nodeId": "test",
+                          "selector": "verification"
+                        }
+                      }
+                    ],
+                    "configuration": {
+                      "kind": "inherit"
+                    },
+                    "output": {
+                      "kind": "json",
+                      "schema": {
+                        "type": "object",
+                        "required": ["outcome", "findings", "evidenceReferences"],
+                        "additionalProperties": false,
+                        "properties": {
+                          "outcome": {
+                            "type": "string",
+                            "enum": ["pass", "needs_changes", "needs_human"]
+                          },
+                          "findings": {
+                            "type": "array",
+                            "maxItems": 10,
+                            "items": {
+                              "type": "object",
+                              "required": ["code", "message"],
+                              "additionalProperties": false,
+                              "properties": {
+                                "code": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 100
+                                },
+                                "message": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 1000
+                                }
+                              }
+                            }
+                          },
+                          "evidenceReferences": {
+                            "type": "array",
+                            "minItems": 1,
+                            "maxItems": 8,
+                            "items": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 200
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "id": "final-gate",
+                    "position": {
+                      "x": 40,
+                      "y": 320
+                    },
+                    "type": "approval",
+                    "name": "Final human review",
+                    "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+                    "evidence": [
+                      {
+                        "alias": "evidence",
+                        "source": {
+                          "kind": "artifact",
+                          "nodeId": "test",
+                          "selector": "test"
+                        }
+                      },
+                      {
+                        "alias": "review",
+                        "source": {
+                          "kind": "artifact",
+                          "nodeId": "reviewer",
+                          "selector": "structured"
+                        }
+                      },
+                      {
+                        "alias": "source",
+                        "source": {
+                          "kind": "source"
+                        }
+                      }
+                    ],
+                    "commentPolicy": "required"
+                  },
+                  {
+                    "id": "end",
+                    "position": {
+                      "x": 300,
+                      "y": 320
+                    },
+                    "type": "end",
+                    "outputNodeId": "test"
+                  }
+                ],
+                "edges": [
+                  {
+                    "source": "start",
+                    "target": "analyze"
+                  },
+                  {
+                    "source": "analyze",
+                    "target": "implement"
+                  },
+                  {
+                    "source": "implement",
+                    "target": "build"
+                  },
+                  {
+                    "source": "build",
+                    "target": "test"
+                  },
+                  {
+                    "source": "test",
+                    "target": "reviewer"
+                  },
+                  {
+                    "source": "reviewer",
+                    "target": "final-gate"
+                  },
+                  {
+                    "source": "final-gate",
+                    "target": "end"
+                  }
+                ],
+                "routing": {
+                  "finalGateId": "final-gate",
+                  "limits": {
+                    "maxNodeAdmissions": 24,
+                    "deadlineMs": 1800000
+                  }
+                }
+              },
+              "parameters": [
+                {
+                  "id": "request",
+                  "label": "Explicit run request",
+                  "type": "string",
+                  "required": true
+                }
+              ],
+              "references": [
+                {
+                  "id": "instructions",
+                  "label": "Additional project instructions",
+                  "kind": "instruction",
+                  "required": false,
+                  "nodeIds": ["analyze", "implement"]
+                },
+                {
+                  "id": "skill",
+                  "label": "Existing native skill",
+                  "kind": "skill",
+                  "required": false,
+                  "nodeIds": ["implement"]
+                }
+              ],
+              "optionalNodes": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "status": "PASS",
+  "record": {
+    "version": 5,
+    "workspaceKey": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790264068639-fd284e\\workspace",
+    "definition": {
+      "version": 5,
+      "revision": 3,
+      "name": "Saved synthetic engineering v2",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"PRIVATE_RUN_DATA_123: verify independent synthetic fixture only.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+        },
+        {
+          "id": "analyze",
+          "position": {
+            "x": 300,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Analyze",
+          "instructions": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\n{{inputs.request}}\nVersion two explicitly reviewed note.",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "implement",
+          "position": {
+            "x": 560,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Implement",
+          "instructions": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            },
+            {
+              "alias": "analyze",
+              "source": {
+                "kind": "node",
+                "nodeId": "analyze"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "build",
+          "position": {
+            "x": 820,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Build",
+          "recipeId": "fixture-build"
+        },
+        {
+          "id": "test",
+          "position": {
+            "x": 1080,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Test configured criteria",
+          "recipeId": "fixture-test"
+        },
+        {
+          "id": "reviewer",
+          "position": {
+            "x": 1340,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Review current verification",
+          "instructions": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{{inputs.verification}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "verification",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "test",
+                "selector": "verification"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          },
+          "output": {
+            "kind": "json",
+            "schema": {
+              "type": "object",
+              "required": ["outcome", "findings", "evidenceReferences"],
+              "additionalProperties": false,
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "enum": ["pass", "needs_changes", "needs_human"]
+                },
+                "findings": {
+                  "type": "array",
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "required": ["code", "message"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "message": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    }
+                  }
+                },
+                "evidenceReferences": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 8,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "final-gate",
+          "position": {
+            "x": 40,
+            "y": 320
+          },
+          "type": "approval",
+          "name": "Final human review",
+          "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+          "evidence": [
+            {
+              "alias": "evidence",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "test",
+                "selector": "test"
+              }
+            },
+            {
+              "alias": "review",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "reviewer",
+                "selector": "structured"
+              }
+            },
+            {
+              "alias": "source",
+              "source": {
+                "kind": "source"
+              }
+            }
+          ],
+          "commentPolicy": "required"
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 300,
+            "y": 320
+          },
+          "type": "end",
+          "outputNodeId": "test"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "analyze"
+        },
+        {
+          "source": "analyze",
+          "target": "implement"
+        },
+        {
+          "source": "implement",
+          "target": "build"
+        },
+        {
+          "source": "build",
+          "target": "test"
+        },
+        {
+          "source": "test",
+          "target": "reviewer"
+        },
+        {
+          "source": "reviewer",
+          "target": "final-gate"
+        },
+        {
+          "source": "final-gate",
+          "target": "end"
+        }
+      ],
+      "routing": {
+        "finalGateId": "final-gate",
+        "limits": {
+          "maxNodeAdmissions": 24,
+          "deadlineMs": 1800000
+        }
+      },
+      "template": {
+        "id": "b7cf413d-439a-41fb-8151-a0eab70b3732",
+        "name": "Saved synthetic engineering v2",
+        "version": 2,
+        "digest": "3d5dec855ee58d46c21225038748a29cce232724732085ae4877d7e7b35ea18b",
+        "parameters": {
+          "request": "PRIVATE_RUN_DATA_123: verify independent synthetic fixture only."
+        },
+        "bindings": {
+          "references": {},
+          "recipes": {
+            "build": "fixture-build",
+            "test": "fixture-test"
+          },
+          "sourcePaths": []
+        },
+        "references": [],
+        "excluded": []
+      }
+    },
+    "runs": []
+  },
+  "nativeLedger": [],
+  "modelRequests": 0
+}

@@ -21,6 +21,22 @@ export type GitChangeSectionId =
 
 export type GitDiffAvailability = "patch" | "binary" | "truncated" | "unavailable";
 
+/** Read-only bounded Git evidence; ignored and unchanged contents are excluded. */
+export interface GitSourceSnapshot {
+  baseline: string;
+  scope: string;
+  files: Array<{
+    path: string;
+    status: string;
+    beforeText?: string;
+    afterText?: string;
+    diff?: string;
+    issue?: string;
+  }>;
+  complete: boolean;
+  issues: string[];
+}
+
 export type GitBranchMutationAction = "switch" | "create-and-switch";
 
 export type GitBranchMutationIssueCode =

@@ -1,6 +1,8 @@
 import { ProxyChannel, type IChannelClient } from "@zcode/rpc";
 import {
   IGraphEngineeringService,
+  IGraphWorkflowService,
+  IGraphParallelService,
   IFileService,
   IMediaPreviewService,
   IGitService,
@@ -51,6 +53,8 @@ import {
  */
 export class RemoteServiceAccess implements IServiceAccessor {
   readonly graphEngineeringService: IGraphEngineeringService;
+  readonly graphWorkflowService: IGraphWorkflowService;
+  readonly graphParallelService: IGraphParallelService;
   readonly fileService: IFileService;
   readonly mediaPreviewService: IMediaPreviewService;
   readonly gitService: IGitService;
@@ -96,6 +100,12 @@ export class RemoteServiceAccess implements IServiceAccessor {
   readonly promptAttachmentTransferService: IPromptAttachmentTransferService;
 
   constructor(channelClient: IChannelClient) {
+    this.graphParallelService = ProxyChannel.toService<IGraphParallelService>(
+      channelClient.getChannel(IGraphParallelService.channelName),
+    );
+    this.graphWorkflowService = ProxyChannel.toService<IGraphWorkflowService>(
+      channelClient.getChannel(IGraphWorkflowService.channelName),
+    );
     this.graphEngineeringService = ProxyChannel.toService<IGraphEngineeringService>(
       channelClient.getChannel(IGraphEngineeringService.channelName),
     );

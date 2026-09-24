@@ -128,6 +128,16 @@ async function resolveUserInstructions(
   return mergeInstructionSources(sources);
 }
 
+/** Reuse native AGENTS discovery for read-only provenance without environment/git detection. */
+export async function resolveNativeInstructionSources(
+  options: UserInstructionsOptions,
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<{ instructions: ResolvedUserInstructions | undefined; diagnostics: ContextSourceDiagnostic[] }> {
+  const diagnostics: ContextSourceDiagnostic[] = [];
+  const instructions = await resolveUserInstructions(options, diagnostics, env);
+  return { instructions, diagnostics };
+}
+
 async function readFirstTextBytes(path: string, maxBytes: number): Promise<string> {
   const content = await readFile(path);
   return content.subarray(0, maxBytes).toString("utf8");

@@ -5,7 +5,7 @@ import type {
   GraphWorkspaceTarget,
 } from "../contract.js";
 import { isConfirmedTerminal, workspaceKey } from "../domain/definition.js";
-import { activeAttempt, nativeExecution, skipPending } from "./attempts.js";
+import { activeAttempt, nativeExecution, skipPending, runFingerprint } from "./attempts.js";
 import { GraphState } from "./state.js";
 import { GraphSequencer } from "./sequencer.js";
 
@@ -16,7 +16,7 @@ export class GraphRecovery {
   ) {}
   private async inspect(run: GraphRun): Promise<GraphRecoveryInspection> {
     const attempts: GraphRecoveryInspection["attempts"] = [];
-    const nodes = run.version === 2 ? run.nodeAttempts : [run];
+    const nodes = run.version !== undefined ? run.nodeAttempts : [run];
     for (const node of nodes) {
       const execution = nativeExecution(run, node.attemptId);
       let proof: GraphInactivityProof | undefined;
@@ -87,6 +87,69 @@ export class GraphRecovery {
       else
         attempts.push({ attemptId: node.attemptId, state: "unknown", reason: inspection.reason });
     }
+    for (const tool of run.version !== undefined && run.version >= 4
+      ? (run.toolAttempts ?? [])
+      : []) {
+      if (["planned", "creating", "created"].includes(tool.dispatchPhase)) {
+        attempts.push({
+          attemptId: tool.attemptId,
+          state: "inactive",
+          reason: "No native operation could start before the persisted sending intent.",
+          proof: {
+            kind: "never-submitted",
+            commandId: tool.operationId,
+            dispatchPhase: tool.dispatchPhase,
+          },
+        });
+        continue;
+      }
+      try {
+        const op = tool.operation?.completedAt
+          ? tool.operation
+          : await this.state.options.tools!.inspect(run.target, tool);
+        const exact =
+          op.operationId === tool.operationId &&
+          op.sessionId === tool.sessionId &&
+          op.recipeId === tool.recipe.id &&
+          (!tool.operation || op.requestDigest === tool.operation.requestDigest);
+        if (
+          exact &&
+          op.completedAt !== undefined &&
+          ["completed", "failed", "cancelled"].includes(op.status) &&
+          (!op.processStarted || op.result?.processExitObserved === true)
+        ) {
+          tool.operation = op;
+          attempts.push({
+            attemptId: tool.attemptId,
+            state: "inactive",
+            reason:
+              "The exact native Tool operation is terminal; this does not validate its result.",
+            proof: {
+              kind: "tool-terminal",
+              operationId: tool.operationId,
+              sessionId: tool.sessionId!,
+              runtimeIdentity: tool.runtimeIdentity!,
+              completedAt: op.completedAt,
+              status: op.status as "completed" | "failed" | "cancelled",
+            },
+          });
+        } else
+          attempts.push({
+            attemptId: tool.attemptId,
+            state:
+              exact && ["running", "awaiting_permission"].includes(op.status)
+                ? "active"
+                : "unknown",
+            reason: "Original native Tool outcome must be inspected; absence is not inactivity.",
+          });
+      } catch {
+        attempts.push({
+          attemptId: tool.attemptId,
+          state: "unknown",
+          reason: "The original native Tool runtime is unavailable; no replay or guessed release.",
+        });
+      }
+    }
     const status = attempts.some((a) => a.state === "active")
       ? "active"
       : attempts.some((a) => a.state === "unknown")
@@ -127,6 +190,23 @@ export class GraphRecovery {
         "Only unresolved interrupted work can be released; active work must first be cancelled or finish.",
       );
     const inspection = await this.inspect(run);
+    if (run.version !== undefined && run.version >= 4)
+      for (const node of run.nodeAttempts)
+        for (const binding of node.bindings ?? []) {
+          if (
+            binding.source.kind === "artifact" &&
+            runFingerprint(binding) !==
+              runFingerprint(
+                await this.sequencer.artifacts.binding(
+                  run,
+                  binding.source,
+                  binding.alias,
+                  node.iterationId,
+                ),
+              )
+          )
+            throw new Error("Captured artifact binding changed; release correlation is unproven.");
+        }
     run.recovery = inspection;
     run.updatedAt = this.state.options.now();
     if (inspection.state !== "inactive") {
@@ -146,13 +226,18 @@ export class GraphRecovery {
     const now = this.state.options.now();
     run.status = "CancelRequested";
     run.updatedAt = now;
-    if (run.version === 2) {
+    if (run.version !== undefined) {
       run.cancelRequestedAt ??= now;
       skipPending(run, now);
     }
     await this.state.put(run);
-    if (!node) {
-      run.status = "Cancelled";
+    if (run.version !== undefined && run.version >= 4 && (await this.sequencer.tools.cancel(run)))
+      return structuredClone(await this.state.get(target, runId));
+    if (
+      !node ||
+      ("dispatchPhase" in node && ["creating", "created"].includes(node.dispatchPhase))
+    ) {
+      run.status = run.version === 5 ? (run.routing?.stopReason?.kind ?? "Cancelled") : "Cancelled";
       await this.state.put(run);
       this.state.liveRuns.delete(runId);
       return run;
@@ -173,7 +258,9 @@ export class GraphRecovery {
       );
     run = structuredClone(await this.state.get(target, runId));
     const current =
-      run.version === 2 ? run.nodeAttempts.find((a) => a.attemptId === node.attemptId)! : run;
+      run.version !== undefined
+        ? run.nodeAttempts.find((a) => a.attemptId === node.attemptId)!
+        : run;
     current.foregroundExecutionId = inspection.fact.foregroundExecutionId;
     await this.state.put(run);
     await this.sequencer.observe(run, node.attemptId);

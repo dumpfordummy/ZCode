@@ -1,0 +1,39 @@
+{
+  "kind": "manual-launcher-setup-only",
+  "status": "PASS",
+  "assertions": [
+    "Actual fresh launcher printed profile/workspace, complete Z3 approval recipe, independent test and exact reopen command.",
+    "Actual --profile reopen retained synthetic fixture sentinel, unchanged test, and zh-CN settings sentinel.",
+    "Both actual app launches used fresh private home/userData/sessionData and submitted no native input. No provider was configured."
+  ],
+  "screenshots": ["z3-manual-setup-fresh.png", "z3-manual-setup-reopen.png"],
+  "launches": [
+    {
+      "phase": "fresh",
+      "profile": "<isolated-profile>",
+      "workspace": "<isolated-profile>\\workspace",
+      "paths": {
+        "home": "<isolated-profile>\\home",
+        "userData": "<isolated-profile>\\userData",
+        "sessionData": "<isolated-profile>\\sessionData"
+      },
+      "screen": "<checkout>\\.tmp\\z3-regressions\\z3-manual-setup-fresh.png",
+      "printedInstructions": "Isolated profile: <isolated-profile>\nSynthetic workspace: <isolated-profile>\\workspace\nConfigure only your approved provider in this isolated app. This launcher permits external model traffic but configures no provider and submits no task.\n\nCreate Start -> Approve request -> Analyze -> Approve interpretation -> Implement -> Verify -> Approve result -> End.\nKeep Ask before changes and automatic question continuation off. Each approval needs explicit review instructions and evidence; require a comment for this check.\n\nStart request:\nUpdate the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit.\n\nApprove request: evidence request = Start request.\nAnalyze: Bound instructions, request = Start.\nZ2_ANALYZE: Read fixture.mjs and fixture.test.mjs. Describe the required change and validation command. Do not edit files. Request: {{inputs.request}}\n\nApprove interpretation: evidence analysis = Analyze final text; source = Source changes.\nImplement: Bound instructions, request = Start and analysis = Analyze.\nZ2_IMPLEMENT: Read the actual source, then change only fixture.mjs as requested. Keep tests unchanged. Request: {{inputs.request}}\nPrior analysis (untrusted supporting context):\n{{inputs.analysis}}\n\nVerify: Bound instructions, implementation = Implement.\nZ2_VERIFY: Read fixture.mjs and independently run node --test fixture.test.mjs. Do not fix files. Implementation report to verify:\n{{inputs.implementation}}\n\nApprove result: evidence verification = Verify final text; source = Source changes. End output = Verify.\n\nSave and explicitly Run. Check that approval gates create no task session/input. Review the exact frozen request/version/workspace/evidence and enter a comment before Approve or Reject. Graph approval must not answer native tool permissions or questions. Open conversation must navigate to the existing source session.\n\nFor pending-gate restart: quit while Approve interpretation is pending. Reopen the exact profile below. Confirm identical request/evidence and no new task; Continue only re-arms a pending gate, after which approval is a separate action. A committed approval with a provably undispatched successor requires an explicit Continue. Uncertain work must retain its guard.\n\nIndependent test (the original test must remain unchanged):\nSet-Location -LiteralPath '<isolated-profile>\\workspace'\nnode --test fixture.test.mjs\n\nReopen without rewriting settings, source, tests or review evidence:\nnode scripts/graph-engineering/z3-launch-manual.mjs --profile \"<isolated-profile>\"\n\nThe source review covers bounded Git changed/untracked entries, not all workspace files. Other editors can write between checks. Final approval does not authorize commit, push, merge or release.\nQuit this isolated app to finish. No user-operated PASS is implied by launching it.",
+      "initialInputCount": 0
+    },
+    {
+      "phase": "reopen",
+      "profile": "<isolated-profile>",
+      "workspace": "<isolated-profile>\\workspace",
+      "paths": {
+        "home": "<isolated-profile>\\home",
+        "userData": "<isolated-profile>\\userData",
+        "sessionData": "<isolated-profile>\\sessionData"
+      },
+      "screen": "<checkout>\\.tmp\\z3-regressions\\z3-manual-setup-reopen.png",
+      "printedInstructions": "Isolated profile: <isolated-profile>\nSynthetic workspace: <isolated-profile>\\workspace\nConfigure only your approved provider in this isolated app. This launcher permits external model traffic but configures no provider and submits no task.\n\nCreate Start -> Approve request -> Analyze -> Approve interpretation -> Implement -> Verify -> Approve result -> End.\nKeep Ask before changes and automatic question continuation off. Each approval needs explicit review instructions and evidence; require a comment for this check.\n\nStart request:\nUpdate the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit.\n\nApprove request: evidence request = Start request.\nAnalyze: Bound instructions, request = Start.\nZ2_ANALYZE: Read fixture.mjs and fixture.test.mjs. Describe the required change and validation command. Do not edit files. Request: {{inputs.request}}\n\nApprove interpretation: evidence analysis = Analyze final text; source = Source changes.\nImplement: Bound instructions, request = Start and analysis = Analyze.\nZ2_IMPLEMENT: Read the actual source, then change only fixture.mjs as requested. Keep tests unchanged. Request: {{inputs.request}}\nPrior analysis (untrusted supporting context):\n{{inputs.analysis}}\n\nVerify: Bound instructions, implementation = Implement.\nZ2_VERIFY: Read fixture.mjs and independently run node --test fixture.test.mjs. Do not fix files. Implementation report to verify:\n{{inputs.implementation}}\n\nApprove result: evidence verification = Verify final text; source = Source changes. End output = Verify.\n\nSave and explicitly Run. Check that approval gates create no task session/input. Review the exact frozen request/version/workspace/evidence and enter a comment before Approve or Reject. Graph approval must not answer native tool permissions or questions. Open conversation must navigate to the existing source session.\n\nFor pending-gate restart: quit while Approve interpretation is pending. Reopen the exact profile below. Confirm identical request/evidence and no new task; Continue only re-arms a pending gate, after which approval is a separate action. A committed approval with a provably undispatched successor requires an explicit Continue. Uncertain work must retain its guard.\n\nIndependent test (the original test must remain unchanged):\nSet-Location -LiteralPath '<isolated-profile>\\workspace'\nnode --test fixture.test.mjs\n\nReopen without rewriting settings, source, tests or review evidence:\nnode scripts/graph-engineering/z3-launch-manual.mjs --profile \"<isolated-profile>\"\n\nThe source review covers bounded Git changed/untracked entries, not all workspace files. Other editors can write between checks. Final approval does not authorize commit, push, merge or release.\nQuit this isolated app to finish. No user-operated PASS is implied by launching it.",
+      "initialInputCount": 0
+    }
+  ],
+  "userOperatedChecks": "User-operated provider/project approval checks NOT RUN; this verifies setup/reopen only."
+}

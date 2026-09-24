@@ -8,6 +8,7 @@ import type {
   GraphWorkspaceTarget,
 } from "../contract.js";
 import { sequentialDefinitionSchema, sequentialReadiness } from "./sequential.js";
+import { routingInactive } from "./routing.js";
 
 export const targetSchema = z
   .object({
@@ -93,10 +94,25 @@ export function defaultDefinition(): GraphLegacyDefinition {
 }
 
 export function isConfirmedTerminal(run: GraphRun): boolean {
+  if (
+    run.version === 5 &&
+    !run.release &&
+    [
+      "Completed",
+      "Failed",
+      "Rejected",
+      "Cancelled",
+      "NeedsHuman",
+      "BudgetExhausted",
+      "NoProgress",
+    ].includes(run.status)
+  )
+    return routingInactive(run);
   return (
     Boolean(run.release) ||
     run.status === "Completed" ||
     run.status === "Failed" ||
+    run.status === "Rejected" ||
     run.status === "Cancelled"
   );
 }
@@ -104,7 +120,7 @@ export function isConfirmedTerminal(run: GraphRun): boolean {
 export function validateReadiness(value: unknown): GraphReadiness {
   try {
     const definition = validateDefinition(value);
-    if (definition.version === 2) return sequentialReadiness(definition);
+    if (definition.version !== undefined) return sequentialReadiness(definition);
     return {
       errors: definition.instructions.trim() ? [] : ["Agent Task instructions are required."],
       path: definition.nodes.filter((n) => n.type === "task").map((n) => n.id),

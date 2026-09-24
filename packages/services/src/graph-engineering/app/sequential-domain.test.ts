@@ -77,7 +77,7 @@ test("reject invalid topology, duplicate identifiers, unsupported versions and f
     mutate(g);
     assert.ok(validateReadiness(g).errors.length);
   }
-  assert.throws(() => validateDefinition({ ...sequentialFixture(), version: 3 }));
+  assert.throws(() => validateDefinition({ ...sequentialFixture(), version: 5 }));
   const future = sequentialFixture();
   const a = future.nodes.find((n) => n.id === "a")!;
   if (a.type === "task") {

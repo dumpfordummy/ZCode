@@ -31,6 +31,7 @@ export interface ProjectConfigDiscovery {
 export function loadProjectConfigs(
   workingDirectory?: string,
   explicitProjectConfigPath?: string,
+  metadataOnly = false,
 ): ProjectConfigDiscovery {
   const resolvedWorkingDirectory = resolve(workingDirectory ?? process.cwd());
   const files = discoverWorkspaceHookConfigPaths({
@@ -41,6 +42,7 @@ export function loadProjectConfigs(
       discoveryOrder,
       explicitProjectConfig: ref.explicitProjectConfig,
       workingDirectory: resolvedWorkingDirectory,
+      metadataOnly,
     }),
   );
 
@@ -50,12 +52,13 @@ export function loadProjectConfigs(
 export function loadProjectConfigFile(
   path: string,
   options: {
+    metadataOnly?: boolean;
     discoveryOrder?: number;
     explicitProjectConfig?: boolean;
     workingDirectory?: string;
   } = {},
 ): ProjectConfigFile {
-  const result = loadFileConfig(path);
+  const result = loadFileConfig(path, { metadataOnly: options.metadataOnly });
   const baseDir = getProjectConfigBaseDir(result.path);
   const diagnostics = [...result.diagnostics];
   const hooks = result.loaded ? result.config.hooks : undefined;

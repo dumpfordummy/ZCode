@@ -47,12 +47,14 @@ export function fixture(initial?: GraphRecord) {
     async validateSelection() {},
     async create(run) {
       creates++;
-      assert.ok(saved?.runs.some((item) => item.version !== 2 && item.attemptId === run.attemptId));
+      assert.ok(
+        saved?.runs.some((item) => item.version === undefined && item.attemptId === run.attemptId),
+      );
       assert.equal(run.sessionId, undefined);
       assert.equal(
         (
           saved!.runs.find(
-            (item) => item.version !== 2 && item.attemptId === run.attemptId,
+            (item) => item.version === undefined && item.attemptId === run.attemptId,
           )! as GraphRun
         ).sessionId,
         undefined,
@@ -64,7 +66,7 @@ export function fixture(initial?: GraphRecord) {
       assert.equal(
         (
           saved!.runs.find(
-            (item) => item.version !== 2 && item.attemptId === _run.attemptId,
+            (item) => item.version === undefined && item.attemptId === _run.attemptId,
           )! as GraphRun
         ).sessionId,
         _run.sessionId,

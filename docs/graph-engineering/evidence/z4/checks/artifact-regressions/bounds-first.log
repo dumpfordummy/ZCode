@@ -1,0 +1,53 @@
+✔ project recipe writes preserve unrelated keys and reject stale/concurrent revisions (73.8429ms)
+✖ recipe schema rejects shell recipes, unsafe paths, duplicated IDs, zero test contracts and unknown placeholders (1.749ms)
+✔ missing output preflight checks existing ancestors and project config links (5.6384ms)
+✔ strict output preserves typed object and rejects prose, trailing data, duplicate escaped keys (1.6393ms)
+✔ strict output bounds depth/bytes/members and validates declared shape without repair (2.3874ms)
+✔ JSON pointers use own properties, escaped segments and canonical indices only (0.2458ms)
+✖ reserved object keys are rejected in JSON, schema properties and decoded pointers (1.0547ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 5
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 486.0621
+
+✖ failing tests:
+
+test at packages\services\src\graph-engineering\adapters\recipes.test.ts:1:1551
+✖ recipe schema rejects shell recipes, unsafe paths, duplicated IDs, zero test contracts and unknown placeholders (1.749ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\adapters\recipes.test.ts:67:12)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at packages\services\src\graph-engineering\app\artifacts.test.ts:1:2042
+✖ reserved object keys are rejected in JSON, schema properties and decoded pointers (1.0547ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\app\artifacts.test.ts:78:12)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /reserved/i,
+    operator: 'throws',
+    diff: 'simple'
+  }

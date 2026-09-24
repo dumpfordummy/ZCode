@@ -29,7 +29,21 @@ export function GraphRecovery({
         <p className="text-foreground-subtle">{t("releaseMeaning")}</p>
       </div>
     );
-  if (["Completed", "Failed", "Cancelled"].includes(run.status)) return null;
+  if (
+    [
+      "NeedsHuman",
+      "BudgetExhausted",
+      "NoProgress",
+      "Completed",
+      "Failed",
+      "Cancelled",
+      "Rejected",
+      "WaitingForApproval",
+      "AwaitingContinuation",
+      "StaleEvidence",
+    ].includes(run.status)
+  )
+    return null;
   return (
     <section className="space-y-3 border-t border-border pt-3" data-testid="graph-recovery">
       <h3 className="text-ui-base font-medium">{t("recovery")}</h3>

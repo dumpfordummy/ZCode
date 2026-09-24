@@ -1,0 +1,843 @@
+(node:42816) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[
+  {
+    "scenario": "admissions",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-admissions.log",
+    "directory": "current/admissions",
+    "nativeInputs": 3,
+    "modelRequests": 13,
+    "nativeProcesses": 2,
+    "admissions": 5,
+    "iterations": 2,
+    "finalStatus": "BudgetExhausted",
+    "stopReason": {
+      "kind": "BudgetExhausted",
+      "message": "The frozen native admission or wall-clock budget is exhausted.",
+      "at": 1790259339720
+    },
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-region-final-evidence.png"
+    ]
+  },
+  {
+    "scenario": "cancel",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-cancel.log",
+    "directory": "current/cancel",
+    "nativeInputs": 4,
+    "modelRequests": 14,
+    "nativeProcesses": 2,
+    "admissions": 5,
+    "iterations": 2,
+    "finalStatus": "Cancelled",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-repair-native-question.png",
+      "z5-cancel-stopped.png"
+    ]
+  },
+  {
+    "scenario": "complete",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-complete-before-ui-fixes.log",
+    "directory": "current/complete-before-ui-fixes",
+    "nativeInputs": 6,
+    "modelRequests": 25,
+    "nativeProcesses": 6,
+    "admissions": 12,
+    "iterations": 3,
+    "finalStatus": "Completed",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-saved-native-graph.png",
+      "z5-run-confirmation.png",
+      "z5-native-permission-task-0.png",
+      "z5-native-permission-026a683e-0af6-45ca-beba-88d73bc59f6e-0.png",
+      "z5-native-permission-5cab32cf-f1d1-4432-89a6-5a2be7d3ad7d-0.png",
+      "z5-native-permission-258e371b-e0bb-442d-9c83-9d0fb94cfa87-1.png",
+      "z5-native-permission-026a683e-0af6-45ca-beba-88d73bc59f6e-1.png",
+      "z5-native-permission-5cab32cf-f1d1-4432-89a6-5a2be7d3ad7d-1.png",
+      "z5-native-permission-258e371b-e0bb-442d-9c83-9d0fb94cfa87-2.png",
+      "z5-native-permission-026a683e-0af6-45ca-beba-88d73bc59f6e-2.png",
+      "z5-native-permission-5cab32cf-f1d1-4432-89a6-5a2be7d3ad7d-2.png",
+      "z5-iteration-0-native-test-report.png",
+      "z5-iteration-0-route.png",
+      "z5-iteration-1-native-test-report.png",
+      "z5-iteration-1-route.png",
+      "z5-iteration-2-native-test-report.png",
+      "z5-iteration-2-route.png",
+      "z5-final-current-evidence-gate.png",
+      "z5-completed-history-reopened.png",
+      "z5-region-final-evidence.png",
+      "iteration-0-report.json.txt",
+      "iteration-0-verification.json.txt",
+      "iteration-1-report.json.txt",
+      "iteration-1-verification.json.txt",
+      "iteration-2-report.json.txt",
+      "iteration-2-verification.json.txt",
+      "z5-source-before.cs.txt",
+      "MathOps.cs.txt",
+      "Runner.cs.txt",
+      "Z4Fixture.csproj.txt",
+      "NuGet.Config.txt"
+    ]
+  },
+  {
+    "scenario": "complete",
+    "status": "FAIL",
+    "log": ".tmp/z5-native-checks/native-complete-confirmation-failed.log",
+    "directory": "current/complete-confirmation-failed",
+    "nativeInputs": 1,
+    "modelRequests": 0,
+    "nativeProcesses": 0,
+    "admissions": 1,
+    "iterations": 1,
+    "finalStatus": "Running",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-saved-native-graph.png",
+      "z5-run-confirmation.png",
+      "z5-failure.png"
+    ],
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    edges: [\n      {\n        source: 'start',\n        target: 'task'\n...\n    ],\n+   revision: 2,\n-   revision: 1,\n    routing: {\n      finalGateId: '43d7a493-54fa-47da-b2e4-36c8ea663871',\n      limits: {\n        deadlineMs: 600000,\n        maxNodeAdmissions: 12\n\n    at startRun (file:///<checkout>/scripts/graph-engineering/z5-native-observe.mjs:139:10)\n    at async file:///<checkout>/scripts/graph-engineering/z5-native-smoke.mjs:84:3"
+  },
+  {
+    "scenario": "complete",
+    "status": "FAIL",
+    "log": ".tmp/z5-native-checks/native-complete-ledger-assertion-failed.log",
+    "directory": "current/complete-ledger-assertion-failed",
+    "nativeInputs": 6,
+    "modelRequests": 25,
+    "nativeProcesses": 6,
+    "admissions": 12,
+    "iterations": 3,
+    "finalStatus": "WaitingForApproval",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-saved-native-graph.png",
+      "z5-run-confirmation.png",
+      "z5-native-permission-task-0.png",
+      "z5-native-permission-c3103857-0194-47b1-a04d-e7fbd89dcc28-0.png",
+      "z5-native-permission-0b312c64-962d-4685-a193-fa2f6c299d9e-0.png",
+      "z5-native-permission-47b19486-dbd7-4038-809d-d8b79fc96188-1.png",
+      "z5-native-permission-c3103857-0194-47b1-a04d-e7fbd89dcc28-1.png",
+      "z5-native-permission-0b312c64-962d-4685-a193-fa2f6c299d9e-1.png",
+      "z5-native-permission-47b19486-dbd7-4038-809d-d8b79fc96188-2.png",
+      "z5-native-permission-c3103857-0194-47b1-a04d-e7fbd89dcc28-2.png",
+      "z5-native-permission-0b312c64-962d-4685-a193-fa2f6c299d9e-2.png",
+      "z5-iteration-0-native-test-report.png",
+      "z5-iteration-0-route.png",
+      "z5-iteration-1-native-test-report.png",
+      "z5-iteration-1-route.png",
+      "z5-iteration-2-native-test-report.png",
+      "z5-iteration-2-route.png",
+      "z5-failure.png",
+      "iteration-0-report.json.txt",
+      "iteration-0-verification.json.txt",
+      "iteration-1-report.json.txt",
+      "iteration-1-verification.json.txt",
+      "iteration-2-report.json.txt",
+      "iteration-2-verification.json.txt"
+    ],
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 6\n\n    at file:///<checkout>/scripts/graph-engineering/z5-native-smoke.mjs:205:14"
+  },
+  {
+    "scenario": "complete",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-complete-pre-guard.log",
+    "directory": "current/complete-pre-guard",
+    "nativeInputs": 6,
+    "modelRequests": 25,
+    "nativeProcesses": 6,
+    "admissions": 12,
+    "iterations": 3,
+    "finalStatus": "Completed",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-saved-native-graph.png",
+      "z5-run-confirmation.png",
+      "z5-native-permission-task-0.png",
+      "z5-native-permission-711458d7-d7af-4071-89de-6d4d619a54e5-0.png",
+      "z5-native-permission-94a3e12d-f1b9-47df-afd1-e0f5ff67f31a-0.png",
+      "z5-native-permission-46170d0d-7f5d-41ee-b795-49089715ceb8-1.png",
+      "z5-native-permission-711458d7-d7af-4071-89de-6d4d619a54e5-1.png",
+      "z5-native-permission-94a3e12d-f1b9-47df-afd1-e0f5ff67f31a-1.png",
+      "z5-native-permission-46170d0d-7f5d-41ee-b795-49089715ceb8-2.png",
+      "z5-native-permission-711458d7-d7af-4071-89de-6d4d619a54e5-2.png",
+      "z5-native-permission-94a3e12d-f1b9-47df-afd1-e0f5ff67f31a-2.png",
+      "z5-iteration-0-native-test-report.png",
+      "z5-iteration-0-route.png",
+      "z5-iteration-1-native-test-report.png",
+      "z5-iteration-1-route.png",
+      "z5-iteration-2-native-test-report.png",
+      "z5-iteration-2-route.png",
+      "z5-final-current-evidence-gate.png",
+      "z5-completed-history-reopened.png",
+      "z5-region-final-evidence.png",
+      "iteration-0-report.json.txt",
+      "iteration-0-verification.json.txt",
+      "iteration-1-report.json.txt",
+      "iteration-1-verification.json.txt",
+      "iteration-2-report.json.txt",
+      "iteration-2-verification.json.txt",
+      "z5-source-before.cs.txt",
+      "MathOps.cs.txt",
+      "Runner.cs.txt",
+      "Z4Fixture.csproj.txt",
+      "NuGet.Config.txt"
+    ]
+  },
+  {
+    "scenario": "complete",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-complete.log",
+    "directory": "current/complete",
+    "nativeInputs": 6,
+    "modelRequests": 25,
+    "nativeProcesses": 6,
+    "admissions": 12,
+    "iterations": 3,
+    "finalStatus": "Completed",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-saved-native-graph.png",
+      "z5-run-confirmation.png",
+      "z5-native-permission-task-0.png",
+      "z5-native-permission-78bc5b38-a032-4f55-81e4-953711d79c77-0.png",
+      "z5-native-permission-aa57bcb3-fbb2-4d0b-a428-aff1e3e4827b-0.png",
+      "z5-native-permission-917fd3c0-73df-4398-a567-605e0d13762a-1.png",
+      "z5-native-permission-78bc5b38-a032-4f55-81e4-953711d79c77-1.png",
+      "z5-native-permission-aa57bcb3-fbb2-4d0b-a428-aff1e3e4827b-1.png",
+      "z5-native-permission-917fd3c0-73df-4398-a567-605e0d13762a-2.png",
+      "z5-native-permission-78bc5b38-a032-4f55-81e4-953711d79c77-2.png",
+      "z5-native-permission-aa57bcb3-fbb2-4d0b-a428-aff1e3e4827b-2.png",
+      "z5-iteration-0-native-test-report.png",
+      "z5-iteration-0-route.png",
+      "z5-iteration-1-native-test-report.png",
+      "z5-iteration-1-route.png",
+      "z5-iteration-2-native-test-report.png",
+      "z5-iteration-2-route.png",
+      "z5-final-current-evidence-gate.png",
+      "z5-completed-history-reopened.png",
+      "z5-region-final-evidence.png",
+      "iteration-0-report.json.txt",
+      "iteration-0-verification.json.txt",
+      "iteration-1-report.json.txt",
+      "iteration-1-verification.json.txt",
+      "iteration-2-report.json.txt",
+      "iteration-2-verification.json.txt",
+      "z5-source-before.cs.txt",
+      "MathOps.cs.txt",
+      "Runner.cs.txt",
+      "Z4Fixture.csproj.txt",
+      "NuGet.Config.txt"
+    ]
+  },
+  {
+    "scenario": "condition-default",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-condition-default.log",
+    "directory": "current/condition-default",
+    "nativeInputs": 3,
+    "modelRequests": 9,
+    "nativeProcesses": 0,
+    "admissions": 3,
+    "iterations": 1,
+    "finalStatus": "Completed",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-typed-condition-route.png"
+    ]
+  },
+  {
+    "scenario": "condition-false",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-condition-false.log",
+    "directory": "current/condition-false",
+    "nativeInputs": 3,
+    "modelRequests": 9,
+    "nativeProcesses": 0,
+    "admissions": 3,
+    "iterations": 1,
+    "finalStatus": "Completed",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-typed-condition-route.png"
+    ]
+  },
+  {
+    "scenario": "condition-true",
+    "status": "FAIL",
+    "log": ".tmp/z5-native-checks/native-condition-inspector-first.log",
+    "directory": "current/condition-inspector-first",
+    "nativeInputs": 0,
+    "modelRequests": 0,
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-failure.png"
+    ],
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n4 !== 0\n\n    at createConditionGraph (file:///<checkout>/scripts/graph-engineering/z5-native-editor.mjs:282:10)\n    at async file:///<checkout>/scripts/graph-engineering/z5-native-smoke.mjs:80:7"
+  },
+  {
+    "scenario": "condition-missing",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-condition-missing.log",
+    "directory": "current/condition-missing",
+    "nativeInputs": 1,
+    "modelRequests": 3,
+    "nativeProcesses": 0,
+    "admissions": 1,
+    "iterations": 1,
+    "finalStatus": "NeedsHuman",
+    "stopReason": {
+      "kind": "NeedsHuman",
+      "message": "Condition operand data/ready is missing.\nCondition operand data/ready is missing.",
+      "at": 1790260012061
+    },
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-typed-condition-route.png"
+    ]
+  },
+  {
+    "scenario": "condition-true",
+    "status": "FAIL",
+    "log": ".tmp/z5-native-checks/native-condition-true-first.log",
+    "directory": "current/condition-true-first",
+    "nativeInputs": 0,
+    "modelRequests": 0,
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-failure.png"
+    ],
+    "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('graph-next-node-1ce14091-ea18-449b-9542-013ead12220a-true')\u001b[22m\n\n    at selectValue (<checkout>\\scripts\\graph-engineering\\z2-native-helpers.mjs:163:36)\n    at connect (<checkout>\\scripts\\graph-engineering\\z5-native-editor.mjs:55:9)\n    at async createConditionGraph (<checkout>\\scripts\\graph-engineering\\z5-native-editor.mjs:278:5)\n    at async file:///<checkout>/scripts/graph-engineering/z5-native-smoke.mjs:80:7"
+  },
+  {
+    "scenario": "condition-true",
+    "status": "FAIL",
+    "log": ".tmp/z5-native-checks/native-condition-true-obsolete-exit.log",
+    "directory": "current/condition-true-obsolete-exit",
+    "nativeInputs": 0,
+    "modelRequests": 0,
+    "nativeProcesses": 0,
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-failure.png"
+    ],
+    "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('graph-run-button')\u001b[22m\n\u001b[2m    - locator resolved to <button disabled data-size=\"sm\" data-slot=\"button\" data-variant=\"default\" data-testid=\"graph-run-button\" class=\"group/button inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding whitespace-nowrap transition-colors outline-none select-none disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg…>…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    59 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not enabled\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at startRun (<checkout>\\scripts\\graph-engineering\\z5-native-observe.mjs:124:48)\n    at async file:///<checkout>/scripts/graph-engineering/z5-native-smoke.mjs:84:3"
+  },
+  {
+    "scenario": "condition-true",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-condition-true.log",
+    "directory": "current/condition-true",
+    "nativeInputs": 3,
+    "modelRequests": 9,
+    "nativeProcesses": 0,
+    "admissions": 3,
+    "iterations": 1,
+    "finalStatus": "Completed",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-typed-condition-route.png"
+    ]
+  },
+  {
+    "scenario": "condition-wrong-type",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-condition-wrong-type.log",
+    "directory": "current/condition-wrong-type",
+    "nativeInputs": 1,
+    "modelRequests": 3,
+    "nativeProcesses": 0,
+    "admissions": 1,
+    "iterations": 1,
+    "finalStatus": "NeedsHuman",
+    "stopReason": {
+      "kind": "NeedsHuman",
+      "message": "Condition comparison types differ.",
+      "at": 1790260033311
+    },
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-typed-condition-route.png"
+    ]
+  },
+  {
+    "scenario": "deadline",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-deadline.log",
+    "directory": "current/deadline",
+    "nativeInputs": 3,
+    "modelRequests": 11,
+    "nativeProcesses": 2,
+    "admissions": 5,
+    "iterations": 2,
+    "finalStatus": "BudgetExhausted",
+    "stopReason": {
+      "kind": "BudgetExhausted",
+      "message": "The frozen wall-clock deadline expired.",
+      "at": 1790259379414
+    },
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-repair-native-question.png",
+      "z5-deadline-stopped.png"
+    ]
+  },
+  {
+    "scenario": "decision-restart",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-decision-restart.log",
+    "directory": "current/decision-restart",
+    "nativeInputs": 3,
+    "modelRequests": 11,
+    "nativeProcesses": 2,
+    "admissions": 5,
+    "iterations": 2,
+    "finalStatus": "Cancelled",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-reopened-decision-boundary.png",
+      "z5-explicit-continuation-result.png"
+    ]
+  },
+  {
+    "scenario": "exhausted",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-exhausted.log",
+    "directory": "current/exhausted",
+    "nativeInputs": 6,
+    "modelRequests": 25,
+    "nativeProcesses": 6,
+    "admissions": 12,
+    "iterations": 3,
+    "finalStatus": "BudgetExhausted",
+    "stopReason": {
+      "kind": "BudgetExhausted",
+      "message": "The frozen maximum repair iterations is exhausted.",
+      "at": 1790259320136
+    },
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-iteration-0-route.png",
+      "z5-iteration-1-route.png",
+      "z5-iteration-2-route.png",
+      "z5-region-final-evidence.png",
+      "iteration-0-report.json.txt",
+      "iteration-0-verification.json.txt",
+      "iteration-1-report.json.txt",
+      "iteration-1-verification.json.txt",
+      "iteration-2-report.json.txt",
+      "iteration-2-verification.json.txt",
+      "z5-source-before.cs.txt",
+      "MathOps.cs.txt",
+      "Runner.cs.txt",
+      "Z4Fixture.csproj.txt",
+      "NuGet.Config.txt"
+    ]
+  },
+  {
+    "scenario": "invalid-json",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-invalid-json.log",
+    "directory": "current/invalid-json",
+    "nativeInputs": 2,
+    "modelRequests": 9,
+    "nativeProcesses": 2,
+    "admissions": 4,
+    "iterations": 1,
+    "finalStatus": "NeedsHuman",
+    "stopReason": {
+      "kind": "NeedsHuman",
+      "message": "Node aeb81272-3d7a-4dc5-a119-994ad3fc70aa did not produce a definitive usable result. No repair is authorized.",
+      "at": 1790259430994
+    },
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-region-final-evidence.png"
+    ]
+  },
+  {
+    "scenario": "invalid-topology",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-invalid-topology.log",
+    "directory": "current/invalid-topology",
+    "nativeInputs": 0,
+    "modelRequests": 0,
+    "nativeProcesses": 0,
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-invalid-final-gate-bypass.png",
+      "z5-invalid-off-region-cycle.png"
+    ]
+  },
+  {
+    "scenario": "no-progress",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-no-progress-pre-guard.log",
+    "directory": "current/no-progress-pre-guard",
+    "nativeInputs": 4,
+    "modelRequests": 16,
+    "nativeProcesses": 4,
+    "admissions": 8,
+    "iterations": 2,
+    "finalStatus": "NoProgress",
+    "stopReason": {
+      "kind": "NoProgress",
+      "message": "Source and complete findings/test results repeat an earlier failed iteration.",
+      "at": 1790259399040
+    },
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-iteration-0-route.png",
+      "z5-iteration-1-route.png",
+      "z5-region-final-evidence.png",
+      "iteration-0-report.json.txt",
+      "iteration-0-verification.json.txt",
+      "iteration-1-report.json.txt",
+      "iteration-1-verification.json.txt",
+      "z5-source-before.cs.txt",
+      "MathOps.cs.txt",
+      "Runner.cs.txt",
+      "Z4Fixture.csproj.txt",
+      "NuGet.Config.txt"
+    ]
+  },
+  {
+    "scenario": "no-progress",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-no-progress.log",
+    "directory": "current/no-progress",
+    "nativeInputs": 4,
+    "modelRequests": 16,
+    "nativeProcesses": 4,
+    "admissions": 8,
+    "iterations": 2,
+    "finalStatus": "NoProgress",
+    "stopReason": {
+      "kind": "NoProgress",
+      "message": "Source and complete findings/test results repeat an earlier failed iteration.",
+      "at": 1790260554245
+    },
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-iteration-0-route.png",
+      "z5-iteration-1-route.png",
+      "z5-region-final-evidence.png",
+      "iteration-0-report.json.txt",
+      "iteration-0-verification.json.txt",
+      "iteration-1-report.json.txt",
+      "iteration-1-verification.json.txt",
+      "z5-source-before.cs.txt",
+      "MathOps.cs.txt",
+      "Runner.cs.txt",
+      "Z4Fixture.csproj.txt",
+      "NuGet.Config.txt"
+    ]
+  },
+  {
+    "scenario": "old-artifact",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-old-artifact.log",
+    "directory": "current/old-artifact",
+    "nativeInputs": 4,
+    "modelRequests": 17,
+    "nativeProcesses": 4,
+    "admissions": 8,
+    "iterations": 2,
+    "finalStatus": "NeedsHuman",
+    "stopReason": {
+      "kind": "NeedsHuman",
+      "message": "Node d07a7d2a-eba0-4de4-abf6-08855ce487bb did not produce a definitive usable result. No repair is authorized.",
+      "at": 1790259451627
+    },
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-region-final-evidence.png"
+    ]
+  },
+  {
+    "scenario": "presentation",
+    "status": "FAIL",
+    "log": ".tmp/z5-native-checks/native-presentation-first.log",
+    "directory": "current/presentation-first",
+    "nativeInputs": 0,
+    "modelRequests": 0,
+    "nativeProcesses": 0,
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-readable-region-condition.png",
+      "z5-explicit-repair-limits.png",
+      "z5-failure.png"
+    ],
+    "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('graph-select-node-0b1d1a5f-11d6-4b5f-9538-f399dc47cd6e')\u001b[22m\n\n    at selectNode (<checkout>\\scripts\\graph-engineering\\z2-native-helpers.mjs:159:55)\n    at <checkout>\\scripts\\graph-engineering\\z5-native-presentation.mjs:97:9"
+  },
+  {
+    "scenario": "presentation",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-presentation.log",
+    "directory": "current/presentation",
+    "nativeInputs": 0,
+    "modelRequests": 0,
+    "nativeProcesses": 0,
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-readable-region-condition.png",
+      "z5-explicit-repair-limits.png",
+      "z5-chinese-light-narrow-canvas.png",
+      "z5-chinese-light-narrow-condition.png"
+    ]
+  },
+  {
+    "scenario": "reject",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-reject.log",
+    "directory": "current/reject",
+    "nativeInputs": 4,
+    "modelRequests": 16,
+    "nativeProcesses": 2,
+    "admissions": 5,
+    "iterations": 2,
+    "finalStatus": "Rejected",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-repair-rejected.png"
+    ]
+  },
+  {
+    "scenario": "reviewer-pass",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-reviewer-pass.log",
+    "directory": "current/reviewer-pass",
+    "nativeInputs": 2,
+    "modelRequests": 9,
+    "nativeProcesses": 2,
+    "admissions": 4,
+    "iterations": 1,
+    "finalStatus": "NeedsHuman",
+    "stopReason": {
+      "kind": "NeedsHuman",
+      "message": "Reviewer PASS cannot override failed machine verification or authorize the success exit.",
+      "at": 1790259416062
+    },
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-region-final-evidence.png"
+    ]
+  },
+  {
+    "scenario": "stale-continue",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-stale-continue.log",
+    "directory": "current/stale-continue",
+    "nativeInputs": 2,
+    "modelRequests": 9,
+    "nativeProcesses": 2,
+    "admissions": 4,
+    "iterations": 2,
+    "finalStatus": "NeedsHuman",
+    "stopReason": {
+      "kind": "NeedsHuman",
+      "message": "Declared source changed outside the authorized writer attempt.",
+      "at": 1790259936083
+    },
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-reopened-decision-boundary.png",
+      "z5-explicit-continuation-result.png"
+    ]
+  },
+  {
+    "scenario": "stale-source",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-stale-source.log",
+    "directory": "current/stale-source",
+    "nativeInputs": 2,
+    "modelRequests": 10,
+    "nativeProcesses": 2,
+    "admissions": 4,
+    "iterations": 1,
+    "finalStatus": "NeedsHuman",
+    "stopReason": {
+      "kind": "NeedsHuman",
+      "message": "Declared source changed outside the authorized writer attempt.",
+      "at": 1790259505773
+    },
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-repair-native-question.png",
+      "z5-stale-source-stopped.png"
+    ]
+  },
+  {
+    "scenario": "unknown-repair",
+    "status": "PASS",
+    "log": ".tmp/z5-native-checks/native-unknown-repair.log",
+    "directory": "current/unknown-repair",
+    "nativeInputs": 3,
+    "modelRequests": 11,
+    "nativeProcesses": 2,
+    "admissions": 5,
+    "iterations": 2,
+    "finalStatus": "Interrupted",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z5-accepted-uncertain-native-question.png",
+      "z5-reopened-decision-boundary.png"
+    ]
+  },
+  {
+    "scenario": "complete",
+    "status": "PASS",
+    "log": ".tmp/z5-baseline/native-chat.log",
+    "directory": "baseline/chat",
+    "nativeInputs": 1,
+    "modelRequests": 5,
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "chat-native-permission.png",
+      "chat-native-result.png"
+    ]
+  },
+  {
+    "scenario": "complete",
+    "status": "PASS",
+    "log": ".tmp/z5-baseline/native-z4-complete.log",
+    "directory": "baseline/z4-complete",
+    "nativeInputs": 1,
+    "modelRequests": 5,
+    "nativeProcesses": 2,
+    "finalStatus": "Completed",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z4-graph-design.png",
+      "z4-code-review.png",
+      "z4-build-native-permission.png",
+      "z4-test-native-permission.png",
+      "z4-positive-native-test-report.png",
+      "z4-native-command-result.png",
+      "z4-completed-reopened.png",
+      "z4-artifact-tamper-refused.png"
+    ]
+  },
+  {
+    "scenario": "crash",
+    "status": "PASS",
+    "log": ".tmp/z5-baseline/native-z4-crash.log",
+    "directory": "baseline/z4-crash",
+    "nativeInputs": 0,
+    "modelRequests": 0,
+    "nativeProcesses": 2,
+    "finalStatus": "Interrupted",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z4-uncertain-operation-reopened.png"
+    ]
+  },
+  {
+    "scenario": "json-invalid",
+    "status": "PASS",
+    "log": ".tmp/z5-baseline/native-z4-invalid-json.log",
+    "directory": "baseline/z4-invalid-json",
+    "nativeInputs": 1,
+    "modelRequests": 3,
+    "nativeProcesses": 0,
+    "finalStatus": "Failed",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z4-structured-output-result.png"
+    ]
+  },
+  {
+    "scenario": "complete",
+    "status": "PASS",
+    "log": ".tmp/z5-regressions/native-chat.log",
+    "directory": "final-regressions/chat",
+    "nativeInputs": 1,
+    "modelRequests": 5,
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "chat-native-permission.png",
+      "chat-native-result.png"
+    ]
+  },
+  {
+    "scenario": "complete",
+    "status": "PASS",
+    "log": ".tmp/z5-regressions/native-z4-complete.log",
+    "directory": "final-regressions/z4-complete",
+    "nativeInputs": 1,
+    "modelRequests": 5,
+    "nativeProcesses": 2,
+    "finalStatus": "Completed",
+    "files": [
+      "summary.json",
+      "controlled-model-requests.json",
+      "z4-graph-design.png",
+      "z4-code-review.png",
+      "z4-build-native-permission.png",
+      "z4-test-native-permission.png",
+      "z4-positive-native-test-report.png",
+      "z4-native-command-result.png",
+      "z4-completed-reopened.png",
+      "z4-artifact-tamper-refused.png"
+    ]
+  },
+  {
+    "scenario": "manual-setup",
+    "status": "PASS",
+    "nativeInputs": 0,
+    "modelRequests": 0,
+    "nativeProcesses": 0,
+    "userOperatedChecks": "NOT RUN",
+    "directory": "manual-setup"
+  },
+  {
+    "scenario": "manual-reopen",
+    "status": "PASS",
+    "nativeInputs": 0,
+    "modelRequests": 0,
+    "nativeProcesses": 0,
+    "userOperatedChecks": "NOT RUN",
+    "directory": "manual-reopen"
+  }
+]

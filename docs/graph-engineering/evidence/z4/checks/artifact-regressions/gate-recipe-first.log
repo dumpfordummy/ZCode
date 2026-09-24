@@ -1,0 +1,33 @@
+✖ cold gate continuation rejects changed frozen Tool recipe even with its recomputed digest (31.3875ms)
+✔ Build cannot combine one output digest with freshness observed from changed bytes (43.1401ms)
+✔ Test freshness fingerprint must describe the exact retained report bytes (271.3147ms)
+✔ all-skipped discovered tests do not count as executed passing tests (0.335ms)
+✔ persisted Agent artifact native input and command identities match its exact attempt (14.7172ms)
+✔ native owner failure cannot become Graph success merely because child process exited zero (15.588ms)
+✔ successful-looking result with unobserved process exit never advances the graph (17.2926ms)
+✔ source evidence changed while native Tool session is created makes the gate stale before process start (6.1329ms)
+✔ real file observations reject a no-op Build reusing stale output and accept refreshed identical bytes (71.4766ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 8
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1325.4789
+
+✖ failing tests:
+
+test at packages\services\src\graph-engineering\adapters\z4-review.test.ts:1:639
+✖ cold gate continuation rejects changed frozen Tool recipe even with its recomputed digest (31.3875ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\adapters\z4-review.test.ts:37:3)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /frozen|changed|identity/i,
+    operator: 'rejects',
+    diff: 'simple'
+  }

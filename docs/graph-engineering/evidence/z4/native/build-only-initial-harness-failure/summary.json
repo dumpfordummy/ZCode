@@ -1,0 +1,120 @@
+{
+  "scenario": "build-only",
+  "home": "<isolated-profile>",
+  "workspace": "<isolated-profile>\\workspace",
+  "assertions": [
+    "Actual native editor saves named C# recipes, Tool nodes, explicit edges and captured approval artifact selections."
+  ],
+  "screenshots": ["<isolated-profile>\\z4-graph-design.png", "<isolated-profile>\\z4-failure.png"],
+  "fixture": {
+    "runnerDigest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79",
+    "source": {
+      "digest": "6c15a9faaa6c96609bdff37e3f8f6b49da9824037f34cca3affc968174ac15ef",
+      "files": [
+        {
+          "path": "Directory.Build.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Build.targets",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Packages.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "MathOps.cs",
+          "length": 96,
+          "digest": "c74c3bced09a37ec35a9d435752abd3743a8b40a6998d2b95b63400b08c61cd1"
+        },
+        {
+          "path": "NuGet.Config",
+          "length": 112,
+          "digest": "7d59a339f0f6022f0710d690fe52e2a0f868519847651f6c10f6c9ff1bd7213a"
+        },
+        {
+          "path": "Runner.cs",
+          "length": 3700,
+          "digest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79"
+        },
+        {
+          "path": "Z4Fixture.csproj",
+          "length": 494,
+          "digest": "97413a96ff9fb4bfc78841548e1d11971590ce5d25a743e6a83b1a1b3fb910ff"
+        },
+        {
+          "path": "global.json",
+          "length": 54,
+          "digest": "9969992897aee36fbc62db0976390d87b1275dc0d7c6fcb937a7f81a316f97dc"
+        }
+      ]
+    }
+  },
+  "ids": {
+    "build": "f3f49d06-b502-4fe6-9705-24ea7909a49c",
+    "gates": [],
+    "route": ["f3f49d06-b502-4fe6-9705-24ea7909a49c"]
+  },
+  "status": "FAIL",
+  "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('graph-run-button')\u001b[22m\n\u001b[2m    - locator resolved to <button disabled data-size=\"sm\" data-slot=\"button\" data-variant=\"default\" data-testid=\"graph-run-button\" class=\"group/button inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding whitespace-nowrap transition-colors outline-none select-none disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg…>…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    59 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not enabled\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at <checkout>\\scripts\\graph-engineering\\z4-native-smoke.mjs:107:48",
+  "body": "Command palette\n\nSearch and run commands available in this workspace.\n\nNew task\nCtrl+N\nSearch\nCtrl+K\nGraph Engineering\nAutomations\nPlugin Marketplace\nGroup\nProject\nProjects\nworkspace\nNo tasks yet\nTasks\nNo tasks yet\nConnect\nMobile remote control\nBack to chat\nGraph Engineering\n\n<isolated-profile>\\workspace\n\nDesign\nRuns\nEdits apply to a future run\nAdd Tool\nAdd Agent Task\nAdd Human Approval\nSave graph\nSave and run\nSaved\nWorkspace defaults for the next run\nDraft needs attention before Run\nEnd must select a task's final text or a Tool result.\n\nAll tasks share this workspace. Other Chats and editors can still change its files; avoid concurrent edits. A new run can repeat earlier side effects.\n\nProject command recipes\n\nEdit this workspace's .zcode/config.json graphRecipes array. Fixed executable/argument arrays, relative cwd, timeout, sourcePaths, expectedOutputs and verifier are required. Only '{operationId}', '{sourceDigest}', '{buildDigest}', '{reportPath}' placeholders are supported. Shell recipes are unsupported. Native permission remains separate; loading or saving does not execute work.\n\nLoad recipes\nSave recipes\n\nRecipes saved. No command was executed.\n\nBuild recipe example\nStart\nEnd\nBuild\nReact Flow\nStart\nEnd\nBuild\n\nDrag nodes or select with Enter / Space then use arrow keys. Connect handles, or choose Next node in the inspector. Edges define order. Fit view is in the canvas controls.\n\nEnd\n\nend\n\nEnd result source\nSelect a task output",
+  "finalRecord": {
+    "version": 4,
+    "workspaceKey": "<isolated-profile>\\workspace",
+    "definition": {
+      "version": 4,
+      "revision": 1,
+      "name": "Z4 isolated C# build-only",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": ""
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 860,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": null
+        },
+        {
+          "id": "f3f49d06-b502-4fe6-9705-24ea7909a49c",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Build",
+          "recipeId": "fixture-build"
+        }
+      ],
+      "edges": [
+        {
+          "source": "f3f49d06-b502-4fe6-9705-24ea7909a49c",
+          "target": "end"
+        },
+        {
+          "source": "start",
+          "target": "f3f49d06-b502-4fe6-9705-24ea7909a49c"
+        }
+      ]
+    },
+    "runs": []
+  },
+  "nativeLedger": [],
+  "nativeToolResults": [],
+  "providerErrors": [],
+  "modelRequests": 0,
+  "marker": "Z4_FRESH_REVIEW_17f0d578-6b06-4e07-9a43-14e5fae33fa9"
+}

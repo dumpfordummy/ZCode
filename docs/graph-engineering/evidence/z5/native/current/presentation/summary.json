@@ -1,0 +1,357 @@
+{
+  "scenario": "presentation",
+  "home": "<isolated-profile>",
+  "workspace": "<isolated-profile>\\workspace",
+  "assertions": [
+    "The actual native editor creates the version-5 repair region, named condition exits, exact artifact/repair-feedback bindings, native recipes, finite limits and required final gate.",
+    "Actual pointer drags arrange the bounded region and named Condition for readable canvas inspection; saving and viewing submit zero native/model inputs.",
+    "The newly created private profile restarts in Chinese/light at 760px; Condition controls remain unique and the document has no horizontal overflow."
+  ],
+  "screenshots": [
+    "<isolated-profile>\\z5-readable-region-condition.png",
+    "<isolated-profile>\\z5-explicit-repair-limits.png",
+    "<isolated-profile>\\z5-chinese-light-narrow-canvas.png",
+    "<isolated-profile>\\z5-chinese-light-narrow-condition.png"
+  ],
+  "ids": {
+    "initial": "task",
+    "build": "0a69a3e9-1911-4f9c-a989-27031468fea5",
+    "test": "2e5ac73a-21e1-4566-a9c5-a3bbdba2cb63",
+    "reviewer": "a005de17-6c7e-4948-88bd-13d5be2d1b74",
+    "repair": "665a741e-6c04-4ae8-bab8-617c16bedca3",
+    "decision": "ba18b186-e911-4ec6-8f30-b662cba7d516",
+    "finalGate": "a3d90bb6-b9ac-4b69-bfa6-96d6531461aa",
+    "admissions": 12,
+    "deadline": 600000
+  },
+  "viewport": {
+    "width": 760,
+    "height": 1000,
+    "scrollWidth": 760,
+    "clientWidth": 760,
+    "theme": "theme-zai-light platform-windows-desktop",
+    "language": "en"
+  },
+  "coverageLimit": "Desktop editor presentation only; actual mobile Web and user-operated checks are NOT RUN.",
+  "status": "PASS",
+  "finalRecord": {
+    "version": 5,
+    "workspaceKey": "<isolated-profile>\\workspace",
+    "definition": {
+      "version": 5,
+      "revision": 2,
+      "name": "Z5 bounded native C# complete",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 74.71814671814671,
+            "y": -173.40540540540542
+          },
+          "type": "start",
+          "request": ""
+        },
+        {
+          "id": "task",
+          "position": {
+            "x": 314.7181467181467,
+            "y": -173.40540540540542
+          },
+          "type": "task",
+          "name": "Implement",
+          "instructions": "Z5_IMPLEMENT: Read MathOps.cs and Runner.cs. Apply the explicitly staged initial synthetic implementation in MathOps.cs only. Preserve the runner. Do not build or run commands; separate native Tool nodes verify it. Return a concise result.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 907.4343629343631,
+            "y": 217.17374517374517
+          },
+          "type": "end",
+          "outputNodeId": "2e5ac73a-21e1-4566-a9c5-a3bbdba2cb63"
+        },
+        {
+          "id": "0a69a3e9-1911-4f9c-a989-27031468fea5",
+          "position": {
+            "x": 560.9420849420849,
+            "y": -173.40540540540542
+          },
+          "type": "tool",
+          "name": "Build",
+          "recipeId": "fixture-build"
+        },
+        {
+          "id": "2e5ac73a-21e1-4566-a9c5-a3bbdba2cb63",
+          "position": {
+            "x": 799.2432432432432,
+            "y": -173.40540540540542
+          },
+          "type": "tool",
+          "name": "Test",
+          "recipeId": "fixture-test"
+        },
+        {
+          "id": "a005de17-6c7e-4948-88bd-13d5be2d1b74",
+          "position": {
+            "x": 820.5559845559844,
+            "y": 17.54440154440155
+          },
+          "type": "task",
+          "name": "Reviewer",
+          "instructions": "Z5_REVIEW: Read MathOps.cs and results/test-report.json. Review this exact native verification; return the required structured reviewer record and its actual artifact ID. Do not edit or execute commands.\nZ5_VERIFICATION_BEGIN\n{{inputs.verification}}\nZ5_VERIFICATION_END",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "verification",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "2e5ac73a-21e1-4566-a9c5-a3bbdba2cb63",
+                "selector": "verification"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          },
+          "output": {
+            "kind": "json",
+            "schema": {
+              "type": "object",
+              "required": ["outcome", "findings", "evidenceReferences"],
+              "additionalProperties": false,
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "enum": ["pass", "needs_changes", "needs_human"]
+                },
+                "findings": {
+                  "type": "array",
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "required": ["code", "message"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "message": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    }
+                  }
+                },
+                "evidenceReferences": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 8,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "665a741e-6c04-4ae8-bab8-617c16bedca3",
+          "position": {
+            "x": 403.55212355212353,
+            "y": 17.54440154440155
+          },
+          "type": "task",
+          "name": "Repair",
+          "instructions": "Z5_REPAIR: Read MathOps.cs. Use this exact previous iteration feedback to make the next bounded synthetic repair in MathOps.cs only. Preserve Runner.cs and tests. Do not build or execute commands.\nZ5_FEEDBACK_BEGIN\n{{inputs.feedback}}\nZ5_FEEDBACK_END",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "feedback",
+              "source": {
+                "kind": "repair-feedback"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "ba18b186-e911-4ec6-8f30-b662cba7d516",
+          "position": {
+            "x": 602.7953667953668,
+            "y": 17.54440154440155
+          },
+          "type": "condition",
+          "name": "Decide from current evidence",
+          "inputs": [
+            {
+              "alias": "review",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "a005de17-6c7e-4948-88bd-13d5be2d1b74",
+                "selector": "structured"
+              }
+            },
+            {
+              "alias": "machine",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "2e5ac73a-21e1-4566-a9c5-a3bbdba2cb63",
+                "selector": "verification"
+              }
+            }
+          ],
+          "branches": [
+            {
+              "exit": "pass",
+              "predicate": {
+                "op": "eq",
+                "alias": "review",
+                "pointer": "/outcome",
+                "value": "pass"
+              }
+            },
+            {
+              "exit": "needs_changes",
+              "predicate": {
+                "op": "eq",
+                "alias": "review",
+                "pointer": "/outcome",
+                "value": "needs_changes"
+              }
+            }
+          ],
+          "defaultExit": "needs_human",
+          "errorPolicy": "needs-human",
+          "verification": {
+            "testNodeIds": ["2e5ac73a-21e1-4566-a9c5-a3bbdba2cb63"],
+            "reviewerNodeId": "a005de17-6c7e-4948-88bd-13d5be2d1b74",
+            "successExit": "pass"
+          }
+        },
+        {
+          "id": "a3d90bb6-b9ac-4b69-bfa6-96d6531461aa",
+          "position": {
+            "x": 654.4864864864865,
+            "y": 217.17374517374517
+          },
+          "type": "approval",
+          "name": "Final human review",
+          "reviewInstructions": "Review this exact iteration's native evidence. This gate does not authorize publication or answer native permissions.",
+          "evidence": [
+            {
+              "alias": "evidence",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "2e5ac73a-21e1-4566-a9c5-a3bbdba2cb63",
+                "selector": "test"
+              }
+            }
+          ],
+          "commentPolicy": "required"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "task"
+        },
+        {
+          "source": "task",
+          "target": "0a69a3e9-1911-4f9c-a989-27031468fea5"
+        },
+        {
+          "source": "0a69a3e9-1911-4f9c-a989-27031468fea5",
+          "target": "2e5ac73a-21e1-4566-a9c5-a3bbdba2cb63"
+        },
+        {
+          "source": "2e5ac73a-21e1-4566-a9c5-a3bbdba2cb63",
+          "target": "a005de17-6c7e-4948-88bd-13d5be2d1b74"
+        },
+        {
+          "source": "a005de17-6c7e-4948-88bd-13d5be2d1b74",
+          "target": "ba18b186-e911-4ec6-8f30-b662cba7d516"
+        },
+        {
+          "source": "665a741e-6c04-4ae8-bab8-617c16bedca3",
+          "target": "0a69a3e9-1911-4f9c-a989-27031468fea5"
+        },
+        {
+          "source": "a3d90bb6-b9ac-4b69-bfa6-96d6531461aa",
+          "target": "end"
+        },
+        {
+          "source": "ba18b186-e911-4ec6-8f30-b662cba7d516",
+          "target": "a3d90bb6-b9ac-4b69-bfa6-96d6531461aa",
+          "sourcePort": "pass"
+        },
+        {
+          "source": "ba18b186-e911-4ec6-8f30-b662cba7d516",
+          "target": "665a741e-6c04-4ae8-bab8-617c16bedca3",
+          "sourcePort": "needs_changes"
+        },
+        {
+          "source": "ba18b186-e911-4ec6-8f30-b662cba7d516",
+          "target": "a3d90bb6-b9ac-4b69-bfa6-96d6531461aa",
+          "sourcePort": "needs_human"
+        }
+      ],
+      "routing": {
+        "finalGateId": "a3d90bb6-b9ac-4b69-bfa6-96d6531461aa",
+        "limits": {
+          "maxNodeAdmissions": 12,
+          "deadlineMs": 600000
+        },
+        "region": {
+          "id": "c6e8b01e-4aba-4c27-bd1c-71ef6021f8c9",
+          "name": "Bounded C# repair",
+          "entryNodeId": "task",
+          "repairEntryNodeId": "665a741e-6c04-4ae8-bab8-617c16bedca3",
+          "decisionNodeId": "ba18b186-e911-4ec6-8f30-b662cba7d516",
+          "bodyNodeIds": [
+            "task",
+            "0a69a3e9-1911-4f9c-a989-27031468fea5",
+            "2e5ac73a-21e1-4566-a9c5-a3bbdba2cb63",
+            "a005de17-6c7e-4948-88bd-13d5be2d1b74",
+            "665a741e-6c04-4ae8-bab8-617c16bedca3",
+            "ba18b186-e911-4ec6-8f30-b662cba7d516"
+          ],
+          "repairExit": "needs_changes",
+          "passExit": "pass",
+          "maxRepairIterations": 2,
+          "stopOnNoProgress": true,
+          "sourcePaths": [
+            "Z4Fixture.csproj",
+            "MathOps.cs",
+            "Runner.cs",
+            "global.json",
+            "NuGet.Config",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props"
+          ]
+        }
+      }
+    },
+    "runs": []
+  },
+  "nativeLedger": [],
+  "nativeToolResults": [],
+  "providerErrors": [],
+  "modelRequests": 0,
+  "collectedModelRequestCounts": {
+    "total": 0,
+    "byStage": {}
+  }
+}

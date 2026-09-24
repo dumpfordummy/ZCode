@@ -22,6 +22,7 @@ import {
 } from "./schema.js";
 
 interface FileConfigOptions {
+  metadataOnly?: boolean;
   baseDir?: string;
   configFileName?: string;
 }
@@ -95,7 +96,7 @@ export function loadFileConfig(filePath?: string, options: FileConfigOptions = {
     const content = readFileSync(resolvedPath, "utf-8");
     const parsed = JSON.parse(content);
     const migrated = migratePluginConfigInFile(parsed);
-    if (migrated) {
+    if (migrated && !options.metadataOnly) {
       // 仅装载态归一化会让旧 key 永久留在磁盘，后续版本无法安全删除迁移逻辑。
       persistPluginConfigMigration(resolvedPath, migrated);
     }

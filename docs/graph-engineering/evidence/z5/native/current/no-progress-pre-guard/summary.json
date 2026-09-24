@@ -1,0 +1,3207 @@
+{
+  "scenario": "no-progress",
+  "home": "<isolated-profile>",
+  "workspace": "<isolated-profile>\\workspace",
+  "assertions": [
+    "The actual native editor creates the version-5 repair region, named condition exits, exact artifact/repair-feedback bindings, native recipes, finite limits and required final gate.",
+    "Native inputs, recipe admissions and finite iteration limits agree with exact durable identity and actual evidence; a stop is never promoted to successful verification."
+  ],
+  "screenshots": [
+    "<isolated-profile>\\z5-saved-native-graph.png",
+    "<isolated-profile>\\z5-run-confirmation.png",
+    "<isolated-profile>\\z5-native-permission-task-0.png",
+    "<isolated-profile>\\z5-native-permission-8d948755-e00c-417d-888d-c891dfb525a3-0.png",
+    "<isolated-profile>\\z5-native-permission-5e7e9a31-9ff8-415c-875e-6b36506d7374-0.png",
+    "<isolated-profile>\\z5-native-permission-8d948755-e00c-417d-888d-c891dfb525a3-1.png",
+    "<isolated-profile>\\z5-native-permission-5e7e9a31-9ff8-415c-875e-6b36506d7374-1.png",
+    "<isolated-profile>\\z5-iteration-0-native-test-report.png",
+    "<isolated-profile>\\z5-iteration-0-route.png",
+    "<isolated-profile>\\z5-iteration-1-native-test-report.png",
+    "<isolated-profile>\\z5-iteration-1-route.png",
+    "<isolated-profile>\\z5-region-final-evidence.png"
+  ],
+  "fixture": {
+    "runnerDigest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79",
+    "source": {
+      "digest": "497750fe192e4531c18aff80ae796e04b25b130c00c69d784df8c7a53e3d9527",
+      "files": [
+        {
+          "path": "Directory.Build.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Build.targets",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Packages.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "MathOps.cs",
+          "length": 100,
+          "digest": "2cc9461517454ad8085486324e36939d54eea73c53454d7b64323dbac578fce9"
+        },
+        {
+          "path": "NuGet.Config",
+          "length": 112,
+          "digest": "7d59a339f0f6022f0710d690fe52e2a0f868519847651f6c10f6c9ff1bd7213a"
+        },
+        {
+          "path": "Runner.cs",
+          "length": 3700,
+          "digest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79"
+        },
+        {
+          "path": "Z4Fixture.csproj",
+          "length": 494,
+          "digest": "97413a96ff9fb4bfc78841548e1d11971590ce5d25a743e6a83b1a1b3fb910ff"
+        },
+        {
+          "path": "global.json",
+          "length": 54,
+          "digest": "9969992897aee36fbc62db0976390d87b1275dc0d7c6fcb937a7f81a316f97dc"
+        }
+      ]
+    }
+  },
+  "ids": {
+    "initial": "task",
+    "build": "8d948755-e00c-417d-888d-c891dfb525a3",
+    "test": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+    "reviewer": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+    "repair": "184fdb50-5b2d-4455-8626-584236de0072",
+    "decision": "99953e6f-405b-4f10-844d-c88de7035a43",
+    "finalGate": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+    "admissions": 12,
+    "deadline": 600000
+  },
+  "confirmedSnapshot": {
+    "definition": {
+      "version": 5,
+      "revision": 2,
+      "name": "Z5 bounded native C# no-progress",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": ""
+        },
+        {
+          "id": "task",
+          "position": {
+            "x": 280,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Implement",
+          "instructions": "Z5_IMPLEMENT: Read MathOps.cs and Runner.cs. Apply the explicitly staged initial synthetic implementation in MathOps.cs only. Preserve the runner. Do not build or run commands; separate native Tool nodes verify it. Return a concise result.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 2160,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374"
+        },
+        {
+          "id": "8d948755-e00c-417d-888d-c891dfb525a3",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Build",
+          "recipeId": "fixture-build"
+        },
+        {
+          "id": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+          "position": {
+            "x": 860,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Test",
+          "recipeId": "fixture-test"
+        },
+        {
+          "id": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+          "position": {
+            "x": 1120,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Reviewer",
+          "instructions": "Z5_REVIEW: Read MathOps.cs and results/test-report.json. Review this exact native verification; return the required structured reviewer record and its actual artifact ID. Do not edit or execute commands.\nZ5_VERIFICATION_BEGIN\n{{inputs.verification}}\nZ5_VERIFICATION_END",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "verification",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                "selector": "verification"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          },
+          "output": {
+            "kind": "json",
+            "schema": {
+              "type": "object",
+              "required": ["outcome", "findings", "evidenceReferences"],
+              "additionalProperties": false,
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "enum": ["pass", "needs_changes", "needs_human"]
+                },
+                "findings": {
+                  "type": "array",
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "required": ["code", "message"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "message": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    }
+                  }
+                },
+                "evidenceReferences": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 8,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "184fdb50-5b2d-4455-8626-584236de0072",
+          "position": {
+            "x": 1380,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Repair",
+          "instructions": "Z5_REPAIR: Read MathOps.cs. Use this exact previous iteration feedback to make the next bounded synthetic repair in MathOps.cs only. Preserve Runner.cs and tests. Do not build or execute commands.\nZ5_FEEDBACK_BEGIN\n{{inputs.feedback}}\nZ5_FEEDBACK_END",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "feedback",
+              "source": {
+                "kind": "repair-feedback"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "99953e6f-405b-4f10-844d-c88de7035a43",
+          "position": {
+            "x": 1640,
+            "y": 100
+          },
+          "type": "condition",
+          "name": "Decide from current evidence",
+          "inputs": [
+            {
+              "alias": "review",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+                "selector": "structured"
+              }
+            },
+            {
+              "alias": "machine",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                "selector": "verification"
+              }
+            }
+          ],
+          "branches": [
+            {
+              "exit": "pass",
+              "predicate": {
+                "op": "eq",
+                "alias": "review",
+                "pointer": "/outcome",
+                "value": "pass"
+              }
+            },
+            {
+              "exit": "needs_changes",
+              "predicate": {
+                "op": "eq",
+                "alias": "review",
+                "pointer": "/outcome",
+                "value": "needs_changes"
+              }
+            }
+          ],
+          "defaultExit": "needs_human",
+          "errorPolicy": "needs-human",
+          "verification": {
+            "testNodeIds": ["5e7e9a31-9ff8-415c-875e-6b36506d7374"],
+            "reviewerNodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+            "successExit": "pass"
+          }
+        },
+        {
+          "id": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+          "position": {
+            "x": 1900,
+            "y": 100
+          },
+          "type": "approval",
+          "name": "Final human review",
+          "reviewInstructions": "Review this exact iteration's native evidence. This gate does not authorize publication or answer native permissions.",
+          "evidence": [
+            {
+              "alias": "evidence",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                "selector": "test"
+              }
+            }
+          ],
+          "commentPolicy": "required"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "task"
+        },
+        {
+          "source": "task",
+          "target": "8d948755-e00c-417d-888d-c891dfb525a3"
+        },
+        {
+          "source": "8d948755-e00c-417d-888d-c891dfb525a3",
+          "target": "5e7e9a31-9ff8-415c-875e-6b36506d7374"
+        },
+        {
+          "source": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+          "target": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35"
+        },
+        {
+          "source": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+          "target": "end"
+        },
+        {
+          "source": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+          "target": "99953e6f-405b-4f10-844d-c88de7035a43"
+        },
+        {
+          "source": "184fdb50-5b2d-4455-8626-584236de0072",
+          "target": "8d948755-e00c-417d-888d-c891dfb525a3"
+        },
+        {
+          "source": "99953e6f-405b-4f10-844d-c88de7035a43",
+          "target": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+          "sourcePort": "pass"
+        },
+        {
+          "source": "99953e6f-405b-4f10-844d-c88de7035a43",
+          "target": "184fdb50-5b2d-4455-8626-584236de0072",
+          "sourcePort": "needs_changes"
+        },
+        {
+          "source": "99953e6f-405b-4f10-844d-c88de7035a43",
+          "target": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+          "sourcePort": "needs_human"
+        }
+      ],
+      "routing": {
+        "finalGateId": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+        "limits": {
+          "maxNodeAdmissions": 12,
+          "deadlineMs": 600000
+        },
+        "region": {
+          "id": "4a593029-c44a-4c3c-9b22-fde5c1f667ce",
+          "name": "Bounded C# repair",
+          "entryNodeId": "task",
+          "repairEntryNodeId": "184fdb50-5b2d-4455-8626-584236de0072",
+          "decisionNodeId": "99953e6f-405b-4f10-844d-c88de7035a43",
+          "bodyNodeIds": [
+            "task",
+            "8d948755-e00c-417d-888d-c891dfb525a3",
+            "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+            "184fdb50-5b2d-4455-8626-584236de0072",
+            "99953e6f-405b-4f10-844d-c88de7035a43"
+          ],
+          "repairExit": "needs_changes",
+          "passExit": "pass",
+          "maxRepairIterations": 2,
+          "stopOnNoProgress": true,
+          "sourcePaths": [
+            "Z4Fixture.csproj",
+            "MathOps.cs",
+            "Runner.cs",
+            "global.json",
+            "NuGet.Config",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props"
+          ]
+        }
+      }
+    },
+    "settings": {
+      "modelSelection": {
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "options": {
+          "reasoningLevel": "enabled"
+        }
+      },
+      "mode": "build",
+      "planEnabled": false
+    }
+  },
+  "conversations": [
+    {
+      "attemptId": "bdadad54-04ef-4fa4-9f82-27ee3ee0389c",
+      "iterationId": "de50b336-c69d-4ae8-85de-8e5011ecab52",
+      "sessionId": "sess_3b62ff7f-6caa-4817-9bfc-6e4485d51ccd",
+      "nativeInputCount": 1
+    },
+    {
+      "attemptId": "11d13fdf-7788-471a-a928-27809dc00a99",
+      "iterationId": "de50b336-c69d-4ae8-85de-8e5011ecab52",
+      "sessionId": "sess_42ea82ad-d1c3-4c15-8e7b-05232bd3af0b",
+      "nativeInputCount": 1
+    },
+    {
+      "attemptId": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+      "iterationId": "de50b336-c69d-4ae8-85de-8e5011ecab52",
+      "sessionId": "sess_d2a37362-39d1-4e8c-9ae3-a177a2e8a825",
+      "nativeInputCount": 1
+    },
+    {
+      "attemptId": "cf1e840b-0d38-4f74-9aba-fd65512e04b1",
+      "iterationId": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+      "sessionId": "sess_2985af86-2f2f-47c7-8ab4-8f268d924810",
+      "nativeInputCount": 3
+    },
+    {
+      "attemptId": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+      "iterationId": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+      "sessionId": "sess_9f23334a-c2d0-452f-b079-a274011da520",
+      "nativeInputCount": 3
+    },
+    {
+      "attemptId": "89697a9c-d135-48c0-8191-88827a7a5cfb",
+      "iterationId": "de50b336-c69d-4ae8-85de-8e5011ecab52",
+      "sessionId": "sess_64dcaa60-7a8f-4edb-bef9-662a031443d5",
+      "nativeInputCount": 4
+    },
+    {
+      "attemptId": "28171c2e-9e04-42b0-b1b4-8fcf7fd79770",
+      "iterationId": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+      "sessionId": "sess_ae1c417a-357f-43b3-aa92-6f1acfaca870",
+      "nativeInputCount": 4
+    },
+    {
+      "attemptId": "ba62c6b5-0bd3-44b2-9b7a-61feb48ea04e",
+      "iterationId": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+      "sessionId": "sess_7ff9024f-e529-4bff-bf35-d4ab0084870c",
+      "nativeInputCount": 4
+    }
+  ],
+  "allowedAttempts": [
+    "bdadad54-04ef-4fa4-9f82-27ee3ee0389c",
+    "11d13fdf-7788-471a-a928-27809dc00a99",
+    "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+    "cf1e840b-0d38-4f74-9aba-fd65512e04b1",
+    "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869"
+  ],
+  "iterationEvidence": [
+    {
+      "iteration": {
+        "id": "de50b336-c69d-4ae8-85de-8e5011ecab52",
+        "index": 0,
+        "createdAt": 1790259387855,
+        "attemptIds": {
+          "184fdb50-5b2d-4455-8626-584236de0072": "b0ff62d8-45b8-428e-a861-abda6c058c77",
+          "task": "bdadad54-04ef-4fa4-9f82-27ee3ee0389c",
+          "f6ed0d9b-2495-4ad6-afc1-82dd08432e35": "89697a9c-d135-48c0-8191-88827a7a5cfb",
+          "8d948755-e00c-417d-888d-c891dfb525a3": "11d13fdf-7788-471a-a928-27809dc00a99",
+          "5e7e9a31-9ff8-415c-875e-6b36506d7374": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+          "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb": "da8dff5e-9b8c-4569-bd5f-38db59fbef9c",
+          "99953e6f-405b-4f10-844d-c88de7035a43": "96a6afec-6469-4bce-8aa0-312517b44874"
+        },
+        "visitedNodeIds": [
+          "task",
+          "8d948755-e00c-417d-888d-c891dfb525a3",
+          "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+          "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+          "99953e6f-405b-4f10-844d-c88de7035a43"
+        ],
+        "sourceDigest": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+        "failureFingerprint": "135efc36a1a9365c5ce78e08aa1243cbf3a33c62ffad2eeae2977fd30baa5251"
+      },
+      "buildAttemptId": "11d13fdf-7788-471a-a928-27809dc00a99",
+      "testAttemptId": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+      "reviewerAttemptId": "89697a9c-d135-48c0-8191-88827a7a5cfb",
+      "verification": {
+        "artifact": {
+          "id": "0d132293-34ef-48ba-8e47-44d799efa9f8",
+          "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+          "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+          "attemptId": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+          "workspaceKey": "<isolated-profile>\\workspace",
+          "type": "json",
+          "provenance": "native-test",
+          "bytes": 825,
+          "digest": "9d5850b113c1dcf98fe4320909a29237517da87567c062af8ed9f28cf94bab64",
+          "capturedAt": 1790259393032,
+          "validation": "valid",
+          "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+          "sessionId": "sess_d2a37362-39d1-4e8c-9ae3-a177a2e8a825",
+          "operationId": "41492502-3171-4e6f-8cb5-b1164b8dd41d"
+        },
+        "content": "{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"d246bb6e-41dc-42f4-a6af-8b2c423ea7b2\",\"iterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"operationId\":\"41492502-3171-4e6f-8cb5-b1164b8dd41d\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"303479d5-5512-40d5-bb43-1b312125d61c\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}",
+        "value": {
+          "artifactId": "0d132293-34ef-48ba-8e47-44d799efa9f8",
+          "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+          "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+          "attemptId": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+          "iterationId": "de50b336-c69d-4ae8-85de-8e5011ecab52",
+          "operationId": "41492502-3171-4e6f-8cb5-b1164b8dd41d",
+          "sourceDigest": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+          "buildDigest": "530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85",
+          "reportArtifactId": "303479d5-5512-40d5-bb43-1b312125d61c",
+          "outcome": "fail",
+          "tests": [
+            {
+              "name": "add-positive",
+              "status": "failed",
+              "message": "Expected 5; actual 6."
+            },
+            {
+              "name": "add-negative",
+              "status": "failed",
+              "message": "Expected 0; actual 1."
+            },
+            {
+              "name": "add-zero",
+              "status": "failed",
+              "message": "Expected 0; actual 1."
+            }
+          ],
+          "testCount": 3,
+          "passed": 0,
+          "failed": 3,
+          "skipped": 0
+        }
+      },
+      "report": {
+        "artifact": {
+          "id": "303479d5-5512-40d5-bb43-1b312125d61c",
+          "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+          "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+          "attemptId": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+          "workspaceKey": "<isolated-profile>\\workspace",
+          "type": "file",
+          "provenance": "workspace-file",
+          "bytes": 624,
+          "digest": "dbe41431495e53dfd04a3936b354ae8864e4ea60c252abe81cc04488905ca2ea",
+          "capturedAt": 1790259393032,
+          "validation": "valid",
+          "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+          "sourcePath": "results/test-report.json",
+          "sessionId": "sess_d2a37362-39d1-4e8c-9ae3-a177a2e8a825",
+          "operationId": "41492502-3171-4e6f-8cb5-b1164b8dd41d"
+        },
+        "content": "{\r\n  \"format\": \"zcode-test-v1\",\r\n  \"operationId\": \"41492502-3171-4e6f-8cb5-b1164b8dd41d\",\r\n  \"sourceDigest\": \"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\r\n  \"buildDigest\": \"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\r\n  \"tests\": [\r\n    {\r\n      \"name\": \"add-positive\",\r\n      \"status\": \"failed\",\r\n      \"message\": \"Expected 5; actual 6.\"\r\n    },\r\n    {\r\n      \"name\": \"add-negative\",\r\n      \"status\": \"failed\",\r\n      \"message\": \"Expected 0; actual 1.\"\r\n    },\r\n    {\r\n      \"name\": \"add-zero\",\r\n      \"status\": \"failed\",\r\n      \"message\": \"Expected 0; actual 1.\"\r\n    }\r\n  ]\r\n}",
+        "value": {
+          "format": "zcode-test-v1",
+          "operationId": "41492502-3171-4e6f-8cb5-b1164b8dd41d",
+          "sourceDigest": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+          "buildDigest": "530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85",
+          "tests": [
+            {
+              "name": "add-positive",
+              "status": "failed",
+              "message": "Expected 5; actual 6."
+            },
+            {
+              "name": "add-negative",
+              "status": "failed",
+              "message": "Expected 0; actual 1."
+            },
+            {
+              "name": "add-zero",
+              "status": "failed",
+              "message": "Expected 0; actual 1."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "iteration": {
+        "id": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+        "index": 1,
+        "createdAt": 1790259393921,
+        "attemptIds": {
+          "184fdb50-5b2d-4455-8626-584236de0072": "ba62c6b5-0bd3-44b2-9b7a-61feb48ea04e",
+          "task": "05df5d54-e551-442f-ad11-8ad5204069d4",
+          "f6ed0d9b-2495-4ad6-afc1-82dd08432e35": "28171c2e-9e04-42b0-b1b4-8fcf7fd79770",
+          "8d948755-e00c-417d-888d-c891dfb525a3": "cf1e840b-0d38-4f74-9aba-fd65512e04b1",
+          "5e7e9a31-9ff8-415c-875e-6b36506d7374": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+          "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb": "f58880e1-0377-4f51-a404-30fc0a10f6b0",
+          "99953e6f-405b-4f10-844d-c88de7035a43": "31012458-2e97-49be-8599-eb6be3aab01b"
+        },
+        "visitedNodeIds": [
+          "184fdb50-5b2d-4455-8626-584236de0072",
+          "8d948755-e00c-417d-888d-c891dfb525a3",
+          "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+          "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+          "99953e6f-405b-4f10-844d-c88de7035a43"
+        ],
+        "sourceDigest": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+        "feedback": {
+          "text": "{\"previousIterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"previousIteration\":0,\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"findings\":[{\"code\":\"add-positive\",\"message\":\"Expected 5; actual 6.\"},{\"code\":\"add-negative\",\"message\":\"Expected 0; actual 1.\"},{\"code\":\"add-zero\",\"message\":\"Expected 0; actual 1.\"}],\"observations\":[{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"digest\":\"9d5850b113c1dcf98fe4320909a29237517da87567c062af8ed9f28cf94bab64\",\"value\":{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"d246bb6e-41dc-42f4-a6af-8b2c423ea7b2\",\"iterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"operationId\":\"41492502-3171-4e6f-8cb5-b1164b8dd41d\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"303479d5-5512-40d5-bb43-1b312125d61c\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}}]}",
+          "digest": "6052faeaa275f613d4bd497e53b3488e25142a653f22a223105098706b3edc74",
+          "artifactIds": ["0d132293-34ef-48ba-8e47-44d799efa9f8"],
+          "previousIterationId": "de50b336-c69d-4ae8-85de-8e5011ecab52"
+        },
+        "failureFingerprint": "135efc36a1a9365c5ce78e08aa1243cbf3a33c62ffad2eeae2977fd30baa5251"
+      },
+      "buildAttemptId": "cf1e840b-0d38-4f74-9aba-fd65512e04b1",
+      "testAttemptId": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+      "reviewerAttemptId": "28171c2e-9e04-42b0-b1b4-8fcf7fd79770",
+      "verification": {
+        "artifact": {
+          "id": "e0639a29-2f5e-4c98-8df1-380ca1060b0f",
+          "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+          "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+          "attemptId": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+          "workspaceKey": "<isolated-profile>\\workspace",
+          "type": "json",
+          "provenance": "native-test",
+          "bytes": 825,
+          "digest": "178490e041e07fbcb17606153f59e58fa28874a5f49219c6ab1abb4aa02bae75",
+          "capturedAt": 1790259398166,
+          "validation": "valid",
+          "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+          "sessionId": "sess_9f23334a-c2d0-452f-b079-a274011da520",
+          "operationId": "c7d7500d-2a91-4907-9bcc-8c56c55c73c4"
+        },
+        "content": "{\"artifactId\":\"e0639a29-2f5e-4c98-8df1-380ca1060b0f\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869\",\"iterationId\":\"3c3e2e0d-a123-4108-bf22-ab256cf82c66\",\"operationId\":\"c7d7500d-2a91-4907-9bcc-8c56c55c73c4\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"eb63d22c-f06f-4b7e-b534-2636c8984285\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}",
+        "value": {
+          "artifactId": "e0639a29-2f5e-4c98-8df1-380ca1060b0f",
+          "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+          "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+          "attemptId": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+          "iterationId": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+          "operationId": "c7d7500d-2a91-4907-9bcc-8c56c55c73c4",
+          "sourceDigest": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+          "buildDigest": "530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85",
+          "reportArtifactId": "eb63d22c-f06f-4b7e-b534-2636c8984285",
+          "outcome": "fail",
+          "tests": [
+            {
+              "name": "add-positive",
+              "status": "failed",
+              "message": "Expected 5; actual 6."
+            },
+            {
+              "name": "add-negative",
+              "status": "failed",
+              "message": "Expected 0; actual 1."
+            },
+            {
+              "name": "add-zero",
+              "status": "failed",
+              "message": "Expected 0; actual 1."
+            }
+          ],
+          "testCount": 3,
+          "passed": 0,
+          "failed": 3,
+          "skipped": 0
+        }
+      },
+      "report": {
+        "artifact": {
+          "id": "eb63d22c-f06f-4b7e-b534-2636c8984285",
+          "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+          "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+          "attemptId": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+          "workspaceKey": "<isolated-profile>\\workspace",
+          "type": "file",
+          "provenance": "workspace-file",
+          "bytes": 624,
+          "digest": "49262677f1fd5da1e1b46580a428b64f3ba34202d9b1f1e3bcc51fc5813143b5",
+          "capturedAt": 1790259398166,
+          "validation": "valid",
+          "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+          "sourcePath": "results/test-report.json",
+          "sessionId": "sess_9f23334a-c2d0-452f-b079-a274011da520",
+          "operationId": "c7d7500d-2a91-4907-9bcc-8c56c55c73c4"
+        },
+        "content": "{\r\n  \"format\": \"zcode-test-v1\",\r\n  \"operationId\": \"c7d7500d-2a91-4907-9bcc-8c56c55c73c4\",\r\n  \"sourceDigest\": \"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\r\n  \"buildDigest\": \"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\r\n  \"tests\": [\r\n    {\r\n      \"name\": \"add-positive\",\r\n      \"status\": \"failed\",\r\n      \"message\": \"Expected 5; actual 6.\"\r\n    },\r\n    {\r\n      \"name\": \"add-negative\",\r\n      \"status\": \"failed\",\r\n      \"message\": \"Expected 0; actual 1.\"\r\n    },\r\n    {\r\n      \"name\": \"add-zero\",\r\n      \"status\": \"failed\",\r\n      \"message\": \"Expected 0; actual 1.\"\r\n    }\r\n  ]\r\n}",
+        "value": {
+          "format": "zcode-test-v1",
+          "operationId": "c7d7500d-2a91-4907-9bcc-8c56c55c73c4",
+          "sourceDigest": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+          "buildDigest": "530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85",
+          "tests": [
+            {
+              "name": "add-positive",
+              "status": "failed",
+              "message": "Expected 5; actual 6."
+            },
+            {
+              "name": "add-negative",
+              "status": "failed",
+              "message": "Expected 0; actual 1."
+            },
+            {
+              "name": "add-zero",
+              "status": "failed",
+              "message": "Expected 0; actual 1."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "status": "PASS",
+  "finalRecord": {
+    "version": 5,
+    "workspaceKey": "<isolated-profile>\\workspace",
+    "definition": {
+      "version": 5,
+      "revision": 2,
+      "name": "Z5 bounded native C# no-progress",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": ""
+        },
+        {
+          "id": "task",
+          "position": {
+            "x": 280,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Implement",
+          "instructions": "Z5_IMPLEMENT: Read MathOps.cs and Runner.cs. Apply the explicitly staged initial synthetic implementation in MathOps.cs only. Preserve the runner. Do not build or run commands; separate native Tool nodes verify it. Return a concise result.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 2160,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374"
+        },
+        {
+          "id": "8d948755-e00c-417d-888d-c891dfb525a3",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Build",
+          "recipeId": "fixture-build"
+        },
+        {
+          "id": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+          "position": {
+            "x": 860,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Test",
+          "recipeId": "fixture-test"
+        },
+        {
+          "id": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+          "position": {
+            "x": 1120,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Reviewer",
+          "instructions": "Z5_REVIEW: Read MathOps.cs and results/test-report.json. Review this exact native verification; return the required structured reviewer record and its actual artifact ID. Do not edit or execute commands.\nZ5_VERIFICATION_BEGIN\n{{inputs.verification}}\nZ5_VERIFICATION_END",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "verification",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                "selector": "verification"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          },
+          "output": {
+            "kind": "json",
+            "schema": {
+              "type": "object",
+              "required": ["outcome", "findings", "evidenceReferences"],
+              "additionalProperties": false,
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "enum": ["pass", "needs_changes", "needs_human"]
+                },
+                "findings": {
+                  "type": "array",
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "required": ["code", "message"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "message": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    }
+                  }
+                },
+                "evidenceReferences": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 8,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "184fdb50-5b2d-4455-8626-584236de0072",
+          "position": {
+            "x": 1380,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Repair",
+          "instructions": "Z5_REPAIR: Read MathOps.cs. Use this exact previous iteration feedback to make the next bounded synthetic repair in MathOps.cs only. Preserve Runner.cs and tests. Do not build or execute commands.\nZ5_FEEDBACK_BEGIN\n{{inputs.feedback}}\nZ5_FEEDBACK_END",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "feedback",
+              "source": {
+                "kind": "repair-feedback"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "99953e6f-405b-4f10-844d-c88de7035a43",
+          "position": {
+            "x": 1640,
+            "y": 100
+          },
+          "type": "condition",
+          "name": "Decide from current evidence",
+          "inputs": [
+            {
+              "alias": "review",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+                "selector": "structured"
+              }
+            },
+            {
+              "alias": "machine",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                "selector": "verification"
+              }
+            }
+          ],
+          "branches": [
+            {
+              "exit": "pass",
+              "predicate": {
+                "op": "eq",
+                "alias": "review",
+                "pointer": "/outcome",
+                "value": "pass"
+              }
+            },
+            {
+              "exit": "needs_changes",
+              "predicate": {
+                "op": "eq",
+                "alias": "review",
+                "pointer": "/outcome",
+                "value": "needs_changes"
+              }
+            }
+          ],
+          "defaultExit": "needs_human",
+          "errorPolicy": "needs-human",
+          "verification": {
+            "testNodeIds": ["5e7e9a31-9ff8-415c-875e-6b36506d7374"],
+            "reviewerNodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+            "successExit": "pass"
+          }
+        },
+        {
+          "id": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+          "position": {
+            "x": 1900,
+            "y": 100
+          },
+          "type": "approval",
+          "name": "Final human review",
+          "reviewInstructions": "Review this exact iteration's native evidence. This gate does not authorize publication or answer native permissions.",
+          "evidence": [
+            {
+              "alias": "evidence",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                "selector": "test"
+              }
+            }
+          ],
+          "commentPolicy": "required"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "task"
+        },
+        {
+          "source": "task",
+          "target": "8d948755-e00c-417d-888d-c891dfb525a3"
+        },
+        {
+          "source": "8d948755-e00c-417d-888d-c891dfb525a3",
+          "target": "5e7e9a31-9ff8-415c-875e-6b36506d7374"
+        },
+        {
+          "source": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+          "target": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35"
+        },
+        {
+          "source": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+          "target": "end"
+        },
+        {
+          "source": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+          "target": "99953e6f-405b-4f10-844d-c88de7035a43"
+        },
+        {
+          "source": "184fdb50-5b2d-4455-8626-584236de0072",
+          "target": "8d948755-e00c-417d-888d-c891dfb525a3"
+        },
+        {
+          "source": "99953e6f-405b-4f10-844d-c88de7035a43",
+          "target": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+          "sourcePort": "pass"
+        },
+        {
+          "source": "99953e6f-405b-4f10-844d-c88de7035a43",
+          "target": "184fdb50-5b2d-4455-8626-584236de0072",
+          "sourcePort": "needs_changes"
+        },
+        {
+          "source": "99953e6f-405b-4f10-844d-c88de7035a43",
+          "target": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+          "sourcePort": "needs_human"
+        }
+      ],
+      "routing": {
+        "finalGateId": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+        "limits": {
+          "maxNodeAdmissions": 12,
+          "deadlineMs": 600000
+        },
+        "region": {
+          "id": "4a593029-c44a-4c3c-9b22-fde5c1f667ce",
+          "name": "Bounded C# repair",
+          "entryNodeId": "task",
+          "repairEntryNodeId": "184fdb50-5b2d-4455-8626-584236de0072",
+          "decisionNodeId": "99953e6f-405b-4f10-844d-c88de7035a43",
+          "bodyNodeIds": [
+            "task",
+            "8d948755-e00c-417d-888d-c891dfb525a3",
+            "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+            "184fdb50-5b2d-4455-8626-584236de0072",
+            "99953e6f-405b-4f10-844d-c88de7035a43"
+          ],
+          "repairExit": "needs_changes",
+          "passExit": "pass",
+          "maxRepairIterations": 2,
+          "stopOnNoProgress": true,
+          "sourcePaths": [
+            "Z4Fixture.csproj",
+            "MathOps.cs",
+            "Runner.cs",
+            "global.json",
+            "NuGet.Config",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props"
+          ]
+        }
+      }
+    },
+    "runs": [
+      {
+        "id": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+        "requestId": "b5461061-d70a-4c6d-9ee8-5fa7a8cf846c",
+        "target": {
+          "workspacePath": "<isolated-profile>\\workspace"
+        },
+        "status": "NoProgress",
+        "createdAt": 1790259387848,
+        "updatedAt": 1790259399040,
+        "message": "Source and complete findings/test results repeat an earlier failed iteration.",
+        "version": 5,
+        "routing": {
+          "configurationDigest": "6da9717a7a68c4f8768c7318ff5a04646e297b842cfb5365aca5d0dbdcd0137e",
+          "recipeConfigurationDigest": "d30a4bb46eae142d78728438a3fe6f9c7d33f169543c10ff8dfd031ee7e65339",
+          "currentIterationId": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+          "cursorNodeId": "99953e6f-405b-4f10-844d-c88de7035a43",
+          "iterations": [
+            {
+              "id": "de50b336-c69d-4ae8-85de-8e5011ecab52",
+              "index": 0,
+              "createdAt": 1790259387855,
+              "attemptIds": {
+                "184fdb50-5b2d-4455-8626-584236de0072": "b0ff62d8-45b8-428e-a861-abda6c058c77",
+                "task": "bdadad54-04ef-4fa4-9f82-27ee3ee0389c",
+                "f6ed0d9b-2495-4ad6-afc1-82dd08432e35": "89697a9c-d135-48c0-8191-88827a7a5cfb",
+                "8d948755-e00c-417d-888d-c891dfb525a3": "11d13fdf-7788-471a-a928-27809dc00a99",
+                "5e7e9a31-9ff8-415c-875e-6b36506d7374": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+                "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb": "da8dff5e-9b8c-4569-bd5f-38db59fbef9c",
+                "99953e6f-405b-4f10-844d-c88de7035a43": "96a6afec-6469-4bce-8aa0-312517b44874"
+              },
+              "visitedNodeIds": [
+                "task",
+                "8d948755-e00c-417d-888d-c891dfb525a3",
+                "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+                "99953e6f-405b-4f10-844d-c88de7035a43"
+              ],
+              "sourceDigest": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+              "failureFingerprint": "135efc36a1a9365c5ce78e08aa1243cbf3a33c62ffad2eeae2977fd30baa5251"
+            },
+            {
+              "id": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+              "index": 1,
+              "createdAt": 1790259393921,
+              "attemptIds": {
+                "184fdb50-5b2d-4455-8626-584236de0072": "ba62c6b5-0bd3-44b2-9b7a-61feb48ea04e",
+                "task": "05df5d54-e551-442f-ad11-8ad5204069d4",
+                "f6ed0d9b-2495-4ad6-afc1-82dd08432e35": "28171c2e-9e04-42b0-b1b4-8fcf7fd79770",
+                "8d948755-e00c-417d-888d-c891dfb525a3": "cf1e840b-0d38-4f74-9aba-fd65512e04b1",
+                "5e7e9a31-9ff8-415c-875e-6b36506d7374": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+                "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb": "f58880e1-0377-4f51-a404-30fc0a10f6b0",
+                "99953e6f-405b-4f10-844d-c88de7035a43": "31012458-2e97-49be-8599-eb6be3aab01b"
+              },
+              "visitedNodeIds": [
+                "184fdb50-5b2d-4455-8626-584236de0072",
+                "8d948755-e00c-417d-888d-c891dfb525a3",
+                "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+                "99953e6f-405b-4f10-844d-c88de7035a43"
+              ],
+              "sourceDigest": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+              "feedback": {
+                "text": "{\"previousIterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"previousIteration\":0,\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"findings\":[{\"code\":\"add-positive\",\"message\":\"Expected 5; actual 6.\"},{\"code\":\"add-negative\",\"message\":\"Expected 0; actual 1.\"},{\"code\":\"add-zero\",\"message\":\"Expected 0; actual 1.\"}],\"observations\":[{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"digest\":\"9d5850b113c1dcf98fe4320909a29237517da87567c062af8ed9f28cf94bab64\",\"value\":{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"d246bb6e-41dc-42f4-a6af-8b2c423ea7b2\",\"iterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"operationId\":\"41492502-3171-4e6f-8cb5-b1164b8dd41d\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"303479d5-5512-40d5-bb43-1b312125d61c\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}}]}",
+                "digest": "6052faeaa275f613d4bd497e53b3488e25142a653f22a223105098706b3edc74",
+                "artifactIds": ["0d132293-34ef-48ba-8e47-44d799efa9f8"],
+                "previousIterationId": "de50b336-c69d-4ae8-85de-8e5011ecab52"
+              },
+              "failureFingerprint": "135efc36a1a9365c5ce78e08aa1243cbf3a33c62ffad2eeae2977fd30baa5251"
+            }
+          ],
+          "conditionAttempts": [
+            {
+              "nodeId": "99953e6f-405b-4f10-844d-c88de7035a43",
+              "attemptId": "96a6afec-6469-4bce-8aa0-312517b44874",
+              "iterationId": "de50b336-c69d-4ae8-85de-8e5011ecab52",
+              "iteration": 0,
+              "status": "Evaluated",
+              "createdAt": 1790259387855,
+              "updatedAt": 1790259393921,
+              "bindings": [
+                {
+                  "alias": "review",
+                  "artifactId": "e052d0b6-988b-404b-9a78-1d0b0c505d35",
+                  "digest": "45b4e76327d45d94525278ee7065645280d415048b8ce316cc44ab079d8eb84e",
+                  "value": {
+                    "outcome": "needs_changes",
+                    "findings": [
+                      {
+                        "code": "add-positive",
+                        "message": "Expected 5; actual 6."
+                      },
+                      {
+                        "code": "add-negative",
+                        "message": "Expected 0; actual 1."
+                      },
+                      {
+                        "code": "add-zero",
+                        "message": "Expected 0; actual 1."
+                      }
+                    ],
+                    "evidenceReferences": ["0d132293-34ef-48ba-8e47-44d799efa9f8"]
+                  }
+                },
+                {
+                  "alias": "machine",
+                  "artifactId": "0d132293-34ef-48ba-8e47-44d799efa9f8",
+                  "digest": "9d5850b113c1dcf98fe4320909a29237517da87567c062af8ed9f28cf94bab64",
+                  "value": {
+                    "artifactId": "0d132293-34ef-48ba-8e47-44d799efa9f8",
+                    "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+                    "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                    "attemptId": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+                    "iterationId": "de50b336-c69d-4ae8-85de-8e5011ecab52",
+                    "operationId": "41492502-3171-4e6f-8cb5-b1164b8dd41d",
+                    "sourceDigest": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+                    "buildDigest": "530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85",
+                    "reportArtifactId": "303479d5-5512-40d5-bb43-1b312125d61c",
+                    "outcome": "fail",
+                    "tests": [
+                      {
+                        "name": "add-positive",
+                        "status": "failed",
+                        "message": "Expected 5; actual 6."
+                      },
+                      {
+                        "name": "add-negative",
+                        "status": "failed",
+                        "message": "Expected 0; actual 1."
+                      },
+                      {
+                        "name": "add-zero",
+                        "status": "failed",
+                        "message": "Expected 0; actual 1."
+                      }
+                    ],
+                    "testCount": 3,
+                    "passed": 0,
+                    "failed": 3,
+                    "skipped": 0
+                  }
+                }
+              ],
+              "values": [
+                {
+                  "alias": "review",
+                  "pointer": "/outcome",
+                  "present": true,
+                  "value": "needs_changes"
+                },
+                {
+                  "alias": "review",
+                  "pointer": "/outcome",
+                  "present": true,
+                  "value": "needs_changes"
+                }
+              ],
+              "selectedExit": "needs_changes",
+              "decisionId": "a782cdf2-6a76-4a82-9c31-f0ed3eba49c0",
+              "successorNodeId": "184fdb50-5b2d-4455-8626-584236de0072"
+            },
+            {
+              "nodeId": "99953e6f-405b-4f10-844d-c88de7035a43",
+              "attemptId": "31012458-2e97-49be-8599-eb6be3aab01b",
+              "iterationId": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+              "iteration": 1,
+              "status": "Evaluated",
+              "createdAt": 1790259393921,
+              "updatedAt": 1790259399040,
+              "bindings": [
+                {
+                  "alias": "review",
+                  "artifactId": "0201f768-b36d-4013-a878-aac514de61a2",
+                  "digest": "e38a3d42d5fe89e13a1003f5e0c00e5909ad9414cf8ce24d94434497f6368709",
+                  "value": {
+                    "outcome": "needs_changes",
+                    "findings": [
+                      {
+                        "code": "add-positive",
+                        "message": "Expected 5; actual 6."
+                      },
+                      {
+                        "code": "add-negative",
+                        "message": "Expected 0; actual 1."
+                      },
+                      {
+                        "code": "add-zero",
+                        "message": "Expected 0; actual 1."
+                      }
+                    ],
+                    "evidenceReferences": ["e0639a29-2f5e-4c98-8df1-380ca1060b0f"]
+                  }
+                },
+                {
+                  "alias": "machine",
+                  "artifactId": "e0639a29-2f5e-4c98-8df1-380ca1060b0f",
+                  "digest": "178490e041e07fbcb17606153f59e58fa28874a5f49219c6ab1abb4aa02bae75",
+                  "value": {
+                    "artifactId": "e0639a29-2f5e-4c98-8df1-380ca1060b0f",
+                    "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+                    "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                    "attemptId": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+                    "iterationId": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+                    "operationId": "c7d7500d-2a91-4907-9bcc-8c56c55c73c4",
+                    "sourceDigest": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+                    "buildDigest": "530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85",
+                    "reportArtifactId": "eb63d22c-f06f-4b7e-b534-2636c8984285",
+                    "outcome": "fail",
+                    "tests": [
+                      {
+                        "name": "add-positive",
+                        "status": "failed",
+                        "message": "Expected 5; actual 6."
+                      },
+                      {
+                        "name": "add-negative",
+                        "status": "failed",
+                        "message": "Expected 0; actual 1."
+                      },
+                      {
+                        "name": "add-zero",
+                        "status": "failed",
+                        "message": "Expected 0; actual 1."
+                      }
+                    ],
+                    "testCount": 3,
+                    "passed": 0,
+                    "failed": 3,
+                    "skipped": 0
+                  }
+                }
+              ],
+              "values": [
+                {
+                  "alias": "review",
+                  "pointer": "/outcome",
+                  "present": true,
+                  "value": "needs_changes"
+                },
+                {
+                  "alias": "review",
+                  "pointer": "/outcome",
+                  "present": true,
+                  "value": "needs_changes"
+                }
+              ],
+              "selectedExit": "needs_changes",
+              "decisionId": "068f45ac-6217-4ab2-b1a6-ba7b76c12326",
+              "successorNodeId": "184fdb50-5b2d-4455-8626-584236de0072"
+            }
+          ],
+          "admissions": 8,
+          "deadlineAt": 1790259987848,
+          "checkpoints": [
+            {
+              "id": "c46b07dd-8c01-4f43-bf6d-2db88b8db2a9",
+              "digest": "de3dd60d896b4ceae6a9faaa5cc0365af763c39650d39dedf8dbd10be1a5adf3",
+              "decisionId": "a782cdf2-6a76-4a82-9c31-f0ed3eba49c0",
+              "iterationId": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+              "successorNodeId": "184fdb50-5b2d-4455-8626-584236de0072",
+              "sourceDigest": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+              "createdAt": 1790259393921,
+              "consumedAt": 1790259394003
+            }
+          ],
+          "continuations": [],
+          "stopReason": {
+            "kind": "NoProgress",
+            "message": "Source and complete findings/test results repeat an earlier failed iteration.",
+            "at": 1790259399040
+          }
+        },
+        "requestFingerprint": "{\"mode\":\"build\",\"modelSelection\":{\"modelId\":\"z1-fixture\",\"options\":{\"reasoningLevel\":\"enabled\"},\"providerId\":\"z1-local-fixture\"},\"planEnabled\":false,\"revision\":2,\"target\":{\"workspacePath\":\"<isolated-profile>\\\\workspace\"}}",
+        "definition": {
+          "version": 5,
+          "revision": 2,
+          "name": "Z5 bounded native C# no-progress",
+          "nodes": [
+            {
+              "id": "start",
+              "position": {
+                "x": 40,
+                "y": 100
+              },
+              "type": "start",
+              "request": ""
+            },
+            {
+              "id": "task",
+              "position": {
+                "x": 280,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Implement",
+              "instructions": "Z5_IMPLEMENT: Read MathOps.cs and Runner.cs. Apply the explicitly staged initial synthetic implementation in MathOps.cs only. Preserve the runner. Do not build or run commands; separate native Tool nodes verify it. Return a concise result.",
+              "instructionMode": "literal",
+              "inputs": [],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "end",
+              "position": {
+                "x": 2160,
+                "y": 100
+              },
+              "type": "end",
+              "outputNodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374"
+            },
+            {
+              "id": "8d948755-e00c-417d-888d-c891dfb525a3",
+              "position": {
+                "x": 600,
+                "y": 100
+              },
+              "type": "tool",
+              "name": "Build",
+              "recipeId": "fixture-build"
+            },
+            {
+              "id": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+              "position": {
+                "x": 860,
+                "y": 100
+              },
+              "type": "tool",
+              "name": "Test",
+              "recipeId": "fixture-test"
+            },
+            {
+              "id": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+              "position": {
+                "x": 1120,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Reviewer",
+              "instructions": "Z5_REVIEW: Read MathOps.cs and results/test-report.json. Review this exact native verification; return the required structured reviewer record and its actual artifact ID. Do not edit or execute commands.\nZ5_VERIFICATION_BEGIN\n{{inputs.verification}}\nZ5_VERIFICATION_END",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "verification",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                    "selector": "verification"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              },
+              "output": {
+                "kind": "json",
+                "schema": {
+                  "type": "object",
+                  "required": ["outcome", "findings", "evidenceReferences"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "outcome": {
+                      "type": "string",
+                      "enum": ["pass", "needs_changes", "needs_human"]
+                    },
+                    "findings": {
+                      "type": "array",
+                      "maxItems": 10,
+                      "items": {
+                        "type": "object",
+                        "required": ["code", "message"],
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          }
+                        }
+                      }
+                    },
+                    "evidenceReferences": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 8,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "184fdb50-5b2d-4455-8626-584236de0072",
+              "position": {
+                "x": 1380,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Repair",
+              "instructions": "Z5_REPAIR: Read MathOps.cs. Use this exact previous iteration feedback to make the next bounded synthetic repair in MathOps.cs only. Preserve Runner.cs and tests. Do not build or execute commands.\nZ5_FEEDBACK_BEGIN\n{{inputs.feedback}}\nZ5_FEEDBACK_END",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "feedback",
+                  "source": {
+                    "kind": "repair-feedback"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "99953e6f-405b-4f10-844d-c88de7035a43",
+              "position": {
+                "x": 1640,
+                "y": 100
+              },
+              "type": "condition",
+              "name": "Decide from current evidence",
+              "inputs": [
+                {
+                  "alias": "review",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+                    "selector": "structured"
+                  }
+                },
+                {
+                  "alias": "machine",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                    "selector": "verification"
+                  }
+                }
+              ],
+              "branches": [
+                {
+                  "exit": "pass",
+                  "predicate": {
+                    "op": "eq",
+                    "alias": "review",
+                    "pointer": "/outcome",
+                    "value": "pass"
+                  }
+                },
+                {
+                  "exit": "needs_changes",
+                  "predicate": {
+                    "op": "eq",
+                    "alias": "review",
+                    "pointer": "/outcome",
+                    "value": "needs_changes"
+                  }
+                }
+              ],
+              "defaultExit": "needs_human",
+              "errorPolicy": "needs-human",
+              "verification": {
+                "testNodeIds": ["5e7e9a31-9ff8-415c-875e-6b36506d7374"],
+                "reviewerNodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+                "successExit": "pass"
+              }
+            },
+            {
+              "id": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+              "position": {
+                "x": 1900,
+                "y": 100
+              },
+              "type": "approval",
+              "name": "Final human review",
+              "reviewInstructions": "Review this exact iteration's native evidence. This gate does not authorize publication or answer native permissions.",
+              "evidence": [
+                {
+                  "alias": "evidence",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                    "selector": "test"
+                  }
+                }
+              ],
+              "commentPolicy": "required"
+            }
+          ],
+          "edges": [
+            {
+              "source": "start",
+              "target": "task"
+            },
+            {
+              "source": "task",
+              "target": "8d948755-e00c-417d-888d-c891dfb525a3"
+            },
+            {
+              "source": "8d948755-e00c-417d-888d-c891dfb525a3",
+              "target": "5e7e9a31-9ff8-415c-875e-6b36506d7374"
+            },
+            {
+              "source": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+              "target": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35"
+            },
+            {
+              "source": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+              "target": "end"
+            },
+            {
+              "source": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+              "target": "99953e6f-405b-4f10-844d-c88de7035a43"
+            },
+            {
+              "source": "184fdb50-5b2d-4455-8626-584236de0072",
+              "target": "8d948755-e00c-417d-888d-c891dfb525a3"
+            },
+            {
+              "source": "99953e6f-405b-4f10-844d-c88de7035a43",
+              "target": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+              "sourcePort": "pass"
+            },
+            {
+              "source": "99953e6f-405b-4f10-844d-c88de7035a43",
+              "target": "184fdb50-5b2d-4455-8626-584236de0072",
+              "sourcePort": "needs_changes"
+            },
+            {
+              "source": "99953e6f-405b-4f10-844d-c88de7035a43",
+              "target": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+              "sourcePort": "needs_human"
+            }
+          ],
+          "routing": {
+            "finalGateId": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+            "limits": {
+              "maxNodeAdmissions": 12,
+              "deadlineMs": 600000
+            },
+            "region": {
+              "id": "4a593029-c44a-4c3c-9b22-fde5c1f667ce",
+              "name": "Bounded C# repair",
+              "entryNodeId": "task",
+              "repairEntryNodeId": "184fdb50-5b2d-4455-8626-584236de0072",
+              "decisionNodeId": "99953e6f-405b-4f10-844d-c88de7035a43",
+              "bodyNodeIds": [
+                "task",
+                "8d948755-e00c-417d-888d-c891dfb525a3",
+                "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+                "184fdb50-5b2d-4455-8626-584236de0072",
+                "99953e6f-405b-4f10-844d-c88de7035a43"
+              ],
+              "repairExit": "needs_changes",
+              "passExit": "pass",
+              "maxRepairIterations": 2,
+              "stopOnNoProgress": true,
+              "sourcePaths": [
+                "Z4Fixture.csproj",
+                "MathOps.cs",
+                "Runner.cs",
+                "global.json",
+                "NuGet.Config",
+                "Directory.Build.props",
+                "Directory.Build.targets",
+                "Directory.Packages.props"
+              ]
+            }
+          }
+        },
+        "defaults": {
+          "modelSelection": {
+            "providerId": "z1-local-fixture",
+            "modelId": "z1-fixture",
+            "options": {
+              "reasoningLevel": "enabled"
+            }
+          },
+          "mode": "build",
+          "planEnabled": false
+        },
+        "plannedPath": [
+          "184fdb50-5b2d-4455-8626-584236de0072",
+          "task",
+          "8d948755-e00c-417d-888d-c891dfb525a3",
+          "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+          "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+          "99953e6f-405b-4f10-844d-c88de7035a43",
+          "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb"
+        ],
+        "startInput": "",
+        "nodeAttempts": [
+          {
+            "iterationId": "de50b336-c69d-4ae8-85de-8e5011ecab52",
+            "iteration": 0,
+            "nodeId": "184fdb50-5b2d-4455-8626-584236de0072",
+            "attemptId": "b0ff62d8-45b8-428e-a861-abda6c058c77",
+            "commandId": "ecbdf441-413b-41bb-b9fe-a59caf232e0e",
+            "inputId": "ecbdf441-413b-41bb-b9fe-a59caf232e0e",
+            "status": "Skipped",
+            "dispatchPhase": "planned",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790259387848,
+            "updatedAt": 1790259393921
+          },
+          {
+            "iterationId": "de50b336-c69d-4ae8-85de-8e5011ecab52",
+            "iteration": 0,
+            "nodeId": "task",
+            "attemptId": "bdadad54-04ef-4fa4-9f82-27ee3ee0389c",
+            "commandId": "08b8f530-b496-44ff-9c7e-da1bc9dd8ed8",
+            "inputId": "08b8f530-b496-44ff-9c7e-da1bc9dd8ed8",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790259387848,
+            "updatedAt": 1790259389463,
+            "sessionId": "sess_3b62ff7f-6caa-4817-9bfc-6e4485d51ccd",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:27028:agent-271e6d82-d4ae-4df7-b5fc-9421c01a5f0f",
+            "foregroundExecutionId": "runtime_command_1",
+            "observationEpoch": "mufm7skm-66kjs1z8",
+            "resolvedInstructions": "Z5_IMPLEMENT: Read MathOps.cs and Runner.cs. Apply the explicitly staged initial synthetic implementation in MathOps.cs only. Preserve the runner. Do not build or run commands; separate native Tool nodes verify it. Return a concise result.",
+            "bindings": [],
+            "terminalProof": {
+              "sourceCommandId": "08b8f530-b496-44ff-9c7e-da1bc9dd8ed8",
+              "state": "completedSuccess",
+              "logEpoch": "mufm7skm-66kjs1z8",
+              "seq": 76,
+              "turnId": "msg_mufm7sy5_c7d10098-5ea7-47f8-a6dc-4deac47ea021"
+            },
+            "finalOutput": {
+              "text": "Z5 initial native implementation Z5_NATIVE_7c016f8e-fa20-4b70-a6da-24d32c559184; separate Test evidence remains authoritative.",
+              "turnId": "msg_mufm7sy5_c7d10098-5ea7-47f8-a6dc-4deac47ea021",
+              "rowId": 6,
+              "entityId": "msg_mufm7tms_a7a710c4-ca7a-4c84-a21e-2005828a5e53",
+              "assistantResponseId": "msg_mufm7tms_a7a710c4-ca7a-4c84-a21e-2005828a5e53"
+            },
+            "outputValidation": {
+              "status": "valid",
+              "issues": []
+            }
+          },
+          {
+            "iterationId": "de50b336-c69d-4ae8-85de-8e5011ecab52",
+            "iteration": 0,
+            "nodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+            "attemptId": "89697a9c-d135-48c0-8191-88827a7a5cfb",
+            "commandId": "c83e8faf-981d-4378-9e74-5edc744d57b1",
+            "inputId": "c83e8faf-981d-4378-9e74-5edc744d57b1",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790259387848,
+            "updatedAt": 1790259393840,
+            "sessionId": "sess_64dcaa60-7a8f-4edb-bef9-662a031443d5",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:27028:agent-271e6d82-d4ae-4df7-b5fc-9421c01a5f0f",
+            "foregroundExecutionId": "runtime_command_2",
+            "observationEpoch": "mufm7wl7-o2tbfk0q",
+            "resolvedInstructions": "Z5_REVIEW: Read MathOps.cs and results/test-report.json. Review this exact native verification; return the required structured reviewer record and its actual artifact ID. Do not edit or execute commands.\nZ5_VERIFICATION_BEGIN\n{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"d246bb6e-41dc-42f4-a6af-8b2c423ea7b2\",\"iterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"operationId\":\"41492502-3171-4e6f-8cb5-b1164b8dd41d\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"303479d5-5512-40d5-bb43-1b312125d61c\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}\nZ5_VERIFICATION_END",
+            "bindings": [
+              {
+                "alias": "verification",
+                "source": {
+                  "kind": "artifact",
+                  "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                  "selector": "verification"
+                },
+                "text": "{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"d246bb6e-41dc-42f4-a6af-8b2c423ea7b2\",\"iterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"operationId\":\"41492502-3171-4e6f-8cb5-b1164b8dd41d\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"303479d5-5512-40d5-bb43-1b312125d61c\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}",
+                "sourceSessionId": "sess_d2a37362-39d1-4e8c-9ae3-a177a2e8a825",
+                "artifactId": "0d132293-34ef-48ba-8e47-44d799efa9f8"
+              }
+            ],
+            "terminalProof": {
+              "sourceCommandId": "c83e8faf-981d-4378-9e74-5edc744d57b1",
+              "state": "completedSuccess",
+              "logEpoch": "mufm7wl7-o2tbfk0q",
+              "seq": 54,
+              "turnId": "msg_mufm7ww8_90b723d0-a181-4031-88ca-7b8f14dd5e28"
+            },
+            "finalOutput": {
+              "text": "{\"outcome\":\"needs_changes\",\"findings\":[{\"code\":\"add-positive\",\"message\":\"Expected 5; actual 6.\"},{\"code\":\"add-negative\",\"message\":\"Expected 0; actual 1.\"},{\"code\":\"add-zero\",\"message\":\"Expected 0; actual 1.\"}],\"evidenceReferences\":[\"0d132293-34ef-48ba-8e47-44d799efa9f8\"]}",
+              "turnId": "msg_mufm7ww8_90b723d0-a181-4031-88ca-7b8f14dd5e28",
+              "rowId": 5,
+              "entityId": "msg_mufm7x0h_b5067fed-bc4c-4f5e-86d2-3e79248e7e5e",
+              "assistantResponseId": "msg_mufm7x0h_b5067fed-bc4c-4f5e-86d2-3e79248e7e5e"
+            },
+            "outputValidation": {
+              "status": "valid",
+              "issues": []
+            }
+          },
+          {
+            "iterationId": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+            "iteration": 1,
+            "nodeId": "184fdb50-5b2d-4455-8626-584236de0072",
+            "attemptId": "ba62c6b5-0bd3-44b2-9b7a-61feb48ea04e",
+            "commandId": "b1b0ed44-7237-4358-af18-5621d5f1728e",
+            "inputId": "b1b0ed44-7237-4358-af18-5621d5f1728e",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790259393921,
+            "updatedAt": 1790259394660,
+            "sessionId": "sess_7ff9024f-e529-4bff-bf35-d4ab0084870c",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:27028:agent-271e6d82-d4ae-4df7-b5fc-9421c01a5f0f",
+            "foregroundExecutionId": "runtime_command_3",
+            "observationEpoch": "mufm7x91-ffpwoa6n",
+            "resolvedInstructions": "Z5_REPAIR: Read MathOps.cs. Use this exact previous iteration feedback to make the next bounded synthetic repair in MathOps.cs only. Preserve Runner.cs and tests. Do not build or execute commands.\nZ5_FEEDBACK_BEGIN\n{\"previousIterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"previousIteration\":0,\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"findings\":[{\"code\":\"add-positive\",\"message\":\"Expected 5; actual 6.\"},{\"code\":\"add-negative\",\"message\":\"Expected 0; actual 1.\"},{\"code\":\"add-zero\",\"message\":\"Expected 0; actual 1.\"}],\"observations\":[{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"digest\":\"9d5850b113c1dcf98fe4320909a29237517da87567c062af8ed9f28cf94bab64\",\"value\":{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"d246bb6e-41dc-42f4-a6af-8b2c423ea7b2\",\"iterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"operationId\":\"41492502-3171-4e6f-8cb5-b1164b8dd41d\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"303479d5-5512-40d5-bb43-1b312125d61c\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}}]}\nZ5_FEEDBACK_END",
+            "bindings": [
+              {
+                "alias": "feedback",
+                "source": {
+                  "kind": "repair-feedback"
+                },
+                "text": "{\"previousIterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"previousIteration\":0,\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"findings\":[{\"code\":\"add-positive\",\"message\":\"Expected 5; actual 6.\"},{\"code\":\"add-negative\",\"message\":\"Expected 0; actual 1.\"},{\"code\":\"add-zero\",\"message\":\"Expected 0; actual 1.\"}],\"observations\":[{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"digest\":\"9d5850b113c1dcf98fe4320909a29237517da87567c062af8ed9f28cf94bab64\",\"value\":{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"d246bb6e-41dc-42f4-a6af-8b2c423ea7b2\",\"iterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"operationId\":\"41492502-3171-4e6f-8cb5-b1164b8dd41d\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"303479d5-5512-40d5-bb43-1b312125d61c\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}}]}"
+              }
+            ],
+            "terminalProof": {
+              "sourceCommandId": "b1b0ed44-7237-4358-af18-5621d5f1728e",
+              "state": "completedSuccess",
+              "logEpoch": "mufm7x91-ffpwoa6n",
+              "seq": 35,
+              "turnId": "msg_mufm7xkw_1be1973b-46c5-4498-bb5e-638ff646c1bf"
+            },
+            "finalOutput": {
+              "text": "Z5 bounded native repair Z5_NATIVE_7c016f8e-fa20-4b70-a6da-24d32c559184; verify current source with the configured tools.",
+              "turnId": "msg_mufm7xkw_1be1973b-46c5-4498-bb5e-638ff646c1bf",
+              "rowId": 4,
+              "entityId": "msg_mufm7xne_3a6bd6c9-77d1-462e-9101-a6b4b1698159",
+              "assistantResponseId": "msg_mufm7xne_3a6bd6c9-77d1-462e-9101-a6b4b1698159"
+            },
+            "outputValidation": {
+              "status": "valid",
+              "issues": []
+            }
+          },
+          {
+            "iterationId": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+            "iteration": 1,
+            "nodeId": "task",
+            "attemptId": "05df5d54-e551-442f-ad11-8ad5204069d4",
+            "commandId": "6bd3675e-4b5f-4d20-b78b-ec16d3f4fb9c",
+            "inputId": "6bd3675e-4b5f-4d20-b78b-ec16d3f4fb9c",
+            "status": "Skipped",
+            "dispatchPhase": "planned",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790259393921,
+            "updatedAt": 1790259393921
+          },
+          {
+            "iterationId": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+            "iteration": 1,
+            "nodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+            "attemptId": "28171c2e-9e04-42b0-b1b4-8fcf7fd79770",
+            "commandId": "1353b2be-8950-414f-9b1f-5deed77c4843",
+            "inputId": "1353b2be-8950-414f-9b1f-5deed77c4843",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790259393921,
+            "updatedAt": 1790259398970,
+            "sessionId": "sess_ae1c417a-357f-43b3-aa92-6f1acfaca870",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:27028:agent-271e6d82-d4ae-4df7-b5fc-9421c01a5f0f",
+            "foregroundExecutionId": "runtime_command_4",
+            "observationEpoch": "mufm80jg-pgkaun2w",
+            "resolvedInstructions": "Z5_REVIEW: Read MathOps.cs and results/test-report.json. Review this exact native verification; return the required structured reviewer record and its actual artifact ID. Do not edit or execute commands.\nZ5_VERIFICATION_BEGIN\n{\"artifactId\":\"e0639a29-2f5e-4c98-8df1-380ca1060b0f\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869\",\"iterationId\":\"3c3e2e0d-a123-4108-bf22-ab256cf82c66\",\"operationId\":\"c7d7500d-2a91-4907-9bcc-8c56c55c73c4\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"eb63d22c-f06f-4b7e-b534-2636c8984285\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}\nZ5_VERIFICATION_END",
+            "bindings": [
+              {
+                "alias": "verification",
+                "source": {
+                  "kind": "artifact",
+                  "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+                  "selector": "verification"
+                },
+                "text": "{\"artifactId\":\"e0639a29-2f5e-4c98-8df1-380ca1060b0f\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869\",\"iterationId\":\"3c3e2e0d-a123-4108-bf22-ab256cf82c66\",\"operationId\":\"c7d7500d-2a91-4907-9bcc-8c56c55c73c4\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"eb63d22c-f06f-4b7e-b534-2636c8984285\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}",
+                "sourceSessionId": "sess_9f23334a-c2d0-452f-b079-a274011da520",
+                "artifactId": "e0639a29-2f5e-4c98-8df1-380ca1060b0f"
+              }
+            ],
+            "terminalProof": {
+              "sourceCommandId": "1353b2be-8950-414f-9b1f-5deed77c4843",
+              "state": "completedSuccess",
+              "logEpoch": "mufm80jg-pgkaun2w",
+              "seq": 54,
+              "turnId": "msg_mufm80ur_b00a7a91-ae1b-4e59-8f9b-d20137a0807a"
+            },
+            "finalOutput": {
+              "text": "{\"outcome\":\"needs_changes\",\"findings\":[{\"code\":\"add-positive\",\"message\":\"Expected 5; actual 6.\"},{\"code\":\"add-negative\",\"message\":\"Expected 0; actual 1.\"},{\"code\":\"add-zero\",\"message\":\"Expected 0; actual 1.\"}],\"evidenceReferences\":[\"e0639a29-2f5e-4c98-8df1-380ca1060b0f\"]}",
+              "turnId": "msg_mufm80ur_b00a7a91-ae1b-4e59-8f9b-d20137a0807a",
+              "rowId": 5,
+              "entityId": "msg_mufm80z1_0b318175-77c9-48f2-b2c4-deba77c23110",
+              "assistantResponseId": "msg_mufm80z1_0b318175-77c9-48f2-b2c4-deba77c23110"
+            },
+            "outputValidation": {
+              "status": "valid",
+              "issues": []
+            }
+          }
+        ],
+        "approvalAttempts": [
+          {
+            "iterationId": "de50b336-c69d-4ae8-85de-8e5011ecab52",
+            "iteration": 0,
+            "nodeId": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+            "attemptId": "da8dff5e-9b8c-4569-bd5f-38db59fbef9c",
+            "status": "Skipped",
+            "createdAt": 1790259387848,
+            "updatedAt": 1790259393921
+          },
+          {
+            "iterationId": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+            "iteration": 1,
+            "nodeId": "c1e8a28d-74c4-4774-8b68-eac9bb7c4bbb",
+            "attemptId": "f58880e1-0377-4f51-a404-30fc0a10f6b0",
+            "status": "Skipped",
+            "createdAt": 1790259393921,
+            "updatedAt": 1790259399040
+          }
+        ],
+        "toolAttempts": [
+          {
+            "iterationId": "de50b336-c69d-4ae8-85de-8e5011ecab52",
+            "iteration": 0,
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "11d13fdf-7788-471a-a928-27809dc00a99",
+            "operationId": "d2f2a951-2562-433e-883c-e622e747f1f2",
+            "recipe": {
+              "id": "fixture-build",
+              "name": "Build C# fixture",
+              "executable": "dotnet",
+              "args": [
+                "build",
+                "Z4Fixture.csproj",
+                "--configuration",
+                "Release",
+                "--nologo",
+                "--no-incremental",
+                "--disable-build-servers",
+                "-p:RestoreConfigFile=NuGet.Config",
+                "-p:NuGetAudit=false",
+                "-p:UseSharedCompilation=false",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-nodeReuse:false"
+              ],
+              "cwd": ".",
+              "timeoutMs": 60000,
+              "sourcePaths": [
+                "Z4Fixture.csproj",
+                "MathOps.cs",
+                "Runner.cs",
+                "global.json",
+                "NuGet.Config",
+                "Directory.Build.props",
+                "Directory.Build.targets",
+                "Directory.Packages.props"
+              ],
+              "expectedOutputs": [
+                "bin/Release/net8.0/Z4Fixture.dll",
+                "bin/Release/net8.0/Z4Fixture.deps.json",
+                "bin/Release/net8.0/Z4Fixture.runtimeconfig.json"
+              ],
+              "verifier": {
+                "kind": "build"
+              }
+            },
+            "recipeDigest": "eb2960224cf63fca86773a89ca7b1fff0ed5fc6012fd4b81b996614e4aec695e",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "createdAt": 1790259387848,
+            "updatedAt": 1790259392146,
+            "sessionId": "sess_42ea82ad-d1c3-4c15-8e7b-05232bd3af0b",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:27028:agent-271e6d82-d4ae-4df7-b5fc-9421c01a5f0f",
+            "sourceDigest": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "outputDigest": "530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85",
+            "resolvedArgs": [
+              "build",
+              "Z4Fixture.csproj",
+              "--configuration",
+              "Release",
+              "--nologo",
+              "--no-incremental",
+              "--disable-build-servers",
+              "-p:RestoreConfigFile=NuGet.Config",
+              "-p:NuGetAudit=false",
+              "-p:UseSharedCompilation=false",
+              "-p:ImportDirectoryBuildProps=false",
+              "-p:ImportDirectoryBuildTargets=false",
+              "-p:ImportDirectoryPackagesProps=false",
+              "-nodeReuse:false"
+            ],
+            "outputsBefore": [
+              {
+                "path": "bin/Release/net8.0/Z4Fixture.deps.json",
+                "exists": false
+              },
+              {
+                "path": "bin/Release/net8.0/Z4Fixture.dll",
+                "exists": false
+              },
+              {
+                "path": "bin/Release/net8.0/Z4Fixture.runtimeconfig.json",
+                "exists": false
+              }
+            ],
+            "operation": {
+              "operationId": "d2f2a951-2562-433e-883c-e622e747f1f2",
+              "sessionId": "sess_42ea82ad-d1c3-4c15-8e7b-05232bd3af0b",
+              "requestDigest": "79bb6b4b2cdead4145be50e31aee8d9495e00eb257793159db1985e40055db56",
+              "recipeId": "fixture-build",
+              "cwd": "<isolated-profile>\\workspace",
+              "status": "completed",
+              "processStarted": true,
+              "startedAt": 1790259390340,
+              "completedAt": 1790259392127,
+              "result": {
+                "status": "completed",
+                "exitCode": 0,
+                "stdout": {
+                  "text": "  Determining projects to restore...\n  Restored [USER_PATH] (in 42 ms).\n  Z4Fixture -> [USER_PATH]\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:01.50\n",
+                  "bytes": 376,
+                  "truncated": false
+                },
+                "stderr": {
+                  "text": "",
+                  "bytes": 0,
+                  "truncated": false
+                },
+                "durationMs": 1783,
+                "timedOut": false,
+                "cancelled": false,
+                "processExitObserved": true
+              }
+            },
+            "verification": {
+              "processKnown": true,
+              "exitSuccessful": true,
+              "reportFresh": false,
+              "reportParsed": false,
+              "acceptancePassed": true,
+              "classification": "build",
+              "issues": []
+            }
+          },
+          {
+            "iterationId": "de50b336-c69d-4ae8-85de-8e5011ecab52",
+            "iteration": 0,
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+            "operationId": "41492502-3171-4e6f-8cb5-b1164b8dd41d",
+            "recipe": {
+              "id": "fixture-test",
+              "name": "Test C# fixture",
+              "executable": "dotnet",
+              "args": [
+                "bin/Release/net8.0/Z4Fixture.dll",
+                "--operation-id",
+                "{operationId}",
+                "--source-digest",
+                "{sourceDigest}",
+                "--build-digest",
+                "{buildDigest}",
+                "--report",
+                "{reportPath}"
+              ],
+              "cwd": ".",
+              "timeoutMs": 60000,
+              "sourcePaths": [
+                "Z4Fixture.csproj",
+                "MathOps.cs",
+                "Runner.cs",
+                "global.json",
+                "NuGet.Config",
+                "Directory.Build.props",
+                "Directory.Build.targets",
+                "Directory.Packages.props"
+              ],
+              "expectedOutputs": [],
+              "verifier": {
+                "kind": "test",
+                "format": "zcode-json-v1",
+                "reportPath": "results/test-report.json",
+                "minimumTests": 3,
+                "expectedTests": 3,
+                "requiredTests": ["add-positive", "add-negative", "add-zero"],
+                "buildNodeId": "8d948755-e00c-417d-888d-c891dfb525a3"
+              }
+            },
+            "recipeDigest": "13240cb8ed3fec98c9b282f995e6b1c9478056693f5f40d3b4b013d40e2a679a",
+            "status": "Failed",
+            "dispatchPhase": "accepted",
+            "createdAt": 1790259387848,
+            "updatedAt": 1790259393032,
+            "sessionId": "sess_d2a37362-39d1-4e8c-9ae3-a177a2e8a825",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:27028:agent-271e6d82-d4ae-4df7-b5fc-9421c01a5f0f",
+            "sourceDigest": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "buildDigest": "530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85",
+            "resolvedArgs": [
+              "bin/Release/net8.0/Z4Fixture.dll",
+              "--operation-id",
+              "41492502-3171-4e6f-8cb5-b1164b8dd41d",
+              "--source-digest",
+              "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+              "--build-digest",
+              "530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85",
+              "--report",
+              "results/test-report.json"
+            ],
+            "operation": {
+              "operationId": "41492502-3171-4e6f-8cb5-b1164b8dd41d",
+              "sessionId": "sess_d2a37362-39d1-4e8c-9ae3-a177a2e8a825",
+              "requestDigest": "e099442fc9486c205294cdac5c13c70b7ea9d55992e1a3491de4e5331734546e",
+              "recipeId": "fixture-test",
+              "cwd": "<isolated-profile>\\workspace",
+              "status": "failed",
+              "processStarted": true,
+              "startedAt": 1790259392877,
+              "completedAt": 1790259393009,
+              "result": {
+                "status": "failed",
+                "exitCode": 1,
+                "stdout": {
+                  "text": "{\"format\":\"zcode-test-v1\",\"operationId\":\"41492502-3171-4e6f-8cb5-b1164b8dd41d\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}]}",
+                  "bytes": 626,
+                  "truncated": false
+                },
+                "stderr": {
+                  "text": "",
+                  "bytes": 0,
+                  "truncated": false
+                },
+                "durationMs": 128,
+                "timedOut": false,
+                "cancelled": false,
+                "processExitObserved": true
+              }
+            },
+            "verification": {
+              "observationValid": true,
+              "outcome": "fail",
+              "tests": [
+                {
+                  "name": "add-positive",
+                  "status": "failed",
+                  "message": "Expected 5; actual 6."
+                },
+                {
+                  "name": "add-negative",
+                  "status": "failed",
+                  "message": "Expected 0; actual 1."
+                },
+                {
+                  "name": "add-zero",
+                  "status": "failed",
+                  "message": "Expected 0; actual 1."
+                }
+              ],
+              "processKnown": true,
+              "exitSuccessful": false,
+              "reportFresh": true,
+              "reportParsed": true,
+              "acceptancePassed": false,
+              "classification": "test",
+              "testCount": 3,
+              "passed": 0,
+              "failed": 3,
+              "skipped": 0,
+              "issues": [
+                "The native command did not exit successfully.",
+                "The native command did not exit successfully.",
+                "The native test report contains failures.",
+                "No executed test passed; all-skipped reports cannot pass.",
+                "Required test add-positive is missing, failed or skipped.",
+                "Required test add-negative is missing, failed or skipped.",
+                "Required test add-zero is missing, failed or skipped."
+              ]
+            },
+            "message": "The native command did not exit successfully.\nThe native command did not exit successfully.\nThe native test report contains failures.\nNo executed test passed; all-skipped reports cannot pass.\nRequired test add-positive is missing, failed or skipped.\nRequired test add-negative is missing, failed or skipped.\nRequired test add-zero is missing, failed or skipped."
+          },
+          {
+            "iterationId": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+            "iteration": 1,
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "cf1e840b-0d38-4f74-9aba-fd65512e04b1",
+            "operationId": "95c2d21b-fd67-41ea-8f49-4f7b757ea79f",
+            "recipe": {
+              "id": "fixture-build",
+              "name": "Build C# fixture",
+              "executable": "dotnet",
+              "args": [
+                "build",
+                "Z4Fixture.csproj",
+                "--configuration",
+                "Release",
+                "--nologo",
+                "--no-incremental",
+                "--disable-build-servers",
+                "-p:RestoreConfigFile=NuGet.Config",
+                "-p:NuGetAudit=false",
+                "-p:UseSharedCompilation=false",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-nodeReuse:false"
+              ],
+              "cwd": ".",
+              "timeoutMs": 60000,
+              "sourcePaths": [
+                "Z4Fixture.csproj",
+                "MathOps.cs",
+                "Runner.cs",
+                "global.json",
+                "NuGet.Config",
+                "Directory.Build.props",
+                "Directory.Build.targets",
+                "Directory.Packages.props"
+              ],
+              "expectedOutputs": [
+                "bin/Release/net8.0/Z4Fixture.dll",
+                "bin/Release/net8.0/Z4Fixture.deps.json",
+                "bin/Release/net8.0/Z4Fixture.runtimeconfig.json"
+              ],
+              "verifier": {
+                "kind": "build"
+              }
+            },
+            "recipeDigest": "eb2960224cf63fca86773a89ca7b1fff0ed5fc6012fd4b81b996614e4aec695e",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "createdAt": 1790259393921,
+            "updatedAt": 1790259397089,
+            "sessionId": "sess_2985af86-2f2f-47c7-8ab4-8f268d924810",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:27028:agent-271e6d82-d4ae-4df7-b5fc-9421c01a5f0f",
+            "sourceDigest": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "outputDigest": "530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85",
+            "resolvedArgs": [
+              "build",
+              "Z4Fixture.csproj",
+              "--configuration",
+              "Release",
+              "--nologo",
+              "--no-incremental",
+              "--disable-build-servers",
+              "-p:RestoreConfigFile=NuGet.Config",
+              "-p:NuGetAudit=false",
+              "-p:UseSharedCompilation=false",
+              "-p:ImportDirectoryBuildProps=false",
+              "-p:ImportDirectoryBuildTargets=false",
+              "-p:ImportDirectoryPackagesProps=false",
+              "-nodeReuse:false"
+            ],
+            "outputsBefore": [
+              {
+                "path": "bin/Release/net8.0/Z4Fixture.deps.json",
+                "exists": true,
+                "bytes": 419,
+                "digest": "966c1943eeee943a49a89672e0545508aae39097e66ae7fb9cd27c552b253805",
+                "modifiedAt": 1790259392076.0498
+              },
+              {
+                "path": "bin/Release/net8.0/Z4Fixture.dll",
+                "exists": true,
+                "bytes": 14336,
+                "digest": "9d2eba07413d3d4343aa12ec127c1d02450e4bcdc8c51505ee904846fee65495",
+                "modifiedAt": 1790259392037.0654
+              },
+              {
+                "path": "bin/Release/net8.0/Z4Fixture.runtimeconfig.json",
+                "exists": true,
+                "bytes": 340,
+                "digest": "28329cf08f6505e73806b17558b187c02f0c1c516fe47ebfb7a013d082aaa306",
+                "modifiedAt": 1790259392096.0498
+              }
+            ],
+            "operation": {
+              "operationId": "95c2d21b-fd67-41ea-8f49-4f7b757ea79f",
+              "sessionId": "sess_2985af86-2f2f-47c7-8ab4-8f268d924810",
+              "requestDigest": "1c57c5b51da2f37727cf3ce1dea296c7050d1a03a6f363e764510da804cde5e6",
+              "recipeId": "fixture-build",
+              "cwd": "<isolated-profile>\\workspace",
+              "status": "completed",
+              "processStarted": true,
+              "startedAt": 1790259395330,
+              "completedAt": 1790259396930,
+              "result": {
+                "status": "completed",
+                "exitCode": 0,
+                "stdout": {
+                  "text": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  Z4Fixture -> [USER_PATH]\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:01.39\n",
+                  "bytes": 296,
+                  "truncated": false
+                },
+                "stderr": {
+                  "text": "",
+                  "bytes": 0,
+                  "truncated": false
+                },
+                "durationMs": 1597,
+                "timedOut": false,
+                "cancelled": false,
+                "processExitObserved": true
+              }
+            },
+            "verification": {
+              "processKnown": true,
+              "exitSuccessful": true,
+              "reportFresh": false,
+              "reportParsed": false,
+              "acceptancePassed": true,
+              "classification": "build",
+              "issues": []
+            }
+          },
+          {
+            "iterationId": "3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+            "iteration": 1,
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+            "operationId": "c7d7500d-2a91-4907-9bcc-8c56c55c73c4",
+            "recipe": {
+              "id": "fixture-test",
+              "name": "Test C# fixture",
+              "executable": "dotnet",
+              "args": [
+                "bin/Release/net8.0/Z4Fixture.dll",
+                "--operation-id",
+                "{operationId}",
+                "--source-digest",
+                "{sourceDigest}",
+                "--build-digest",
+                "{buildDigest}",
+                "--report",
+                "{reportPath}"
+              ],
+              "cwd": ".",
+              "timeoutMs": 60000,
+              "sourcePaths": [
+                "Z4Fixture.csproj",
+                "MathOps.cs",
+                "Runner.cs",
+                "global.json",
+                "NuGet.Config",
+                "Directory.Build.props",
+                "Directory.Build.targets",
+                "Directory.Packages.props"
+              ],
+              "expectedOutputs": [],
+              "verifier": {
+                "kind": "test",
+                "format": "zcode-json-v1",
+                "reportPath": "results/test-report.json",
+                "minimumTests": 3,
+                "expectedTests": 3,
+                "requiredTests": ["add-positive", "add-negative", "add-zero"],
+                "buildNodeId": "8d948755-e00c-417d-888d-c891dfb525a3"
+              }
+            },
+            "recipeDigest": "13240cb8ed3fec98c9b282f995e6b1c9478056693f5f40d3b4b013d40e2a679a",
+            "status": "Failed",
+            "dispatchPhase": "accepted",
+            "createdAt": 1790259393921,
+            "updatedAt": 1790259398166,
+            "sessionId": "sess_9f23334a-c2d0-452f-b079-a274011da520",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:27028:agent-271e6d82-d4ae-4df7-b5fc-9421c01a5f0f",
+            "sourceDigest": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "buildDigest": "530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85",
+            "resolvedArgs": [
+              "bin/Release/net8.0/Z4Fixture.dll",
+              "--operation-id",
+              "c7d7500d-2a91-4907-9bcc-8c56c55c73c4",
+              "--source-digest",
+              "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+              "--build-digest",
+              "530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85",
+              "--report",
+              "results/test-report.json"
+            ],
+            "beforeReportDigest": "8369ea8150d21c5c4341ac0840f14cb674e071fbd2dc1323933bb7a50fe94516",
+            "operation": {
+              "operationId": "c7d7500d-2a91-4907-9bcc-8c56c55c73c4",
+              "sessionId": "sess_9f23334a-c2d0-452f-b079-a274011da520",
+              "requestDigest": "ab298c40b65ac3260ef3bf7cfd754eaa045eb9fa9fb7ed02eb4465328a8bd318",
+              "recipeId": "fixture-test",
+              "cwd": "<isolated-profile>\\workspace",
+              "status": "failed",
+              "processStarted": true,
+              "startedAt": 1790259397840,
+              "completedAt": 1790259397976,
+              "result": {
+                "status": "failed",
+                "exitCode": 1,
+                "stdout": {
+                  "text": "{\"format\":\"zcode-test-v1\",\"operationId\":\"c7d7500d-2a91-4907-9bcc-8c56c55c73c4\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}]}",
+                  "bytes": 626,
+                  "truncated": false
+                },
+                "stderr": {
+                  "text": "",
+                  "bytes": 0,
+                  "truncated": false
+                },
+                "durationMs": 133,
+                "timedOut": false,
+                "cancelled": false,
+                "processExitObserved": true
+              }
+            },
+            "verification": {
+              "observationValid": true,
+              "outcome": "fail",
+              "tests": [
+                {
+                  "name": "add-positive",
+                  "status": "failed",
+                  "message": "Expected 5; actual 6."
+                },
+                {
+                  "name": "add-negative",
+                  "status": "failed",
+                  "message": "Expected 0; actual 1."
+                },
+                {
+                  "name": "add-zero",
+                  "status": "failed",
+                  "message": "Expected 0; actual 1."
+                }
+              ],
+              "processKnown": true,
+              "exitSuccessful": false,
+              "reportFresh": true,
+              "reportParsed": true,
+              "acceptancePassed": false,
+              "classification": "test",
+              "testCount": 3,
+              "passed": 0,
+              "failed": 3,
+              "skipped": 0,
+              "issues": [
+                "The native command did not exit successfully.",
+                "The native command did not exit successfully.",
+                "The native test report contains failures.",
+                "No executed test passed; all-skipped reports cannot pass.",
+                "Required test add-positive is missing, failed or skipped.",
+                "Required test add-negative is missing, failed or skipped.",
+                "Required test add-zero is missing, failed or skipped."
+              ]
+            },
+            "message": "The native command did not exit successfully.\nThe native command did not exit successfully.\nThe native test report contains failures.\nNo executed test passed; all-skipped reports cannot pass.\nRequired test add-positive is missing, failed or skipped.\nRequired test add-negative is missing, failed or skipped.\nRequired test add-zero is missing, failed or skipped."
+          }
+        ],
+        "artifacts": [
+          {
+            "id": "5ff6786a-a372-43c9-951c-052fd3823b4e",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "task",
+            "attemptId": "bdadad54-04ef-4fa4-9f82-27ee3ee0389c",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "text",
+            "provenance": "native-agent-final",
+            "bytes": 126,
+            "digest": "e14859b426e2d88d287ab9240cbe2027c3830adb0acee25603e8942ceecdb9c6",
+            "capturedAt": 1790259389463,
+            "validation": "valid",
+            "sessionId": "sess_3b62ff7f-6caa-4817-9bfc-6e4485d51ccd",
+            "inputId": "08b8f530-b496-44ff-9c7e-da1bc9dd8ed8",
+            "commandId": "08b8f530-b496-44ff-9c7e-da1bc9dd8ed8"
+          },
+          {
+            "id": "4eaa5bd3-8f7f-493d-a08d-5bd6c50b74be",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "11d13fdf-7788-471a-a928-27809dc00a99",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "command",
+            "provenance": "native-command",
+            "bytes": 744,
+            "digest": "7ac41b7b3a68839d40ec68b03d22a870aed93bb9a4a683f0e77283f7ec6e7aec",
+            "capturedAt": 1790259392146,
+            "validation": "valid",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sessionId": "sess_42ea82ad-d1c3-4c15-8e7b-05232bd3af0b",
+            "operationId": "d2f2a951-2562-433e-883c-e622e747f1f2"
+          },
+          {
+            "id": "8c846c55-2cc9-4581-b81a-1f9f6b27fa8b",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "11d13fdf-7788-471a-a928-27809dc00a99",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 0,
+            "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedAt": 1790259392146,
+            "validation": "incomplete",
+            "issue": "The encoded data was not valid for encoding utf-8",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sourcePath": "bin/Release/net8.0/Z4Fixture.dll",
+            "sessionId": "sess_42ea82ad-d1c3-4c15-8e7b-05232bd3af0b",
+            "operationId": "d2f2a951-2562-433e-883c-e622e747f1f2"
+          },
+          {
+            "id": "f93f6c56-ec35-4808-89de-ea72f91b7556",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "11d13fdf-7788-471a-a928-27809dc00a99",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 419,
+            "digest": "966c1943eeee943a49a89672e0545508aae39097e66ae7fb9cd27c552b253805",
+            "capturedAt": 1790259392146,
+            "validation": "valid",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sourcePath": "bin/Release/net8.0/Z4Fixture.deps.json",
+            "sessionId": "sess_42ea82ad-d1c3-4c15-8e7b-05232bd3af0b",
+            "operationId": "d2f2a951-2562-433e-883c-e622e747f1f2"
+          },
+          {
+            "id": "60162fff-633a-4d54-8bff-35d4a83083bd",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "11d13fdf-7788-471a-a928-27809dc00a99",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 340,
+            "digest": "28329cf08f6505e73806b17558b187c02f0c1c516fe47ebfb7a013d082aaa306",
+            "capturedAt": 1790259392146,
+            "validation": "valid",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sourcePath": "bin/Release/net8.0/Z4Fixture.runtimeconfig.json",
+            "sessionId": "sess_42ea82ad-d1c3-4c15-8e7b-05232bd3af0b",
+            "operationId": "d2f2a951-2562-433e-883c-e622e747f1f2"
+          },
+          {
+            "id": "88f16923-0e84-4da4-be62-3c833138e13a",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "command",
+            "provenance": "native-command",
+            "bytes": 1082,
+            "digest": "bc7fcc36b145c80a7030d7d39361b6a0745b7a299becbc3bd1f9e38e62ac0652",
+            "capturedAt": 1790259393032,
+            "validation": "invalid",
+            "issue": "The native command did not exit successfully.",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sessionId": "sess_d2a37362-39d1-4e8c-9ae3-a177a2e8a825",
+            "operationId": "41492502-3171-4e6f-8cb5-b1164b8dd41d"
+          },
+          {
+            "id": "303479d5-5512-40d5-bb43-1b312125d61c",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 624,
+            "digest": "dbe41431495e53dfd04a3936b354ae8864e4ea60c252abe81cc04488905ca2ea",
+            "capturedAt": 1790259393032,
+            "validation": "valid",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sourcePath": "results/test-report.json",
+            "sessionId": "sess_d2a37362-39d1-4e8c-9ae3-a177a2e8a825",
+            "operationId": "41492502-3171-4e6f-8cb5-b1164b8dd41d"
+          },
+          {
+            "id": "aabf0605-d21f-4232-9775-28f186b9394a",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "test",
+            "provenance": "native-test",
+            "bytes": 745,
+            "digest": "5fa085ab0c34b3a62a68278972af3cd717399e8e2255d36683e9e6c0e2a34a7c",
+            "capturedAt": 1790259393032,
+            "validation": "invalid",
+            "issue": "The native command did not exit successfully.\nThe native command did not exit successfully.\nThe native test report contains failures.\nNo executed test passed; all-skipped reports cannot pass.\nRequired test add-positive is missing, failed or skipped.\nRequired test add-negative is missing, failed or skipped.\nRequired test add-zero is missing, failed or skipped.",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sessionId": "sess_d2a37362-39d1-4e8c-9ae3-a177a2e8a825",
+            "operationId": "41492502-3171-4e6f-8cb5-b1164b8dd41d"
+          },
+          {
+            "id": "0d132293-34ef-48ba-8e47-44d799efa9f8",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "json",
+            "provenance": "native-test",
+            "bytes": 825,
+            "digest": "9d5850b113c1dcf98fe4320909a29237517da87567c062af8ed9f28cf94bab64",
+            "capturedAt": 1790259393032,
+            "validation": "valid",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sessionId": "sess_d2a37362-39d1-4e8c-9ae3-a177a2e8a825",
+            "operationId": "41492502-3171-4e6f-8cb5-b1164b8dd41d"
+          },
+          {
+            "id": "0fd8cf11-bb77-40f4-a5ec-44594debd7f6",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+            "attemptId": "89697a9c-d135-48c0-8191-88827a7a5cfb",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "text",
+            "provenance": "native-agent-final",
+            "bytes": 272,
+            "digest": "45b4e76327d45d94525278ee7065645280d415048b8ce316cc44ab079d8eb84e",
+            "capturedAt": 1790259393840,
+            "validation": "valid",
+            "sessionId": "sess_64dcaa60-7a8f-4edb-bef9-662a031443d5",
+            "inputId": "c83e8faf-981d-4378-9e74-5edc744d57b1",
+            "commandId": "c83e8faf-981d-4378-9e74-5edc744d57b1"
+          },
+          {
+            "id": "e052d0b6-988b-404b-9a78-1d0b0c505d35",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+            "attemptId": "89697a9c-d135-48c0-8191-88827a7a5cfb",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "json",
+            "provenance": "native-agent-final",
+            "bytes": 272,
+            "digest": "45b4e76327d45d94525278ee7065645280d415048b8ce316cc44ab079d8eb84e",
+            "capturedAt": 1790259393840,
+            "validation": "valid",
+            "sessionId": "sess_64dcaa60-7a8f-4edb-bef9-662a031443d5",
+            "inputId": "c83e8faf-981d-4378-9e74-5edc744d57b1",
+            "commandId": "c83e8faf-981d-4378-9e74-5edc744d57b1"
+          },
+          {
+            "id": "cf5d12d2-f318-48e5-9d9f-d5d26c19b5e2",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "184fdb50-5b2d-4455-8626-584236de0072",
+            "attemptId": "ba62c6b5-0bd3-44b2-9b7a-61feb48ea04e",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "text",
+            "provenance": "native-agent-final",
+            "bytes": 121,
+            "digest": "a36fc7c9b5a6d0150af8cede61bb8c664c7b7ca0ebd5e129b4a876505640050d",
+            "capturedAt": 1790259394660,
+            "validation": "valid",
+            "sessionId": "sess_7ff9024f-e529-4bff-bf35-d4ab0084870c",
+            "inputId": "b1b0ed44-7237-4358-af18-5621d5f1728e",
+            "commandId": "b1b0ed44-7237-4358-af18-5621d5f1728e"
+          },
+          {
+            "id": "5e00887f-e10b-425b-b3c0-c0d9bb4d4704",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "cf1e840b-0d38-4f74-9aba-fd65512e04b1",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "command",
+            "provenance": "native-command",
+            "bytes": 752,
+            "digest": "47cf30d0d73c1197f65790b1d5c40e4b5df07f79464bd9daff969cf48c68fde8",
+            "capturedAt": 1790259397089,
+            "validation": "valid",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sessionId": "sess_2985af86-2f2f-47c7-8ab4-8f268d924810",
+            "operationId": "95c2d21b-fd67-41ea-8f49-4f7b757ea79f"
+          },
+          {
+            "id": "3a188fab-c066-4429-b5f4-508204dccf26",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "cf1e840b-0d38-4f74-9aba-fd65512e04b1",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 0,
+            "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedAt": 1790259397089,
+            "validation": "incomplete",
+            "issue": "The encoded data was not valid for encoding utf-8",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sourcePath": "bin/Release/net8.0/Z4Fixture.dll",
+            "sessionId": "sess_2985af86-2f2f-47c7-8ab4-8f268d924810",
+            "operationId": "95c2d21b-fd67-41ea-8f49-4f7b757ea79f"
+          },
+          {
+            "id": "70a3457a-6297-4fc7-ba05-7dcbed5e1b32",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "cf1e840b-0d38-4f74-9aba-fd65512e04b1",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 419,
+            "digest": "966c1943eeee943a49a89672e0545508aae39097e66ae7fb9cd27c552b253805",
+            "capturedAt": 1790259397089,
+            "validation": "valid",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sourcePath": "bin/Release/net8.0/Z4Fixture.deps.json",
+            "sessionId": "sess_2985af86-2f2f-47c7-8ab4-8f268d924810",
+            "operationId": "95c2d21b-fd67-41ea-8f49-4f7b757ea79f"
+          },
+          {
+            "id": "1f38f39e-65e5-4ec0-9467-2b5536e4b64a",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "cf1e840b-0d38-4f74-9aba-fd65512e04b1",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 340,
+            "digest": "28329cf08f6505e73806b17558b187c02f0c1c516fe47ebfb7a013d082aaa306",
+            "capturedAt": 1790259397089,
+            "validation": "valid",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sourcePath": "bin/Release/net8.0/Z4Fixture.runtimeconfig.json",
+            "sessionId": "sess_2985af86-2f2f-47c7-8ab4-8f268d924810",
+            "operationId": "95c2d21b-fd67-41ea-8f49-4f7b757ea79f"
+          },
+          {
+            "id": "51553757-298b-47fa-85b4-4930214d6f49",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "command",
+            "provenance": "native-command",
+            "bytes": 1082,
+            "digest": "cac7a9934b1ecd00f06c29bd325d2a72e5340ee125475048b192c1372e3333bf",
+            "capturedAt": 1790259398166,
+            "validation": "invalid",
+            "issue": "The native command did not exit successfully.",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sessionId": "sess_9f23334a-c2d0-452f-b079-a274011da520",
+            "operationId": "c7d7500d-2a91-4907-9bcc-8c56c55c73c4"
+          },
+          {
+            "id": "eb63d22c-f06f-4b7e-b534-2636c8984285",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 624,
+            "digest": "49262677f1fd5da1e1b46580a428b64f3ba34202d9b1f1e3bcc51fc5813143b5",
+            "capturedAt": 1790259398166,
+            "validation": "valid",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sourcePath": "results/test-report.json",
+            "sessionId": "sess_9f23334a-c2d0-452f-b079-a274011da520",
+            "operationId": "c7d7500d-2a91-4907-9bcc-8c56c55c73c4"
+          },
+          {
+            "id": "3821ccb2-886b-4311-a42d-94904de8fb82",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "test",
+            "provenance": "native-test",
+            "bytes": 745,
+            "digest": "2fb1d506cd2082d80121df3af3b4f87af1073c8103b41bab92c8fb0434d769a2",
+            "capturedAt": 1790259398166,
+            "validation": "invalid",
+            "issue": "The native command did not exit successfully.\nThe native command did not exit successfully.\nThe native test report contains failures.\nNo executed test passed; all-skipped reports cannot pass.\nRequired test add-positive is missing, failed or skipped.\nRequired test add-negative is missing, failed or skipped.\nRequired test add-zero is missing, failed or skipped.",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sessionId": "sess_9f23334a-c2d0-452f-b079-a274011da520",
+            "operationId": "c7d7500d-2a91-4907-9bcc-8c56c55c73c4"
+          },
+          {
+            "id": "e0639a29-2f5e-4c98-8df1-380ca1060b0f",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "json",
+            "provenance": "native-test",
+            "bytes": 825,
+            "digest": "178490e041e07fbcb17606153f59e58fa28874a5f49219c6ab1abb4aa02bae75",
+            "capturedAt": 1790259398166,
+            "validation": "valid",
+            "sourceBaseline": "3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d",
+            "sessionId": "sess_9f23334a-c2d0-452f-b079-a274011da520",
+            "operationId": "c7d7500d-2a91-4907-9bcc-8c56c55c73c4"
+          },
+          {
+            "id": "167a39bf-4f12-4f33-b2c7-9b358774558a",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+            "attemptId": "28171c2e-9e04-42b0-b1b4-8fcf7fd79770",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "text",
+            "provenance": "native-agent-final",
+            "bytes": 272,
+            "digest": "e38a3d42d5fe89e13a1003f5e0c00e5909ad9414cf8ce24d94434497f6368709",
+            "capturedAt": 1790259398970,
+            "validation": "valid",
+            "sessionId": "sess_ae1c417a-357f-43b3-aa92-6f1acfaca870",
+            "inputId": "1353b2be-8950-414f-9b1f-5deed77c4843",
+            "commandId": "1353b2be-8950-414f-9b1f-5deed77c4843"
+          },
+          {
+            "id": "0201f768-b36d-4013-a878-aac514de61a2",
+            "runId": "d83e8d7c-6af8-4851-9c84-60ae8e7a08e8",
+            "nodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+            "attemptId": "28171c2e-9e04-42b0-b1b4-8fcf7fd79770",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "json",
+            "provenance": "native-agent-final",
+            "bytes": 272,
+            "digest": "e38a3d42d5fe89e13a1003f5e0c00e5909ad9414cf8ce24d94434497f6368709",
+            "capturedAt": 1790259398970,
+            "validation": "valid",
+            "sessionId": "sess_ae1c417a-357f-43b3-aa92-6f1acfaca870",
+            "inputId": "1353b2be-8950-414f-9b1f-5deed77c4843",
+            "commandId": "1353b2be-8950-414f-9b1f-5deed77c4843"
+          }
+        ],
+        "artifactBindings": [
+          {
+            "nodeId": "task",
+            "attemptId": "bdadad54-04ef-4fa4-9f82-27ee3ee0389c",
+            "selector": "final",
+            "artifactId": "5ff6786a-a372-43c9-951c-052fd3823b4e"
+          },
+          {
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "11d13fdf-7788-471a-a928-27809dc00a99",
+            "selector": "command",
+            "artifactId": "4eaa5bd3-8f7f-493d-a08d-5bd6c50b74be"
+          },
+          {
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "11d13fdf-7788-471a-a928-27809dc00a99",
+            "selector": "bin/Release/net8.0/Z4Fixture.dll",
+            "artifactId": "8c846c55-2cc9-4581-b81a-1f9f6b27fa8b"
+          },
+          {
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "11d13fdf-7788-471a-a928-27809dc00a99",
+            "selector": "bin/Release/net8.0/Z4Fixture.deps.json",
+            "artifactId": "f93f6c56-ec35-4808-89de-ea72f91b7556"
+          },
+          {
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "11d13fdf-7788-471a-a928-27809dc00a99",
+            "selector": "bin/Release/net8.0/Z4Fixture.runtimeconfig.json",
+            "artifactId": "60162fff-633a-4d54-8bff-35d4a83083bd"
+          },
+          {
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+            "selector": "command",
+            "artifactId": "88f16923-0e84-4da4-be62-3c833138e13a"
+          },
+          {
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+            "selector": "results/test-report.json",
+            "artifactId": "303479d5-5512-40d5-bb43-1b312125d61c"
+          },
+          {
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+            "selector": "test",
+            "artifactId": "aabf0605-d21f-4232-9775-28f186b9394a"
+          },
+          {
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "d246bb6e-41dc-42f4-a6af-8b2c423ea7b2",
+            "selector": "verification",
+            "artifactId": "0d132293-34ef-48ba-8e47-44d799efa9f8"
+          },
+          {
+            "nodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+            "attemptId": "89697a9c-d135-48c0-8191-88827a7a5cfb",
+            "selector": "final",
+            "artifactId": "0fd8cf11-bb77-40f4-a5ec-44594debd7f6"
+          },
+          {
+            "nodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+            "attemptId": "89697a9c-d135-48c0-8191-88827a7a5cfb",
+            "selector": "structured",
+            "artifactId": "e052d0b6-988b-404b-9a78-1d0b0c505d35"
+          },
+          {
+            "nodeId": "184fdb50-5b2d-4455-8626-584236de0072",
+            "attemptId": "ba62c6b5-0bd3-44b2-9b7a-61feb48ea04e",
+            "selector": "final",
+            "artifactId": "cf5d12d2-f318-48e5-9d9f-d5d26c19b5e2"
+          },
+          {
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "cf1e840b-0d38-4f74-9aba-fd65512e04b1",
+            "selector": "command",
+            "artifactId": "5e00887f-e10b-425b-b3c0-c0d9bb4d4704"
+          },
+          {
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "cf1e840b-0d38-4f74-9aba-fd65512e04b1",
+            "selector": "bin/Release/net8.0/Z4Fixture.dll",
+            "artifactId": "3a188fab-c066-4429-b5f4-508204dccf26"
+          },
+          {
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "cf1e840b-0d38-4f74-9aba-fd65512e04b1",
+            "selector": "bin/Release/net8.0/Z4Fixture.deps.json",
+            "artifactId": "70a3457a-6297-4fc7-ba05-7dcbed5e1b32"
+          },
+          {
+            "nodeId": "8d948755-e00c-417d-888d-c891dfb525a3",
+            "attemptId": "cf1e840b-0d38-4f74-9aba-fd65512e04b1",
+            "selector": "bin/Release/net8.0/Z4Fixture.runtimeconfig.json",
+            "artifactId": "1f38f39e-65e5-4ec0-9467-2b5536e4b64a"
+          },
+          {
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+            "selector": "command",
+            "artifactId": "51553757-298b-47fa-85b4-4930214d6f49"
+          },
+          {
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+            "selector": "results/test-report.json",
+            "artifactId": "eb63d22c-f06f-4b7e-b534-2636c8984285"
+          },
+          {
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+            "selector": "test",
+            "artifactId": "3821ccb2-886b-4311-a42d-94904de8fb82"
+          },
+          {
+            "nodeId": "5e7e9a31-9ff8-415c-875e-6b36506d7374",
+            "attemptId": "60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869",
+            "selector": "verification",
+            "artifactId": "e0639a29-2f5e-4c98-8df1-380ca1060b0f"
+          },
+          {
+            "nodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+            "attemptId": "28171c2e-9e04-42b0-b1b4-8fcf7fd79770",
+            "selector": "final",
+            "artifactId": "167a39bf-4f12-4f33-b2c7-9b358774558a"
+          },
+          {
+            "nodeId": "f6ed0d9b-2495-4ad6-afc1-82dd08432e35",
+            "attemptId": "28171c2e-9e04-42b0-b1b4-8fcf7fd79770",
+            "selector": "structured",
+            "artifactId": "0201f768-b36d-4013-a878-aac514de61a2"
+          }
+        ]
+      }
+    ]
+  },
+  "nativeLedger": [
+    {
+      "id": "queue_08b8f530-b496-44ff-9c7e-da1bc9dd8ed8",
+      "session_id": "sess_3b62ff7f-6caa-4817-9bfc-6e4485d51ccd",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Z5_IMPLEMENT: Read MathOps.cs and Runner.cs. Apply the explicitly staged initial synthetic implementation in MathOps.cs only. Preserve the runner. Do not build or run commands; separate native Tool nodes verify it. Return a concise result.",
+        "intent": {
+          "sourceCommandId": "08b8f530-b496-44ff-9c7e-da1bc9dd8ed8",
+          "queueItemId": "queue_08b8f530-b496-44ff-9c7e-da1bc9dd8ed8",
+          "clientId": "graph:bdadad54-04ef-4fa4-9f82-27ee3ee0389c",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790259388037,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "08b8f530-b496-44ff-9c7e-da1bc9dd8ed8",
+          "queueItemId": "queue_08b8f530-b496-44ff-9c7e-da1bc9dd8ed8",
+          "clientId": "graph:bdadad54-04ef-4fa4-9f82-27ee3ee0389c",
+          "kind": "sendText",
+          "text": "Z5_IMPLEMENT: Read MathOps.cs and Runner.cs. Apply the explicitly staged initial synthetic implementation in MathOps.cs only. Preserve the runner. Do not build or run commands; separate native Tool nodes verify it. Return a concise result.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790259388037
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790259388048,
+      "time_updated": 1790259388503
+    },
+    {
+      "id": "queue_c83e8faf-981d-4378-9e74-5edc744d57b1",
+      "session_id": "sess_64dcaa60-7a8f-4edb-bef9-662a031443d5",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Z5_REVIEW: Read MathOps.cs and results/test-report.json. Review this exact native verification; return the required structured reviewer record and its actual artifact ID. Do not edit or execute commands.\nZ5_VERIFICATION_BEGIN\n{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"d246bb6e-41dc-42f4-a6af-8b2c423ea7b2\",\"iterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"operationId\":\"41492502-3171-4e6f-8cb5-b1164b8dd41d\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"303479d5-5512-40d5-bb43-1b312125d61c\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}\nZ5_VERIFICATION_END",
+        "intent": {
+          "sourceCommandId": "c83e8faf-981d-4378-9e74-5edc744d57b1",
+          "queueItemId": "queue_c83e8faf-981d-4378-9e74-5edc744d57b1",
+          "clientId": "graph:89697a9c-d135-48c0-8191-88827a7a5cfb",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790259393232,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "c83e8faf-981d-4378-9e74-5edc744d57b1",
+          "queueItemId": "queue_c83e8faf-981d-4378-9e74-5edc744d57b1",
+          "clientId": "graph:89697a9c-d135-48c0-8191-88827a7a5cfb",
+          "kind": "sendText",
+          "text": "Z5_REVIEW: Read MathOps.cs and results/test-report.json. Review this exact native verification; return the required structured reviewer record and its actual artifact ID. Do not edit or execute commands.\nZ5_VERIFICATION_BEGIN\n{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"d246bb6e-41dc-42f4-a6af-8b2c423ea7b2\",\"iterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"operationId\":\"41492502-3171-4e6f-8cb5-b1164b8dd41d\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"303479d5-5512-40d5-bb43-1b312125d61c\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}\nZ5_VERIFICATION_END",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790259393232
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790259393237,
+      "time_updated": 1790259393617
+    },
+    {
+      "id": "queue_b1b0ed44-7237-4358-af18-5621d5f1728e",
+      "session_id": "sess_7ff9024f-e529-4bff-bf35-d4ab0084870c",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Z5_REPAIR: Read MathOps.cs. Use this exact previous iteration feedback to make the next bounded synthetic repair in MathOps.cs only. Preserve Runner.cs and tests. Do not build or execute commands.\nZ5_FEEDBACK_BEGIN\n{\"previousIterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"previousIteration\":0,\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"findings\":[{\"code\":\"add-positive\",\"message\":\"Expected 5; actual 6.\"},{\"code\":\"add-negative\",\"message\":\"Expected 0; actual 1.\"},{\"code\":\"add-zero\",\"message\":\"Expected 0; actual 1.\"}],\"observations\":[{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"digest\":\"9d5850b113c1dcf98fe4320909a29237517da87567c062af8ed9f28cf94bab64\",\"value\":{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"d246bb6e-41dc-42f4-a6af-8b2c423ea7b2\",\"iterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"operationId\":\"41492502-3171-4e6f-8cb5-b1164b8dd41d\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"303479d5-5512-40d5-bb43-1b312125d61c\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}}]}\nZ5_FEEDBACK_END",
+        "intent": {
+          "sourceCommandId": "b1b0ed44-7237-4358-af18-5621d5f1728e",
+          "queueItemId": "queue_b1b0ed44-7237-4358-af18-5621d5f1728e",
+          "clientId": "graph:ba62c6b5-0bd3-44b2-9b7a-61feb48ea04e",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790259394110,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "b1b0ed44-7237-4358-af18-5621d5f1728e",
+          "queueItemId": "queue_b1b0ed44-7237-4358-af18-5621d5f1728e",
+          "clientId": "graph:ba62c6b5-0bd3-44b2-9b7a-61feb48ea04e",
+          "kind": "sendText",
+          "text": "Z5_REPAIR: Read MathOps.cs. Use this exact previous iteration feedback to make the next bounded synthetic repair in MathOps.cs only. Preserve Runner.cs and tests. Do not build or execute commands.\nZ5_FEEDBACK_BEGIN\n{\"previousIterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"previousIteration\":0,\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"findings\":[{\"code\":\"add-positive\",\"message\":\"Expected 5; actual 6.\"},{\"code\":\"add-negative\",\"message\":\"Expected 0; actual 1.\"},{\"code\":\"add-zero\",\"message\":\"Expected 0; actual 1.\"}],\"observations\":[{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"digest\":\"9d5850b113c1dcf98fe4320909a29237517da87567c062af8ed9f28cf94bab64\",\"value\":{\"artifactId\":\"0d132293-34ef-48ba-8e47-44d799efa9f8\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"d246bb6e-41dc-42f4-a6af-8b2c423ea7b2\",\"iterationId\":\"de50b336-c69d-4ae8-85de-8e5011ecab52\",\"operationId\":\"41492502-3171-4e6f-8cb5-b1164b8dd41d\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"303479d5-5512-40d5-bb43-1b312125d61c\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}}]}\nZ5_FEEDBACK_END",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790259394110
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790259394115,
+      "time_updated": 1790259394505
+    },
+    {
+      "id": "queue_1353b2be-8950-414f-9b1f-5deed77c4843",
+      "session_id": "sess_ae1c417a-357f-43b3-aa92-6f1acfaca870",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Z5_REVIEW: Read MathOps.cs and results/test-report.json. Review this exact native verification; return the required structured reviewer record and its actual artifact ID. Do not edit or execute commands.\nZ5_VERIFICATION_BEGIN\n{\"artifactId\":\"e0639a29-2f5e-4c98-8df1-380ca1060b0f\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869\",\"iterationId\":\"3c3e2e0d-a123-4108-bf22-ab256cf82c66\",\"operationId\":\"c7d7500d-2a91-4907-9bcc-8c56c55c73c4\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"eb63d22c-f06f-4b7e-b534-2636c8984285\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}\nZ5_VERIFICATION_END",
+        "intent": {
+          "sourceCommandId": "1353b2be-8950-414f-9b1f-5deed77c4843",
+          "queueItemId": "queue_1353b2be-8950-414f-9b1f-5deed77c4843",
+          "clientId": "graph:28171c2e-9e04-42b0-b1b4-8fcf7fd79770",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790259398354,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "1353b2be-8950-414f-9b1f-5deed77c4843",
+          "queueItemId": "queue_1353b2be-8950-414f-9b1f-5deed77c4843",
+          "clientId": "graph:28171c2e-9e04-42b0-b1b4-8fcf7fd79770",
+          "kind": "sendText",
+          "text": "Z5_REVIEW: Read MathOps.cs and results/test-report.json. Review this exact native verification; return the required structured reviewer record and its actual artifact ID. Do not edit or execute commands.\nZ5_VERIFICATION_BEGIN\n{\"artifactId\":\"e0639a29-2f5e-4c98-8df1-380ca1060b0f\",\"runId\":\"d83e8d7c-6af8-4851-9c84-60ae8e7a08e8\",\"nodeId\":\"5e7e9a31-9ff8-415c-875e-6b36506d7374\",\"attemptId\":\"60574cd5-1fbc-40d6-b9c0-aa6a4d1eb869\",\"iterationId\":\"3c3e2e0d-a123-4108-bf22-ab256cf82c66\",\"operationId\":\"c7d7500d-2a91-4907-9bcc-8c56c55c73c4\",\"sourceDigest\":\"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\"buildDigest\":\"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\"reportArtifactId\":\"eb63d22c-f06f-4b7e-b534-2636c8984285\",\"outcome\":\"fail\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"failed\",\"message\":\"Expected 5; actual 6.\"},{\"name\":\"add-negative\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"},{\"name\":\"add-zero\",\"status\":\"failed\",\"message\":\"Expected 0; actual 1.\"}],\"testCount\":3,\"passed\":0,\"failed\":3,\"skipped\":0}\nZ5_VERIFICATION_END",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790259398354
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790259398360,
+      "time_updated": 1790259398747
+    }
+  ],
+  "nativeToolResults": [
+    {
+      "id": "z5_implement_read_initial",
+      "output": "1\tpublic static class MathOps\n2\t{\n3\t    public static int Add(int left, int right) => left + right + 2;\n4\t}\n5\t",
+      "observedAt": 1790259388662
+    },
+    {
+      "id": "z5_implement_runner_initial",
+      "output": "1\tusing System.Text.Json;\n2\t\n3\tvar values = new Dictionary<string, string>(StringComparer.Ordinal);\n4\tvar flags = new HashSet<string>(StringComparer.Ordinal);\n5\tfor (var index = 0; index < args.Length; index++)\n6\t{\n7\t    var argument = args[index];\n8\t    if (argument is \"--zero\" or \"--omit-report\" or \"--hold\" or \"--emit-synthetic-secret\")\n9\t        flags.Add(argument);\n10\t    else if (argument is \"--operation-id\" or \"--source-digest\" or \"--build-digest\" or \"--report\" or \"--ready-file\")\n11\t    {\n12\t        if (++index >= args.Length || !values.TryAdd(argument, args[index]))\n13\t            throw new ArgumentException(\"Missing or repeated configured fixture argument.\");\n14\t    }\n15\t    else throw new ArgumentException(\"Unknown configured fixture argument: \" + argument);\n16\t}\n17\tstring Required(string key) => values.TryGetValue(key, out var value) && value.Length > 0\n18\t    ? value : throw new ArgumentException(\"Missing configured fixture argument: \" + key);\n19\tstring WorkspaceFile(string relative)\n20\t{\n21\t    if (Path.IsPathRooted(relative)) throw new ArgumentException(\"Fixture report paths must be relative.\");\n22\t    var root = Path.GetFullPath(Environment.CurrentDirectory) + Path.DirectorySeparatorChar;\n23\t    var absolute = Path.GetFullPath(relative, root);\n24\t    if (!absolute.StartsWith(root, OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))\n25\t        throw new ArgumentException(\"Fixture output must remain within its synthetic workspace.\");\n26\t    return absolute;\n27\t}\n28\tvar operationId = Required(\"--operation-id\");\n29\tvar sourceDigest = Required(\"--source-digest\");\n30\tvar buildDigest = Required(\"--build-digest\");\n31\tvar reportPath = WorkspaceFile(Required(\"--report\"));\n32\tif (flags.Contains(\"--emit-synthetic-secret\"))\n33\t{\n34\t    var synthetic = Environment.GetEnvironmentVariable(\"Z4_FIXTURE_SECRET\") ?? throw new InvalidOperationException(\"Synthetic secret was not configured.\");\n35\t    Console.WriteLine(\"Synthetic stdout: \" + synthetic);\n36\t    Console.Error.WriteLine(\"Synthetic stderr: \" + synthetic);\n37\t}\n38\tif (flags.Contains(\"--hold\"))\n39\t{\n40\t    var readyPath = WorkspaceFile(Required(\"--ready-file\"));\n41\t    // 观察者会在进程运行时读取就绪文件；先写临时文件再原子重命名，避免读到尚未写完的 JSON。\n42\t    var readyTemporary = readyPath + \".tmp\";\n43\t    await File.WriteAllTextAsync(readyTemporary, JsonSerializer.Serialize(new\n44\t    {\n45\t        operationId,\n46\t        processId = Environment.ProcessId,\n47\t        state = \"actual-process-started\",\n48\t    }));\n49\t    File.Move(readyTemporary, readyPath);\n50\t    Console.WriteLine(\"Z4_FIXTURE_PROCESS_READY \" + operationId);\n51\t    await Task.Delay(Timeout.Infinite);\n52\t}\n53\tvar tests = new List<Dictionary<string, object>>();\n54\tvoid Check(string name, Func<int> calculation, int expected)\n55\t{\n56\t    try\n57\t    {\n58\t        var actual = calculation();\n59\t        if (actual != expected)\n60\t            throw new InvalidOperationException($\"Expected {expected}; actual {actual}.\");\n61\t        tests.Add(new() { [\"name\"] = name, [\"status\"] = \"passed\" });\n62\t    }\n63\t    catch (Exception error)\n64\t    {\n65\t        tests.Add(new() { [\"name\"] = name, [\"status\"] = \"failed\", [\"message\"] = error.Message });\n66\t    }\n67\t}\n68\tif (!flags.Contains(\"--zero\"))\n69\t{\n70\t    Check(\"add-positive\", () => MathOps.Add(2, 3), 5);\n71\t    Check(\"add-negative\", () => MathOps.Add(-2, 2), 0);\n72\t    Check(\"add-zero\", () => MathOps.Add(0, 0), 0);\n73\t}\n74\tvar report = new { format = \"zcode-test-v1\", operationId, sourceDigest, buildDigest, tests };\n75\tvar serialized = JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true });\n76\tif (!flags.Contains(\"--omit-report\")) await File.WriteAllTextAsync(reportPath, serialized);\n77\tConsole.WriteLine(serialized);\n78\treturn tests.Any(test => (string)test[\"status\"] != \"passed\") ? 1 : 0;\n79\t",
+      "observedAt": 1790259388736
+    },
+    {
+      "id": "z5_implement_edit_initial",
+      "output": "The file <isolated-profile>/workspace/MathOps.cs has been updated successfully. (file state is current in your context — no need to Read it back)",
+      "observedAt": 1790259389394
+    },
+    {
+      "id": "z5_review_read_de50b336-c69d-4ae8-85de-8e5011ecab52",
+      "output": "1\tpublic static class MathOps\n2\t{\n3\t    public static int Add(int left, int right) => left + right + 1;\n4\t}\n5\t",
+      "observedAt": 1790259393719
+    },
+    {
+      "id": "z5_review_report_de50b336-c69d-4ae8-85de-8e5011ecab52",
+      "output": "1\t{\n2\t  \"format\": \"zcode-test-v1\",\n3\t  \"operationId\": \"41492502-3171-4e6f-8cb5-b1164b8dd41d\",\n4\t  \"sourceDigest\": \"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\n5\t  \"buildDigest\": \"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\n6\t  \"tests\": [\n7\t    {\n8\t      \"name\": \"add-positive\",\n9\t      \"status\": \"failed\",\n10\t      \"message\": \"Expected 5; actual 6.\"\n11\t    },\n12\t    {\n13\t      \"name\": \"add-negative\",\n14\t      \"status\": \"failed\",\n15\t      \"message\": \"Expected 0; actual 1.\"\n16\t    },\n17\t    {\n18\t      \"name\": \"add-zero\",\n19\t      \"status\": \"failed\",\n20\t      \"message\": \"Expected 0; actual 1.\"\n21\t    }\n22\t  ]\n23\t}",
+      "observedAt": 1790259393775
+    },
+    {
+      "id": "z5_repair_read_de50b336-c69d-4ae8-85de-8e5011ecab52",
+      "output": "1\tpublic static class MathOps\n2\t{\n3\t    public static int Add(int left, int right) => left + right + 1;\n4\t}\n5\t",
+      "observedAt": 1790259394598
+    },
+    {
+      "id": "z5_review_read_3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+      "output": "1\tpublic static class MathOps\n2\t{\n3\t    public static int Add(int left, int right) => left + right + 1;\n4\t}\n5\t",
+      "observedAt": 1790259398846
+    },
+    {
+      "id": "z5_review_report_3c3e2e0d-a123-4108-bf22-ab256cf82c66",
+      "output": "1\t{\n2\t  \"format\": \"zcode-test-v1\",\n3\t  \"operationId\": \"c7d7500d-2a91-4907-9bcc-8c56c55c73c4\",\n4\t  \"sourceDigest\": \"3af6fe8fe94bb254957b25655535b00347820844deb0a62b6852d6320e3c295d\",\n5\t  \"buildDigest\": \"530f36f11af719deb205dd4e041ad9258e5877bdcfcf7bd8569592e4de0ebc85\",\n6\t  \"tests\": [\n7\t    {\n8\t      \"name\": \"add-positive\",\n9\t      \"status\": \"failed\",\n10\t      \"message\": \"Expected 5; actual 6.\"\n11\t    },\n12\t    {\n13\t      \"name\": \"add-negative\",\n14\t      \"status\": \"failed\",\n15\t      \"message\": \"Expected 0; actual 1.\"\n16\t    },\n17\t    {\n18\t      \"name\": \"add-zero\",\n19\t      \"status\": \"failed\",\n20\t      \"message\": \"Expected 0; actual 1.\"\n21\t    }\n22\t  ]\n23\t}",
+      "observedAt": 1790259398907
+    }
+  ],
+  "providerErrors": [],
+  "modelRequests": 16,
+  "collectedModelRequestCounts": {
+    "total": 16,
+    "byStage": {
+      "implement": {
+        "nativeExecution": 4,
+        "auxiliary": 1
+      },
+      "review": {
+        "nativeExecution": 6,
+        "auxiliary": 2
+      },
+      "repair": {
+        "nativeExecution": 2,
+        "auxiliary": 1
+      }
+    }
+  }
+}

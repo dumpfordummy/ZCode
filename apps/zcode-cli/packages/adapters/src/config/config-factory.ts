@@ -34,6 +34,8 @@ import {
 } from "./project-config.adapter.js";
 
 export interface ConfigFactoryOptions {
+  /** Inspect effective declarations without migrations or diagnostic log writes. */
+  metadataOnly?: boolean;
   /** Path to user config file (default: ~/.zcode/cli/config.json) */
   userConfigPath?: string;
   /** Path to project config file */
@@ -135,7 +137,7 @@ export function createConfig(options: ConfigFactoryOptions = {}): ConfigResult {
   // 2. User config file
   const userConfigResult: LoadedConfig = options.skipUserConfig
     ? { config: {}, diagnostics: [], path: getDefaultConfigPath(), loaded: false }
-    : loadFileConfig(options.userConfigPath);
+    : loadFileConfig(options.userConfigPath, { metadataOnly: options.metadataOnly });
 
   if (userConfigResult.loaded) {
     configs.push(
@@ -151,12 +153,13 @@ export function createConfig(options: ConfigFactoryOptions = {}): ConfigResult {
 
   // 3. Project config files
   const discoveredProjectConfigs: ProjectConfigDiscovery = options.workingDirectory
-    ? loadProjectConfigs(options.workingDirectory, options.projectConfigPath)
+    ? loadProjectConfigs(options.workingDirectory, options.projectConfigPath, options.metadataOnly)
     : options.projectConfigPath
       ? summarizeProjectConfigs([
           loadProjectConfigFile(options.projectConfigPath, {
             discoveryOrder: 0,
             explicitProjectConfig: true,
+            metadataOnly: options.metadataOnly,
           }),
         ])
       : summarizeProjectConfigs([]);
@@ -169,7 +172,7 @@ export function createConfig(options: ConfigFactoryOptions = {}): ConfigResult {
   const projectDiagnostics = discoveredProjectConfigs.diagnostics;
   // 配置 diagnostics 过去只返回给调用方，用户导出日志时看不到加载失败或被跳过的 MCP server。
   // 在汇总入口统一写 warn，保留具体文件路径和 JSON path，方便定位迁移配置问题。
-  logConfigDiagnostics({
+  if (!options.metadataOnly) logConfigDiagnostics({
     env: options.env,
     loggerFactory: options.loggerFactory,
     projectDiagnostics,

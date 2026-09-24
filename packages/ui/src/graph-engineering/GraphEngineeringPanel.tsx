@@ -1,11 +1,14 @@
 import { ArrowLeft } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button.js";
 import { useGraphEngineering } from "@/hooks/useGraphEngineering.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphEditor } from "./GraphEditor.js";
 import type { GraphPanelProps } from "./graphEngineeringView.js";
+import { GraphParallelPanel } from "./GraphParallelPanel.js";
 
 export default function GraphEngineeringPanel(props: GraphPanelProps) {
+  const [parallel, setParallel] = useState(false);
   const graph = useGraphEngineering(props);
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
@@ -20,6 +23,16 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
           {t("backToChat")}
         </Button>
         <h2 className="text-ui-base font-medium">{t("title")}</h2>
+        {graph.local ? (
+          <Button
+            variant={parallel ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => setParallel((value) => !value)}
+            data-testid="graph-parallel-toggle"
+          >
+            {t(parallel ? "z7.sequential" : "z7.title")}
+          </Button>
+        ) : null}
         <p
           className="min-w-0 flex-1 break-all font-mono text-ui-sm text-foreground-subtle"
           data-testid="graph-workspace"
@@ -39,6 +52,11 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
         <p className="p-4 text-ui-base" role="status">
           {t("loading")}
         </p>
+      ) : parallel ? (
+        <GraphParallelPanel
+          key={props.workspaceIdentity?.trim() || props.workspacePath}
+          {...props}
+        />
       ) : graph.view ? (
         <GraphEditor
           key={props.workspaceIdentity?.trim() || props.workspacePath}

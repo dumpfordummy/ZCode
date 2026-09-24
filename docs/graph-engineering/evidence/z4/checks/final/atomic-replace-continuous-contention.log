@@ -1,0 +1,31 @@
+✖ rapid atomic metadata replacement tolerates transient OS reader sharing without losing revisions (5396.5505ms)
+✔ atomic graph metadata files preserve definitions and isolate workspace identities (11.0459ms)
+✔ malformed persisted metadata fails closed instead of inventing an empty graph (6.466ms)
+✔ terminal records require correlated proof and coherent identity / timestamps (24.499ms)
+✔ only one Host owns graph metadata until release, with concurrent same-owner acquisition (127.0622ms)
+✔ disposal releases ownership acquired during an in-flight acquisition and rejects later writes (5.1188ms)
+✔ repository reuses native abandoned-lock recovery and does not hide filesystem failures (9.9053ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 6
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6342.4984
+
+✖ failing tests:
+
+test at packages\services\src\graph-engineering\adapters\repository.test.ts:1:304
+✖ rapid atomic metadata replacement tolerates transient OS reader sharing without losing revisions (5396.5505ms)
+  Error: EPERM: operation not permitted, rename 'C:\Users\USER\AppData\Local\Temp\z4-graph-replace-BGxpTW\.bab5e15f11bf61003a338bec234b391b99fe4f5b4a21ecdb9a283a67fded836c.json.26680.1790254200205.d47c723819006.tmp' -> 'C:\Users\USER\AppData\Local\Temp\z4-graph-replace-BGxpTW\bab5e15f11bf61003a338bec234b391b99fe4f5b4a21ecdb9a283a67fded836c.json'
+      at async rename (node:internal/fs/promises:782:10)
+      at async renameWithRetry (C:\Users\USER\Desktop\Personal\ZCode\packages\shared\src\node\privateFilePersistence.ts:39:7)
+      at async atomicWritePrivateTextFile (C:\Users\USER\Desktop\Personal\ZCode\packages\shared\src\node\privateFilePersistence.ts:101:5)
+      at async <anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\adapters\repository.ts:104:9) {
+    errno: -4048,
+    code: 'EPERM',
+    syscall: 'rename',
+    path: 'C:\\Users\\USER\\AppData\\Local\\Temp\\z4-graph-replace-BGxpTW\\.bab5e15f11bf61003a338bec234b391b99fe4f5b4a21ecdb9a283a67fded836c.json.26680.1790254200205.d47c723819006.tmp',
+    dest: 'C:\\Users\\USER\\AppData\\Local\\Temp\\z4-graph-replace-BGxpTW\\bab5e15f11bf61003a338bec234b391b99fe4f5b4a21ecdb9a283a67fded836c.json'
+  }

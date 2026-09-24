@@ -1,0 +1,347 @@
+{
+  "scenario": "presentation",
+  "home": "<isolated-profile>",
+  "workspace": "<isolated-profile>\\workspace",
+  "assertions": [
+    "The actual native editor creates the version-5 repair region, named condition exits, exact artifact/repair-feedback bindings, native recipes, finite limits and required final gate."
+  ],
+  "screenshots": [
+    "<isolated-profile>\\z5-readable-region-condition.png",
+    "<isolated-profile>\\z5-explicit-repair-limits.png",
+    "<isolated-profile>\\z5-failure.png"
+  ],
+  "ids": {
+    "initial": "task",
+    "build": "507fe8cc-e72e-445d-99a7-edfad55edfe7",
+    "test": "b8ebe935-d25b-4bc0-8934-4254acc0c33a",
+    "reviewer": "32a3a51f-5861-4773-beb4-741199cec78b",
+    "repair": "f5bf5a37-ae02-49bf-b08c-595411303495",
+    "decision": "0b1d1a5f-11d6-4b5f-9538-f399dc47cd6e",
+    "finalGate": "f22efcdb-e511-4b46-90f0-22eaacd20411",
+    "admissions": 12,
+    "deadline": 600000
+  },
+  "status": "FAIL",
+  "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('graph-select-node-0b1d1a5f-11d6-4b5f-9538-f399dc47cd6e')\u001b[22m\n\n    at selectNode (<checkout>\\scripts\\graph-engineering\\z2-native-helpers.mjs:159:55)\n    at <checkout>\\scripts\\graph-engineering\\z5-native-presentation.mjs:97:9",
+  "body": "命令面板\n\n搜索并执行当前工作区可用的命令。\n\n新建任务\nCtrl+N\n搜索\nCtrl+K\n图工程\n自动化\n插件市场\n分组\n项目\n项目\nworkspace\n暂无任务\n任务\n还没有任务\n连接使用\n移动端远程控制\n返回对话\n图工程\n\n<isolated-profile>\\workspace\n\n设计\n运行记录\n固定运行快照：已提交的定义与配置\n\n暂无运行记录。保存或打开图不会启动智能体任务。\n\n所有任务共用此工作区。其他对话及编辑器仍可修改文件，请避免并发编辑。新运行可能重复之前的副作用。",
+  "finalRecord": {
+    "version": 5,
+    "workspaceKey": "<isolated-profile>\\workspace",
+    "definition": {
+      "version": 5,
+      "revision": 2,
+      "name": "Z5 bounded native C# complete",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 74.71814671814671,
+            "y": -173.40540540540542
+          },
+          "type": "start",
+          "request": ""
+        },
+        {
+          "id": "task",
+          "position": {
+            "x": 314.7181467181467,
+            "y": -173.40540540540542
+          },
+          "type": "task",
+          "name": "Implement",
+          "instructions": "Z5_IMPLEMENT: Read MathOps.cs and Runner.cs. Apply the explicitly staged initial synthetic implementation in MathOps.cs only. Preserve the runner. Do not build or run commands; separate native Tool nodes verify it. Return a concise result.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 907.4343629343631,
+            "y": 217.17374517374517
+          },
+          "type": "end",
+          "outputNodeId": "b8ebe935-d25b-4bc0-8934-4254acc0c33a"
+        },
+        {
+          "id": "507fe8cc-e72e-445d-99a7-edfad55edfe7",
+          "position": {
+            "x": 560.9420849420849,
+            "y": -173.40540540540542
+          },
+          "type": "tool",
+          "name": "Build",
+          "recipeId": "fixture-build"
+        },
+        {
+          "id": "b8ebe935-d25b-4bc0-8934-4254acc0c33a",
+          "position": {
+            "x": 799.2432432432432,
+            "y": -173.40540540540542
+          },
+          "type": "tool",
+          "name": "Test",
+          "recipeId": "fixture-test"
+        },
+        {
+          "id": "32a3a51f-5861-4773-beb4-741199cec78b",
+          "position": {
+            "x": 820.5559845559844,
+            "y": 17.54440154440155
+          },
+          "type": "task",
+          "name": "Reviewer",
+          "instructions": "Z5_REVIEW: Read MathOps.cs and results/test-report.json. Review this exact native verification; return the required structured reviewer record and its actual artifact ID. Do not edit or execute commands.\nZ5_VERIFICATION_BEGIN\n{{inputs.verification}}\nZ5_VERIFICATION_END",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "verification",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "b8ebe935-d25b-4bc0-8934-4254acc0c33a",
+                "selector": "verification"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          },
+          "output": {
+            "kind": "json",
+            "schema": {
+              "type": "object",
+              "required": ["outcome", "findings", "evidenceReferences"],
+              "additionalProperties": false,
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "enum": ["pass", "needs_changes", "needs_human"]
+                },
+                "findings": {
+                  "type": "array",
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "required": ["code", "message"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "message": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    }
+                  }
+                },
+                "evidenceReferences": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 8,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "f5bf5a37-ae02-49bf-b08c-595411303495",
+          "position": {
+            "x": 403.55212355212353,
+            "y": 17.54440154440155
+          },
+          "type": "task",
+          "name": "Repair",
+          "instructions": "Z5_REPAIR: Read MathOps.cs. Use this exact previous iteration feedback to make the next bounded synthetic repair in MathOps.cs only. Preserve Runner.cs and tests. Do not build or execute commands.\nZ5_FEEDBACK_BEGIN\n{{inputs.feedback}}\nZ5_FEEDBACK_END",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "feedback",
+              "source": {
+                "kind": "repair-feedback"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "0b1d1a5f-11d6-4b5f-9538-f399dc47cd6e",
+          "position": {
+            "x": 602.7953667953668,
+            "y": 17.54440154440155
+          },
+          "type": "condition",
+          "name": "Decide from current evidence",
+          "inputs": [
+            {
+              "alias": "review",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "32a3a51f-5861-4773-beb4-741199cec78b",
+                "selector": "structured"
+              }
+            },
+            {
+              "alias": "machine",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "b8ebe935-d25b-4bc0-8934-4254acc0c33a",
+                "selector": "verification"
+              }
+            }
+          ],
+          "branches": [
+            {
+              "exit": "pass",
+              "predicate": {
+                "op": "eq",
+                "alias": "review",
+                "pointer": "/outcome",
+                "value": "pass"
+              }
+            },
+            {
+              "exit": "needs_changes",
+              "predicate": {
+                "op": "eq",
+                "alias": "review",
+                "pointer": "/outcome",
+                "value": "needs_changes"
+              }
+            }
+          ],
+          "defaultExit": "needs_human",
+          "errorPolicy": "needs-human",
+          "verification": {
+            "testNodeIds": ["b8ebe935-d25b-4bc0-8934-4254acc0c33a"],
+            "reviewerNodeId": "32a3a51f-5861-4773-beb4-741199cec78b",
+            "successExit": "pass"
+          }
+        },
+        {
+          "id": "f22efcdb-e511-4b46-90f0-22eaacd20411",
+          "position": {
+            "x": 654.4864864864865,
+            "y": 217.17374517374517
+          },
+          "type": "approval",
+          "name": "Final human review",
+          "reviewInstructions": "Review this exact iteration's native evidence. This gate does not authorize publication or answer native permissions.",
+          "evidence": [
+            {
+              "alias": "evidence",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "b8ebe935-d25b-4bc0-8934-4254acc0c33a",
+                "selector": "test"
+              }
+            }
+          ],
+          "commentPolicy": "required"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "task"
+        },
+        {
+          "source": "task",
+          "target": "507fe8cc-e72e-445d-99a7-edfad55edfe7"
+        },
+        {
+          "source": "507fe8cc-e72e-445d-99a7-edfad55edfe7",
+          "target": "b8ebe935-d25b-4bc0-8934-4254acc0c33a"
+        },
+        {
+          "source": "b8ebe935-d25b-4bc0-8934-4254acc0c33a",
+          "target": "32a3a51f-5861-4773-beb4-741199cec78b"
+        },
+        {
+          "source": "32a3a51f-5861-4773-beb4-741199cec78b",
+          "target": "0b1d1a5f-11d6-4b5f-9538-f399dc47cd6e"
+        },
+        {
+          "source": "f5bf5a37-ae02-49bf-b08c-595411303495",
+          "target": "507fe8cc-e72e-445d-99a7-edfad55edfe7"
+        },
+        {
+          "source": "f22efcdb-e511-4b46-90f0-22eaacd20411",
+          "target": "end"
+        },
+        {
+          "source": "0b1d1a5f-11d6-4b5f-9538-f399dc47cd6e",
+          "target": "f22efcdb-e511-4b46-90f0-22eaacd20411",
+          "sourcePort": "pass"
+        },
+        {
+          "source": "0b1d1a5f-11d6-4b5f-9538-f399dc47cd6e",
+          "target": "f5bf5a37-ae02-49bf-b08c-595411303495",
+          "sourcePort": "needs_changes"
+        },
+        {
+          "source": "0b1d1a5f-11d6-4b5f-9538-f399dc47cd6e",
+          "target": "f22efcdb-e511-4b46-90f0-22eaacd20411",
+          "sourcePort": "needs_human"
+        }
+      ],
+      "routing": {
+        "finalGateId": "f22efcdb-e511-4b46-90f0-22eaacd20411",
+        "limits": {
+          "maxNodeAdmissions": 12,
+          "deadlineMs": 600000
+        },
+        "region": {
+          "id": "f1b8edac-f2fa-41fb-96e6-dd037ca892cd",
+          "name": "Bounded C# repair",
+          "entryNodeId": "task",
+          "repairEntryNodeId": "f5bf5a37-ae02-49bf-b08c-595411303495",
+          "decisionNodeId": "0b1d1a5f-11d6-4b5f-9538-f399dc47cd6e",
+          "bodyNodeIds": [
+            "task",
+            "507fe8cc-e72e-445d-99a7-edfad55edfe7",
+            "b8ebe935-d25b-4bc0-8934-4254acc0c33a",
+            "32a3a51f-5861-4773-beb4-741199cec78b",
+            "f5bf5a37-ae02-49bf-b08c-595411303495",
+            "0b1d1a5f-11d6-4b5f-9538-f399dc47cd6e"
+          ],
+          "repairExit": "needs_changes",
+          "passExit": "pass",
+          "maxRepairIterations": 2,
+          "stopOnNoProgress": true,
+          "sourcePaths": [
+            "Z4Fixture.csproj",
+            "MathOps.cs",
+            "Runner.cs",
+            "global.json",
+            "NuGet.Config",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props"
+          ]
+        }
+      }
+    },
+    "runs": []
+  },
+  "nativeLedger": [],
+  "nativeToolResults": [],
+  "providerErrors": [],
+  "modelRequests": 0,
+  "collectedModelRequestCounts": {
+    "total": 0,
+    "byStage": {}
+  }
+}

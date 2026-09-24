@@ -558,8 +558,8 @@ export function loadMarketplaceManifestSync(
   return parseMarketplaceManifest(parsed);
 }
 
-function loadInstalledPluginsSync(storageRoot: string): InstalledPluginsState {
-  const parsed = readJsonFileSync(join(storageRoot, INSTALLED_PLUGINS_FILE));
+function loadInstalledPluginsSync(storageRoot: string, metadataOnly = false): InstalledPluginsState {
+  const parsed = readJsonFileSync(join(storageRoot, INSTALLED_PLUGINS_FILE), metadataOnly);
   return normalizeInstalledPluginsState(parsed);
 }
 
@@ -570,18 +570,19 @@ async function saveInstalledPlugins(
   await writeJsonFile(join(storageRoot, INSTALLED_PLUGINS_FILE), state);
 }
 
-export function listInstalledPluginRecords(storageRoot: string): InstalledPluginRecord[] {
-  return loadInstalledPluginsSync(storageRoot).plugins;
+export function listInstalledPluginRecords(storageRoot: string, metadataOnly = false): InstalledPluginRecord[] {
+  return loadInstalledPluginsSync(storageRoot, metadataOnly).plugins;
 }
 
 export function resolveInstalledPluginRoot(
   storageRoot: string,
   record: InstalledPluginRecord,
+  metadataOnly = false,
 ): string {
   const root =
     record.installPath ||
     getPluginCacheDir(storageRoot, record.marketplace, record.name, record.version);
-  return recoverAtomicTargetSync(root);
+  return metadataOnly ? root : recoverAtomicTargetSync(root);
 }
 
 export async function installMarketplacePlugin(input: {
@@ -2613,8 +2614,9 @@ function isPluginMarketplaceManifest(value: unknown): value is PluginMarketplace
   );
 }
 
-function readJsonFileSync(path: string): unknown {
-  const readablePath = recoverAtomicTargetSync(path);
+function readJsonFileSync(path: string, metadataOnly = false): unknown {
+  // 预检不能修复中断的安装事务；恢复会改名/删除文件，必须保留给显式安装流程。
+  const readablePath = metadataOnly ? path : recoverAtomicTargetSync(path);
   try {
     return JSON.parse(readFileSync(readablePath, "utf8")) as unknown;
   } catch {

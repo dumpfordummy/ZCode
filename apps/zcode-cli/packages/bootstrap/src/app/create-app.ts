@@ -1,4 +1,5 @@
 import { isAbsolute, join, resolve } from "node:path";
+import { createNativeRecipeOperations } from "./native-recipe-operations.js";
 import {
   createInMemorySessionEventStore,
   createNodeToolArtifactStore,
@@ -882,6 +883,13 @@ export async function createZCodeApp(options: ZCodeAppOptions): Promise<ZCodeApp
     });
 
     const closeSession = sessionFacade.close;
+    const nativeRecipes = createNativeRecipeOperations({
+      runtime,
+      sessionId,
+      workingDirectory,
+      traceContext,
+      env: options.env ?? process.env,
+    });
     const resolvePromptAttachment = async (input: {
       ref: string;
       mime: string;
@@ -921,6 +929,7 @@ export async function createZCodeApp(options: ZCodeAppOptions): Promise<ZCodeApp
     };
     return {
       sessionId,
+      nativeRecipes,
       traceId: traceContext.traceId,
       runtime,
       respondWorkspaceHookReview: (input) =>
@@ -1108,6 +1117,7 @@ export async function createZCodeApp(options: ZCodeAppOptions): Promise<ZCodeApp
       ...sessionFacade,
       close: async () => {
         try {
+          await nativeRecipes.close();
           await closeSession?.();
         } finally {
           try {

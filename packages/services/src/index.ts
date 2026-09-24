@@ -25,10 +25,50 @@ export {
 
 // Accessor
 export { IGraphEngineeringService } from "./graph-engineering/contract.js";
+export * from "./graph-engineering/workflow-contract.js";
+export * from "./graph-engineering/parallel-contract.js";
+export type {
+  GraphPredicate,
+  GraphConditionNode,
+  GraphRepairRegion,
+  GraphRoutingDefinition,
+  GraphConditionAttempt,
+  GraphIteration,
+  GraphRouteCheckpoint,
+  GraphRoutingState,
+  GraphRunStartCommand,
+  GraphRunContinueCommand,
+} from "./graph-engineering/contract.js";
+export type {
+  GraphToolNode,
+  GraphToolAttempt,
+  GraphToolOperation,
+  GraphCommandResult,
+  GraphToolVerification,
+  GraphArtifactSource,
+  GraphArtifactContent,
+  GraphArtifactRequest,
+  GraphArtifact,
+  GraphArtifactType,
+  GraphArtifactProvenance,
+  GraphJsonSchema,
+  GraphJsonValue,
+  GraphRecipe,
+  GraphRecipeSnapshot,
+  GraphRecipeVerifier,
+} from "./graph-engineering/contract.js";
 export type {
   GraphDefinition,
   GraphLegacyDefinition,
   GraphSequentialDefinition,
+  GraphApprovalNode,
+  GraphApprovalAttempt,
+  GraphApprovalRequest,
+  GraphApprovalEvidence,
+  GraphApprovalEvidenceSource,
+  GraphApprovalDecision,
+  GraphApprovalCommand,
+  GraphSourceSnapshot,
   GraphLegacyRun,
   GraphSequentialRun,
   GraphNativeSettings,

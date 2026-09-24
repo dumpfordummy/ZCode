@@ -60,6 +60,8 @@ import { getCliStorageRoot, getPluginStorageRoot } from "./app/paths.js";
 import { withPluginStorageLock } from "./lib/plugin-storage-lock.js";
 
 export interface ResolveZCodePluginsOptions {
+  /** Preview only installed metadata; never seed bundled plugins or materialize commands. */
+  metadataOnly?: boolean;
   configResult?: ConfigResult;
   env?: NodeJS.ProcessEnv;
   logger?: Logger;
@@ -253,7 +255,7 @@ export function resolveZCodePlugins(options: ResolveZCodePluginsOptions = {}): P
   return discoverNodePluginsSync({
     config: configResult.config.plugins,
     env: options.env ?? process.env,
-    officialPluginRoots: resolveOfficialPluginRoots({
+    officialPluginRoots: options.metadataOnly ? (options.officialPluginRoots ?? []) : resolveOfficialPluginRoots({
       extraRoots: options.officialPluginRoots,
       // cache 锁冲突已从 fatal 改为 degraded，普通插件入口也必须保留诊断日志。
       logger: options.logger,
@@ -263,7 +265,7 @@ export function resolveZCodePlugins(options: ResolveZCodePluginsOptions = {}): P
     officialPluginsEnabledByDefault: DEFAULT_ENABLED_OFFICIAL_PLUGIN_IDS,
     storageRoot: pluginStorageRoot,
     workingDirectory,
-  });
+  }, { metadataOnly: options.metadataOnly });
 }
 
 export function getZCodePluginsOverview(
@@ -444,6 +446,7 @@ export async function setZCodePluginEnabled(
     options.configResult ??
     createConfig({
       env: options.env,
+      metadataOnly: options.metadataOnly,
       projectConfigPath: options.projectConfigPath,
       workingDirectory,
       skipUserConfig: options.skipUserConfig,

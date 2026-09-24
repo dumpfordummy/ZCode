@@ -5,11 +5,12 @@ import type {
   GraphRun,
   GraphSequentialRun,
   GraphTerminalProof,
+  GraphToolAttempt,
 } from "../contract.js";
 import { resolveGraphInstructions } from "./bindings.js";
 import { workspaceKey } from "./definition.js";
 
-type Attempt = GraphLegacyRun | GraphNodeAttempt;
+type Attempt = GraphLegacyRun | GraphNodeAttempt | GraphToolAttempt;
 const RELEASABLE_STATUSES = new Set(["Interrupted", "Unknown", "CancelRequested"]);
 const PRE_SEND_PHASES = new Set(["planned", "creating", "created"]);
 const PRE_SEND_STATUSES = new Set([
@@ -32,6 +33,25 @@ function sameTerminal(left: GraphTerminalProof, right: GraphTerminalProof): bool
 }
 
 function proofMatches(run: GraphRun, attempt: Attempt, proof: GraphInactivityProof): boolean {
+  if ("operationId" in attempt) {
+    if (proof.kind === "never-submitted")
+      return (
+        proof.commandId === attempt.operationId &&
+        proof.dispatchPhase === attempt.dispatchPhase &&
+        PRE_SEND_PHASES.has(attempt.dispatchPhase) &&
+        !attempt.operation
+      );
+    if (proof.kind !== "tool-terminal") return false;
+    return (
+      proof.operationId === attempt.operationId &&
+      proof.sessionId === attempt.sessionId &&
+      proof.runtimeIdentity === attempt.runtimeIdentity &&
+      proof.completedAt === attempt.operation?.completedAt &&
+      proof.status === attempt.operation.status &&
+      (!attempt.operation.processStarted || attempt.operation.result?.processExitObserved === true)
+    );
+  }
+  if (proof.kind === "tool-terminal") return false;
   if (proof.kind === "never-submitted") {
     return (
       "dispatchPhase" in attempt &&
@@ -77,7 +97,22 @@ function bindingsMatch(run: GraphSequentialRun, attempt: GraphNodeAttempt): bool
   const task = run.definition.nodes.find((node) => node.id === attempt.nodeId);
   if (task?.type !== "task") return false;
   try {
-    const expected = resolveGraphInstructions(task, run.definition, run.nodeAttempts);
+    const expected = resolveGraphInstructions(
+      task,
+      run.definition,
+      run.version === 5
+        ? run.nodeAttempts.filter(
+            (a) =>
+              run.routing?.iterations.find((i) => i.id === attempt.iterationId)?.attemptIds[
+                a.nodeId
+              ] === a.attemptId,
+          )
+        : run.nodeAttempts,
+      attempt.bindings.filter(
+        (b) => b.source.kind === "artifact" || b.source.kind === "repair-feedback",
+      ),
+      run.provenance,
+    );
     return (
       expected.instructions === attempt.resolvedInstructions &&
       expected.bindings.length === attempt.bindings.length &&
@@ -91,7 +126,9 @@ function bindingsMatch(run: GraphSequentialRun, attempt: GraphNodeAttempt): bool
           binding.text === stored.text &&
           binding.sourceSessionId === stored.sourceSessionId &&
           binding.sourceInputId === stored.sourceInputId &&
-          binding.sourceCommandId === stored.sourceCommandId
+          binding.sourceCommandId === stored.sourceCommandId &&
+          binding.artifactId === stored.artifactId &&
+          JSON.stringify(binding.source) === JSON.stringify(stored.source)
         );
       })
     );
@@ -104,7 +141,8 @@ function bindingsMatch(run: GraphSequentialRun, attempt: GraphNodeAttempt): bool
 export function releaseAuditErrors(run: GraphRun): string[] {
   if (!run.release) return [];
   const errors: string[] = [];
-  const attempts: Attempt[] = run.version === 2 ? run.nodeAttempts : [run];
+  const attempts: Attempt[] =
+    run.version !== undefined ? [...run.nodeAttempts, ...(run.toolAttempts ?? [])] : [run];
   const inspection = run.release.inspection;
   const proofs = new Map(inspection.attempts.map((attempt) => [attempt.attemptId, attempt]));
   // 旧实现只验证存在一个 inactive 项；复制别的任务证明就可能在冷读时错误释放所有输入。
@@ -129,7 +167,10 @@ export function releaseAuditErrors(run: GraphRun): string[] {
       errors.push(`Graph release evidence does not match attempt ${attempt.attemptId}.`);
     }
   }
-  if (run.version === 2 && run.nodeAttempts.some((attempt) => !bindingsMatch(run, attempt))) {
+  if (
+    run.version !== undefined &&
+    run.nodeAttempts.some((attempt) => !bindingsMatch(run, attempt))
+  ) {
     errors.push("Graph release contains changed resolved instructions or handoff source evidence.");
   }
   return errors;

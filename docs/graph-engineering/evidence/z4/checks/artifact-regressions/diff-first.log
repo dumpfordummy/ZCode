@@ -1,0 +1,33 @@
+✔ artifact immutable retry, ownership and tamper detection (47.4681ms)
+✔ declared capture retains HTML as data and displays unsafe/binary/oversized failures (47.4036ms)
+✔ workspace junction capture and fingerprint refuse external files (10.0569ms)
+✔ secret-bearing retained copy is marked incomplete, while binary fingerprints retain only metadata (14.6249ms)
+✔ file observations distinguish missing, stale and refreshed output without changing content digest (18.1047ms)
+✖ explicit declared diff snapshots retain exact inert text under the same capture rules (12.7111ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 899.1319
+
+✖ failing tests:
+
+test at packages\services\src\graph-engineering\adapters\artifacts.test.ts:1:5239
+✖ explicit declared diff snapshots retain exact inert text under the same capture rules (12.7111ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  'file' !== 'diff'
+  
+      at TestContext.<anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\adapters\artifacts.test.ts:155:10)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'file',
+    expected: 'diff',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

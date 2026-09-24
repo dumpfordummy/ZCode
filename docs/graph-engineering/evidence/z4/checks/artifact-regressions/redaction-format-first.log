@@ -1,0 +1,37 @@
+✔ artifact immutable retry, ownership and tamper detection (54.6515ms)
+✔ declared capture retains HTML as data and displays unsafe/binary/oversized failures (56.4172ms)
+✔ workspace junction capture and fingerprint refuse external files (11.4348ms)
+✔ secret-bearing retained copy is marked incomplete, while binary fingerprints retain only metadata (16.606ms)
+✔ file observations distinguish missing, stale and refreshed output without changing content digest (18.6047ms)
+✔ explicit declared diff snapshots retain exact inert text under the same capture rules (17.4548ms)
+✖ native JSON formatting normalization preserves exact pretty report bytes without marking redacted (14.5262ms)
+✔ semantic redaction preservation cannot restore actual secrets or duplicate-hidden secrets (23.8528ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1012.4596
+
+✖ failing tests:
+
+test at packages\services\src\graph-engineering\adapters\artifacts.test.ts:1:5843
+✖ native JSON formatting normalization preserves exact pretty report bytes without marking redacted (14.5262ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'incomplete'
+  - 'valid'
+  
+      at TestContext.<anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\adapters\artifacts.test.ts:173:10)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'incomplete',
+    expected: 'valid',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

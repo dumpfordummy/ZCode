@@ -21,6 +21,13 @@ import { bashOutputDisplaySchema } from "../bash-output-display.js";
 export * from "../background-bash-output.js";
 import { executionOutputPreviewSchema } from "../execution-output-preview.js";
 import { z } from "zod";
+export { zcodeExecutionEnvironmentPreviewSchema } from "../zcode-execution-environment.js";
+import {
+  zcodeRecipeStartParamsSchema,
+  zcodeRecipeTargetSchema,
+  zcodeRecipeSnapshotSchema,
+} from "../native-recipe.js";
+export * from "../native-recipe.js";
 export * from "../process-diagnostic.js";
 import { errorAttributionSchema } from "../zcode-protocol-v4/snapshot.js";
 import { modelSelectionSchema } from "../model-selection.js";
@@ -587,6 +594,24 @@ const zcodeTurnInputSourceSchema = legacyZcodeSyntheticUserMessageSourceSchema;
 export const zcodeSessionPersistenceSchema = z.enum(["immediate", "deferred"]);
 export type ZCodeSessionPersistence = z.infer<typeof zcodeSessionPersistenceSchema>;
 export type ZCodeWorkspaceRef = z.infer<typeof zcodeWorkspaceRefSchema>;
+export const zcodeExecutionEnvironmentPreviewParamsSchema = z
+  .object({
+    workspace: zcodeWorkspaceRefSchema,
+    executables: z
+      .array(
+        z
+          .string()
+          .min(1)
+          .max(1024)
+          .refine(
+            (value) => !Array.from(value).some((character) => character.charCodeAt(0) < 32),
+            "Executable contains control characters.",
+          ),
+      )
+      .max(32)
+      .optional(),
+  })
+  .strict();
 export const zcodePermissionOptionSchema = z
   .object({
     optionId: nonEmptyString,
@@ -3563,6 +3588,9 @@ export const zcodeOffPeakListResultSchema = z
 export type ZCodeOffPeakListProtocolResult = z.infer<typeof zcodeOffPeakListResultSchema>;
 
 export const zcodeProtocolMethods = {
+  sessionRecipeStart: "session/recipe/start",
+  sessionRecipeInspect: "session/recipe/inspect",
+  sessionRecipeCancel: "session/recipe/cancel",
   runtimeCapabilities: "runtime/capabilities",
   computerUseOperationEvent: "computer-use/operation-event",
   sessionCreate: "session/create",
@@ -3600,6 +3628,7 @@ export const zcodeProtocolMethods = {
   sessionSetThoughtLevel: "session/setThoughtLevel",
   sessionSetMode: "session/setMode",
   workspaceReadPresentation: "workspace/readPresentation",
+  workspacePreviewExecutionEnvironment: "workspace/previewExecutionEnvironment",
   workspaceHookTrustGrant: "workspace/hooks/trustGrant",
   // 进程级 Account Provider Config 与 workspace 运行目录分离。
   providerUpdateAccountConfig: "provider/updateAccountConfig",
@@ -3675,6 +3704,18 @@ export const zcodeProtocolEmptyResultSchema = z.object({}).strict();
 // 最新 V4 主链已不再依赖旧版全量方法表；这里仅保留仍被兼容测试和 browser broker
 // 消费的最小契约集合，避免重新引入已移除的 legacy 方法。
 export const zcodeProtocolSessionMethodContracts = {
+  [zcodeProtocolMethods.sessionRecipeStart]: {
+    params: zcodeRecipeStartParamsSchema,
+    result: zcodeRecipeSnapshotSchema,
+  },
+  [zcodeProtocolMethods.sessionRecipeInspect]: {
+    params: zcodeRecipeTargetSchema,
+    result: zcodeRecipeSnapshotSchema,
+  },
+  [zcodeProtocolMethods.sessionRecipeCancel]: {
+    params: zcodeRecipeTargetSchema,
+    result: zcodeRecipeSnapshotSchema,
+  },
   [zcodeProtocolMethods.workspaceHookTrustGrant]: {
     params: zcodeWorkspaceHookTrustGrantParamsSchema,
     result: zcodeWorkspaceHookTrustGrantResultSchema,

@@ -35,5 +35,7 @@ export interface PluginComponents {
 }
 
 export interface PluginAbortOptions {
+  /** No plugin data directories or generated command files during inventory. */
+  metadataOnly?: boolean;
   signal?: AbortSignal;
 }

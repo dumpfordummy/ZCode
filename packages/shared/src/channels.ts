@@ -74,6 +74,8 @@ import type {
 /** RPC 服务频道名。与 ServiceDescriptor.channelName 对应。 */
 export const ServiceChannels = {
   GraphEngineering: "graphEngineering",
+  GraphWorkflow: "graphWorkflow",
+  GraphParallel: "graphParallel",
   File: "file",
   MediaPreview: "media-preview",
   System: "system",

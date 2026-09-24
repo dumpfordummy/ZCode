@@ -13,11 +13,20 @@ const directory = path.join(profile, "data/.zcode/v2/graph-engineering");
 const originalWrite = fs.writeFile;
 let held = false;
 fs.writeFile = async function (file, content, options) {
+  // Graph 复用已有私有原子写入器后临时名加入 PID/时间；只接受同一隔离目录内已知两种哈希文件名。
+  const temporary =
+    typeof file === "string"
+      ? path
+          .basename(file)
+          .match(
+            /^(?:([a-f0-9]{64})\.json\.[a-f0-9-]+|\.([a-f0-9]{64})\.json\.\d+\.\d+\.[a-f0-9]+)\.tmp$/,
+          )
+      : null;
   if (
     !held &&
     typeof file === "string" &&
     path.dirname(path.resolve(file)) === directory &&
-    /^[a-f0-9]{64}\.json\.[a-f0-9-]+\.tmp$/.test(path.basename(file)) &&
+    temporary &&
     typeof content === "string"
   ) {
     const proposed = JSON.parse(content);
@@ -29,7 +38,7 @@ fs.writeFile = async function (file, content, options) {
       !run.nodeAttempts[1].sessionId
     ) {
       held = true;
-      const destination = file.replace(/\.[a-f0-9-]+\.tmp$/, "");
+      const destination = path.join(directory, `${temporary[1] ?? temporary[2]}.json`);
       const persisted = JSON.parse(await fs.readFile(destination, "utf8"));
       const previous = persisted.runs.at(-1);
       if (

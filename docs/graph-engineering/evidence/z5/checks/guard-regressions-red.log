@@ -1,0 +1,63 @@
+✖ oversized combined repair feedback persists Invalid/NeedsHuman without advancing route history (10.9535ms)
+✔ typed conditions keep false/default distinct from missing or wrong types (1.0475ms)
+✔ predicate bounds and non-short-circuited invalid operands cannot select success (4.6001ms)
+✖ malformed predicate operator types fail definition validation and cannot select an exit (2.8965ms)
+✔ exclusive branches can merge but every End path requires the final gate (3.663ms)
+✔ current attempt uses the exact iteration map and never first/last history fallback (0.1685ms)
+✔ final approval must follow all native executable work on every End path (1.3791ms)
+✔ real failed assertions are provenance-valid while malformed or foreign reports are not (1.2461ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 6
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 904.1996
+
+✖ failing tests:
+
+test at packages\services\src\graph-engineering\app\routing-feedback.test.ts:1:358
+✖ oversized combined repair feedback persists Invalid/NeedsHuman without advancing route history (10.9535ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   'Only an evaluated Condition can appear in an advanced route.'
+  + ]
+  - []
+  
+      at GraphState.state.put (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\app\routing-feedback.test.ts:58:14)
+      at GraphRoutingChecks.stop (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\app\routing-checks.ts:108:22)
+      at GraphRoutingDecision.evaluate (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\app\routing-decision.ts:304:25)
+      at async TestContext.<anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\app\routing-feedback.test.ts:61:5)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'Only an evaluated Condition can appear in an advanced route.' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at packages\services\src\graph-engineering\app\routing.test.ts:1:1813
+✖ malformed predicate operator types fail definition validation and cannot select an exit (2.8965ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(result.errors.length)
+  
+      at TestContext.<anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\app\routing.test.ts:55:12)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

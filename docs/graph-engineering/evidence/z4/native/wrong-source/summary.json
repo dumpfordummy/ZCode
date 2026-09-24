@@ -1,0 +1,808 @@
+{
+  "scenario": "wrong-source",
+  "configuredProvider": false,
+  "uiFirstWait": false,
+  "home": "<isolated-profile>",
+  "workspace": "<isolated-profile>\\workspace",
+  "assertions": [
+    "Actual native editor saves named C# recipes, Tool nodes, explicit edges and captured approval artifact selections.",
+    "Real native C# process/exit/report/acceptance remain separate: only the exact current source/build and positive required test set can pass."
+  ],
+  "screenshots": [
+    "<isolated-profile>\\z4-graph-design.png",
+    "<isolated-profile>\\z4-build-native-permission.png",
+    "<isolated-profile>\\z4-test-native-permission.png",
+    "<isolated-profile>\\z4-native-command-result.png"
+  ],
+  "fixture": {
+    "runnerDigest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79",
+    "source": {
+      "digest": "6c15a9faaa6c96609bdff37e3f8f6b49da9824037f34cca3affc968174ac15ef",
+      "files": [
+        {
+          "path": "Directory.Build.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Build.targets",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Packages.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "MathOps.cs",
+          "length": 96,
+          "digest": "c74c3bced09a37ec35a9d435752abd3743a8b40a6998d2b95b63400b08c61cd1"
+        },
+        {
+          "path": "NuGet.Config",
+          "length": 112,
+          "digest": "7d59a339f0f6022f0710d690fe52e2a0f868519847651f6c10f6c9ff1bd7213a"
+        },
+        {
+          "path": "Runner.cs",
+          "length": 3700,
+          "digest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79"
+        },
+        {
+          "path": "Z4Fixture.csproj",
+          "length": 494,
+          "digest": "97413a96ff9fb4bfc78841548e1d11971590ce5d25a743e6a83b1a1b3fb910ff"
+        },
+        {
+          "path": "global.json",
+          "length": 54,
+          "digest": "9969992897aee36fbc62db0976390d87b1275dc0d7c6fcb937a7f81a316f97dc"
+        }
+      ]
+    }
+  },
+  "ids": {
+    "build": "de623378-4d42-4903-94fe-ac94fbb81213",
+    "test": "a7a281f7-4138-4bab-b7b8-8e649d725047",
+    "gates": [],
+    "route": ["de623378-4d42-4903-94fe-ac94fbb81213", "a7a281f7-4138-4bab-b7b8-8e649d725047"]
+  },
+  "buildBeforePermission": {
+    "nodeId": "de623378-4d42-4903-94fe-ac94fbb81213",
+    "attemptId": "c3377a1d-979f-4a8f-869f-8cfc174c9ab6",
+    "operationId": "2653a053-42e4-44c6-94c5-e2be31627189",
+    "recipe": {
+      "id": "fixture-build",
+      "name": "Build C# fixture",
+      "executable": "dotnet",
+      "args": [
+        "build",
+        "Z4Fixture.csproj",
+        "--configuration",
+        "Release",
+        "--nologo",
+        "--no-incremental",
+        "--disable-build-servers",
+        "-p:RestoreConfigFile=NuGet.Config",
+        "-p:NuGetAudit=false",
+        "-p:UseSharedCompilation=false",
+        "-p:ImportDirectoryBuildProps=false",
+        "-p:ImportDirectoryBuildTargets=false",
+        "-p:ImportDirectoryPackagesProps=false",
+        "-nodeReuse:false"
+      ],
+      "cwd": ".",
+      "timeoutMs": 60000,
+      "sourcePaths": [
+        "Z4Fixture.csproj",
+        "MathOps.cs",
+        "Runner.cs",
+        "global.json",
+        "NuGet.Config",
+        "Directory.Build.props",
+        "Directory.Build.targets",
+        "Directory.Packages.props"
+      ],
+      "expectedOutputs": [
+        "bin/Release/net8.0/Z4Fixture.dll",
+        "bin/Release/net8.0/Z4Fixture.deps.json",
+        "bin/Release/net8.0/Z4Fixture.runtimeconfig.json"
+      ],
+      "verifier": {
+        "kind": "build"
+      }
+    },
+    "recipeDigest": "eb2960224cf63fca86773a89ca7b1fff0ed5fc6012fd4b81b996614e4aec695e",
+    "status": "WaitingForPermission",
+    "dispatchPhase": "accepted",
+    "createdAt": 1790254972829,
+    "updatedAt": 1790254973684,
+    "sessionId": "sess_cee73623-d77c-45ac-a3f5-d0ecc5c71c6b",
+    "runtimeIdentity": "<isolated-profile>\\workspace:1:10656:agent-948ffe5b-4215-4168-ac79-77e0900ef3f9",
+    "sourceDigest": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+    "resolvedArgs": [
+      "build",
+      "Z4Fixture.csproj",
+      "--configuration",
+      "Release",
+      "--nologo",
+      "--no-incremental",
+      "--disable-build-servers",
+      "-p:RestoreConfigFile=NuGet.Config",
+      "-p:NuGetAudit=false",
+      "-p:UseSharedCompilation=false",
+      "-p:ImportDirectoryBuildProps=false",
+      "-p:ImportDirectoryBuildTargets=false",
+      "-p:ImportDirectoryPackagesProps=false",
+      "-nodeReuse:false"
+    ],
+    "outputsBefore": [
+      {
+        "path": "bin/Release/net8.0/Z4Fixture.deps.json",
+        "exists": false
+      },
+      {
+        "path": "bin/Release/net8.0/Z4Fixture.dll",
+        "exists": false
+      },
+      {
+        "path": "bin/Release/net8.0/Z4Fixture.runtimeconfig.json",
+        "exists": false
+      }
+    ],
+    "operation": {
+      "operationId": "2653a053-42e4-44c6-94c5-e2be31627189",
+      "sessionId": "sess_cee73623-d77c-45ac-a3f5-d0ecc5c71c6b",
+      "requestDigest": "4eb702f5c04ad8752adda613735327fbf6e09615491f510ed5d4c2c60db932c2",
+      "recipeId": "fixture-build",
+      "cwd": "<isolated-profile>\\workspace",
+      "status": "awaiting_permission",
+      "processStarted": false
+    }
+  },
+  "exportedManifest": {
+    "version": 1,
+    "runId": "97c6fdf5-1ae5-41a3-9811-b76ee5ff4a91",
+    "status": "Failed",
+    "artifacts": [
+      {
+        "id": "d9855ce2-a4ee-4fba-a17a-3cedfcffe336",
+        "nodeId": "de623378-4d42-4903-94fe-ac94fbb81213",
+        "attemptId": "c3377a1d-979f-4a8f-869f-8cfc174c9ab6",
+        "type": "command",
+        "provenance": "native-command",
+        "digest": "154fd8b57bf1ae7a48efe2d55cd00503d2eefba7fb7d57caa14fcf80e28a80e3",
+        "bytes": 744,
+        "capturedAt": 1790254976183,
+        "validation": "valid",
+        "redacted": false
+      },
+      {
+        "id": "6a207661-538b-4013-b08e-d517cf2ed5a7",
+        "nodeId": "de623378-4d42-4903-94fe-ac94fbb81213",
+        "attemptId": "c3377a1d-979f-4a8f-869f-8cfc174c9ab6",
+        "type": "file",
+        "provenance": "workspace-file",
+        "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "capturedAt": 1790254976183,
+        "validation": "incomplete",
+        "redacted": false
+      },
+      {
+        "id": "c223e12b-d305-40ae-a6ba-f7184e898056",
+        "nodeId": "de623378-4d42-4903-94fe-ac94fbb81213",
+        "attemptId": "c3377a1d-979f-4a8f-869f-8cfc174c9ab6",
+        "type": "file",
+        "provenance": "workspace-file",
+        "digest": "966c1943eeee943a49a89672e0545508aae39097e66ae7fb9cd27c552b253805",
+        "bytes": 419,
+        "capturedAt": 1790254976183,
+        "validation": "valid",
+        "redacted": false
+      },
+      {
+        "id": "fbeab2f7-ba59-414c-aa68-b3898c336cf9",
+        "nodeId": "de623378-4d42-4903-94fe-ac94fbb81213",
+        "attemptId": "c3377a1d-979f-4a8f-869f-8cfc174c9ab6",
+        "type": "file",
+        "provenance": "workspace-file",
+        "digest": "28329cf08f6505e73806b17558b187c02f0c1c516fe47ebfb7a013d082aaa306",
+        "bytes": 340,
+        "capturedAt": 1790254976183,
+        "validation": "valid",
+        "redacted": false
+      },
+      {
+        "id": "73241538-f426-43dd-a4c8-c03e1878050f",
+        "nodeId": "a7a281f7-4138-4bab-b7b8-8e649d725047",
+        "attemptId": "1d550683-e856-452c-9834-3f52dabd31ac",
+        "type": "command",
+        "provenance": "native-command",
+        "digest": "3c4abc66de0d778ee7a0b1321af74d3f1df525e839393911794652693f2c5508",
+        "bytes": 974,
+        "capturedAt": 1790254977180,
+        "validation": "valid",
+        "redacted": false
+      },
+      {
+        "id": "039fd215-d4b2-4e24-8ef1-ca72880d856b",
+        "nodeId": "a7a281f7-4138-4bab-b7b8-8e649d725047",
+        "attemptId": "1d550683-e856-452c-9834-3f52dabd31ac",
+        "type": "file",
+        "provenance": "workspace-file",
+        "digest": "039af39aac6efa5bf70af50302bc3bcd32853c956be18dd8f37b549fae0922b9",
+        "bytes": 495,
+        "capturedAt": 1790254977180,
+        "validation": "valid",
+        "redacted": false
+      },
+      {
+        "id": "9524842c-279c-4171-ae64-055fa2b17ed1",
+        "nodeId": "a7a281f7-4138-4bab-b7b8-8e649d725047",
+        "attemptId": "1d550683-e856-452c-9834-3f52dabd31ac",
+        "type": "test",
+        "provenance": "native-test",
+        "digest": "e037c9dcab6605042832b9a64c8d289052b7513bb6ab842d2d47ad1bf638afca",
+        "bytes": 192,
+        "capturedAt": 1790254977180,
+        "validation": "invalid",
+        "redacted": false
+      }
+    ]
+  },
+  "status": "PASS",
+  "finalRecord": {
+    "version": 4,
+    "workspaceKey": "<isolated-profile>\\workspace",
+    "definition": {
+      "version": 4,
+      "revision": 2,
+      "name": "Z4 isolated C# wrong-source",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": ""
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 1120,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "a7a281f7-4138-4bab-b7b8-8e649d725047"
+        },
+        {
+          "id": "de623378-4d42-4903-94fe-ac94fbb81213",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Build",
+          "recipeId": "fixture-build"
+        },
+        {
+          "id": "a7a281f7-4138-4bab-b7b8-8e649d725047",
+          "position": {
+            "x": 860,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Test",
+          "recipeId": "fixture-test"
+        }
+      ],
+      "edges": [
+        {
+          "source": "de623378-4d42-4903-94fe-ac94fbb81213",
+          "target": "a7a281f7-4138-4bab-b7b8-8e649d725047"
+        },
+        {
+          "source": "a7a281f7-4138-4bab-b7b8-8e649d725047",
+          "target": "end"
+        },
+        {
+          "source": "start",
+          "target": "de623378-4d42-4903-94fe-ac94fbb81213"
+        }
+      ]
+    },
+    "runs": [
+      {
+        "id": "97c6fdf5-1ae5-41a3-9811-b76ee5ff4a91",
+        "requestId": "ca74c6f2-1570-4d67-88e8-18b225f7596a",
+        "target": {
+          "workspacePath": "<isolated-profile>\\workspace"
+        },
+        "status": "Failed",
+        "createdAt": 1790254972829,
+        "updatedAt": 1790254977180,
+        "message": "Declared source changed during command execution.",
+        "version": 4,
+        "requestFingerprint": "{\"mode\":\"build\",\"modelSelection\":{\"modelId\":\"graph-tool-only\",\"providerId\":\"graph-tool-only\"},\"planEnabled\":false,\"revision\":2,\"target\":{\"workspacePath\":\"<isolated-profile>\\\\workspace\"}}",
+        "definition": {
+          "version": 4,
+          "revision": 2,
+          "name": "Z4 isolated C# wrong-source",
+          "nodes": [
+            {
+              "id": "start",
+              "position": {
+                "x": 40,
+                "y": 100
+              },
+              "type": "start",
+              "request": ""
+            },
+            {
+              "id": "end",
+              "position": {
+                "x": 1120,
+                "y": 100
+              },
+              "type": "end",
+              "outputNodeId": "a7a281f7-4138-4bab-b7b8-8e649d725047"
+            },
+            {
+              "id": "de623378-4d42-4903-94fe-ac94fbb81213",
+              "position": {
+                "x": 600,
+                "y": 100
+              },
+              "type": "tool",
+              "name": "Build",
+              "recipeId": "fixture-build"
+            },
+            {
+              "id": "a7a281f7-4138-4bab-b7b8-8e649d725047",
+              "position": {
+                "x": 860,
+                "y": 100
+              },
+              "type": "tool",
+              "name": "Test",
+              "recipeId": "fixture-test"
+            }
+          ],
+          "edges": [
+            {
+              "source": "de623378-4d42-4903-94fe-ac94fbb81213",
+              "target": "a7a281f7-4138-4bab-b7b8-8e649d725047"
+            },
+            {
+              "source": "a7a281f7-4138-4bab-b7b8-8e649d725047",
+              "target": "end"
+            },
+            {
+              "source": "start",
+              "target": "de623378-4d42-4903-94fe-ac94fbb81213"
+            }
+          ]
+        },
+        "defaults": {
+          "modelSelection": {
+            "providerId": "graph-tool-only",
+            "modelId": "graph-tool-only"
+          },
+          "mode": "build",
+          "planEnabled": false
+        },
+        "plannedPath": [
+          "de623378-4d42-4903-94fe-ac94fbb81213",
+          "a7a281f7-4138-4bab-b7b8-8e649d725047"
+        ],
+        "startInput": "",
+        "nodeAttempts": [],
+        "approvalAttempts": [],
+        "toolAttempts": [
+          {
+            "nodeId": "de623378-4d42-4903-94fe-ac94fbb81213",
+            "attemptId": "c3377a1d-979f-4a8f-869f-8cfc174c9ab6",
+            "operationId": "2653a053-42e4-44c6-94c5-e2be31627189",
+            "recipe": {
+              "id": "fixture-build",
+              "name": "Build C# fixture",
+              "executable": "dotnet",
+              "args": [
+                "build",
+                "Z4Fixture.csproj",
+                "--configuration",
+                "Release",
+                "--nologo",
+                "--no-incremental",
+                "--disable-build-servers",
+                "-p:RestoreConfigFile=NuGet.Config",
+                "-p:NuGetAudit=false",
+                "-p:UseSharedCompilation=false",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-nodeReuse:false"
+              ],
+              "cwd": ".",
+              "timeoutMs": 60000,
+              "sourcePaths": [
+                "Z4Fixture.csproj",
+                "MathOps.cs",
+                "Runner.cs",
+                "global.json",
+                "NuGet.Config",
+                "Directory.Build.props",
+                "Directory.Build.targets",
+                "Directory.Packages.props"
+              ],
+              "expectedOutputs": [
+                "bin/Release/net8.0/Z4Fixture.dll",
+                "bin/Release/net8.0/Z4Fixture.deps.json",
+                "bin/Release/net8.0/Z4Fixture.runtimeconfig.json"
+              ],
+              "verifier": {
+                "kind": "build"
+              }
+            },
+            "recipeDigest": "eb2960224cf63fca86773a89ca7b1fff0ed5fc6012fd4b81b996614e4aec695e",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "createdAt": 1790254972829,
+            "updatedAt": 1790254976183,
+            "sessionId": "sess_cee73623-d77c-45ac-a3f5-d0ecc5c71c6b",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:10656:agent-948ffe5b-4215-4168-ac79-77e0900ef3f9",
+            "sourceDigest": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "outputDigest": "4bc95646bdeca2b13c1947f7529f710209e0ce3ed7d40d849c06237a0c2d0347",
+            "resolvedArgs": [
+              "build",
+              "Z4Fixture.csproj",
+              "--configuration",
+              "Release",
+              "--nologo",
+              "--no-incremental",
+              "--disable-build-servers",
+              "-p:RestoreConfigFile=NuGet.Config",
+              "-p:NuGetAudit=false",
+              "-p:UseSharedCompilation=false",
+              "-p:ImportDirectoryBuildProps=false",
+              "-p:ImportDirectoryBuildTargets=false",
+              "-p:ImportDirectoryPackagesProps=false",
+              "-nodeReuse:false"
+            ],
+            "outputsBefore": [
+              {
+                "path": "bin/Release/net8.0/Z4Fixture.deps.json",
+                "exists": false
+              },
+              {
+                "path": "bin/Release/net8.0/Z4Fixture.dll",
+                "exists": false
+              },
+              {
+                "path": "bin/Release/net8.0/Z4Fixture.runtimeconfig.json",
+                "exists": false
+              }
+            ],
+            "operation": {
+              "operationId": "2653a053-42e4-44c6-94c5-e2be31627189",
+              "sessionId": "sess_cee73623-d77c-45ac-a3f5-d0ecc5c71c6b",
+              "requestDigest": "4eb702f5c04ad8752adda613735327fbf6e09615491f510ed5d4c2c60db932c2",
+              "recipeId": "fixture-build",
+              "cwd": "<isolated-profile>\\workspace",
+              "status": "completed",
+              "processStarted": true,
+              "startedAt": 1790254974281,
+              "completedAt": 1790254976095,
+              "result": {
+                "status": "completed",
+                "exitCode": 0,
+                "stdout": {
+                  "text": "  Determining projects to restore...\n  Restored [USER_PATH] (in 38 ms).\n  Z4Fixture -> [USER_PATH]\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:01.52\n",
+                  "bytes": 376,
+                  "truncated": false
+                },
+                "stderr": {
+                  "text": "",
+                  "bytes": 0,
+                  "truncated": false
+                },
+                "durationMs": 1809,
+                "timedOut": false,
+                "cancelled": false,
+                "processExitObserved": true
+              }
+            },
+            "verification": {
+              "processKnown": true,
+              "exitSuccessful": true,
+              "reportFresh": false,
+              "reportParsed": false,
+              "acceptancePassed": true,
+              "classification": "build",
+              "issues": []
+            }
+          },
+          {
+            "nodeId": "a7a281f7-4138-4bab-b7b8-8e649d725047",
+            "attemptId": "1d550683-e856-452c-9834-3f52dabd31ac",
+            "operationId": "4dda7062-68f9-4ca2-ae19-39979743f1a8",
+            "recipe": {
+              "id": "fixture-test",
+              "name": "Test C# fixture",
+              "executable": "dotnet",
+              "args": [
+                "bin/Release/net8.0/Z4Fixture.dll",
+                "--operation-id",
+                "{operationId}",
+                "--source-digest",
+                "{sourceDigest}",
+                "--build-digest",
+                "{buildDigest}",
+                "--report",
+                "{reportPath}"
+              ],
+              "cwd": ".",
+              "timeoutMs": 60000,
+              "sourcePaths": [
+                "Z4Fixture.csproj",
+                "MathOps.cs",
+                "Runner.cs",
+                "global.json",
+                "NuGet.Config",
+                "Directory.Build.props",
+                "Directory.Build.targets",
+                "Directory.Packages.props"
+              ],
+              "expectedOutputs": [],
+              "verifier": {
+                "kind": "test",
+                "format": "zcode-json-v1",
+                "reportPath": "results/test-report.json",
+                "minimumTests": 3,
+                "expectedTests": 3,
+                "requiredTests": ["add-positive", "add-negative", "add-zero"],
+                "buildNodeId": "de623378-4d42-4903-94fe-ac94fbb81213"
+              }
+            },
+            "recipeDigest": "940340f779cbd832c3ced2bcbfce65ad8b25b1c66e5bbbaf6dc752d438548e64",
+            "status": "Failed",
+            "dispatchPhase": "accepted",
+            "createdAt": 1790254972829,
+            "updatedAt": 1790254977180,
+            "sessionId": "sess_d96c766f-1613-430d-851a-34b3c37a7cd6",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:10656:agent-948ffe5b-4215-4168-ac79-77e0900ef3f9",
+            "sourceDigest": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "buildDigest": "4bc95646bdeca2b13c1947f7529f710209e0ce3ed7d40d849c06237a0c2d0347",
+            "resolvedArgs": [
+              "bin/Release/net8.0/Z4Fixture.dll",
+              "--operation-id",
+              "4dda7062-68f9-4ca2-ae19-39979743f1a8",
+              "--source-digest",
+              "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+              "--build-digest",
+              "4bc95646bdeca2b13c1947f7529f710209e0ce3ed7d40d849c06237a0c2d0347",
+              "--report",
+              "results/test-report.json"
+            ],
+            "operation": {
+              "operationId": "4dda7062-68f9-4ca2-ae19-39979743f1a8",
+              "sessionId": "sess_d96c766f-1613-430d-851a-34b3c37a7cd6",
+              "requestDigest": "1b513b185f0a8e9f5130c689f5aeeb59aace87ee027706ff60889a90ed53811b",
+              "recipeId": "fixture-test",
+              "cwd": "<isolated-profile>\\workspace",
+              "status": "completed",
+              "processStarted": true,
+              "startedAt": 1790254976862,
+              "completedAt": 1790254977006,
+              "result": {
+                "status": "completed",
+                "exitCode": 0,
+                "stdout": {
+                  "text": "{\"format\":\"zcode-test-v1\",\"operationId\":\"4dda7062-68f9-4ca2-ae19-39979743f1a8\",\"sourceDigest\":\"295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe\",\"buildDigest\":\"4bc95646bdeca2b13c1947f7529f710209e0ce3ed7d40d849c06237a0c2d0347\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"passed\"},{\"name\":\"add-negative\",\"status\":\"passed\"},{\"name\":\"add-zero\",\"status\":\"passed\"}]}",
+                  "bytes": 497,
+                  "truncated": false
+                },
+                "stderr": {
+                  "text": "",
+                  "bytes": 0,
+                  "truncated": false
+                },
+                "durationMs": 140,
+                "timedOut": false,
+                "cancelled": false,
+                "processExitObserved": true
+              }
+            },
+            "verification": {
+              "processKnown": true,
+              "exitSuccessful": true,
+              "reportFresh": true,
+              "reportParsed": true,
+              "acceptancePassed": false,
+              "classification": "test",
+              "testCount": 3,
+              "passed": 3,
+              "failed": 0,
+              "skipped": 0,
+              "issues": ["Declared source changed during command execution."]
+            },
+            "message": "Declared source changed during command execution."
+          }
+        ],
+        "artifacts": [
+          {
+            "id": "d9855ce2-a4ee-4fba-a17a-3cedfcffe336",
+            "runId": "97c6fdf5-1ae5-41a3-9811-b76ee5ff4a91",
+            "nodeId": "de623378-4d42-4903-94fe-ac94fbb81213",
+            "attemptId": "c3377a1d-979f-4a8f-869f-8cfc174c9ab6",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "command",
+            "provenance": "native-command",
+            "bytes": 744,
+            "digest": "154fd8b57bf1ae7a48efe2d55cd00503d2eefba7fb7d57caa14fcf80e28a80e3",
+            "capturedAt": 1790254976183,
+            "validation": "valid",
+            "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "sessionId": "sess_cee73623-d77c-45ac-a3f5-d0ecc5c71c6b",
+            "operationId": "2653a053-42e4-44c6-94c5-e2be31627189"
+          },
+          {
+            "id": "6a207661-538b-4013-b08e-d517cf2ed5a7",
+            "runId": "97c6fdf5-1ae5-41a3-9811-b76ee5ff4a91",
+            "nodeId": "de623378-4d42-4903-94fe-ac94fbb81213",
+            "attemptId": "c3377a1d-979f-4a8f-869f-8cfc174c9ab6",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 0,
+            "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedAt": 1790254976183,
+            "validation": "incomplete",
+            "issue": "The encoded data was not valid for encoding utf-8",
+            "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "sourcePath": "bin/Release/net8.0/Z4Fixture.dll",
+            "sessionId": "sess_cee73623-d77c-45ac-a3f5-d0ecc5c71c6b",
+            "operationId": "2653a053-42e4-44c6-94c5-e2be31627189"
+          },
+          {
+            "id": "c223e12b-d305-40ae-a6ba-f7184e898056",
+            "runId": "97c6fdf5-1ae5-41a3-9811-b76ee5ff4a91",
+            "nodeId": "de623378-4d42-4903-94fe-ac94fbb81213",
+            "attemptId": "c3377a1d-979f-4a8f-869f-8cfc174c9ab6",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 419,
+            "digest": "966c1943eeee943a49a89672e0545508aae39097e66ae7fb9cd27c552b253805",
+            "capturedAt": 1790254976183,
+            "validation": "valid",
+            "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "sourcePath": "bin/Release/net8.0/Z4Fixture.deps.json",
+            "sessionId": "sess_cee73623-d77c-45ac-a3f5-d0ecc5c71c6b",
+            "operationId": "2653a053-42e4-44c6-94c5-e2be31627189"
+          },
+          {
+            "id": "fbeab2f7-ba59-414c-aa68-b3898c336cf9",
+            "runId": "97c6fdf5-1ae5-41a3-9811-b76ee5ff4a91",
+            "nodeId": "de623378-4d42-4903-94fe-ac94fbb81213",
+            "attemptId": "c3377a1d-979f-4a8f-869f-8cfc174c9ab6",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 340,
+            "digest": "28329cf08f6505e73806b17558b187c02f0c1c516fe47ebfb7a013d082aaa306",
+            "capturedAt": 1790254976183,
+            "validation": "valid",
+            "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "sourcePath": "bin/Release/net8.0/Z4Fixture.runtimeconfig.json",
+            "sessionId": "sess_cee73623-d77c-45ac-a3f5-d0ecc5c71c6b",
+            "operationId": "2653a053-42e4-44c6-94c5-e2be31627189"
+          },
+          {
+            "id": "73241538-f426-43dd-a4c8-c03e1878050f",
+            "runId": "97c6fdf5-1ae5-41a3-9811-b76ee5ff4a91",
+            "nodeId": "a7a281f7-4138-4bab-b7b8-8e649d725047",
+            "attemptId": "1d550683-e856-452c-9834-3f52dabd31ac",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "command",
+            "provenance": "native-command",
+            "bytes": 974,
+            "digest": "3c4abc66de0d778ee7a0b1321af74d3f1df525e839393911794652693f2c5508",
+            "capturedAt": 1790254977180,
+            "validation": "valid",
+            "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "sessionId": "sess_d96c766f-1613-430d-851a-34b3c37a7cd6",
+            "operationId": "4dda7062-68f9-4ca2-ae19-39979743f1a8"
+          },
+          {
+            "id": "039fd215-d4b2-4e24-8ef1-ca72880d856b",
+            "runId": "97c6fdf5-1ae5-41a3-9811-b76ee5ff4a91",
+            "nodeId": "a7a281f7-4138-4bab-b7b8-8e649d725047",
+            "attemptId": "1d550683-e856-452c-9834-3f52dabd31ac",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 495,
+            "digest": "039af39aac6efa5bf70af50302bc3bcd32853c956be18dd8f37b549fae0922b9",
+            "capturedAt": 1790254977180,
+            "validation": "valid",
+            "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "sourcePath": "results/test-report.json",
+            "sessionId": "sess_d96c766f-1613-430d-851a-34b3c37a7cd6",
+            "operationId": "4dda7062-68f9-4ca2-ae19-39979743f1a8"
+          },
+          {
+            "id": "9524842c-279c-4171-ae64-055fa2b17ed1",
+            "runId": "97c6fdf5-1ae5-41a3-9811-b76ee5ff4a91",
+            "nodeId": "a7a281f7-4138-4bab-b7b8-8e649d725047",
+            "attemptId": "1d550683-e856-452c-9834-3f52dabd31ac",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "test",
+            "provenance": "native-test",
+            "bytes": 192,
+            "digest": "e037c9dcab6605042832b9a64c8d289052b7513bb6ab842d2d47ad1bf638afca",
+            "capturedAt": 1790254977180,
+            "validation": "invalid",
+            "issue": "Declared source changed during command execution.",
+            "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "sessionId": "sess_d96c766f-1613-430d-851a-34b3c37a7cd6",
+            "operationId": "4dda7062-68f9-4ca2-ae19-39979743f1a8"
+          }
+        ],
+        "artifactBindings": [
+          {
+            "nodeId": "de623378-4d42-4903-94fe-ac94fbb81213",
+            "attemptId": "c3377a1d-979f-4a8f-869f-8cfc174c9ab6",
+            "selector": "command",
+            "artifactId": "d9855ce2-a4ee-4fba-a17a-3cedfcffe336"
+          },
+          {
+            "nodeId": "de623378-4d42-4903-94fe-ac94fbb81213",
+            "attemptId": "c3377a1d-979f-4a8f-869f-8cfc174c9ab6",
+            "selector": "bin/Release/net8.0/Z4Fixture.dll",
+            "artifactId": "6a207661-538b-4013-b08e-d517cf2ed5a7"
+          },
+          {
+            "nodeId": "de623378-4d42-4903-94fe-ac94fbb81213",
+            "attemptId": "c3377a1d-979f-4a8f-869f-8cfc174c9ab6",
+            "selector": "bin/Release/net8.0/Z4Fixture.deps.json",
+            "artifactId": "c223e12b-d305-40ae-a6ba-f7184e898056"
+          },
+          {
+            "nodeId": "de623378-4d42-4903-94fe-ac94fbb81213",
+            "attemptId": "c3377a1d-979f-4a8f-869f-8cfc174c9ab6",
+            "selector": "bin/Release/net8.0/Z4Fixture.runtimeconfig.json",
+            "artifactId": "fbeab2f7-ba59-414c-aa68-b3898c336cf9"
+          },
+          {
+            "nodeId": "a7a281f7-4138-4bab-b7b8-8e649d725047",
+            "attemptId": "1d550683-e856-452c-9834-3f52dabd31ac",
+            "selector": "command",
+            "artifactId": "73241538-f426-43dd-a4c8-c03e1878050f"
+          },
+          {
+            "nodeId": "a7a281f7-4138-4bab-b7b8-8e649d725047",
+            "attemptId": "1d550683-e856-452c-9834-3f52dabd31ac",
+            "selector": "results/test-report.json",
+            "artifactId": "039fd215-d4b2-4e24-8ef1-ca72880d856b"
+          },
+          {
+            "nodeId": "a7a281f7-4138-4bab-b7b8-8e649d725047",
+            "attemptId": "1d550683-e856-452c-9834-3f52dabd31ac",
+            "selector": "test",
+            "artifactId": "9524842c-279c-4171-ae64-055fa2b17ed1"
+          }
+        ]
+      }
+    ]
+  },
+  "nativeLedger": [],
+  "nativeToolResults": [],
+  "providerErrors": [],
+  "modelRequests": 0,
+  "marker": "Z4_FRESH_REVIEW_4e321c6e-4343-46d9-848e-f9873c4a3f39"
+}

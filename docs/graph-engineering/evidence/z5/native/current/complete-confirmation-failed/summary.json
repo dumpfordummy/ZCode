@@ -1,0 +1,1339 @@
+{
+  "scenario": "complete",
+  "home": "<isolated-profile>",
+  "workspace": "<isolated-profile>\\workspace",
+  "assertions": [
+    "The actual native editor creates the version-5 repair region, named condition exits, exact artifact/repair-feedback bindings, native recipes, finite limits and required final gate."
+  ],
+  "screenshots": [
+    "<isolated-profile>\\z5-saved-native-graph.png",
+    "<isolated-profile>\\z5-run-confirmation.png",
+    "<isolated-profile>\\z5-failure.png"
+  ],
+  "fixture": {
+    "runnerDigest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79",
+    "source": {
+      "digest": "497750fe192e4531c18aff80ae796e04b25b130c00c69d784df8c7a53e3d9527",
+      "files": [
+        {
+          "path": "Directory.Build.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Build.targets",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Packages.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "MathOps.cs",
+          "length": 100,
+          "digest": "2cc9461517454ad8085486324e36939d54eea73c53454d7b64323dbac578fce9"
+        },
+        {
+          "path": "NuGet.Config",
+          "length": 112,
+          "digest": "7d59a339f0f6022f0710d690fe52e2a0f868519847651f6c10f6c9ff1bd7213a"
+        },
+        {
+          "path": "Runner.cs",
+          "length": 3700,
+          "digest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79"
+        },
+        {
+          "path": "Z4Fixture.csproj",
+          "length": 494,
+          "digest": "97413a96ff9fb4bfc78841548e1d11971590ce5d25a743e6a83b1a1b3fb910ff"
+        },
+        {
+          "path": "global.json",
+          "length": 54,
+          "digest": "9969992897aee36fbc62db0976390d87b1275dc0d7c6fcb937a7f81a316f97dc"
+        }
+      ]
+    }
+  },
+  "ids": {
+    "initial": "task",
+    "build": "9583b909-f837-44ee-8f1d-11b6f7e923dc",
+    "test": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+    "reviewer": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+    "repair": "a297c60a-2a8f-46e5-9a79-7806d863413b",
+    "decision": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+    "finalGate": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+    "admissions": 12,
+    "deadline": 600000
+  },
+  "confirmedSnapshot": {
+    "definition": {
+      "version": 5,
+      "revision": 1,
+      "name": "Z5 bounded native C# complete",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": ""
+        },
+        {
+          "id": "task",
+          "position": {
+            "x": 280,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Implement",
+          "instructions": "Z5_IMPLEMENT: Read MathOps.cs and Runner.cs. Apply the explicitly staged initial synthetic implementation in MathOps.cs only. Preserve the runner. Do not build or run commands; separate native Tool nodes verify it. Return a concise result.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 2160,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c"
+        },
+        {
+          "id": "9583b909-f837-44ee-8f1d-11b6f7e923dc",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Build",
+          "recipeId": "fixture-build"
+        },
+        {
+          "id": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+          "position": {
+            "x": 860,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Test",
+          "recipeId": "fixture-test"
+        },
+        {
+          "id": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+          "position": {
+            "x": 1120,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Reviewer",
+          "instructions": "Z5_REVIEW: Read MathOps.cs and results/test-report.json. Review this exact native verification; return the required structured reviewer record and its actual artifact ID. Do not edit or execute commands.\nZ5_VERIFICATION_BEGIN\n{{inputs.verification}}\nZ5_VERIFICATION_END",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "verification",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+                "selector": "verification"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          },
+          "output": {
+            "kind": "json",
+            "schema": {
+              "type": "object",
+              "required": ["outcome", "findings", "evidenceReferences"],
+              "additionalProperties": false,
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "enum": ["pass", "needs_changes", "needs_human"]
+                },
+                "findings": {
+                  "type": "array",
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "required": ["code", "message"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "message": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    }
+                  }
+                },
+                "evidenceReferences": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 8,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "a297c60a-2a8f-46e5-9a79-7806d863413b",
+          "position": {
+            "x": 1380,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Repair",
+          "instructions": "Z5_REPAIR: Read MathOps.cs. Use this exact previous iteration feedback to make the next bounded synthetic repair in MathOps.cs only. Preserve Runner.cs and tests. Do not build or execute commands.\nZ5_FEEDBACK_BEGIN\n{{inputs.feedback}}\nZ5_FEEDBACK_END",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "feedback",
+              "source": {
+                "kind": "repair-feedback"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+          "position": {
+            "x": 1640,
+            "y": 100
+          },
+          "type": "condition",
+          "name": "Decide from current evidence",
+          "inputs": [
+            {
+              "alias": "review",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+                "selector": "structured"
+              }
+            },
+            {
+              "alias": "machine",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+                "selector": "verification"
+              }
+            }
+          ],
+          "branches": [
+            {
+              "exit": "pass",
+              "predicate": {
+                "op": "eq",
+                "alias": "review",
+                "pointer": "/outcome",
+                "value": "pass"
+              }
+            },
+            {
+              "exit": "needs_changes",
+              "predicate": {
+                "op": "eq",
+                "alias": "review",
+                "pointer": "/outcome",
+                "value": "needs_changes"
+              }
+            }
+          ],
+          "defaultExit": "needs_human",
+          "errorPolicy": "needs-human",
+          "verification": {
+            "testNodeIds": ["cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c"],
+            "reviewerNodeId": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+            "successExit": "pass"
+          }
+        },
+        {
+          "id": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+          "position": {
+            "x": 1900,
+            "y": 100
+          },
+          "type": "approval",
+          "name": "Final human review",
+          "reviewInstructions": "Review this exact iteration's native evidence. This gate does not authorize publication or answer native permissions.",
+          "evidence": [
+            {
+              "alias": "evidence",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+                "selector": "test"
+              }
+            }
+          ],
+          "commentPolicy": "required"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "task"
+        },
+        {
+          "source": "task",
+          "target": "9583b909-f837-44ee-8f1d-11b6f7e923dc"
+        },
+        {
+          "source": "9583b909-f837-44ee-8f1d-11b6f7e923dc",
+          "target": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c"
+        },
+        {
+          "source": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+          "target": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b"
+        },
+        {
+          "source": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+          "target": "end"
+        },
+        {
+          "source": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+          "target": "c059bde5-4074-4c26-b762-555dfe92f6a1"
+        },
+        {
+          "source": "a297c60a-2a8f-46e5-9a79-7806d863413b",
+          "target": "9583b909-f837-44ee-8f1d-11b6f7e923dc"
+        },
+        {
+          "source": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+          "target": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+          "sourcePort": "pass"
+        },
+        {
+          "source": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+          "target": "a297c60a-2a8f-46e5-9a79-7806d863413b",
+          "sourcePort": "needs_changes"
+        },
+        {
+          "source": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+          "target": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+          "sourcePort": "needs_human"
+        }
+      ],
+      "routing": {
+        "finalGateId": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+        "limits": {
+          "maxNodeAdmissions": 12,
+          "deadlineMs": 600000
+        },
+        "region": {
+          "id": "853a6bef-9d0d-4000-a73c-fa2fd6932551",
+          "name": "Bounded C# repair",
+          "entryNodeId": "task",
+          "repairEntryNodeId": "a297c60a-2a8f-46e5-9a79-7806d863413b",
+          "decisionNodeId": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+          "bodyNodeIds": [
+            "task",
+            "9583b909-f837-44ee-8f1d-11b6f7e923dc",
+            "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+            "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+            "a297c60a-2a8f-46e5-9a79-7806d863413b",
+            "c059bde5-4074-4c26-b762-555dfe92f6a1"
+          ],
+          "repairExit": "needs_changes",
+          "passExit": "pass",
+          "maxRepairIterations": 2,
+          "stopOnNoProgress": true,
+          "sourcePaths": [
+            "Z4Fixture.csproj",
+            "MathOps.cs",
+            "Runner.cs",
+            "global.json",
+            "NuGet.Config",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props"
+          ]
+        }
+      }
+    },
+    "settings": {
+      "modelSelection": {
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "options": {
+          "reasoningLevel": "enabled"
+        }
+      },
+      "mode": "build",
+      "planEnabled": false
+    }
+  },
+  "status": "FAIL",
+  "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    edges: [\n      {\n        source: 'start',\n        target: 'task'\n...\n    ],\n+   revision: 2,\n-   revision: 1,\n    routing: {\n      finalGateId: '43d7a493-54fa-47da-b2e4-36c8ea663871',\n      limits: {\n        deadlineMs: 600000,\n        maxNodeAdmissions: 12\n\n    at startRun (file:///<checkout>/scripts/graph-engineering/z5-native-observe.mjs:139:10)\n    at async file:///<checkout>/scripts/graph-engineering/z5-native-smoke.mjs:84:3",
+  "body": "Command palette\n\nSearch and run commands available in this workspace.\n\nNew task\nCtrl+N\nSearch\nCtrl+K\nGraph Engineering\nAutomations\nPlugin Marketplace\nGroup\nProject\nProjects\nworkspace\nNo tasks yet\nTasks\nNo tasks yet\nConnect\nMobile remote control\nBack to chat\nGraph Engineering\n\n<isolated-profile>\\workspace\n\nDesign\nRuns\nFrozen run — submitted definition and settings\nZ5 bounded native C# complete · Running · 10:03:08 PM\n\nAll tasks share this workspace. Other Chats and editors can still change its files; avoid concurrent edits. A new run can repeat earlier side effects.\n\npass\nneeds_changes\nneeds_human\nBounded C# repair\nStart\nImplement\nRunning\nEnd\nBuild\nPending\nTest\nPending\nReviewer\nPending\nRepair\nPending\nDecide from current evidence\nPending\npass\nneeds_changes\nneeds_human\nHuman Approval\nFinal human review\nPending\nReact Flow\nBounded C# repair\nStart\nImplement\nEnd\nBuild\nTest\nReviewer\nRepair\nDecide from current evidence\nFinal human review\n\nDrag nodes or select with Enter / Space then use arrow keys. Connect handles, or choose Next node in the inspector. Edges define order. Fit view is in the canvas controls.\n\n5a097a30-fd50-49f7-aea6-2792e5ceb6ee\n\nRunning\n\nCancel attempt\nBounded C# repair\nNative admissions used / maximum\n1 / 12\nFrozen deadline\n9/24/2026, 10:13:08 PM\nMaximum repair iterations after iteration 0\n2\nModel usage and cost\nUnavailable; no estimate is recorded\nIterations, attempts and feedback\nPersisted route checkpoints\nEnd\n\nThis inspector shows the saved run snapshot. Later graph edits and Chat follow-ups cannot rewrite it.\n\ncd5d3801-9ccb-48a8-99ec-d7dd2e997e5c\n\nFrozen run result\n\nNo confirmed output available\n\nCaptured artifacts\nExport metadata manifest\nInspect and release ownership\nInspect native execution\n\nRelease requires authoritative inactivity proof. Open the stored conversation to inspect the exact input, resolve native interactions, or use exact cancellation when available. Refreshing never replays work.",
+  "finalRecord": {
+    "version": 5,
+    "workspaceKey": "<isolated-profile>\\workspace",
+    "definition": {
+      "version": 5,
+      "revision": 2,
+      "name": "Z5 bounded native C# complete",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": ""
+        },
+        {
+          "id": "task",
+          "position": {
+            "x": 280,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Implement",
+          "instructions": "Z5_IMPLEMENT: Read MathOps.cs and Runner.cs. Apply the explicitly staged initial synthetic implementation in MathOps.cs only. Preserve the runner. Do not build or run commands; separate native Tool nodes verify it. Return a concise result.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 2160,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c"
+        },
+        {
+          "id": "9583b909-f837-44ee-8f1d-11b6f7e923dc",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Build",
+          "recipeId": "fixture-build"
+        },
+        {
+          "id": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+          "position": {
+            "x": 860,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Test",
+          "recipeId": "fixture-test"
+        },
+        {
+          "id": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+          "position": {
+            "x": 1120,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Reviewer",
+          "instructions": "Z5_REVIEW: Read MathOps.cs and results/test-report.json. Review this exact native verification; return the required structured reviewer record and its actual artifact ID. Do not edit or execute commands.\nZ5_VERIFICATION_BEGIN\n{{inputs.verification}}\nZ5_VERIFICATION_END",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "verification",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+                "selector": "verification"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          },
+          "output": {
+            "kind": "json",
+            "schema": {
+              "type": "object",
+              "required": ["outcome", "findings", "evidenceReferences"],
+              "additionalProperties": false,
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "enum": ["pass", "needs_changes", "needs_human"]
+                },
+                "findings": {
+                  "type": "array",
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "required": ["code", "message"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "message": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    }
+                  }
+                },
+                "evidenceReferences": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 8,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "a297c60a-2a8f-46e5-9a79-7806d863413b",
+          "position": {
+            "x": 1380,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Repair",
+          "instructions": "Z5_REPAIR: Read MathOps.cs. Use this exact previous iteration feedback to make the next bounded synthetic repair in MathOps.cs only. Preserve Runner.cs and tests. Do not build or execute commands.\nZ5_FEEDBACK_BEGIN\n{{inputs.feedback}}\nZ5_FEEDBACK_END",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "feedback",
+              "source": {
+                "kind": "repair-feedback"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+          "position": {
+            "x": 1640,
+            "y": 100
+          },
+          "type": "condition",
+          "name": "Decide from current evidence",
+          "inputs": [
+            {
+              "alias": "review",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+                "selector": "structured"
+              }
+            },
+            {
+              "alias": "machine",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+                "selector": "verification"
+              }
+            }
+          ],
+          "branches": [
+            {
+              "exit": "pass",
+              "predicate": {
+                "op": "eq",
+                "alias": "review",
+                "pointer": "/outcome",
+                "value": "pass"
+              }
+            },
+            {
+              "exit": "needs_changes",
+              "predicate": {
+                "op": "eq",
+                "alias": "review",
+                "pointer": "/outcome",
+                "value": "needs_changes"
+              }
+            }
+          ],
+          "defaultExit": "needs_human",
+          "errorPolicy": "needs-human",
+          "verification": {
+            "testNodeIds": ["cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c"],
+            "reviewerNodeId": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+            "successExit": "pass"
+          }
+        },
+        {
+          "id": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+          "position": {
+            "x": 1900,
+            "y": 100
+          },
+          "type": "approval",
+          "name": "Final human review",
+          "reviewInstructions": "Review this exact iteration's native evidence. This gate does not authorize publication or answer native permissions.",
+          "evidence": [
+            {
+              "alias": "evidence",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+                "selector": "test"
+              }
+            }
+          ],
+          "commentPolicy": "required"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "task"
+        },
+        {
+          "source": "task",
+          "target": "9583b909-f837-44ee-8f1d-11b6f7e923dc"
+        },
+        {
+          "source": "9583b909-f837-44ee-8f1d-11b6f7e923dc",
+          "target": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c"
+        },
+        {
+          "source": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+          "target": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b"
+        },
+        {
+          "source": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+          "target": "end"
+        },
+        {
+          "source": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+          "target": "c059bde5-4074-4c26-b762-555dfe92f6a1"
+        },
+        {
+          "source": "a297c60a-2a8f-46e5-9a79-7806d863413b",
+          "target": "9583b909-f837-44ee-8f1d-11b6f7e923dc"
+        },
+        {
+          "source": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+          "target": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+          "sourcePort": "pass"
+        },
+        {
+          "source": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+          "target": "a297c60a-2a8f-46e5-9a79-7806d863413b",
+          "sourcePort": "needs_changes"
+        },
+        {
+          "source": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+          "target": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+          "sourcePort": "needs_human"
+        }
+      ],
+      "routing": {
+        "finalGateId": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+        "limits": {
+          "maxNodeAdmissions": 12,
+          "deadlineMs": 600000
+        },
+        "region": {
+          "id": "853a6bef-9d0d-4000-a73c-fa2fd6932551",
+          "name": "Bounded C# repair",
+          "entryNodeId": "task",
+          "repairEntryNodeId": "a297c60a-2a8f-46e5-9a79-7806d863413b",
+          "decisionNodeId": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+          "bodyNodeIds": [
+            "task",
+            "9583b909-f837-44ee-8f1d-11b6f7e923dc",
+            "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+            "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+            "a297c60a-2a8f-46e5-9a79-7806d863413b",
+            "c059bde5-4074-4c26-b762-555dfe92f6a1"
+          ],
+          "repairExit": "needs_changes",
+          "passExit": "pass",
+          "maxRepairIterations": 2,
+          "stopOnNoProgress": true,
+          "sourcePaths": [
+            "Z4Fixture.csproj",
+            "MathOps.cs",
+            "Runner.cs",
+            "global.json",
+            "NuGet.Config",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props"
+          ]
+        }
+      }
+    },
+    "runs": [
+      {
+        "id": "5a097a30-fd50-49f7-aea6-2792e5ceb6ee",
+        "requestId": "7a771da1-7807-4317-bcd3-bdf384d9a1a1",
+        "target": {
+          "workspacePath": "<isolated-profile>\\workspace"
+        },
+        "status": "Running",
+        "createdAt": 1790258588572,
+        "updatedAt": 1790258588763,
+        "version": 5,
+        "routing": {
+          "configurationDigest": "3f537fadc17de30275c5ba988d5dcf6f5463c91fd8848be04afc7ed08bdd6a98",
+          "recipeConfigurationDigest": "f4bb8eae869b0f653baa1817c3404b033fefa30ad25c9d91bc3092001bc3480f",
+          "currentIterationId": "a1cf433c-2614-449a-a39d-b559fcaad887",
+          "cursorNodeId": "task",
+          "iterations": [
+            {
+              "id": "a1cf433c-2614-449a-a39d-b559fcaad887",
+              "index": 0,
+              "createdAt": 1790258588580,
+              "attemptIds": {
+                "a297c60a-2a8f-46e5-9a79-7806d863413b": "1fca31b8-0b9f-44bf-a752-cc74e6b7a707",
+                "task": "67b31040-f311-48a2-9087-cab047bf9652",
+                "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b": "a36f4876-eee0-4533-ad3b-fd4c066b76e1",
+                "9583b909-f837-44ee-8f1d-11b6f7e923dc": "2cc83402-a5d8-4a5f-b6fb-c3d2496fc1e2",
+                "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c": "c3e5c5b1-aa48-4e8d-bcea-1e50e06f6803",
+                "43d7a493-54fa-47da-b2e4-36c8ea663871": "6e4242ed-cb15-480d-83c2-d47515246e99",
+                "c059bde5-4074-4c26-b762-555dfe92f6a1": "8377bc70-f9b9-4250-a0c5-b5aae917864b"
+              },
+              "visitedNodeIds": ["task"],
+              "sourceDigest": "9217a301bdf2d4087019137eaaf2b3fe473a2994c50a85053ef13d9a0cb2cafd"
+            }
+          ],
+          "conditionAttempts": [
+            {
+              "nodeId": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+              "attemptId": "8377bc70-f9b9-4250-a0c5-b5aae917864b",
+              "iterationId": "a1cf433c-2614-449a-a39d-b559fcaad887",
+              "iteration": 0,
+              "status": "Pending",
+              "createdAt": 1790258588580,
+              "updatedAt": 1790258588580
+            }
+          ],
+          "admissions": 1,
+          "deadlineAt": 1790259188572,
+          "checkpoints": [],
+          "continuations": []
+        },
+        "requestFingerprint": "{\"mode\":\"build\",\"modelSelection\":{\"modelId\":\"z1-fixture\",\"options\":{\"reasoningLevel\":\"enabled\"},\"providerId\":\"z1-local-fixture\"},\"planEnabled\":false,\"revision\":2,\"target\":{\"workspacePath\":\"<isolated-profile>\\\\workspace\"}}",
+        "definition": {
+          "version": 5,
+          "revision": 2,
+          "name": "Z5 bounded native C# complete",
+          "nodes": [
+            {
+              "id": "start",
+              "position": {
+                "x": 40,
+                "y": 100
+              },
+              "type": "start",
+              "request": ""
+            },
+            {
+              "id": "task",
+              "position": {
+                "x": 280,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Implement",
+              "instructions": "Z5_IMPLEMENT: Read MathOps.cs and Runner.cs. Apply the explicitly staged initial synthetic implementation in MathOps.cs only. Preserve the runner. Do not build or run commands; separate native Tool nodes verify it. Return a concise result.",
+              "instructionMode": "literal",
+              "inputs": [],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "end",
+              "position": {
+                "x": 2160,
+                "y": 100
+              },
+              "type": "end",
+              "outputNodeId": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c"
+            },
+            {
+              "id": "9583b909-f837-44ee-8f1d-11b6f7e923dc",
+              "position": {
+                "x": 600,
+                "y": 100
+              },
+              "type": "tool",
+              "name": "Build",
+              "recipeId": "fixture-build"
+            },
+            {
+              "id": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+              "position": {
+                "x": 860,
+                "y": 100
+              },
+              "type": "tool",
+              "name": "Test",
+              "recipeId": "fixture-test"
+            },
+            {
+              "id": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+              "position": {
+                "x": 1120,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Reviewer",
+              "instructions": "Z5_REVIEW: Read MathOps.cs and results/test-report.json. Review this exact native verification; return the required structured reviewer record and its actual artifact ID. Do not edit or execute commands.\nZ5_VERIFICATION_BEGIN\n{{inputs.verification}}\nZ5_VERIFICATION_END",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "verification",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+                    "selector": "verification"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              },
+              "output": {
+                "kind": "json",
+                "schema": {
+                  "type": "object",
+                  "required": ["outcome", "findings", "evidenceReferences"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "outcome": {
+                      "type": "string",
+                      "enum": ["pass", "needs_changes", "needs_human"]
+                    },
+                    "findings": {
+                      "type": "array",
+                      "maxItems": 10,
+                      "items": {
+                        "type": "object",
+                        "required": ["code", "message"],
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          }
+                        }
+                      }
+                    },
+                    "evidenceReferences": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 8,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "a297c60a-2a8f-46e5-9a79-7806d863413b",
+              "position": {
+                "x": 1380,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Repair",
+              "instructions": "Z5_REPAIR: Read MathOps.cs. Use this exact previous iteration feedback to make the next bounded synthetic repair in MathOps.cs only. Preserve Runner.cs and tests. Do not build or execute commands.\nZ5_FEEDBACK_BEGIN\n{{inputs.feedback}}\nZ5_FEEDBACK_END",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "feedback",
+                  "source": {
+                    "kind": "repair-feedback"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+              "position": {
+                "x": 1640,
+                "y": 100
+              },
+              "type": "condition",
+              "name": "Decide from current evidence",
+              "inputs": [
+                {
+                  "alias": "review",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+                    "selector": "structured"
+                  }
+                },
+                {
+                  "alias": "machine",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+                    "selector": "verification"
+                  }
+                }
+              ],
+              "branches": [
+                {
+                  "exit": "pass",
+                  "predicate": {
+                    "op": "eq",
+                    "alias": "review",
+                    "pointer": "/outcome",
+                    "value": "pass"
+                  }
+                },
+                {
+                  "exit": "needs_changes",
+                  "predicate": {
+                    "op": "eq",
+                    "alias": "review",
+                    "pointer": "/outcome",
+                    "value": "needs_changes"
+                  }
+                }
+              ],
+              "defaultExit": "needs_human",
+              "errorPolicy": "needs-human",
+              "verification": {
+                "testNodeIds": ["cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c"],
+                "reviewerNodeId": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+                "successExit": "pass"
+              }
+            },
+            {
+              "id": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+              "position": {
+                "x": 1900,
+                "y": 100
+              },
+              "type": "approval",
+              "name": "Final human review",
+              "reviewInstructions": "Review this exact iteration's native evidence. This gate does not authorize publication or answer native permissions.",
+              "evidence": [
+                {
+                  "alias": "evidence",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+                    "selector": "test"
+                  }
+                }
+              ],
+              "commentPolicy": "required"
+            }
+          ],
+          "edges": [
+            {
+              "source": "start",
+              "target": "task"
+            },
+            {
+              "source": "task",
+              "target": "9583b909-f837-44ee-8f1d-11b6f7e923dc"
+            },
+            {
+              "source": "9583b909-f837-44ee-8f1d-11b6f7e923dc",
+              "target": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c"
+            },
+            {
+              "source": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+              "target": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b"
+            },
+            {
+              "source": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+              "target": "end"
+            },
+            {
+              "source": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+              "target": "c059bde5-4074-4c26-b762-555dfe92f6a1"
+            },
+            {
+              "source": "a297c60a-2a8f-46e5-9a79-7806d863413b",
+              "target": "9583b909-f837-44ee-8f1d-11b6f7e923dc"
+            },
+            {
+              "source": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+              "target": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+              "sourcePort": "pass"
+            },
+            {
+              "source": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+              "target": "a297c60a-2a8f-46e5-9a79-7806d863413b",
+              "sourcePort": "needs_changes"
+            },
+            {
+              "source": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+              "target": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+              "sourcePort": "needs_human"
+            }
+          ],
+          "routing": {
+            "finalGateId": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+            "limits": {
+              "maxNodeAdmissions": 12,
+              "deadlineMs": 600000
+            },
+            "region": {
+              "id": "853a6bef-9d0d-4000-a73c-fa2fd6932551",
+              "name": "Bounded C# repair",
+              "entryNodeId": "task",
+              "repairEntryNodeId": "a297c60a-2a8f-46e5-9a79-7806d863413b",
+              "decisionNodeId": "c059bde5-4074-4c26-b762-555dfe92f6a1",
+              "bodyNodeIds": [
+                "task",
+                "9583b909-f837-44ee-8f1d-11b6f7e923dc",
+                "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+                "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+                "a297c60a-2a8f-46e5-9a79-7806d863413b",
+                "c059bde5-4074-4c26-b762-555dfe92f6a1"
+              ],
+              "repairExit": "needs_changes",
+              "passExit": "pass",
+              "maxRepairIterations": 2,
+              "stopOnNoProgress": true,
+              "sourcePaths": [
+                "Z4Fixture.csproj",
+                "MathOps.cs",
+                "Runner.cs",
+                "global.json",
+                "NuGet.Config",
+                "Directory.Build.props",
+                "Directory.Build.targets",
+                "Directory.Packages.props"
+              ]
+            }
+          }
+        },
+        "defaults": {
+          "modelSelection": {
+            "providerId": "z1-local-fixture",
+            "modelId": "z1-fixture",
+            "options": {
+              "reasoningLevel": "enabled"
+            }
+          },
+          "mode": "build",
+          "planEnabled": false
+        },
+        "plannedPath": [
+          "a297c60a-2a8f-46e5-9a79-7806d863413b",
+          "task",
+          "9583b909-f837-44ee-8f1d-11b6f7e923dc",
+          "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+          "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+          "c059bde5-4074-4c26-b762-555dfe92f6a1",
+          "43d7a493-54fa-47da-b2e4-36c8ea663871"
+        ],
+        "startInput": "",
+        "nodeAttempts": [
+          {
+            "iterationId": "a1cf433c-2614-449a-a39d-b559fcaad887",
+            "iteration": 0,
+            "nodeId": "a297c60a-2a8f-46e5-9a79-7806d863413b",
+            "attemptId": "1fca31b8-0b9f-44bf-a752-cc74e6b7a707",
+            "commandId": "ee0c3e8c-4234-4815-9d08-4ea2d9628d3a",
+            "inputId": "ee0c3e8c-4234-4815-9d08-4ea2d9628d3a",
+            "status": "Pending",
+            "dispatchPhase": "planned",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790258588572,
+            "updatedAt": 1790258588572
+          },
+          {
+            "iterationId": "a1cf433c-2614-449a-a39d-b559fcaad887",
+            "iteration": 0,
+            "nodeId": "task",
+            "attemptId": "67b31040-f311-48a2-9087-cab047bf9652",
+            "commandId": "4fce9098-4258-4e2b-9167-0aa172df9f05",
+            "inputId": "4fce9098-4258-4e2b-9167-0aa172df9f05",
+            "status": "Running",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790258588572,
+            "updatedAt": 1790258588763,
+            "sessionId": "sess_46ab7976-c130-4f74-94a0-00790ecc33d7",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:37948:agent-4dccf62d-b7da-4d4f-92fc-1b729fd043b8",
+            "resolvedInstructions": "Z5_IMPLEMENT: Read MathOps.cs and Runner.cs. Apply the explicitly staged initial synthetic implementation in MathOps.cs only. Preserve the runner. Do not build or run commands; separate native Tool nodes verify it. Return a concise result.",
+            "bindings": []
+          },
+          {
+            "iterationId": "a1cf433c-2614-449a-a39d-b559fcaad887",
+            "iteration": 0,
+            "nodeId": "f4d7c86b-1d0c-488c-9e78-35aa0f581f8b",
+            "attemptId": "a36f4876-eee0-4533-ad3b-fd4c066b76e1",
+            "commandId": "d7d7d9e9-a37d-4339-b606-c59079d11b75",
+            "inputId": "d7d7d9e9-a37d-4339-b606-c59079d11b75",
+            "status": "Pending",
+            "dispatchPhase": "planned",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790258588572,
+            "updatedAt": 1790258588572
+          }
+        ],
+        "approvalAttempts": [
+          {
+            "iterationId": "a1cf433c-2614-449a-a39d-b559fcaad887",
+            "iteration": 0,
+            "nodeId": "43d7a493-54fa-47da-b2e4-36c8ea663871",
+            "attemptId": "6e4242ed-cb15-480d-83c2-d47515246e99",
+            "status": "Pending",
+            "createdAt": 1790258588572,
+            "updatedAt": 1790258588572
+          }
+        ],
+        "toolAttempts": [
+          {
+            "iterationId": "a1cf433c-2614-449a-a39d-b559fcaad887",
+            "iteration": 0,
+            "nodeId": "9583b909-f837-44ee-8f1d-11b6f7e923dc",
+            "attemptId": "2cc83402-a5d8-4a5f-b6fb-c3d2496fc1e2",
+            "operationId": "b62db64e-818d-43ec-8d1f-102af2b482a2",
+            "recipe": {
+              "id": "fixture-build",
+              "name": "Build C# fixture",
+              "executable": "dotnet",
+              "args": [
+                "build",
+                "Z4Fixture.csproj",
+                "--configuration",
+                "Release",
+                "--nologo",
+                "--no-incremental",
+                "--disable-build-servers",
+                "-p:RestoreConfigFile=NuGet.Config",
+                "-p:NuGetAudit=false",
+                "-p:UseSharedCompilation=false",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-nodeReuse:false"
+              ],
+              "cwd": ".",
+              "timeoutMs": 60000,
+              "sourcePaths": [
+                "Z4Fixture.csproj",
+                "MathOps.cs",
+                "Runner.cs",
+                "global.json",
+                "NuGet.Config",
+                "Directory.Build.props",
+                "Directory.Build.targets",
+                "Directory.Packages.props"
+              ],
+              "expectedOutputs": [
+                "bin/Release/net8.0/Z4Fixture.dll",
+                "bin/Release/net8.0/Z4Fixture.deps.json",
+                "bin/Release/net8.0/Z4Fixture.runtimeconfig.json"
+              ],
+              "verifier": {
+                "kind": "build"
+              }
+            },
+            "recipeDigest": "eb2960224cf63fca86773a89ca7b1fff0ed5fc6012fd4b81b996614e4aec695e",
+            "status": "Pending",
+            "dispatchPhase": "planned",
+            "createdAt": 1790258588572,
+            "updatedAt": 1790258588572
+          },
+          {
+            "iterationId": "a1cf433c-2614-449a-a39d-b559fcaad887",
+            "iteration": 0,
+            "nodeId": "cd5d3801-9ccb-48a8-99ec-d7dd2e997e5c",
+            "attemptId": "c3e5c5b1-aa48-4e8d-bcea-1e50e06f6803",
+            "operationId": "b918a46b-5c82-4231-849d-9f84db591e08",
+            "recipe": {
+              "id": "fixture-test",
+              "name": "Test C# fixture",
+              "executable": "dotnet",
+              "args": [
+                "bin/Release/net8.0/Z4Fixture.dll",
+                "--operation-id",
+                "{operationId}",
+                "--source-digest",
+                "{sourceDigest}",
+                "--build-digest",
+                "{buildDigest}",
+                "--report",
+                "{reportPath}"
+              ],
+              "cwd": ".",
+              "timeoutMs": 60000,
+              "sourcePaths": [
+                "Z4Fixture.csproj",
+                "MathOps.cs",
+                "Runner.cs",
+                "global.json",
+                "NuGet.Config",
+                "Directory.Build.props",
+                "Directory.Build.targets",
+                "Directory.Packages.props"
+              ],
+              "expectedOutputs": [],
+              "verifier": {
+                "kind": "test",
+                "format": "zcode-json-v1",
+                "reportPath": "results/test-report.json",
+                "minimumTests": 3,
+                "expectedTests": 3,
+                "requiredTests": ["add-positive", "add-negative", "add-zero"],
+                "buildNodeId": "9583b909-f837-44ee-8f1d-11b6f7e923dc"
+              }
+            },
+            "recipeDigest": "83d5484893feba4a7c3628f0a0e22743084afa60a1a2ed823e45e849ba813dea",
+            "status": "Pending",
+            "dispatchPhase": "planned",
+            "createdAt": 1790258588572,
+            "updatedAt": 1790258588572
+          }
+        ],
+        "artifacts": [],
+        "artifactBindings": []
+      }
+    ]
+  },
+  "nativeLedger": [
+    {
+      "id": "queue_4fce9098-4258-4e2b-9167-0aa172df9f05",
+      "session_id": "sess_46ab7976-c130-4f74-94a0-00790ecc33d7",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Z5_IMPLEMENT: Read MathOps.cs and Runner.cs. Apply the explicitly staged initial synthetic implementation in MathOps.cs only. Preserve the runner. Do not build or run commands; separate native Tool nodes verify it. Return a concise result.",
+        "intent": {
+          "sourceCommandId": "4fce9098-4258-4e2b-9167-0aa172df9f05",
+          "queueItemId": "queue_4fce9098-4258-4e2b-9167-0aa172df9f05",
+          "clientId": "graph:67b31040-f311-48a2-9087-cab047bf9652",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790258588743,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "4fce9098-4258-4e2b-9167-0aa172df9f05",
+          "queueItemId": "queue_4fce9098-4258-4e2b-9167-0aa172df9f05",
+          "clientId": "graph:67b31040-f311-48a2-9087-cab047bf9652",
+          "kind": "sendText",
+          "text": "Z5_IMPLEMENT: Read MathOps.cs and Runner.cs. Apply the explicitly staged initial synthetic implementation in MathOps.cs only. Preserve the runner. Do not build or run commands; separate native Tool nodes verify it. Return a concise result.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790258588743
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "admitted",
+      "time_created": 1790258588754,
+      "time_updated": 1790258588754
+    }
+  ],
+  "nativeToolResults": [],
+  "providerErrors": [],
+  "modelRequests": 0,
+  "collectedModelRequestCounts": {
+    "total": 0,
+    "byStage": {}
+  }
+}

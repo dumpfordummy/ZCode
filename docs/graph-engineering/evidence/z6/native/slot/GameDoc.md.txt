@@ -1,0 +1,23 @@
+# Z6 synthetic slot fixture authority
+
+This document defines this development fixture only. It is not a real game's math or certification.
+
+## R1
+Normal starts a new round, resetting accumulated win and retrigger count, then adds the supplied nonnegative win.
+
+## R2
+A Normal trigger awards exactly three Free spins unless the win cap already stopped the round.
+
+## R3
+Free consumes one remaining spin, then adds its supplied nonnegative win to the shared total. A retrigger awards two spins at most once per round.
+
+## R4
+Accumulated win is capped at ten. Reaching or exceeding ten clamps the stored total to ten, marks stopped and clears all remaining Free spins. A retrigger cannot revive a stopped round.
+
+## R5
+Free input after stop or zero remaining spins is inert. A negative win throws before changing state in Normal or Free.
+
+## Explicit exclusions and unknowns
+Bonus and Respin are not present in this fixture and must be excluded from instantiated native tasks.
+No RTP target, sample size or tolerance is supplied. RTP comparison is not applicable. There is no probability model, certification claim or company pilot result.
+The selected engine is this C# fixture. The operator selects the explicit offline Build/Test recipes; no other project command is assumed.

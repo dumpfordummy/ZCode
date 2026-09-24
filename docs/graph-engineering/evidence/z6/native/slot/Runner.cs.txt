@@ -1,0 +1,56 @@
+using System.Text.Json;
+
+var values = new Dictionary<string, string>(StringComparer.Ordinal);
+for (var index = 0; index < args.Length; index++)
+{
+    var argument = args[index];
+    if (argument is not ("--operation-id" or "--source-digest" or "--build-digest" or "--report"))
+        throw new ArgumentException("Unknown configured fixture argument: " + argument);
+    if (++index >= args.Length || !values.TryAdd(argument, args[index]))
+        throw new ArgumentException("Missing or repeated configured fixture argument.");
+}
+string Required(string key) => values.TryGetValue(key, out var value) && value.Length > 0
+    ? value : throw new ArgumentException("Missing configured fixture argument: " + key);
+string WorkspaceFile(string relative)
+{
+    if (Path.IsPathRooted(relative)) throw new ArgumentException("Report must be relative.");
+    var root = Path.GetFullPath(Environment.CurrentDirectory) + Path.DirectorySeparatorChar;
+    var absolute = Path.GetFullPath(relative, root);
+    if (!absolute.StartsWith(root, OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+        throw new ArgumentException("Report must remain in synthetic workspace.");
+    return absolute;
+}
+var tests = new List<Dictionary<string, object>>();
+void Check(string name, Action action)
+{
+    try { action(); tests.Add(new() { ["name"] = name, ["status"] = "passed" }); }
+    catch (Exception error) { tests.Add(new() { ["name"] = name, ["status"] = "failed", ["message"] = error.Message }); }
+}
+void Same(SlotState state, int total, int spins, int retriggers, bool stopped)
+{
+    if ((state.TotalWin, state.FreeSpins, state.Retriggers, state.Stopped) != (total, spins, retriggers, stopped))
+        throw new InvalidOperationException($"Expected ({total},{spins},{retriggers},{stopped}); actual ({state.TotalWin},{state.FreeSpins},{state.Retriggers},{state.Stopped}).");
+}
+void Negative(Action action)
+{
+    try { action(); } catch (ArgumentOutOfRangeException) { return; }
+    throw new InvalidOperationException("Negative win did not throw before mutation.");
+}
+Check("normal-basic-R1", () => { var s = new SlotState(); SlotRules.Normal(s, 2, false); Same(s, 2, 0, 0, false); });
+Check("normal-reset-R1", () => { var s = new SlotState { TotalWin = 8, FreeSpins = 4, Retriggers = 1, Stopped = true }; SlotRules.Normal(s, 1, false); Same(s, 1, 0, 0, false); });
+Check("normal-trigger-R2", () => { var s = new SlotState(); SlotRules.Normal(s, 2, true); Same(s, 2, 3, 0, false); });
+Check("normal-cap-trigger-R2-R4", () => { var s = new SlotState(); SlotRules.Normal(s, 12, true); Same(s, 10, 0, 0, true); });
+Check("free-shared-win-R3", () => { var s = new SlotState { TotalWin = 2, FreeSpins = 3 }; SlotRules.Free(s, 3, false); Same(s, 5, 2, 0, false); });
+Check("free-first-retrigger-R3", () => { var s = new SlotState { TotalWin = 2, FreeSpins = 3 }; SlotRules.Free(s, 1, true); Same(s, 3, 4, 1, false); });
+Check("free-second-retrigger-R3", () => { var s = new SlotState { TotalWin = 3, FreeSpins = 4, Retriggers = 1 }; SlotRules.Free(s, 1, true); Same(s, 4, 3, 1, false); });
+Check("free-cap-stops-R4", () => { var s = new SlotState { TotalWin = 8, FreeSpins = 3 }; SlotRules.Free(s, 4, true); Same(s, 10, 0, 0, true); });
+Check("free-overflow-cap-R4", () => { var s = new SlotState { TotalWin = 8, FreeSpins = 3 }; SlotRules.Free(s, int.MaxValue, true); Same(s, 10, 0, 0, true); });
+Check("free-exhausted-inert-R5", () => { var s = new SlotState { TotalWin = 5, FreeSpins = 0, Retriggers = 1 }; SlotRules.Free(s, 3, true); Same(s, 5, 0, 1, false); });
+Check("free-stopped-inert-R5", () => { var s = new SlotState { TotalWin = 10, FreeSpins = 0, Retriggers = 1, Stopped = true }; SlotRules.Free(s, 4, true); Same(s, 10, 0, 1, true); });
+Check("normal-negative-atomic-R5", () => { var s = new SlotState { TotalWin = 4, FreeSpins = 2, Retriggers = 1 }; Negative(() => SlotRules.Normal(s, -1, true)); Same(s, 4, 2, 1, false); });
+Check("free-negative-atomic-R5", () => { var s = new SlotState { TotalWin = 4, FreeSpins = 2, Retriggers = 1 }; Negative(() => SlotRules.Free(s, -1, true)); Same(s, 4, 2, 1, false); });
+var report = new { format = "zcode-test-v1", operationId = Required("--operation-id"), sourceDigest = Required("--source-digest"), buildDigest = Required("--build-digest"), tests };
+var serialized = JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true });
+await File.WriteAllTextAsync(WorkspaceFile(Required("--report")), serialized);
+Console.WriteLine(serialized);
+return tests.Any(test => (string)test["status"] != "passed") ? 1 : 0;

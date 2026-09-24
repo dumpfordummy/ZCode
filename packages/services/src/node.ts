@@ -4,7 +4,10 @@ import { randomBytes } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import type { GitGraphWorkspace } from "@zcode/shared";
 import { IGraphEngineeringService } from "./graph-engineering/contract.js";
+import { IGraphWorkflowService } from "./graph-engineering/workflow-contract.js";
+import { IGraphParallelService } from "./graph-engineering/parallel-contract.js";
 import { createGraphEngineeringService } from "./graph-engineering/node.js";
 import {
   createNodeProviderRuntimePathEnv,
@@ -2311,12 +2314,8 @@ export function createLocalServices(options: {
     taskIndexSyncer: zcodeTaskIndexSyncer,
     cuaProductMcpServerResolver,
   });
-  graphEngineeringService = createGraphEngineeringService({
-    directory: join(resolveAppConfigDir(), "graph-engineering"),
-    agentService: zcodeAgentService,
-    sessionService: zcodeSessionService,
-    modelSelectionService: providerRuntime.modelSelection,
-    settingService,
+  const fileService = createFileService({
+    workspaceFileSearchFilter: options?.workspaceFileSearchFilter,
   });
   const gitCommitMessageGenerator = new GitCommitMessageGenerator({
     currentModelProvider: {
@@ -2339,8 +2338,28 @@ export function createLocalServices(options: {
     },
     logger: createServiceLogger("git-commit-message"),
   });
+  let cleanupGraphWorkspace:
+    | ((workspace: GitGraphWorkspace) => Promise<GitGraphWorkspace>)
+    | undefined;
   const gitService = createGitService({
+    onGraphWorkspaceCleanup: (cleanup) => {
+      cleanupGraphWorkspace = cleanup;
+    },
+    graphWorkspaceDirectory: join(resolveAppConfigDir(), "graph-engineering", "workspaces"),
     commitMessageGenerator: gitCommitMessageGenerator,
+    fileService,
+  });
+  graphEngineeringService = createGraphEngineeringService({
+    cleanupWorkspace: (workspace) => {
+      if (!cleanupGraphWorkspace) throw new Error("Owned cleanup is unavailable.");
+      return cleanupGraphWorkspace(workspace);
+    },
+    directory: join(resolveAppConfigDir(), "graph-engineering"),
+    agentService: zcodeAgentService,
+    sessionService: zcodeSessionService,
+    modelSelectionService: providerRuntime.modelSelection,
+    settingService,
+    gitService,
   });
   // task wrapper 由 ZCode task service adapter 提供；核心 session 状态由 ZCode agent server 维护。
   const zcodeTaskService = createZCodeTaskServiceAdapter({
@@ -2411,9 +2430,6 @@ export function createLocalServices(options: {
       credentials: await resolveOffPeakCredentials(offPeakCredentialResolverDeps),
       ticketId,
     });
-  const fileService = createFileService({
-    workspaceFileSearchFilter: options?.workspaceFileSearchFilter,
-  });
   const mediaPreviewService = createMediaPreviewService({
     fileService,
     authorizeLocalMediaPreviewPath: options?.authorizeLocalMediaPreviewPath,
@@ -2448,6 +2464,8 @@ export function createLocalServices(options: {
   const sqliteReposToClose: Array<{ close(): void }> = [];
   const services = new ServiceCollection()
     .register(IGraphEngineeringService, graphEngineeringService)
+    .register(IGraphWorkflowService, graphEngineeringService.workflowService)
+    .register(IGraphParallelService, graphEngineeringService.parallelService)
     .register(IFileService, fileService)
     .register(IMediaPreviewService, mediaPreviewService)
     .register(IGitService, gitService)

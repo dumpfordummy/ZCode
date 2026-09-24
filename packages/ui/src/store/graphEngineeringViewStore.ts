@@ -4,6 +4,8 @@ interface GraphViewSelection {
   mode: "design" | "runs";
   runId?: string;
   nodeId?: string;
+  attemptId?: string;
+  regionId?: string;
 }
 
 /** Renderer-local navigation only. Accepted graphs, attempts and settings remain Host facts. */

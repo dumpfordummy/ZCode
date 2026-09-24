@@ -1,0 +1,137 @@
+{
+  "scenario": "z1-literal-compatibility",
+  "status": "PASS",
+  "assertions": [
+    "Unversioned Z1 runs through unchanged native Read/Edit/Bash with its literal template preserved, one exact session/input, and independent fixture test",
+    "Completed Z1 history reopens in Z2 Runs without migration, semantic reinterpretation, new session or new native/provider input"
+  ],
+  "testOutput": "✔ synthetic marker (0.5329ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 60.9679\n",
+  "completedRun": {
+    "id": "6f03c6ba-4cc6-4182-8542-0e56cee91792",
+    "requestId": "727f38fb-85c6-4849-af28-040ff3cdb000",
+    "target": {
+      "workspacePath": "<isolated-profile>\\workspace"
+    },
+    "status": "Completed",
+    "createdAt": 1790248456464,
+    "updatedAt": 1790248460436,
+    "message": "The native input completed. Inspect the conversation, files and tests to verify the task outcome.",
+    "attemptId": "a8efc240-7d9a-4078-86ec-63fe33fde5cd",
+    "definition": {
+      "revision": 2,
+      "name": "Z1 literal compatibility under Z2",
+      "taskName": "Agent Task",
+      "instructions": "Z1_SYNTHETIC_TASK: Read fixture.mjs, replace Z1_BEFORE_7391 with Z1_AFTER_7391, and run node --test fixture.test.mjs. Work only in this synthetic workspace.\nLiteral compatibility token remains unchanged: {{inputs.unbound}}",
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          }
+        },
+        {
+          "id": "task",
+          "type": "task",
+          "position": {
+            "x": 280,
+            "y": 100
+          }
+        },
+        {
+          "id": "end",
+          "type": "end",
+          "position": {
+            "x": 600,
+            "y": 100
+          }
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "task"
+        },
+        {
+          "source": "task",
+          "target": "end"
+        }
+      ]
+    },
+    "modelSelection": {
+      "providerId": "z1-local-fixture",
+      "modelId": "z1-fixture",
+      "options": {
+        "reasoningLevel": "enabled"
+      }
+    },
+    "mode": "build",
+    "planEnabled": false,
+    "commandId": "bf1d13b1-1810-4527-9d03-e67b12085746",
+    "inputId": "bf1d13b1-1810-4527-9d03-e67b12085746",
+    "sessionId": "sess_a4d340f7-7d8d-45ab-ace5-b37465491e14",
+    "runtimeIdentity": "<isolated-profile>\\workspace:1:41920:agent-99eb641e-ca0a-4b90-910a-5ca1d8e52221",
+    "foregroundExecutionId": "runtime_command_1",
+    "terminalProof": {
+      "sourceCommandId": "bf1d13b1-1810-4527-9d03-e67b12085746",
+      "state": "completedSuccess",
+      "logEpoch": "muffpi6w-qhkd2e5n",
+      "seq": 78
+    }
+  },
+  "nativeLedger": [
+    {
+      "id": "queue_bf1d13b1-1810-4527-9d03-e67b12085746",
+      "session_id": "sess_a4d340f7-7d8d-45ab-ace5-b37465491e14",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Z1_SYNTHETIC_TASK: Read fixture.mjs, replace Z1_BEFORE_7391 with Z1_AFTER_7391, and run node --test fixture.test.mjs. Work only in this synthetic workspace.\nLiteral compatibility token remains unchanged: {{inputs.unbound}}",
+        "intent": {
+          "sourceCommandId": "bf1d13b1-1810-4527-9d03-e67b12085746",
+          "queueItemId": "queue_bf1d13b1-1810-4527-9d03-e67b12085746",
+          "clientId": "graph:a8efc240-7d9a-4078-86ec-63fe33fde5cd",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790248457069,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "bf1d13b1-1810-4527-9d03-e67b12085746",
+          "queueItemId": "queue_bf1d13b1-1810-4527-9d03-e67b12085746",
+          "clientId": "graph:a8efc240-7d9a-4078-86ec-63fe33fde5cd",
+          "kind": "sendText",
+          "text": "Z1_SYNTHETIC_TASK: Read fixture.mjs, replace Z1_BEFORE_7391 with Z1_AFTER_7391, and run node --test fixture.test.mjs. Work only in this synthetic workspace.\nLiteral compatibility token remains unchanged: {{inputs.unbound}}",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790248457069
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790248457083,
+      "time_updated": 1790248457691
+    }
+  ],
+  "evidenceOrigin": ".tmp/z3-regressions/z1-compatibility.log",
+  "screenshots": [
+    "z1-compatibility--z1-compatible-completed.png",
+    "z1-compatibility--z1-compatible-reopened.png"
+  ]
+}

@@ -3,6 +3,14 @@ import type { GitBranchComparison, GitFileChange, GitChangeSectionId } from "@zc
 import { isPathInWorkspaceScope, normalizeGitPath, toWorkspaceRelativeGitPath } from "./config.js";
 import { filterCommitMessageFilesByCurrentSession } from "./commitMessageFileScope.js";
 import type { IGitService } from "./git.js";
+import type { IFileService } from "../index.js";
+import { createGitSourceSnapshotReader } from "./sourceSnapshot.js";
+import { createGitGraphWorkspaces } from "./graphWorkspace.js";
+import type { GitGraphWorkspace } from "@zcode/shared";
+import {
+  createGitCommandProvider,
+  type GitCommandProvider,
+} from "./providers/gitCommandProvider.js";
 import type { GitCommitMessageGenerator } from "./gitCommitMessageGenerator.js";
 import {
   createGitCliRepo,
@@ -168,12 +176,41 @@ function getCommitMessageDiffQueries(
 }
 
 export function createGitService(options?: {
+  graphWorkspaceDirectory?: string;
+  onGraphWorkspaceCleanup?: (
+    cleanup: (workspace: GitGraphWorkspace) => Promise<GitGraphWorkspace>,
+  ) => void;
   repo?: GitCliRepo;
+  commandProvider?: GitCommandProvider;
+  fileService?: IFileService;
   commitMessageGenerator?: GitCommitMessageGenerator;
 }): IGitService {
-  const repo = options?.repo ?? createGitCliRepo();
+  const commandProvider = options?.commandProvider ?? createGitCommandProvider();
+  const repo = options?.repo ?? createGitCliRepo({ commandProvider });
+  const graphWorkspaces = createGitGraphWorkspaces(
+    commandProvider,
+    options?.graphWorkspaceDirectory,
+  );
+  // 删除能力仅交给 Host 装配层，不放入可由 Renderer/RPC 调用的 Git service 对象。
+  options?.onGraphWorkspaceCleanup?.((workspace) =>
+    graphWorkspaces.execute({ action: "cleanup", workspace }),
+  );
+  const captureSource = createGitSourceSnapshotReader({
+    repo,
+    commandProvider,
+    fileService: options?.fileService,
+  });
 
   return {
+    getGraphBase: (params) => graphWorkspaces.inspect(params.workspacePath),
+    graphWorkspace: (params) => {
+      if (!["prepare", "validate"].includes(params.action))
+        throw new Error("Cleanup requires the audited Graph owner control path.");
+      return graphWorkspaces.execute(params);
+    },
+    async getSourceSnapshot(params) {
+      return await captureSource(params.workspacePath);
+    },
     async getRepositorySummary(params) {
       const status = await repo.getStatus(params.workspacePath);
       return status.summary;

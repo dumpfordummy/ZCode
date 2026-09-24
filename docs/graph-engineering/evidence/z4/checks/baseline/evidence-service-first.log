@@ -1,0 +1,75 @@
+✖ Tool intents persist before native effects; duplicate Run and viewing cannot admit extra commands (1584.9384ms)
+✔ known failed native command never advances even if unrelated model says PASS (18.5306ms)
+✔ cancel targets only owned Tool and retains cancellation without stopping native agents (10.3454ms)
+✔ lost Tool start acknowledgement and cold load never replay; guard blocks arbitrary prompts (4.1293ms)
+✖ metadata write failures happen before dispatch; terminal write failure stops successor (1548.6064ms)
+✔ strict structured result binds exact attempt field while native completion remains separate (31.182ms)
+✖ invalid strict output stops all dependents without repair and retains successful native proof (14.8248ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 4
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4016.4839
+
+✖ failing tests:
+
+test at packages\services\src\graph-engineering\app\evidence-service.test.ts:1:317
+✖ Tool intents persist before native effects; duplicate Run and viewing cannot admit extra commands (1584.9384ms)
+  Error: Expected fixture state was not observed
+      at Object.wait (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\app\evidence.fixture.ts:46:239)
+      at async TestContext.<anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\app\evidence-service.test.ts:12:19)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3)
+
+test at packages\services\src\graph-engineering\app\evidence-service.test.ts:1:2562
+✖ metadata write failures happen before dispatch; terminal write failure stops successor (1548.6064ms)
+  Error: Expected fixture state was not observed
+      at Object.wait (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\app\evidence.fixture.ts:46:239)
+      at async TestContext.<anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\app\evidence-service.test.ts:42:3)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7)
+
+test at packages\services\src\graph-engineering\app\evidence-service.test.ts:1:4106
+✖ invalid strict output stops all dependents without repair and retains successful native proof (14.8248ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /configuration/. Input:
+  
+  '[\n' +
+    '  {\n' +
+    '    "code": "invalid_value",\n' +
+    '    "values": [\n' +
+    '      "build",\n' +
+    '      "edit",\n' +
+    '      "plan",\n' +
+    '      "yolo"\n' +
+    '    ],\n' +
+    '    "path": [],\n' +
+    '    "message": "Invalid option: expected one of \\"build\\"|\\"edit\\"|\\"plan\\"|\\"yolo\\""\n' +
+    '  }\n' +
+    ']'
+  
+      at async TestContext.<anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\app\evidence-service.test.ts:58:3)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: ZodError: [
+      {
+        "code": "invalid_value",
+        "values": [
+          "build",
+          "edit",
+          "plan",
+          "yolo"
+        ],
+        "path": [],
+        "message": "Invalid option: expected one of \"build\"|\"edit\"|\"plan\"|\"yolo\""
+      }
+    ]
+        at <anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\app\service.ts:95:36),
+    expected: /configuration/,
+    operator: 'rejects',
+    diff: 'simple'
+  }

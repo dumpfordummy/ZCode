@@ -1,0 +1,38 @@
+public sealed class SlotState
+{
+    public int TotalWin { get; set; }
+    public int FreeSpins { get; set; }
+    public int Retriggers { get; set; }
+    public bool Stopped { get; set; }
+}
+
+public static class SlotRules
+{
+    public static void Normal(SlotState state, int win, bool trigger)
+    {
+        if (win < 0) throw new ArgumentOutOfRangeException(nameof(win));
+        state.TotalWin = Math.Min(10, win);
+        state.Retriggers = 0;
+        state.Stopped = state.TotalWin == 10;
+        state.FreeSpins = state.Stopped ? 0 : trigger ? 3 : 0;
+    }
+
+    public static void Free(SlotState state, int win, bool retrigger)
+    {
+        if (win < 0) throw new ArgumentOutOfRangeException(nameof(win));
+        if (state.Stopped || state.FreeSpins == 0) return;
+        state.FreeSpins--;
+        state.TotalWin = (int)Math.Min(10L, (long)state.TotalWin + win);
+        if (state.TotalWin == 10)
+        {
+            state.Stopped = true;
+            state.FreeSpins = 0;
+            return;
+        }
+        if (retrigger && state.Retriggers == 0)
+        {
+            state.Retriggers++;
+            state.FreeSpins += 2;
+        }
+    }
+}

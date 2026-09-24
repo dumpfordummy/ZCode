@@ -1,0 +1,170 @@
+{
+  "status": "IMPLEMENTED WITH NAMED BASELINE EXCEPTIONS — ready for user check",
+  "milestone": "Z6 only",
+  "userReportWaived": true,
+  "userOperatedChecks": "NOT RUN",
+  "sourceTests": {
+    "total": 307,
+    "failed": 0,
+    "skipped": 0,
+    "groups": {
+      "graphAndNativeFacade": 166,
+      "ui": 39,
+      "sourceSnapshots": 13,
+      "servicesAndInteractionRegistry": 14,
+      "nativeRecipeSessionAndMetadata": 12,
+      "independentFixtures": 24,
+      "packagingSourceRegressions": 39
+    }
+  },
+  "checks": [
+    {
+      "command": "pnpm typecheck",
+      "result": "PASS",
+      "evidence": "typecheck.log"
+    },
+    {
+      "command": "pnpm --dir apps/zcode-cli typecheck",
+      "result": "PASS",
+      "tasks": 27,
+      "evidence": "cli-typecheck.log"
+    },
+    {
+      "command": "pnpm lint",
+      "result": "PASS",
+      "warnings": 70,
+      "errors": 0,
+      "evidence": "root-lint.log"
+    },
+    {
+      "command": "pnpm --dir apps/zcode-cli lint --continue",
+      "result": "FAIL — baseline exceptions",
+      "warnings": 53,
+      "errors": 85,
+      "evidence": "cli-lint.log",
+      "comparison": "cli-lint-message-comparison.json",
+      "note": "138 rule/file diagnostic identities retained. Five existing max-lines counts increased: server 834→837; bootstrap plugins 1280→1282; adapter plugins 878→880; file-config 509→510; marketplace 2480→2481."
+    },
+    {
+      "command": "pnpm architecture:check --changed",
+      "result": "PASS",
+      "violations": 0,
+      "evidence": "architecture.log"
+    },
+    {
+      "command": "pnpm fmt:check",
+      "result": "FAIL — unchanged baseline",
+      "paths": 2870,
+      "evidence": "format.log",
+      "comparison": "baseline-comparison.json"
+    },
+    {
+      "command": "$env:ZCODE_ENV='test'; node scripts/build-desktop-agent-cli.mjs",
+      "result": "PASS",
+      "evidence": "cli-build.log"
+    },
+    {
+      "command": "pnpm --filter @zcode/desktop build:no-runtime-assets",
+      "result": "PASS",
+      "evidence": "desktop-build.log"
+    }
+  ],
+  "acceptance": [
+    {
+      "id": "Z6-A01",
+      "result": "PASS",
+      "layer": "service fixture + native library",
+      "evidence": [
+        "graph-native-facade-tests.log",
+        "../native/library-current/z6-library-summary.json"
+      ],
+      "outcome": "Atomic stale-revision conflicts; lifecycle and history preservation."
+    },
+    {
+      "id": "Z6-A02",
+      "result": "PASS",
+      "layer": "service fixture + native",
+      "evidence": [
+        "graph-native-facade-tests.log",
+        "../native/library-current/z6-library-summary.json",
+        "../native/generic-retry/summary.json"
+      ],
+      "outcome": "Immutable selected version and frozen run provenance; later library versions do not mutate existing instances."
+    },
+    {
+      "id": "Z6-A03",
+      "result": "PASS",
+      "layer": "service fixture + native library",
+      "evidence": [
+        "graph-native-facade-tests.log",
+        "../native/library-current/z6-library-summary.json"
+      ],
+      "outcome": "Invalid/unsupported/unsafe imports preserve saved and unsaved drafts; zero inputs, model requests or tool operations."
+    },
+    {
+      "id": "Z6-A04",
+      "result": "PASS",
+      "layer": "service fixture + native library",
+      "evidence": [
+        "graph-native-facade-tests.log",
+        "../native/library-current/reviewed-portable.json.txt"
+      ],
+      "outcome": "Portable capture excludes local bindings/history; literal synthetic secret/private path refusal. Not a universal secret scanner."
+    },
+    {
+      "id": "Z6-A05",
+      "result": "PASS",
+      "layer": "service/native metadata fixtures + real native Skill/Read",
+      "evidence": [
+        "graph-native-facade-tests.log",
+        "native-source-tests.log",
+        "../native/generic-retry/summary.json"
+      ],
+      "outcome": "Existing native skill resolved by native name, instructions read by actual tools, digest drift blocks admission."
+    },
+    {
+      "id": "Z6-A06",
+      "result": "PASS",
+      "layer": "native metadata fixture + native preflight UI",
+      "evidence": [
+        "native-source-tests.log",
+        "graph-native-facade-tests.log",
+        "../native/slot/z6-native-preflight-destinations.png"
+      ],
+      "outcome": "Metadata-only native resolution, selected and auxiliary destinations, inherited config, explicit Unknown acknowledgment. No private external integrations tested."
+    },
+    {
+      "id": "Z6-A07",
+      "result": "PASS",
+      "layer": "real native controlled provider + independent C# runner",
+      "evidence": ["../native/generic-retry/summary.json", "../native/bugfix/summary.json"],
+      "outcome": "Generic3/3; bugfix0/3→2/3→3/3 within two repairs; final gates and completed-history restarts."
+    },
+    {
+      "id": "Z6-A08",
+      "result": "PASS",
+      "layer": "real native controlled provider + independent C# runner",
+      "evidence": ["../native/slot/summary.json"],
+      "outcome": "Source-linked R1–R5, interpretation gate, Normal/Free sequential tasks, Bonus/Respin explicitly excluded,13/13 assertions, final gate. Math/RTP target absent: N/A."
+    },
+    {
+      "id": "Z6-A09",
+      "result": "PASS",
+      "layer": "service + fixture",
+      "evidence": ["graph-native-facade-tests.log", "fixture-regressions.log"],
+      "outcome": "Missing native tooling, references, recipes, unavailable selections and incomplete math target/sampling pair block rather than invent success."
+    },
+    {
+      "id": "Z6-A10",
+      "result": "NOT RUN",
+      "layer": "user-operated company project",
+      "evidence": "../../../PRIVATE_PROJECT_PILOT_CHECKLIST.md",
+      "outcome": "Requires separate named authorization and actual evidence."
+    }
+  ],
+  "limitations": [
+    "Controlled providers establish plumbing/tool behavior, not live model quality.",
+    "Live user/provider/project, company pilot, external integrations, installed profiles, packaging/second-PC and mobile/remote/non-Windows acceptance: NOT RUN.",
+    "No Z6 report, Z7 work, repository staging/commit/push/merge/publication, or installed-setting modification."
+  ]
+}

@@ -1,0 +1,251 @@
+{
+  "worker-a": {
+    "id": "8521d9c5-b9be-4d68-994d-253efe041b94",
+    "requestId": "c36a2beb-62c3-4c90-a632-a56dcd26f9a0",
+    "target": {
+      "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271246282-493a17\\data\\.zcode\\v2\\graph-engineering\\workspaces\\7a5983ef-1b31-48fd-8d52-7ec3028b7536\\worker-a"
+    },
+    "status": "Interrupted",
+    "createdAt": 1790271257826,
+    "updatedAt": 1790271264596,
+    "message": "The owning Host was interrupted. Inspect the original input; pending tasks will not be submitted automatically.",
+    "version": 4,
+    "requestFingerprint": "{\"mode\":\"build\",\"modelSelection\":{\"modelId\":\"z1-fixture\",\"options\":{\"reasoningLevel\":\"enabled\"},\"providerId\":\"z1-local-fixture\"},\"planEnabled\":false,\"revision\":1,\"target\":{\"workspacePath\":\"C:\\\\Users\\\\USER\\\\Desktop\\\\Personal\\\\ZCode\\\\.tmp\\\\z1-native-1790271246282-493a17\\\\data\\\\.zcode\\\\v2\\\\graph-engineering\\\\workspaces\\\\7a5983ef-1b31-48fd-8d52-7ec3028b7536\\\\worker-a\"}}",
+    "definition": {
+      "version": 4,
+      "revision": 1,
+      "name": "Fork / Join / worker-a",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": "{\"request\":\"Implement independent contributions A=1 and B=2; preserve all independent tests.\",\"sharedContract\":\"Only PartA.cs and PartB.cs may change. Preserve Runner.cs and MathOps.cs. The combined (1,1) state must fail existing tests.\",\"resultRequirements\":\"Full reviewed integration and fresh native Build/Test of all three independent assertions; no original publication.\",\"base\":\"38e6d45ab732f9008442e79ce51cb10db9b4b555\",\"branch\":{\"id\":\"worker-a\",\"name\":\"worker-a\",\"selected\":true,\"instructions\":\"Read PartA.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\",\"files\":[\"PartA.cs\"],\"additions\":[]}}"
+        },
+        {
+          "id": "worker-a",
+          "position": {
+            "x": 290,
+            "y": 100
+          },
+          "type": "task",
+          "name": "worker-a",
+          "instructions": "Parallel worker task: worker-a.\nRead PartA.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\nUse native tools in this workspace only. Edit only the explicitly selected files; additional files require explicit additions approval. Preserve the shared contract, tests and configuration. Do not stage, commit, push, merge or access other worker directories. Report actual changes and tests, with unknowns explicit.\n{{inputs.request}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 540,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "worker-a"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "worker-a"
+        },
+        {
+          "source": "worker-a",
+          "target": "end"
+        }
+      ]
+    },
+    "defaults": {
+      "modelSelection": {
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "options": {
+          "reasoningLevel": "enabled"
+        }
+      },
+      "mode": "build",
+      "planEnabled": false
+    },
+    "plannedPath": ["worker-a"],
+    "startInput": "{\"request\":\"Implement independent contributions A=1 and B=2; preserve all independent tests.\",\"sharedContract\":\"Only PartA.cs and PartB.cs may change. Preserve Runner.cs and MathOps.cs. The combined (1,1) state must fail existing tests.\",\"resultRequirements\":\"Full reviewed integration and fresh native Build/Test of all three independent assertions; no original publication.\",\"base\":\"38e6d45ab732f9008442e79ce51cb10db9b4b555\",\"branch\":{\"id\":\"worker-a\",\"name\":\"worker-a\",\"selected\":true,\"instructions\":\"Read PartA.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\",\"files\":[\"PartA.cs\"],\"additions\":[]}}",
+    "nodeAttempts": [
+      {
+        "nodeId": "worker-a",
+        "attemptId": "2737db20-3f3a-45fd-aa13-dba2eaf9bf86",
+        "commandId": "ccaf4c98-74b9-448b-9721-90de87d6c695",
+        "inputId": "ccaf4c98-74b9-448b-9721-90de87d6c695",
+        "status": "WaitingForPermission",
+        "dispatchPhase": "accepted",
+        "settings": {
+          "modelSelection": {
+            "providerId": "z1-local-fixture",
+            "modelId": "z1-fixture",
+            "options": {
+              "reasoningLevel": "enabled"
+            }
+          },
+          "mode": "build",
+          "planEnabled": false,
+          "source": "workspace"
+        },
+        "createdAt": 1790271257826,
+        "updatedAt": 1790271258831,
+        "sessionId": "sess_6da83754-4616-48c6-ae4d-6a9399ec751b",
+        "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271246282-493a17\\data\\.zcode\\v2\\graph-engineering\\workspaces\\7a5983ef-1b31-48fd-8d52-7ec3028b7536\\worker-a:1:7124:agent-f2a0a9d2-88b0-4fa5-b3ef-5e580413fc3d",
+        "foregroundExecutionId": "runtime_command_1",
+        "observationEpoch": "mufta7hi-yhnpquw5",
+        "resolvedInstructions": "Parallel worker task: worker-a.\nRead PartA.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\nUse native tools in this workspace only. Edit only the explicitly selected files; additional files require explicit additions approval. Preserve the shared contract, tests and configuration. Do not stage, commit, push, merge or access other worker directories. Report actual changes and tests, with unknowns explicit.\n{\"request\":\"Implement independent contributions A=1 and B=2; preserve all independent tests.\",\"sharedContract\":\"Only PartA.cs and PartB.cs may change. Preserve Runner.cs and MathOps.cs. The combined (1,1) state must fail existing tests.\",\"resultRequirements\":\"Full reviewed integration and fresh native Build/Test of all three independent assertions; no original publication.\",\"base\":\"38e6d45ab732f9008442e79ce51cb10db9b4b555\",\"branch\":{\"id\":\"worker-a\",\"name\":\"worker-a\",\"selected\":true,\"instructions\":\"Read PartA.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\",\"files\":[\"PartA.cs\"],\"additions\":[]}}",
+        "bindings": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            },
+            "text": "{\"request\":\"Implement independent contributions A=1 and B=2; preserve all independent tests.\",\"sharedContract\":\"Only PartA.cs and PartB.cs may change. Preserve Runner.cs and MathOps.cs. The combined (1,1) state must fail existing tests.\",\"resultRequirements\":\"Full reviewed integration and fresh native Build/Test of all three independent assertions; no original publication.\",\"base\":\"38e6d45ab732f9008442e79ce51cb10db9b4b555\",\"branch\":{\"id\":\"worker-a\",\"name\":\"worker-a\",\"selected\":true,\"instructions\":\"Read PartA.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\",\"files\":[\"PartA.cs\"],\"additions\":[]}}"
+          }
+        ]
+      }
+    ],
+    "approvalAttempts": [],
+    "toolAttempts": [],
+    "artifacts": [],
+    "artifactBindings": []
+  },
+  "worker-b": {
+    "id": "39c09275-f6cd-428f-8ddd-0736104b1ce5",
+    "requestId": "2bd6cd8c-dca8-44ca-87fe-5e9764e691d4",
+    "target": {
+      "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271246282-493a17\\data\\.zcode\\v2\\graph-engineering\\workspaces\\7a5983ef-1b31-48fd-8d52-7ec3028b7536\\worker-b"
+    },
+    "status": "WaitingForPermission",
+    "createdAt": 1790271258557,
+    "updatedAt": 1790271259577,
+    "version": 4,
+    "requestFingerprint": "{\"mode\":\"build\",\"modelSelection\":{\"modelId\":\"z1-fixture\",\"options\":{\"reasoningLevel\":\"enabled\"},\"providerId\":\"z1-local-fixture\"},\"planEnabled\":false,\"revision\":1,\"target\":{\"workspacePath\":\"C:\\\\Users\\\\USER\\\\Desktop\\\\Personal\\\\ZCode\\\\.tmp\\\\z1-native-1790271246282-493a17\\\\data\\\\.zcode\\\\v2\\\\graph-engineering\\\\workspaces\\\\7a5983ef-1b31-48fd-8d52-7ec3028b7536\\\\worker-b\"}}",
+    "definition": {
+      "version": 4,
+      "revision": 1,
+      "name": "Fork / Join / worker-b",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": "{\"request\":\"Implement independent contributions A=1 and B=2; preserve all independent tests.\",\"sharedContract\":\"Only PartA.cs and PartB.cs may change. Preserve Runner.cs and MathOps.cs. The combined (1,1) state must fail existing tests.\",\"resultRequirements\":\"Full reviewed integration and fresh native Build/Test of all three independent assertions; no original publication.\",\"base\":\"38e6d45ab732f9008442e79ce51cb10db9b4b555\",\"branch\":{\"id\":\"worker-b\",\"name\":\"worker-b\",\"selected\":true,\"instructions\":\"Read PartB.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\",\"files\":[\"PartB.cs\"],\"additions\":[]}}"
+        },
+        {
+          "id": "worker-b",
+          "position": {
+            "x": 290,
+            "y": 100
+          },
+          "type": "task",
+          "name": "worker-b",
+          "instructions": "Parallel worker task: worker-b.\nRead PartB.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\nUse native tools in this workspace only. Edit only the explicitly selected files; additional files require explicit additions approval. Preserve the shared contract, tests and configuration. Do not stage, commit, push, merge or access other worker directories. Report actual changes and tests, with unknowns explicit.\n{{inputs.request}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 540,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "worker-b"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "worker-b"
+        },
+        {
+          "source": "worker-b",
+          "target": "end"
+        }
+      ]
+    },
+    "defaults": {
+      "modelSelection": {
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "options": {
+          "reasoningLevel": "enabled"
+        }
+      },
+      "mode": "build",
+      "planEnabled": false
+    },
+    "plannedPath": ["worker-b"],
+    "startInput": "{\"request\":\"Implement independent contributions A=1 and B=2; preserve all independent tests.\",\"sharedContract\":\"Only PartA.cs and PartB.cs may change. Preserve Runner.cs and MathOps.cs. The combined (1,1) state must fail existing tests.\",\"resultRequirements\":\"Full reviewed integration and fresh native Build/Test of all three independent assertions; no original publication.\",\"base\":\"38e6d45ab732f9008442e79ce51cb10db9b4b555\",\"branch\":{\"id\":\"worker-b\",\"name\":\"worker-b\",\"selected\":true,\"instructions\":\"Read PartB.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\",\"files\":[\"PartB.cs\"],\"additions\":[]}}",
+    "nodeAttempts": [
+      {
+        "nodeId": "worker-b",
+        "attemptId": "3a4940df-2077-43ea-9b62-0194c37046e7",
+        "commandId": "8cfae7cd-c85e-4e37-89aa-99fe2480b442",
+        "inputId": "8cfae7cd-c85e-4e37-89aa-99fe2480b442",
+        "status": "WaitingForPermission",
+        "dispatchPhase": "accepted",
+        "settings": {
+          "modelSelection": {
+            "providerId": "z1-local-fixture",
+            "modelId": "z1-fixture",
+            "options": {
+              "reasoningLevel": "enabled"
+            }
+          },
+          "mode": "build",
+          "planEnabled": false,
+          "source": "workspace"
+        },
+        "createdAt": 1790271258557,
+        "updatedAt": 1790271259577,
+        "sessionId": "sess_c6299023-2282-4e1d-a86f-ba214ee3674e",
+        "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271246282-493a17\\data\\.zcode\\v2\\graph-engineering\\workspaces\\7a5983ef-1b31-48fd-8d52-7ec3028b7536\\worker-b:1:42260:agent-8a4d001e-4e6d-44c0-935f-46c1c4bcb9d5",
+        "foregroundExecutionId": "runtime_command_1",
+        "observationEpoch": "mufta81m-we9jxh5p",
+        "resolvedInstructions": "Parallel worker task: worker-b.\nRead PartB.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\nUse native tools in this workspace only. Edit only the explicitly selected files; additional files require explicit additions approval. Preserve the shared contract, tests and configuration. Do not stage, commit, push, merge or access other worker directories. Report actual changes and tests, with unknowns explicit.\n{\"request\":\"Implement independent contributions A=1 and B=2; preserve all independent tests.\",\"sharedContract\":\"Only PartA.cs and PartB.cs may change. Preserve Runner.cs and MathOps.cs. The combined (1,1) state must fail existing tests.\",\"resultRequirements\":\"Full reviewed integration and fresh native Build/Test of all three independent assertions; no original publication.\",\"base\":\"38e6d45ab732f9008442e79ce51cb10db9b4b555\",\"branch\":{\"id\":\"worker-b\",\"name\":\"worker-b\",\"selected\":true,\"instructions\":\"Read PartB.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\",\"files\":[\"PartB.cs\"],\"additions\":[]}}",
+        "bindings": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            },
+            "text": "{\"request\":\"Implement independent contributions A=1 and B=2; preserve all independent tests.\",\"sharedContract\":\"Only PartA.cs and PartB.cs may change. Preserve Runner.cs and MathOps.cs. The combined (1,1) state must fail existing tests.\",\"resultRequirements\":\"Full reviewed integration and fresh native Build/Test of all three independent assertions; no original publication.\",\"base\":\"38e6d45ab732f9008442e79ce51cb10db9b4b555\",\"branch\":{\"id\":\"worker-b\",\"name\":\"worker-b\",\"selected\":true,\"instructions\":\"Read PartB.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\",\"files\":[\"PartB.cs\"],\"additions\":[]}}"
+          }
+        ]
+      }
+    ],
+    "approvalAttempts": [],
+    "toolAttempts": [],
+    "artifacts": [],
+    "artifactBindings": []
+  }
+}

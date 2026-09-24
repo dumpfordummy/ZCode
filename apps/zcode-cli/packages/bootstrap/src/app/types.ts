@@ -289,6 +289,7 @@ export interface SetLocaleResult {
 }
 
 export interface ZCodeApp {
+  nativeRecipes?: import("./native-recipe-operations.js").NativeRecipeOperations;
   readonly sessionId: SessionId;
   readonly traceId: string;
   readonly runtime: AgentRuntime;

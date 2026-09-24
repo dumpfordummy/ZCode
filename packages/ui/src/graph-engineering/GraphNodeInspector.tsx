@@ -1,16 +1,17 @@
-import type {
-  GraphNativeSettings,
-  GraphNode,
-  GraphSequentialDefinition,
-  GraphTaskNode,
-} from "@zcode/services";
+import type { GraphNativeSettings, GraphNode, GraphSequentialDefinition } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import { Input } from "@/components/ui/input.js";
 import { Textarea } from "@/components/ui/textarea.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphNodeConfiguration } from "./GraphNodeConfiguration.js";
 import { GraphSelect } from "./GraphSelect.js";
-import { connectGraphNodes, removeGraphTask } from "./graphEditing.js";
+import { GraphBindingSource } from "./GraphBindingSource.js";
+import { GraphStructuredOutput } from "./GraphStructuredOutput.js";
+import { GraphToolEditor } from "./GraphToolEditor.js";
+import type { GraphRecipeSnapshot } from "@zcode/services";
+import { GraphConditionEditor } from "./GraphConditionEditor.js";
+import { GraphApprovalEditor } from "./GraphApprovalEditor.js";
+import { connectGraphNodes, removeGraphTask, updateGraphNode } from "./graphEditing.js";
 
 export function GraphNodeInspector({
   definition,
@@ -20,6 +21,7 @@ export function GraphNodeInspector({
   defaults,
   workspacePath,
   workspaceIdentity,
+  recipes,
 }: {
   definition: GraphSequentialDefinition;
   node: GraphNode;
@@ -28,22 +30,34 @@ export function GraphNodeInspector({
   defaults: GraphNativeSettings | null;
   workspacePath: string;
   workspaceIdentity?: string;
+  recipes: GraphRecipeSnapshot | null;
 }) {
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
   const update = (next: GraphNode) => {
-    if (!disabled)
-      onChange({
-        ...definition,
-        nodes: definition.nodes.map((current) => (current.id === next.id ? next : current)),
-      });
+    if (!disabled) onChange(updateGraphNode(definition, next));
   };
-  const tasks = definition.nodes.filter((item): item is GraphTaskNode => item.type === "task");
-  const label = (item: GraphNode) => (item.type === "task" ? item.name : t(`node.${item.type}`));
+  const outputs = definition.nodes.filter((item) => item.type === "task" || item.type === "tool");
+  const label = (item: GraphNode) =>
+    item.type === "task" ||
+    item.type === "approval" ||
+    item.type === "tool" ||
+    item.type === "condition"
+      ? item.name
+      : t(`node.${item.type}`);
   return (
     <section className="space-y-4" data-testid="graph-node-inspector" data-node-id={node.id}>
       <h3 className="text-ui-base font-medium">{label(node)}</h3>
       <p className="break-all font-mono text-ui-xs text-foreground-subtlest">{node.id}</p>
+      {node.type === "condition" ? (
+        <GraphConditionEditor key={node.id} node={node} disabled={disabled} onChange={update} />
+      ) : null}
+      {node.type === "approval" ? (
+        <GraphApprovalEditor {...{ node, definition, disabled }} onChange={update} />
+      ) : null}
+      {node.type === "tool" ? (
+        <GraphToolEditor {...{ node, disabled, recipes }} onChange={update} />
+      ) : null}
       {node.type === "start" ? (
         <label className="block space-y-1 text-ui-sm text-foreground-subtle">
           <span>{t("startInput")}</span>
@@ -66,8 +80,8 @@ export function GraphNodeInspector({
           disabled={disabled}
           options={[
             { value: "none", label: t("selectOutput") },
-            ...tasks.map((task) => ({ value: task.id, label: task.name })),
-            ...(node.outputNodeId && !tasks.some((task) => task.id === node.outputNodeId)
+            ...outputs.map((task) => ({ value: task.id, label: task.name })),
+            ...(node.outputNodeId && !outputs.some((task) => task.id === node.outputNodeId)
               ? [{ value: node.outputNodeId, label: `${t("missingSource")}: ${node.outputNodeId}` }]
               : []),
           ]}
@@ -129,45 +143,21 @@ export function GraphNodeInspector({
                       })
                     }
                   />
-                  <GraphSelect
-                    label={t("bindingSource")}
-                    testId={`graph-binding-source-${index}`}
+                  <GraphBindingSource
+                    source={binding.source}
+                    definition={definition}
                     disabled={disabled}
-                    value={
-                      binding.source.kind === "start" ? "start" : `node:${binding.source.nodeId}`
-                    }
-                    options={[
-                      { value: "start", label: t("startInput") },
-                      ...tasks.map((task) => ({ value: `node:${task.id}`, label: task.name })),
-                      ...(binding.source.kind === "node" &&
-                      !tasks.some(
-                        (task) =>
-                          binding.source.kind === "node" && task.id === binding.source.nodeId,
-                      )
-                        ? [
-                            {
-                              value: `node:${binding.source.nodeId}`,
-                              label: `${t("missingSource")}: ${binding.source.nodeId}`,
-                            },
-                          ]
-                        : []),
-                    ]}
-                    onChange={(value) =>
-                      update({
-                        ...node,
-                        inputs: node.inputs.map((item, offset) =>
-                          offset === index
-                            ? {
-                                ...item,
-                                source:
-                                  value === "start"
-                                    ? { kind: "start" }
-                                    : { kind: "node", nodeId: value.slice(5) },
-                              }
-                            : item,
-                        ),
-                      })
-                    }
+                    testId={`graph-binding-source-${index}`}
+                    prefix={`binding-${index}`}
+                    onChange={(source) => {
+                      if (source.kind !== "source")
+                        update({
+                          ...node,
+                          inputs: node.inputs.map((item, offset) =>
+                            offset === index ? { ...item, source } : item,
+                          ),
+                        });
+                    }}
                   />
                   <Button
                     size="sm"
@@ -207,15 +197,49 @@ export function GraphNodeInspector({
           ) : (
             <p className="text-ui-sm text-foreground-subtle">{t("literalHelp")}</p>
           )}
+          {/* 同级编辑器不能复用 key；原生回归显示重复 key 会在切换节点后遗留输出面板。 */}
+          <GraphStructuredOutput
+            key={`output:${node.id}`}
+            {...{ node, disabled }}
+            onChange={update}
+          />
           <GraphNodeConfiguration
-            key={node.id}
+            key={`settings:${node.id}`}
             {...{ workspacePath, workspaceIdentity, defaults, disabled }}
             node={node}
             onChange={update}
           />
         </>
       ) : null}
-      {node.type !== "end" ? (
+      {node.type === "condition"
+        ? [...new Set([...node.branches.map((branch) => branch.exit), node.defaultExit])].map(
+            (exit) => (
+              <GraphSelect
+                key={exit}
+                label={`${t("z5.exit")}: ${exit}`}
+                testId={`graph-next-node-${node.id}-${exit}`}
+                disabled={disabled}
+                value={
+                  definition.edges.find(
+                    (edge) => edge.source === node.id && edge.sourcePort === exit,
+                  )?.target ?? "none"
+                }
+                options={[
+                  { value: "none", label: t("disconnected") },
+                  ...definition.nodes
+                    .filter((item) => item.id !== node.id && item.type !== "start")
+                    .map((item) => ({ value: item.id, label: label(item) })),
+                ]}
+                onChange={(value) =>
+                  onChange(
+                    connectGraphNodes(definition, node.id, value === "none" ? null : value, exit),
+                  )
+                }
+              />
+            ),
+          )
+        : null}
+      {node.type !== "end" && node.type !== "condition" ? (
         <GraphSelect
           label={t("nextNode")}
           testId={`graph-next-node-${node.id}`}
@@ -232,7 +256,10 @@ export function GraphNodeInspector({
           }
         />
       ) : null}
-      {node.type === "task" ? (
+      {node.type === "task" ||
+      node.type === "approval" ||
+      node.type === "tool" ||
+      node.type === "condition" ? (
         <Button
           variant="outline"
           size="sm"
@@ -240,7 +267,15 @@ export function GraphNodeInspector({
           data-testid="graph-delete-node"
           onClick={() => onChange(removeGraphTask(definition, node.id))}
         >
-          {t("deleteNode")}
+          {t(
+            node.type === "condition"
+              ? "z5.deleteCondition"
+              : node.type === "approval"
+                ? "approval.deleteNode"
+                : node.type === "tool"
+                  ? "z4.deleteTool"
+                  : "deleteNode",
+          )}
         </Button>
       ) : null}
     </section>

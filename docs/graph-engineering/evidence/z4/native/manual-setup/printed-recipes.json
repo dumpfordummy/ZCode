@@ -1,0 +1,81 @@
+[
+  {
+    "id": "fixture-build",
+    "name": "Build C# fixture",
+    "executable": "dotnet",
+    "args": [
+      "build",
+      "Z4Fixture.csproj",
+      "--configuration",
+      "Release",
+      "--nologo",
+      "--no-incremental",
+      "--disable-build-servers",
+      "-p:RestoreConfigFile=NuGet.Config",
+      "-p:NuGetAudit=false",
+      "-p:UseSharedCompilation=false",
+      "-p:ImportDirectoryBuildProps=false",
+      "-p:ImportDirectoryBuildTargets=false",
+      "-p:ImportDirectoryPackagesProps=false",
+      "-nodeReuse:false"
+    ],
+    "cwd": ".",
+    "timeoutMs": 60000,
+    "sourcePaths": [
+      "Z4Fixture.csproj",
+      "MathOps.cs",
+      "Runner.cs",
+      "global.json",
+      "NuGet.Config",
+      "Directory.Build.props",
+      "Directory.Build.targets",
+      "Directory.Packages.props"
+    ],
+    "expectedOutputs": [
+      "bin/Release/net8.0/Z4Fixture.dll",
+      "bin/Release/net8.0/Z4Fixture.deps.json",
+      "bin/Release/net8.0/Z4Fixture.runtimeconfig.json"
+    ],
+    "verifier": {
+      "kind": "build"
+    }
+  },
+  {
+    "id": "fixture-test",
+    "name": "Test C# fixture",
+    "executable": "dotnet",
+    "args": [
+      "bin/Release/net8.0/Z4Fixture.dll",
+      "--operation-id",
+      "{operationId}",
+      "--source-digest",
+      "{sourceDigest}",
+      "--build-digest",
+      "{buildDigest}",
+      "--report",
+      "{reportPath}"
+    ],
+    "cwd": ".",
+    "timeoutMs": 60000,
+    "sourcePaths": [
+      "Z4Fixture.csproj",
+      "MathOps.cs",
+      "Runner.cs",
+      "global.json",
+      "NuGet.Config",
+      "Directory.Build.props",
+      "Directory.Build.targets",
+      "Directory.Packages.props"
+    ],
+    "expectedOutputs": [],
+    "verifier": {
+      "kind": "test",
+      "format": "zcode-json-v1",
+      "reportPath": "results/test-report.json",
+      "minimumTests": 3,
+      "expectedTests": 3,
+      "requiredTests": ["add-positive", "add-negative", "add-zero"],
+      "buildNodeId": "fixture-manual-build"
+    }
+  }
+]

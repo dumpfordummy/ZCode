@@ -23,7 +23,7 @@ test("actual persisted Z1 pending guard stays owned on reopen, with IDs/literal 
   );
   const old = data.runs[0]!;
   assert.equal(old.version, undefined);
-  if (old.version === 2) throw new Error("Expected legacy fixture");
+  if (old.version !== undefined) throw new Error("Expected legacy fixture");
   const f = fixture({ definition: data.definition, runs: data.runs });
   const view = await f.service.getWorkspace(old.target);
   const run = view.runs[0]!;

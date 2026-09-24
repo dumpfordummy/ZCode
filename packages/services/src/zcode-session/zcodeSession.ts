@@ -32,6 +32,8 @@ export interface ZCodeTaskTarget extends ZCodeSessionWorkspaceTarget {
 }
 
 export interface ZCodeSessionCreateParams extends ZCodeSessionWorkspaceTarget {
+  /** Host-only routing for an explicitly non-model native Tool session. */
+  purpose?: "native-recipe";
   /** 仅导入事务使用的预分配 ID；普通新会话继续由 Agent 分配。 */
   sessionId?: string;
   sessionTraceId?: TraceId;
@@ -133,7 +135,9 @@ export interface ZCodeSessionWorkspaceRuntimeIdentity {
 }
 
 export interface IZCodeSessionService {
-  initializeWorkspace(params: ZCodeSessionWorkspaceTarget): Promise<ZCodeSessionInitializeResult>;
+  initializeWorkspace(
+    params: ZCodeSessionWorkspaceTarget & { purpose?: "native-recipe" },
+  ): Promise<ZCodeSessionInitializeResult>;
   getWorkspaceRuntimeIdentity(
     params: ZCodeSessionWorkspaceTarget,
   ): Promise<ZCodeSessionWorkspaceRuntimeIdentity>;

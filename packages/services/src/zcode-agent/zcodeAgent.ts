@@ -197,6 +197,8 @@ export type ZCodeAgentCuaPermissionObservation = CuaPermissionObservation &
   ZCodeAgentWorkspaceTarget;
 
 export interface ZCodeAgentCreateSessionParams extends ZCodeAgentWorkspaceTarget {
+  /** Host-only routing for an explicitly non-model native Tool session. */
+  purpose?: "native-recipe";
   sessionId?: string;
   sessionTraceId?: TraceId;
   parentSessionId?: string;
@@ -578,6 +580,21 @@ export interface ZCodeAgentStorageStartupSnapshot {
 }
 
 export interface IZCodeAgentService {
+  previewExecutionEnvironment(
+    params: ZCodeAgentWorkspaceTarget & { executables?: string[] },
+  ): Promise<import("@zcode/shared").ZCodeExecutionEnvironmentPreview>;
+  startRecipe(
+    params: ZCodeAgentSessionTarget & {
+      expectedRuntimeIdentity: string;
+      request: import("@zcode/shared").ZCodeRecipeRequest;
+    },
+  ): Promise<import("@zcode/shared").ZCodeRecipeSnapshot>;
+  inspectRecipe(
+    params: ZCodeAgentSessionTarget & { expectedRuntimeIdentity: string; operationId: string },
+  ): Promise<import("@zcode/shared").ZCodeRecipeSnapshot>;
+  cancelRecipe(
+    params: ZCodeAgentSessionTarget & { expectedRuntimeIdentity: string; operationId: string },
+  ): Promise<import("@zcode/shared").ZCodeRecipeSnapshot>;
   /** 控制面不需要账号或模型，且不发送普通协议请求。 */
   prepareStorage(params: ZCodeAgentWorkspaceTarget): Promise<void>;
   getStorageStartupState(
@@ -586,7 +603,9 @@ export interface IZCodeAgentService {
   onDynamicStorageStartupState(
     params: ZCodeAgentWorkspaceTarget,
   ): Event<ZCodeAgentStorageStartupSnapshot>;
-  initialize(params: ZCodeAgentWorkspaceTarget): Promise<ZCodeAgentInitializeResult>;
+  initialize(
+    params: ZCodeAgentWorkspaceTarget & { purpose?: "native-recipe" },
+  ): Promise<ZCodeAgentInitializeResult>;
   /**
    * 同步 App 全局运行时偏好到所有已活动 workspace；不得为此启动空闲 Agent。
    */

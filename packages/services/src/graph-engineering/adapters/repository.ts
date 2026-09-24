@@ -1,9 +1,9 @@
-import { createHash, randomUUID } from "node:crypto";
-import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { recordSchema } from "../domain/record.js";
 import { isZCodeFileLockTimeoutError } from "@zcode/shared";
-import { acquireFileLock } from "@zcode/shared/node";
+import { acquireFileLock, atomicWritePrivateTextFile } from "@zcode/shared/node";
 
 import type { GraphWorkspaceTarget } from "../contract.js";
 import type { GraphRecord, GraphRepository } from "../app/ports.js";
@@ -74,14 +74,19 @@ export function createGraphRepository(directory: string): GraphRepository {
         validateDefinition(run.definition);
         if (
           workspaceKey(run.target) !== parsed.workspaceKey ||
-          (run.version !== 2 && run.inputId !== run.commandId) ||
-          (run.version !== 2 &&
+          (run.version === undefined && run.inputId !== run.commandId) ||
+          (run.version === undefined &&
             run.terminalProof &&
             run.terminalProof.sourceCommandId !== run.commandId)
         )
           throw new Error("Graph attempt correlation is invalid.");
       }
-      return { definition: parsed.definition, runs: parsed.runs };
+      return {
+        definition: parsed.definition,
+        runs: parsed.runs,
+        ...(parsed.parallel ? { parallel: parsed.parallel } : {}),
+        ...(parsed.parallelParent ? { parallelParent: parsed.parallelParent } : {}),
+      };
     },
     write(target, record): Promise<void> {
       const operation = (async () => {
@@ -89,24 +94,21 @@ export function createGraphRepository(directory: string): GraphRepository {
           throw new Error("Graph metadata ownership belongs to another Host.");
         const value = recordSchema.parse({
           version:
-            record.definition.version === 2 || record.runs.some((run) => run.version === 2) ? 2 : 1,
+            record.definition.version === 5 || record.runs.some((run) => run.version === 5)
+              ? 5
+              : record.definition.version === 4 || record.runs.some((run) => run.version === 4)
+                ? 4
+                : record.definition.version === 3 || record.runs.some((run) => run.version === 3)
+                  ? 3
+                  : record.definition.version !== undefined ||
+                      record.runs.some((run) => run.version !== undefined)
+                    ? 2
+                    : 1,
           workspaceKey: workspaceKey(target),
           ...record,
         });
-        await mkdir(directory, { recursive: true });
-        const destination = pathFor(target);
-        const temporary = `${destination}.${randomUUID()}.tmp`;
-        try {
-          await writeFile(temporary, JSON.stringify(value, null, 2), {
-            encoding: "utf8",
-            flag: "wx",
-          });
-          await rename(temporary, destination);
-        } finally {
-          await unlink(temporary).catch((error: NodeJS.ErrnoException) => {
-            if (error.code !== "ENOENT") throw error;
-          });
-        }
+        // Windows 短暂读取占用已在原生运行及独立测试复现；复用既有有限原子替换重试，持有原 owner 锁且绝不重放命令。
+        await atomicWritePrivateTextFile(pathFor(target), JSON.stringify(value, null, 2));
       })();
       writes.add(operation);
       void operation.finally(() => writes.delete(operation)).catch(() => {});

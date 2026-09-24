@@ -180,6 +180,8 @@ export interface ExecutionStreamResult {
 }
 
 export interface ExecutionResult {
+  /** True only after the actual child exit event; synthetic forced-stop settlement is not proof. */
+  processExitObserved?: boolean;
   status: ExecutionStatus;
   exitCode?: number;
   signal?: string;

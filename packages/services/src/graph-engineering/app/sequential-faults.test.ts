@@ -9,7 +9,11 @@ test("transient accepted-write failure closes sequencing before an already queue
   let failed = false;
   f.repository.write = async (t, record) => {
     const run = record.runs[0];
-    if (!failed && run?.version === 2 && run.nodeAttempts[0]!.dispatchPhase === "accepted") {
+    if (
+      !failed &&
+      run?.version !== undefined &&
+      run.nodeAttempts[0]!.dispatchPhase === "accepted"
+    ) {
       failed = true;
       throw new Error("single accepted write failure");
     }
@@ -41,7 +45,7 @@ test("first persistence failure has no cached reservation; creating intent failu
   assert.equal((await f.view()).runs.length, 0);
   f.repository.write = async (t, record) => {
     const run = record.runs[0];
-    if (run?.version === 2 && run.nodeAttempts[0]!.dispatchPhase === "creating")
+    if (run?.version !== undefined && run.nodeAttempts[0]!.dispatchPhase === "creating")
       throw new Error("intent disk failure");
     await write(t, record);
   };
@@ -76,7 +80,7 @@ test("lost create/send replies never recreate or repeat; terminal persistence fa
   let fail = true;
   f.repository.write = async (t, record) => {
     const run = record.runs[0];
-    if (fail && run?.version === 2 && run.nodeAttempts[0]!.terminalProof) {
+    if (fail && run?.version !== undefined && run.nodeAttempts[0]!.terminalProof) {
       fail = false;
       throw new Error("terminal disk failure");
     }
@@ -98,7 +102,10 @@ test("lost create/send replies never recreate or repeat; terminal persistence fa
     confirmed: true,
   });
   assert.equal(released.status, "Interrupted");
-  assert.equal(released.version === 2 && released.nodeAttempts[0]!.terminalProof, undefined);
+  assert.equal(
+    released.version !== undefined && released.nodeAttempts[0]!.terminalProof,
+    undefined,
+  );
   assert.equal(f.sends.length, 1);
   assert.equal(await f.service.isSessionOwned({ ...target, sessionId: "native-1" }), false);
 });

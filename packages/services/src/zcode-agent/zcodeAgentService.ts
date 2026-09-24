@@ -1,7 +1,11 @@
 import { requestPluginReferenceCatalog } from "#src/zcode-agent/pluginReferenceCatalogRequest.js";
+import { previewExistingExecutionEnvironment } from "./executionEnvironmentPreview.js";
 import { expectedRuntimeClient } from "./expectedRuntimeClient.js";
+import { conversationCommandClient } from "./conversationCommandClient.js";
+import { sessionPurposeClient } from "./sessionPurposeClient.js";
 import {
   localTtftFactsSchema,
+  zcodeRecipeSnapshotSchema,
   sessionDebugSnapshotSchema,
   type LocalTtftFacts,
 } from "@zcode/shared";
@@ -3360,7 +3364,9 @@ export function createZCodeAgentService(
     hasActiveCuaOperationTurn(): boolean {
       return cuaOperationTurnTracker?.hasActiveTurn() ?? false;
     },
-    async initialize(params: ZCodeAgentWorkspaceTarget): Promise<ZCodeAgentInitializeResult> {
+    async initialize(
+      params: ZCodeAgentWorkspaceTarget & { purpose?: "native-recipe" },
+    ): Promise<ZCodeAgentInitializeResult> {
       const workspaceKey = resolveWorkspaceKey(params);
       const startedAt = Date.now();
       logger.info(undefined, "开始初始化 ZCode agent", {
@@ -3368,7 +3374,10 @@ export function createZCodeAgentService(
         workspacePath: params.workspacePath,
       });
       try {
-        const client = await getClient(params);
+        const client = await sessionPurposeClient(params, {
+          native: () => getReadOnlyClient(params),
+          model: () => getClient(params),
+        });
         logger.info(undefined, "ZCode agent 初始化完成", {
           durationMs: Date.now() - startedAt,
           transportKind: client.transportKind === "websocket" ? "websocket" : "stdio",
@@ -3437,12 +3446,21 @@ export function createZCodeAgentService(
 
     async createSession(params: ZCodeAgentCreateSessionParams) {
       const startedAt = Date.now();
-      const client = await getClient(params);
-      await ensureAccountProviderConfigSynced({
-        client,
-        reason: "session_create",
-        workspace: params,
+      const client = await sessionPurposeClient(params, {
+        native: () => getReadOnlyClient(params),
+        model: async () => {
+          const modelClient = await getClient(params);
+          await ensureAccountProviderConfigSynced({
+            client: modelClient,
+            reason: "session_create",
+            workspace: params,
+          });
+          return modelClient;
+        },
       });
+      // 原生 Tool 会话没有模型输入；自动标题也必须禁用，避免间接启动模型请求。
+      const createParams =
+        params.purpose === "native-recipe" ? { ...params, titleGenerationEnabled: false } : params;
       const sessionTraceId = params.sessionTraceId;
       logger.info(sessionTraceId, "开始请求 ZCode Protocol session/create", {
         hasInitialModel: params.model !== undefined,
@@ -3460,7 +3478,7 @@ export function createZCodeAgentService(
       try {
         const snapshot = await client.request(
           zcodeProtocolMethods.sessionCreate,
-          buildSessionCreateParams({ ...params, offPeakToolEnabled, dynamicWorkflowEnabled }),
+          buildSessionCreateParams({ ...createParams, offPeakToolEnabled, dynamicWorkflowEnabled }),
           zcodeSessionStateSnapshotSchema,
           sessionTraceId ? { trace: { traceId: sessionTraceId } } : undefined,
         );
@@ -3501,7 +3519,7 @@ export function createZCodeAgentService(
         const snapshot = await client.request(
           zcodeProtocolMethods.sessionCreate,
           buildSessionCreateParams(
-            { ...params, offPeakToolEnabled, dynamicWorkflowEnabled },
+            { ...createParams, offPeakToolEnabled, dynamicWorkflowEnabled },
             new Set(compatFields),
           ),
           zcodeSessionStateSnapshotSchema,
@@ -3737,6 +3755,49 @@ export function createZCodeAgentService(
       );
     },
 
+    async startRecipe(params) {
+      await options?.assertInputAllowed?.({
+        ...params,
+        commandId: params.request.operationId,
+        commandType: "startRecipe",
+      });
+      const client = await expectedRuntimeClient(
+        params.expectedRuntimeIdentity,
+        () => processManager.getExistingClient(params),
+        async () => (await processManager.getRuntimeIdentity(params)).identity,
+      );
+      return client.request(
+        zcodeProtocolMethods.sessionRecipeStart,
+        { sessionId: params.sessionId, request: params.request },
+        zcodeRecipeSnapshotSchema,
+      );
+    },
+    async inspectRecipe(params) {
+      const client = await expectedRuntimeClient(
+        params.expectedRuntimeIdentity,
+        () => processManager.getExistingClient(params),
+        async () => (await processManager.getRuntimeIdentity(params)).identity,
+      );
+      return client.request(
+        zcodeProtocolMethods.sessionRecipeInspect,
+        { sessionId: params.sessionId, operationId: params.operationId },
+        zcodeRecipeSnapshotSchema,
+        { lifecycle: "observation" },
+      );
+    },
+    async cancelRecipe(params) {
+      const client = await expectedRuntimeClient(
+        params.expectedRuntimeIdentity,
+        () => processManager.getExistingClient(params),
+        async () => (await processManager.getRuntimeIdentity(params)).identity,
+      );
+      return client.request(
+        zcodeProtocolMethods.sessionRecipeCancel,
+        { sessionId: params.sessionId, operationId: params.operationId },
+        zcodeRecipeSnapshotSchema,
+      );
+    },
+
     async readSessionEvents(params: ZCodeAgentReadSessionEventsParams) {
       const client = await getReadOnlyClient(params);
       const result = await client.request(
@@ -3829,6 +3890,14 @@ export function createZCodeAgentService(
           hookDeclarationDigest: params.hookDeclarationDigest,
         },
         zcodeWorkspaceHookTrustGrantResultSchema,
+      );
+    },
+
+    previewExecutionEnvironment(params) {
+      return previewExistingExecutionEnvironment(
+        processManager.getExistingClient(params),
+        buildWorkspaceRef(params),
+        params.executables,
       );
     },
 
@@ -5105,13 +5174,23 @@ export function createZCodeAgentService(
           commandType: params.envelope.type,
         });
       }
-      const client = params.expectedRuntimeIdentity
-        ? await expectedRuntimeClient(
-            params.expectedRuntimeIdentity,
-            () => processManager.getExistingClient(params),
-            async () => (await processManager.getRuntimeIdentity(params)).identity,
-          )
-        : await getClient(params);
+      const client = await conversationCommandClient(
+        {
+          type: params.envelope.type,
+          sessionId: params.envelope.sessionId,
+          expectedRuntimeIdentity: params.expectedRuntimeIdentity,
+        },
+        {
+          expected: (identity) =>
+            expectedRuntimeClient(
+              identity,
+              () => processManager.getExistingClient(params),
+              async () => (await processManager.getRuntimeIdentity(params)).identity,
+            ),
+          existing: () => getReadOnlyClient(params, "existing-only"),
+          modelEnabled: () => getClient(params),
+        },
+      );
       if (params.expectedRuntimeIdentity && options?.getExplicitQuestionSessionIds) {
         // 图任务保护名单必须先于输入生效；全局设置没变化时也不能跳过这次同步。
         const preferences =

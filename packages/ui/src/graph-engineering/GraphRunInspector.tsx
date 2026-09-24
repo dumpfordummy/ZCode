@@ -2,14 +2,28 @@ import type { GraphSequentialRun } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { graphConversationTarget } from "./graphEngineeringView.js";
+import { GraphApprovalInspector, type GraphApprovalActions } from "./GraphApprovalInspector.js";
+import { GraphSelect } from "./GraphSelect.js";
+import { graphNodeAttempts, graphSelectedAttempt } from "./graphRoutingView.js";
+import { GraphConditionInspector } from "./GraphRoutingInspector.js";
+import { GraphToolInspector } from "./GraphToolInspector.js";
+import { GraphArtifactInspector, type GraphEvidenceActions } from "./GraphArtifactInspector.js";
 
 export function GraphRunInspector({
   run,
   nodeId,
   onOpenConversation,
+  approvalActions,
+  evidenceActions,
+  selectedAttemptId,
+  onSelectAttempt,
 }: {
   run: GraphSequentialRun;
   nodeId?: string;
+  selectedAttemptId?: string;
+  onSelectAttempt?: (attemptId: string) => void;
+  approvalActions: GraphApprovalActions;
+  evidenceActions: GraphEvidenceActions;
   onOpenConversation: (
     workspacePath: string,
     sessionId: string,
@@ -19,7 +33,14 @@ export function GraphRunInspector({
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
   const node = run.definition.nodes.find((item) => item.id === nodeId);
-  const attempt = run.nodeAttempts.find((item) => item.nodeId === nodeId);
+  const choices = nodeId ? graphNodeAttempts(run, nodeId) : [];
+  const selected = nodeId ? graphSelectedAttempt(run, nodeId, selectedAttemptId) : undefined;
+  const attempt = run.nodeAttempts.find((item) => item.attemptId === selected?.attemptId);
+  const approval = run.approvalAttempts?.find((item) => item.attemptId === selected?.attemptId);
+  const tool = run.toolAttempts?.find((item) => item.attemptId === selected?.attemptId);
+  const condition = run.routing?.conditionAttempts.find(
+    (item) => item.attemptId === selected?.attemptId,
+  );
   const conversation = graphConversationTarget({
     ...run.target,
     sessionId: attempt?.sessionId ?? null,
@@ -29,14 +50,52 @@ export function GraphRunInspector({
       className="space-y-3"
       data-testid="graph-node-inspector"
       data-node-id={nodeId ?? ""}
-      data-session-id={attempt?.sessionId ?? ""}
+      data-session-id={attempt?.sessionId ?? tool?.sessionId ?? ""}
       data-input-id={attempt?.inputId ?? ""}
-      data-status={attempt?.status ?? ""}
+      data-status={selected?.status ?? ""}
+      data-attempt-id={selected?.attemptId ?? ""}
+      data-iteration-id={selected?.iterationId ?? ""}
     >
       <h3 className="text-ui-base font-medium">
-        {node?.type === "task" ? node.name : node ? t(`node.${node.type}`) : t("selectNode")}
+        {node?.type === "task" ||
+        node?.type === "approval" ||
+        node?.type === "tool" ||
+        node?.type === "condition"
+          ? node.name
+          : node
+            ? t(`node.${node.type}`)
+            : t("selectNode")}
       </h3>
       <p className="text-ui-sm text-foreground-subtle">{t("frozenHelp")}</p>
+      {run.version === 5 && choices.length ? (
+        <GraphSelect
+          label={t("z5.iterationAttempt")}
+          testId="graph-attempt-select"
+          value={selected?.attemptId ?? "none"}
+          options={[
+            ...(!selected ? [{ value: "none", label: t("z5.selectAttempt") }] : []),
+            ...choices.map((item) => ({
+              value: item.attemptId,
+              label: `${t("z5.iteration")} ${item.iteration ?? 0} · ${t(`status.${item.status}`)} · ${item.attemptId}`,
+            })),
+          ]}
+          onChange={(value) => {
+            if (value !== "none") onSelectAttempt?.(value);
+          }}
+          disabled={false}
+        />
+      ) : null}
+      {condition ? <GraphConditionInspector attempt={condition} /> : null}
+      {tool ? <GraphToolInspector {...{ run, attempt: tool, onOpenConversation }} /> : null}
+      {approval && node?.type === "approval" ? (
+        <GraphApprovalInspector
+          key={`${run.id}:${approval.attemptId}:${approval.request?.id ?? "pending"}:${approval.request?.version ?? 0}`}
+          run={run}
+          gate={approval}
+          actions={approvalActions}
+          onOpenConversation={onOpenConversation}
+        />
+      ) : null}
       {node?.type === "start" ? (
         <TextEvidence title={t("startInput")} text={run.startInput} />
       ) : null}
@@ -140,6 +199,16 @@ export function GraphRunInspector({
             </pre>
           </details>
         </>
+      ) : null}
+      {run.version >= 4 ? (
+        <GraphArtifactInspector
+          key={`${run.id}:${nodeId}:${selected?.attemptId}`}
+          run={run}
+          nodeId={nodeId}
+          attemptId={selected?.attemptId}
+          actions={evidenceActions}
+          disabled={approvalActions.disabled}
+        />
       ) : null}
     </section>
   );

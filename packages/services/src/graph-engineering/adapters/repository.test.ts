@@ -7,6 +7,37 @@ import { createGraphRepository } from "./repository.js";
 import { defaultDefinition } from "../domain/definition.js";
 import type { GraphRun } from "../contract.js";
 
+test("rapid atomic metadata replacement tolerates transient OS reader sharing without losing revisions", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "z4-graph-replace-"));
+  const repository = createGraphRepository(directory);
+  const target = { workspacePath: "C:/synthetic/replacement" };
+  const record = { definition: defaultDefinition(), runs: [] };
+  let running = true;
+  try {
+    await repository.write(target, record);
+    const [name] = (await readdir(directory)).filter((file) => file.endsWith(".json"));
+    const reader = (async () => {
+      for (let reads = 0; running && reads < 200; reads++)
+        JSON.parse(await readFile(join(directory, name!), "utf8"));
+    })();
+    try {
+      for (let revision = 1; revision <= 100; revision++) {
+        record.definition.revision = revision;
+        await repository.write(target, record);
+      }
+    } finally {
+      running = false;
+      await reader;
+    }
+    assert.equal((await repository.read(target))?.definition.revision, 100);
+  } finally {
+    running = false;
+    await repository.dispose?.();
+    assert.ok(directory.startsWith(join(tmpdir(), "z4-graph-replace-")));
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test("atomic graph metadata files preserve definitions and isolate workspace identities", async () => {
   const directory = await mkdtemp(join(tmpdir(), "z1-graph-repository-"));
   const repository = createGraphRepository(directory);

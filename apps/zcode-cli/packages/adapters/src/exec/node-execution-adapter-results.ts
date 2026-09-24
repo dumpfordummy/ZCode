@@ -236,6 +236,7 @@ export class NodeExecutionAdapterResults extends NodeExecutionAdapterBase {
   }
 
   protected createResult(args: {
+    processExitObserved?: boolean;
     status: ExecutionStatus;
     startedAt: Date;
     completedAt: Date;
@@ -251,6 +252,7 @@ export class NodeExecutionAdapterResults extends NodeExecutionAdapterBase {
   }): ExecutionResult {
     return {
       status: args.status,
+      processExitObserved: args.processExitObserved,
       exitCode: args.exitCode,
       signal: args.signal,
       stdout: args.stdout,

@@ -1,0 +1,679 @@
+{
+  "acceptance": "Z7-A12",
+  "verifiedAt": "2026-09-24T17:46:22.918Z",
+  "status": "FAIL - Fork/Join is outside the current portable workflow contract",
+  "scope": "Real service/schema/library operations; synthetic in-memory graph repository; execution ports denied. No Electron or native runtime was launched.",
+  "observations": [
+    {
+      "concurrency": 1,
+      "sourceParallelPlan": {
+        "version": 1,
+        "revision": 1,
+        "enabled": true,
+        "name": "Fixture fork",
+        "request": "Synthetic task",
+        "sharedContract": "Independent files only",
+        "resultRequirements": "Combined independent tests and final review",
+        "concurrency": 1,
+        "deadlineMs": 60000,
+        "admissionBudget": 5,
+        "branches": [
+          {
+            "id": "a",
+            "name": "a",
+            "selected": true,
+            "instructions": "Edit a.cs",
+            "files": ["a.cs"],
+            "additions": []
+          },
+          {
+            "id": "b",
+            "name": "b",
+            "selected": true,
+            "instructions": "Edit b.cs",
+            "files": ["b.cs"],
+            "additions": []
+          }
+        ],
+        "buildRecipeId": "build",
+        "testRecipeId": "test"
+      },
+      "exportedId": "portability-1",
+      "importedId": "portability-2",
+      "exportedTemplate": {
+        "format": "zcode-workflow",
+        "version": 1,
+        "name": "Synthetic fork 1",
+        "description": "Portability acceptance audit",
+        "graph": {
+          "version": 5,
+          "revision": 0,
+          "name": "Synthetic fork 1",
+          "nodes": [
+            {
+              "id": "start",
+              "position": {
+                "x": 40,
+                "y": 100
+              },
+              "type": "start",
+              "request": ""
+            },
+            {
+              "id": "analyze",
+              "position": {
+                "x": 300,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Analyze",
+              "instructions": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\n{{inputs.request}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "request",
+                  "source": {
+                    "kind": "start"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "implement",
+              "position": {
+                "x": 560,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Implement",
+              "instructions": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "request",
+                  "source": {
+                    "kind": "start"
+                  }
+                },
+                {
+                  "alias": "analyze",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "analyze"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "build",
+              "position": {
+                "x": 820,
+                "y": 100
+              },
+              "type": "tool",
+              "name": "Build",
+              "recipeId": "build"
+            },
+            {
+              "id": "test",
+              "position": {
+                "x": 1080,
+                "y": 100
+              },
+              "type": "tool",
+              "name": "Test configured criteria",
+              "recipeId": "test"
+            },
+            {
+              "id": "reviewer",
+              "position": {
+                "x": 1340,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Review current verification",
+              "instructions": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{{inputs.verification}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "verification",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "test",
+                    "selector": "verification"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              },
+              "output": {
+                "kind": "json",
+                "schema": {
+                  "type": "object",
+                  "required": ["outcome", "findings", "evidenceReferences"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "outcome": {
+                      "type": "string",
+                      "enum": ["pass", "needs_changes", "needs_human"]
+                    },
+                    "findings": {
+                      "type": "array",
+                      "maxItems": 10,
+                      "items": {
+                        "type": "object",
+                        "required": ["code", "message"],
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          }
+                        }
+                      }
+                    },
+                    "evidenceReferences": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 8,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "final-gate",
+              "position": {
+                "x": 40,
+                "y": 320
+              },
+              "type": "approval",
+              "name": "Final human review",
+              "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+              "evidence": [
+                {
+                  "alias": "evidence",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "test",
+                    "selector": "test"
+                  }
+                },
+                {
+                  "alias": "review",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "reviewer",
+                    "selector": "structured"
+                  }
+                },
+                {
+                  "alias": "source",
+                  "source": {
+                    "kind": "source"
+                  }
+                }
+              ],
+              "commentPolicy": "required"
+            },
+            {
+              "id": "end",
+              "position": {
+                "x": 300,
+                "y": 320
+              },
+              "type": "end",
+              "outputNodeId": "test"
+            }
+          ],
+          "edges": [
+            {
+              "source": "start",
+              "target": "analyze"
+            },
+            {
+              "source": "analyze",
+              "target": "implement"
+            },
+            {
+              "source": "implement",
+              "target": "build"
+            },
+            {
+              "source": "build",
+              "target": "test"
+            },
+            {
+              "source": "test",
+              "target": "reviewer"
+            },
+            {
+              "source": "reviewer",
+              "target": "final-gate"
+            },
+            {
+              "source": "final-gate",
+              "target": "end"
+            }
+          ],
+          "routing": {
+            "finalGateId": "final-gate",
+            "limits": {
+              "maxNodeAdmissions": 24,
+              "deadlineMs": 1800000
+            }
+          }
+        },
+        "parameters": [
+          {
+            "id": "request",
+            "label": "Run request",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "references": [],
+        "optionalNodes": []
+      },
+      "importedParallelPlan": null,
+      "importedParallelRuns": 0,
+      "sequentialEdgesPreserved": true,
+      "sourceUnchanged": true,
+      "rejected": [
+        {
+          "label": "top-level parallel plan",
+          "errors": [
+            "[\n  {\n    \"code\": \"unrecognized_keys\",\n    \"keys\": [\n      \"parallel\"\n    ],\n    \"path\": [],\n    \"message\": \"Unrecognized key: \\\"parallel\\\"\"\n  }\n]"
+          ]
+        },
+        {
+          "label": "nested parallel plan",
+          "errors": [
+            "[\n  {\n    \"code\": \"unrecognized_keys\",\n    \"keys\": [\n      \"parallel\"\n    ],\n    \"path\": [\n      \"graph\"\n    ],\n    \"message\": \"Unrecognized key: \\\"parallel\\\"\"\n  }\n]"
+          ]
+        },
+        {
+          "label": "Fork node",
+          "errors": [
+            "[\n  {\n    \"code\": \"invalid_union\",\n    \"errors\": [],\n    \"note\": \"No matching discriminator\",\n    \"discriminator\": \"type\",\n    \"options\": [\n      \"condition\",\n      \"tool\",\n      \"approval\",\n      \"start\",\n      \"end\",\n      \"task\"\n    ],\n    \"path\": [\n      \"graph\",\n      \"nodes\",\n      8,\n      \"type\"\n    ],\n    \"message\": \"Invalid discriminator value. Expected 'condition' | 'tool' | 'approval' | 'start' | 'end' | 'task'\"\n  }\n]"
+          ]
+        },
+        {
+          "label": "Join node",
+          "errors": [
+            "[\n  {\n    \"code\": \"invalid_union\",\n    \"errors\": [],\n    \"note\": \"No matching discriminator\",\n    \"discriminator\": \"type\",\n    \"options\": [\n      \"condition\",\n      \"tool\",\n      \"approval\",\n      \"start\",\n      \"end\",\n      \"task\"\n    ],\n    \"path\": [\n      \"graph\",\n      \"nodes\",\n      8,\n      \"type\"\n    ],\n    \"message\": \"Invalid discriminator value. Expected 'condition' | 'tool' | 'approval' | 'start' | 'end' | 'task'\"\n  }\n]"
+          ]
+        }
+      ]
+    },
+    {
+      "concurrency": 2,
+      "sourceParallelPlan": {
+        "version": 1,
+        "revision": 2,
+        "enabled": true,
+        "name": "Fixture fork",
+        "request": "Synthetic task",
+        "sharedContract": "Independent files only",
+        "resultRequirements": "Combined independent tests and final review",
+        "concurrency": 2,
+        "deadlineMs": 60000,
+        "admissionBudget": 5,
+        "branches": [
+          {
+            "id": "a",
+            "name": "a",
+            "selected": true,
+            "instructions": "Edit a.cs",
+            "files": ["a.cs"],
+            "additions": []
+          },
+          {
+            "id": "b",
+            "name": "b",
+            "selected": true,
+            "instructions": "Edit b.cs",
+            "files": ["b.cs"],
+            "additions": []
+          }
+        ],
+        "buildRecipeId": "build",
+        "testRecipeId": "test"
+      },
+      "exportedId": "portability-3",
+      "importedId": "portability-4",
+      "exportedTemplate": {
+        "format": "zcode-workflow",
+        "version": 1,
+        "name": "Synthetic fork 2",
+        "description": "Portability acceptance audit",
+        "graph": {
+          "version": 5,
+          "revision": 0,
+          "name": "Synthetic fork 2",
+          "nodes": [
+            {
+              "id": "start",
+              "position": {
+                "x": 40,
+                "y": 100
+              },
+              "type": "start",
+              "request": ""
+            },
+            {
+              "id": "analyze",
+              "position": {
+                "x": 300,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Analyze",
+              "instructions": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\n{{inputs.request}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "request",
+                  "source": {
+                    "kind": "start"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "implement",
+              "position": {
+                "x": 560,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Implement",
+              "instructions": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "request",
+                  "source": {
+                    "kind": "start"
+                  }
+                },
+                {
+                  "alias": "analyze",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "analyze"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "build",
+              "position": {
+                "x": 820,
+                "y": 100
+              },
+              "type": "tool",
+              "name": "Build",
+              "recipeId": "build"
+            },
+            {
+              "id": "test",
+              "position": {
+                "x": 1080,
+                "y": 100
+              },
+              "type": "tool",
+              "name": "Test configured criteria",
+              "recipeId": "test"
+            },
+            {
+              "id": "reviewer",
+              "position": {
+                "x": 1340,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Review current verification",
+              "instructions": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{{inputs.verification}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "verification",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "test",
+                    "selector": "verification"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              },
+              "output": {
+                "kind": "json",
+                "schema": {
+                  "type": "object",
+                  "required": ["outcome", "findings", "evidenceReferences"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "outcome": {
+                      "type": "string",
+                      "enum": ["pass", "needs_changes", "needs_human"]
+                    },
+                    "findings": {
+                      "type": "array",
+                      "maxItems": 10,
+                      "items": {
+                        "type": "object",
+                        "required": ["code", "message"],
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          }
+                        }
+                      }
+                    },
+                    "evidenceReferences": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 8,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "final-gate",
+              "position": {
+                "x": 40,
+                "y": 320
+              },
+              "type": "approval",
+              "name": "Final human review",
+              "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+              "evidence": [
+                {
+                  "alias": "evidence",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "test",
+                    "selector": "test"
+                  }
+                },
+                {
+                  "alias": "review",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "reviewer",
+                    "selector": "structured"
+                  }
+                },
+                {
+                  "alias": "source",
+                  "source": {
+                    "kind": "source"
+                  }
+                }
+              ],
+              "commentPolicy": "required"
+            },
+            {
+              "id": "end",
+              "position": {
+                "x": 300,
+                "y": 320
+              },
+              "type": "end",
+              "outputNodeId": "test"
+            }
+          ],
+          "edges": [
+            {
+              "source": "start",
+              "target": "analyze"
+            },
+            {
+              "source": "analyze",
+              "target": "implement"
+            },
+            {
+              "source": "implement",
+              "target": "build"
+            },
+            {
+              "source": "build",
+              "target": "test"
+            },
+            {
+              "source": "test",
+              "target": "reviewer"
+            },
+            {
+              "source": "reviewer",
+              "target": "final-gate"
+            },
+            {
+              "source": "final-gate",
+              "target": "end"
+            }
+          ],
+          "routing": {
+            "finalGateId": "final-gate",
+            "limits": {
+              "maxNodeAdmissions": 24,
+              "deadlineMs": 1800000
+            }
+          }
+        },
+        "parameters": [
+          {
+            "id": "request",
+            "label": "Run request",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "references": [],
+        "optionalNodes": []
+      },
+      "importedParallelPlan": null,
+      "importedParallelRuns": 0,
+      "sequentialEdgesPreserved": true,
+      "sourceUnchanged": true,
+      "rejected": [
+        {
+          "label": "top-level parallel plan",
+          "errors": [
+            "[\n  {\n    \"code\": \"unrecognized_keys\",\n    \"keys\": [\n      \"parallel\"\n    ],\n    \"path\": [],\n    \"message\": \"Unrecognized key: \\\"parallel\\\"\"\n  }\n]"
+          ]
+        },
+        {
+          "label": "nested parallel plan",
+          "errors": [
+            "[\n  {\n    \"code\": \"unrecognized_keys\",\n    \"keys\": [\n      \"parallel\"\n    ],\n    \"path\": [\n      \"graph\"\n    ],\n    \"message\": \"Unrecognized key: \\\"parallel\\\"\"\n  }\n]"
+          ]
+        },
+        {
+          "label": "Fork node",
+          "errors": [
+            "[\n  {\n    \"code\": \"invalid_union\",\n    \"errors\": [],\n    \"note\": \"No matching discriminator\",\n    \"discriminator\": \"type\",\n    \"options\": [\n      \"condition\",\n      \"tool\",\n      \"approval\",\n      \"start\",\n      \"end\",\n      \"task\"\n    ],\n    \"path\": [\n      \"graph\",\n      \"nodes\",\n      8,\n      \"type\"\n    ],\n    \"message\": \"Invalid discriminator value. Expected 'condition' | 'tool' | 'approval' | 'start' | 'end' | 'task'\"\n  }\n]"
+          ]
+        },
+        {
+          "label": "Join node",
+          "errors": [
+            "[\n  {\n    \"code\": \"invalid_union\",\n    \"errors\": [],\n    \"note\": \"No matching discriminator\",\n    \"discriminator\": \"type\",\n    \"options\": [\n      \"condition\",\n      \"tool\",\n      \"approval\",\n      \"start\",\n      \"end\",\n      \"task\"\n    ],\n    \"path\": [\n      \"graph\",\n      \"nodes\",\n      8,\n      \"type\"\n    ],\n    \"message\": \"Invalid discriminator value. Expected 'condition' | 'tool' | 'approval' | 'start' | 'end' | 'task'\"\n  }\n]"
+          ]
+        }
+      ]
+    }
+  ],
+  "sideEffects": {
+    "calls": {
+      "native.available": 0,
+      "native.validateSelection": 0,
+      "native.create": 0,
+      "native.send": 0,
+      "native.observe": 0,
+      "native.cancel": 0,
+      "native.reconcile": 0,
+      "native.inspect": 0,
+      "tools.available": 0,
+      "tools.create": 0,
+      "tools.start": 0,
+      "tools.inspect": 0,
+      "tools.cancel": 0,
+      "parallel.preview": 0,
+      "parallel.prepare": 0,
+      "parallel.initialize": 0,
+      "parallel.inventory": 0,
+      "parallel.verifyBase": 0,
+      "parallel.validate": 0,
+      "parallel.capture": 0,
+      "parallel.cleanup": 0,
+      "preflight.capture": 0
+    },
+    "total": 0,
+    "graphRecords": 3,
+    "nativeCreates": 0,
+    "nativeSends": 0
+  },
+  "limitation": "The supported sequential transfer and unsupported payload rejection invoked no execution/workspace ports. A valid Fork/Join round trip and its native UI side-effect check are NOT RUN because no such import/export path exists."
+}

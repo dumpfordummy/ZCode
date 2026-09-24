@@ -1,0 +1,481 @@
+{
+  "scenario": "json-invalid",
+  "configuredProvider": false,
+  "uiFirstWait": false,
+  "home": "<isolated-profile>",
+  "workspace": "<isolated-profile>\\workspace",
+  "assertions": [
+    "Actual native editor enables strict output and explicitly selects the earlier exact-attempt artifact/JSON field.",
+    "Exact native final output is attributed to its original command; validated artifact handoffs are explicit, while invalid/capped output admits no dependent input or repair prompt."
+  ],
+  "screenshots": [
+    "<isolated-profile>\\z4-graph-design.png",
+    "<isolated-profile>\\z4-structured-output-result.png"
+  ],
+  "fixture": {
+    "runnerDigest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79",
+    "source": {
+      "digest": "6c15a9faaa6c96609bdff37e3f8f6b49da9824037f34cca3affc968174ac15ef",
+      "files": [
+        {
+          "path": "Directory.Build.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Build.targets",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Packages.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "MathOps.cs",
+          "length": 96,
+          "digest": "c74c3bced09a37ec35a9d435752abd3743a8b40a6998d2b95b63400b08c61cd1"
+        },
+        {
+          "path": "NuGet.Config",
+          "length": 112,
+          "digest": "7d59a339f0f6022f0710d690fe52e2a0f868519847651f6c10f6c9ff1bd7213a"
+        },
+        {
+          "path": "Runner.cs",
+          "length": 3700,
+          "digest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79"
+        },
+        {
+          "path": "Z4Fixture.csproj",
+          "length": 494,
+          "digest": "97413a96ff9fb4bfc78841548e1d11971590ce5d25a743e6a83b1a1b3fb910ff"
+        },
+        {
+          "path": "global.json",
+          "length": 54,
+          "digest": "9969992897aee36fbc62db0976390d87b1275dc0d7c6fcb937a7f81a316f97dc"
+        }
+      ]
+    }
+  },
+  "ids": {
+    "agent": "task",
+    "downstream": "9b137cdc-623d-42d7-8bb0-1b09479fd8d2"
+  },
+  "status": "PASS",
+  "finalRecord": {
+    "version": 4,
+    "workspaceKey": "<isolated-profile>\\workspace",
+    "definition": {
+      "version": 4,
+      "revision": 2,
+      "name": "Z4 exact structured artifact handoff",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": ""
+        },
+        {
+          "id": "task",
+          "position": {
+            "x": 280,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Structured review",
+          "instructions": "Z4_REVIEW: Read MathOps.cs. Do not edit source or run commands. Return the requested reviewer record; machine test evidence remains separate.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          },
+          "output": {
+            "kind": "json",
+            "schema": {
+              "type": "object",
+              "required": ["outcome", "summary", "findings"],
+              "additionalProperties": false,
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "enum": ["pass", "needs_changes", "needs_human"]
+                },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "findings": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 10
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 860,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "9b137cdc-623d-42d7-8bb0-1b09479fd8d2"
+        },
+        {
+          "id": "9b137cdc-623d-42d7-8bb0-1b09479fd8d2",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Bound artifact consumer",
+          "instructions": "Z4_DOWNSTREAM: Read MathOps.cs. This explicit prior-artifact binding is supporting context: {{inputs.review}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "review",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "task",
+                "selector": "structured",
+                "pointer": "/summary"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "task"
+        },
+        {
+          "source": "task",
+          "target": "9b137cdc-623d-42d7-8bb0-1b09479fd8d2"
+        },
+        {
+          "source": "9b137cdc-623d-42d7-8bb0-1b09479fd8d2",
+          "target": "end"
+        }
+      ]
+    },
+    "runs": [
+      {
+        "id": "13e9c48f-7c6a-41dc-a736-2289b9fe78fb",
+        "requestId": "30b961c0-bd88-45d1-9946-a54d2a7e92ba",
+        "target": {
+          "workspacePath": "<isolated-profile>\\workspace"
+        },
+        "status": "Failed",
+        "createdAt": 1790257230515,
+        "updatedAt": 1790257231305,
+        "version": 4,
+        "requestFingerprint": "{\"mode\":\"build\",\"modelSelection\":{\"modelId\":\"z1-fixture\",\"options\":{\"reasoningLevel\":\"enabled\"},\"providerId\":\"z1-local-fixture\"},\"planEnabled\":false,\"revision\":2,\"target\":{\"workspacePath\":\"<isolated-profile>\\\\workspace\"}}",
+        "definition": {
+          "version": 4,
+          "revision": 2,
+          "name": "Z4 exact structured artifact handoff",
+          "nodes": [
+            {
+              "id": "start",
+              "position": {
+                "x": 40,
+                "y": 100
+              },
+              "type": "start",
+              "request": ""
+            },
+            {
+              "id": "task",
+              "position": {
+                "x": 280,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Structured review",
+              "instructions": "Z4_REVIEW: Read MathOps.cs. Do not edit source or run commands. Return the requested reviewer record; machine test evidence remains separate.",
+              "instructionMode": "literal",
+              "inputs": [],
+              "configuration": {
+                "kind": "inherit"
+              },
+              "output": {
+                "kind": "json",
+                "schema": {
+                  "type": "object",
+                  "required": ["outcome", "summary", "findings"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "outcome": {
+                      "type": "string",
+                      "enum": ["pass", "needs_changes", "needs_human"]
+                    },
+                    "summary": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    },
+                    "findings": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 10
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "end",
+              "position": {
+                "x": 860,
+                "y": 100
+              },
+              "type": "end",
+              "outputNodeId": "9b137cdc-623d-42d7-8bb0-1b09479fd8d2"
+            },
+            {
+              "id": "9b137cdc-623d-42d7-8bb0-1b09479fd8d2",
+              "position": {
+                "x": 600,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Bound artifact consumer",
+              "instructions": "Z4_DOWNSTREAM: Read MathOps.cs. This explicit prior-artifact binding is supporting context: {{inputs.review}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "review",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "task",
+                    "selector": "structured",
+                    "pointer": "/summary"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            }
+          ],
+          "edges": [
+            {
+              "source": "start",
+              "target": "task"
+            },
+            {
+              "source": "task",
+              "target": "9b137cdc-623d-42d7-8bb0-1b09479fd8d2"
+            },
+            {
+              "source": "9b137cdc-623d-42d7-8bb0-1b09479fd8d2",
+              "target": "end"
+            }
+          ]
+        },
+        "defaults": {
+          "modelSelection": {
+            "providerId": "z1-local-fixture",
+            "modelId": "z1-fixture",
+            "options": {
+              "reasoningLevel": "enabled"
+            }
+          },
+          "mode": "build",
+          "planEnabled": false
+        },
+        "plannedPath": ["task", "9b137cdc-623d-42d7-8bb0-1b09479fd8d2"],
+        "startInput": "",
+        "nodeAttempts": [
+          {
+            "nodeId": "task",
+            "attemptId": "8fca8210-4585-4b8e-a326-ea5983a61028",
+            "commandId": "38ac8cc7-16f7-456e-abf5-46057a3512e0",
+            "inputId": "38ac8cc7-16f7-456e-abf5-46057a3512e0",
+            "status": "Failed",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790257230515,
+            "updatedAt": 1790257231305,
+            "sessionId": "sess_ce1b0a85-1574-47f2-aebd-0b5f8b58da97",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:41800:agent-0038fc73-2a96-4b1e-b75f-7141259e77bf",
+            "foregroundExecutionId": "runtime_command_1",
+            "observationEpoch": "mufkxjx0-dyhud2d9",
+            "resolvedInstructions": "Z4_REVIEW: Read MathOps.cs. Do not edit source or run commands. Return the requested reviewer record; machine test evidence remains separate.",
+            "bindings": [],
+            "terminalProof": {
+              "sourceCommandId": "38ac8cc7-16f7-456e-abf5-46057a3512e0",
+              "state": "completedSuccess",
+              "logEpoch": "mufkxjx0-dyhud2d9",
+              "seq": 35,
+              "turnId": "msg_mufkxk9k_19eea96d-f015-4d21-8998-8a5d22261cd7"
+            },
+            "finalOutput": {
+              "text": "{\"outcome\":\"pass\",\"outcome\":\"needs_changes\",\"summary\":\"duplicate keys\",\"findings\":[]}",
+              "turnId": "msg_mufkxk9k_19eea96d-f015-4d21-8998-8a5d22261cd7",
+              "rowId": 4,
+              "entityId": "msg_mufkxkdv_512cef53-77cf-448a-8cb6-e011ba592327",
+              "assistantResponseId": "msg_mufkxkdv_512cef53-77cf-448a-8cb6-e011ba592327"
+            },
+            "outputIssue": "Native redaction changed retained evidence; it is not an unmodified validation input.",
+            "outputValidation": {
+              "status": "invalid",
+              "issues": [
+                "Native redaction changed retained evidence; it is not an unmodified validation input."
+              ]
+            },
+            "message": "Native input completed; output validation failed. Native redaction changed retained evidence; it is not an unmodified validation input."
+          },
+          {
+            "nodeId": "9b137cdc-623d-42d7-8bb0-1b09479fd8d2",
+            "attemptId": "3818c494-b72f-4fb6-a8e3-1b437cc90bde",
+            "commandId": "92cef21f-2bdf-41d3-b8fc-9883af7cd9de",
+            "inputId": "92cef21f-2bdf-41d3-b8fc-9883af7cd9de",
+            "status": "Skipped",
+            "dispatchPhase": "planned",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790257230515,
+            "updatedAt": 1790257231305
+          }
+        ],
+        "approvalAttempts": [],
+        "toolAttempts": [],
+        "artifacts": [
+          {
+            "id": "3ab49810-28be-45ec-b0ef-7c5896fd3486",
+            "runId": "13e9c48f-7c6a-41dc-a736-2289b9fe78fb",
+            "nodeId": "task",
+            "attemptId": "8fca8210-4585-4b8e-a326-ea5983a61028",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "text",
+            "provenance": "native-agent-final",
+            "bytes": 68,
+            "digest": "faac286761bdf2f5d585c3065fa03aae121cb93dee5790e348eac45cf3e00277",
+            "capturedAt": 1790257231305,
+            "validation": "incomplete",
+            "issue": "Native redaction changed retained evidence; it is not an unmodified validation input.",
+            "redacted": true,
+            "sessionId": "sess_ce1b0a85-1574-47f2-aebd-0b5f8b58da97",
+            "inputId": "38ac8cc7-16f7-456e-abf5-46057a3512e0",
+            "commandId": "38ac8cc7-16f7-456e-abf5-46057a3512e0"
+          }
+        ],
+        "artifactBindings": [
+          {
+            "nodeId": "task",
+            "attemptId": "8fca8210-4585-4b8e-a326-ea5983a61028",
+            "selector": "final",
+            "artifactId": "3ab49810-28be-45ec-b0ef-7c5896fd3486"
+          }
+        ]
+      }
+    ]
+  },
+  "nativeLedger": [
+    {
+      "id": "queue_38ac8cc7-16f7-456e-abf5-46057a3512e0",
+      "session_id": "sess_ce1b0a85-1574-47f2-aebd-0b5f8b58da97",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Z4_REVIEW: Read MathOps.cs. Do not edit source or run commands. Return the requested reviewer record; machine test evidence remains separate.",
+        "intent": {
+          "sourceCommandId": "38ac8cc7-16f7-456e-abf5-46057a3512e0",
+          "queueItemId": "queue_38ac8cc7-16f7-456e-abf5-46057a3512e0",
+          "clientId": "graph:8fca8210-4585-4b8e-a326-ea5983a61028",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790257230631,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "38ac8cc7-16f7-456e-abf5-46057a3512e0",
+          "queueItemId": "queue_38ac8cc7-16f7-456e-abf5-46057a3512e0",
+          "clientId": "graph:8fca8210-4585-4b8e-a326-ea5983a61028",
+          "kind": "sendText",
+          "text": "Z4_REVIEW: Read MathOps.cs. Do not edit source or run commands. Return the requested reviewer record; machine test evidence remains separate.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790257230631
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790257230643,
+      "time_updated": 1790257231075
+    }
+  ],
+  "nativeToolResults": [
+    {
+      "id": "z4_review_read",
+      "output": "1\tpublic static class MathOps\n2\t{\n3\t    public static int Add(int left, int right) => left + right;\n4\t}\n5\t",
+      "observedAt": 1790257231233
+    }
+  ],
+  "providerErrors": [],
+  "modelRequests": 3,
+  "marker": "Z4_FRESH_REVIEW_ccf7a586-766d-480c-bb24-fd710ff45f0f",
+  "collectedModelRequestCounts": {
+    "total": 3,
+    "byStage": {
+      "review": {
+        "nativeExecution": 2,
+        "auxiliary": 1
+      }
+    }
+  }
+}

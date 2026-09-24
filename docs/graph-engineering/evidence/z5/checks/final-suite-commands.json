@@ -1,0 +1,25 @@
+{
+  "environment": ". .\\.tmp\\z1-env.ps1; repository node_modules/.bin prepended to PATH",
+  "suites": [
+    {
+      "key": "agent-tests-final",
+      "cmd": "$z5Tests = @(Get-ChildItem -LiteralPath packages/services/src/zcode-agent -Filter '*.test.ts' | ForEach-Object FullName)\nnode node_modules/tsx/dist/cli.mjs --test @z5Tests"
+    },
+    {
+      "key": "source-tests-final",
+      "cmd": "node node_modules/tsx/dist/cli.mjs --test packages/services/src/git/sourceSnapshot.test.ts packages/services/src/git/sourceSnapshot.edges.test.ts"
+    },
+    {
+      "key": "regression-tests-final",
+      "cmd": "$z5Tests = @((Get-ChildItem -LiteralPath packages/services/test -Filter '*.test.ts' | ForEach-Object FullName)) + @('apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/interaction-registry.test.ts') + @((Get-ChildItem -LiteralPath scripts/graph-engineering -Filter '*.test.mjs' | ForEach-Object FullName))\nnode node_modules/tsx/dist/cli.mjs --test @z5Tests"
+    },
+    {
+      "key": "ui-tests-final",
+      "cmd": "$env:TSX_TSCONFIG_PATH = 'packages/ui/tsconfig.json'\n$z5Tests = @(Get-ChildItem -LiteralPath packages/ui/test -Filter '*.test.ts' | ForEach-Object FullName)\nnode node_modules/tsx/dist/cli.mjs --test @z5Tests"
+    },
+    {
+      "key": "native-tests-final",
+      "cmd": "node node_modules/tsx/dist/cli.mjs --test apps/zcode-cli/packages/bootstrap/src/app/native-recipe.test.ts apps/zcode-cli/packages/bootstrap/src/app/native-session-create.test.ts"
+    }
+  ]
+}

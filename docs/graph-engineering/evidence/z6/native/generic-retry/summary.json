@@ -1,0 +1,2943 @@
+{
+  "scenario": "generic",
+  "home": "<isolated-profile>",
+  "workspace": "<isolated-profile>\\workspace",
+  "assertions": [
+    "Actual native library instantiation pins chosen version, explicit parameters and local bindings with zero native inputs/model requests.",
+    "Selected additional instructions and a real native fixture-guidance Skill have captured digests; the actual native Skill tool loads the workspace SKILL.md before implementation.",
+    "Shipped template executes through existing native sessions with exact explicit handoffs, real Read/Edit/Build/Test, human gates and independently verified unchanged assertions; completed reopen dispatches nothing."
+  ],
+  "screenshots": [
+    "<isolated-profile>\\z6-explicit-template-bindings.png",
+    "<isolated-profile>\\z6-instantiated-native-template.png",
+    "<isolated-profile>\\z6-native-preflight-destinations.png",
+    "<isolated-profile>\\z5-native-permission-implement-0.png",
+    "<isolated-profile>\\z5-native-permission-build-0.png",
+    "<isolated-profile>\\z5-native-permission-test-0.png",
+    "<isolated-profile>\\z6-iteration-0-actual-test-evidence.png",
+    "<isolated-profile>\\z6-final-human-review.png",
+    "<isolated-profile>\\z5-completed-history-reopened.png",
+    "<isolated-profile>\\z6-completed-pinned-history-reopened.png"
+  ],
+  "testedBuild": [
+    {
+      "file": "apps/zcode-cli/packages/cli/dist/zcode.cjs",
+      "sha256": "7b3f05c4a8168671ad5596b91c3ac4cc95cc13e45aa1ebae729b703944674534"
+    },
+    {
+      "file": "packages/desktop/out/main/index.js",
+      "sha256": "e27fdf8322399795bcc7332afa9920f63e43aca0c7d6574583e052cb4b4926a8"
+    },
+    {
+      "file": "packages/desktop/out/host/index.js",
+      "sha256": "9370639783a6519514e70d2a74372ed668d77d60e5c9e7bd936f6517b27d043d"
+    }
+  ],
+  "fixture": {
+    "runnerDigest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79",
+    "source": {
+      "digest": "497750fe192e4531c18aff80ae796e04b25b130c00c69d784df8c7a53e3d9527",
+      "files": [
+        {
+          "path": "Directory.Build.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Build.targets",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Packages.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "MathOps.cs",
+          "length": 100,
+          "digest": "2cc9461517454ad8085486324e36939d54eea73c53454d7b64323dbac578fce9"
+        },
+        {
+          "path": "NuGet.Config",
+          "length": 112,
+          "digest": "7d59a339f0f6022f0710d690fe52e2a0f868519847651f6c10f6c9ff1bd7213a"
+        },
+        {
+          "path": "Runner.cs",
+          "length": 3700,
+          "digest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79"
+        },
+        {
+          "path": "Z4Fixture.csproj",
+          "length": 494,
+          "digest": "97413a96ff9fb4bfc78841548e1d11971590ce5d25a743e6a83b1a1b3fb910ff"
+        },
+        {
+          "path": "global.json",
+          "length": 54,
+          "digest": "9969992897aee36fbc62db0976390d87b1275dc0d7c6fcb937a7f81a316f97dc"
+        }
+      ]
+    }
+  },
+  "instantiatedDefinition": {
+    "version": 5,
+    "revision": 1,
+    "name": "Sequential engineering",
+    "nodes": [
+      {
+        "id": "start",
+        "position": {
+          "x": 40,
+          "y": 100
+        },
+        "type": "start",
+        "request": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+      },
+      {
+        "id": "analyze",
+        "position": {
+          "x": 300,
+          "y": 100
+        },
+        "type": "task",
+        "name": "Analyze",
+        "instructions": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\n{{inputs.request}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "implement",
+        "position": {
+          "x": 560,
+          "y": 100
+        },
+        "type": "task",
+        "name": "Implement",
+        "instructions": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
+          {
+            "alias": "analyze",
+            "source": {
+              "kind": "node",
+              "nodeId": "analyze"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "build",
+        "position": {
+          "x": 820,
+          "y": 100
+        },
+        "type": "tool",
+        "name": "Build",
+        "recipeId": "fixture-build"
+      },
+      {
+        "id": "test",
+        "position": {
+          "x": 1080,
+          "y": 100
+        },
+        "type": "tool",
+        "name": "Test configured criteria",
+        "recipeId": "fixture-test"
+      },
+      {
+        "id": "reviewer",
+        "position": {
+          "x": 1340,
+          "y": 100
+        },
+        "type": "task",
+        "name": "Review current verification",
+        "instructions": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{{inputs.verification}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "verification",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "test",
+              "selector": "verification"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        },
+        "output": {
+          "kind": "json",
+          "schema": {
+            "type": "object",
+            "required": ["outcome", "findings", "evidenceReferences"],
+            "additionalProperties": false,
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "enum": ["pass", "needs_changes", "needs_human"]
+              },
+              "findings": {
+                "type": "array",
+                "maxItems": 10,
+                "items": {
+                  "type": "object",
+                  "required": ["code", "message"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  }
+                }
+              },
+              "evidenceReferences": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 8,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "final-gate",
+        "position": {
+          "x": 40,
+          "y": 320
+        },
+        "type": "approval",
+        "name": "Final human review",
+        "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+        "evidence": [
+          {
+            "alias": "evidence",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "test",
+              "selector": "test"
+            }
+          },
+          {
+            "alias": "review",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "reviewer",
+              "selector": "structured"
+            }
+          },
+          {
+            "alias": "source",
+            "source": {
+              "kind": "source"
+            }
+          }
+        ],
+        "commentPolicy": "required"
+      },
+      {
+        "id": "end",
+        "position": {
+          "x": 300,
+          "y": 320
+        },
+        "type": "end",
+        "outputNodeId": "test"
+      }
+    ],
+    "edges": [
+      {
+        "source": "start",
+        "target": "analyze"
+      },
+      {
+        "source": "analyze",
+        "target": "implement"
+      },
+      {
+        "source": "implement",
+        "target": "build"
+      },
+      {
+        "source": "build",
+        "target": "test"
+      },
+      {
+        "source": "test",
+        "target": "reviewer"
+      },
+      {
+        "source": "reviewer",
+        "target": "final-gate"
+      },
+      {
+        "source": "final-gate",
+        "target": "end"
+      }
+    ],
+    "routing": {
+      "finalGateId": "final-gate",
+      "limits": {
+        "maxNodeAdmissions": 24,
+        "deadlineMs": 1800000
+      }
+    },
+    "template": {
+      "id": "generic",
+      "name": "Sequential engineering",
+      "version": 1,
+      "digest": "bd856d719f8fd4fc05364222ea0e5ba27e4ee2cbecb565de4d7b9eddc3d96f34",
+      "parameters": {
+        "request": "Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required."
+      },
+      "bindings": {
+        "references": {
+          "instructions": "ExtraInstructions.md",
+          "skill": "glm:workspace:<isolated-profile>\\workspace\\.agents\\skills\\fixture-guidance\\SKILL.md"
+        },
+        "recipes": {
+          "build": "fixture-build",
+          "test": "fixture-test"
+        },
+        "sourcePaths": []
+      },
+      "references": [
+        {
+          "id": "instructions",
+          "kind": "instruction",
+          "nodeIds": ["analyze", "implement"]
+        },
+        {
+          "id": "skill",
+          "kind": "skill",
+          "nodeIds": ["implement"]
+        }
+      ],
+      "excluded": []
+    }
+  },
+  "confirmedSnapshot": {
+    "definition": {
+      "version": 5,
+      "revision": 2,
+      "name": "Sequential engineering",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+        },
+        {
+          "id": "analyze",
+          "position": {
+            "x": 300,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Analyze",
+          "instructions": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\n{{inputs.request}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "implement",
+          "position": {
+            "x": 560,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Implement",
+          "instructions": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            },
+            {
+              "alias": "analyze",
+              "source": {
+                "kind": "node",
+                "nodeId": "analyze"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "build",
+          "position": {
+            "x": 820,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Build",
+          "recipeId": "fixture-build"
+        },
+        {
+          "id": "test",
+          "position": {
+            "x": 1080,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Test configured criteria",
+          "recipeId": "fixture-test"
+        },
+        {
+          "id": "reviewer",
+          "position": {
+            "x": 1340,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Review current verification",
+          "instructions": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{{inputs.verification}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "verification",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "test",
+                "selector": "verification"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          },
+          "output": {
+            "kind": "json",
+            "schema": {
+              "type": "object",
+              "required": ["outcome", "findings", "evidenceReferences"],
+              "additionalProperties": false,
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "enum": ["pass", "needs_changes", "needs_human"]
+                },
+                "findings": {
+                  "type": "array",
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "required": ["code", "message"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "message": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    }
+                  }
+                },
+                "evidenceReferences": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 8,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "final-gate",
+          "position": {
+            "x": 40,
+            "y": 320
+          },
+          "type": "approval",
+          "name": "Final human review",
+          "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+          "evidence": [
+            {
+              "alias": "evidence",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "test",
+                "selector": "test"
+              }
+            },
+            {
+              "alias": "review",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "reviewer",
+                "selector": "structured"
+              }
+            },
+            {
+              "alias": "source",
+              "source": {
+                "kind": "source"
+              }
+            }
+          ],
+          "commentPolicy": "required"
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 300,
+            "y": 320
+          },
+          "type": "end",
+          "outputNodeId": "test"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "analyze"
+        },
+        {
+          "source": "analyze",
+          "target": "implement"
+        },
+        {
+          "source": "implement",
+          "target": "build"
+        },
+        {
+          "source": "build",
+          "target": "test"
+        },
+        {
+          "source": "test",
+          "target": "reviewer"
+        },
+        {
+          "source": "reviewer",
+          "target": "final-gate"
+        },
+        {
+          "source": "final-gate",
+          "target": "end"
+        }
+      ],
+      "routing": {
+        "finalGateId": "final-gate",
+        "limits": {
+          "maxNodeAdmissions": 24,
+          "deadlineMs": 1800000
+        }
+      },
+      "template": {
+        "id": "generic",
+        "name": "Sequential engineering",
+        "version": 1,
+        "digest": "bd856d719f8fd4fc05364222ea0e5ba27e4ee2cbecb565de4d7b9eddc3d96f34",
+        "parameters": {
+          "request": "Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required."
+        },
+        "bindings": {
+          "references": {
+            "instructions": "ExtraInstructions.md",
+            "skill": "glm:workspace:<isolated-profile>\\workspace\\.agents\\skills\\fixture-guidance\\SKILL.md"
+          },
+          "recipes": {
+            "build": "fixture-build",
+            "test": "fixture-test"
+          },
+          "sourcePaths": []
+        },
+        "references": [
+          {
+            "id": "instructions",
+            "kind": "instruction",
+            "nodeIds": ["analyze", "implement"]
+          },
+          {
+            "id": "skill",
+            "kind": "skill",
+            "nodeIds": ["implement"]
+          }
+        ],
+        "excluded": []
+      }
+    },
+    "settings": {
+      "modelSelection": {
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "options": {
+          "reasoningLevel": "enabled"
+        }
+      },
+      "mode": "build",
+      "planEnabled": false
+    },
+    "provenance": {
+      "digest": "35843cdd2f62ac2bbe4187a3aa4caa287d1687f7b3090ab00dc8ae426ebb415e",
+      "template": {
+        "id": "generic",
+        "name": "Sequential engineering",
+        "version": 1,
+        "digest": "bd856d719f8fd4fc05364222ea0e5ba27e4ee2cbecb565de4d7b9eddc3d96f34",
+        "parameters": {
+          "request": "Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required."
+        },
+        "bindings": {
+          "references": {
+            "instructions": "ExtraInstructions.md",
+            "skill": "glm:workspace:<isolated-profile>\\workspace\\.agents\\skills\\fixture-guidance\\SKILL.md"
+          },
+          "recipes": {
+            "build": "fixture-build",
+            "test": "fixture-test"
+          },
+          "sourcePaths": []
+        },
+        "references": [
+          {
+            "id": "instructions",
+            "kind": "instruction",
+            "nodeIds": ["analyze", "implement"]
+          },
+          {
+            "id": "skill",
+            "kind": "skill",
+            "nodeIds": ["implement"]
+          }
+        ],
+        "excluded": []
+      },
+      "environment": {
+        "version": 1,
+        "status": "available",
+        "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+        "executables": [
+          {
+            "executable": "dotnet",
+            "status": "available",
+            "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+          }
+        ],
+        "instructions": [
+          {
+            "scope": "workspace",
+            "path": "<isolated-profile>\\workspace\\AGENTS.md",
+            "digest": "07549829e8aacee6b98faaebf19e67128ef7e038a1250951fedeb4d2feba433d",
+            "bytes": 281,
+            "truncated": false
+          }
+        ],
+        "skills": [
+          {
+            "id": "glm:plugin:<isolated-profile>\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+            "name": "browser-use:control-browser",
+            "path": "<isolated-profile>\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+            "scope": "plugin",
+            "enabled": true,
+            "plugin": "browser-use",
+            "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+          },
+          {
+            "id": "glm:workspace:<isolated-profile>\\workspace\\.agents\\skills\\fixture-guidance\\SKILL.md",
+            "name": "fixture-guidance",
+            "path": "<isolated-profile>\\workspace\\.agents\\skills\\fixture-guidance\\SKILL.md",
+            "scope": "workspace",
+            "enabled": true,
+            "digest": "2007159e6c11cf0a5e104bedc273974fbaf3a27217ae9ad9d7836a47097a4aa3"
+          },
+          {
+            "id": "glm:plugin:<isolated-profile>\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+            "name": "browser-use:web-gui-tester",
+            "path": "<isolated-profile>\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+            "scope": "plugin",
+            "enabled": true,
+            "plugin": "browser-use",
+            "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+          }
+        ],
+        "plugins": [
+          {
+            "id": "node-repl-host@zcode-plugins-official",
+            "name": "node-repl-host",
+            "enabled": true,
+            "source": "official",
+            "version": "0.6.0"
+          },
+          {
+            "id": "browser-use@zcode-plugins-official",
+            "name": "browser-use",
+            "enabled": true,
+            "source": "official",
+            "version": "0.5.1"
+          }
+        ],
+        "hooks": [],
+        "mcp": [],
+        "unknowns": [
+          "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+          "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+          "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+          "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+        ]
+      },
+      "models": [
+        {
+          "nodeId": "analyze",
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "type": "openai-chat-completions",
+          "destination": "http://127.0.0.1:50675",
+          "configurationDigest": "3dea9e777342bd75fc79b723552c12b49fddc4d99518c2b043b6f187b769062d"
+        },
+        {
+          "nodeId": "implement",
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "type": "openai-chat-completions",
+          "destination": "http://127.0.0.1:50675",
+          "configurationDigest": "3dea9e777342bd75fc79b723552c12b49fddc4d99518c2b043b6f187b769062d"
+        },
+        {
+          "nodeId": "reviewer",
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "type": "openai-chat-completions",
+          "destination": "http://127.0.0.1:50675",
+          "configurationDigest": "3dea9e777342bd75fc79b723552c12b49fddc4d99518c2b043b6f187b769062d"
+        }
+      ],
+      "auxiliary": [
+        "Native title generation uses each session's selected primary model (Graph supplies no title-model override)."
+      ],
+      "references": [
+        {
+          "id": "instructions",
+          "kind": "instruction",
+          "path": "ExtraInstructions.md",
+          "digest": "c200201e29a0dc39aa4f0964bc8bb273cb5f72554d5ac5ab83cf4997b1e79a9e",
+          "origin": "explicit workspace reference"
+        },
+        {
+          "id": "skill",
+          "kind": "skill",
+          "path": "<isolated-profile>\\workspace\\.agents\\skills\\fixture-guidance\\SKILL.md",
+          "digest": "2007159e6c11cf0a5e104bedc273974fbaf3a27217ae9ad9d7836a47097a4aa3",
+          "origin": "workspace:fixture-guidance",
+          "nativeName": "fixture-guidance"
+        }
+      ],
+      "recipes": [
+        {
+          "nodeId": "build",
+          "id": "fixture-build",
+          "digest": "eb2960224cf63fca86773a89ca7b1fff0ed5fc6012fd4b81b996614e4aec695e",
+          "command": "[\"dotnet\",\"build\",\"Z4Fixture.csproj\",\"--configuration\",\"Release\",\"--nologo\",\"--no-incremental\",\"--disable-build-servers\",\"-p:RestoreConfigFile=NuGet.Config\",\"-p:NuGetAudit=false\",\"-p:UseSharedCompilation=false\",\"-p:ImportDirectoryBuildProps=false\",\"-p:ImportDirectoryBuildTargets=false\",\"-p:ImportDirectoryPackagesProps=false\",\"-nodeReuse:false\"]",
+          "cwd": "."
+        },
+        {
+          "nodeId": "test",
+          "id": "fixture-test",
+          "digest": "780d0ba759527c41207bd3e4b2f68edd83fbad5c1e2e66c73b823f41d692fd32",
+          "command": "[\"dotnet\",\"bin/Release/net8.0/Z4Fixture.dll\",\"--operation-id\",\"{operationId}\",\"--source-digest\",\"{sourceDigest}\",\"--build-digest\",\"{buildDigest}\",\"--report\",\"{reportPath}\"]",
+          "cwd": "."
+        }
+      ],
+      "permissions": [
+        {
+          "nodeId": "analyze",
+          "mode": "build",
+          "planEnabled": false
+        },
+        {
+          "nodeId": "implement",
+          "mode": "build",
+          "planEnabled": false
+        },
+        {
+          "nodeId": "reviewer",
+          "mode": "build",
+          "planEnabled": false
+        }
+      ],
+      "unknowns": [
+        "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+        "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+        "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+        "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+        "Executable availability does not verify its SDK version, script contents or network behavior; review the existing project toolchain and recipes.",
+        "Provider redirects, backend routing and external tools cannot be established from local configuration.",
+        "Native web/search, memory and delegated-tool behavior may contact additional destinations; primary endpoint locality is not a traffic guarantee."
+      ]
+    }
+  },
+  "conversations": [
+    {
+      "attemptId": "fcbd1083-72ee-4a0e-823e-6d02a5f77e37",
+      "iterationId": "0d84c3f7-18d3-4102-8541-64bbb58b2d7e",
+      "sessionId": "sess_69790760-86cb-4e69-932a-65dabd51392c",
+      "nativeInputCount": 2
+    },
+    {
+      "attemptId": "737deb1a-8936-4bad-a485-a400199df334",
+      "iterationId": "0d84c3f7-18d3-4102-8541-64bbb58b2d7e",
+      "sessionId": "sess_8465a9cc-6b96-4966-94f2-436187c32eac",
+      "nativeInputCount": 2
+    },
+    {
+      "attemptId": "a37f63e6-283a-4194-9001-b98f955a62ec",
+      "iterationId": "0d84c3f7-18d3-4102-8541-64bbb58b2d7e",
+      "sessionId": "sess_2a0590ee-c25f-43de-97c5-d97034079786",
+      "nativeInputCount": 2
+    },
+    {
+      "attemptId": "e054d786-78d6-4b04-993b-bccab74da8f6",
+      "iterationId": "0d84c3f7-18d3-4102-8541-64bbb58b2d7e",
+      "sessionId": "sess_8ec58783-4c81-4147-a9ac-d16b8850199d",
+      "nativeInputCount": 3
+    }
+  ],
+  "allowedAttempts": [
+    "fcbd1083-72ee-4a0e-823e-6d02a5f77e37",
+    "737deb1a-8936-4bad-a485-a400199df334",
+    "a37f63e6-283a-4194-9001-b98f955a62ec"
+  ],
+  "iterationEvidence": [
+    {
+      "iteration": {
+        "id": "0d84c3f7-18d3-4102-8541-64bbb58b2d7e",
+        "index": 0,
+        "createdAt": 1790263354507,
+        "attemptIds": {
+          "analyze": "8b3de74c-fcbd-4324-9ad0-d9028a74d4df",
+          "implement": "fcbd1083-72ee-4a0e-823e-6d02a5f77e37",
+          "reviewer": "e054d786-78d6-4b04-993b-bccab74da8f6",
+          "build": "737deb1a-8936-4bad-a485-a400199df334",
+          "test": "a37f63e6-283a-4194-9001-b98f955a62ec",
+          "final-gate": "7f3df1d2-0e82-4ab1-80da-f4d4f03467f3"
+        },
+        "visitedNodeIds": ["analyze", "implement", "build", "test", "reviewer"]
+      },
+      "verification": {
+        "artifact": {
+          "id": "4df61d01-258f-4c9c-9eed-506189eaa098",
+          "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+          "nodeId": "test",
+          "attemptId": "a37f63e6-283a-4194-9001-b98f955a62ec",
+          "workspaceKey": "<isolated-profile>\\workspace",
+          "type": "json",
+          "provenance": "native-test",
+          "bytes": 691,
+          "digest": "ff5ad9d62b3defda01ad7c2c52c0ce911c4ecdff338f2a1eeb90741ae748a1aa",
+          "capturedAt": 1790263364441,
+          "validation": "valid",
+          "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+          "sessionId": "sess_2a0590ee-c25f-43de-97c5-d97034079786",
+          "operationId": "1783274a-3856-4597-a7f9-074a9605c0a3"
+        },
+        "content": "{\"artifactId\":\"4df61d01-258f-4c9c-9eed-506189eaa098\",\"runId\":\"5f581380-97a6-427d-80d6-e27ec7a57b13\",\"nodeId\":\"test\",\"attemptId\":\"a37f63e6-283a-4194-9001-b98f955a62ec\",\"iterationId\":\"0d84c3f7-18d3-4102-8541-64bbb58b2d7e\",\"operationId\":\"1783274a-3856-4597-a7f9-074a9605c0a3\",\"sourceDigest\":\"295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe\",\"buildDigest\":\"d7dcce4caab1ea1bde9be2ec8900033b2d62694487a97bd0bd5873792591586f\",\"reportArtifactId\":\"07a3df5f-96f3-4d1d-a7b9-5d56a6b7d763\",\"outcome\":\"pass\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"passed\"},{\"name\":\"add-negative\",\"status\":\"passed\"},{\"name\":\"add-zero\",\"status\":\"passed\"}],\"testCount\":3,\"passed\":3,\"failed\":0,\"skipped\":0}",
+        "value": {
+          "artifactId": "4df61d01-258f-4c9c-9eed-506189eaa098",
+          "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+          "nodeId": "test",
+          "attemptId": "a37f63e6-283a-4194-9001-b98f955a62ec",
+          "iterationId": "0d84c3f7-18d3-4102-8541-64bbb58b2d7e",
+          "operationId": "1783274a-3856-4597-a7f9-074a9605c0a3",
+          "sourceDigest": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+          "buildDigest": "d7dcce4caab1ea1bde9be2ec8900033b2d62694487a97bd0bd5873792591586f",
+          "reportArtifactId": "07a3df5f-96f3-4d1d-a7b9-5d56a6b7d763",
+          "outcome": "pass",
+          "tests": [
+            {
+              "name": "add-positive",
+              "status": "passed"
+            },
+            {
+              "name": "add-negative",
+              "status": "passed"
+            },
+            {
+              "name": "add-zero",
+              "status": "passed"
+            }
+          ],
+          "testCount": 3,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        }
+      },
+      "report": {
+        "artifact": {
+          "id": "07a3df5f-96f3-4d1d-a7b9-5d56a6b7d763",
+          "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+          "nodeId": "test",
+          "attemptId": "a37f63e6-283a-4194-9001-b98f955a62ec",
+          "workspaceKey": "<isolated-profile>\\workspace",
+          "type": "file",
+          "provenance": "workspace-file",
+          "bytes": 495,
+          "digest": "30815970e5e0122c35baa800779432e67391ec8a3320d5cab393857f96b207b4",
+          "capturedAt": 1790263364441,
+          "validation": "valid",
+          "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+          "sourcePath": "results/test-report.json",
+          "sessionId": "sess_2a0590ee-c25f-43de-97c5-d97034079786",
+          "operationId": "1783274a-3856-4597-a7f9-074a9605c0a3"
+        },
+        "content": "{\r\n  \"format\": \"zcode-test-v1\",\r\n  \"operationId\": \"1783274a-3856-4597-a7f9-074a9605c0a3\",\r\n  \"sourceDigest\": \"295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe\",\r\n  \"buildDigest\": \"d7dcce4caab1ea1bde9be2ec8900033b2d62694487a97bd0bd5873792591586f\",\r\n  \"tests\": [\r\n    {\r\n      \"name\": \"add-positive\",\r\n      \"status\": \"passed\"\r\n    },\r\n    {\r\n      \"name\": \"add-negative\",\r\n      \"status\": \"passed\"\r\n    },\r\n    {\r\n      \"name\": \"add-zero\",\r\n      \"status\": \"passed\"\r\n    }\r\n  ]\r\n}",
+        "value": {
+          "format": "zcode-test-v1",
+          "operationId": "1783274a-3856-4597-a7f9-074a9605c0a3",
+          "sourceDigest": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+          "buildDigest": "d7dcce4caab1ea1bde9be2ec8900033b2d62694487a97bd0bd5873792591586f",
+          "tests": [
+            {
+              "name": "add-positive",
+              "status": "passed"
+            },
+            {
+              "name": "add-negative",
+              "status": "passed"
+            },
+            {
+              "name": "add-zero",
+              "status": "passed"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "independentTest": {
+    "operationId": "568c0bff-e516-4ca8-97ef-83c70e8b40e1",
+    "reportPath": "results/568c0bff-e516-4ca8-97ef-83c70e8b40e1.json",
+    "command": {
+      "args": [
+        "bin/Release/net8.0/Z4Fixture.dll",
+        "--operation-id",
+        "568c0bff-e516-4ca8-97ef-83c70e8b40e1",
+        "--source-digest",
+        "6c15a9faaa6c96609bdff37e3f8f6b49da9824037f34cca3affc968174ac15ef",
+        "--build-digest",
+        "ad5e520d88b1df8a68bb07e52839923d4eda2baab7877c0e58524bc603ac068b",
+        "--report",
+        "results/568c0bff-e516-4ca8-97ef-83c70e8b40e1.json"
+      ],
+      "startedAt": 1790263367359,
+      "finishedAt": 1790263367444,
+      "exitCode": 0,
+      "stdout": "{\r\n  \"format\": \"zcode-test-v1\",\r\n  \"operationId\": \"568c0bff-e516-4ca8-97ef-83c70e8b40e1\",\r\n  \"sourceDigest\": \"6c15a9faaa6c96609bdff37e3f8f6b49da9824037f34cca3affc968174ac15ef\",\r\n  \"buildDigest\": \"ad5e520d88b1df8a68bb07e52839923d4eda2baab7877c0e58524bc603ac068b\",\r\n  \"tests\": [\r\n    {\r\n      \"name\": \"add-positive\",\r\n      \"status\": \"passed\"\r\n    },\r\n    {\r\n      \"name\": \"add-negative\",\r\n      \"status\": \"passed\"\r\n    },\r\n    {\r\n      \"name\": \"add-zero\",\r\n      \"status\": \"passed\"\r\n    }\r\n  ]\r\n}\r\n",
+      "stderr": ""
+    },
+    "report": {
+      "format": "zcode-test-v1",
+      "operationId": "568c0bff-e516-4ca8-97ef-83c70e8b40e1",
+      "sourceDigest": "6c15a9faaa6c96609bdff37e3f8f6b49da9824037f34cca3affc968174ac15ef",
+      "buildDigest": "ad5e520d88b1df8a68bb07e52839923d4eda2baab7877c0e58524bc603ac068b",
+      "tests": [
+        {
+          "name": "add-positive",
+          "status": "passed"
+        },
+        {
+          "name": "add-negative",
+          "status": "passed"
+        },
+        {
+          "name": "add-zero",
+          "status": "passed"
+        }
+      ]
+    }
+  },
+  "status": "PASS",
+  "finalRecord": {
+    "version": 5,
+    "workspaceKey": "<isolated-profile>\\workspace",
+    "definition": {
+      "version": 5,
+      "revision": 2,
+      "name": "Sequential engineering",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+        },
+        {
+          "id": "analyze",
+          "position": {
+            "x": 300,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Analyze",
+          "instructions": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\n{{inputs.request}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "implement",
+          "position": {
+            "x": 560,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Implement",
+          "instructions": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            },
+            {
+              "alias": "analyze",
+              "source": {
+                "kind": "node",
+                "nodeId": "analyze"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "build",
+          "position": {
+            "x": 820,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Build",
+          "recipeId": "fixture-build"
+        },
+        {
+          "id": "test",
+          "position": {
+            "x": 1080,
+            "y": 100
+          },
+          "type": "tool",
+          "name": "Test configured criteria",
+          "recipeId": "fixture-test"
+        },
+        {
+          "id": "reviewer",
+          "position": {
+            "x": 1340,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Review current verification",
+          "instructions": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{{inputs.verification}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "verification",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "test",
+                "selector": "verification"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          },
+          "output": {
+            "kind": "json",
+            "schema": {
+              "type": "object",
+              "required": ["outcome", "findings", "evidenceReferences"],
+              "additionalProperties": false,
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "enum": ["pass", "needs_changes", "needs_human"]
+                },
+                "findings": {
+                  "type": "array",
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "required": ["code", "message"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "message": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    }
+                  }
+                },
+                "evidenceReferences": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 8,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "final-gate",
+          "position": {
+            "x": 40,
+            "y": 320
+          },
+          "type": "approval",
+          "name": "Final human review",
+          "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+          "evidence": [
+            {
+              "alias": "evidence",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "test",
+                "selector": "test"
+              }
+            },
+            {
+              "alias": "review",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "reviewer",
+                "selector": "structured"
+              }
+            },
+            {
+              "alias": "source",
+              "source": {
+                "kind": "source"
+              }
+            }
+          ],
+          "commentPolicy": "required"
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 300,
+            "y": 320
+          },
+          "type": "end",
+          "outputNodeId": "test"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "analyze"
+        },
+        {
+          "source": "analyze",
+          "target": "implement"
+        },
+        {
+          "source": "implement",
+          "target": "build"
+        },
+        {
+          "source": "build",
+          "target": "test"
+        },
+        {
+          "source": "test",
+          "target": "reviewer"
+        },
+        {
+          "source": "reviewer",
+          "target": "final-gate"
+        },
+        {
+          "source": "final-gate",
+          "target": "end"
+        }
+      ],
+      "routing": {
+        "finalGateId": "final-gate",
+        "limits": {
+          "maxNodeAdmissions": 24,
+          "deadlineMs": 1800000
+        }
+      },
+      "template": {
+        "id": "generic",
+        "name": "Sequential engineering",
+        "version": 1,
+        "digest": "bd856d719f8fd4fc05364222ea0e5ba27e4ee2cbecb565de4d7b9eddc3d96f34",
+        "parameters": {
+          "request": "Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required."
+        },
+        "bindings": {
+          "references": {
+            "instructions": "ExtraInstructions.md",
+            "skill": "glm:workspace:<isolated-profile>\\workspace\\.agents\\skills\\fixture-guidance\\SKILL.md"
+          },
+          "recipes": {
+            "build": "fixture-build",
+            "test": "fixture-test"
+          },
+          "sourcePaths": []
+        },
+        "references": [
+          {
+            "id": "instructions",
+            "kind": "instruction",
+            "nodeIds": ["analyze", "implement"]
+          },
+          {
+            "id": "skill",
+            "kind": "skill",
+            "nodeIds": ["implement"]
+          }
+        ],
+        "excluded": []
+      }
+    },
+    "runs": [
+      {
+        "id": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+        "requestId": "965a9fa8-b3c4-47f6-b92a-0fd3dcea853b",
+        "target": {
+          "workspacePath": "<isolated-profile>\\workspace"
+        },
+        "status": "Completed",
+        "createdAt": 1790263354502,
+        "updatedAt": 1790263366973,
+        "version": 5,
+        "routing": {
+          "configurationDigest": "36da008d6ad549c795918fa4cb575a8c748b8d3797bf74e5ee6d957a1effccfe",
+          "recipeConfigurationDigest": "b8fd998bb39c4aee351ec5fde87713785fd4d37e189f098e7c6fa2a6a56bc6d3",
+          "currentIterationId": "0d84c3f7-18d3-4102-8541-64bbb58b2d7e",
+          "cursorNodeId": "end",
+          "iterations": [
+            {
+              "id": "0d84c3f7-18d3-4102-8541-64bbb58b2d7e",
+              "index": 0,
+              "createdAt": 1790263354507,
+              "attemptIds": {
+                "analyze": "8b3de74c-fcbd-4324-9ad0-d9028a74d4df",
+                "implement": "fcbd1083-72ee-4a0e-823e-6d02a5f77e37",
+                "reviewer": "e054d786-78d6-4b04-993b-bccab74da8f6",
+                "build": "737deb1a-8936-4bad-a485-a400199df334",
+                "test": "a37f63e6-283a-4194-9001-b98f955a62ec",
+                "final-gate": "7f3df1d2-0e82-4ab1-80da-f4d4f03467f3"
+              },
+              "visitedNodeIds": ["analyze", "implement", "build", "test", "reviewer", "final-gate"]
+            }
+          ],
+          "conditionAttempts": [],
+          "admissions": 5,
+          "deadlineAt": 1790265154502,
+          "checkpoints": [],
+          "continuations": []
+        },
+        "provenance": {
+          "operationalDecision": {
+            "acknowledgedUnknowns": true,
+            "acceptedAt": 1790263354598
+          },
+          "digest": "35843cdd2f62ac2bbe4187a3aa4caa287d1687f7b3090ab00dc8ae426ebb415e",
+          "template": {
+            "id": "generic",
+            "name": "Sequential engineering",
+            "version": 1,
+            "digest": "bd856d719f8fd4fc05364222ea0e5ba27e4ee2cbecb565de4d7b9eddc3d96f34",
+            "parameters": {
+              "request": "Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required."
+            },
+            "bindings": {
+              "references": {
+                "instructions": "ExtraInstructions.md",
+                "skill": "glm:workspace:<isolated-profile>\\workspace\\.agents\\skills\\fixture-guidance\\SKILL.md"
+              },
+              "recipes": {
+                "build": "fixture-build",
+                "test": "fixture-test"
+              },
+              "sourcePaths": []
+            },
+            "references": [
+              {
+                "id": "instructions",
+                "kind": "instruction",
+                "nodeIds": ["analyze", "implement"]
+              },
+              {
+                "id": "skill",
+                "kind": "skill",
+                "nodeIds": ["implement"]
+              }
+            ],
+            "excluded": []
+          },
+          "environment": {
+            "version": 1,
+            "status": "available",
+            "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+            "executables": [
+              {
+                "executable": "dotnet",
+                "status": "available",
+                "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+              }
+            ],
+            "instructions": [
+              {
+                "scope": "workspace",
+                "path": "<isolated-profile>\\workspace\\AGENTS.md",
+                "digest": "07549829e8aacee6b98faaebf19e67128ef7e038a1250951fedeb4d2feba433d",
+                "bytes": 281,
+                "truncated": false
+              }
+            ],
+            "skills": [
+              {
+                "id": "glm:plugin:<isolated-profile>\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "name": "browser-use:control-browser",
+                "path": "<isolated-profile>\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+              },
+              {
+                "id": "glm:workspace:<isolated-profile>\\workspace\\.agents\\skills\\fixture-guidance\\SKILL.md",
+                "name": "fixture-guidance",
+                "path": "<isolated-profile>\\workspace\\.agents\\skills\\fixture-guidance\\SKILL.md",
+                "scope": "workspace",
+                "enabled": true,
+                "digest": "2007159e6c11cf0a5e104bedc273974fbaf3a27217ae9ad9d7836a47097a4aa3"
+              },
+              {
+                "id": "glm:plugin:<isolated-profile>\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "name": "browser-use:web-gui-tester",
+                "path": "<isolated-profile>\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+              }
+            ],
+            "plugins": [
+              {
+                "id": "node-repl-host@zcode-plugins-official",
+                "name": "node-repl-host",
+                "enabled": true,
+                "source": "official",
+                "version": "0.6.0"
+              },
+              {
+                "id": "browser-use@zcode-plugins-official",
+                "name": "browser-use",
+                "enabled": true,
+                "source": "official",
+                "version": "0.5.1"
+              }
+            ],
+            "hooks": [],
+            "mcp": [],
+            "unknowns": [
+              "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+              "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+              "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+              "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+            ]
+          },
+          "models": [
+            {
+              "nodeId": "analyze",
+              "providerId": "z1-local-fixture",
+              "modelId": "z1-fixture",
+              "type": "openai-chat-completions",
+              "destination": "http://127.0.0.1:50675",
+              "configurationDigest": "3dea9e777342bd75fc79b723552c12b49fddc4d99518c2b043b6f187b769062d"
+            },
+            {
+              "nodeId": "implement",
+              "providerId": "z1-local-fixture",
+              "modelId": "z1-fixture",
+              "type": "openai-chat-completions",
+              "destination": "http://127.0.0.1:50675",
+              "configurationDigest": "3dea9e777342bd75fc79b723552c12b49fddc4d99518c2b043b6f187b769062d"
+            },
+            {
+              "nodeId": "reviewer",
+              "providerId": "z1-local-fixture",
+              "modelId": "z1-fixture",
+              "type": "openai-chat-completions",
+              "destination": "http://127.0.0.1:50675",
+              "configurationDigest": "3dea9e777342bd75fc79b723552c12b49fddc4d99518c2b043b6f187b769062d"
+            }
+          ],
+          "auxiliary": [
+            "Native title generation uses each session's selected primary model (Graph supplies no title-model override)."
+          ],
+          "references": [
+            {
+              "id": "instructions",
+              "kind": "instruction",
+              "path": "ExtraInstructions.md",
+              "digest": "c200201e29a0dc39aa4f0964bc8bb273cb5f72554d5ac5ab83cf4997b1e79a9e",
+              "origin": "explicit workspace reference"
+            },
+            {
+              "id": "skill",
+              "kind": "skill",
+              "path": "<isolated-profile>\\workspace\\.agents\\skills\\fixture-guidance\\SKILL.md",
+              "digest": "2007159e6c11cf0a5e104bedc273974fbaf3a27217ae9ad9d7836a47097a4aa3",
+              "origin": "workspace:fixture-guidance",
+              "nativeName": "fixture-guidance"
+            }
+          ],
+          "recipes": [
+            {
+              "nodeId": "build",
+              "id": "fixture-build",
+              "digest": "eb2960224cf63fca86773a89ca7b1fff0ed5fc6012fd4b81b996614e4aec695e",
+              "command": "[\"dotnet\",\"build\",\"Z4Fixture.csproj\",\"--configuration\",\"Release\",\"--nologo\",\"--no-incremental\",\"--disable-build-servers\",\"-p:RestoreConfigFile=NuGet.Config\",\"-p:NuGetAudit=false\",\"-p:UseSharedCompilation=false\",\"-p:ImportDirectoryBuildProps=false\",\"-p:ImportDirectoryBuildTargets=false\",\"-p:ImportDirectoryPackagesProps=false\",\"-nodeReuse:false\"]",
+              "cwd": "."
+            },
+            {
+              "nodeId": "test",
+              "id": "fixture-test",
+              "digest": "780d0ba759527c41207bd3e4b2f68edd83fbad5c1e2e66c73b823f41d692fd32",
+              "command": "[\"dotnet\",\"bin/Release/net8.0/Z4Fixture.dll\",\"--operation-id\",\"{operationId}\",\"--source-digest\",\"{sourceDigest}\",\"--build-digest\",\"{buildDigest}\",\"--report\",\"{reportPath}\"]",
+              "cwd": "."
+            }
+          ],
+          "permissions": [
+            {
+              "nodeId": "analyze",
+              "mode": "build",
+              "planEnabled": false
+            },
+            {
+              "nodeId": "implement",
+              "mode": "build",
+              "planEnabled": false
+            },
+            {
+              "nodeId": "reviewer",
+              "mode": "build",
+              "planEnabled": false
+            }
+          ],
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+            "Executable availability does not verify its SDK version, script contents or network behavior; review the existing project toolchain and recipes.",
+            "Provider redirects, backend routing and external tools cannot be established from local configuration.",
+            "Native web/search, memory and delegated-tool behavior may contact additional destinations; primary endpoint locality is not a traffic guarantee."
+          ]
+        },
+        "requestFingerprint": "{\"mode\":\"build\",\"modelSelection\":{\"modelId\":\"z1-fixture\",\"options\":{\"reasoningLevel\":\"enabled\"},\"providerId\":\"z1-local-fixture\"},\"planEnabled\":false,\"preflight\":{\"acknowledgedUnknowns\":true,\"digest\":\"35843cdd2f62ac2bbe4187a3aa4caa287d1687f7b3090ab00dc8ae426ebb415e\"},\"revision\":2,\"target\":{\"workspacePath\":\"<isolated-profile>\\\\workspace\"}}",
+        "definition": {
+          "version": 5,
+          "revision": 2,
+          "name": "Sequential engineering",
+          "nodes": [
+            {
+              "id": "start",
+              "position": {
+                "x": 40,
+                "y": 100
+              },
+              "type": "start",
+              "request": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+            },
+            {
+              "id": "analyze",
+              "position": {
+                "x": 300,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Analyze",
+              "instructions": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\n{{inputs.request}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "request",
+                  "source": {
+                    "kind": "start"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "implement",
+              "position": {
+                "x": 560,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Implement",
+              "instructions": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "request",
+                  "source": {
+                    "kind": "start"
+                  }
+                },
+                {
+                  "alias": "analyze",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "analyze"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "build",
+              "position": {
+                "x": 820,
+                "y": 100
+              },
+              "type": "tool",
+              "name": "Build",
+              "recipeId": "fixture-build"
+            },
+            {
+              "id": "test",
+              "position": {
+                "x": 1080,
+                "y": 100
+              },
+              "type": "tool",
+              "name": "Test configured criteria",
+              "recipeId": "fixture-test"
+            },
+            {
+              "id": "reviewer",
+              "position": {
+                "x": 1340,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Review current verification",
+              "instructions": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{{inputs.verification}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "verification",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "test",
+                    "selector": "verification"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              },
+              "output": {
+                "kind": "json",
+                "schema": {
+                  "type": "object",
+                  "required": ["outcome", "findings", "evidenceReferences"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "outcome": {
+                      "type": "string",
+                      "enum": ["pass", "needs_changes", "needs_human"]
+                    },
+                    "findings": {
+                      "type": "array",
+                      "maxItems": 10,
+                      "items": {
+                        "type": "object",
+                        "required": ["code", "message"],
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          }
+                        }
+                      }
+                    },
+                    "evidenceReferences": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 8,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "final-gate",
+              "position": {
+                "x": 40,
+                "y": 320
+              },
+              "type": "approval",
+              "name": "Final human review",
+              "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+              "evidence": [
+                {
+                  "alias": "evidence",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "test",
+                    "selector": "test"
+                  }
+                },
+                {
+                  "alias": "review",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "reviewer",
+                    "selector": "structured"
+                  }
+                },
+                {
+                  "alias": "source",
+                  "source": {
+                    "kind": "source"
+                  }
+                }
+              ],
+              "commentPolicy": "required"
+            },
+            {
+              "id": "end",
+              "position": {
+                "x": 300,
+                "y": 320
+              },
+              "type": "end",
+              "outputNodeId": "test"
+            }
+          ],
+          "edges": [
+            {
+              "source": "start",
+              "target": "analyze"
+            },
+            {
+              "source": "analyze",
+              "target": "implement"
+            },
+            {
+              "source": "implement",
+              "target": "build"
+            },
+            {
+              "source": "build",
+              "target": "test"
+            },
+            {
+              "source": "test",
+              "target": "reviewer"
+            },
+            {
+              "source": "reviewer",
+              "target": "final-gate"
+            },
+            {
+              "source": "final-gate",
+              "target": "end"
+            }
+          ],
+          "routing": {
+            "finalGateId": "final-gate",
+            "limits": {
+              "maxNodeAdmissions": 24,
+              "deadlineMs": 1800000
+            }
+          },
+          "template": {
+            "id": "generic",
+            "name": "Sequential engineering",
+            "version": 1,
+            "digest": "bd856d719f8fd4fc05364222ea0e5ba27e4ee2cbecb565de4d7b9eddc3d96f34",
+            "parameters": {
+              "request": "Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required."
+            },
+            "bindings": {
+              "references": {
+                "instructions": "ExtraInstructions.md",
+                "skill": "glm:workspace:<isolated-profile>\\workspace\\.agents\\skills\\fixture-guidance\\SKILL.md"
+              },
+              "recipes": {
+                "build": "fixture-build",
+                "test": "fixture-test"
+              },
+              "sourcePaths": []
+            },
+            "references": [
+              {
+                "id": "instructions",
+                "kind": "instruction",
+                "nodeIds": ["analyze", "implement"]
+              },
+              {
+                "id": "skill",
+                "kind": "skill",
+                "nodeIds": ["implement"]
+              }
+            ],
+            "excluded": []
+          }
+        },
+        "defaults": {
+          "modelSelection": {
+            "providerId": "z1-local-fixture",
+            "modelId": "z1-fixture",
+            "options": {
+              "reasoningLevel": "enabled"
+            }
+          },
+          "mode": "build",
+          "planEnabled": false
+        },
+        "plannedPath": ["analyze", "implement", "build", "test", "reviewer", "final-gate"],
+        "startInput": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.",
+        "nodeAttempts": [
+          {
+            "iterationId": "0d84c3f7-18d3-4102-8541-64bbb58b2d7e",
+            "iteration": 0,
+            "nodeId": "analyze",
+            "attemptId": "8b3de74c-fcbd-4324-9ad0-d9028a74d4df",
+            "commandId": "df9cba18-fbd7-460e-bce0-748a12797d13",
+            "inputId": "df9cba18-fbd7-460e-bce0-748a12797d13",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790263354502,
+            "updatedAt": 1790263355944,
+            "sessionId": "sess_20e92577-9c1b-41a8-8475-5bb71703a64e",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:42104:agent-1f09abfd-052a-46d0-b65d-92599c66f317",
+            "foregroundExecutionId": "runtime_command_1",
+            "observationEpoch": "mufoktfa-v9e7htwr",
+            "resolvedInstructions": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"ExtraInstructions.md\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+            "bindings": [
+              {
+                "alias": "request",
+                "source": {
+                  "kind": "start"
+                },
+                "text": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+              }
+            ],
+            "terminalProof": {
+              "sourceCommandId": "df9cba18-fbd7-460e-bce0-748a12797d13",
+              "state": "completedSuccess",
+              "logEpoch": "mufoktfa-v9e7htwr",
+              "seq": 73,
+              "turnId": "msg_mufoktvf_50462ca8-b101-4da9-a936-5347c2529cf2"
+            },
+            "finalOutput": {
+              "text": "Analysis: MathOps.cs must satisfy the supplied request and Runner.cs add-positive/add-negative/add-zero assertions. Only MathOps.Add is affected; preserve Runner.cs as independent authority.",
+              "turnId": "msg_mufoktvf_50462ca8-b101-4da9-a936-5347c2529cf2",
+              "rowId": 6,
+              "entityId": "msg_mufoku4y_228971f1-b294-4879-9ac8-1278a81404ba",
+              "assistantResponseId": "msg_mufoku4y_228971f1-b294-4879-9ac8-1278a81404ba"
+            },
+            "outputValidation": {
+              "status": "valid",
+              "issues": []
+            }
+          },
+          {
+            "iterationId": "0d84c3f7-18d3-4102-8541-64bbb58b2d7e",
+            "iteration": 0,
+            "nodeId": "implement",
+            "attemptId": "fcbd1083-72ee-4a0e-823e-6d02a5f77e37",
+            "commandId": "e3209983-fa8a-49c7-95f5-0bc819dc9b7f",
+            "inputId": "e3209983-fa8a-49c7-95f5-0bc819dc9b7f",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790263354502,
+            "updatedAt": 1790263359799,
+            "sessionId": "sess_69790760-86cb-4e69-932a-65dabd51392c",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:42104:agent-1f09abfd-052a-46d0-b65d-92599c66f317",
+            "foregroundExecutionId": "runtime_command_2",
+            "observationEpoch": "mufokuwe-qidum9y3",
+            "resolvedInstructions": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nanalyze:\nAnalysis: MathOps.cs must satisfy the supplied request and Runner.cs add-positive/add-negative/add-zero assertions. Only MathOps.Add is affected; preserve Runner.cs as independent authority.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"ExtraInstructions.md\"},{\"id\":\"skill\",\"kind\":\"skill\",\"selected\":\"glm:workspace:<isolated-profile>\\\\workspace\\\\.agents\\\\skills\\\\fixture-guidance\\\\SKILL.md\",\"nativeSkillName\":\"fixture-guidance\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+            "bindings": [
+              {
+                "alias": "request",
+                "source": {
+                  "kind": "start"
+                },
+                "text": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+              },
+              {
+                "alias": "analyze",
+                "source": {
+                  "kind": "node",
+                  "nodeId": "analyze"
+                },
+                "text": "Analysis: MathOps.cs must satisfy the supplied request and Runner.cs add-positive/add-negative/add-zero assertions. Only MathOps.Add is affected; preserve Runner.cs as independent authority.",
+                "sourceSessionId": "sess_20e92577-9c1b-41a8-8475-5bb71703a64e",
+                "sourceInputId": "df9cba18-fbd7-460e-bce0-748a12797d13",
+                "sourceCommandId": "df9cba18-fbd7-460e-bce0-748a12797d13"
+              }
+            ],
+            "terminalProof": {
+              "sourceCommandId": "e3209983-fa8a-49c7-95f5-0bc819dc9b7f",
+              "state": "completedSuccess",
+              "logEpoch": "mufokuwe-qidum9y3",
+              "seq": 114,
+              "turnId": "msg_mufokweb_6fb050ec-a573-4366-a3be-63585462ecfd"
+            },
+            "finalOutput": {
+              "text": "Native implementation completed in MathOps.cs only. Configured Build/Test must establish the actual result; prose is not a PASS.",
+              "turnId": "msg_mufokweb_6fb050ec-a573-4366-a3be-63585462ecfd",
+              "rowId": 8,
+              "entityId": "msg_mufokx5o_693553bf-511d-4119-8a5c-db0300e34e74",
+              "assistantResponseId": "msg_mufokx5o_693553bf-511d-4119-8a5c-db0300e34e74"
+            },
+            "outputValidation": {
+              "status": "valid",
+              "issues": []
+            }
+          },
+          {
+            "iterationId": "0d84c3f7-18d3-4102-8541-64bbb58b2d7e",
+            "iteration": 0,
+            "nodeId": "reviewer",
+            "attemptId": "e054d786-78d6-4b04-993b-bccab74da8f6",
+            "commandId": "b1d4d44c-ed45-45f9-b213-6a167db1ec31",
+            "inputId": "b1d4d44c-ed45-45f9-b213-6a167db1ec31",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790263354502,
+            "updatedAt": 1790263365465,
+            "sessionId": "sess_8ec58783-4c81-4147-a9ac-d16b8850199d",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:42104:agent-1f09abfd-052a-46d0-b65d-92599c66f317",
+            "foregroundExecutionId": "runtime_command_3",
+            "observationEpoch": "mufol11s-83bz3rgo",
+            "resolvedInstructions": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{\"artifactId\":\"4df61d01-258f-4c9c-9eed-506189eaa098\",\"runId\":\"5f581380-97a6-427d-80d6-e27ec7a57b13\",\"nodeId\":\"test\",\"attemptId\":\"a37f63e6-283a-4194-9001-b98f955a62ec\",\"iterationId\":\"0d84c3f7-18d3-4102-8541-64bbb58b2d7e\",\"operationId\":\"1783274a-3856-4597-a7f9-074a9605c0a3\",\"sourceDigest\":\"295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe\",\"buildDigest\":\"d7dcce4caab1ea1bde9be2ec8900033b2d62694487a97bd0bd5873792591586f\",\"reportArtifactId\":\"07a3df5f-96f3-4d1d-a7b9-5d56a6b7d763\",\"outcome\":\"pass\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"passed\"},{\"name\":\"add-negative\",\"status\":\"passed\"},{\"name\":\"add-zero\",\"status\":\"passed\"}],\"testCount\":3,\"passed\":3,\"failed\":0,\"skipped\":0}",
+            "bindings": [
+              {
+                "alias": "verification",
+                "source": {
+                  "kind": "artifact",
+                  "nodeId": "test",
+                  "selector": "verification"
+                },
+                "text": "{\"artifactId\":\"4df61d01-258f-4c9c-9eed-506189eaa098\",\"runId\":\"5f581380-97a6-427d-80d6-e27ec7a57b13\",\"nodeId\":\"test\",\"attemptId\":\"a37f63e6-283a-4194-9001-b98f955a62ec\",\"iterationId\":\"0d84c3f7-18d3-4102-8541-64bbb58b2d7e\",\"operationId\":\"1783274a-3856-4597-a7f9-074a9605c0a3\",\"sourceDigest\":\"295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe\",\"buildDigest\":\"d7dcce4caab1ea1bde9be2ec8900033b2d62694487a97bd0bd5873792591586f\",\"reportArtifactId\":\"07a3df5f-96f3-4d1d-a7b9-5d56a6b7d763\",\"outcome\":\"pass\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"passed\"},{\"name\":\"add-negative\",\"status\":\"passed\"},{\"name\":\"add-zero\",\"status\":\"passed\"}],\"testCount\":3,\"passed\":3,\"failed\":0,\"skipped\":0}",
+                "sourceSessionId": "sess_2a0590ee-c25f-43de-97c5-d97034079786",
+                "artifactId": "4df61d01-258f-4c9c-9eed-506189eaa098"
+              }
+            ],
+            "terminalProof": {
+              "sourceCommandId": "b1d4d44c-ed45-45f9-b213-6a167db1ec31",
+              "state": "completedSuccess",
+              "logEpoch": "mufol11s-83bz3rgo",
+              "seq": 54,
+              "turnId": "msg_mufol1eh_23b900c1-c9aa-4dd8-aa1d-0935254811ed"
+            },
+            "finalOutput": {
+              "text": "{\"outcome\":\"pass\",\"findings\":[],\"evidenceReferences\":[\"4df61d01-258f-4c9c-9eed-506189eaa098\"]}",
+              "turnId": "msg_mufol1eh_23b900c1-c9aa-4dd8-aa1d-0935254811ed",
+              "rowId": 5,
+              "entityId": "msg_mufol1jn_25201f4f-0955-42be-a010-a652c4614095",
+              "assistantResponseId": "msg_mufol1jn_25201f4f-0955-42be-a010-a652c4614095"
+            },
+            "outputValidation": {
+              "status": "valid",
+              "issues": []
+            }
+          }
+        ],
+        "approvalAttempts": [
+          {
+            "iterationId": "0d84c3f7-18d3-4102-8541-64bbb58b2d7e",
+            "iteration": 0,
+            "nodeId": "final-gate",
+            "attemptId": "7f3df1d2-0e82-4ab1-80da-f4d4f03467f3",
+            "status": "Approved",
+            "createdAt": 1790263354502,
+            "updatedAt": 1790263366973,
+            "request": {
+              "id": "76431ae9-454a-44b9-bdbe-4997339caa4c",
+              "version": 1,
+              "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+              "nodeId": "final-gate",
+              "attemptId": "7f3df1d2-0e82-4ab1-80da-f4d4f03467f3",
+              "target": {
+                "workspacePath": "<isolated-profile>\\workspace"
+              },
+              "graphDigest": "36da008d6ad549c795918fa4cb575a8c748b8d3797bf74e5ee6d957a1effccfe",
+              "digest": "ff4a614fd556120d0252c7a317dbfe8c0b0e44a89a3ba68bf4ca1af9c9175a40",
+              "title": "Final human review",
+              "reviewText": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+              "commentPolicy": "required",
+              "successorNodeId": "end",
+              "evidence": [
+                {
+                  "alias": "evidence",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "test",
+                    "selector": "test"
+                  },
+                  "digest": "5a4808c3bb1e298d0272ffc1c9fcea71d87a1b735074e5aede17d00cfa52e9ff",
+                  "text": "{\"operationId\":\"1783274a-3856-4597-a7f9-074a9605c0a3\",\"reportArtifactId\":\"07a3df5f-96f3-4d1d-a7b9-5d56a6b7d763\",\"reportParsed\":true,\"provenanceValid\":true,\"outcome\":\"pass\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"passed\"},{\"name\":\"add-negative\",\"status\":\"passed\"},{\"name\":\"add-zero\",\"status\":\"passed\"}],\"testCount\":3,\"passed\":3,\"failed\":0,\"skipped\":0,\"issues\":[]}",
+                  "sourceSessionId": "sess_2a0590ee-c25f-43de-97c5-d97034079786",
+                  "artifactId": "1c53bedc-15d7-4631-bc4e-c2cb611459ef"
+                },
+                {
+                  "alias": "review",
+                  "source": {
+                    "kind": "artifact",
+                    "nodeId": "reviewer",
+                    "selector": "structured"
+                  },
+                  "digest": "b0398011e5e1ca95ce5e9062b1911aa56d0e1ee3a73e3d94eb492ae6f1645fa7",
+                  "text": "{\"outcome\":\"pass\",\"findings\":[],\"evidenceReferences\":[\"4df61d01-258f-4c9c-9eed-506189eaa098\"]}",
+                  "sourceSessionId": "sess_8ec58783-4c81-4147-a9ac-d16b8850199d",
+                  "sourceInputId": "b1d4d44c-ed45-45f9-b213-6a167db1ec31",
+                  "sourceCommandId": "b1d4d44c-ed45-45f9-b213-6a167db1ec31",
+                  "artifactId": "06f4365c-1881-4ff6-8910-39d06c028e60"
+                },
+                {
+                  "alias": "source",
+                  "source": {
+                    "kind": "source"
+                  },
+                  "digest": "1c2e8580d8ac5613fe549f71465ec1dbc9db52ed824ee59a00854eff4be0da89",
+                  "snapshot": {
+                    "baseline": "{\"version\":1,\"head\":\"unborn\",\"index\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"status\":\"e2a5f9872a0a55a36cdc53e2ca8d4853a8a762469fce8956a1f86e02b6ccddc0\"}",
+                    "scope": "Git changes and non-ignored untracked paths in the captured workspace; ignored and unchanged contents excluded. Limits: 64 paths, 128 KiB/text, 256 KiB/diff, 1 MiB retained content, 512 KiB/manifest.",
+                    "complete": true,
+                    "issues": [],
+                    "files": [
+                      {
+                        "path": ".agents/skills/fixture-guidance/SKILL.md",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "---\nname: fixture-guidance\ndescription: Preserve the synthetic arithmetic test authority while fixing MathOps.\n---\nZ6_NATIVE_SKILL_AUTHORITY: Read MathOps.cs and Runner.cs. Change only MathOps.cs for the requested addition fix. Preserve independent tests and configured Build/Test. No external tools, credentials or publication.\n"
+                      },
+                      {
+                        "path": ".env",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": ""
+                      },
+                      {
+                        "path": ".gitignore",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "bin/\nobj/\nresults/\n"
+                      },
+                      {
+                        "path": ".zcode/config.json",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "{\n  \"graphRecipes\": [\n    {\n      \"id\": \"fixture-build\",\n      \"name\": \"Build C# fixture\",\n      \"executable\": \"dotnet\",\n      \"args\": [\n        \"build\",\n        \"Z4Fixture.csproj\",\n        \"--configuration\",\n        \"Release\",\n        \"--nologo\",\n        \"--no-incremental\",\n        \"--disable-build-servers\",\n        \"-p:RestoreConfigFile=NuGet.Config\",\n        \"-p:NuGetAudit=false\",\n        \"-p:UseSharedCompilation=false\",\n        \"-p:ImportDirectoryBuildProps=false\",\n        \"-p:ImportDirectoryBuildTargets=false\",\n        \"-p:ImportDirectoryPackagesProps=false\",\n        \"-nodeReuse:false\"\n      ],\n      \"cwd\": \".\",\n      \"timeoutMs\": 60000,\n      \"sourcePaths\": [\n        \"Z4Fixture.csproj\",\n        \"MathOps.cs\",\n        \"Runner.cs\",\n        \"global.json\",\n        \"NuGet.Config\",\n        \"Directory.Build.props\",\n        \"Directory.Build.targets\",\n        \"Directory.Packages.props\"\n      ],\n      \"expectedOutputs\": [\n        \"bin/Release/net8.0/Z4Fixture.dll\",\n        \"bin/Release/net8.0/Z4Fixture.deps.json\",\n        \"bin/Release/net8.0/Z4Fixture.runtimeconfig.json\"\n      ],\n      \"verifier\": {\n        \"kind\": \"build\"\n      }\n    },\n    {\n      \"id\": \"fixture-test\",\n      \"name\": \"Test C# fixture\",\n      \"executable\": \"dotnet\",\n      \"args\": [\n        \"bin/Release/net8.0/Z4Fixture.dll\",\n        \"--operation-id\",\n        \"{operationId}\",\n        \"--source-digest\",\n        \"{sourceDigest}\",\n        \"--build-digest\",\n        \"{buildDigest}\",\n        \"--report\",\n        \"{reportPath}\"\n      ],\n      \"cwd\": \".\",\n      \"timeoutMs\": 60000,\n      \"sourcePaths\": [\n        \"Z4Fixture.csproj\",\n        \"MathOps.cs\",\n        \"Runner.cs\",\n        \"global.json\",\n        \"NuGet.Config\",\n        \"Directory.Build.props\",\n        \"Directory.Build.targets\",\n        \"Directory.Packages.props\"\n      ],\n      \"expectedOutputs\": [],\n      \"verifier\": {\n        \"kind\": \"test\",\n        \"format\": \"zcode-json-v1\",\n        \"reportPath\": \"results/test-report.json\",\n        \"minimumTests\": 3,\n        \"expectedTests\": 3,\n        \"requiredTests\": [\n          \"add-positive\",\n          \"add-negative\",\n          \"add-zero\"\n        ],\n        \"buildNodeId\": \"build\"\n      }\n    }\n  ]\n}\n"
+                      },
+                      {
+                        "path": "AGENTS.md",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "Synthetic Z5 C# workspace. Use actual Read/Edit only on MathOps.cs when requested. Preserve Runner.cs and all three assertions. Build/Test run through separately configured native Tool nodes. Never inspect parent directories, install packages, commit or alter graph configuration.\n"
+                      },
+                      {
+                        "path": "Directory.Build.props",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "<Project />\n"
+                      },
+                      {
+                        "path": "Directory.Build.targets",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "<Project />\n"
+                      },
+                      {
+                        "path": "Directory.Packages.props",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "<Project />\n"
+                      },
+                      {
+                        "path": "ExtraInstructions.md",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "Z6_EXTRA_INSTRUCTIONS: The explicit requested Add behavior is left + right. Preserve Runner.cs and all three assertions. Selected native skill fixture-guidance supplies the same bounded project guidance.\n"
+                      },
+                      {
+                        "path": "MathOps.cs",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "public static class MathOps\n{\n    public static int Add(int left, int right) => left + right;\n}\n"
+                      },
+                      {
+                        "path": "NuGet.Config",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "<?xml version=\"1.0\" encoding=\"utf-8\"?><configuration><packageSources><clear /></packageSources></configuration>\n"
+                      },
+                      {
+                        "path": "Runner.cs",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "using System.Text.Json;\n\nvar values = new Dictionary<string, string>(StringComparer.Ordinal);\nvar flags = new HashSet<string>(StringComparer.Ordinal);\nfor (var index = 0; index < args.Length; index++)\n{\n    var argument = args[index];\n    if (argument is \"--zero\" or \"--omit-report\" or \"--hold\" or \"--emit-synthetic-secret\")\n        flags.Add(argument);\n    else if (argument is \"--operation-id\" or \"--source-digest\" or \"--build-digest\" or \"--report\" or \"--ready-file\")\n    {\n        if (++index >= args.Length || !values.TryAdd(argument, args[index]))\n            throw new ArgumentException(\"Missing or repeated configured fixture argument.\");\n    }\n    else throw new ArgumentException(\"Unknown configured fixture argument: \" + argument);\n}\nstring Required(string key) => values.TryGetValue(key, out var value) && value.Length > 0\n    ? value : throw new ArgumentException(\"Missing configured fixture argument: \" + key);\nstring WorkspaceFile(string relative)\n{\n    if (Path.IsPathRooted(relative)) throw new ArgumentException(\"Fixture report paths must be relative.\");\n    var root = Path.GetFullPath(Environment.CurrentDirectory) + Path.DirectorySeparatorChar;\n    var absolute = Path.GetFullPath(relative, root);\n    if (!absolute.StartsWith(root, OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))\n        throw new ArgumentException(\"Fixture output must remain within its synthetic workspace.\");\n    return absolute;\n}\nvar operationId = Required(\"--operation-id\");\nvar sourceDigest = Required(\"--source-digest\");\nvar buildDigest = Required(\"--build-digest\");\nvar reportPath = WorkspaceFile(Required(\"--report\"));\nif (flags.Contains(\"--emit-synthetic-secret\"))\n{\n    var synthetic = Environment.GetEnvironmentVariable(\"Z4_FIXTURE_SECRET\") ?? throw new InvalidOperationException(\"Synthetic secret was not configured.\");\n    Console.WriteLine(\"Synthetic stdout: \" + synthetic);\n    Console.Error.WriteLine(\"Synthetic stderr: \" + synthetic);\n}\nif (flags.Contains(\"--hold\"))\n{\n    var readyPath = WorkspaceFile(Required(\"--ready-file\"));\n    // 观察者会在进程运行时读取就绪文件；先写临时文件再原子重命名，避免读到尚未写完的 JSON。\n    var readyTemporary = readyPath + \".tmp\";\n    await File.WriteAllTextAsync(readyTemporary, JsonSerializer.Serialize(new\n    {\n        operationId,\n        processId = Environment.ProcessId,\n        state = \"actual-process-started\",\n    }));\n    File.Move(readyTemporary, readyPath);\n    Console.WriteLine(\"Z4_FIXTURE_PROCESS_READY \" + operationId);\n    await Task.Delay(Timeout.Infinite);\n}\nvar tests = new List<Dictionary<string, object>>();\nvoid Check(string name, Func<int> calculation, int expected)\n{\n    try\n    {\n        var actual = calculation();\n        if (actual != expected)\n            throw new InvalidOperationException($\"Expected {expected}; actual {actual}.\");\n        tests.Add(new() { [\"name\"] = name, [\"status\"] = \"passed\" });\n    }\n    catch (Exception error)\n    {\n        tests.Add(new() { [\"name\"] = name, [\"status\"] = \"failed\", [\"message\"] = error.Message });\n    }\n}\nif (!flags.Contains(\"--zero\"))\n{\n    Check(\"add-positive\", () => MathOps.Add(2, 3), 5);\n    Check(\"add-negative\", () => MathOps.Add(-2, 2), 0);\n    Check(\"add-zero\", () => MathOps.Add(0, 0), 0);\n}\nvar report = new { format = \"zcode-test-v1\", operationId, sourceDigest, buildDigest, tests };\nvar serialized = JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true });\nif (!flags.Contains(\"--omit-report\")) await File.WriteAllTextAsync(reportPath, serialized);\nConsole.WriteLine(serialized);\nreturn tests.Any(test => (string)test[\"status\"] != \"passed\") ? 1 : 0;\n"
+                      },
+                      {
+                        "path": "Z4Fixture.csproj",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net8.0</TargetFramework>\n    <ImplicitUsings>enable</ImplicitUsings>\n    <Nullable>enable</Nullable>\n    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>\n    <UseSharedCompilation>false</UseSharedCompilation>\n    <NuGetAudit>false</NuGetAudit>\n  </PropertyGroup>\n  <ItemGroup>\n    <Compile Include=\"MathOps.cs\" />\n    <Compile Include=\"Runner.cs\" />\n  </ItemGroup>\n</Project>\n"
+                      },
+                      {
+                        "path": "fixture.mjs",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "export const marker = 'Z1_BEFORE_7391';\n"
+                      },
+                      {
+                        "path": "fixture.test.mjs",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "import assert from 'node:assert/strict';\nimport test from 'node:test';\nimport { marker } from './fixture.mjs';\ntest('synthetic marker', () => assert.equal(marker, 'Z1_AFTER_7391'));\n"
+                      },
+                      {
+                        "path": "global.json",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "{\"sdk\":{\"version\":\"8.0.425\",\"rollForward\":\"disable\"}}\n"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "complete": true,
+              "issues": [],
+              "createdAt": 1790263365869
+            },
+            "decision": {
+              "id": "913ce011-4bc0-4698-946e-e26773793e25",
+              "requestId": "76431ae9-454a-44b9-bdbe-4997339caa4c",
+              "requestVersion": 1,
+              "requestDigest": "ff4a614fd556120d0252c7a317dbfe8c0b0e44a89a3ba68bf4ca1af9c9175a40",
+              "value": "approve",
+              "comment": "Reviewed current actual source/diff, immutable test report and source-linked reviewer findings. Controlled synthetic acceptance only; no publication/company pilot authorized.",
+              "decidedAt": 1790263366973,
+              "actor": {
+                "kind": "local-user",
+                "hostSessionId": "5fe84568-d101-428f-84bd-757f79405e9c"
+              }
+            },
+            "successorIntent": {
+              "id": "8879264f-c9cf-475a-991b-618b3fbcb8a2",
+              "successorNodeId": "end"
+            }
+          }
+        ],
+        "toolAttempts": [
+          {
+            "iterationId": "0d84c3f7-18d3-4102-8541-64bbb58b2d7e",
+            "iteration": 0,
+            "nodeId": "build",
+            "attemptId": "737deb1a-8936-4bad-a485-a400199df334",
+            "operationId": "71197f46-1584-4c8a-8696-21eba36bd310",
+            "recipe": {
+              "id": "fixture-build",
+              "name": "Build C# fixture",
+              "executable": "dotnet",
+              "args": [
+                "build",
+                "Z4Fixture.csproj",
+                "--configuration",
+                "Release",
+                "--nologo",
+                "--no-incremental",
+                "--disable-build-servers",
+                "-p:RestoreConfigFile=NuGet.Config",
+                "-p:NuGetAudit=false",
+                "-p:UseSharedCompilation=false",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-nodeReuse:false"
+              ],
+              "cwd": ".",
+              "timeoutMs": 60000,
+              "sourcePaths": [
+                "Z4Fixture.csproj",
+                "MathOps.cs",
+                "Runner.cs",
+                "global.json",
+                "NuGet.Config",
+                "Directory.Build.props",
+                "Directory.Build.targets",
+                "Directory.Packages.props"
+              ],
+              "expectedOutputs": [
+                "bin/Release/net8.0/Z4Fixture.dll",
+                "bin/Release/net8.0/Z4Fixture.deps.json",
+                "bin/Release/net8.0/Z4Fixture.runtimeconfig.json"
+              ],
+              "verifier": {
+                "kind": "build"
+              }
+            },
+            "recipeDigest": "eb2960224cf63fca86773a89ca7b1fff0ed5fc6012fd4b81b996614e4aec695e",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "createdAt": 1790263354502,
+            "updatedAt": 1790263363225,
+            "sessionId": "sess_8465a9cc-6b96-4966-94f2-436187c32eac",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:42104:agent-1f09abfd-052a-46d0-b65d-92599c66f317",
+            "sourceDigest": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "outputDigest": "d7dcce4caab1ea1bde9be2ec8900033b2d62694487a97bd0bd5873792591586f",
+            "resolvedArgs": [
+              "build",
+              "Z4Fixture.csproj",
+              "--configuration",
+              "Release",
+              "--nologo",
+              "--no-incremental",
+              "--disable-build-servers",
+              "-p:RestoreConfigFile=NuGet.Config",
+              "-p:NuGetAudit=false",
+              "-p:UseSharedCompilation=false",
+              "-p:ImportDirectoryBuildProps=false",
+              "-p:ImportDirectoryBuildTargets=false",
+              "-p:ImportDirectoryPackagesProps=false",
+              "-nodeReuse:false"
+            ],
+            "outputsBefore": [
+              {
+                "path": "bin/Release/net8.0/Z4Fixture.deps.json",
+                "exists": false
+              },
+              {
+                "path": "bin/Release/net8.0/Z4Fixture.dll",
+                "exists": false
+              },
+              {
+                "path": "bin/Release/net8.0/Z4Fixture.runtimeconfig.json",
+                "exists": false
+              }
+            ],
+            "operation": {
+              "operationId": "71197f46-1584-4c8a-8696-21eba36bd310",
+              "sessionId": "sess_8465a9cc-6b96-4966-94f2-436187c32eac",
+              "requestDigest": "cc5c166ffdd160ab23e05762c94f36e8261264c4a4d61709c7fc89c372358038",
+              "recipeId": "fixture-build",
+              "cwd": "<isolated-profile>\\workspace",
+              "status": "completed",
+              "processStarted": true,
+              "startedAt": 1790263361334,
+              "completedAt": 1790263363040,
+              "result": {
+                "status": "completed",
+                "exitCode": 0,
+                "stdout": {
+                  "text": "  Determining projects to restore...\n  Restored [USER_PATH] (in 35 ms).\n  Z4Fixture -> [USER_PATH]\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:01.42\n",
+                  "bytes": 376,
+                  "truncated": false
+                },
+                "stderr": {
+                  "text": "",
+                  "bytes": 0,
+                  "truncated": false
+                },
+                "durationMs": 1702,
+                "timedOut": false,
+                "cancelled": false,
+                "processExitObserved": true
+              }
+            },
+            "verification": {
+              "processKnown": true,
+              "exitSuccessful": true,
+              "reportFresh": false,
+              "reportParsed": false,
+              "acceptancePassed": true,
+              "classification": "build",
+              "issues": []
+            }
+          },
+          {
+            "iterationId": "0d84c3f7-18d3-4102-8541-64bbb58b2d7e",
+            "iteration": 0,
+            "nodeId": "test",
+            "attemptId": "a37f63e6-283a-4194-9001-b98f955a62ec",
+            "operationId": "1783274a-3856-4597-a7f9-074a9605c0a3",
+            "recipe": {
+              "id": "fixture-test",
+              "name": "Test C# fixture",
+              "executable": "dotnet",
+              "args": [
+                "bin/Release/net8.0/Z4Fixture.dll",
+                "--operation-id",
+                "{operationId}",
+                "--source-digest",
+                "{sourceDigest}",
+                "--build-digest",
+                "{buildDigest}",
+                "--report",
+                "{reportPath}"
+              ],
+              "cwd": ".",
+              "timeoutMs": 60000,
+              "sourcePaths": [
+                "Z4Fixture.csproj",
+                "MathOps.cs",
+                "Runner.cs",
+                "global.json",
+                "NuGet.Config",
+                "Directory.Build.props",
+                "Directory.Build.targets",
+                "Directory.Packages.props"
+              ],
+              "expectedOutputs": [],
+              "verifier": {
+                "kind": "test",
+                "format": "zcode-json-v1",
+                "reportPath": "results/test-report.json",
+                "minimumTests": 3,
+                "expectedTests": 3,
+                "requiredTests": ["add-positive", "add-negative", "add-zero"],
+                "buildNodeId": "build"
+              }
+            },
+            "recipeDigest": "780d0ba759527c41207bd3e4b2f68edd83fbad5c1e2e66c73b823f41d692fd32",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "createdAt": 1790263354502,
+            "updatedAt": 1790263364441,
+            "sessionId": "sess_2a0590ee-c25f-43de-97c5-d97034079786",
+            "runtimeIdentity": "<isolated-profile>\\workspace:1:42104:agent-1f09abfd-052a-46d0-b65d-92599c66f317",
+            "sourceDigest": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "buildDigest": "d7dcce4caab1ea1bde9be2ec8900033b2d62694487a97bd0bd5873792591586f",
+            "resolvedArgs": [
+              "bin/Release/net8.0/Z4Fixture.dll",
+              "--operation-id",
+              "1783274a-3856-4597-a7f9-074a9605c0a3",
+              "--source-digest",
+              "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+              "--build-digest",
+              "d7dcce4caab1ea1bde9be2ec8900033b2d62694487a97bd0bd5873792591586f",
+              "--report",
+              "results/test-report.json"
+            ],
+            "operation": {
+              "operationId": "1783274a-3856-4597-a7f9-074a9605c0a3",
+              "sessionId": "sess_2a0590ee-c25f-43de-97c5-d97034079786",
+              "requestDigest": "d834535168802f115d65c9d1aec6a8eb5c44e9f88edacb3f8e83b6813759fdf7",
+              "recipeId": "fixture-test",
+              "cwd": "<isolated-profile>\\workspace",
+              "status": "completed",
+              "processStarted": true,
+              "startedAt": 1790263364110,
+              "completedAt": 1790263364242,
+              "result": {
+                "status": "completed",
+                "exitCode": 0,
+                "stdout": {
+                  "text": "{\"format\":\"zcode-test-v1\",\"operationId\":\"1783274a-3856-4597-a7f9-074a9605c0a3\",\"sourceDigest\":\"295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe\",\"buildDigest\":\"d7dcce4caab1ea1bde9be2ec8900033b2d62694487a97bd0bd5873792591586f\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"passed\"},{\"name\":\"add-negative\",\"status\":\"passed\"},{\"name\":\"add-zero\",\"status\":\"passed\"}]}",
+                  "bytes": 497,
+                  "truncated": false
+                },
+                "stderr": {
+                  "text": "",
+                  "bytes": 0,
+                  "truncated": false
+                },
+                "durationMs": 128,
+                "timedOut": false,
+                "cancelled": false,
+                "processExitObserved": true
+              }
+            },
+            "verification": {
+              "observationValid": true,
+              "outcome": "pass",
+              "tests": [
+                {
+                  "name": "add-positive",
+                  "status": "passed"
+                },
+                {
+                  "name": "add-negative",
+                  "status": "passed"
+                },
+                {
+                  "name": "add-zero",
+                  "status": "passed"
+                }
+              ],
+              "processKnown": true,
+              "exitSuccessful": true,
+              "reportFresh": true,
+              "reportParsed": true,
+              "acceptancePassed": true,
+              "classification": "test",
+              "testCount": 3,
+              "passed": 3,
+              "failed": 0,
+              "skipped": 0,
+              "issues": []
+            }
+          }
+        ],
+        "artifacts": [
+          {
+            "id": "0edd1a86-4c6e-4c5b-bdf8-e2f5a514fda8",
+            "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+            "nodeId": "analyze",
+            "attemptId": "8b3de74c-fcbd-4324-9ad0-d9028a74d4df",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "text",
+            "provenance": "native-agent-final",
+            "bytes": 190,
+            "digest": "30610451162ca20646bb04fc019b8b3e2f530251b07f8347d4ad431e538da5b4",
+            "capturedAt": 1790263355944,
+            "validation": "valid",
+            "sessionId": "sess_20e92577-9c1b-41a8-8475-5bb71703a64e",
+            "inputId": "df9cba18-fbd7-460e-bce0-748a12797d13",
+            "commandId": "df9cba18-fbd7-460e-bce0-748a12797d13"
+          },
+          {
+            "id": "f312922f-7128-44c7-a7ee-5ec2b5532dbf",
+            "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+            "nodeId": "implement",
+            "attemptId": "fcbd1083-72ee-4a0e-823e-6d02a5f77e37",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "text",
+            "provenance": "native-agent-final",
+            "bytes": 128,
+            "digest": "4475fe9e533015c29a0f3f69f0c49a399771184f245a239860ad7ef39351b50b",
+            "capturedAt": 1790263359799,
+            "validation": "valid",
+            "sessionId": "sess_69790760-86cb-4e69-932a-65dabd51392c",
+            "inputId": "e3209983-fa8a-49c7-95f5-0bc819dc9b7f",
+            "commandId": "e3209983-fa8a-49c7-95f5-0bc819dc9b7f"
+          },
+          {
+            "id": "71f13d64-f7db-489c-b408-f97789feb57c",
+            "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+            "nodeId": "build",
+            "attemptId": "737deb1a-8936-4bad-a485-a400199df334",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "command",
+            "provenance": "native-command",
+            "bytes": 744,
+            "digest": "92ccf3a35b2321a0fbc64dcaeed3c1afa4c8942bf551a2e67a1a1a355e1480ae",
+            "capturedAt": 1790263363225,
+            "validation": "valid",
+            "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "sessionId": "sess_8465a9cc-6b96-4966-94f2-436187c32eac",
+            "operationId": "71197f46-1584-4c8a-8696-21eba36bd310"
+          },
+          {
+            "id": "f696cd9c-e309-44af-87db-6718db00eafe",
+            "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+            "nodeId": "build",
+            "attemptId": "737deb1a-8936-4bad-a485-a400199df334",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 0,
+            "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedAt": 1790263363225,
+            "validation": "incomplete",
+            "issue": "The encoded data was not valid for encoding utf-8",
+            "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "sourcePath": "bin/Release/net8.0/Z4Fixture.dll",
+            "sessionId": "sess_8465a9cc-6b96-4966-94f2-436187c32eac",
+            "operationId": "71197f46-1584-4c8a-8696-21eba36bd310"
+          },
+          {
+            "id": "9c5e86ca-8c66-4311-91e1-f0ca1ffb0ab6",
+            "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+            "nodeId": "build",
+            "attemptId": "737deb1a-8936-4bad-a485-a400199df334",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 419,
+            "digest": "966c1943eeee943a49a89672e0545508aae39097e66ae7fb9cd27c552b253805",
+            "capturedAt": 1790263363225,
+            "validation": "valid",
+            "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "sourcePath": "bin/Release/net8.0/Z4Fixture.deps.json",
+            "sessionId": "sess_8465a9cc-6b96-4966-94f2-436187c32eac",
+            "operationId": "71197f46-1584-4c8a-8696-21eba36bd310"
+          },
+          {
+            "id": "eba3f12e-d2b0-429c-9ee7-5bae9afeb739",
+            "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+            "nodeId": "build",
+            "attemptId": "737deb1a-8936-4bad-a485-a400199df334",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 340,
+            "digest": "28329cf08f6505e73806b17558b187c02f0c1c516fe47ebfb7a013d082aaa306",
+            "capturedAt": 1790263363225,
+            "validation": "valid",
+            "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "sourcePath": "bin/Release/net8.0/Z4Fixture.runtimeconfig.json",
+            "sessionId": "sess_8465a9cc-6b96-4966-94f2-436187c32eac",
+            "operationId": "71197f46-1584-4c8a-8696-21eba36bd310"
+          },
+          {
+            "id": "31455b77-3b05-451a-9ccd-26d9f9847b6e",
+            "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+            "nodeId": "test",
+            "attemptId": "a37f63e6-283a-4194-9001-b98f955a62ec",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "command",
+            "provenance": "native-command",
+            "bytes": 974,
+            "digest": "80bb9cb18bb9b452626ebe570e03d05ffc79a922bbcffb9af4819b7b432d13eb",
+            "capturedAt": 1790263364441,
+            "validation": "valid",
+            "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "sessionId": "sess_2a0590ee-c25f-43de-97c5-d97034079786",
+            "operationId": "1783274a-3856-4597-a7f9-074a9605c0a3"
+          },
+          {
+            "id": "07a3df5f-96f3-4d1d-a7b9-5d56a6b7d763",
+            "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+            "nodeId": "test",
+            "attemptId": "a37f63e6-283a-4194-9001-b98f955a62ec",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "file",
+            "provenance": "workspace-file",
+            "bytes": 495,
+            "digest": "30815970e5e0122c35baa800779432e67391ec8a3320d5cab393857f96b207b4",
+            "capturedAt": 1790263364441,
+            "validation": "valid",
+            "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "sourcePath": "results/test-report.json",
+            "sessionId": "sess_2a0590ee-c25f-43de-97c5-d97034079786",
+            "operationId": "1783274a-3856-4597-a7f9-074a9605c0a3"
+          },
+          {
+            "id": "1c53bedc-15d7-4631-bc4e-c2cb611459ef",
+            "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+            "nodeId": "test",
+            "attemptId": "a37f63e6-283a-4194-9001-b98f955a62ec",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "test",
+            "provenance": "native-test",
+            "bytes": 364,
+            "digest": "b556165338884e89f7e264c3809e5bb63a6f5af7ba5e6301828e3dcdce56c4d3",
+            "capturedAt": 1790263364441,
+            "validation": "valid",
+            "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "sessionId": "sess_2a0590ee-c25f-43de-97c5-d97034079786",
+            "operationId": "1783274a-3856-4597-a7f9-074a9605c0a3"
+          },
+          {
+            "id": "4df61d01-258f-4c9c-9eed-506189eaa098",
+            "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+            "nodeId": "test",
+            "attemptId": "a37f63e6-283a-4194-9001-b98f955a62ec",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "json",
+            "provenance": "native-test",
+            "bytes": 691,
+            "digest": "ff5ad9d62b3defda01ad7c2c52c0ce911c4ecdff338f2a1eeb90741ae748a1aa",
+            "capturedAt": 1790263364441,
+            "validation": "valid",
+            "sourceBaseline": "295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe",
+            "sessionId": "sess_2a0590ee-c25f-43de-97c5-d97034079786",
+            "operationId": "1783274a-3856-4597-a7f9-074a9605c0a3"
+          },
+          {
+            "id": "5b5cc016-8e7a-4a20-851c-8699097759f5",
+            "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+            "nodeId": "reviewer",
+            "attemptId": "e054d786-78d6-4b04-993b-bccab74da8f6",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "text",
+            "provenance": "native-agent-final",
+            "bytes": 94,
+            "digest": "a902743297e74fc06994c9b8288ae4ef941bc3f1d8ba518b6b22ba64ebc76a4e",
+            "capturedAt": 1790263365465,
+            "validation": "valid",
+            "sessionId": "sess_8ec58783-4c81-4147-a9ac-d16b8850199d",
+            "inputId": "b1d4d44c-ed45-45f9-b213-6a167db1ec31",
+            "commandId": "b1d4d44c-ed45-45f9-b213-6a167db1ec31"
+          },
+          {
+            "id": "06f4365c-1881-4ff6-8910-39d06c028e60",
+            "runId": "5f581380-97a6-427d-80d6-e27ec7a57b13",
+            "nodeId": "reviewer",
+            "attemptId": "e054d786-78d6-4b04-993b-bccab74da8f6",
+            "workspaceKey": "<isolated-profile>\\workspace",
+            "type": "json",
+            "provenance": "native-agent-final",
+            "bytes": 94,
+            "digest": "a902743297e74fc06994c9b8288ae4ef941bc3f1d8ba518b6b22ba64ebc76a4e",
+            "capturedAt": 1790263365465,
+            "validation": "valid",
+            "sessionId": "sess_8ec58783-4c81-4147-a9ac-d16b8850199d",
+            "inputId": "b1d4d44c-ed45-45f9-b213-6a167db1ec31",
+            "commandId": "b1d4d44c-ed45-45f9-b213-6a167db1ec31"
+          }
+        ],
+        "artifactBindings": [
+          {
+            "nodeId": "analyze",
+            "attemptId": "8b3de74c-fcbd-4324-9ad0-d9028a74d4df",
+            "selector": "final",
+            "artifactId": "0edd1a86-4c6e-4c5b-bdf8-e2f5a514fda8"
+          },
+          {
+            "nodeId": "implement",
+            "attemptId": "fcbd1083-72ee-4a0e-823e-6d02a5f77e37",
+            "selector": "final",
+            "artifactId": "f312922f-7128-44c7-a7ee-5ec2b5532dbf"
+          },
+          {
+            "nodeId": "build",
+            "attemptId": "737deb1a-8936-4bad-a485-a400199df334",
+            "selector": "command",
+            "artifactId": "71f13d64-f7db-489c-b408-f97789feb57c"
+          },
+          {
+            "nodeId": "build",
+            "attemptId": "737deb1a-8936-4bad-a485-a400199df334",
+            "selector": "bin/Release/net8.0/Z4Fixture.dll",
+            "artifactId": "f696cd9c-e309-44af-87db-6718db00eafe"
+          },
+          {
+            "nodeId": "build",
+            "attemptId": "737deb1a-8936-4bad-a485-a400199df334",
+            "selector": "bin/Release/net8.0/Z4Fixture.deps.json",
+            "artifactId": "9c5e86ca-8c66-4311-91e1-f0ca1ffb0ab6"
+          },
+          {
+            "nodeId": "build",
+            "attemptId": "737deb1a-8936-4bad-a485-a400199df334",
+            "selector": "bin/Release/net8.0/Z4Fixture.runtimeconfig.json",
+            "artifactId": "eba3f12e-d2b0-429c-9ee7-5bae9afeb739"
+          },
+          {
+            "nodeId": "test",
+            "attemptId": "a37f63e6-283a-4194-9001-b98f955a62ec",
+            "selector": "command",
+            "artifactId": "31455b77-3b05-451a-9ccd-26d9f9847b6e"
+          },
+          {
+            "nodeId": "test",
+            "attemptId": "a37f63e6-283a-4194-9001-b98f955a62ec",
+            "selector": "results/test-report.json",
+            "artifactId": "07a3df5f-96f3-4d1d-a7b9-5d56a6b7d763"
+          },
+          {
+            "nodeId": "test",
+            "attemptId": "a37f63e6-283a-4194-9001-b98f955a62ec",
+            "selector": "test",
+            "artifactId": "1c53bedc-15d7-4631-bc4e-c2cb611459ef"
+          },
+          {
+            "nodeId": "test",
+            "attemptId": "a37f63e6-283a-4194-9001-b98f955a62ec",
+            "selector": "verification",
+            "artifactId": "4df61d01-258f-4c9c-9eed-506189eaa098"
+          },
+          {
+            "nodeId": "reviewer",
+            "attemptId": "e054d786-78d6-4b04-993b-bccab74da8f6",
+            "selector": "final",
+            "artifactId": "5b5cc016-8e7a-4a20-851c-8699097759f5"
+          },
+          {
+            "nodeId": "reviewer",
+            "attemptId": "e054d786-78d6-4b04-993b-bccab74da8f6",
+            "selector": "structured",
+            "artifactId": "06f4365c-1881-4ff6-8910-39d06c028e60"
+          }
+        ],
+        "resultArtifactId": "1c53bedc-15d7-4631-bc4e-c2cb611459ef"
+      }
+    ]
+  },
+  "nativeLedger": [
+    {
+      "id": "queue_df9cba18-fbd7-460e-bce0-748a12797d13",
+      "session_id": "sess_20e92577-9c1b-41a8-8475-5bb71703a64e",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"ExtraInstructions.md\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+        "intent": {
+          "sourceCommandId": "df9cba18-fbd7-460e-bce0-748a12797d13",
+          "queueItemId": "queue_df9cba18-fbd7-460e-bce0-748a12797d13",
+          "clientId": "graph:8b3de74c-fcbd-4324-9ad0-d9028a74d4df",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790263354946,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "df9cba18-fbd7-460e-bce0-748a12797d13",
+          "queueItemId": "queue_df9cba18-fbd7-460e-bce0-748a12797d13",
+          "clientId": "graph:8b3de74c-fcbd-4324-9ad0-d9028a74d4df",
+          "kind": "sendText",
+          "text": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"ExtraInstructions.md\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790263354946
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790263354958,
+      "time_updated": 1790263355463
+    },
+    {
+      "id": "queue_e3209983-fa8a-49c7-95f5-0bc819dc9b7f",
+      "session_id": "sess_69790760-86cb-4e69-932a-65dabd51392c",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nanalyze:\nAnalysis: MathOps.cs must satisfy the supplied request and Runner.cs add-positive/add-negative/add-zero assertions. Only MathOps.Add is affected; preserve Runner.cs as independent authority.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"ExtraInstructions.md\"},{\"id\":\"skill\",\"kind\":\"skill\",\"selected\":\"glm:workspace:<isolated-profile>\\\\workspace\\\\.agents\\\\skills\\\\fixture-guidance\\\\SKILL.md\",\"nativeSkillName\":\"fixture-guidance\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+        "intent": {
+          "sourceCommandId": "e3209983-fa8a-49c7-95f5-0bc819dc9b7f",
+          "queueItemId": "queue_e3209983-fa8a-49c7-95f5-0bc819dc9b7f",
+          "clientId": "graph:fcbd1083-72ee-4a0e-823e-6d02a5f77e37",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790263358073,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "e3209983-fa8a-49c7-95f5-0bc819dc9b7f",
+          "queueItemId": "queue_e3209983-fa8a-49c7-95f5-0bc819dc9b7f",
+          "clientId": "graph:fcbd1083-72ee-4a0e-823e-6d02a5f77e37",
+          "kind": "sendText",
+          "text": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Fix MathOps.Add to return left + right. Analyze actual source/tests and preserve Runner.cs; real Build/Test is required.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nanalyze:\nAnalysis: MathOps.cs must satisfy the supplied request and Runner.cs add-positive/add-negative/add-zero assertions. Only MathOps.Add is affected; preserve Runner.cs as independent authority.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"ExtraInstructions.md\"},{\"id\":\"skill\",\"kind\":\"skill\",\"selected\":\"glm:workspace:<isolated-profile>\\\\workspace\\\\.agents\\\\skills\\\\fixture-guidance\\\\SKILL.md\",\"nativeSkillName\":\"fixture-guidance\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790263358073
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790263358081,
+      "time_updated": 1790263358732
+    },
+    {
+      "id": "queue_b1d4d44c-ed45-45f9-b213-6a167db1ec31",
+      "session_id": "sess_8ec58783-4c81-4147-a9ac-d16b8850199d",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{\"artifactId\":\"4df61d01-258f-4c9c-9eed-506189eaa098\",\"runId\":\"5f581380-97a6-427d-80d6-e27ec7a57b13\",\"nodeId\":\"test\",\"attemptId\":\"a37f63e6-283a-4194-9001-b98f955a62ec\",\"iterationId\":\"0d84c3f7-18d3-4102-8541-64bbb58b2d7e\",\"operationId\":\"1783274a-3856-4597-a7f9-074a9605c0a3\",\"sourceDigest\":\"295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe\",\"buildDigest\":\"d7dcce4caab1ea1bde9be2ec8900033b2d62694487a97bd0bd5873792591586f\",\"reportArtifactId\":\"07a3df5f-96f3-4d1d-a7b9-5d56a6b7d763\",\"outcome\":\"pass\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"passed\"},{\"name\":\"add-negative\",\"status\":\"passed\"},{\"name\":\"add-zero\",\"status\":\"passed\"}],\"testCount\":3,\"passed\":3,\"failed\":0,\"skipped\":0}",
+        "intent": {
+          "sourceCommandId": "b1d4d44c-ed45-45f9-b213-6a167db1ec31",
+          "queueItemId": "queue_b1d4d44c-ed45-45f9-b213-6a167db1ec31",
+          "clientId": "graph:e054d786-78d6-4b04-993b-bccab74da8f6",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790263364808,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "b1d4d44c-ed45-45f9-b213-6a167db1ec31",
+          "queueItemId": "queue_b1d4d44c-ed45-45f9-b213-6a167db1ec31",
+          "clientId": "graph:e054d786-78d6-4b04-993b-bccab74da8f6",
+          "kind": "sendText",
+          "text": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{\"artifactId\":\"4df61d01-258f-4c9c-9eed-506189eaa098\",\"runId\":\"5f581380-97a6-427d-80d6-e27ec7a57b13\",\"nodeId\":\"test\",\"attemptId\":\"a37f63e6-283a-4194-9001-b98f955a62ec\",\"iterationId\":\"0d84c3f7-18d3-4102-8541-64bbb58b2d7e\",\"operationId\":\"1783274a-3856-4597-a7f9-074a9605c0a3\",\"sourceDigest\":\"295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe\",\"buildDigest\":\"d7dcce4caab1ea1bde9be2ec8900033b2d62694487a97bd0bd5873792591586f\",\"reportArtifactId\":\"07a3df5f-96f3-4d1d-a7b9-5d56a6b7d763\",\"outcome\":\"pass\",\"tests\":[{\"name\":\"add-positive\",\"status\":\"passed\"},{\"name\":\"add-negative\",\"status\":\"passed\"},{\"name\":\"add-zero\",\"status\":\"passed\"}],\"testCount\":3,\"passed\":3,\"failed\":0,\"skipped\":0}",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790263364808
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790263364814,
+      "time_updated": 1790263365217
+    }
+  ],
+  "nativeToolResults": [
+    {
+      "id": "z6_analyze_source",
+      "output": "1\tpublic static class MathOps\n2\t{\n3\t    public static int Add(int left, int right) => left + right + 2;\n4\t}\n5\t",
+      "observedAt": 1790263355657
+    },
+    {
+      "id": "z6_analyze_instructions",
+      "output": "1\tZ6_EXTRA_INSTRUCTIONS: The explicit requested Add behavior is left + right. Preserve Runner.cs and all three assertions. Selected native skill fixture-guidance supplies the same bounded project guidance.\n2\t",
+      "observedAt": 1790263355742
+    },
+    {
+      "id": "z6_analyze_runner",
+      "output": "1\tusing System.Text.Json;\n2\t\n3\tvar values = new Dictionary<string, string>(StringComparer.Ordinal);\n4\tvar flags = new HashSet<string>(StringComparer.Ordinal);\n5\tfor (var index = 0; index < args.Length; index++)\n6\t{\n7\t    var argument = args[index];\n8\t    if (argument is \"--zero\" or \"--omit-report\" or \"--hold\" or \"--emit-synthetic-secret\")\n9\t        flags.Add(argument);\n10\t    else if (argument is \"--operation-id\" or \"--source-digest\" or \"--build-digest\" or \"--report\" or \"--ready-file\")\n11\t    {\n12\t        if (++index >= args.Length || !values.TryAdd(argument, args[index]))\n13\t            throw new ArgumentException(\"Missing or repeated configured fixture argument.\");\n14\t    }\n15\t    else throw new ArgumentException(\"Unknown configured fixture argument: \" + argument);\n16\t}\n17\tstring Required(string key) => values.TryGetValue(key, out var value) && value.Length > 0\n18\t    ? value : throw new ArgumentException(\"Missing configured fixture argument: \" + key);\n19\tstring WorkspaceFile(string relative)\n20\t{\n21\t    if (Path.IsPathRooted(relative)) throw new ArgumentException(\"Fixture report paths must be relative.\");\n22\t    var root = Path.GetFullPath(Environment.CurrentDirectory) + Path.DirectorySeparatorChar;\n23\t    var absolute = Path.GetFullPath(relative, root);\n24\t    if (!absolute.StartsWith(root, OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))\n25\t        throw new ArgumentException(\"Fixture output must remain within its synthetic workspace.\");\n26\t    return absolute;\n27\t}\n28\tvar operationId = Required(\"--operation-id\");\n29\tvar sourceDigest = Required(\"--source-digest\");\n30\tvar buildDigest = Required(\"--build-digest\");\n31\tvar reportPath = WorkspaceFile(Required(\"--report\"));\n32\tif (flags.Contains(\"--emit-synthetic-secret\"))\n33\t{\n34\t    var synthetic = Environment.GetEnvironmentVariable(\"Z4_FIXTURE_SECRET\") ?? throw new InvalidOperationException(\"Synthetic secret was not configured.\");\n35\t    Console.WriteLine(\"Synthetic stdout: \" + synthetic);\n36\t    Console.Error.WriteLine(\"Synthetic stderr: \" + synthetic);\n37\t}\n38\tif (flags.Contains(\"--hold\"))\n39\t{\n40\t    var readyPath = WorkspaceFile(Required(\"--ready-file\"));\n41\t    // 观察者会在进程运行时读取就绪文件；先写临时文件再原子重命名，避免读到尚未写完的 JSON。\n42\t    var readyTemporary = readyPath + \".tmp\";\n43\t    await File.WriteAllTextAsync(readyTemporary, JsonSerializer.Serialize(new\n44\t    {\n45\t        operationId,\n46\t        processId = Environment.ProcessId,\n47\t        state = \"actual-process-started\",\n48\t    }));\n49\t    File.Move(readyTemporary, readyPath);\n50\t    Console.WriteLine(\"Z4_FIXTURE_PROCESS_READY \" + operationId);\n51\t    await Task.Delay(Timeout.Infinite);\n52\t}\n53\tvar tests = new List<Dictionary<string, object>>();\n54\tvoid Check(string name, Func<int> calculation, int expected)\n55\t{\n56\t    try\n57\t    {\n58\t        var actual = calculation();\n59\t        if (actual != expected)\n60\t            throw new InvalidOperationException($\"Expected {expected}; actual {actual}.\");\n61\t        tests.Add(new() { [\"name\"] = name, [\"status\"] = \"passed\" });\n62\t    }\n63\t    catch (Exception error)\n64\t    {\n65\t        tests.Add(new() { [\"name\"] = name, [\"status\"] = \"failed\", [\"message\"] = error.Message });\n66\t    }\n67\t}\n68\tif (!flags.Contains(\"--zero\"))\n69\t{\n70\t    Check(\"add-positive\", () => MathOps.Add(2, 3), 5);\n71\t    Check(\"add-negative\", () => MathOps.Add(-2, 2), 0);\n72\t    Check(\"add-zero\", () => MathOps.Add(0, 0), 0);\n73\t}\n74\tvar report = new { format = \"zcode-test-v1\", operationId, sourceDigest, buildDigest, tests };\n75\tvar serialized = JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true });\n76\tif (!flags.Contains(\"--omit-report\")) await File.WriteAllTextAsync(reportPath, serialized);\n77\tConsole.WriteLine(serialized);\n78\treturn tests.Any(test => (string)test[\"status\"] != \"passed\") ? 1 : 0;\n79\t",
+      "observedAt": 1790263355814
+    },
+    {
+      "id": "z6_implement_skill",
+      "output": "<skill_content name=\"fixture-guidance\">\n# Skill: fixture-guidance\nZ6_NATIVE_SKILL_AUTHORITY: Read MathOps.cs and Runner.cs. Change only MathOps.cs for the requested addition fix. Preserve independent tests and configured Build/Test. No external tools, credentials or publication.\nBase directory for this skill: <isolated-profile>\\workspace\\.agents\\skills\\fixture-guidance\nRelative paths in this skill are relative to this base directory.\n</skill_content>",
+      "observedAt": 1790263358854
+    },
+    {
+      "id": "z6_implement_source",
+      "output": "1\tpublic static class MathOps\n2\t{\n3\t    public static int Add(int left, int right) => left + right + 2;\n4\t}\n5\t",
+      "observedAt": 1790263358912
+    },
+    {
+      "id": "z6_implement_instructions",
+      "output": "1\tZ6_EXTRA_INSTRUCTIONS: The explicit requested Add behavior is left + right. Preserve Runner.cs and all three assertions. Selected native skill fixture-guidance supplies the same bounded project guidance.\n2\t",
+      "observedAt": 1790263359000
+    },
+    {
+      "id": "z6_implement_runner",
+      "output": "1\tusing System.Text.Json;\n2\t\n3\tvar values = new Dictionary<string, string>(StringComparer.Ordinal);\n4\tvar flags = new HashSet<string>(StringComparer.Ordinal);\n5\tfor (var index = 0; index < args.Length; index++)\n6\t{\n7\t    var argument = args[index];\n8\t    if (argument is \"--zero\" or \"--omit-report\" or \"--hold\" or \"--emit-synthetic-secret\")\n9\t        flags.Add(argument);\n10\t    else if (argument is \"--operation-id\" or \"--source-digest\" or \"--build-digest\" or \"--report\" or \"--ready-file\")\n11\t    {\n12\t        if (++index >= args.Length || !values.TryAdd(argument, args[index]))\n13\t            throw new ArgumentException(\"Missing or repeated configured fixture argument.\");\n14\t    }\n15\t    else throw new ArgumentException(\"Unknown configured fixture argument: \" + argument);\n16\t}\n17\tstring Required(string key) => values.TryGetValue(key, out var value) && value.Length > 0\n18\t    ? value : throw new ArgumentException(\"Missing configured fixture argument: \" + key);\n19\tstring WorkspaceFile(string relative)\n20\t{\n21\t    if (Path.IsPathRooted(relative)) throw new ArgumentException(\"Fixture report paths must be relative.\");\n22\t    var root = Path.GetFullPath(Environment.CurrentDirectory) + Path.DirectorySeparatorChar;\n23\t    var absolute = Path.GetFullPath(relative, root);\n24\t    if (!absolute.StartsWith(root, OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))\n25\t        throw new ArgumentException(\"Fixture output must remain within its synthetic workspace.\");\n26\t    return absolute;\n27\t}\n28\tvar operationId = Required(\"--operation-id\");\n29\tvar sourceDigest = Required(\"--source-digest\");\n30\tvar buildDigest = Required(\"--build-digest\");\n31\tvar reportPath = WorkspaceFile(Required(\"--report\"));\n32\tif (flags.Contains(\"--emit-synthetic-secret\"))\n33\t{\n34\t    var synthetic = Environment.GetEnvironmentVariable(\"Z4_FIXTURE_SECRET\") ?? throw new InvalidOperationException(\"Synthetic secret was not configured.\");\n35\t    Console.WriteLine(\"Synthetic stdout: \" + synthetic);\n36\t    Console.Error.WriteLine(\"Synthetic stderr: \" + synthetic);\n37\t}\n38\tif (flags.Contains(\"--hold\"))\n39\t{\n40\t    var readyPath = WorkspaceFile(Required(\"--ready-file\"));\n41\t    // 观察者会在进程运行时读取就绪文件；先写临时文件再原子重命名，避免读到尚未写完的 JSON。\n42\t    var readyTemporary = readyPath + \".tmp\";\n43\t    await File.WriteAllTextAsync(readyTemporary, JsonSerializer.Serialize(new\n44\t    {\n45\t        operationId,\n46\t        processId = Environment.ProcessId,\n47\t        state = \"actual-process-started\",\n48\t    }));\n49\t    File.Move(readyTemporary, readyPath);\n50\t    Console.WriteLine(\"Z4_FIXTURE_PROCESS_READY \" + operationId);\n51\t    await Task.Delay(Timeout.Infinite);\n52\t}\n53\tvar tests = new List<Dictionary<string, object>>();\n54\tvoid Check(string name, Func<int> calculation, int expected)\n55\t{\n56\t    try\n57\t    {\n58\t        var actual = calculation();\n59\t        if (actual != expected)\n60\t            throw new InvalidOperationException($\"Expected {expected}; actual {actual}.\");\n61\t        tests.Add(new() { [\"name\"] = name, [\"status\"] = \"passed\" });\n62\t    }\n63\t    catch (Exception error)\n64\t    {\n65\t        tests.Add(new() { [\"name\"] = name, [\"status\"] = \"failed\", [\"message\"] = error.Message });\n66\t    }\n67\t}\n68\tif (!flags.Contains(\"--zero\"))\n69\t{\n70\t    Check(\"add-positive\", () => MathOps.Add(2, 3), 5);\n71\t    Check(\"add-negative\", () => MathOps.Add(-2, 2), 0);\n72\t    Check(\"add-zero\", () => MathOps.Add(0, 0), 0);\n73\t}\n74\tvar report = new { format = \"zcode-test-v1\", operationId, sourceDigest, buildDigest, tests };\n75\tvar serialized = JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true });\n76\tif (!flags.Contains(\"--omit-report\")) await File.WriteAllTextAsync(reportPath, serialized);\n77\tConsole.WriteLine(serialized);\n78\treturn tests.Any(test => (string)test[\"status\"] != \"passed\") ? 1 : 0;\n79\t",
+      "observedAt": 1790263359054
+    },
+    {
+      "id": "z6_implement_edit",
+      "output": "The file <isolated-profile>/workspace/MathOps.cs has been updated successfully. (file state is current in your context — no need to Read it back)",
+      "observedAt": 1790263359721
+    },
+    {
+      "id": "z6_reviewer_source_1783274a-3856-4597-a7f9-074a9605c0a3",
+      "output": "1\tpublic static class MathOps\n2\t{\n3\t    public static int Add(int left, int right) => left + right;\n4\t}\n5\t",
+      "observedAt": 1790263365349
+    },
+    {
+      "id": "z6_reviewer_report_1783274a-3856-4597-a7f9-074a9605c0a3",
+      "output": "1\t{\n2\t  \"format\": \"zcode-test-v1\",\n3\t  \"operationId\": \"1783274a-3856-4597-a7f9-074a9605c0a3\",\n4\t  \"sourceDigest\": \"295b19f442eebbacb47a3206595fb9de5a25226fe60be79880eaa0a2a2711bbe\",\n5\t  \"buildDigest\": \"d7dcce4caab1ea1bde9be2ec8900033b2d62694487a97bd0bd5873792591586f\",\n6\t  \"tests\": [\n7\t    {\n8\t      \"name\": \"add-positive\",\n9\t      \"status\": \"passed\"\n10\t    },\n11\t    {\n12\t      \"name\": \"add-negative\",\n13\t      \"status\": \"passed\"\n14\t    },\n15\t    {\n16\t      \"name\": \"add-zero\",\n17\t      \"status\": \"passed\"\n18\t    }\n19\t  ]\n20\t}",
+      "observedAt": 1790263365406
+    }
+  ],
+  "providerErrors": [],
+  "modelRequests": 16,
+  "nativeSessions": [
+    {
+      "id": "sess_20e92577-9c1b-41a8-8475-5bb71703a64e",
+      "directory": "<isolated-profile>\\workspace",
+      "parent_id": null,
+      "workspace_id": null
+    },
+    {
+      "id": "sess_69790760-86cb-4e69-932a-65dabd51392c",
+      "directory": "<isolated-profile>\\workspace",
+      "parent_id": null,
+      "workspace_id": null
+    },
+    {
+      "id": "sess_8ec58783-4c81-4147-a9ac-d16b8850199d",
+      "directory": "<isolated-profile>\\workspace",
+      "parent_id": null,
+      "workspace_id": null
+    },
+    {
+      "id": "sess_8465a9cc-6b96-4966-94f2-436187c32eac",
+      "directory": "<isolated-profile>\\workspace",
+      "parent_id": null,
+      "workspace_id": null
+    },
+    {
+      "id": "sess_2a0590ee-c25f-43de-97c5-d97034079786",
+      "directory": "<isolated-profile>\\workspace",
+      "parent_id": null,
+      "workspace_id": null
+    }
+  ],
+  "requestCounts": {
+    "total": 16,
+    "execution": 13,
+    "auxiliary": 3
+  }
+}

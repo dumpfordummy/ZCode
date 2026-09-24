@@ -1,14 +1,67 @@
+import type { GraphTemplateInstance, GraphRunProvenance } from "./workflow-provenance.js";
+import type {
+  GraphWorkspaceTarget,
+  GraphNodeBase,
+  GraphApprovalNode,
+  GraphApprovalAttempt,
+  GraphApprovalCommand,
+} from "./approval-types.js";
+export type {
+  GraphWorkspaceTarget,
+  GraphInputSource,
+  GraphNodeBase,
+  GraphApprovalNode,
+  GraphApprovalAttempt,
+  GraphApprovalCommand,
+  GraphApprovalEvidenceSource,
+  GraphApprovalRequest,
+  GraphApprovalEvidence,
+  GraphApprovalDecision,
+  GraphSourceSnapshot,
+} from "./approval-types.js";
 import type { Event } from "@zcode/rpc";
 import type { ModelSelection } from "@zcode/shared";
 import type { SubmissionMode } from "@zcode/shared/zcode-protocol-v4";
 import { ServiceChannels } from "@zcode/shared";
 import { createServiceDescriptor } from "../descriptors.js";
-
-export interface GraphWorkspaceTarget {
-  workspacePath: string;
-  workspaceIdentity?: string;
-  remoteSessionId?: string;
-}
+import type {
+  GraphArtifact,
+  GraphJsonSchema,
+  GraphRecipe,
+  GraphRecipeSnapshot,
+} from "./artifact-types.js";
+import type {
+  GraphArtifactContent,
+  GraphArtifactRequest,
+  GraphToolAttempt,
+  GraphToolNode,
+} from "./tool-types.js";
+import type {
+  GraphRunStatus,
+  GraphDispatchPhase,
+  GraphNativeSettings,
+  GraphInputBinding,
+  GraphTerminalProof,
+  GraphFinalOutput,
+} from "./base-types.js";
+import type {
+  GraphConditionNode,
+  GraphRoutingDefinition,
+  GraphRoutingState,
+  GraphRunContinueCommand,
+  GraphRunStartCommand,
+} from "./routing-types.js";
+export type * from "./routing-types.js";
+export type {
+  GraphRunStatus,
+  GraphDispatchPhase,
+  GraphNativeSettings,
+  GraphInputBinding,
+  GraphTerminalProof,
+  GraphFinalOutput,
+} from "./base-types.js";
+export type * from "./artifact-types.js";
+export type * from "./tool-types.js";
 
 export interface GraphLegacyDefinition {
   version?: undefined;
@@ -19,18 +72,6 @@ export interface GraphLegacyDefinition {
   nodes: Array<{ id: string; type: "start" | "task" | "end"; position: { x: number; y: number } }>;
   edges: Array<{ source: string; target: string }>;
 }
-
-export type GraphRunStatus =
-  | "Starting"
-  | "Running"
-  | "WaitingForPermission"
-  | "WaitingForUser"
-  | "CancelRequested"
-  | "Completed"
-  | "Failed"
-  | "Cancelled"
-  | "Interrupted"
-  | "Unknown";
 
 export interface GraphLegacyRun {
   version?: undefined;
@@ -61,20 +102,6 @@ export interface GraphLegacyRun {
   release?: GraphReleaseAudit;
 }
 
-export interface GraphNativeSettings {
-  modelSelection: ModelSelection;
-  mode: SubmissionMode;
-  planEnabled: boolean;
-}
-export type GraphInputSource = { kind: "start" } | { kind: "node"; nodeId: string };
-export interface GraphInputBinding {
-  alias: string;
-  source: GraphInputSource;
-}
-export interface GraphNodeBase {
-  id: string;
-  position: { x: number; y: number };
-}
 export interface GraphStartNode extends GraphNodeBase {
   type: "start";
   request: string;
@@ -86,47 +113,43 @@ export interface GraphTaskNode extends GraphNodeBase {
   instructionMode: "literal" | "bound";
   inputs: GraphInputBinding[];
   configuration: { kind: "inherit" } | ({ kind: "override" } & GraphNativeSettings);
+  output?: { kind: "json"; schema: GraphJsonSchema };
 }
 export interface GraphEndNode extends GraphNodeBase {
   type: "end";
   outputNodeId: string | null;
 }
-export type GraphNode = GraphStartNode | GraphTaskNode | GraphEndNode;
+export type GraphNode =
+  | GraphStartNode
+  | GraphTaskNode
+  | GraphEndNode
+  | GraphApprovalNode
+  | GraphConditionNode
+  | GraphToolNode;
 export interface GraphSequentialDefinition {
-  version: 2;
+  template?: GraphTemplateInstance;
+  version: 2 | 3 | 4 | 5;
   revision: number;
   name: string;
   nodes: GraphNode[];
-  edges: Array<{ source: string; target: string }>;
+  edges: Array<{ source: string; target: string; sourcePort?: string }>;
+  routing?: GraphRoutingDefinition;
 }
 export type GraphDefinition = GraphLegacyDefinition | GraphSequentialDefinition;
 export interface GraphReadiness {
   errors: string[];
-  /** Task IDs in edge order; empty for an invalid path. */
   path: string[];
-}
-export interface GraphTerminalProof {
-  sourceCommandId: string;
-  state: "completedSuccess" | "completedInterrupted" | "failed";
-  logEpoch: string;
-  seq: number;
-  turnId?: string;
-}
-export interface GraphFinalOutput {
-  text: string;
-  turnId: string;
-  rowId: number;
-  entityId?: string;
-  assistantResponseId?: string;
 }
 export interface GraphResolvedBinding extends GraphInputBinding {
   text: string;
   sourceSessionId?: string;
   sourceInputId?: string;
   sourceCommandId?: string;
+  artifactId?: string;
 }
-export type GraphDispatchPhase = "planned" | "creating" | "created" | "sending" | "accepted";
 export interface GraphNodeAttempt {
+  iterationId?: string;
+  iteration?: number;
   nodeId: string;
   attemptId: string;
   commandId: string;
@@ -145,9 +168,18 @@ export interface GraphNodeAttempt {
   terminalProof?: GraphTerminalProof;
   finalOutput?: GraphFinalOutput;
   outputIssue?: string;
+  outputValidation?: { status: "valid" | "invalid"; issues: string[] };
   message?: string;
 }
 export type GraphInactivityProof =
+  | {
+      kind: "tool-terminal";
+      runtimeIdentity: string;
+      sessionId: string;
+      operationId: string;
+      completedAt: number;
+      status: "completed" | "failed" | "cancelled";
+    }
   | {
       kind: "input-terminal";
       runtimeIdentity: string;
@@ -176,7 +208,9 @@ export interface GraphReleaseAudit {
   inspection: GraphRecoveryInspection;
 }
 export interface GraphSequentialRun {
-  version: 2;
+  provenance?: GraphRunProvenance;
+  version: 2 | 3 | 4 | 5;
+  routing?: GraphRoutingState;
   id: string;
   requestId: string;
   requestFingerprint: string;
@@ -186,12 +220,22 @@ export interface GraphSequentialRun {
   plannedPath: string[];
   startInput: string;
   nodeAttempts: GraphNodeAttempt[];
+  approvalAttempts?: GraphApprovalAttempt[];
+  toolAttempts?: GraphToolAttempt[];
+  artifacts?: GraphArtifact[];
+  artifactBindings?: Array<{
+    nodeId: string;
+    attemptId: string;
+    selector: string;
+    artifactId: string;
+  }>;
   status: GraphRunStatus;
   createdAt: number;
   updatedAt: number;
   message?: string;
   cancelRequestedAt?: number;
   result?: GraphFinalOutput;
+  resultArtifactId?: string;
   recovery?: GraphRecoveryInspection;
   release?: GraphReleaseAudit;
 }
@@ -206,6 +250,29 @@ export interface GraphWorkspaceView {
 }
 
 export interface IGraphEngineeringService {
+  recipes(
+    params:
+      | { target: GraphWorkspaceTarget; action: "read" }
+      | {
+          target: GraphWorkspaceTarget;
+          action: "save";
+          recipes: GraphRecipe[];
+          expectedDigest: string;
+        },
+  ): Promise<GraphRecipeSnapshot>;
+  artifact(
+    params:
+      | (GraphArtifactRequest & { action: "read" })
+      | { target: GraphWorkspaceTarget; runId: string; action: "manifest" },
+  ): Promise<(GraphArtifactContent & { kind: "content" }) | { kind: "manifest"; text: string }>;
+  decideApproval(
+    params: GraphApprovalCommand & {
+      decisionId: string;
+      value: "approve" | "reject";
+      comment: string;
+    },
+  ): Promise<GraphRun>;
+  continueApproval(params: GraphApprovalCommand): Promise<GraphRun>;
   validateDefinition(params: { definition: GraphDefinition }): Promise<GraphReadiness>;
   getWorkspace(target: GraphWorkspaceTarget): Promise<GraphWorkspaceView>;
   saveDefinition(params: {
@@ -213,14 +280,7 @@ export interface IGraphEngineeringService {
     definition: GraphDefinition;
     expectedRevision: number;
   }): Promise<GraphDefinition>;
-  run(params: {
-    target: GraphWorkspaceTarget;
-    requestId: string;
-    revision: number;
-    modelSelection: ModelSelection;
-    mode: SubmissionMode;
-    planEnabled?: boolean;
-  }): Promise<GraphRun>;
+  run(params: GraphRunStartCommand | GraphRunContinueCommand): Promise<GraphRun>;
   cancel(params: { target: GraphWorkspaceTarget; runId: string }): Promise<GraphRun>;
   inspectRecovery(params: { target: GraphWorkspaceTarget; runId: string }): Promise<GraphRun>;
   releaseInterrupted(params: {

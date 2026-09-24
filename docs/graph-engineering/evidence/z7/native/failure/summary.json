@@ -1,0 +1,2341 @@
+{
+  "scenario": "failure",
+  "concurrency": 2,
+  "home": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865",
+  "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+  "screenshots": [
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\z7-approved-native-preflight.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\z7-prepared-separate-workspaces.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\z7-active-independent-native-workers.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\z7-unrelated-native-chat-survives.png"
+  ],
+  "assertions": [
+    "One actual worker failed while its sibling awaited Edit permission. Only that owned sibling was cancelled; unrelated native Chat retained its question and completed after an explicit answer.",
+    "Actual native active workers did not authorize integration or additional worker admission; pinned ownership retained."
+  ],
+  "startedAt": 1790271232878,
+  "fixture": {
+    "base": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+    "files": {
+      "Z4Fixture.csproj": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net8.0</TargetFramework>\n    <ImplicitUsings>enable</ImplicitUsings>\n    <Nullable>enable</Nullable>\n    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>\n    <UseSharedCompilation>false</UseSharedCompilation>\n    <NuGetAudit>false</NuGetAudit>\n  </PropertyGroup>\n  <ItemGroup>\n    <Compile Include=\"MathOps.cs\" /><Compile Include=\"PartA.cs\" /><Compile Include=\"PartB.cs\" />\n    <Compile Include=\"Runner.cs\" />\n  </ItemGroup>\n</Project>\n",
+      "MathOps.cs": "public static class MathOps\n{\n    public static int Add(int left, int right) => left + right + (PartA.Value == 1 && PartB.Value == 1 ? 1 : 0);\n}\n",
+      "PartA.cs": "public static class PartA { public const int Value = 0; }\n",
+      "PartB.cs": "public static class PartB { public const int Value = 0; }\n",
+      ".gitignore": "bin/\nobj/\nresults/*\n!results/.gitkeep\n.zcode/\n.env\n",
+      "AGENTS.md": "Synthetic Z7 workspace. Read/write only the explicitly requested PartA.cs or PartB.cs. Preserve Runner.cs and all three assertions. The combined (1,1) state is invalid; isolated branch edits can each pass. Use local offline dotnet Build/Test. Never inspect parent folders, modify configuration, stage, commit, push or merge.\n",
+      "results/.gitkeep": "",
+      ".zcode/config.json": "{\"graphRecipes\":[{\"id\":\"fixture-build\",\"name\":\"Build C# fixture\",\"executable\":\"dotnet\",\"args\":[\"build\",\"Z4Fixture.csproj\",\"--configuration\",\"Release\",\"--nologo\",\"--no-incremental\",\"--disable-build-servers\",\"-p:RestoreConfigFile=NuGet.Config\",\"-p:NuGetAudit=false\",\"-p:UseSharedCompilation=false\",\"-p:ImportDirectoryBuildProps=false\",\"-p:ImportDirectoryBuildTargets=false\",\"-p:ImportDirectoryPackagesProps=false\",\"-nodeReuse:false\"],\"cwd\":\".\",\"timeoutMs\":60000,\"sourcePaths\":[\"Z4Fixture.csproj\",\"MathOps.cs\",\"Runner.cs\",\"global.json\",\"NuGet.Config\",\"Directory.Build.props\",\"Directory.Build.targets\",\"Directory.Packages.props\",\"PartA.cs\",\"PartB.cs\"],\"expectedOutputs\":[\"bin/Release/net8.0/Z4Fixture.dll\",\"bin/Release/net8.0/Z4Fixture.deps.json\",\"bin/Release/net8.0/Z4Fixture.runtimeconfig.json\"],\"verifier\":{\"kind\":\"build\"}},{\"id\":\"fixture-test\",\"name\":\"Test C# fixture\",\"executable\":\"dotnet\",\"args\":[\"bin/Release/net8.0/Z4Fixture.dll\",\"--operation-id\",\"{operationId}\",\"--source-digest\",\"{sourceDigest}\",\"--build-digest\",\"{buildDigest}\",\"--report\",\"{reportPath}\"],\"cwd\":\".\",\"timeoutMs\":60000,\"sourcePaths\":[\"Z4Fixture.csproj\",\"MathOps.cs\",\"Runner.cs\",\"global.json\",\"NuGet.Config\",\"Directory.Build.props\",\"Directory.Build.targets\",\"Directory.Packages.props\",\"PartA.cs\",\"PartB.cs\"],\"expectedOutputs\":[],\"verifier\":{\"kind\":\"test\",\"format\":\"zcode-json-v1\",\"reportPath\":\"results/test-report.json\",\"minimumTests\":3,\"expectedTests\":3,\"requiredTests\":[\"add-positive\",\"add-negative\",\"add-zero\"],\"buildNodeId\":\"build\"}}]}"
+    }
+  },
+  "build": [
+    {
+      "file": "apps/zcode-cli/packages/cli/dist/zcode.cjs",
+      "sha256": "03efb3942ef23198c5cc637ce5b7f2dfb8bdd2626658501a48ca28f14b80d6cc"
+    },
+    {
+      "file": "packages/desktop/out/main/index.js",
+      "sha256": "ef9baf76f103b381cb65e3ef7d4a1e21e78d2ce1453cc6ef142652b410f2a29c"
+    },
+    {
+      "file": "packages/desktop/out/host/index.js",
+      "sha256": "ff1e8c591e6af83e85bac719c928cc8a7e38d88d597937111ae0b9cb132bddcc"
+    },
+    {
+      "file": "packages/desktop/out/renderer/index.html",
+      "sha256": "b63ef79c4b18c4a90fa8e334901bbbae9bd40ee7171ab15862385f566589dd7f"
+    }
+  ],
+  "companionSessionId": "sess_bca3640d-dd74-4de1-86fa-abb22b24c443",
+  "prepared": {
+    "id": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+    "requestId": "e360e782-6915-4a8e-bf87-a0a38d34d060",
+    "requestFingerprint": "e83dfd89e9455790bf0d4225dadd6fb703843ded757ae818657b8db24611dc3e",
+    "target": {
+      "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace"
+    },
+    "plan": {
+      "version": 1,
+      "revision": 1,
+      "enabled": true,
+      "name": "Fork / Join",
+      "request": "Implement independent contributions A=1 and B=2; preserve all independent tests.",
+      "sharedContract": "Only PartA.cs and PartB.cs may change. Preserve Runner.cs and MathOps.cs. The combined (1,1) state must fail existing tests.",
+      "resultRequirements": "Full reviewed integration and fresh native Build/Test of all three independent assertions; no original publication.",
+      "concurrency": 2,
+      "deadlineMs": 1200000,
+      "admissionBudget": 5,
+      "branches": [
+        {
+          "id": "worker-a",
+          "name": "worker-a",
+          "selected": true,
+          "instructions": "Read PartA.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.",
+          "files": ["PartA.cs"],
+          "additions": []
+        },
+        {
+          "id": "worker-b",
+          "name": "worker-b",
+          "selected": true,
+          "instructions": "Read PartB.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.",
+          "files": ["PartB.cs"],
+          "additions": []
+        }
+      ],
+      "buildRecipeId": "fixture-build",
+      "testRecipeId": "fixture-test"
+    },
+    "settings": {
+      "modelSelection": {
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "options": {
+          "reasoningLevel": "enabled"
+        }
+      },
+      "mode": "build",
+      "planEnabled": false
+    },
+    "preview": {
+      "digest": "b7d4e1b596594b81e30be9877defe67409b108c38967ae693d447c111b6a7005",
+      "base": {
+        "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+        "head": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+        "digest": "61336bbb4b68907236d7973904bab48639fdece2ad77329f8d3a06d3db606d2e",
+        "trackedPaths": [
+          ".gitignore",
+          "AGENTS.md",
+          "Directory.Build.props",
+          "Directory.Build.targets",
+          "Directory.Packages.props",
+          "MathOps.cs",
+          "NuGet.Config",
+          "PartA.cs",
+          "PartB.cs",
+          "Runner.cs",
+          "Z4Fixture.csproj",
+          "fixture.mjs",
+          "fixture.test.mjs",
+          "global.json",
+          "results/.gitkeep"
+        ]
+      },
+      "inventory": {
+        "environment": {
+          "version": 1,
+          "status": "available",
+          "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+          "executables": [
+            {
+              "executable": "dotnet",
+              "status": "available",
+              "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+            }
+          ],
+          "instructions": [
+            {
+              "scope": "workspace",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace\\AGENTS.md",
+              "digest": "fbe288923ec6e0e256040218fc81a99651ef8a8b8499999a0d4cc78bf13c931d",
+              "bytes": 325,
+              "truncated": false
+            }
+          ],
+          "skills": [
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "name": "browser-use:control-browser",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+            },
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "name": "browser-use:web-gui-tester",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+            }
+          ],
+          "plugins": [
+            {
+              "id": "node-repl-host@zcode-plugins-official",
+              "name": "node-repl-host",
+              "enabled": true,
+              "source": "official",
+              "version": "0.6.0"
+            },
+            {
+              "id": "browser-use@zcode-plugins-official",
+              "name": "browser-use",
+              "enabled": true,
+              "source": "official",
+              "version": "0.5.1"
+            }
+          ],
+          "hooks": [],
+          "mcp": [],
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+          ]
+        },
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "destination": "http://127.0.0.1:52077",
+        "modelDigest": "b3c0ce8073af0907d65f2078de2b627572e4f6dc03e8bd449cfc8286455f4a68",
+        "digest": "eae3d993c6619ebfe7eb04763d0c72e5e855e24dabaf2c43a5fe2528027cf740",
+        "unknowns": [
+          "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+          "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+          "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+          "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+          "Native title requests use the selected session model. Delegated tools, hooks, MCP, redirects and backend routing may contact additional destinations. Directory separation is not an OS sandbox."
+        ]
+      },
+      "recipes": [
+        {
+          "id": "fixture-build",
+          "name": "Build C# fixture",
+          "executable": "dotnet",
+          "args": [
+            "build",
+            "Z4Fixture.csproj",
+            "--configuration",
+            "Release",
+            "--nologo",
+            "--no-incremental",
+            "--disable-build-servers",
+            "-p:RestoreConfigFile=NuGet.Config",
+            "-p:NuGetAudit=false",
+            "-p:UseSharedCompilation=false",
+            "-p:ImportDirectoryBuildProps=false",
+            "-p:ImportDirectoryBuildTargets=false",
+            "-p:ImportDirectoryPackagesProps=false",
+            "-nodeReuse:false"
+          ],
+          "cwd": ".",
+          "timeoutMs": 60000,
+          "sourcePaths": [
+            "Z4Fixture.csproj",
+            "MathOps.cs",
+            "Runner.cs",
+            "global.json",
+            "NuGet.Config",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props",
+            "PartA.cs",
+            "PartB.cs"
+          ],
+          "expectedOutputs": [
+            "bin/Release/net8.0/Z4Fixture.dll",
+            "bin/Release/net8.0/Z4Fixture.deps.json",
+            "bin/Release/net8.0/Z4Fixture.runtimeconfig.json"
+          ],
+          "verifier": {
+            "kind": "build"
+          }
+        },
+        {
+          "id": "fixture-test",
+          "name": "Test C# fixture",
+          "executable": "dotnet",
+          "args": [
+            "bin/Release/net8.0/Z4Fixture.dll",
+            "--operation-id",
+            "{operationId}",
+            "--source-digest",
+            "{sourceDigest}",
+            "--build-digest",
+            "{buildDigest}",
+            "--report",
+            "{reportPath}"
+          ],
+          "cwd": ".",
+          "timeoutMs": 60000,
+          "sourcePaths": [
+            "Z4Fixture.csproj",
+            "MathOps.cs",
+            "Runner.cs",
+            "global.json",
+            "NuGet.Config",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props",
+            "PartA.cs",
+            "PartB.cs"
+          ],
+          "expectedOutputs": [],
+          "verifier": {
+            "kind": "test",
+            "format": "zcode-json-v1",
+            "reportPath": "results/test-report.json",
+            "minimumTests": 3,
+            "expectedTests": 3,
+            "requiredTests": ["add-positive", "add-negative", "add-zero"],
+            "buildNodeId": "build"
+          }
+        }
+      ]
+    },
+    "phase": "Prepared",
+    "createdAt": 1790271240142,
+    "updatedAt": 1790271244311,
+    "admissions": 0,
+    "children": [
+      {
+        "id": "worker-a",
+        "requestId": "39b1f4f3-4106-4388-93bb-0fa063157980",
+        "selected": true,
+        "workspace": {
+          "ownerId": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+          "slot": "worker-a",
+          "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-a",
+          "base": {
+            "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+            "head": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+            "digest": "61336bbb4b68907236d7973904bab48639fdece2ad77329f8d3a06d3db606d2e",
+            "trackedPaths": [
+              ".gitignore",
+              "AGENTS.md",
+              "Directory.Build.props",
+              "Directory.Build.targets",
+              "Directory.Packages.props",
+              "MathOps.cs",
+              "NuGet.Config",
+              "PartA.cs",
+              "PartB.cs",
+              "Runner.cs",
+              "Z4Fixture.csproj",
+              "fixture.mjs",
+              "fixture.test.mjs",
+              "global.json",
+              "results/.gitkeep"
+            ]
+          },
+          "token": "a79f768e-d4b3-4f97-8a6c-e673a49ed461",
+          "configDigest": "7da7537e467ecdbbf022c754c874258072d3a2de084ad612d4c9e6463a7d4c5c"
+        },
+        "inventory": {
+          "environment": {
+            "version": 1,
+            "status": "available",
+            "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+            "executables": [
+              {
+                "executable": "dotnet",
+                "status": "available",
+                "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+              }
+            ],
+            "instructions": [
+              {
+                "scope": "workspace",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-a\\AGENTS.md",
+                "digest": "fbe288923ec6e0e256040218fc81a99651ef8a8b8499999a0d4cc78bf13c931d",
+                "bytes": 325,
+                "truncated": false
+              }
+            ],
+            "skills": [
+              {
+                "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "name": "browser-use:control-browser",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+              },
+              {
+                "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "name": "browser-use:web-gui-tester",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+              }
+            ],
+            "plugins": [
+              {
+                "id": "node-repl-host@zcode-plugins-official",
+                "name": "node-repl-host",
+                "enabled": true,
+                "source": "official",
+                "version": "0.6.0"
+              },
+              {
+                "id": "browser-use@zcode-plugins-official",
+                "name": "browser-use",
+                "enabled": true,
+                "source": "official",
+                "version": "0.5.1"
+              }
+            ],
+            "hooks": [],
+            "mcp": [],
+            "unknowns": [
+              "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+              "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+              "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+              "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+            ]
+          },
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "destination": "http://127.0.0.1:52077",
+          "modelDigest": "b3c0ce8073af0907d65f2078de2b627572e4f6dc03e8bd449cfc8286455f4a68",
+          "digest": "b3f445caa7748a397b7f9c5d140a7540c20bf1992a9aae9cd6f56e129197d972",
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+            "Native title requests use the selected session model. Delegated tools, hooks, MCP, redirects and backend routing may contact additional destinations. Directory separation is not an OS sandbox."
+          ]
+        }
+      },
+      {
+        "id": "worker-b",
+        "requestId": "db0cb8aa-6f9a-4f35-a11a-3a4998a09c0d",
+        "selected": true,
+        "workspace": {
+          "ownerId": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+          "slot": "worker-b",
+          "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-b",
+          "base": {
+            "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+            "head": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+            "digest": "61336bbb4b68907236d7973904bab48639fdece2ad77329f8d3a06d3db606d2e",
+            "trackedPaths": [
+              ".gitignore",
+              "AGENTS.md",
+              "Directory.Build.props",
+              "Directory.Build.targets",
+              "Directory.Packages.props",
+              "MathOps.cs",
+              "NuGet.Config",
+              "PartA.cs",
+              "PartB.cs",
+              "Runner.cs",
+              "Z4Fixture.csproj",
+              "fixture.mjs",
+              "fixture.test.mjs",
+              "global.json",
+              "results/.gitkeep"
+            ]
+          },
+          "token": "d5f56ae5-dfbb-4f41-9e19-ebed7c0d5593",
+          "configDigest": "7da7537e467ecdbbf022c754c874258072d3a2de084ad612d4c9e6463a7d4c5c"
+        },
+        "inventory": {
+          "environment": {
+            "version": 1,
+            "status": "available",
+            "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+            "executables": [
+              {
+                "executable": "dotnet",
+                "status": "available",
+                "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+              }
+            ],
+            "instructions": [
+              {
+                "scope": "workspace",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-b\\AGENTS.md",
+                "digest": "fbe288923ec6e0e256040218fc81a99651ef8a8b8499999a0d4cc78bf13c931d",
+                "bytes": 325,
+                "truncated": false
+              }
+            ],
+            "skills": [
+              {
+                "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "name": "browser-use:control-browser",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+              },
+              {
+                "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "name": "browser-use:web-gui-tester",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+              }
+            ],
+            "plugins": [
+              {
+                "id": "node-repl-host@zcode-plugins-official",
+                "name": "node-repl-host",
+                "enabled": true,
+                "source": "official",
+                "version": "0.6.0"
+              },
+              {
+                "id": "browser-use@zcode-plugins-official",
+                "name": "browser-use",
+                "enabled": true,
+                "source": "official",
+                "version": "0.5.1"
+              }
+            ],
+            "hooks": [],
+            "mcp": [],
+            "unknowns": [
+              "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+              "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+              "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+              "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+            ]
+          },
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "destination": "http://127.0.0.1:52077",
+          "modelDigest": "b3c0ce8073af0907d65f2078de2b627572e4f6dc03e8bd449cfc8286455f4a68",
+          "digest": "4bfe521642c0461129e078e777416c863d5322544b2faf64803bd6ea673339c6",
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+            "Native title requests use the selected session model. Delegated tools, hooks, MCP, redirects and backend routing may contact additional destinations. Directory separation is not an OS sandbox."
+          ]
+        }
+      }
+    ],
+    "integration": {
+      "id": "integration",
+      "requestId": "45632913-ddbc-4533-a99e-be6bf7f4a965",
+      "selected": true,
+      "workspace": {
+        "ownerId": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+        "slot": "integration",
+        "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\integration",
+        "base": {
+          "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+          "head": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+          "digest": "61336bbb4b68907236d7973904bab48639fdece2ad77329f8d3a06d3db606d2e",
+          "trackedPaths": [
+            ".gitignore",
+            "AGENTS.md",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props",
+            "MathOps.cs",
+            "NuGet.Config",
+            "PartA.cs",
+            "PartB.cs",
+            "Runner.cs",
+            "Z4Fixture.csproj",
+            "fixture.mjs",
+            "fixture.test.mjs",
+            "global.json",
+            "results/.gitkeep"
+          ]
+        },
+        "token": "ead3f855-86e5-452b-a80f-abba73cb00df",
+        "configDigest": "7da7537e467ecdbbf022c754c874258072d3a2de084ad612d4c9e6463a7d4c5c"
+      },
+      "inventory": {
+        "environment": {
+          "version": 1,
+          "status": "available",
+          "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+          "executables": [
+            {
+              "executable": "dotnet",
+              "status": "available",
+              "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+            }
+          ],
+          "instructions": [
+            {
+              "scope": "workspace",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\integration\\AGENTS.md",
+              "digest": "fbe288923ec6e0e256040218fc81a99651ef8a8b8499999a0d4cc78bf13c931d",
+              "bytes": 325,
+              "truncated": false
+            }
+          ],
+          "skills": [
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "name": "browser-use:control-browser",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+            },
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "name": "browser-use:web-gui-tester",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+            }
+          ],
+          "plugins": [
+            {
+              "id": "node-repl-host@zcode-plugins-official",
+              "name": "node-repl-host",
+              "enabled": true,
+              "source": "official",
+              "version": "0.6.0"
+            },
+            {
+              "id": "browser-use@zcode-plugins-official",
+              "name": "browser-use",
+              "enabled": true,
+              "source": "official",
+              "version": "0.5.1"
+            }
+          ],
+          "hooks": [],
+          "mcp": [],
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+          ]
+        },
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "destination": "http://127.0.0.1:52077",
+        "modelDigest": "b3c0ce8073af0907d65f2078de2b627572e4f6dc03e8bd449cfc8286455f4a68",
+        "digest": "6cbca1ab6a7d40e6429d5c5b3ce7b35936cd3fa8728da50067118b98ead7fea6",
+        "unknowns": [
+          "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+          "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+          "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+          "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+          "Native title requests use the selected session model. Delegated tools, hooks, MCP, redirects and backend routing may contact additional destinations. Directory separation is not an OS sandbox."
+        ]
+      }
+    },
+    "validation": {
+      "id": "validation",
+      "requestId": "2897aa2e-ae23-4ad1-bc87-78df92d516cd",
+      "selected": true,
+      "workspace": {
+        "ownerId": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+        "slot": "integration",
+        "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\integration",
+        "base": {
+          "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+          "head": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+          "digest": "61336bbb4b68907236d7973904bab48639fdece2ad77329f8d3a06d3db606d2e",
+          "trackedPaths": [
+            ".gitignore",
+            "AGENTS.md",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props",
+            "MathOps.cs",
+            "NuGet.Config",
+            "PartA.cs",
+            "PartB.cs",
+            "Runner.cs",
+            "Z4Fixture.csproj",
+            "fixture.mjs",
+            "fixture.test.mjs",
+            "global.json",
+            "results/.gitkeep"
+          ]
+        },
+        "token": "ead3f855-86e5-452b-a80f-abba73cb00df",
+        "configDigest": "7da7537e467ecdbbf022c754c874258072d3a2de084ad612d4c9e6463a7d4c5c"
+      },
+      "inventory": {
+        "environment": {
+          "version": 1,
+          "status": "available",
+          "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+          "executables": [
+            {
+              "executable": "dotnet",
+              "status": "available",
+              "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+            }
+          ],
+          "instructions": [
+            {
+              "scope": "workspace",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\integration\\AGENTS.md",
+              "digest": "fbe288923ec6e0e256040218fc81a99651ef8a8b8499999a0d4cc78bf13c931d",
+              "bytes": 325,
+              "truncated": false
+            }
+          ],
+          "skills": [
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "name": "browser-use:control-browser",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+            },
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "name": "browser-use:web-gui-tester",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+            }
+          ],
+          "plugins": [
+            {
+              "id": "node-repl-host@zcode-plugins-official",
+              "name": "node-repl-host",
+              "enabled": true,
+              "source": "official",
+              "version": "0.6.0"
+            },
+            {
+              "id": "browser-use@zcode-plugins-official",
+              "name": "browser-use",
+              "enabled": true,
+              "source": "official",
+              "version": "0.5.1"
+            }
+          ],
+          "hooks": [],
+          "mcp": [],
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+          ]
+        },
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "destination": "http://127.0.0.1:52077",
+        "modelDigest": "b3c0ce8073af0907d65f2078de2b627572e4f6dc03e8bd449cfc8286455f4a68",
+        "digest": "6cbca1ab6a7d40e6429d5c5b3ce7b35936cd3fa8728da50067118b98ead7fea6",
+        "unknowns": [
+          "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+          "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+          "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+          "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+          "Native title requests use the selected session model. Delegated tools, hooks, MCP, redirects and backend routing may contact additional destinations. Directory separation is not an OS sandbox."
+        ]
+      }
+    },
+    "preparedDigest": "f52191cadf24b6b14ca2919b19a5f27110c56d0d1926caa759ab4995aff6655a",
+    "preservedSlots": [],
+    "cleanup": []
+  },
+  "workStartedAt": 1790271244859,
+  "beforeInterruption": {
+    "id": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+    "requestId": "e360e782-6915-4a8e-bf87-a0a38d34d060",
+    "requestFingerprint": "e83dfd89e9455790bf0d4225dadd6fb703843ded757ae818657b8db24611dc3e",
+    "target": {
+      "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace"
+    },
+    "plan": {
+      "version": 1,
+      "revision": 1,
+      "enabled": true,
+      "name": "Fork / Join",
+      "request": "Implement independent contributions A=1 and B=2; preserve all independent tests.",
+      "sharedContract": "Only PartA.cs and PartB.cs may change. Preserve Runner.cs and MathOps.cs. The combined (1,1) state must fail existing tests.",
+      "resultRequirements": "Full reviewed integration and fresh native Build/Test of all three independent assertions; no original publication.",
+      "concurrency": 2,
+      "deadlineMs": 1200000,
+      "admissionBudget": 5,
+      "branches": [
+        {
+          "id": "worker-a",
+          "name": "worker-a",
+          "selected": true,
+          "instructions": "Read PartA.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.",
+          "files": ["PartA.cs"],
+          "additions": []
+        },
+        {
+          "id": "worker-b",
+          "name": "worker-b",
+          "selected": true,
+          "instructions": "Read PartB.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.",
+          "files": ["PartB.cs"],
+          "additions": []
+        }
+      ],
+      "buildRecipeId": "fixture-build",
+      "testRecipeId": "fixture-test"
+    },
+    "settings": {
+      "modelSelection": {
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "options": {
+          "reasoningLevel": "enabled"
+        }
+      },
+      "mode": "build",
+      "planEnabled": false
+    },
+    "preview": {
+      "digest": "b7d4e1b596594b81e30be9877defe67409b108c38967ae693d447c111b6a7005",
+      "base": {
+        "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+        "head": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+        "digest": "61336bbb4b68907236d7973904bab48639fdece2ad77329f8d3a06d3db606d2e",
+        "trackedPaths": [
+          ".gitignore",
+          "AGENTS.md",
+          "Directory.Build.props",
+          "Directory.Build.targets",
+          "Directory.Packages.props",
+          "MathOps.cs",
+          "NuGet.Config",
+          "PartA.cs",
+          "PartB.cs",
+          "Runner.cs",
+          "Z4Fixture.csproj",
+          "fixture.mjs",
+          "fixture.test.mjs",
+          "global.json",
+          "results/.gitkeep"
+        ]
+      },
+      "inventory": {
+        "environment": {
+          "version": 1,
+          "status": "available",
+          "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+          "executables": [
+            {
+              "executable": "dotnet",
+              "status": "available",
+              "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+            }
+          ],
+          "instructions": [
+            {
+              "scope": "workspace",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace\\AGENTS.md",
+              "digest": "fbe288923ec6e0e256040218fc81a99651ef8a8b8499999a0d4cc78bf13c931d",
+              "bytes": 325,
+              "truncated": false
+            }
+          ],
+          "skills": [
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "name": "browser-use:control-browser",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+            },
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "name": "browser-use:web-gui-tester",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+            }
+          ],
+          "plugins": [
+            {
+              "id": "node-repl-host@zcode-plugins-official",
+              "name": "node-repl-host",
+              "enabled": true,
+              "source": "official",
+              "version": "0.6.0"
+            },
+            {
+              "id": "browser-use@zcode-plugins-official",
+              "name": "browser-use",
+              "enabled": true,
+              "source": "official",
+              "version": "0.5.1"
+            }
+          ],
+          "hooks": [],
+          "mcp": [],
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+          ]
+        },
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "destination": "http://127.0.0.1:52077",
+        "modelDigest": "b3c0ce8073af0907d65f2078de2b627572e4f6dc03e8bd449cfc8286455f4a68",
+        "digest": "eae3d993c6619ebfe7eb04763d0c72e5e855e24dabaf2c43a5fe2528027cf740",
+        "unknowns": [
+          "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+          "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+          "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+          "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+          "Native title requests use the selected session model. Delegated tools, hooks, MCP, redirects and backend routing may contact additional destinations. Directory separation is not an OS sandbox."
+        ]
+      },
+      "recipes": [
+        {
+          "id": "fixture-build",
+          "name": "Build C# fixture",
+          "executable": "dotnet",
+          "args": [
+            "build",
+            "Z4Fixture.csproj",
+            "--configuration",
+            "Release",
+            "--nologo",
+            "--no-incremental",
+            "--disable-build-servers",
+            "-p:RestoreConfigFile=NuGet.Config",
+            "-p:NuGetAudit=false",
+            "-p:UseSharedCompilation=false",
+            "-p:ImportDirectoryBuildProps=false",
+            "-p:ImportDirectoryBuildTargets=false",
+            "-p:ImportDirectoryPackagesProps=false",
+            "-nodeReuse:false"
+          ],
+          "cwd": ".",
+          "timeoutMs": 60000,
+          "sourcePaths": [
+            "Z4Fixture.csproj",
+            "MathOps.cs",
+            "Runner.cs",
+            "global.json",
+            "NuGet.Config",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props",
+            "PartA.cs",
+            "PartB.cs"
+          ],
+          "expectedOutputs": [
+            "bin/Release/net8.0/Z4Fixture.dll",
+            "bin/Release/net8.0/Z4Fixture.deps.json",
+            "bin/Release/net8.0/Z4Fixture.runtimeconfig.json"
+          ],
+          "verifier": {
+            "kind": "build"
+          }
+        },
+        {
+          "id": "fixture-test",
+          "name": "Test C# fixture",
+          "executable": "dotnet",
+          "args": [
+            "bin/Release/net8.0/Z4Fixture.dll",
+            "--operation-id",
+            "{operationId}",
+            "--source-digest",
+            "{sourceDigest}",
+            "--build-digest",
+            "{buildDigest}",
+            "--report",
+            "{reportPath}"
+          ],
+          "cwd": ".",
+          "timeoutMs": 60000,
+          "sourcePaths": [
+            "Z4Fixture.csproj",
+            "MathOps.cs",
+            "Runner.cs",
+            "global.json",
+            "NuGet.Config",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props",
+            "PartA.cs",
+            "PartB.cs"
+          ],
+          "expectedOutputs": [],
+          "verifier": {
+            "kind": "test",
+            "format": "zcode-json-v1",
+            "reportPath": "results/test-report.json",
+            "minimumTests": 3,
+            "expectedTests": 3,
+            "requiredTests": ["add-positive", "add-negative", "add-zero"],
+            "buildNodeId": "build"
+          }
+        }
+      ]
+    },
+    "phase": "Workers",
+    "createdAt": 1790271240142,
+    "updatedAt": 1790271247401,
+    "deadlineAt": 1790272445262,
+    "admissions": 2,
+    "children": [
+      {
+        "id": "worker-a",
+        "requestId": "39b1f4f3-4106-4388-93bb-0fa063157980",
+        "selected": true,
+        "workspace": {
+          "ownerId": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+          "slot": "worker-a",
+          "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-a",
+          "base": {
+            "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+            "head": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+            "digest": "61336bbb4b68907236d7973904bab48639fdece2ad77329f8d3a06d3db606d2e",
+            "trackedPaths": [
+              ".gitignore",
+              "AGENTS.md",
+              "Directory.Build.props",
+              "Directory.Build.targets",
+              "Directory.Packages.props",
+              "MathOps.cs",
+              "NuGet.Config",
+              "PartA.cs",
+              "PartB.cs",
+              "Runner.cs",
+              "Z4Fixture.csproj",
+              "fixture.mjs",
+              "fixture.test.mjs",
+              "global.json",
+              "results/.gitkeep"
+            ]
+          },
+          "token": "a79f768e-d4b3-4f97-8a6c-e673a49ed461",
+          "configDigest": "7da7537e467ecdbbf022c754c874258072d3a2de084ad612d4c9e6463a7d4c5c"
+        },
+        "inventory": {
+          "environment": {
+            "version": 1,
+            "status": "available",
+            "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+            "executables": [
+              {
+                "executable": "dotnet",
+                "status": "available",
+                "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+              }
+            ],
+            "instructions": [
+              {
+                "scope": "workspace",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-a\\AGENTS.md",
+                "digest": "fbe288923ec6e0e256040218fc81a99651ef8a8b8499999a0d4cc78bf13c931d",
+                "bytes": 325,
+                "truncated": false
+              }
+            ],
+            "skills": [
+              {
+                "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "name": "browser-use:control-browser",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+              },
+              {
+                "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "name": "browser-use:web-gui-tester",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+              }
+            ],
+            "plugins": [
+              {
+                "id": "node-repl-host@zcode-plugins-official",
+                "name": "node-repl-host",
+                "enabled": true,
+                "source": "official",
+                "version": "0.6.0"
+              },
+              {
+                "id": "browser-use@zcode-plugins-official",
+                "name": "browser-use",
+                "enabled": true,
+                "source": "official",
+                "version": "0.5.1"
+              }
+            ],
+            "hooks": [],
+            "mcp": [],
+            "unknowns": [
+              "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+              "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+              "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+              "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+            ]
+          },
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "destination": "http://127.0.0.1:52077",
+          "modelDigest": "b3c0ce8073af0907d65f2078de2b627572e4f6dc03e8bd449cfc8286455f4a68",
+          "digest": "b3f445caa7748a397b7f9c5d140a7540c20bf1992a9aae9cd6f56e129197d972",
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+            "Native title requests use the selected session model. Delegated tools, hooks, MCP, redirects and backend routing may contact additional destinations. Directory separation is not an OS sandbox."
+          ]
+        },
+        "definitionRevision": 1,
+        "runId": "117f88f2-fb4f-4dc3-bb89-9fecb931fddf",
+        "admission": "acknowledged"
+      },
+      {
+        "id": "worker-b",
+        "requestId": "db0cb8aa-6f9a-4f35-a11a-3a4998a09c0d",
+        "selected": true,
+        "workspace": {
+          "ownerId": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+          "slot": "worker-b",
+          "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-b",
+          "base": {
+            "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+            "head": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+            "digest": "61336bbb4b68907236d7973904bab48639fdece2ad77329f8d3a06d3db606d2e",
+            "trackedPaths": [
+              ".gitignore",
+              "AGENTS.md",
+              "Directory.Build.props",
+              "Directory.Build.targets",
+              "Directory.Packages.props",
+              "MathOps.cs",
+              "NuGet.Config",
+              "PartA.cs",
+              "PartB.cs",
+              "Runner.cs",
+              "Z4Fixture.csproj",
+              "fixture.mjs",
+              "fixture.test.mjs",
+              "global.json",
+              "results/.gitkeep"
+            ]
+          },
+          "token": "d5f56ae5-dfbb-4f41-9e19-ebed7c0d5593",
+          "configDigest": "7da7537e467ecdbbf022c754c874258072d3a2de084ad612d4c9e6463a7d4c5c"
+        },
+        "inventory": {
+          "environment": {
+            "version": 1,
+            "status": "available",
+            "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+            "executables": [
+              {
+                "executable": "dotnet",
+                "status": "available",
+                "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+              }
+            ],
+            "instructions": [
+              {
+                "scope": "workspace",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-b\\AGENTS.md",
+                "digest": "fbe288923ec6e0e256040218fc81a99651ef8a8b8499999a0d4cc78bf13c931d",
+                "bytes": 325,
+                "truncated": false
+              }
+            ],
+            "skills": [
+              {
+                "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "name": "browser-use:control-browser",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+              },
+              {
+                "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "name": "browser-use:web-gui-tester",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+              }
+            ],
+            "plugins": [
+              {
+                "id": "node-repl-host@zcode-plugins-official",
+                "name": "node-repl-host",
+                "enabled": true,
+                "source": "official",
+                "version": "0.6.0"
+              },
+              {
+                "id": "browser-use@zcode-plugins-official",
+                "name": "browser-use",
+                "enabled": true,
+                "source": "official",
+                "version": "0.5.1"
+              }
+            ],
+            "hooks": [],
+            "mcp": [],
+            "unknowns": [
+              "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+              "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+              "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+              "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+            ]
+          },
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "destination": "http://127.0.0.1:52077",
+          "modelDigest": "b3c0ce8073af0907d65f2078de2b627572e4f6dc03e8bd449cfc8286455f4a68",
+          "digest": "4bfe521642c0461129e078e777416c863d5322544b2faf64803bd6ea673339c6",
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+            "Native title requests use the selected session model. Delegated tools, hooks, MCP, redirects and backend routing may contact additional destinations. Directory separation is not an OS sandbox."
+          ]
+        },
+        "definitionRevision": 1,
+        "runId": "3ed6da29-4895-4eed-87e4-252ebceea454",
+        "admission": "acknowledged"
+      }
+    ],
+    "integration": {
+      "id": "integration",
+      "requestId": "45632913-ddbc-4533-a99e-be6bf7f4a965",
+      "selected": true,
+      "workspace": {
+        "ownerId": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+        "slot": "integration",
+        "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\integration",
+        "base": {
+          "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+          "head": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+          "digest": "61336bbb4b68907236d7973904bab48639fdece2ad77329f8d3a06d3db606d2e",
+          "trackedPaths": [
+            ".gitignore",
+            "AGENTS.md",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props",
+            "MathOps.cs",
+            "NuGet.Config",
+            "PartA.cs",
+            "PartB.cs",
+            "Runner.cs",
+            "Z4Fixture.csproj",
+            "fixture.mjs",
+            "fixture.test.mjs",
+            "global.json",
+            "results/.gitkeep"
+          ]
+        },
+        "token": "ead3f855-86e5-452b-a80f-abba73cb00df",
+        "configDigest": "7da7537e467ecdbbf022c754c874258072d3a2de084ad612d4c9e6463a7d4c5c"
+      },
+      "inventory": {
+        "environment": {
+          "version": 1,
+          "status": "available",
+          "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+          "executables": [
+            {
+              "executable": "dotnet",
+              "status": "available",
+              "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+            }
+          ],
+          "instructions": [
+            {
+              "scope": "workspace",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\integration\\AGENTS.md",
+              "digest": "fbe288923ec6e0e256040218fc81a99651ef8a8b8499999a0d4cc78bf13c931d",
+              "bytes": 325,
+              "truncated": false
+            }
+          ],
+          "skills": [
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "name": "browser-use:control-browser",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+            },
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "name": "browser-use:web-gui-tester",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+            }
+          ],
+          "plugins": [
+            {
+              "id": "node-repl-host@zcode-plugins-official",
+              "name": "node-repl-host",
+              "enabled": true,
+              "source": "official",
+              "version": "0.6.0"
+            },
+            {
+              "id": "browser-use@zcode-plugins-official",
+              "name": "browser-use",
+              "enabled": true,
+              "source": "official",
+              "version": "0.5.1"
+            }
+          ],
+          "hooks": [],
+          "mcp": [],
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+          ]
+        },
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "destination": "http://127.0.0.1:52077",
+        "modelDigest": "b3c0ce8073af0907d65f2078de2b627572e4f6dc03e8bd449cfc8286455f4a68",
+        "digest": "6cbca1ab6a7d40e6429d5c5b3ce7b35936cd3fa8728da50067118b98ead7fea6",
+        "unknowns": [
+          "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+          "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+          "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+          "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+          "Native title requests use the selected session model. Delegated tools, hooks, MCP, redirects and backend routing may contact additional destinations. Directory separation is not an OS sandbox."
+        ]
+      }
+    },
+    "validation": {
+      "id": "validation",
+      "requestId": "2897aa2e-ae23-4ad1-bc87-78df92d516cd",
+      "selected": true,
+      "workspace": {
+        "ownerId": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+        "slot": "integration",
+        "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\integration",
+        "base": {
+          "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+          "head": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+          "digest": "61336bbb4b68907236d7973904bab48639fdece2ad77329f8d3a06d3db606d2e",
+          "trackedPaths": [
+            ".gitignore",
+            "AGENTS.md",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props",
+            "MathOps.cs",
+            "NuGet.Config",
+            "PartA.cs",
+            "PartB.cs",
+            "Runner.cs",
+            "Z4Fixture.csproj",
+            "fixture.mjs",
+            "fixture.test.mjs",
+            "global.json",
+            "results/.gitkeep"
+          ]
+        },
+        "token": "ead3f855-86e5-452b-a80f-abba73cb00df",
+        "configDigest": "7da7537e467ecdbbf022c754c874258072d3a2de084ad612d4c9e6463a7d4c5c"
+      },
+      "inventory": {
+        "environment": {
+          "version": 1,
+          "status": "available",
+          "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+          "executables": [
+            {
+              "executable": "dotnet",
+              "status": "available",
+              "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+            }
+          ],
+          "instructions": [
+            {
+              "scope": "workspace",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\integration\\AGENTS.md",
+              "digest": "fbe288923ec6e0e256040218fc81a99651ef8a8b8499999a0d4cc78bf13c931d",
+              "bytes": 325,
+              "truncated": false
+            }
+          ],
+          "skills": [
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "name": "browser-use:control-browser",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+            },
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "name": "browser-use:web-gui-tester",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+            }
+          ],
+          "plugins": [
+            {
+              "id": "node-repl-host@zcode-plugins-official",
+              "name": "node-repl-host",
+              "enabled": true,
+              "source": "official",
+              "version": "0.6.0"
+            },
+            {
+              "id": "browser-use@zcode-plugins-official",
+              "name": "browser-use",
+              "enabled": true,
+              "source": "official",
+              "version": "0.5.1"
+            }
+          ],
+          "hooks": [],
+          "mcp": [],
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+          ]
+        },
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "destination": "http://127.0.0.1:52077",
+        "modelDigest": "b3c0ce8073af0907d65f2078de2b627572e4f6dc03e8bd449cfc8286455f4a68",
+        "digest": "6cbca1ab6a7d40e6429d5c5b3ce7b35936cd3fa8728da50067118b98ead7fea6",
+        "unknowns": [
+          "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+          "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+          "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+          "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+          "Native title requests use the selected session model. Delegated tools, hooks, MCP, redirects and backend routing may contact additional destinations. Directory separation is not an OS sandbox."
+        ]
+      }
+    },
+    "preparedDigest": "f52191cadf24b6b14ca2919b19a5f27110c56d0d1926caa759ab4995aff6655a",
+    "planDecision": {
+      "id": "2bdd11ca-a7d4-4d76-bc08-63e4227141bd",
+      "digest": "f52191cadf24b6b14ca2919b19a5f27110c56d0d1926caa759ab4995aff6655a",
+      "approved": true,
+      "comment": "Reviewed exact synthetic plan, separate directories, full proposals and native configuration; no publication.",
+      "at": 1790271244886
+    },
+    "preservedSlots": [],
+    "cleanup": []
+  },
+  "status": "PASS",
+  "finishedAt": 1790271249539,
+  "final": {
+    "id": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+    "requestId": "e360e782-6915-4a8e-bf87-a0a38d34d060",
+    "requestFingerprint": "e83dfd89e9455790bf0d4225dadd6fb703843ded757ae818657b8db24611dc3e",
+    "target": {
+      "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace"
+    },
+    "plan": {
+      "version": 1,
+      "revision": 1,
+      "enabled": true,
+      "name": "Fork / Join",
+      "request": "Implement independent contributions A=1 and B=2; preserve all independent tests.",
+      "sharedContract": "Only PartA.cs and PartB.cs may change. Preserve Runner.cs and MathOps.cs. The combined (1,1) state must fail existing tests.",
+      "resultRequirements": "Full reviewed integration and fresh native Build/Test of all three independent assertions; no original publication.",
+      "concurrency": 2,
+      "deadlineMs": 1200000,
+      "admissionBudget": 5,
+      "branches": [
+        {
+          "id": "worker-a",
+          "name": "worker-a",
+          "selected": true,
+          "instructions": "Read PartA.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.",
+          "files": ["PartA.cs"],
+          "additions": []
+        },
+        {
+          "id": "worker-b",
+          "name": "worker-b",
+          "selected": true,
+          "instructions": "Read PartB.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.",
+          "files": ["PartB.cs"],
+          "additions": []
+        }
+      ],
+      "buildRecipeId": "fixture-build",
+      "testRecipeId": "fixture-test"
+    },
+    "settings": {
+      "modelSelection": {
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "options": {
+          "reasoningLevel": "enabled"
+        }
+      },
+      "mode": "build",
+      "planEnabled": false
+    },
+    "preview": {
+      "digest": "b7d4e1b596594b81e30be9877defe67409b108c38967ae693d447c111b6a7005",
+      "base": {
+        "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+        "head": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+        "digest": "61336bbb4b68907236d7973904bab48639fdece2ad77329f8d3a06d3db606d2e",
+        "trackedPaths": [
+          ".gitignore",
+          "AGENTS.md",
+          "Directory.Build.props",
+          "Directory.Build.targets",
+          "Directory.Packages.props",
+          "MathOps.cs",
+          "NuGet.Config",
+          "PartA.cs",
+          "PartB.cs",
+          "Runner.cs",
+          "Z4Fixture.csproj",
+          "fixture.mjs",
+          "fixture.test.mjs",
+          "global.json",
+          "results/.gitkeep"
+        ]
+      },
+      "inventory": {
+        "environment": {
+          "version": 1,
+          "status": "available",
+          "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+          "executables": [
+            {
+              "executable": "dotnet",
+              "status": "available",
+              "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+            }
+          ],
+          "instructions": [
+            {
+              "scope": "workspace",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace\\AGENTS.md",
+              "digest": "fbe288923ec6e0e256040218fc81a99651ef8a8b8499999a0d4cc78bf13c931d",
+              "bytes": 325,
+              "truncated": false
+            }
+          ],
+          "skills": [
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "name": "browser-use:control-browser",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+            },
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "name": "browser-use:web-gui-tester",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+            }
+          ],
+          "plugins": [
+            {
+              "id": "node-repl-host@zcode-plugins-official",
+              "name": "node-repl-host",
+              "enabled": true,
+              "source": "official",
+              "version": "0.6.0"
+            },
+            {
+              "id": "browser-use@zcode-plugins-official",
+              "name": "browser-use",
+              "enabled": true,
+              "source": "official",
+              "version": "0.5.1"
+            }
+          ],
+          "hooks": [],
+          "mcp": [],
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+          ]
+        },
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "destination": "http://127.0.0.1:52077",
+        "modelDigest": "b3c0ce8073af0907d65f2078de2b627572e4f6dc03e8bd449cfc8286455f4a68",
+        "digest": "eae3d993c6619ebfe7eb04763d0c72e5e855e24dabaf2c43a5fe2528027cf740",
+        "unknowns": [
+          "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+          "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+          "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+          "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+          "Native title requests use the selected session model. Delegated tools, hooks, MCP, redirects and backend routing may contact additional destinations. Directory separation is not an OS sandbox."
+        ]
+      },
+      "recipes": [
+        {
+          "id": "fixture-build",
+          "name": "Build C# fixture",
+          "executable": "dotnet",
+          "args": [
+            "build",
+            "Z4Fixture.csproj",
+            "--configuration",
+            "Release",
+            "--nologo",
+            "--no-incremental",
+            "--disable-build-servers",
+            "-p:RestoreConfigFile=NuGet.Config",
+            "-p:NuGetAudit=false",
+            "-p:UseSharedCompilation=false",
+            "-p:ImportDirectoryBuildProps=false",
+            "-p:ImportDirectoryBuildTargets=false",
+            "-p:ImportDirectoryPackagesProps=false",
+            "-nodeReuse:false"
+          ],
+          "cwd": ".",
+          "timeoutMs": 60000,
+          "sourcePaths": [
+            "Z4Fixture.csproj",
+            "MathOps.cs",
+            "Runner.cs",
+            "global.json",
+            "NuGet.Config",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props",
+            "PartA.cs",
+            "PartB.cs"
+          ],
+          "expectedOutputs": [
+            "bin/Release/net8.0/Z4Fixture.dll",
+            "bin/Release/net8.0/Z4Fixture.deps.json",
+            "bin/Release/net8.0/Z4Fixture.runtimeconfig.json"
+          ],
+          "verifier": {
+            "kind": "build"
+          }
+        },
+        {
+          "id": "fixture-test",
+          "name": "Test C# fixture",
+          "executable": "dotnet",
+          "args": [
+            "bin/Release/net8.0/Z4Fixture.dll",
+            "--operation-id",
+            "{operationId}",
+            "--source-digest",
+            "{sourceDigest}",
+            "--build-digest",
+            "{buildDigest}",
+            "--report",
+            "{reportPath}"
+          ],
+          "cwd": ".",
+          "timeoutMs": 60000,
+          "sourcePaths": [
+            "Z4Fixture.csproj",
+            "MathOps.cs",
+            "Runner.cs",
+            "global.json",
+            "NuGet.Config",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props",
+            "PartA.cs",
+            "PartB.cs"
+          ],
+          "expectedOutputs": [],
+          "verifier": {
+            "kind": "test",
+            "format": "zcode-json-v1",
+            "reportPath": "results/test-report.json",
+            "minimumTests": 3,
+            "expectedTests": 3,
+            "requiredTests": ["add-positive", "add-negative", "add-zero"],
+            "buildNodeId": "build"
+          }
+        }
+      ]
+    },
+    "phase": "Stopped",
+    "createdAt": 1790271240142,
+    "updatedAt": 1790271249019,
+    "deadlineAt": 1790272445262,
+    "admissions": 2,
+    "children": [
+      {
+        "id": "worker-a",
+        "requestId": "39b1f4f3-4106-4388-93bb-0fa063157980",
+        "selected": true,
+        "workspace": {
+          "ownerId": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+          "slot": "worker-a",
+          "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-a",
+          "base": {
+            "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+            "head": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+            "digest": "61336bbb4b68907236d7973904bab48639fdece2ad77329f8d3a06d3db606d2e",
+            "trackedPaths": [
+              ".gitignore",
+              "AGENTS.md",
+              "Directory.Build.props",
+              "Directory.Build.targets",
+              "Directory.Packages.props",
+              "MathOps.cs",
+              "NuGet.Config",
+              "PartA.cs",
+              "PartB.cs",
+              "Runner.cs",
+              "Z4Fixture.csproj",
+              "fixture.mjs",
+              "fixture.test.mjs",
+              "global.json",
+              "results/.gitkeep"
+            ]
+          },
+          "token": "a79f768e-d4b3-4f97-8a6c-e673a49ed461",
+          "configDigest": "7da7537e467ecdbbf022c754c874258072d3a2de084ad612d4c9e6463a7d4c5c"
+        },
+        "inventory": {
+          "environment": {
+            "version": 1,
+            "status": "available",
+            "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+            "executables": [
+              {
+                "executable": "dotnet",
+                "status": "available",
+                "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+              }
+            ],
+            "instructions": [
+              {
+                "scope": "workspace",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-a\\AGENTS.md",
+                "digest": "fbe288923ec6e0e256040218fc81a99651ef8a8b8499999a0d4cc78bf13c931d",
+                "bytes": 325,
+                "truncated": false
+              }
+            ],
+            "skills": [
+              {
+                "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "name": "browser-use:control-browser",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+              },
+              {
+                "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "name": "browser-use:web-gui-tester",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+              }
+            ],
+            "plugins": [
+              {
+                "id": "node-repl-host@zcode-plugins-official",
+                "name": "node-repl-host",
+                "enabled": true,
+                "source": "official",
+                "version": "0.6.0"
+              },
+              {
+                "id": "browser-use@zcode-plugins-official",
+                "name": "browser-use",
+                "enabled": true,
+                "source": "official",
+                "version": "0.5.1"
+              }
+            ],
+            "hooks": [],
+            "mcp": [],
+            "unknowns": [
+              "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+              "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+              "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+              "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+            ]
+          },
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "destination": "http://127.0.0.1:52077",
+          "modelDigest": "b3c0ce8073af0907d65f2078de2b627572e4f6dc03e8bd449cfc8286455f4a68",
+          "digest": "b3f445caa7748a397b7f9c5d140a7540c20bf1992a9aae9cd6f56e129197d972",
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+            "Native title requests use the selected session model. Delegated tools, hooks, MCP, redirects and backend routing may contact additional destinations. Directory separation is not an OS sandbox."
+          ]
+        },
+        "definitionRevision": 1,
+        "runId": "117f88f2-fb4f-4dc3-bb89-9fecb931fddf",
+        "admission": "acknowledged"
+      },
+      {
+        "id": "worker-b",
+        "requestId": "db0cb8aa-6f9a-4f35-a11a-3a4998a09c0d",
+        "selected": true,
+        "workspace": {
+          "ownerId": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+          "slot": "worker-b",
+          "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-b",
+          "base": {
+            "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+            "head": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+            "digest": "61336bbb4b68907236d7973904bab48639fdece2ad77329f8d3a06d3db606d2e",
+            "trackedPaths": [
+              ".gitignore",
+              "AGENTS.md",
+              "Directory.Build.props",
+              "Directory.Build.targets",
+              "Directory.Packages.props",
+              "MathOps.cs",
+              "NuGet.Config",
+              "PartA.cs",
+              "PartB.cs",
+              "Runner.cs",
+              "Z4Fixture.csproj",
+              "fixture.mjs",
+              "fixture.test.mjs",
+              "global.json",
+              "results/.gitkeep"
+            ]
+          },
+          "token": "d5f56ae5-dfbb-4f41-9e19-ebed7c0d5593",
+          "configDigest": "7da7537e467ecdbbf022c754c874258072d3a2de084ad612d4c9e6463a7d4c5c"
+        },
+        "inventory": {
+          "environment": {
+            "version": 1,
+            "status": "available",
+            "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+            "executables": [
+              {
+                "executable": "dotnet",
+                "status": "available",
+                "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+              }
+            ],
+            "instructions": [
+              {
+                "scope": "workspace",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-b\\AGENTS.md",
+                "digest": "fbe288923ec6e0e256040218fc81a99651ef8a8b8499999a0d4cc78bf13c931d",
+                "bytes": 325,
+                "truncated": false
+              }
+            ],
+            "skills": [
+              {
+                "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "name": "browser-use:control-browser",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+              },
+              {
+                "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "name": "browser-use:web-gui-tester",
+                "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+              }
+            ],
+            "plugins": [
+              {
+                "id": "node-repl-host@zcode-plugins-official",
+                "name": "node-repl-host",
+                "enabled": true,
+                "source": "official",
+                "version": "0.6.0"
+              },
+              {
+                "id": "browser-use@zcode-plugins-official",
+                "name": "browser-use",
+                "enabled": true,
+                "source": "official",
+                "version": "0.5.1"
+              }
+            ],
+            "hooks": [],
+            "mcp": [],
+            "unknowns": [
+              "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+              "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+              "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+              "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+            ]
+          },
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "destination": "http://127.0.0.1:52077",
+          "modelDigest": "b3c0ce8073af0907d65f2078de2b627572e4f6dc03e8bd449cfc8286455f4a68",
+          "digest": "4bfe521642c0461129e078e777416c863d5322544b2faf64803bd6ea673339c6",
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+            "Native title requests use the selected session model. Delegated tools, hooks, MCP, redirects and backend routing may contact additional destinations. Directory separation is not an OS sandbox."
+          ]
+        },
+        "definitionRevision": 1,
+        "runId": "3ed6da29-4895-4eed-87e4-252ebceea454",
+        "admission": "acknowledged"
+      }
+    ],
+    "integration": {
+      "id": "integration",
+      "requestId": "45632913-ddbc-4533-a99e-be6bf7f4a965",
+      "selected": true,
+      "workspace": {
+        "ownerId": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+        "slot": "integration",
+        "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\integration",
+        "base": {
+          "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+          "head": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+          "digest": "61336bbb4b68907236d7973904bab48639fdece2ad77329f8d3a06d3db606d2e",
+          "trackedPaths": [
+            ".gitignore",
+            "AGENTS.md",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props",
+            "MathOps.cs",
+            "NuGet.Config",
+            "PartA.cs",
+            "PartB.cs",
+            "Runner.cs",
+            "Z4Fixture.csproj",
+            "fixture.mjs",
+            "fixture.test.mjs",
+            "global.json",
+            "results/.gitkeep"
+          ]
+        },
+        "token": "ead3f855-86e5-452b-a80f-abba73cb00df",
+        "configDigest": "7da7537e467ecdbbf022c754c874258072d3a2de084ad612d4c9e6463a7d4c5c"
+      },
+      "inventory": {
+        "environment": {
+          "version": 1,
+          "status": "available",
+          "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+          "executables": [
+            {
+              "executable": "dotnet",
+              "status": "available",
+              "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+            }
+          ],
+          "instructions": [
+            {
+              "scope": "workspace",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\integration\\AGENTS.md",
+              "digest": "fbe288923ec6e0e256040218fc81a99651ef8a8b8499999a0d4cc78bf13c931d",
+              "bytes": 325,
+              "truncated": false
+            }
+          ],
+          "skills": [
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "name": "browser-use:control-browser",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+            },
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "name": "browser-use:web-gui-tester",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+            }
+          ],
+          "plugins": [
+            {
+              "id": "node-repl-host@zcode-plugins-official",
+              "name": "node-repl-host",
+              "enabled": true,
+              "source": "official",
+              "version": "0.6.0"
+            },
+            {
+              "id": "browser-use@zcode-plugins-official",
+              "name": "browser-use",
+              "enabled": true,
+              "source": "official",
+              "version": "0.5.1"
+            }
+          ],
+          "hooks": [],
+          "mcp": [],
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+          ]
+        },
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "destination": "http://127.0.0.1:52077",
+        "modelDigest": "b3c0ce8073af0907d65f2078de2b627572e4f6dc03e8bd449cfc8286455f4a68",
+        "digest": "6cbca1ab6a7d40e6429d5c5b3ce7b35936cd3fa8728da50067118b98ead7fea6",
+        "unknowns": [
+          "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+          "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+          "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+          "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+          "Native title requests use the selected session model. Delegated tools, hooks, MCP, redirects and backend routing may contact additional destinations. Directory separation is not an OS sandbox."
+        ]
+      }
+    },
+    "validation": {
+      "id": "validation",
+      "requestId": "2897aa2e-ae23-4ad1-bc87-78df92d516cd",
+      "selected": true,
+      "workspace": {
+        "ownerId": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+        "slot": "integration",
+        "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\integration",
+        "base": {
+          "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\workspace",
+          "head": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+          "digest": "61336bbb4b68907236d7973904bab48639fdece2ad77329f8d3a06d3db606d2e",
+          "trackedPaths": [
+            ".gitignore",
+            "AGENTS.md",
+            "Directory.Build.props",
+            "Directory.Build.targets",
+            "Directory.Packages.props",
+            "MathOps.cs",
+            "NuGet.Config",
+            "PartA.cs",
+            "PartB.cs",
+            "Runner.cs",
+            "Z4Fixture.csproj",
+            "fixture.mjs",
+            "fixture.test.mjs",
+            "global.json",
+            "results/.gitkeep"
+          ]
+        },
+        "token": "ead3f855-86e5-452b-a80f-abba73cb00df",
+        "configDigest": "7da7537e467ecdbbf022c754c874258072d3a2de084ad612d4c9e6463a7d4c5c"
+      },
+      "inventory": {
+        "environment": {
+          "version": 1,
+          "status": "available",
+          "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+          "executables": [
+            {
+              "executable": "dotnet",
+              "status": "available",
+              "path": "C:\\Program Files\\dotnet\\dotnet.exe"
+            }
+          ],
+          "instructions": [
+            {
+              "scope": "workspace",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\integration\\AGENTS.md",
+              "digest": "fbe288923ec6e0e256040218fc81a99651ef8a8b8499999a0d4cc78bf13c931d",
+              "bytes": 325,
+              "truncated": false
+            }
+          ],
+          "skills": [
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "name": "browser-use:control-browser",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+            },
+            {
+              "id": "glm:plugin:C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "name": "browser-use:web-gui-tester",
+              "path": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+              "scope": "plugin",
+              "enabled": true,
+              "plugin": "browser-use",
+              "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+            }
+          ],
+          "plugins": [
+            {
+              "id": "node-repl-host@zcode-plugins-official",
+              "name": "node-repl-host",
+              "enabled": true,
+              "source": "official",
+              "version": "0.6.0"
+            },
+            {
+              "id": "browser-use@zcode-plugins-official",
+              "name": "browser-use",
+              "enabled": true,
+              "source": "official",
+              "version": "0.5.1"
+            }
+          ],
+          "hooks": [],
+          "mcp": [],
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+          ]
+        },
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "destination": "http://127.0.0.1:52077",
+        "modelDigest": "b3c0ce8073af0907d65f2078de2b627572e4f6dc03e8bd449cfc8286455f4a68",
+        "digest": "6cbca1ab6a7d40e6429d5c5b3ce7b35936cd3fa8728da50067118b98ead7fea6",
+        "unknowns": [
+          "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+          "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+          "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+          "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+          "Native title requests use the selected session model. Delegated tools, hooks, MCP, redirects and backend routing may contact additional destinations. Directory separation is not an OS sandbox."
+        ]
+      }
+    },
+    "preparedDigest": "f52191cadf24b6b14ca2919b19a5f27110c56d0d1926caa759ab4995aff6655a",
+    "planDecision": {
+      "id": "2bdd11ca-a7d4-4d76-bc08-63e4227141bd",
+      "digest": "f52191cadf24b6b14ca2919b19a5f27110c56d0d1926caa759ab4995aff6655a",
+      "approved": true,
+      "comment": "Reviewed exact synthetic plan, separate directories, full proposals and native configuration; no publication.",
+      "at": 1790271244886
+    },
+    "message": "Owned child Fork / Join / worker-a stopped: Failed. No partial integration or success.",
+    "preservedSlots": [],
+    "cleanup": []
+  },
+  "ledger": [
+    {
+      "id": "queue_01a0d47b-2d69-78c4-b153-c4c8baf6e7d4",
+      "session_id": "sess_bca3640d-dd74-4de1-86fa-abb22b24c443",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Z1_COMPANION_TASK: Ask for explicit confirmation and wait. This ordinary chat is independent of the Graph Engineering task. Do not edit files or run commands.",
+        "intent": {
+          "sourceCommandId": "01a0d47b-2d69-78c4-b153-c4c8baf6e7d4",
+          "queueItemId": "queue_01a0d47b-2d69-78c4-b153-c4c8baf6e7d4",
+          "clientId": "client-01a0d47b-2cf6-7b98-b661-dd32de455e77",
+          "kind": "sendText",
+          "admissionSeq": 2,
+          "admittedAt": 1790271237844,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "01a0d47b-2d69-78c4-b153-c4c8baf6e7d4",
+          "queueItemId": "queue_01a0d47b-2d69-78c4-b153-c4c8baf6e7d4",
+          "clientId": "client-01a0d47b-2cf6-7b98-b661-dd32de455e77",
+          "kind": "sendText",
+          "text": "Z1_COMPANION_TASK: Ask for explicit confirmation and wait. This ordinary chat is independent of the Graph Engineering task. Do not edit files or run commands.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 2
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790271237844
+        },
+        "attachments": [],
+        "sourceCommandType": "createSession"
+      },
+      "status": "promoted",
+      "time_created": 1790271237900,
+      "time_updated": 1790271238389
+    },
+    {
+      "id": "queue_df406d4b-d388-4e79-a566-24883eb2c48c",
+      "session_id": "sess_dae69749-48c8-47e7-8421-e0b1ac2c5c1a",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Parallel worker task: worker-a.\nRead PartA.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\nUse native tools in this workspace only. Edit only the explicitly selected files; additional files require explicit additions approval. Preserve the shared contract, tests and configuration. Do not stage, commit, push, merge or access other worker directories. Report actual changes and tests, with unknowns explicit.\n{\"request\":\"Implement independent contributions A=1 and B=2; preserve all independent tests.\",\"sharedContract\":\"Only PartA.cs and PartB.cs may change. Preserve Runner.cs and MathOps.cs. The combined (1,1) state must fail existing tests.\",\"resultRequirements\":\"Full reviewed integration and fresh native Build/Test of all three independent assertions; no original publication.\",\"base\":\"93b2c2bc2e852cf5c98ea3bf85204678b5d08157\",\"branch\":{\"id\":\"worker-a\",\"name\":\"worker-a\",\"selected\":true,\"instructions\":\"Read PartA.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\",\"files\":[\"PartA.cs\"],\"additions\":[]}}",
+        "intent": {
+          "sourceCommandId": "df406d4b-d388-4e79-a566-24883eb2c48c",
+          "queueItemId": "queue_df406d4b-d388-4e79-a566-24883eb2c48c",
+          "clientId": "graph:795f5a8c-73a3-4d7e-ba73-a150b2c4b067",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790271246564,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "df406d4b-d388-4e79-a566-24883eb2c48c",
+          "queueItemId": "queue_df406d4b-d388-4e79-a566-24883eb2c48c",
+          "clientId": "graph:795f5a8c-73a3-4d7e-ba73-a150b2c4b067",
+          "kind": "sendText",
+          "text": "Parallel worker task: worker-a.\nRead PartA.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\nUse native tools in this workspace only. Edit only the explicitly selected files; additional files require explicit additions approval. Preserve the shared contract, tests and configuration. Do not stage, commit, push, merge or access other worker directories. Report actual changes and tests, with unknowns explicit.\n{\"request\":\"Implement independent contributions A=1 and B=2; preserve all independent tests.\",\"sharedContract\":\"Only PartA.cs and PartB.cs may change. Preserve Runner.cs and MathOps.cs. The combined (1,1) state must fail existing tests.\",\"resultRequirements\":\"Full reviewed integration and fresh native Build/Test of all three independent assertions; no original publication.\",\"base\":\"93b2c2bc2e852cf5c98ea3bf85204678b5d08157\",\"branch\":{\"id\":\"worker-a\",\"name\":\"worker-a\",\"selected\":true,\"instructions\":\"Read PartA.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\",\"files\":[\"PartA.cs\"],\"additions\":[]}}",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790271246564
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790271246573,
+      "time_updated": 1790271247111
+    },
+    {
+      "id": "queue_ea0febf2-d983-4453-8805-744f24e75bb1",
+      "session_id": "sess_f8588d4a-a93a-46b3-9605-6aa84ee41cda",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Parallel worker task: worker-b.\nRead PartB.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\nUse native tools in this workspace only. Edit only the explicitly selected files; additional files require explicit additions approval. Preserve the shared contract, tests and configuration. Do not stage, commit, push, merge or access other worker directories. Report actual changes and tests, with unknowns explicit.\n{\"request\":\"Implement independent contributions A=1 and B=2; preserve all independent tests.\",\"sharedContract\":\"Only PartA.cs and PartB.cs may change. Preserve Runner.cs and MathOps.cs. The combined (1,1) state must fail existing tests.\",\"resultRequirements\":\"Full reviewed integration and fresh native Build/Test of all three independent assertions; no original publication.\",\"base\":\"93b2c2bc2e852cf5c98ea3bf85204678b5d08157\",\"branch\":{\"id\":\"worker-b\",\"name\":\"worker-b\",\"selected\":true,\"instructions\":\"Read PartB.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\",\"files\":[\"PartB.cs\"],\"additions\":[]}}",
+        "intent": {
+          "sourceCommandId": "ea0febf2-d983-4453-8805-744f24e75bb1",
+          "queueItemId": "queue_ea0febf2-d983-4453-8805-744f24e75bb1",
+          "clientId": "graph:cfab59b3-ca0c-4d8e-88c1-d7531ee33e51",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790271247380,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "ea0febf2-d983-4453-8805-744f24e75bb1",
+          "queueItemId": "queue_ea0febf2-d983-4453-8805-744f24e75bb1",
+          "clientId": "graph:cfab59b3-ca0c-4d8e-88c1-d7531ee33e51",
+          "kind": "sendText",
+          "text": "Parallel worker task: worker-b.\nRead PartB.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\nUse native tools in this workspace only. Edit only the explicitly selected files; additional files require explicit additions approval. Preserve the shared contract, tests and configuration. Do not stage, commit, push, merge or access other worker directories. Report actual changes and tests, with unknowns explicit.\n{\"request\":\"Implement independent contributions A=1 and B=2; preserve all independent tests.\",\"sharedContract\":\"Only PartA.cs and PartB.cs may change. Preserve Runner.cs and MathOps.cs. The combined (1,1) state must fail existing tests.\",\"resultRequirements\":\"Full reviewed integration and fresh native Build/Test of all three independent assertions; no original publication.\",\"base\":\"93b2c2bc2e852cf5c98ea3bf85204678b5d08157\",\"branch\":{\"id\":\"worker-b\",\"name\":\"worker-b\",\"selected\":true,\"instructions\":\"Read PartB.cs and update its Value to the controlled requested value. Run actual offline Build/Test, preserve test authority, report actual result.\",\"files\":[\"PartB.cs\"],\"additions\":[]}}",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790271247380
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790271247390,
+      "time_updated": 1790271248012
+    }
+  ],
+  "toolResults": [
+    {
+      "id": "z7_worker-b_PartB_read",
+      "output": "1\tpublic static class PartB { public const int Value = 0; }\n2\t",
+      "at": 1790271248417
+    },
+    {
+      "id": "z1_companion_question",
+      "output": "User has answered your questions: \"Confirm unrelated native Chat survived Fork/Join cancellation.\"=\"Complete companion\". You can now continue with the user's answers in mind.",
+      "at": 1790271249223
+    }
+  ],
+  "providerErrors": [],
+  "modelRequests": 6
+}

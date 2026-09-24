@@ -25,12 +25,17 @@ export function GraphRunHistory({
               data-testid="graph-run"
               data-run-id={run.id}
               data-status={run.status}
-              data-session-id={run.version === 2 ? "" : (run.sessionId ?? "")}
-              data-input-id={run.version === 2 ? "" : run.inputId}
+              data-session-id={run.version !== undefined ? "" : (run.sessionId ?? "")}
+              data-input-id={run.version !== undefined ? "" : run.inputId}
               onClick={() => onSelect(run.id)}
             >
-              {run.definition.name} · {t(`status.${run.status}`)} ·{" "}
-              {new Date(run.createdAt).toLocaleTimeString()}
+              {run.definition.name} ·{" "}
+              {t(
+                run.version === 3 && run.status === "Completed"
+                  ? "approval.runCompleted"
+                  : `status.${run.status}`,
+              )}{" "}
+              · {new Date(run.createdAt).toLocaleTimeString()}
               {run.release ? ` · ${t("released")}` : ""}
             </Button>
           ))}

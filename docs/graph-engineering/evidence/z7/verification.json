@@ -1,0 +1,713 @@
+{
+  "milestone": "Z7 only",
+  "status": "Incomplete expanded acceptance: additional Z7-A12 Fork/Join portability fails",
+  "originalStatusBeforeA12": "Implemented and verified with named repository baseline exceptions; ready for user check",
+  "portabilityAudit": "portability/README.md",
+  "reportWaived": true,
+  "predecessorPrerequisiteReverificationWaived": true,
+  "userOperatedChecks": "NOT RUN",
+  "checks": [
+    {
+      "command": "pnpm typecheck",
+      "status": "PASS",
+      "log": "checks/typecheck.log"
+    },
+    {
+      "command": "pnpm --dir apps/zcode-cli typecheck",
+      "status": "PASS",
+      "tasks": 27,
+      "log": "checks/cli-typecheck.log"
+    },
+    {
+      "command": "pnpm --dir apps/zcode-cli build",
+      "status": "PASS",
+      "tasks": 16,
+      "log": "checks/cli-build.log"
+    },
+    {
+      "command": "pnpm --filter @zcode/desktop build:no-runtime-assets",
+      "status": "PASS",
+      "log": "checks/desktop-build.log"
+    },
+    {
+      "command": "node --import tsx --test <Graph and Git test paths>",
+      "status": "PASS",
+      "tests": 189,
+      "log": "checks/services-tests.log"
+    },
+    {
+      "command": "node --import tsx --test packages/ui/test/graph*.test.ts",
+      "status": "PASS",
+      "tests": 34,
+      "log": "checks/ui-tests.log"
+    },
+    {
+      "command": "node --test scripts/graph-engineering/*.test.mjs",
+      "status": "PASS",
+      "tests": 63,
+      "log": "checks/fixture-tests.log"
+    },
+    {
+      "command": "pnpm lint",
+      "status": "PASS with baseline warnings",
+      "warnings": 70,
+      "errors": 0,
+      "log": "checks/root-lint.log"
+    },
+    {
+      "command": "pnpm --dir apps/zcode-cli lint --continue",
+      "status": "FAIL - unchanged baseline",
+      "warnings": 53,
+      "errors": 85,
+      "log": "checks/cli-lint.log"
+    },
+    {
+      "command": "pnpm fmt:check",
+      "status": "FAIL - baseline files remain",
+      "files": 2869,
+      "newFiles": 0,
+      "log": "checks/format.log"
+    },
+    {
+      "command": "pnpm architecture:check --changed",
+      "status": "PASS",
+      "violations": 0,
+      "log": "checks/architecture.log"
+    },
+    {
+      "command": "'quit' | node scripts/graph-engineering/z7-launch-fixture.mjs",
+      "status": "PASS - automated startup/close only",
+      "log": "checks/launch-fixture.log"
+    }
+  ],
+  "acceptance": [
+    {
+      "id": "Z7-A01",
+      "status": "PASS",
+      "layer": "Service/UI regressions and native disabled-plan UI",
+      "evidence": [
+        "checks/services-tests.log",
+        "checks/ui-tests.log",
+        "native/complete/summary.json"
+      ]
+    },
+    {
+      "id": "Z7-A02",
+      "status": "PASS",
+      "layer": "Actual native workers and filesystem observations",
+      "evidence": ["native/complete/summary.json", "native/complete/children.json"]
+    },
+    {
+      "id": "Z7-A03",
+      "status": "PASS",
+      "layer": "Real Git fixtures and Host admission drift tests",
+      "evidence": ["checks/services-tests.log"]
+    },
+    {
+      "id": "Z7-A04",
+      "status": "PASS",
+      "layer": "Actual native integration, Build/Test, human gate and exact source",
+      "evidence": ["native/complete/summary.json", "native/complete/children.json"]
+    },
+    {
+      "id": "Z7-A05",
+      "status": "PASS",
+      "layer": "Native conflicting proposals, explicit UI choice; service scope refusal",
+      "evidence": ["native/conflict/summary.json", "checks/services-tests.log"]
+    },
+    {
+      "id": "Z7-A06",
+      "status": "PASS",
+      "layer": "Native failed worker, permission-wait sibling cancellation and unrelated Chat; unknown ACK fixture",
+      "evidence": ["native/failure/summary.json", "checks/services-tests.log"]
+    },
+    {
+      "id": "Z7-A07",
+      "status": "PASS",
+      "layer": "Actual private Electron/Host restart with active native workers",
+      "evidence": ["native/restart/summary.json"]
+    },
+    {
+      "id": "Z7-A08",
+      "status": "PASS",
+      "layer": "Real Git capture/cleanup and schema fixtures: traversal, junction, binary, staged, full deletion and explicit additions",
+      "evidence": ["checks/services-tests.log"]
+    },
+    {
+      "id": "Z7-A09",
+      "status": "PASS",
+      "layer": "Native active-runtime refusal and selected inactive cleanup; real foreign/junction refusal; audited preservation",
+      "evidence": ["native/complete/summary.json", "checks/services-tests.log"]
+    },
+    {
+      "id": "Z7-A10",
+      "status": "PASS",
+      "layer": "Native concurrency 1/2 plus service deadline/budget/duplicate-view/admission tests",
+      "evidence": [
+        "native/complete/summary.json",
+        "native/sequential/summary.json",
+        "checks/services-tests.log"
+      ]
+    },
+    {
+      "id": "Z7-A11",
+      "status": "PASS",
+      "layer": "Actual branch Build/Test passes then combined native Test failure",
+      "evidence": ["native/combined-failure/summary.json", "native/combined-failure/children.json"]
+    },
+    {
+      "id": "Z7-A12",
+      "status": "FAIL - Fork/Join transfer is not supported by the sequential portable contract",
+      "layer": "Real service/schema/library operations with synthetic graph persistence and denied native/workspace ports",
+      "evidence": ["portability/result.json", "portability/README.md"],
+      "nativeUiRoundTrip": "NOT RUN - no Fork/Join export/import contract or controls"
+    }
+  ],
+  "runs": {
+    "complete": {
+      "status": "PASS",
+      "summary": "native/complete/summary.json",
+      "children": "native/complete/children.json",
+      "screenshots": [
+        "native/complete/z7-prepared-separate-workspaces.png",
+        "native/complete/z7-join-full-proposals.png",
+        "native/complete/z7-combined-diff-tests-final-review.png",
+        "native/complete/z7-completed-history-after-restart.png",
+        "native/complete/z7-explicit-inactive-worker-cleanup.png"
+      ],
+      "base": "7fa65adddd244629bc697b52b1ac021b99cc4fea",
+      "tree": "17f6509362a8603ec40842e4acdcf4b4d72c122b",
+      "concurrency": 2,
+      "parentId": "520005d4-3d43-4ecf-800e-0864afad9ab5",
+      "phase": "Completed",
+      "nativeAgentInputs": 3,
+      "modelRequests": 16,
+      "graphAdmissions": 5,
+      "workerWallTimeMs": 26624,
+      "finalApprovalElapsedMs": 54325,
+      "wholeHarnessMs": 71206,
+      "cleanup": [
+        {
+          "slot": "worker-a",
+          "at": 1790271132472,
+          "reason": "Explicitly remove only inactive owned worker A; retain sibling and integrated result."
+        }
+      ],
+      "combined": [
+        {
+          "node": "build",
+          "status": "Completed",
+          "sessionId": "sess_4e1d6b4b-003d-4b00-9e9a-69a973cec10c",
+          "operationId": "52e025d9-c8cf-4617-a9f3-842bc4477ac6",
+          "verification": {
+            "processKnown": true,
+            "exitSuccessful": true,
+            "reportFresh": false,
+            "reportParsed": false,
+            "acceptancePassed": true,
+            "classification": "build",
+            "issues": []
+          }
+        },
+        {
+          "node": "test",
+          "status": "Completed",
+          "sessionId": "sess_a6633fb7-4333-4f1b-86d9-33f13abf0cf7",
+          "operationId": "be336c65-1aee-4964-9fad-4ce156594a4f",
+          "verification": {
+            "processKnown": true,
+            "exitSuccessful": true,
+            "reportFresh": true,
+            "reportParsed": true,
+            "acceptancePassed": true,
+            "classification": "test",
+            "testCount": 3,
+            "passed": 3,
+            "failed": 0,
+            "skipped": 0,
+            "issues": []
+          }
+        }
+      ],
+      "nativeIdentities": [
+        {
+          "slot": "worker-a",
+          "node": "worker-a",
+          "sessionId": "sess_85cb7a98-bfe6-49fd-b735-759e62ac308d",
+          "inputId": "b7bd261a-248f-4544-956e-3eafaf14e8ad",
+          "commandId": "b7bd261a-248f-4544-956e-3eafaf14e8ad",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271061350-44752c\\data\\.zcode\\v2\\graph-engineering\\workspaces\\520005d4-3d43-4ecf-800e-0864afad9ab5\\worker-a:1:34284:agent-78e95a97-5b54-427c-baa3-89ee27399bf0",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271061350-44752c\\data\\.zcode\\v2\\graph-engineering\\workspaces\\520005d4-3d43-4ecf-800e-0864afad9ab5\\worker-a"
+        },
+        {
+          "slot": "worker-b",
+          "node": "worker-b",
+          "sessionId": "sess_ee920335-a139-4f59-95f8-678b70e0eee9",
+          "inputId": "c867447f-1485-454b-969e-5efc803c4efd",
+          "commandId": "c867447f-1485-454b-969e-5efc803c4efd",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271061350-44752c\\data\\.zcode\\v2\\graph-engineering\\workspaces\\520005d4-3d43-4ecf-800e-0864afad9ab5\\worker-b:1:34076:agent-1a239462-c431-45c0-862a-1a73ac0f8ef2",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271061350-44752c\\data\\.zcode\\v2\\graph-engineering\\workspaces\\520005d4-3d43-4ecf-800e-0864afad9ab5\\worker-b"
+        },
+        {
+          "slot": "integration",
+          "node": "integration",
+          "sessionId": "sess_1364cce0-7442-4278-a2cf-672bfda6a794",
+          "inputId": "4f422d86-153e-4d10-8817-4403ef541814",
+          "commandId": "4f422d86-153e-4d10-8817-4403ef541814",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271061350-44752c\\data\\.zcode\\v2\\graph-engineering\\workspaces\\520005d4-3d43-4ecf-800e-0864afad9ab5\\integration:1:3132:agent-9206c159-1ed5-4238-83b3-0c825f808396",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271061350-44752c\\data\\.zcode\\v2\\graph-engineering\\workspaces\\520005d4-3d43-4ecf-800e-0864afad9ab5\\integration"
+        },
+        {
+          "slot": "validation",
+          "node": "build",
+          "sessionId": "sess_4e1d6b4b-003d-4b00-9e9a-69a973cec10c",
+          "operationId": "52e025d9-c8cf-4617-a9f3-842bc4477ac6",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271061350-44752c\\data\\.zcode\\v2\\graph-engineering\\workspaces\\520005d4-3d43-4ecf-800e-0864afad9ab5\\integration:1:3132:agent-9206c159-1ed5-4238-83b3-0c825f808396",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271061350-44752c\\data\\.zcode\\v2\\graph-engineering\\workspaces\\520005d4-3d43-4ecf-800e-0864afad9ab5\\integration"
+        },
+        {
+          "slot": "validation",
+          "node": "test",
+          "sessionId": "sess_a6633fb7-4333-4f1b-86d9-33f13abf0cf7",
+          "operationId": "be336c65-1aee-4964-9fad-4ce156594a4f",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271061350-44752c\\data\\.zcode\\v2\\graph-engineering\\workspaces\\520005d4-3d43-4ecf-800e-0864afad9ab5\\integration:1:3132:agent-9206c159-1ed5-4238-83b3-0c825f808396",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271061350-44752c\\data\\.zcode\\v2\\graph-engineering\\workspaces\\520005d4-3d43-4ecf-800e-0864afad9ab5\\integration"
+        }
+      ]
+    },
+    "sequential": {
+      "status": "PASS",
+      "summary": "native/sequential/summary.json",
+      "children": "native/sequential/children.json",
+      "screenshots": [
+        "native/sequential/z7-prepared-separate-workspaces.png",
+        "native/sequential/z7-join-full-proposals.png",
+        "native/sequential/z7-combined-diff-tests-final-review.png",
+        "native/sequential/z7-completed-history-after-restart.png",
+        "native/sequential/z7-explicit-inactive-worker-cleanup.png"
+      ],
+      "base": "cca84331e73363ce0e57cf5d33181d2af3202e71",
+      "tree": "17f6509362a8603ec40842e4acdcf4b4d72c122b",
+      "concurrency": 1,
+      "parentId": "af30b38f-1e28-4801-bbd0-47c90fe2953f",
+      "phase": "Completed",
+      "nativeAgentInputs": 3,
+      "modelRequests": 16,
+      "graphAdmissions": 5,
+      "workerWallTimeMs": 26698,
+      "finalApprovalElapsedMs": 53677,
+      "wholeHarnessMs": 70496,
+      "cleanup": [
+        {
+          "slot": "worker-a",
+          "at": 1790271203574,
+          "reason": "Explicitly remove only inactive owned worker A; retain sibling and integrated result."
+        }
+      ],
+      "combined": [
+        {
+          "node": "build",
+          "status": "Completed",
+          "sessionId": "sess_95cd693f-5248-4007-8fba-b449af87a487",
+          "operationId": "f4f177b5-46c7-480e-8cf1-0187d672c96e",
+          "verification": {
+            "processKnown": true,
+            "exitSuccessful": true,
+            "reportFresh": false,
+            "reportParsed": false,
+            "acceptancePassed": true,
+            "classification": "build",
+            "issues": []
+          }
+        },
+        {
+          "node": "test",
+          "status": "Completed",
+          "sessionId": "sess_270f2ba6-7dc7-41df-ba34-5f318d1deea3",
+          "operationId": "cff7fdee-96d7-400b-8c44-c9d0c1be73b8",
+          "verification": {
+            "processKnown": true,
+            "exitSuccessful": true,
+            "reportFresh": true,
+            "reportParsed": true,
+            "acceptancePassed": true,
+            "classification": "test",
+            "testCount": 3,
+            "passed": 3,
+            "failed": 0,
+            "skipped": 0,
+            "issues": []
+          }
+        }
+      ],
+      "nativeIdentities": [
+        {
+          "slot": "worker-a",
+          "node": "worker-a",
+          "sessionId": "sess_97db6b91-b58a-4cc7-82b1-a70e7f4564be",
+          "inputId": "f5d36abf-ed65-4c7d-ad0a-8d8bc25fdc7b",
+          "commandId": "f5d36abf-ed65-4c7d-ad0a-8d8bc25fdc7b",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271133161-1976d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\af30b38f-1e28-4801-bbd0-47c90fe2953f\\worker-a:1:22500:agent-8dc8a530-82b3-482a-8faa-afd182043a78",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271133161-1976d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\af30b38f-1e28-4801-bbd0-47c90fe2953f\\worker-a"
+        },
+        {
+          "slot": "worker-b",
+          "node": "worker-b",
+          "sessionId": "sess_c05ce16e-9d90-4e53-9bf9-b08aba63818f",
+          "inputId": "c824a4ee-845e-49e8-bfa8-fa8b757ed21b",
+          "commandId": "c824a4ee-845e-49e8-bfa8-fa8b757ed21b",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271133161-1976d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\af30b38f-1e28-4801-bbd0-47c90fe2953f\\worker-b:1:38744:agent-5cd08870-5638-4b2d-a7cf-5863e5ae21ec",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271133161-1976d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\af30b38f-1e28-4801-bbd0-47c90fe2953f\\worker-b"
+        },
+        {
+          "slot": "integration",
+          "node": "integration",
+          "sessionId": "sess_015fd899-5565-4cdc-ac6c-c989457264b7",
+          "inputId": "8a780eca-f949-4053-9327-579e0a8bcfe9",
+          "commandId": "8a780eca-f949-4053-9327-579e0a8bcfe9",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271133161-1976d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\af30b38f-1e28-4801-bbd0-47c90fe2953f\\integration:1:43492:agent-741b5fae-cc2d-4390-91f3-6f34e020b02a",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271133161-1976d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\af30b38f-1e28-4801-bbd0-47c90fe2953f\\integration"
+        },
+        {
+          "slot": "validation",
+          "node": "build",
+          "sessionId": "sess_95cd693f-5248-4007-8fba-b449af87a487",
+          "operationId": "f4f177b5-46c7-480e-8cf1-0187d672c96e",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271133161-1976d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\af30b38f-1e28-4801-bbd0-47c90fe2953f\\integration:1:43492:agent-741b5fae-cc2d-4390-91f3-6f34e020b02a",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271133161-1976d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\af30b38f-1e28-4801-bbd0-47c90fe2953f\\integration"
+        },
+        {
+          "slot": "validation",
+          "node": "test",
+          "sessionId": "sess_270f2ba6-7dc7-41df-ba34-5f318d1deea3",
+          "operationId": "cff7fdee-96d7-400b-8c44-c9d0c1be73b8",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271133161-1976d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\af30b38f-1e28-4801-bbd0-47c90fe2953f\\integration:1:43492:agent-741b5fae-cc2d-4390-91f3-6f34e020b02a",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271133161-1976d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\af30b38f-1e28-4801-bbd0-47c90fe2953f\\integration"
+        }
+      ]
+    },
+    "conflict": {
+      "status": "PASS",
+      "summary": "native/conflict/summary.json",
+      "children": "native/conflict/children.json",
+      "screenshots": [
+        "native/conflict/z7-prepared-separate-workspaces.png",
+        "native/conflict/z7-join-full-proposals.png",
+        "native/conflict/z7-conflict-stops-unreviewed-integration.png",
+        "native/conflict/z7-combined-diff-tests-final-review.png",
+        "native/conflict/z7-completed-history-after-restart.png",
+        "native/conflict/z7-explicit-inactive-worker-cleanup.png"
+      ],
+      "base": "2509cf65732e1074b13d3a6ff8f71eb3ab129912",
+      "tree": "17f6509362a8603ec40842e4acdcf4b4d72c122b",
+      "concurrency": 2,
+      "parentId": "c0deccaa-101a-4a24-a685-551090b55874",
+      "phase": "Completed",
+      "nativeAgentInputs": 3,
+      "modelRequests": 14,
+      "graphAdmissions": 5,
+      "workerWallTimeMs": 29263,
+      "finalApprovalElapsedMs": 59393,
+      "wholeHarnessMs": 76165,
+      "cleanup": [
+        {
+          "slot": "worker-a",
+          "at": 1790271349218,
+          "reason": "Explicitly remove only inactive owned worker A; retain sibling and integrated result."
+        }
+      ],
+      "combined": [
+        {
+          "node": "build",
+          "status": "Completed",
+          "sessionId": "sess_0756e418-0041-4f8c-b567-494604ba652f",
+          "operationId": "3cd73136-14a1-48da-807f-e0d6117c885d",
+          "verification": {
+            "processKnown": true,
+            "exitSuccessful": true,
+            "reportFresh": false,
+            "reportParsed": false,
+            "acceptancePassed": true,
+            "classification": "build",
+            "issues": []
+          }
+        },
+        {
+          "node": "test",
+          "status": "Completed",
+          "sessionId": "sess_1e329cbf-4ea4-4c04-91f0-cdd76a789758",
+          "operationId": "9bd3cbe3-632e-45d9-a0c7-729a6468bd3e",
+          "verification": {
+            "processKnown": true,
+            "exitSuccessful": true,
+            "reportFresh": true,
+            "reportParsed": true,
+            "acceptancePassed": true,
+            "classification": "test",
+            "testCount": 3,
+            "passed": 3,
+            "failed": 0,
+            "skipped": 0,
+            "issues": []
+          }
+        }
+      ],
+      "nativeIdentities": [
+        {
+          "slot": "worker-a",
+          "node": "worker-a",
+          "sessionId": "sess_2e7e7bf4-f8d1-4267-9f86-230b62116301",
+          "inputId": "779078d9-377e-4b11-83ad-670873f3aa0e",
+          "commandId": "779078d9-377e-4b11-83ad-670873f3aa0e",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271273101-08861a\\data\\.zcode\\v2\\graph-engineering\\workspaces\\c0deccaa-101a-4a24-a685-551090b55874\\worker-a:1:39704:agent-e180317f-2375-48f0-b168-04eb66581d90",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271273101-08861a\\data\\.zcode\\v2\\graph-engineering\\workspaces\\c0deccaa-101a-4a24-a685-551090b55874\\worker-a"
+        },
+        {
+          "slot": "worker-b",
+          "node": "worker-b",
+          "sessionId": "sess_fef7d8df-2746-472f-a05c-a39f93653f2d",
+          "inputId": "4f66e544-1c38-4898-9266-1987650c87dd",
+          "commandId": "4f66e544-1c38-4898-9266-1987650c87dd",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271273101-08861a\\data\\.zcode\\v2\\graph-engineering\\workspaces\\c0deccaa-101a-4a24-a685-551090b55874\\worker-b:1:36584:agent-5961cb3c-6f8d-4fce-89d9-efb1b37377d8",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271273101-08861a\\data\\.zcode\\v2\\graph-engineering\\workspaces\\c0deccaa-101a-4a24-a685-551090b55874\\worker-b"
+        },
+        {
+          "slot": "integration",
+          "node": "integration",
+          "sessionId": "sess_b8adde4c-8bbb-4958-9109-ae106c7549a1",
+          "inputId": "a9a6efd3-1d50-49ba-800c-f0305e55a6ba",
+          "commandId": "a9a6efd3-1d50-49ba-800c-f0305e55a6ba",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271273101-08861a\\data\\.zcode\\v2\\graph-engineering\\workspaces\\c0deccaa-101a-4a24-a685-551090b55874\\integration:1:43652:agent-7917f8cb-f3f9-4228-919c-05e129b9e359",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271273101-08861a\\data\\.zcode\\v2\\graph-engineering\\workspaces\\c0deccaa-101a-4a24-a685-551090b55874\\integration"
+        },
+        {
+          "slot": "validation",
+          "node": "build",
+          "sessionId": "sess_0756e418-0041-4f8c-b567-494604ba652f",
+          "operationId": "3cd73136-14a1-48da-807f-e0d6117c885d",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271273101-08861a\\data\\.zcode\\v2\\graph-engineering\\workspaces\\c0deccaa-101a-4a24-a685-551090b55874\\integration:1:43652:agent-7917f8cb-f3f9-4228-919c-05e129b9e359",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271273101-08861a\\data\\.zcode\\v2\\graph-engineering\\workspaces\\c0deccaa-101a-4a24-a685-551090b55874\\integration"
+        },
+        {
+          "slot": "validation",
+          "node": "test",
+          "sessionId": "sess_1e329cbf-4ea4-4c04-91f0-cdd76a789758",
+          "operationId": "9bd3cbe3-632e-45d9-a0c7-729a6468bd3e",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271273101-08861a\\data\\.zcode\\v2\\graph-engineering\\workspaces\\c0deccaa-101a-4a24-a685-551090b55874\\integration:1:43652:agent-7917f8cb-f3f9-4228-919c-05e129b9e359",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271273101-08861a\\data\\.zcode\\v2\\graph-engineering\\workspaces\\c0deccaa-101a-4a24-a685-551090b55874\\integration"
+        }
+      ]
+    },
+    "failure": {
+      "status": "PASS",
+      "summary": "native/failure/summary.json",
+      "children": "native/failure/children.json",
+      "screenshots": [
+        "native/failure/z7-prepared-separate-workspaces.png",
+        "native/failure/z7-active-independent-native-workers.png",
+        "native/failure/z7-unrelated-native-chat-survives.png"
+      ],
+      "base": "93b2c2bc2e852cf5c98ea3bf85204678b5d08157",
+      "tree": "17f6509362a8603ec40842e4acdcf4b4d72c122b",
+      "concurrency": 2,
+      "parentId": "b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f",
+      "phase": "Stopped",
+      "nativeAgentInputs": 3,
+      "modelRequests": 6,
+      "graphAdmissions": 2,
+      "workerWallTimeMs": null,
+      "finalApprovalElapsedMs": null,
+      "wholeHarnessMs": 16661,
+      "cleanup": [],
+      "nativeIdentities": [
+        {
+          "slot": "worker-a",
+          "node": "worker-a",
+          "sessionId": "sess_dae69749-48c8-47e7-8421-e0b1ac2c5c1a",
+          "inputId": "df406d4b-d388-4e79-a566-24883eb2c48c",
+          "commandId": "df406d4b-d388-4e79-a566-24883eb2c48c",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-a:1:44480:agent-46cd9850-f989-4461-a189-f2920af9ca14",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-a"
+        },
+        {
+          "slot": "worker-b",
+          "node": "worker-b",
+          "sessionId": "sess_f8588d4a-a93a-46b3-9605-6aa84ee41cda",
+          "inputId": "ea0febf2-d983-4453-8805-744f24e75bb1",
+          "commandId": "ea0febf2-d983-4453-8805-744f24e75bb1",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-b:1:33084:agent-af58e63a-cb92-4cec-a6b9-406f6f903f1f",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271232812-ee1865\\data\\.zcode\\v2\\graph-engineering\\workspaces\\b4a4bc69-7d9f-4f7c-9c32-a12ffcc1dd2f\\worker-b"
+        }
+      ]
+    },
+    "restart": {
+      "status": "PASS",
+      "summary": "native/restart/summary.json",
+      "children": "native/restart/children.json",
+      "screenshots": [
+        "native/restart/z7-prepared-separate-workspaces.png",
+        "native/restart/z7-active-independent-native-workers.png",
+        "native/restart/z7-restarted-no-replay.png"
+      ],
+      "base": "38e6d45ab732f9008442e79ce51cb10db9b4b555",
+      "tree": "17f6509362a8603ec40842e4acdcf4b4d72c122b",
+      "concurrency": 2,
+      "parentId": "7a5983ef-1b31-48fd-8d52-7ec3028b7536",
+      "phase": "Interrupted",
+      "nativeAgentInputs": 2,
+      "modelRequests": 4,
+      "graphAdmissions": 2,
+      "workerWallTimeMs": null,
+      "finalApprovalElapsedMs": null,
+      "wholeHarnessMs": 18462,
+      "cleanup": [],
+      "nativeIdentities": [
+        {
+          "slot": "worker-a",
+          "node": "worker-a",
+          "sessionId": "sess_6da83754-4616-48c6-ae4d-6a9399ec751b",
+          "inputId": "ccaf4c98-74b9-448b-9721-90de87d6c695",
+          "commandId": "ccaf4c98-74b9-448b-9721-90de87d6c695",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271246282-493a17\\data\\.zcode\\v2\\graph-engineering\\workspaces\\7a5983ef-1b31-48fd-8d52-7ec3028b7536\\worker-a:1:7124:agent-f2a0a9d2-88b0-4fa5-b3ef-5e580413fc3d",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271246282-493a17\\data\\.zcode\\v2\\graph-engineering\\workspaces\\7a5983ef-1b31-48fd-8d52-7ec3028b7536\\worker-a"
+        },
+        {
+          "slot": "worker-b",
+          "node": "worker-b",
+          "sessionId": "sess_c6299023-2282-4e1d-a86f-ba214ee3674e",
+          "inputId": "8cfae7cd-c85e-4e37-89aa-99fe2480b442",
+          "commandId": "8cfae7cd-c85e-4e37-89aa-99fe2480b442",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271246282-493a17\\data\\.zcode\\v2\\graph-engineering\\workspaces\\7a5983ef-1b31-48fd-8d52-7ec3028b7536\\worker-b:1:42260:agent-8a4d001e-4e6d-44c0-935f-46c1c4bcb9d5",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271246282-493a17\\data\\.zcode\\v2\\graph-engineering\\workspaces\\7a5983ef-1b31-48fd-8d52-7ec3028b7536\\worker-b"
+        }
+      ]
+    },
+    "combined-failure": {
+      "status": "PASS",
+      "summary": "native/combined-failure/summary.json",
+      "children": "native/combined-failure/children.json",
+      "screenshots": [
+        "native/combined-failure/z7-prepared-separate-workspaces.png",
+        "native/combined-failure/z7-join-full-proposals.png",
+        "native/combined-failure/z7-combined-test-failure-blocks-success.png"
+      ],
+      "base": "c850ded79807d45f7009f5a1fb07b7ea6c84f7a6",
+      "tree": "17f6509362a8603ec40842e4acdcf4b4d72c122b",
+      "concurrency": 2,
+      "parentId": "11cfad53-8395-40f1-8732-8d439299d2e0",
+      "phase": "Stopped",
+      "nativeAgentInputs": 3,
+      "modelRequests": 16,
+      "graphAdmissions": 5,
+      "workerWallTimeMs": 26382,
+      "finalApprovalElapsedMs": null,
+      "wholeHarnessMs": 66769,
+      "cleanup": [],
+      "combined": [
+        {
+          "node": "build",
+          "status": "Completed",
+          "sessionId": "sess_c8be5d03-f660-41ac-8216-1537ada3535b",
+          "operationId": "75283a14-c0a0-4837-b39a-60a0bb00ab5c",
+          "verification": {
+            "processKnown": true,
+            "exitSuccessful": true,
+            "reportFresh": false,
+            "reportParsed": false,
+            "acceptancePassed": true,
+            "classification": "build",
+            "issues": []
+          }
+        },
+        {
+          "node": "test",
+          "status": "Failed",
+          "sessionId": "sess_2be9d4d2-5e13-4b97-9298-6d0872156f9a",
+          "operationId": "ddc316c1-ba3e-49b3-b601-7895e831eb4b",
+          "verification": {
+            "processKnown": true,
+            "exitSuccessful": false,
+            "reportFresh": true,
+            "reportParsed": true,
+            "acceptancePassed": false,
+            "classification": "test",
+            "testCount": 3,
+            "passed": 0,
+            "failed": 3,
+            "skipped": 0,
+            "issues": [
+              "The native command did not exit successfully.",
+              "The native command did not exit successfully.",
+              "The native test report contains failures.",
+              "No executed test passed; all-skipped reports cannot pass.",
+              "Required test add-positive is missing, failed or skipped.",
+              "Required test add-negative is missing, failed or skipped.",
+              "Required test add-zero is missing, failed or skipped."
+            ]
+          }
+        }
+      ],
+      "nativeIdentities": [
+        {
+          "slot": "worker-a",
+          "node": "worker-a",
+          "sessionId": "sess_2adaa81a-531e-4dc1-9493-f364fe3f3883",
+          "inputId": "2d244a03-5b89-4b6e-a395-4146500334ce",
+          "commandId": "2d244a03-5b89-4b6e-a395-4146500334ce",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271259695-7fc4d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\11cfad53-8395-40f1-8732-8d439299d2e0\\worker-a:1:28272:agent-4de15430-db02-448d-9868-9e248d4acd34",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271259695-7fc4d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\11cfad53-8395-40f1-8732-8d439299d2e0\\worker-a"
+        },
+        {
+          "slot": "worker-b",
+          "node": "worker-b",
+          "sessionId": "sess_81f2b39e-e13f-4ff1-a411-590923533b07",
+          "inputId": "cf3d8b14-bb26-4283-92ac-c6d85c4adc10",
+          "commandId": "cf3d8b14-bb26-4283-92ac-c6d85c4adc10",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271259695-7fc4d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\11cfad53-8395-40f1-8732-8d439299d2e0\\worker-b:1:43676:agent-33b29d8d-cbb8-4211-971c-801d44adc8d9",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271259695-7fc4d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\11cfad53-8395-40f1-8732-8d439299d2e0\\worker-b"
+        },
+        {
+          "slot": "integration",
+          "node": "integration",
+          "sessionId": "sess_5a337b19-3286-4242-9a61-34a2cfc4efb9",
+          "inputId": "8e7364e1-b436-49b5-9b90-f5456146c088",
+          "commandId": "8e7364e1-b436-49b5-9b90-f5456146c088",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271259695-7fc4d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\11cfad53-8395-40f1-8732-8d439299d2e0\\integration:1:3328:agent-0230a8b9-bc6a-44d4-8518-a580b3e12bd7",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271259695-7fc4d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\11cfad53-8395-40f1-8732-8d439299d2e0\\integration"
+        },
+        {
+          "slot": "validation",
+          "node": "build",
+          "sessionId": "sess_c8be5d03-f660-41ac-8216-1537ada3535b",
+          "operationId": "75283a14-c0a0-4837-b39a-60a0bb00ab5c",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271259695-7fc4d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\11cfad53-8395-40f1-8732-8d439299d2e0\\integration:1:3328:agent-0230a8b9-bc6a-44d4-8518-a580b3e12bd7",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271259695-7fc4d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\11cfad53-8395-40f1-8732-8d439299d2e0\\integration"
+        },
+        {
+          "slot": "validation",
+          "node": "test",
+          "sessionId": "sess_2be9d4d2-5e13-4b97-9298-6d0872156f9a",
+          "operationId": "ddc316c1-ba3e-49b3-b601-7895e831eb4b",
+          "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271259695-7fc4d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\11cfad53-8395-40f1-8732-8d439299d2e0\\integration:1:3328:agent-0230a8b9-bc6a-44d4-8518-a580b3e12bd7",
+          "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790271259695-7fc4d4\\data\\.zcode\\v2\\graph-engineering\\workspaces\\11cfad53-8395-40f1-8732-8d439299d2e0\\integration"
+        }
+      ]
+    }
+  },
+  "baselineComparison": "checks/baseline-comparison.json",
+  "notRun": [
+    "User-operated provider/project checks",
+    "Installed credentials/settings or company source",
+    "Actual phone/Web/macOS/Linux acceptance",
+    "Another PC/EXE install/update/release",
+    "External MCP, hooks, dependency download and live network behavior",
+    "Real model quality/token/cost and CPU/RAM performance benchmark"
+  ],
+  "boundaries": [
+    "Local committed clean ordinary Git root only; independent shallow clones, maximum two workers; no OS sandbox guarantee.",
+    "Owned native tools are fully capable; malicious same-user tools and external processes are outside the tested coordination boundary.",
+    "Scope violations, unsupported complete-source capture and source/config drift stop; no automatic original merge/publication.",
+    "Interrupted/unknown inputs never replay. Cleanup requires authoritative inactivity, owned real paths, absent native runtime and no preservation.",
+    "Partial preparation failures retain exact ownership intent/paths for inspection; no destructive uncertain rollback."
+  ]
+}

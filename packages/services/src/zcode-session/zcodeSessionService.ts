@@ -195,7 +195,7 @@ export function createZCodeSessionService({
   }
 
   return {
-    async initializeWorkspace(params: ZCodeSessionWorkspaceTarget) {
+    async initializeWorkspace(params: ZCodeSessionWorkspaceTarget & { purpose?: "native-recipe" }) {
       const result = await agentService.initialize(params);
       // task index 的 v4 摄入（sessions-index/workspace-config）是
       // workspace 级常驻订阅。v4 命令路径（createSession/sendText 走 v4/command）

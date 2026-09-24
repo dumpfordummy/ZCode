@@ -18,6 +18,8 @@ import {
 } from "@zcode/shared";
 
 interface LoadZCodeAgentProfilesInput {
+  /** Read current declarations without migrating user files or state. */
+  metadataOnly?: boolean;
   logger?: Logger;
   storageRoot: string;
   workingDirectory: string;
@@ -49,8 +51,11 @@ const RESERVED_AGENT_NAMES = new Set(["general-purpose", "Explore"]);
 export async function loadZCodeAgentProfiles(
   input: LoadZCodeAgentProfilesInput,
 ): Promise<LoadZCodeAgentProfilesResult> {
-  const migration = await migrateUserSubagentMarkdown(join(input.storageRoot, "agents"));
-  await migrateSubagentStateFile(join(input.storageRoot, "v2", "agents-state.json"));
+  const migration = input.metadataOnly
+    ? { failures: [] }
+    : await migrateUserSubagentMarkdown(join(input.storageRoot, "agents"));
+  if (!input.metadataOnly)
+    await migrateSubagentStateFile(join(input.storageRoot, "v2", "agents-state.json"));
   const roots = [
     { path: join(input.storageRoot, "agents"), source: "user" as const },
     { path: join(input.workingDirectory, ".zcode", "agents"), source: "project" as const },

@@ -1,0 +1,339 @@
+{
+  "scenario": "invalid-topology",
+  "home": "<isolated-profile>",
+  "workspace": "<isolated-profile>\\workspace",
+  "assertions": [
+    "Actual editor saves named exclusive branches and a common merge with a required final gate.",
+    "The actual editor preserves invalid drafts but blocks Run for a final gate bypass and an undeclared cycle; zero native inputs or controlled model requests occur."
+  ],
+  "screenshots": [
+    "<isolated-profile>\\z5-invalid-final-gate-bypass.png",
+    "<isolated-profile>\\z5-invalid-off-region-cycle.png"
+  ],
+  "fixture": {
+    "runnerDigest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79",
+    "source": {
+      "digest": "497750fe192e4531c18aff80ae796e04b25b130c00c69d784df8c7a53e3d9527",
+      "files": [
+        {
+          "path": "Directory.Build.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Build.targets",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "Directory.Packages.props",
+          "length": 12,
+          "digest": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+        },
+        {
+          "path": "MathOps.cs",
+          "length": 100,
+          "digest": "2cc9461517454ad8085486324e36939d54eea73c53454d7b64323dbac578fce9"
+        },
+        {
+          "path": "NuGet.Config",
+          "length": 112,
+          "digest": "7d59a339f0f6022f0710d690fe52e2a0f868519847651f6c10f6c9ff1bd7213a"
+        },
+        {
+          "path": "Runner.cs",
+          "length": 3700,
+          "digest": "7cd3cd702a05178bc73b52a10b9f1f012a94942aa7d06377dda2a42b1f05ef79"
+        },
+        {
+          "path": "Z4Fixture.csproj",
+          "length": 494,
+          "digest": "97413a96ff9fb4bfc78841548e1d11971590ce5d25a743e6a83b1a1b3fb910ff"
+        },
+        {
+          "path": "global.json",
+          "length": 54,
+          "digest": "9969992897aee36fbc62db0976390d87b1275dc0d7c6fcb937a7f81a316f97dc"
+        }
+      ]
+    }
+  },
+  "ids": {
+    "initial": "task",
+    "decision": "853f95c9-264e-42ac-9e7f-b7a5e06477ff",
+    "branches": {
+      "true": "8e9cc783-8623-4956-aa7c-dad42c26160f",
+      "false": "bb50288c-fb6d-46cd-99ba-150052486c6e",
+      "default": "21edb127-59a5-4267-94ce-ed8c0d83bc51"
+    },
+    "merge": "f788349a-2d4e-4317-9d2a-9f540de97c46",
+    "finalGate": "783800cc-c459-4f8b-9a29-200806d13549",
+    "admissions": 8,
+    "deadline": 600000
+  },
+  "invalidDefinitions": [
+    {
+      "kind": "final-gate-bypass",
+      "visibleExplanation": "Command palette\n\nSearch and run commands available in this workspace.\n\nNew task\nCtrl+N\nSearch\nCtrl+K\nGraph Engineering\nAutomations\nPlugin Marketplace\nGroup\nProject\nProjects\nworkspace\nNo tasks yet\nTasks\nNo tasks yet\nConnect\nMobile remote control\nBack to chat\nGraph Engineering\n\n<isolated-profile>\\workspace\n\nDesign\nRuns\nEdits apply to a future run\nAdd Condition\nAdd Tool\nAdd Agent Task\nAdd Human Approval\nSave graph\nSave and run\nSaved\nWorkspace defaults for the next run\nDraft needs attention before Run\nEvery success path to End must pass the required final Human Approval.\nEnd output must name an executable result available on every route.\n\nAll tasks share this workspace. Other Chats and editors can still change its files; avoid concurrent edits. A new run can repeat earlier side effects.\n\nRouting and repair limits\nProject command recipes\ntrue\nfalse\ndefault\nStart\nCondition data\nEnd\nChoose one route\ntrue\nfalse\ndefault\nSelected true route\nSelected false route\nSelected default route\nExclusive merge\nHuman Approval\nFinal route review\nReact Flow\nStart\nCondition data\nEnd\nChoose one route\nSelected true route\nSelected false route\nSelected default route\nExclusive merge\nFinal route review\n\nDrag nodes or select with Enter / Space then use arrow keys. Connect handles, or choose Next node in the inspector. Edges define order. Fit view is in the canvas controls.\n\nSelected true route\n\n8e9cc783-8623-4956-aa7c-dad42c26160f\n\nAgent Task name\nInstruction mode\nLiteral text\nInstructions\n\nInstructions are submitted verbatim. Template markers have no special meaning in literal mode.\n\nOutput validation\nNormal final text\nSettings source\nInherit workspace defaults\nAsk before changes\nManage models\nZ1 loopback fixture/z1-fixture\nOn\n\nz1-local-fixture / z1-fixture · build · enabled\n\nAll task settings are captured together when Run is admitted. Node overrides do not change ordinary Chat defaults.\n\nNext node\nEnd\nDelete Agent Task and incident edges"
+    },
+    {
+      "kind": "off-region-cycle",
+      "visibleExplanation": "Command palette\n\nSearch and run commands available in this workspace.\n\nNew task\nCtrl+N\nSearch\nCtrl+K\nGraph Engineering\nAutomations\nPlugin Marketplace\nGroup\nProject\nProjects\nworkspace\nNo tasks yet\nTasks\nNo tasks yet\nConnect\nMobile remote control\nBack to chat\nGraph Engineering\n\n<isolated-profile>\\workspace\n\nDesign\nRuns\nEdits apply to a future run\nAdd Condition\nAdd Tool\nAdd Agent Task\nAdd Human Approval\nSave graph\nSave and run\nSaved\nWorkspace defaults for the next run\nDraft needs attention before Run\nOnly the declared decision-to-repair edge may form a cycle.\n\nAll tasks share this workspace. Other Chats and editors can still change its files; avoid concurrent edits. A new run can repeat earlier side effects.\n\nRouting and repair limits\nProject command recipes\ntrue\nfalse\ndefault\nStart\nCondition data\nEnd\nChoose one route\ntrue\nfalse\ndefault\nSelected true route\nSelected false route\nSelected default route\nExclusive merge\nHuman Approval\nFinal route review\nReact Flow\nStart\nCondition data\nEnd\nChoose one route\nSelected true route\nSelected false route\nSelected default route\nExclusive merge\nFinal route review\n\nDrag nodes or select with Enter / Space then use arrow keys. Connect handles, or choose Next node in the inspector. Edges define order. Fit view is in the canvas controls.\n\nSelected true route\n\n8e9cc783-8623-4956-aa7c-dad42c26160f\n\nAgent Task name\nInstruction mode\nLiteral text\nInstructions\n\nInstructions are submitted verbatim. Template markers have no special meaning in literal mode.\n\nOutput validation\nNormal final text\nSettings source\nInherit workspace defaults\nAsk before changes\nZ1 loopback fixture/z1-fixture\nOn\n\nz1-local-fixture / z1-fixture · build · enabled\n\nAll task settings are captured together when Run is admitted. Node overrides do not change ordinary Chat defaults.\n\nNext node\nChoose one route\nDelete Agent Task and incident edges"
+    }
+  ],
+  "status": "PASS",
+  "finalRecord": {
+    "version": 5,
+    "workspaceKey": "<isolated-profile>\\workspace",
+    "definition": {
+      "version": 5,
+      "revision": 3,
+      "name": "Z5 typed exclusive routes",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": ""
+        },
+        {
+          "id": "task",
+          "position": {
+            "x": 280,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Condition data",
+          "instructions": "Z5_CONDITION: Read MathOps.cs and return the exact controlled structured data.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          },
+          "output": {
+            "kind": "json",
+            "schema": {
+              "type": "object",
+              "required": [],
+              "additionalProperties": false,
+              "properties": {
+                "ready": {
+                  "type": "boolean"
+                },
+                "count": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 2160,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "f788349a-2d4e-4317-9d2a-9f540de97c46"
+        },
+        {
+          "id": "853f95c9-264e-42ac-9e7f-b7a5e06477ff",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "type": "condition",
+          "name": "Choose one route",
+          "inputs": [
+            {
+              "alias": "data",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "task",
+                "selector": "structured"
+              }
+            }
+          ],
+          "branches": [
+            {
+              "exit": "true",
+              "predicate": {
+                "op": "all",
+                "predicates": [
+                  {
+                    "op": "eq",
+                    "alias": "data",
+                    "pointer": "/ready",
+                    "value": true
+                  },
+                  {
+                    "op": "gte",
+                    "alias": "data",
+                    "pointer": "/count",
+                    "value": 3
+                  }
+                ]
+              }
+            },
+            {
+              "exit": "false",
+              "predicate": {
+                "op": "eq",
+                "alias": "data",
+                "pointer": "/ready",
+                "value": false
+              }
+            }
+          ],
+          "defaultExit": "default",
+          "errorPolicy": "needs-human"
+        },
+        {
+          "id": "8e9cc783-8623-4956-aa7c-dad42c26160f",
+          "position": {
+            "x": 860,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Selected true route",
+          "instructions": "Z5_ROUTE: Read MathOps.cs; route=true.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "bb50288c-fb6d-46cd-99ba-150052486c6e",
+          "position": {
+            "x": 1120,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Selected false route",
+          "instructions": "Z5_ROUTE: Read MathOps.cs; route=false.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "21edb127-59a5-4267-94ce-ed8c0d83bc51",
+          "position": {
+            "x": 1380,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Selected default route",
+          "instructions": "Z5_ROUTE: Read MathOps.cs; route=default.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "f788349a-2d4e-4317-9d2a-9f540de97c46",
+          "position": {
+            "x": 1640,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Exclusive merge",
+          "instructions": "Z5_ROUTE: Read MathOps.cs; route=merge.",
+          "instructionMode": "literal",
+          "inputs": [],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "783800cc-c459-4f8b-9a29-200806d13549",
+          "position": {
+            "x": 1900,
+            "y": 100
+          },
+          "type": "approval",
+          "name": "Final route review",
+          "reviewInstructions": "Review this exact iteration's native evidence. This gate does not authorize publication or answer native permissions.",
+          "evidence": [
+            {
+              "alias": "evidence",
+              "source": {
+                "kind": "artifact",
+                "nodeId": "f788349a-2d4e-4317-9d2a-9f540de97c46",
+                "selector": "final"
+              }
+            }
+          ],
+          "commentPolicy": "required"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "task"
+        },
+        {
+          "source": "task",
+          "target": "853f95c9-264e-42ac-9e7f-b7a5e06477ff"
+        },
+        {
+          "source": "f788349a-2d4e-4317-9d2a-9f540de97c46",
+          "target": "783800cc-c459-4f8b-9a29-200806d13549"
+        },
+        {
+          "source": "783800cc-c459-4f8b-9a29-200806d13549",
+          "target": "end"
+        },
+        {
+          "source": "853f95c9-264e-42ac-9e7f-b7a5e06477ff",
+          "target": "8e9cc783-8623-4956-aa7c-dad42c26160f",
+          "sourcePort": "true"
+        },
+        {
+          "source": "853f95c9-264e-42ac-9e7f-b7a5e06477ff",
+          "target": "bb50288c-fb6d-46cd-99ba-150052486c6e",
+          "sourcePort": "false"
+        },
+        {
+          "source": "bb50288c-fb6d-46cd-99ba-150052486c6e",
+          "target": "f788349a-2d4e-4317-9d2a-9f540de97c46"
+        },
+        {
+          "source": "853f95c9-264e-42ac-9e7f-b7a5e06477ff",
+          "target": "21edb127-59a5-4267-94ce-ed8c0d83bc51",
+          "sourcePort": "default"
+        },
+        {
+          "source": "21edb127-59a5-4267-94ce-ed8c0d83bc51",
+          "target": "f788349a-2d4e-4317-9d2a-9f540de97c46"
+        },
+        {
+          "source": "8e9cc783-8623-4956-aa7c-dad42c26160f",
+          "target": "853f95c9-264e-42ac-9e7f-b7a5e06477ff"
+        }
+      ],
+      "routing": {
+        "finalGateId": "783800cc-c459-4f8b-9a29-200806d13549",
+        "limits": {
+          "maxNodeAdmissions": 8,
+          "deadlineMs": 600000
+        }
+      }
+    },
+    "runs": []
+  },
+  "nativeLedger": [],
+  "nativeToolResults": [],
+  "providerErrors": [],
+  "modelRequests": 0,
+  "collectedModelRequestCounts": {
+    "total": 0,
+    "byStage": {}
+  }
+}

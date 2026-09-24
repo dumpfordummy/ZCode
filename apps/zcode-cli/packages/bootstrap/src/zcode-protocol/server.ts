@@ -1,4 +1,6 @@
 import { querySessionDebug } from "./session-debug.js";
+import { previewExecutionEnvironment } from "./execution-environment.js";
+import { startNativeRecipe, readNativeRecipe } from "./native-recipe.js";
 import {
   zcodePluginsCancelOperationParamsSchema,
   zcodeProtocolMethods,
@@ -568,6 +570,12 @@ export class ZCodeProtocolAgentServer {
         return this.requireV4Gateway().queryCommands(request.params);
       case zcodeProtocolMethods.sessionCreate:
         return await createSession(this.context, request.params, request.trace);
+      case zcodeProtocolMethods.sessionRecipeStart:
+        return await startNativeRecipe(this.context, request.params);
+      case zcodeProtocolMethods.sessionRecipeInspect:
+        return readNativeRecipe(this.context, request.params);
+      case zcodeProtocolMethods.sessionRecipeCancel:
+        return readNativeRecipe(this.context, request.params, true);
       case zcodeProtocolMethods.sessionResume:
         return await resumeSession(this.context, request.params);
       case zcodeProtocolMethods.sessionList:
@@ -643,6 +651,8 @@ export class ZCodeProtocolAgentServer {
         return await testProviderModelConnectivity(this.context, request.params);
       case zcodeProtocolMethods.mcpList:
         return await listMcpServers(this.context, request.params);
+      case zcodeProtocolMethods.workspacePreviewExecutionEnvironment:
+        return await previewExecutionEnvironment(this.context, request.params);
       case zcodeProtocolMethods.pluginsList:
         return await listPlugins(this.context, request.params);
       case zcodeProtocolMethods.pluginsReferenceCatalogWithCategory:

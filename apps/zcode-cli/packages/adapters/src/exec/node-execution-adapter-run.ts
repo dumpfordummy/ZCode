@@ -103,6 +103,7 @@ export class NodeExecutionAdapterRun extends NodeExecutionAdapterProcess {
     let cancelled = false;
     let exited = false;
     let childClosed = false;
+    let processExitObserved = false;
     let executionSettled = false;
     let childReadyForTermination = false;
     let terminationRequested = false;
@@ -224,12 +225,13 @@ export class NodeExecutionAdapterRun extends NodeExecutionAdapterProcess {
           resolve(state);
         };
         spawnedChild.once("error", (error) => finishExit({ error }));
-        spawnedChild.once("exit", (code, signal) =>
+        spawnedChild.once("exit", (code, signal) => {
+          processExitObserved = true;
           finishExit({
             code: code ?? undefined,
             signal: signal ?? undefined,
-          }),
-        );
+          });
+        });
       });
 
       const closePromise = new Promise<void>((resolve) => {
@@ -349,6 +351,7 @@ export class NodeExecutionAdapterRun extends NodeExecutionAdapterProcess {
           : undefined;
       const result = this.createResult({
         status,
+        processExitObserved,
         startedAt,
         completedAt,
         pid: spawnedChild.pid,

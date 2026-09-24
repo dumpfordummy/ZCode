@@ -202,6 +202,7 @@ export class NodePluginAdapter implements PluginPort {
             options: request.config.options[loaded.id] ?? {},
             priority,
             workingDirectory: request.workingDirectory,
+            metadataOnly: options?.metadataOnly,
           })
         : emptyComponents(hookInspection.details);
       priority += PRIORITY_STEP;
@@ -262,11 +263,11 @@ export class NodePluginAdapter implements PluginPort {
         source: "official" as const,
       })),
     );
-    for (const installed of listInstalledPluginRecords(request.storageRoot)) {
+    for (const installed of listInstalledPluginRecords(request.storageRoot, options?.metadataOnly)) {
       candidates.push({
         defaultEnabled: false,
         marketplace: installed.marketplace,
-        rootPath: resolveInstalledPluginRoot(request.storageRoot, installed),
+        rootPath: resolveInstalledPluginRoot(request.storageRoot, installed, options?.metadataOnly),
         source: "cache",
       });
     }
@@ -334,6 +335,7 @@ function createPluginMetadata(
 }
 
 function resolveEnabledComponents(input: {
+  metadataOnly?: boolean;
   dataPath: string;
   diagnostics: PluginDiagnostic[];
   env: Record<string, string | undefined>;
@@ -345,11 +347,11 @@ function resolveEnabledComponents(input: {
   priority: number;
   workingDirectory: string;
 }): PluginComponents {
-  mkdirSync(input.dataPath, { recursive: true });
+  if (!input.metadataOnly) mkdirSync(input.dataPath, { recursive: true });
 
   const skillRoots = resolveSkillRoots(input, input.priority);
   return {
-    commandRoots: resolveCommandRoots(input, input.priority + 1),
+    commandRoots: input.metadataOnly ? [] : resolveCommandRoots(input, input.priority + 1),
     hooks: input.hookEvents,
     hookDetails: input.hookDetails,
     mcpServers: resolvePluginMcpServers({

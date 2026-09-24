@@ -1,5 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { GraphDefinition, GraphReadiness, GraphWorkspaceView } from "@zcode/services";
+import type {
+  GraphApprovalCommand,
+  GraphRunContinueCommand,
+  GraphDefinition,
+  GraphSequentialDefinition,
+  GraphNativeSettings,
+  GraphReadiness,
+  GraphWorkspaceView,
+  GraphRecipe,
+  GraphRecipeSnapshot,
+  GraphRunProvenance,
+} from "@zcode/services";
 import type { ModelSelection } from "@zcode/shared";
 import type { SubmissionMode } from "@zcode/shared/zcode-protocol-v4";
 import { useWorkspaceServicesResolution } from "@/hooks/useWorkspaceServices.js";
@@ -9,8 +20,16 @@ import {
 } from "@/graph-engineering/graphEngineeringView.js";
 import {
   captureGraphSubmission,
+  prepareGraphRunConfirmation,
   type GraphSubmission,
 } from "@/graph-engineering/graphSubmission.js";
+import {
+  captureGraphDecision,
+  graphApprovalKey,
+  type GraphDecisionIntent,
+} from "@/graph-engineering/graphApprovalView.js";
+
+import { captureGraphContinuation } from "@/graph-engineering/graphRoutingView.js";
 
 interface GraphScope {
   workspacePath: string;
@@ -29,6 +48,7 @@ export function useGraphEngineering(scope: GraphScope) {
   );
   const local = isLocalGraphTarget(scope) && !resolution.isRemoteTarget;
   const service = local ? resolution.services.graphEngineeringService : undefined;
+  const workflowService = local ? resolution.services.graphWorkflowService : undefined;
   const target = useMemo(
     () =>
       graphWorkspaceTarget({
@@ -39,11 +59,16 @@ export function useGraphEngineering(scope: GraphScope) {
   );
   const targetKey = target.workspaceIdentity?.trim() || target.workspacePath;
   const [view, setView] = useState<GraphWorkspaceView | null>(null);
+  const [recipes, setRecipes] = useState<GraphRecipeSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [pending, setPending] = useState(false);
   const flight = useRef<number | null>(null);
   const submission = useRef<GraphSubmission | null>(null);
+  const submissionDefinition = useRef<GraphDefinition | null>(null);
+  const confirmationProvenance = useRef<GraphRunProvenance | null>(null);
+  const continuations = useRef(new Map<string, GraphRunContinueCommand>());
+  const decisions = useRef(new Map<string, GraphDecisionIntent>());
   const generation = useRef(0);
   const readSequence = useRef(0);
   const reload = useCallback(async () => {
@@ -59,8 +84,11 @@ export function useGraphEngineering(scope: GraphScope) {
         if (
           submission.current &&
           next.runs.some((run) => run.requestId === submission.current?.requestId)
-        )
+        ) {
           submission.current = null;
+          submissionDefinition.current = null;
+          confirmationProvenance.current = null;
+        }
       }
     } catch (cause) {
       if (owner === generation.current && sequence === readSequence.current) {
@@ -73,10 +101,15 @@ export function useGraphEngineering(scope: GraphScope) {
   useEffect(() => {
     generation.current += 1;
     setView(null);
+    setRecipes(null);
     setError(null);
     setLoading(Boolean(service));
     setPending(false);
     submission.current = null;
+    submissionDefinition.current = null;
+    confirmationProvenance.current = null;
+    decisions.current.clear();
+    continuations.current.clear();
     if (!service) return;
     const subscription = service.onDidChange(({ workspaceKey }) => {
       if (workspaceKey === targetKey) void reload();
@@ -116,7 +149,11 @@ export function useGraphEngineering(scope: GraphScope) {
     (definition: GraphDefinition) =>
       act(async () => {
         if (!service) return;
-        await service.saveDefinition({ target, definition, expectedRevision: definition.revision });
+        return await service.saveDefinition({
+          target,
+          definition,
+          expectedRevision: definition.revision,
+        });
       }),
     [act, service, target],
   );
@@ -127,23 +164,39 @@ export function useGraphEngineering(scope: GraphScope) {
       modelSelection: ModelSelection,
       mode: SubmissionMode,
       planEnabled: boolean,
+      confirmed = false,
+      preflight?: GraphSubmission["preflight"],
     ) =>
       act(async () => {
         if (!service) return;
         const owner = generation.current;
+        const confirmedDefinition = structuredClone(definition);
         const request = await captureGraphSubmission({
           retained: submission.current,
-          definition,
-          intent: { target, requestId: crypto.randomUUID(), modelSelection, mode, planEnabled },
+          retainedDefinition: submissionDefinition.current,
+          confirmed,
+          definition: confirmedDefinition,
+          intent: {
+            target,
+            requestId: crypto.randomUUID(),
+            modelSelection,
+            mode,
+            planEnabled,
+            ...(preflight ? { preflight } : {}),
+          },
           save: (draft) =>
             service.saveDefinition({ target, definition: draft, expectedRevision: draft.revision }),
         });
         // 保存期间切工作区后不再派发；丢失 Run ACK 时保留同一 revision/config/request，禁止重新保存后重试。
         if (owner !== generation.current) return;
+        if (!submission.current) submissionDefinition.current = confirmedDefinition;
         submission.current = request;
         const run = await service.run(request);
-        if (owner === generation.current && submission.current === request)
+        if (owner === generation.current && submission.current === request) {
           submission.current = null;
+          submissionDefinition.current = null;
+          confirmationProvenance.current = null;
+        }
         return owner === generation.current ? run.id : undefined;
       }),
     [act, service, target],
@@ -159,14 +212,141 @@ export function useGraphEngineering(scope: GraphScope) {
 
   return {
     view,
+    recipes,
     loading,
     pending,
     error,
     local,
     supported: Boolean(service),
     save,
+    prepareRunConfirmation: useCallback(
+      (definition: GraphSequentialDefinition, settings: GraphNativeSettings) =>
+        act(async () => {
+          if (!service) return;
+          const owner = generation.current;
+          const captured = await prepareGraphRunConfirmation({
+            definition,
+            settings,
+            retained: submission.current,
+            retainedDefinition: submissionDefinition.current,
+            retainedProvenance: confirmationProvenance.current,
+            save: (draft) =>
+              service.saveDefinition({
+                target,
+                definition: draft,
+                expectedRevision: draft.revision,
+              }),
+            prepare: async (saved, capturedSettings) => {
+              if (!workflowService) throw new Error("Workflow preflight service is unavailable.");
+              return workflowService.prepare({
+                target,
+                revision: saved.revision,
+                settings: capturedSettings,
+              });
+            },
+          });
+          if (owner === generation.current && captured?.provenance)
+            confirmationProvenance.current = captured.provenance;
+          return owner === generation.current ? captured : undefined;
+        }),
+      [act, service, workflowService, target],
+    ),
     run,
     cancel,
+    readRecipes: useCallback(
+      () =>
+        act(async () => {
+          if (!service) return;
+          const owner = generation.current;
+          const value = await service.recipes({ target, action: "read" });
+          if (owner === generation.current) setRecipes(value);
+          return value;
+        }),
+      [act, service, target],
+    ),
+    saveRecipes: useCallback(
+      (values: GraphRecipe[], expectedDigest: string) =>
+        act(async () => {
+          if (!service) return;
+          const owner = generation.current;
+          const value = await service.recipes({
+            target,
+            action: "save",
+            recipes: values,
+            expectedDigest,
+          });
+          if (owner === generation.current) setRecipes(value);
+          return value;
+        }),
+      [act, service, target],
+    ),
+    readArtifact: useCallback(
+      (runId: string, artifactId: string) =>
+        act(async () => {
+          const value = await service?.artifact({ target, runId, artifactId, action: "read" });
+          return value?.kind === "content" ? value : undefined;
+        }),
+      [act, service, target],
+    ),
+    exportManifest: useCallback(
+      (runId: string) =>
+        act(async () => {
+          const value = await service?.artifact({ target, runId, action: "manifest" });
+          return value?.kind === "manifest" ? value.text : undefined;
+        }),
+      [act, service, target],
+    ),
+    retainedDecision: useCallback(
+      (command: GraphApprovalCommand) => decisions.current.get(graphApprovalKey(command)),
+      [],
+    ),
+    decideApproval: useCallback(
+      (command: GraphApprovalCommand, value: "approve" | "reject", comment: string) =>
+        act(async () => {
+          if (!service) return;
+          const owner = generation.current;
+          const key = graphApprovalKey(command);
+          const intent = captureGraphDecision(decisions.current.get(key), {
+            ...command,
+            decisionId: crypto.randomUUID(),
+            value,
+            comment,
+          });
+          decisions.current.set(key, intent);
+          await service.decideApproval(intent);
+          if (owner === generation.current && decisions.current.get(key) === intent)
+            decisions.current.delete(key);
+        }),
+      [act, service],
+    ),
+    continueRouting: useCallback(
+      (runId: string, checkpointId: string, checkpointDigest: string) =>
+        act(async () => {
+          if (!service) return;
+          const owner = generation.current,
+            key = `${runId}:${checkpointId}`;
+          const intent = captureGraphContinuation(continuations.current.get(key), {
+            action: "continue",
+            target,
+            runId,
+            requestId: crypto.randomUUID(),
+            checkpointId,
+            checkpointDigest,
+          });
+          continuations.current.set(key, intent);
+          await service.run(intent);
+          if (owner === generation.current && continuations.current.get(key) === intent)
+            continuations.current.delete(key);
+        }),
+      [act, service, target],
+    ),
+    continueApproval: useCallback(
+      (command: GraphApprovalCommand) =>
+        act(async () => {
+          await service?.continueApproval(command);
+        }),
+      [act, service],
+    ),
     inspectRecovery: useCallback(
       (runId: string) =>
         act(async () => {
@@ -192,86 +372,6 @@ export function useGraphEngineering(scope: GraphScope) {
   };
 }
 
-/** Validation reads are disposable projections; a stale reply cannot enable a newer draft. */
-export function useGraphReadiness(
-  definition: GraphDefinition,
-  validate: (definition: GraphDefinition) => Promise<GraphReadiness>,
-) {
-  const [result, setResult] = useState<{
-    definition: GraphDefinition;
-    value: GraphReadiness;
-  } | null>(null);
-  useEffect(() => {
-    let live = true;
-    void validate(definition).then(
-      (value) => {
-        if (live) setResult({ definition, value });
-      },
-      (error: unknown) => {
-        if (live)
-          setResult({
-            definition,
-            value: {
-              path: [],
-              errors: [error instanceof Error ? error.message : String(error)],
-            },
-          });
-      },
-    );
-    return () => {
-      live = false;
-    };
-  }, [definition, validate]);
-  return result?.definition === definition ? result.value : null;
-}
+export { useGraphReadiness } from "./useGraphReadiness.js";
 
-/** UI indication only; the native Host guard remains authoritative, including other attachments. */
-export function useGraphSessionOwnership(
-  scope: Omit<GraphScope, "remoteTarget">,
-  sessionId: string | null,
-): boolean {
-  const { services, rpcReady } = useWorkspaceServicesResolution(
-    scope.workspacePath,
-    scope.remoteSessionId,
-    scope.workspaceIdentity,
-  );
-  const service = services.graphEngineeringService;
-  const workspaceKey = scope.workspaceIdentity?.trim() || scope.workspacePath;
-  const [ownedState, setOwnedState] = useState<{ key: string; owned: boolean } | null>(null);
-  const key = `${workspaceKey}:${sessionId ?? ""}`;
-  useEffect(() => {
-    if (!service || !rpcReady || !sessionId) return;
-    let live = true;
-    let sequence = 0;
-    const read = async () => {
-      const current = ++sequence;
-      try {
-        const owned = await service.isSessionOwned({
-          workspacePath: scope.workspacePath,
-          workspaceIdentity: scope.workspaceIdentity,
-          sessionId,
-        });
-        if (live && current === sequence) setOwnedState({ key, owned });
-      } catch {
-        // Host 拒绝仍是最终门禁；读取失败不得阻断普通聊天或交互应答。
-      }
-    };
-    const subscription = service.onDidChange((event) => {
-      if (event.workspaceKey === workspaceKey) void read();
-    });
-    void read();
-    return () => {
-      live = false;
-      subscription.dispose();
-    };
-  }, [
-    service,
-    rpcReady,
-    sessionId,
-    scope.workspacePath,
-    scope.workspaceIdentity,
-    workspaceKey,
-    key,
-  ]);
-  return ownedState?.key === key && ownedState.owned;
-}
+export { useGraphSessionOwnership } from "./useGraphSessionOwnership.js";

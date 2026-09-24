@@ -1,0 +1,37 @@
+✔ Tool intents persist before native effects; duplicate Run and viewing cannot admit extra commands (52.7804ms)
+✔ known failed native command never advances even if unrelated model says PASS (19.0509ms)
+✔ cancel targets only owned Tool and retains cancellation without stopping native agents (10.5047ms)
+✔ lost Tool start acknowledgement and cold load never replay; guard blocks arbitrary prompts (4.1001ms)
+✔ metadata write failures happen before dispatch; terminal write failure stops successor (17.5533ms)
+✖ failed Tool intent or acknowledgement writes keep the last durable cached dispatch phase (3.4353ms)
+✔ strict structured result binds exact attempt field while native completion remains separate (37.6983ms)
+✔ invalid strict output stops all dependents without repair and retains successful native proof (13.6922ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 985.3972
+
+✖ failing tests:
+
+test at packages\services\src\graph-engineering\adapters\evidence-service.test.ts:1:2942
+✖ failed Tool intent or acknowledgement writes keep the last durable cached dispatch phase (3.4353ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'sending'
+  - 'created'
+  
+      at TestContext.<anonymous> (C:\Users\USER\Desktop\Personal\ZCode\packages\services\src\graph-engineering\adapters\evidence-service.test.ts:60:12)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'sending',
+    expected: 'created',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
