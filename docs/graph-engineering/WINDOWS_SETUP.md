@@ -4,8 +4,8 @@ ZCode Graph is this fork's Windows x64 distribution of native Z1: Start → Agen
 
 ## Install and use
 
-1. Open [this fork's Releases](https://github.com/dumpfordummy/ZCode/releases) and select a **ZCode Graph** prerelease. Download `ZCode Graph-<version>-win-x64.exe` and `SHA256SUMS.txt` from the same release.
-2. In PowerShell, run `Get-FileHash -Algorithm SHA256 '.\ZCode Graph-3.14.0-z1.2-win-x64.exe'` (substitute the downloaded version) and compare its hash with `SHA256SUMS.txt`.
+1. Open the [verified 1.2 prerelease](https://github.com/dumpfordummy/ZCode/releases/tag/graph-v3.14.0-z1.2). Download `ZCode.Graph-3.14.0-z1.2-win-x64.exe` and `SHA256SUMS.txt` from the same release. Later versions are listed in [this fork's Releases](https://github.com/dumpfordummy/ZCode/releases).
+2. In PowerShell, run `Get-FileHash -Algorithm SHA256 '.\ZCode.Graph-3.14.0-z1.2-win-x64.exe'` (substitute the downloaded version) and compare its hash with `SHA256SUMS.txt`. GitHub normalizes the space in the original build filename to a dot; the checksum file's original filename contains a space, but the hash applies to the downloaded `.exe`.
 3. Run the installer and launch **ZCode Graph**. This prerelease is unsigned; Windows may show an unknown-publisher warning. Verify the source and checksum before choosing to run it. Code-signing/SmartScreen reputation is not certified.
 4. Use **Use API key** and configure your own supported provider/model through ordinary ZCode settings. No account or model balance is included. Account OAuth callbacks using the shared `zcode:` URL protocol are outside this distribution's acceptance scope.
 5. Open a local test workspace. Select a model in ordinary Chat, then open **Graph Engineering** in the workspace sidebar. Set the graph/task name and instructions, **Save**, then **Run**.

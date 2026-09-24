@@ -2,7 +2,7 @@
 
 This fork adds **Graph Engineering** to ZCode: Start → Agent Task → End using the same native agent/session services as Chat. **Open conversation** opens the exact session belonging to the attempt. Native permissions, questions, cancellation and conservative restart recovery are preserved.
 
-Download the `ZCode Graph-<version>-win-x64.exe` installer and verify it against `SHA256SUMS.txt`. There is no need to clone the source to install. Model credentials and project development tools are supplied by each user.
+Download the Windows x64 `.exe` installer and compare its SHA256 hash with `SHA256SUMS.txt`. GitHub changes the space in the build filename to a dot (`ZCode.Graph-<version>-win-x64.exe`); the checksum line retains the original build filename. There is no need to clone the source to install. Model credentials and project development tools are supplied by each user.
 
 The separate **ZCode Graph** app uses `%USERPROFILE%\.zcode-graph-engineering`, with a private home for the application and its tools. It does not copy an existing ZCode/Codex profile, take over the upstream URL handler/Explorer menu, or install upstream updates. Use personal provider settings; upstream account OAuth callbacks are not covered. This is an **unsigned prerelease**.
 
