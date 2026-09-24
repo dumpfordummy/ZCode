@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Graph prerelease version (e.g. 3.14.0-z7.1); manual runs build artifacts only"
+        description: "Graph prerelease version (e.g. 3.14.0-z7.2); manual runs build artifacts only"
         required: true
-        default: "3.14.0-z7.1"
+        default: "3.14.0-z7.2"
 
 concurrency:
   group: graph-windows-${{ github.ref }}
@@ -35,6 +35,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24.14.0
+      - name: Use canonical temporary workspace paths
+        run: |
+          # Hosted Windows TEMP may use RUNNER~1; keep Graph's alias rejection intact.
+          $canonicalTemp = node --input-type=module -e "import { realpath } from 'node:fs/promises'; console.log(await realpath(process.env.RUNNER_TEMP));"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          "TMP=$canonicalTemp" >> $env:GITHUB_ENV
+          "TEMP=$canonicalTemp" >> $env:GITHUB_ENV
+          "Canonical fixture temporary directory: $canonicalTemp"
       - name: Validate release version
         id: release
         env:

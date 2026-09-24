@@ -7,8 +7,8 @@ import { parsePublishArgs, publishGraph } from "./publish-core.mjs";
 const root = path.resolve(import.meta.dirname, "../..");
 const help = `Publish the committed ZCode Graph Windows prerelease through GitHub Actions.
 
-Usage: pnpm graph:release --version 3.14.0-z7.1 [--dry-run] [--resume]
-       pnpm graph:release --version 3.14.0-z7.1 --timeout-minutes 100
+Usage: pnpm graph:release --version 3.14.0-z7.2 [--dry-run] [--resume]
+       pnpm graph:release --version 3.14.0-z7.2 --timeout-minutes 100
 
 Requires a clean checkout, Git, and an authenticated GitHub CLI (gh) with
 write access to dumpfordummy/ZCode. Build tools run on GitHub's Windows runner.

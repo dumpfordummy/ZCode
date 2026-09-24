@@ -8,6 +8,8 @@ The version resolver remains the sole version policy owner. The workflow remains
 
 When GitHub CLI is unavailable locally, an authorized maintainer may use standard Git to push the same reviewed annotated tag after checking a clean commit, exact fork, active workflow and tag/release collisions, then observe the exact tag/SHA and release assets through GitHub's public API or UI. Do not extract tokens or change authentication configuration. The CI workflow still performs publication with its own ephemeral token. No existing tag or asset may be overwritten.
 
+The first Z7 tag (`graph-v3.14.0-z7.1`, run `36037890709`) failed before packaging: hosted Windows tests used `C:\Users\RUNNER~1\...` temporary workspace aliases, triggering the existing canonical-path refusal. CI must resolve the runner's temporary directory with `realpath` and set job-local `TMP`/`TEMP` before fixtures or packaged smoke. This changes only fixture/build environment; production alias guards remain intact. Preserve the failed tag and use a new patch suffix for the corrected workflow.
+
 This follow-up adds release automation for the existing native Z2 implementation. It does not publish a release during implementation or change Graph/Chat execution, installed settings, product identity or the updater. The original Z1 distribution contract continues to govern isolation and packaging; its Z1-only version/publication scope is extended here to Z2.
 
 ## Command and ownership
