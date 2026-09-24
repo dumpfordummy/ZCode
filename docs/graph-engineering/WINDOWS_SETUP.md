@@ -4,8 +4,8 @@ ZCode Graph is this fork's Windows x64 distribution of native Graph Engineering.
 
 ## Install and use
 
-1. Open [this fork's Releases](https://github.com/dumpfordummy/ZCode/releases), choose the intended version and download its Windows x64 `.exe` plus `SHA256SUMS.txt`. The existing [Z1 1.2 prerelease](https://github.com/dumpfordummy/ZCode/releases/tag/graph-v3.14.0-z1.2) does not include Z2; these source instructions do not establish that a Z2 release has been published.
-2. In PowerShell, run `Get-FileHash -Algorithm SHA256 '.\ZCode.Graph-3.14.0-z1.2-win-x64.exe'` (substitute the downloaded version) and compare its hash with `SHA256SUMS.txt`. GitHub normalizes the space in the original build filename to a dot; the checksum file's original filename contains a space, but the hash applies to the downloaded `.exe`.
+1. Open the published [ZCode Graph 3.14.0-z2.2 release](https://github.com/dumpfordummy/ZCode/releases/tag/graph-v3.14.0-z2.2) and download its Windows x64 `.exe` plus `SHA256SUMS.txt`. Use [this fork's Releases](https://github.com/dumpfordummy/ZCode/releases) for later versions. The historical Z1 1.2 prerelease does not include Z2.
+2. In PowerShell, run `Get-FileHash -Algorithm SHA256 '.\ZCode.Graph-3.14.0-z2.2-win-x64.exe'` (substitute the downloaded version) and compare its hash with `SHA256SUMS.txt`. GitHub normalizes the space in the original build filename to a dot; the checksum file's original filename contains a space, but the hash applies to the downloaded `.exe`.
 3. Run the installer and launch **ZCode Graph**. This prerelease is unsigned; Windows may show an unknown-publisher warning. Verify the source and checksum before choosing to run it. Code-signing/SmartScreen reputation is not certified.
 4. Use **Use API key** and configure your own supported provider/model through ordinary ZCode settings. No account or model balance is included. Account OAuth callbacks using the shared `zcode:` URL protocol are outside this distribution's acceptance scope.
 5. Open a local test workspace. Select a model in ordinary Chat, then open **Graph Engineering** in the workspace sidebar. Set the graph/task name and instructions, **Save**, then **Run**.
@@ -30,13 +30,13 @@ node --test scripts/graph-engineering/distribution.test.mjs
 pnpm typecheck
 pnpm lint
 pnpm architecture:check --changed
-node scripts/graph-engineering/build-windows.mjs 3.14.0-z2.1
-node scripts/graph-engineering/packaged-smoke.mjs 3.14.0-z2.1
+node scripts/graph-engineering/build-windows.mjs 3.14.0-z2.2
+node scripts/graph-engineering/packaged-smoke.mjs 3.14.0-z2.2
 ```
 
 Stop if a command fails. Packaging downloads public native/runtime assets. Output is `packages/desktop/dist-graph/`: the NSIS `.exe`, checksum file, and `win-unpacked/`. To run unpacked, keep the **entire** `win-unpacked` directory together and launch `ZCode Graph.exe`; copying that single executable is insufficient. `git pull --ff-only` updates source, after which dependencies and the build must be refreshed; Git does not install an executable automatically. Do not run typecheck concurrently with packaging because its emitted Host output shares the build directory.
 
-The repeatable CI workflow is `.github/workflows/graph-windows-release.yml`. After reviewing and committing the intended release, `pnpm graph:release --version 3.14.0-z2.1` pushes its version tag, waits for the checked build, and prints the confirmed Release URL. See [PUBLISH.md](PUBLISH.md) for prerequisites, offline dry-run and explicit resume. A manual workflow run produces downloadable Actions artifacts without creating a Release. Release tags are immutable. Binaries, caches and private test profiles are ignored by Git.
+The repeatable CI workflow is `.github/workflows/graph-windows-release.yml`. After reviewing and committing the next intended release, `pnpm graph:release --version 3.14.0-z2.3` pushes its unused version tag, waits for the checked build, and prints the confirmed Release URL. See [PUBLISH.md](PUBLISH.md) for prerequisites, offline dry-run and explicit resume. A manual workflow run produces downloadable Actions artifacts without creating a Release. Release tags are immutable. Binaries, caches and private test profiles are ignored by Git.
 
 ## No-cost automated acceptance
 

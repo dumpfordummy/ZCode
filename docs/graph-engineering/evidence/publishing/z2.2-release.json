@@ -1,0 +1,285 @@
+{
+  "version": "3.14.0-z2.2",
+  "tag": "graph-v3.14.0-z2.2",
+  "commit": "55c5ad6d0c8d5dc464686ec4f1e1b7398cf2a1d3",
+  "releaseUrl": "https://github.com/dumpfordummy/ZCode/releases/tag/graph-v3.14.0-z2.2",
+  "publishedAt": "2026-09-24T10:28:39Z",
+  "draft": false,
+  "prerelease": true,
+  "workflow": {
+    "url": "https://github.com/dumpfordummy/ZCode/actions/runs/35985877508",
+    "runId": 35985877508,
+    "jobId": 107588294029,
+    "conclusion": "success"
+  },
+  "assets": [
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 102,
+      "digest": "sha256:04eef885a791619c2762e27c38339488623c19a68f0dc1d7823d602ff0aa65f1",
+      "url": "https://github.com/dumpfordummy/ZCode/releases/download/graph-v3.14.0-z2.2/SHA256SUMS.txt"
+    },
+    {
+      "name": "ZCode.Graph-3.14.0-z2.2-win-x64.exe",
+      "size": 149654458,
+      "digest": "sha256:d9fed73f6820f1f9e4022b2f2628c740f382858347fd79f3a9013ed1ea8e029e",
+      "url": "https://github.com/dumpfordummy/ZCode/releases/download/graph-v3.14.0-z2.2/ZCode.Graph-3.14.0-z2.2-win-x64.exe"
+    }
+  ],
+  "checksumVerification": {
+    "result": "PASS",
+    "method": "Downloaded public SHA256SUMS.txt; its installer hash equals the GitHub release asset digest.",
+    "sha256": "d9fed73f6820f1f9e4022b2f2628c740f382858347fd79f3a9013ed1ea8e029e"
+  },
+  "sourceChecks": {
+    "tests": {
+      "publisherAndDistribution": 41,
+      "graphAndNativeGuards": 62,
+      "nativeInteractionRegressions": 14,
+      "ui": 20,
+      "total": 137,
+      "failed": 0
+    },
+    "typecheck": "PASS",
+    "rootLint": {
+      "status": "PASS",
+      "warnings": 70,
+      "errors": 0
+    },
+    "architecture": {
+      "status": "PASS",
+      "violations": 0
+    },
+    "supplementalCliLint": {
+      "status": "FAIL",
+      "exitCode": 1,
+      "classification": "Existing baseline exception; diagnostics in Actions artifact."
+    },
+    "wholeRepositoryFormatting": {
+      "status": "FAIL",
+      "exitCode": 1,
+      "classification": "Existing baseline exception; diagnostics in Actions artifact."
+    }
+  },
+  "packagedScenarios": [
+    {
+      "name": "ordinary-chat",
+      "status": "PASS",
+      "assertions": [
+        "Uninstrumented packaged ZCode Graph uses its own home and Electron profile",
+        "Real CLI Read/Edit/Bash events, changed synthetic file and independent node:test pass"
+      ],
+      "screenshots": [
+        "smoke-evidence/ordinary-chat/chat-native-permission.png",
+        "smoke-evidence/ordinary-chat/chat-native-result.png"
+      ],
+      "packagedIdentity": {
+        "name": "ZCode Graph",
+        "isPackaged": true,
+        "version": "3.14.0-z2.2",
+        "userData": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\zcode-graph-acceptance-PRXyEg\\home\\.zcode-graph-engineering\\electron",
+        "home": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\zcode-graph-acceptance-PRXyEg\\home\\.zcode-graph-engineering\\home"
+      }
+    },
+    {
+      "name": "no-provider",
+      "status": "PASS",
+      "assertions": [
+        "Uninstrumented packaged ZCode Graph uses its own home and Electron profile",
+        "Native tab, instructions/name and keyboard layout persist after navigation",
+        "No provider: run unavailable without probing a model"
+      ],
+      "screenshots": ["smoke-evidence/no-provider/graph-saved.png"],
+      "packagedIdentity": {
+        "name": "ZCode Graph",
+        "isPackaged": true,
+        "version": "3.14.0-z2.2",
+        "userData": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\zcode-graph-acceptance-JGLA5o\\home\\.zcode-graph-engineering\\electron",
+        "home": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\zcode-graph-acceptance-JGLA5o\\home\\.zcode-graph-engineering\\home"
+      }
+    },
+    {
+      "name": "z1-literal-compatibility",
+      "status": "PASS",
+      "assertions": [
+        "Unversioned Z1 runs through unchanged native Read/Edit/Bash with its literal template preserved, one exact session/input, and independent fixture test",
+        "Completed Z1 history reopens in Z2 Runs without migration, semantic reinterpretation, new session or new native/provider input"
+      ],
+      "screenshots": [
+        "smoke-evidence/z1-literal-compatibility/z1-compatible-completed.png",
+        "smoke-evidence/z1-literal-compatibility/z1-compatible-reopened.png"
+      ]
+    },
+    {
+      "name": "z2-complete",
+      "status": "PASS",
+      "assertions": [
+        "Native editor adds/removes/renames tasks, reconnects a three-task path, saves keyboard layout, explicit Start/prior-node bindings, Verify override and End output; text Backspace preserves nodes",
+        "An actual disconnected editor draft displays actionable readiness errors and disables Run before native session creation",
+        "Design persists across native Chat navigation with the same document and no run",
+        "Editing the future Verify instructions and native permission override after admission does not mutate the frozen run settings/template",
+        "Native Edit permission holds Implement; Verify has no session/input, and completed Analyze plus Implement conversations remain owned",
+        "Three distinct native sessions and initial inputs run sequential Read/Read, Read/Edit, Read/Bash; exact fresh output reaches durable downstream input; actual fixture changes and independent unchanged test passes",
+        "Open conversation selects each actual stored SessionPane ID; navigation creates no native input and terminal completion releases composer ownership",
+        "An explicit later ordinary Chat input in the completed Analyze session is usable and does not replace that run's exact frozen final text",
+        "Actual app restart preserves every frozen output/session/input and dispatches zero new inputs/provider requests"
+      ],
+      "screenshots": [
+        "smoke-evidence/z2-complete/z2-canvas-design.png",
+        "smoke-evidence/z2-complete/z2-implement-handoff-inspector.png",
+        "smoke-evidence/z2-complete/z2-native-edit-permission.png",
+        "smoke-evidence/z2-complete/z2-completed-handoff.png",
+        "smoke-evidence/z2-complete/z2-resolved-handoff-evidence.png",
+        "smoke-evidence/z2-complete/z2-binding-source-identities.png",
+        "smoke-evidence/z2-complete/z2-conversation-task.png",
+        "smoke-evidence/z2-complete/z2-conversation-1a75e3cc-f91c-4fda-911a-69e857994b2c.png",
+        "smoke-evidence/z2-complete/z2-conversation-edfe757c-5a2f-4669-b1e1-e484f5755dd5.png",
+        "smoke-evidence/z2-complete/z2-native-verify-test-result.png",
+        "smoke-evidence/z2-complete/z2-completed-reopened.png"
+      ]
+    },
+    {
+      "name": "z2-question",
+      "status": "PASS",
+      "assertions": [
+        "Native editor adds/removes/renames tasks, reconnects a three-task path, saves keyboard layout, explicit Start/prior-node bindings, Verify override and End output; text Backspace preserves nodes",
+        "An actual disconnected editor draft displays actionable readiness errors and disables Run before native session creation",
+        "Design persists across native Chat navigation with the same document and no run",
+        "Actual native AskUserQuestion waits without automatic answer; only the first owned initial input exists and successors remain pending",
+        "Editing the future Verify instructions and native permission override after admission does not mutate the frozen run settings/template",
+        "Native Edit permission holds Implement; Verify has no session/input, and completed Analyze plus Implement conversations remain owned",
+        "Three distinct native sessions and initial inputs run sequential Read/Read, Read/Edit, Read/Bash; exact fresh output reaches durable downstream input; actual fixture changes and independent unchanged test passes",
+        "Open conversation selects each actual stored SessionPane ID; navigation creates no native input and terminal completion releases composer ownership",
+        "An explicit later ordinary Chat input in the completed Analyze session is usable and does not replace that run's exact frozen final text",
+        "Actual app restart preserves every frozen output/session/input and dispatches zero new inputs/provider requests"
+      ],
+      "screenshots": [
+        "smoke-evidence/z2-question/z2-canvas-design.png",
+        "smoke-evidence/z2-question/z2-native-question.png",
+        "smoke-evidence/z2-question/z2-implement-handoff-inspector.png",
+        "smoke-evidence/z2-question/z2-native-edit-permission.png",
+        "smoke-evidence/z2-question/z2-completed-handoff.png",
+        "smoke-evidence/z2-question/z2-resolved-handoff-evidence.png",
+        "smoke-evidence/z2-question/z2-binding-source-identities.png",
+        "smoke-evidence/z2-question/z2-conversation-task.png",
+        "smoke-evidence/z2-question/z2-conversation-2c780b62-849c-4cbd-bf8f-0b961e58215c.png",
+        "smoke-evidence/z2-question/z2-conversation-f3f41ffa-bc3d-4d84-8878-51220b40818f.png",
+        "smoke-evidence/z2-question/z2-native-verify-test-result.png",
+        "smoke-evidence/z2-question/z2-completed-reopened.png"
+      ]
+    },
+    {
+      "name": "z2-cancel-question",
+      "status": "PASS",
+      "assertions": [
+        "Native editor adds/removes/renames tasks, reconnects a three-task path, saves keyboard layout, explicit Start/prior-node bindings, Verify override and End output; text Backspace preserves nodes",
+        "An actual disconnected editor draft displays actionable readiness errors and disables Run before native session creation",
+        "Design persists across native Chat navigation with the same document and no run",
+        "Actual native AskUserQuestion waits without automatic answer; only the first owned initial input exists and successors remain pending",
+        "Exact Graph cancellation skips successors, preserves pristine source and unrelated Chat; its original question completes without rewriting cancelled Graph history"
+      ],
+      "screenshots": [
+        "smoke-evidence/z2-cancel-question/z2-canvas-design.png",
+        "smoke-evidence/z2-cancel-question/z2-native-question.png",
+        "smoke-evidence/z2-cancel-question/z2-cancelled.png"
+      ]
+    },
+    {
+      "name": "z2-cancel-permission",
+      "status": "PASS",
+      "assertions": [
+        "Native editor adds/removes/renames tasks, reconnects a three-task path, saves keyboard layout, explicit Start/prior-node bindings, Verify override and End output; text Backspace preserves nodes",
+        "An actual disconnected editor draft displays actionable readiness errors and disables Run before native session creation",
+        "Design persists across native Chat navigation with the same document and no run",
+        "Native Edit permission holds Implement; Verify has no session/input, and completed Analyze plus Implement conversations remain owned",
+        "Exact Graph cancellation skips successors, preserves pristine source and unrelated Chat; its original question completes without rewriting cancelled Graph history"
+      ],
+      "screenshots": [
+        "smoke-evidence/z2-cancel-permission/z2-canvas-design.png",
+        "smoke-evidence/z2-cancel-permission/z2-implement-handoff-inspector.png",
+        "smoke-evidence/z2-cancel-permission/z2-native-edit-permission.png",
+        "smoke-evidence/z2-cancel-permission/z2-cancelled.png"
+      ]
+    },
+    {
+      "name": "z2-cancel-progress",
+      "status": "PASS",
+      "assertions": [
+        "Native editor adds/removes/renames tasks, reconnects a three-task path, saves keyboard layout, explicit Start/prior-node bindings, Verify override and End output; text Backspace preserves nodes",
+        "An actual disconnected editor draft displays actionable readiness errors and disables Run before native session creation",
+        "Design persists across native Chat navigation with the same document and no run",
+        "Exact Graph cancellation skips successors, preserves pristine source and unrelated Chat; its original question completes without rewriting cancelled Graph history"
+      ],
+      "screenshots": [
+        "smoke-evidence/z2-cancel-progress/z2-canvas-design.png",
+        "smoke-evidence/z2-cancel-progress/z2-cancelled.png"
+      ]
+    },
+    {
+      "name": "z2-restart-interrupted",
+      "status": "PASS",
+      "assertions": [
+        "Native editor adds/removes/renames tasks, reconnects a three-task path, saves keyboard layout, explicit Start/prior-node bindings, Verify override and End output; text Backspace preserves nodes",
+        "An actual disconnected editor draft displays actionable readiness errors and disables Run before native session creation",
+        "Design persists across native Chat navigation with the same document and no run",
+        "Actual native AskUserQuestion waits without automatic answer; only the first owned initial input exists and successors remain pending",
+        "Real app restart preserves interruption, original identities and pending successors; no native replay; previous-Host retirement is unproven and release stays disabled"
+      ],
+      "screenshots": [
+        "smoke-evidence/z2-restart-interrupted/z2-canvas-design.png",
+        "smoke-evidence/z2-restart-interrupted/z2-native-question.png",
+        "smoke-evidence/z2-restart-interrupted/z2-interrupted-recovery-refused.png"
+      ]
+    },
+    {
+      "name": "z2-restart-permission",
+      "status": "PASS",
+      "assertions": [
+        "Native editor adds/removes/renames tasks, reconnects a three-task path, saves keyboard layout, explicit Start/prior-node bindings, Verify override and End output; text Backspace preserves nodes",
+        "An actual disconnected editor draft displays actionable readiness errors and disables Run before native session creation",
+        "Design persists across native Chat navigation with the same document and no run",
+        "Native Edit permission holds Implement; Verify has no session/input, and completed Analyze plus Implement conversations remain owned",
+        "Real app restart preserves interruption, original identities and pending successors; no native replay; previous-Host retirement is unproven and release stays disabled"
+      ],
+      "screenshots": [
+        "smoke-evidence/z2-restart-permission/z2-canvas-design.png",
+        "smoke-evidence/z2-restart-permission/z2-implement-handoff-inspector.png",
+        "smoke-evidence/z2-restart-permission/z2-native-edit-permission.png",
+        "smoke-evidence/z2-restart-permission/z2-interrupted-recovery-refused.png"
+      ]
+    },
+    {
+      "name": "z2-persistence-recovery",
+      "status": "PASS",
+      "assertions": [
+        "Native editor adds/removes/renames tasks, reconnects a three-task path, saves keyboard layout, explicit Start/prior-node bindings, Verify override and End output; text Backspace preserves nodes",
+        "An actual disconnected editor draft displays actionable readiness errors and disables Run before native session creation",
+        "Design persists across native Chat navigation with the same document and no run",
+        "Recovery inspection proves the exact owned input remains active; no release action is offered and no successor is admitted",
+        "Native Edit permission holds Implement; Verify has no session/input, and completed Analyze plus Implement conversations remain owned",
+        "An injected isolated metadata write failure stops sequencing; exact original warm terminal evidence permits audited explicit release without changing Unknown outcome or sending Verify",
+        "Audited release makes a new explicit Run available but does not itself submit any input"
+      ],
+      "screenshots": [
+        "smoke-evidence/z2-persistence-recovery/z2-canvas-design.png",
+        "smoke-evidence/z2-persistence-recovery/z2-implement-handoff-inspector.png",
+        "smoke-evidence/z2-persistence-recovery/z2-native-edit-permission.png",
+        "smoke-evidence/z2-persistence-recovery/z2-confirmed-inactive-release.png"
+      ]
+    }
+  ],
+  "artifact": {
+    "id": 10802254758,
+    "url": "https://github.com/dumpfordummy/ZCode/actions/runs/35985877508/artifacts/10802254758",
+    "size": 154013290,
+    "digest": "sha256:e970f8af2fa307090f1f007fb6a42307e930cc05c3d3599a5f796e0b59370ad2",
+    "expiresAt": "2026-12-23T10:12:29Z"
+  },
+  "notRun": [
+    "User-operated real-provider Z1/Z2 checks",
+    "Second physical PC or clean VM installation",
+    "Actual installer upgrade/uninstall",
+    "Code-signing and SmartScreen reputation certification"
+  ],
+  "scope": "Actual native tools and persistence with controlled loopback providers and synthetic workspaces/profiles. No paid/live-model tasks."
+}

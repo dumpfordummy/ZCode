@@ -2,7 +2,9 @@
 
 Date: 2026-09-24, Asia/Kuala_Lumpur.
 
-Scope: the side-conversation request to implement a one-command publisher. This is a release follow-up to Z2, not another Graph implementation milestone. No release, tag, commit, push, staging, merge, installed application launch or credentials/configuration change was performed in this checkout.
+Scope: the side-conversation request to implement a one-command publisher, followed by the user's explicit request to commit and publish it. This is a release follow-up to Z2, not another Graph implementation milestone. The initial automation work did not stage, commit, tag or publish; the authorized publication follow-up below records the subsequent Git and GitHub execution. Installed application credentials/configuration were not accessed or changed.
+
+Current result: **PUBLISHED** — [ZCode Graph 3.14.0-z2.2 for Windows x64](https://github.com/dumpfordummy/ZCode/releases/tag/graph-v3.14.0-z2.2), from commit `55c5ad6d0c8d5dc464686ec4f1e1b7398cf2a1d3`. The verified release evidence and remaining manual checks are recorded at the end of this report.
 
 ## Result
 
@@ -14,7 +16,9 @@ The packaged acceptance helper now derives metadata/ledger paths from the newly 
 
 Specifications were updated before implementation in [PUBLISH_SPEC.md](PUBLISH_SPEC.md). Exact operator instructions, prerequisites and recovery are in [PUBLISH.md](PUBLISH.md). Windows setup and upcoming release notes now describe Z2 while retaining the earlier Z1 release as historical evidence.
 
-## Verification
+## Initial automation verification (before publication authorization)
+
+This table records the initial automation task. The authorized publication sections below record later execution; their evidence supersedes the historical NOT RUN entries for GitHub and packaging.
 
 Used the project-local Node 24.14.0 and pnpm 10.33.2 from `.tmp/z1-toolchain`, matching `mise.toml`. System Node/pnpm versions differ and were not used for required checks. The read-only freshness check used `--no-fetch` and reported 0 ahead/0 behind against the existing local tracking refs; it is not a fresh network fetch. Architecture-governance instructions and desktop/Graph context were read. Architecture passed before edits.
 
@@ -49,7 +53,7 @@ The reviewed diff is confined to release orchestration, the desktop build-versio
 
 Change size relative to this side task's starting files: seven tracked release files +113/-43 lines, ten new publishing/test/documentation files (901 lines), and a net reduction of seven lines in the inherited untracked Z2 test helper: net +964 lines across 18 files. The main task's other Z2 changes are excluded from these counts. `git diff --check` passed, and the checkout's staged diff remained empty.
 
-The checkout is intentionally still dirty with pre-existing Z2 and handoff work plus this follow-up. Before publishing, install/authenticate GitHub CLI yourself if needed, review/commit the intended release (preserving unrelated files), and use a clean release checkout. Run the offline command, then the actual publisher as described in PUBLISH.md. The publisher must pass GitHub's source/build/packaged gates before the installer appears in Releases. It does not bypass unavailable acceptance or automatically update installations on other PCs.
+At the end of the initial automation task, the checkout was intentionally still dirty with pre-existing Z2 and handoff work plus this follow-up. The operator script requires an authenticated GitHub CLI and a clean release checkout as described in PUBLISH.md. The later user-authorized publication used Git directly and GitHub connector reads, as recorded below. Both paths use the same source/build/packaged gates before the installer appears in Releases; neither automatically updates installations on other PCs.
 
 ## Authorized publication follow-up
 
@@ -64,3 +68,20 @@ Commit `5d7498bb892911651223669ec750b74a1161dd5c` was pushed to main and immutab
 The harness had treated the still-visible Edit Allow button as the next Bash permission and raced the native response acknowledgement. The test-only helper now captures the original Allow element, approves once and waits for that specific element to detach. Existing V4 interaction dialogs are keyed by interaction ID, so this is an acknowledgement boundary rather than a sleep or relaxed permission policy. Both the legacy Z1 regression and ordinary Chat fixture reuse it. No application UI/runtime policy or timeouts changed.
 
 The corrected native regression passed locally with a fresh synthetic home, actual native Read/Edit/Bash, an independent fixture test, exact session identity and completed restart; [its summary is retained](evidence/publishing/z1-approval-regression.json). Root typecheck and pre-push lint/architecture passed again (70 existing lint warnings, zero errors). The next publication attempt uses a new `graph-v3.14.0-z2.2` tag; the failed z2.1 tag is not moved or deleted.
+
+### Verified publication
+
+Commit `55c5ad6d0c8d5dc464686ec4f1e1b7398cf2a1d3` and annotated tag `graph-v3.14.0-z2.2` were pushed atomically. [Workflow 35985877508](https://github.com/dumpfordummy/ZCode/actions/runs/35985877508) completed successfully and published the [non-draft Windows x64 prerelease](https://github.com/dumpfordummy/ZCode/releases/tag/graph-v3.14.0-z2.2) on 2026-09-24 at 10:28:39 UTC (18:28:39 Asia/Kuala_Lumpur).
+
+Actual CI results:
+
+- All 137 source tests passed: 41 publisher/distribution/provider/path, 62 Graph/native guards, 14 native interaction/services and 20 UI.
+- Root typecheck passed; root lint reported 70 warnings and zero errors; architecture reported zero violations.
+- The Windows installer built successfully. All eleven detached packaged cases passed: ordinary Chat, no provider, literal Z1 compatibility, Z2 completion, question, cancellation during question/permission/progress, interrupted restart, permission-boundary restart and persistence recovery. These include real native tools, independent fixture tests, exact existing session navigation and restart checks with controlled loopback responses.
+- The eleven summaries record 57 assertions and 48 screenshots. Their summaries/screenshots and supplemental diagnostic logs are in the [Actions artifact](https://github.com/dumpfordummy/ZCode/actions/runs/35985877508/artifacts/10802254758), which is scheduled to expire on 2026-12-23. The durable [release evidence JSON](evidence/publishing/z2.2-release.json) records the result, assertions, screenshot paths and release metadata.
+- Supplemental CLI lint and whole-repository formatting both exited 1. They remain visible baseline exceptions; GitHub's continue-on-error step presentation does not make those checks pass.
+- The published installer is `ZCode.Graph-3.14.0-z2.2-win-x64.exe`, 149,654,458 bytes. The downloaded public `SHA256SUMS.txt` hash matches GitHub's installer asset digest: `d9fed73f6820f1f9e4022b2f2628c740f382858347fd79f3a9013ed1ea8e029e`. Both required assets are present and nonempty. Release-note source links point to the immutable z2.2 tag.
+
+User-operated live-provider checks, second-PC/clean-VM installation, actual installer upgrade/uninstall and signing reputation remain **NOT RUN**. The publisher command itself was not run end-to-end locally because this shell has no GitHub CLI; the direct Git/tag workflow path above was executed and verified. No paid task, installed profile or company repository was used. Unrelated standalone/future handoff files remain local and untracked. Release tags were not moved, and Z3 was not started.
+
+The publication report and operator examples were updated after release as documentation-only follow-up on main. The released executable remains tied to the immutable `55c5ad6` source commit. The next new Z2 release must use an unused version; the examples now use `3.14.0-z2.3`.

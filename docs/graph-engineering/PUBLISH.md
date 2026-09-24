@@ -3,10 +3,10 @@
 Run from the repository root after reviewing and committing the intended release:
 
 ```powershell
-pnpm graph:release --version 3.14.0-z2.1
+pnpm graph:release --version 3.14.0-z2.3
 ```
 
-The command pushes one annotated version tag to `dumpfordummy/ZCode`, waits for that exact tag/commit's Windows workflow, checks the published prerelease and required assets, and prints its GitHub Releases URL. The build runs on GitHub; this command does not build or launch the installed application on your PC. A successful run makes the installer visible in the repository's **Releases** section. The chosen version must be unused. Future Z2 releases can use `3.14.0-z2.2`, etc.; Z3 is not supported by this assignment.
+The command pushes one annotated version tag to `dumpfordummy/ZCode`, waits for that exact tag/commit's Windows workflow, checks the published prerelease and required assets, and prints its GitHub Releases URL. The build runs on GitHub; this command does not build or launch the installed application on your PC. A successful run makes the installer visible in the repository's **Releases** section. The chosen version must be unused. `3.14.0-z2.1` is a retained failed build tag and [3.14.0-z2.2 is published](https://github.com/dumpfordummy/ZCode/releases/tag/graph-v3.14.0-z2.2); these examples use the next version, `3.14.0-z2.3`. Later Z2 releases can increment that suffix; Z3 is not supported by this assignment.
 
 ## One-time setup
 
@@ -18,7 +18,7 @@ The command pushes one annotated version tag to `dumpfordummy/ZCode`, waits for 
 For a read-only local preview, run:
 
 ```powershell
-pnpm graph:release --version 3.14.0-z2.1 --dry-run
+pnpm graph:release --version 3.14.0-z2.3 --dry-run
 ```
 
 Dry-run checks local cleanliness, repository and commit/tag state, then prints the plan. It does **not** contact GitHub, read authentication, verify a remote version is free, run checks or publish. A dirty checkout is an expected refusal, not a failed release. `pnpm graph:release --help` is available without GitHub access.
@@ -38,13 +38,13 @@ The command uses the GitHub CLI's documented [run listing](https://cli.github.co
 The default local wait is 80 minutes. To allow a longer Actions queue:
 
 ```powershell
-pnpm graph:release --version 3.14.0-z2.1 --timeout-minutes 120
+pnpm graph:release --version 3.14.0-z2.3 --timeout-minutes 120
 ```
 
 If the terminal disconnects, a push is rejected after the local tag is made, or the wait expires, inspect Actions and resume from the **same clean commit**:
 
 ```powershell
-pnpm graph:release --version 3.14.0-z2.1 --resume
+pnpm graph:release --version 3.14.0-z2.3 --resume
 ```
 
 Resume pushes a matching local-only tag or observes an already-pushed matching tag. It never replaces a tag/release, reruns CI, edits release assets or rolls back remote work. A timeout does not cancel a remote build. Failed/cancelled CI remains a failure; inspect its linked logs. Fix source in a new reviewed commit and choose a new version. For an infrastructure-only transient failure, a maintainer can inspect and rerun the exact workflow in GitHub, then use resume to observe it. If the tag or HEAD points at different code, resume refuses.
