@@ -95,11 +95,13 @@ const writes = (calls) =>
   );
 
 test("arguments require an explicit supported version and reject ambiguous switches", () => {
+  assert.equal(parsePublishArgs(["--version", "3.14.0-z7.1"]).version, "3.14.0-z7.1");
   assert.equal(parsePublishArgs(["--version", version, "--dry-run"]).dryRun, true);
   for (const args of [
     [],
     ["--version", "3.14.0"],
     ["--version", "3.14.0-z3.1"],
+    ["--version", "3.14.0-z8.1"],
     ["--version", "3.14.0-z2.01"],
     ["--version", version, "--force"],
     ["--version", version, "--version", version],

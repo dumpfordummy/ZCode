@@ -1,5 +1,13 @@
 # Graph Windows publishing contract
 
+## Authorized Z7 publication follow-up
+
+The user's subsequent request to publish the current fork authorizes the Z7 Windows prerelease and the necessary release-metadata commit/tag/push. Extend the existing strict version allowlist to Z7 (`major.minor.patch-z7.number`) while preserving Z1/Z2 compatibility; other milestone labels remain rejected. Use the existing workflow, product identity, private profile, unsigned installer and manual updates. This is packaging work, not a new Graph milestone.
+
+The version resolver remains the sole version policy owner. The workflow remains the sole build/packaged-acceptance/publication owner. Release notes must describe the committed Z1–Z7 functionality and prominently disclose Z7-A12's unsupported Fork/Join export/import. Preserve prior acceptance evidence and distinguish the existing detached Z1/Z2/Chat packaged checks from recorded Z7 development checks; no Z7 packaged/native PASS may be inferred from them. Do not publish an installer if the existing build or packaged gates fail. No installed application profile is touched.
+
+When GitHub CLI is unavailable locally, an authorized maintainer may use standard Git to push the same reviewed annotated tag after checking a clean commit, exact fork, active workflow and tag/release collisions, then observe the exact tag/SHA and release assets through GitHub's public API or UI. Do not extract tokens or change authentication configuration. The CI workflow still performs publication with its own ephemeral token. No existing tag or asset may be overwritten.
+
 This follow-up adds release automation for the existing native Z2 implementation. It does not publish a release during implementation or change Graph/Chat execution, installed settings, product identity or the updater. The original Z1 distribution contract continues to govern isolation and packaging; its Z1-only version/publication scope is extended here to Z2.
 
 ## Command and ownership
