@@ -23,6 +23,18 @@ modules:
     requires: [shared]
     publicEntrypoints: [packages/services/src/session/contract.ts]
     owner: conversation
+  - id: graph-engineering
+    roots: [packages/services/src/graph-engineering]
+    managed: true
+    requires: [shared, rpc, services]
+    publicEntrypoints:
+      [
+        packages/services/src/graph-engineering/contract.ts,
+        packages/services/src/graph-engineering/node.ts,
+      ]
+    layers: { domain: domain, app: app, adapters: adapters }
+    layerOrder: [domain, app, adapters]
+    owner: graph-engineering
   - id: storage
     roots: [packages/services/src/storage]
     managed: true

@@ -1,5 +1,69 @@
 /** English translations */
 const enUS: Record<string, string> = {
+  "graph.title": "Graph Engineering",
+  "graph.backToChat": "Back to chat",
+  "graph.node.start": "Start",
+  "graph.node.end": "End",
+  "graph.scope":
+    "Z1 supports one Agent Task: Start → Agent Task → End. The task uses the same native agent and tools as chat.",
+  "graph.localOnly":
+    "Graph Engineering currently supports local workspaces only. Select a local workspace to continue.",
+  "graph.unavailableHost":
+    "This Host does not provide Graph Engineering. Use the locally built desktop application.",
+  "graph.loading": "Loading graph…",
+  "graph.refresh": "Refresh",
+  "graph.name": "Graph name",
+  "graph.taskName": "Agent Task name",
+  "graph.instructions": "Instructions",
+  "graph.layoutHelp":
+    "Drag nodes to arrange the graph, or focus a node, press Enter or Space to select it, then use the arrow keys. Save preserves names, instructions and positions.",
+  "graph.configuration": "Model and permission configuration",
+  "graph.selectedModel": "Selected model",
+  "graph.reasoning": "Reasoning",
+  "graph.sharedConfiguration":
+    "These are the ordinary new-chat model and permission selectors. Each run captures its configuration and workspace when admitted.",
+  "graph.noModel":
+    "Select an available model through the existing provider settings. Opening this page does not test or call a paid model.",
+  "graph.modelSettings": "Model settings",
+  "graph.prerequisite":
+    "Before running, disable “Automatically continue questions” in Settings → General. Graph Engineering does not change this setting for you.",
+  "graph.generalSettings": "General settings",
+  "graph.save": "Save graph",
+  "graph.run": "Save and run",
+  "graph.saving": "Saving or sending request…",
+  "graph.unsaved": "Unsaved changes",
+  "graph.saved": "Saved",
+  "graph.conflict":
+    "The saved graph changed in another editor. Your unsaved text is preserved here. Copy it before reloading the saved graph.",
+  "graph.reloadSaved": "Discard local edits and reload saved graph",
+  "graph.runs": "Runs",
+  "graph.noRuns": "No runs yet. Saving or opening a graph does not start an agent task.",
+  "graph.openConversation": "Open conversation",
+  "graph.cancel": "Cancel attempt",
+  "graph.completionMeaning":
+    "The native input completed. Check the conversation, file changes and test output to verify the requested result.",
+  "graph.waitingHelp":
+    "Open the same conversation to respond using the existing permission or question interface.",
+  "graph.uncertainHelp":
+    "The outcome is unconfirmed. This attempt remains reserved to prevent duplicate work; reopening will not resend it.",
+  "graph.correlation": "Native session and frozen configuration",
+  "graph.attempt": "Attempt",
+  "graph.session": "Session",
+  "graph.input": "Input",
+  "graph.command": "Command",
+  "graph.workspace": "Captured workspace",
+  "graph.inputOwned":
+    "Graph Engineering owns this attempt. Additional prompts and edits are blocked while it is active or unresolved. Permission and question responses remain available below the conversation.",
+  "graph.status.Starting": "Starting",
+  "graph.status.Running": "Running",
+  "graph.status.WaitingForPermission": "Waiting for permission",
+  "graph.status.WaitingForUser": "Waiting for your response",
+  "graph.status.CancelRequested": "Cancellation requested",
+  "graph.status.Completed": "Input completed",
+  "graph.status.Failed": "Failed",
+  "graph.status.Cancelled": "Cancelled",
+  "graph.status.Interrupted": "Interrupted — outcome unconfirmed",
+  "graph.status.Unknown": "Unknown — acceptance or outcome unconfirmed",
   "startPlan.recommendation.subagentDescription":
     "Your Start Plan has quota available for {model}. Switch this subagent’s model to the Start Plan?",
   "startPlan.recommendation.preferenceSaveFailed":

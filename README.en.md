@@ -15,6 +15,8 @@ ZCode is an AI coding workspace with desktop, browser, and terminal interfaces. 
 
 ## Updates
 
+This fork includes native **Graph Engineering Z1** and a separate Windows x64 **ZCode Graph** installer. Download a prerelease from [this repository's Releases](https://github.com/dumpfordummy/ZCode/releases) without cloning, or follow the [Windows setup and source build instructions](docs/graph-engineering/WINDOWS_SETUP.md). This unsigned prerelease uses a private profile and requires each user's own model configuration; verification limits are documented in the report.
+
 - 2026-9-23: Updated to ZCode v3.14.3.
 
 ## Setup

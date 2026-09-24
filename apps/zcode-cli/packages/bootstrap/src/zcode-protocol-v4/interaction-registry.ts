@@ -15,7 +15,13 @@
 // 差异——broker 注册时自带各自的 resolve 回调（闭包已知 kind），本表对应答体透明。
 // 归属：本文件是 v4 原生基础设施（放 v4 目录），旧目录（broker/server）import 本文件
 // 合法（依赖方向只允许 旧目录 → v4 目录）。
-import { ASK_USER_QUESTION_E2E_CLOCK_SCALE_ENV } from "@zcode/shared";
+import {
+  ASK_USER_QUESTION_HIDDEN_GRACE_MS,
+  ASK_USER_QUESTION_AUTO_RESOLUTION_MS,
+  interactionSessionIsProtected,
+  type V4InteractionRegistryOptions,
+} from "./interaction-auto-resolution-policy.js";
+export { resolveV4InteractionRegistryOptionsFromEnv } from "./interaction-auto-resolution-policy.js";
 
 export type V4InteractionAnswer = {
   optionId?: string;
@@ -26,30 +32,6 @@ export type V4InteractionAnswer = {
   action?: "accept" | "decline" | "cancel";
   content?: Record<string, unknown>;
 };
-
-const ASK_USER_QUESTION_HIDDEN_GRACE_MS = 60_000;
-const ASK_USER_QUESTION_AUTO_RESOLUTION_MS = 300_000;
-interface V4InteractionRegistryOptions {
-  hiddenGraceMs?: number;
-  autoResolutionMs?: number;
-  now?: () => number;
-}
-
-export function resolveV4InteractionRegistryOptionsFromEnv(
-  env: NodeJS.ProcessEnv,
-): V4InteractionRegistryOptions | undefined {
-  if (env.ZCODE_ENV !== "test") return undefined;
-  const rawScale = env[ASK_USER_QUESTION_E2E_CLOCK_SCALE_ENV]?.trim();
-  if (!rawScale) return undefined;
-  const scale = Number(rawScale);
-  if (!Number.isFinite(scale) || scale < 1 || scale > 1_000) {
-    throw new Error(`${ASK_USER_QUESTION_E2E_CLOCK_SCALE_ENV} must be between 1 and 1000`);
-  }
-  return {
-    hiddenGraceMs: Math.max(1, Math.round(ASK_USER_QUESTION_HIDDEN_GRACE_MS / scale)),
-    autoResolutionMs: Math.max(1, Math.round(ASK_USER_QUESTION_AUTO_RESOLUTION_MS / scale)),
-  };
-}
 
 export type V4InteractionAutoResolution =
   | {
@@ -66,6 +48,7 @@ export type V4InteractionAutoResolution =
 
 export interface V4InteractionRegistrationOptions {
   sessionId: string;
+  ancestorSessionIds?: readonly string[];
   kind: "askUserQuestion" | "other";
   fullAccess?: () => Promise<void>;
   initialAutoResolution?: V4InteractionAutoResolution;
@@ -94,6 +77,7 @@ export class V4InteractionRegistry {
   private readonly autoResolutionMs: number;
   private readonly now: () => number;
   private askUserQuestionAutoResolutionEnabled = true;
+  private protectedSessionIds = new Set<string>();
   private interactionPreferenceCommandApplied = false;
 
   constructor(options: V4InteractionRegistryOptions = {}) {
@@ -122,8 +106,11 @@ export class V4InteractionRegistry {
       options,
       token,
       autoResolutionEligible:
-        previous?.autoResolutionEligible ??
-        (options?.kind === "askUserQuestion" ? this.askUserQuestionAutoResolutionEnabled : false),
+        !interactionSessionIsProtected(options, this.protectedSessionIds) &&
+        (previous?.autoResolutionEligible ??
+          (options?.kind === "askUserQuestion"
+            ? this.askUserQuestionAutoResolutionEnabled
+            : false)),
       ...(previous?.autoResolution || options?.initialAutoResolution
         ? { autoResolution: previous?.autoResolution ?? options?.initialAutoResolution }
         : {}),
@@ -209,7 +196,11 @@ export class V4InteractionRegistry {
    * 更新全局 gate。关闭会同步取消所有 timer，并在 ACK 前等待活动倒计时持久化为 snoozed；
    * 重新开启只允许之后新注册的问题计时。
    */
-  async setAskUserQuestionAutoResolutionEnabled(enabled: boolean): Promise<number> {
+  async setAskUserQuestionAutoResolutionEnabled(
+    enabled: boolean,
+    protectedSessionIds?: readonly string[],
+  ): Promise<number> {
+    if (protectedSessionIds) this.protectedSessionIds = new Set(protectedSessionIds);
     this.interactionPreferenceCommandApplied = true;
     return this.applyAskUserQuestionAutoResolutionEnabled(enabled);
   }
@@ -225,12 +216,13 @@ export class V4InteractionRegistry {
 
   private async applyAskUserQuestionAutoResolutionEnabled(enabled: boolean): Promise<number> {
     this.askUserQuestionAutoResolutionEnabled = enabled;
-    if (enabled) return 0;
 
     const persistence: Promise<void>[] = [];
     let snoozedInteractionCount = 0;
     for (const entry of this.pending.values()) {
       if (entry.options?.kind !== "askUserQuestion") continue;
+      if (enabled && !interactionSessionIsProtected(entry.options, this.protectedSessionIds))
+        continue;
       entry.autoResolutionEligible = false;
       if (entry.autoResolution && entry.autoResolution.state !== "snoozed") {
         snoozedInteractionCount += 1;
@@ -292,12 +284,7 @@ export class V4InteractionRegistry {
     }
     const now = this.now();
     if (now >= autoResolution.deadlineAt) {
-      queueMicrotask(() => {
-        this.resolve(interactionId, {
-          action: "accept",
-          content: { answers: {} },
-        });
-      });
+      queueMicrotask(() => this.resolveAutomatically(interactionId, entry));
       return;
     }
     if (autoResolution.state === "hiddenGrace" && now >= autoResolution.visibleAt) {
@@ -333,14 +320,21 @@ export class V4InteractionRegistry {
       );
     }
     entry.deadlineTimer = setTimeout(
-      () => {
-        this.resolve(interactionId, {
-          action: "accept",
-          content: { answers: {} },
-        });
-      },
+      () => this.resolveAutomatically(interactionId, entry),
       Math.max(0, autoResolution.deadlineAt - now),
     );
+  }
+
+  private resolveAutomatically(interactionId: string, entry: RegisteredInteraction): void {
+    // 设置更新可与已排队的 timer/microtask 竞态；必须再次核对当前归属和人工应答资格。
+    if (
+      this.pending.get(interactionId) !== entry ||
+      !entry.autoResolutionEligible ||
+      entry.autoResolution?.state === "snoozed" ||
+      interactionSessionIsProtected(entry.options, this.protectedSessionIds)
+    )
+      return;
+    this.resolve(interactionId, { action: "accept", content: { answers: {} } });
   }
 
   private notifyAutoResolution(entry: RegisteredInteraction): void {

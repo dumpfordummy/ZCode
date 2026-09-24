@@ -1,4 +1,5 @@
 import { requestPluginReferenceCatalog } from "#src/zcode-agent/pluginReferenceCatalogRequest.js";
+import { expectedRuntimeClient } from "./expectedRuntimeClient.js";
 import {
   localTtftFactsSchema,
   sessionDebugSnapshotSchema,
@@ -862,6 +863,10 @@ interface CreateZCodeAgentServiceOptions extends Omit<
   ZCodeAgentProcessManagerOptions,
   "idleTimeoutMs"
 > {
+  /** Host orchestration ownership; reads and interaction responses do not cross this guard. */
+  assertInputAllowed?: (
+    params: ZCodeAgentSessionTarget & { commandId?: string; commandType: string },
+  ) => Promise<void>;
   /** 仅供 MCP 状态探测进程使用，不能把空闲回收传给 chat。 */
   mcpStatusIdleTimeoutMs?: number;
   accountProviderConfigSource?: ProviderSource<AccountProviderConfigSnapshot>;
@@ -872,7 +877,9 @@ interface CreateZCodeAgentServiceOptions extends Omit<
   sessionRuntimePreferencesAuthority?: "local" | "external";
   resolveSessionRuntimePreferences?: (
     scope: ZCodeSessionRuntimePreferencesScope,
+    target: ZCodeAgentSessionTarget,
   ) => Promise<ZCodeSessionRuntimePreferencesResult>;
+  getExplicitQuestionSessionIds?: (target: ZCodeAgentWorkspaceTarget) => Promise<string[]>;
   /** manual run 落库后由当前 host 直接派发；返回时 prompt 必须已被 session 接受。 */
   onAutomationManualRunRequested?: (params: {
     automation: ZCodeAutomation;
@@ -1472,6 +1479,7 @@ export function createZCodeAgentService(
               askUserQuestionAutoResolutionEnabled:
                 params.preferences.askUserQuestionAutoResolutionEnabled,
             },
+            protectedSessionIds: await options?.getExplicitQuestionSessionIds?.(params.workspace),
           },
           zcodeWorkspaceUpdateInteractionPreferencesResultSchema,
         );
@@ -2137,7 +2145,10 @@ export function createZCodeAgentService(
                 preferences = zcodeSessionRuntimePreferencesResultSchema.parse(
                   // 同一 RPC 承载 runtime 创建与首次执行两个时机；必须继续传递
                   // 已校验的 scope，避免首次执行为了 Shell 再次等待远端 client config。
-                  (await resolveSessionRuntimePreferences?.(parsed.data.scope)) ?? {
+                  (await resolveSessionRuntimePreferences?.(parsed.data.scope, {
+                    ...workspace,
+                    sessionId: parsed.data.sessionId,
+                  })) ?? {
                     askUserQuestionAutoResolutionEnabled: true,
                     nativeSearchEnhancementsEnabled: true,
                     memoryEnabled: false,
@@ -4428,6 +4439,11 @@ export function createZCodeAgentService(
     },
 
     async sendPrompt(params: ZCodeAgentSendPromptParams) {
+      await options?.assertInputAllowed?.({
+        ...params,
+        commandId: params.inputId,
+        commandType: "sendText",
+      });
       const startedAt = Date.now();
       const client = await getClient(params);
       const sessionTraceId = params.sessionTraceId?.trim() || getSessionTraceId(params);
@@ -4504,6 +4520,11 @@ export function createZCodeAgentService(
     },
 
     async compactSession(params: ZCodeAgentCompactParams) {
+      await options?.assertInputAllowed?.({
+        ...params,
+        commandId: params.inputId,
+        commandType: "compact",
+      });
       const startedAt = Date.now();
       const client = await getClient(params);
       const sessionTraceId = getSessionTraceId(params);
@@ -4546,6 +4567,11 @@ export function createZCodeAgentService(
     },
 
     async goalSession(params: ZCodeAgentGoalParams) {
+      await options?.assertInputAllowed?.({
+        ...params,
+        commandId: params.inputId,
+        commandType: "sendGoalCommand",
+      });
       const startedAt = Date.now();
       const client = await getClient(params);
       logger.info(params.inputId, "开始请求 ZCode Protocol session/goal", {
@@ -4613,6 +4639,7 @@ export function createZCodeAgentService(
     },
 
     async setModel(params: ZCodeAgentSetModelParams) {
+      await options?.assertInputAllowed?.({ ...params, commandType: "switchModelConfig" });
       const startedAt = Date.now();
       const client = await getClient(params);
       logger.info(undefined, "开始请求 ZCode Protocol session/setModel", {
@@ -4657,6 +4684,7 @@ export function createZCodeAgentService(
     },
 
     async setThoughtLevel(params: ZCodeAgentSetThoughtLevelParams) {
+      await options?.assertInputAllowed?.({ ...params, commandType: "switchModelConfig" });
       const client = await getClient(params);
       const snapshot = await client.request(
         zcodeProtocolMethods.sessionSetThoughtLevel,
@@ -4672,6 +4700,7 @@ export function createZCodeAgentService(
     },
 
     async setMode(params: ZCodeAgentSetModeParams) {
+      await options?.assertInputAllowed?.({ ...params, commandType: "switchCollaborationMode" });
       const client = await getClient(params);
       return client.request(
         zcodeProtocolMethods.sessionSetMode,
@@ -4944,7 +4973,13 @@ export function createZCodeAgentService(
       const cliBootstrapStartedAt = performance.now();
       // 历史 topic 是任务列表点击后的只读事实源。provider/model 未配置时若复用
       // 模型执行门禁，列表虽然能出现但点击后仍无法打开；订阅只启动 CLI，不提升写能力。
-      const client = await getReadOnlyClient(params);
+      const client = params.expectedRuntimeIdentity
+        ? await expectedRuntimeClient(
+            params.expectedRuntimeIdentity,
+            () => processManager.getExistingClient(params),
+            async () => (await processManager.getRuntimeIdentity(params)).identity,
+          )
+        : await getReadOnlyClient(params);
       const cliBootstrapMs =
         cliProcessState === "spawned"
           ? Math.max(0, Math.round(performance.now() - cliBootstrapStartedAt))
@@ -5042,7 +5077,50 @@ export function createZCodeAgentService(
     },
 
     async sendConversationCommandV4(params: ZCodeAgentConversationCommandParams) {
-      const client = await getClient(params);
+      // 图任务期间的额外输入必须在 Host 统一挡住；仅禁用当前 renderer 会漏掉手机和旧附件入口。
+      if (
+        params.envelope.sessionId &&
+        new Set([
+          "sendText",
+          "sendGoalCommand",
+          "compact",
+          "retryTurn",
+          "editUserQuery",
+          "sendQueuedNow",
+          "resumeGoal",
+          "startSavedWorkflow",
+          "resumeWorkflowRun",
+          "switchModelConfig",
+          "switchCollaborationMode",
+        ]).has(params.envelope.type)
+      ) {
+        await options?.assertInputAllowed?.({
+          ...params,
+          sessionId: params.envelope.sessionId,
+          commandId: params.envelope.commandId,
+          commandType: params.envelope.type,
+        });
+      }
+      const client = params.expectedRuntimeIdentity
+        ? await expectedRuntimeClient(
+            params.expectedRuntimeIdentity,
+            () => processManager.getExistingClient(params),
+            async () => (await processManager.getRuntimeIdentity(params)).identity,
+          )
+        : await getClient(params);
+      if (params.expectedRuntimeIdentity && options?.getExplicitQuestionSessionIds) {
+        // 图任务保护名单必须先于输入生效；全局设置没变化时也不能跳过这次同步。
+        const preferences =
+          latestAppRuntimePreferences ??
+          (params.envelope.sessionId
+            ? await resolveSessionRuntimePreferences?.("runtime-materialization", {
+                ...params,
+                sessionId: params.envelope.sessionId,
+              })
+            : undefined);
+        if (!preferences) throw new Error("Native interaction preferences are unavailable.");
+        await enqueueInteractionPreferenceSync({ client, preferences, workspace: params });
+      }
       const planPayload = params.envelope.payload as {
         planEnabled?: boolean;
         config?: { planEnabled?: boolean };

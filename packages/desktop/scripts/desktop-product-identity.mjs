@@ -26,7 +26,31 @@ const PREVIEW_IDENTITY = Object.freeze({
 export const desktopProductIdentities = Object.freeze({
   production: PRODUCTION_IDENTITY,
   preview: PREVIEW_IDENTITY,
+  graph: Object.freeze({
+    flavor: "graph",
+    appId: "dev.dumpfordummy.zcode.graph",
+    productName: "ZCode Graph",
+    linuxExecutableName: "zcode-graph",
+    linuxPackageName: "zcode-graph",
+    cuaHelperInstallVariant: null,
+  }),
 });
+
+function isGraphDistribution(env) {
+  const value = env.ZCODE_GRAPH_DISTRIBUTION?.trim() ?? "";
+  if (value === "1") return true;
+  if (value === "" || value === "0") return false;
+  throw new Error("invalid ZCODE_GRAPH_DISTRIBUTION; expected 1 or 0");
+}
+
+export function resolveGraphDistributionVersion(env, fallback) {
+  if (!isGraphDistribution(env)) return fallback;
+  const version = env.ZCODE_GRAPH_VERSION;
+  if (!version || !/^\d+\.\d+\.\d+-z1\.\d+$/.test(version)) {
+    throw new Error("ZCODE_GRAPH_VERSION must be an explicit Z1 prerelease, e.g. 3.14.0-z1.1");
+  }
+  return version;
+}
 
 function normalizeDesktopZCodeEnv(env) {
   return env.ZCODE_ENV?.trim().toLowerCase() === "production" ? "production" : "test";
@@ -57,6 +81,7 @@ export function isPreviewIdentityRequested(env = process.env) {
  * 未知 `ZCODE_ENV` 继续按 test 处理，和共享层 normalizeZCodeEnv 的 fail-safe 默认值一致。
  */
 export function resolveDesktopProductFlavor(env = process.env) {
+  if (isGraphDistribution(env)) return "graph";
   if (isPreviewIdentityRequested(env)) {
     return "preview";
   }
@@ -86,7 +111,7 @@ export function resolveWindowsAppUserModelIdForFlavor(flavor, runtime = { isPack
   if (runtime.isPackaged === false) {
     return "cn.aminer.zcode";
   }
-  return desktopProductIdentities[flavor === "preview" ? "preview" : "production"].appId;
+  return (desktopProductIdentities[flavor] ?? PRODUCTION_IDENTITY).appId;
 }
 
 export function resolveWindowsAppUserModelId(env = process.env, runtime = { isPackaged: true }) {

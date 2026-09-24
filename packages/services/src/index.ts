@@ -24,6 +24,14 @@ export {
 } from "./memoryDiagnostics.js";
 
 // Accessor
+export { IGraphEngineeringService } from "./graph-engineering/contract.js";
+export type {
+  GraphDefinition,
+  GraphRun,
+  GraphRunStatus,
+  GraphWorkspaceTarget,
+  GraphWorkspaceView,
+} from "./graph-engineering/contract.js";
 export type { IServiceAccessor } from "./accessor.js";
 export {
   ConversationShareServiceError,

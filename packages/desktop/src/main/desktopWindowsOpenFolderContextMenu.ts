@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 import type { Locale } from "@zcode/shared";
+import { ZCODE_PRODUCT_FLAVOR } from "@zcode/shared";
 
 const MENU_KEY_NAME = "ZCode.OpenInZCode";
 const DIRECTORY_MENU_KEY = `HKCU\\Software\\Classes\\Directory\\shell\\${MENU_KEY_NAME}`;
@@ -83,7 +84,7 @@ export async function installWindowsOpenFolderContextMenu(options: {
   locale: Locale;
   logger: Logger;
 }): Promise<void> {
-  if (options.platform !== "win32") {
+  if (options.platform !== "win32" || ZCODE_PRODUCT_FLAVOR === "graph") {
     return;
   }
 

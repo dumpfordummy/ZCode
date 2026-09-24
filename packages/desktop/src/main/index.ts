@@ -2031,7 +2031,10 @@ app.whenReady().then(async () => {
     }),
   });
 
-  if (process.platform === "darwin" || process.platform === "win32") {
+  if (
+    ZCODE_PRODUCT_FLAVOR !== "graph" &&
+    (process.platform === "darwin" || process.platform === "win32")
+  ) {
     app.clearRecentDocuments();
   }
 

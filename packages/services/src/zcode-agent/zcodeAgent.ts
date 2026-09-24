@@ -351,6 +351,8 @@ export interface ZCodeAgentSessionSubscribeParams extends ZCodeAgentSessionTarge
 // v4/conversation/frame 通知按 workspace fan-out 给 renderer。
 
 export interface ZCodeAgentConversationSubscribeParams extends ZCodeAgentSessionTarget {
+  /** Host-only guard: bind observation to this existing runtime; never start a replacement. */
+  expectedRuntimeIdentity?: string;
   /** 水位不变量：仅当客户端真持有该时刻一致状态才允许带。 */
   base?: { logEpoch: string; seq: number };
   visibility?: "foreground" | "background";
@@ -449,6 +451,8 @@ export interface ZCodeAgentConversationFileRewindPreviewParams extends ZCodeAgen
 
 export interface ZCodeAgentConversationCommandParams extends ZCodeAgentWorkspaceTarget {
   envelope: CommandEnvelope;
+  /** Host-only guard: bind dispatch to this existing runtime; never start a replacement. */
+  expectedRuntimeIdentity?: string;
   /** 仅 host 内部用于 Browser Use runtime 边界，不进入 v4 wire envelope。 */
   clientMode?: ZCodeTaskClientMode;
 }

@@ -17,6 +17,8 @@ ZCode 是 AI 编程工作台，提供桌面应用、浏览器界面和终端 Age
 
 ## 更新
 
+本分支提供原生 **Graph Engineering Z1** 和独立 Windows x64 **ZCode Graph** 安装包。普通用户可从 [本仓库 Releases](https://github.com/dumpfordummy/ZCode/releases) 下载安装，无需克隆源码。开发者可按 [Windows 构建与使用说明](docs/graph-engineering/WINDOWS_SETUP.md) 从源码构建。该预发布版使用独立数据目录，模型需要用户自行配置；未签名，验收边界见报告。
+
 - 2026-9-23：更新至 ZCode v3.14.3 版本。
 
 ## 初始化

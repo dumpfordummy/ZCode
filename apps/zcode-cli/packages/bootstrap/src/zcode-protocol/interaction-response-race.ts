@@ -3,6 +3,7 @@ import type {
   V4InteractionRegistrationOptions,
 } from "../zcode-protocol-v4/interaction-registry.js";
 import type { ZCodeProtocolAgentServerContext } from "./server-types.js";
+import { collectInteractionAncestors } from "../zcode-protocol-v4/interaction-auto-resolution-policy.js";
 
 /**
  * 让 legacy 反向 RPC（interaction/requestPermission 等）与 v4 resolveInteraction 命令
@@ -45,6 +46,15 @@ export async function raceClientRequestWithV4Interaction<T>(
 
   // 用容器而非裸值区分"应答就是 undefined 字段"与"尚未应答"。
   let v4Answer: { answer: V4InteractionAnswer } | undefined;
+  const runtimeOptions = registrationOptions
+    ? {
+        ...registrationOptions,
+        ancestorSessionIds: collectInteractionAncestors(
+          registrationOptions.sessionId,
+          (id) => context.sessions.get(id)?.parentSessionId,
+        ),
+      }
+    : undefined;
   const unregister = context.v4Interactions.register(
     interactionId,
     (answer) => {
@@ -54,7 +64,7 @@ export async function raceClientRequestWithV4Interaction<T>(
     },
     registrationOptions?.fullAccess
       ? {
-          ...registrationOptions,
+          ...runtimeOptions!,
           fullAccess: async () => {
             let notifyFailure!: () => void;
             const failure = new Promise<void>((resolve) => {
@@ -70,7 +80,7 @@ export async function raceClientRequestWithV4Interaction<T>(
             }
           },
         }
-      : registrationOptions,
+      : runtimeOptions,
   );
 
   const waitForFullAccess = async () => {

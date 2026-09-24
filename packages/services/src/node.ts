@@ -4,6 +4,8 @@ import { randomBytes } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { IGraphEngineeringService } from "./graph-engineering/contract.js";
+import { createGraphEngineeringService } from "./graph-engineering/node.js";
 import {
   createNodeProviderRuntimePathEnv,
   NodeModelSelectionConfigRepository,
@@ -2074,6 +2076,7 @@ export function createLocalServices(options: {
   // OffPeakTaskService 单例在下方 DI register IIFE 中创建（晚于 agent service）；
   // 用前向引用 holder 惰性绑定——offPeak/create 协议请求只会发生在服务集合装配完成后。
   let offPeakTaskServiceForAgent: OffPeakTaskService | undefined;
+  let graphEngineeringService: ReturnType<typeof createGraphEngineeringService> | undefined;
   // desktop-attached-remote 装配不暴露 Off-Peak 工具面（远程不在支持范围）。
   const offPeakToolWiring =
     options?.serviceAuthorityMode === "desktop-attached-remote"
@@ -2083,6 +2086,10 @@ export function createLocalServices(options: {
           resolveOffPeakTaskService: () => offPeakTaskServiceForAgent,
         };
   const zcodeAgentService = createZCodeAgentService({
+    getExplicitQuestionSessionIds: (target) =>
+      graphEngineeringService?.protectedSessionIds(target) ?? Promise.resolve([]),
+    assertInputAllowed: (params) =>
+      graphEngineeringService?.assertInputAllowed(params) ?? Promise.resolve(),
     ...(agentAccountProviderConfigSource
       ? { accountProviderConfigSource: agentAccountProviderConfigSource }
       : {}),
@@ -2250,13 +2257,14 @@ export function createLocalServices(options: {
       ? { sessionRuntimePreferencesAuthority: "external" as const }
       : {
           sessionRuntimePreferencesAuthority: "local" as const,
-          resolveSessionRuntimePreferences: async (scope) => {
+          resolveSessionRuntimePreferences: async (scope, target) => {
             // 预算已统一，不能把可选远端配置作为本地/手机 shared-host 建会话的前置条件。
             const settings = await settingService.get();
             const modelContextBudgetStrategy = DEFAULT_ZCODE_MODEL_CONTEXT_BUDGET_STRATEGY;
             return {
               askUserQuestionAutoResolutionEnabled:
-                settings.askUserQuestionAutoResolutionEnabled !== false,
+                settings.askUserQuestionAutoResolutionEnabled !== false &&
+                !(await graphEngineeringService?.isSessionOwned(target)),
               nativeSearchEnhancementsEnabled: settings.nativeSearchEnhancementsEnabled !== false,
               memoryEnabled: settings.memoryEnabled === true,
               modelContextBudgetStrategy,
@@ -2302,6 +2310,13 @@ export function createLocalServices(options: {
     agentService: zcodeAgentService,
     taskIndexSyncer: zcodeTaskIndexSyncer,
     cuaProductMcpServerResolver,
+  });
+  graphEngineeringService = createGraphEngineeringService({
+    directory: join(resolveAppConfigDir(), "graph-engineering"),
+    agentService: zcodeAgentService,
+    sessionService: zcodeSessionService,
+    modelSelectionService: providerRuntime.modelSelection,
+    settingService,
   });
   const gitCommitMessageGenerator = new GitCommitMessageGenerator({
     currentModelProvider: {
@@ -2432,6 +2447,7 @@ export function createLocalServices(options: {
   // services 集合建好后在 return 前统一登记进 sharedSqliteRepos 侧表
   const sqliteReposToClose: Array<{ close(): void }> = [];
   const services = new ServiceCollection()
+    .register(IGraphEngineeringService, graphEngineeringService)
     .register(IFileService, fileService)
     .register(IMediaPreviewService, mediaPreviewService)
     .register(IGitService, gitService)
@@ -2735,6 +2751,9 @@ function readTelemetryOAuthUserId(rawUserInfo: string | null): string {
 }
 
 export function disposeServiceResources(services: ServiceCollection): void {
+  (
+    services.getOptional(IGraphEngineeringService) as { dispose?: () => void } | undefined
+  )?.dispose?.();
   // host process 退出前以前没有统一遍历本地服务做资源回收，
   // terminal/task wrapper 这类会拉起子进程的服务只能等宿主进程自己结束，时序上可能留下短暂残留。
   // 这里集中调用各服务的本地 disposeAll 钩子，把“退出 app = 回收所有托管资源”落成机械动作。
@@ -2770,6 +2789,11 @@ export function disposeServiceResources(services: ServiceCollection): void {
 }
 
 export async function disposeServiceResourcesAndWait(services: ServiceCollection): Promise<void> {
+  await (
+    services.getOptional(IGraphEngineeringService) as
+      | { disposeAndWait?: () => Promise<void> }
+      | undefined
+  )?.disposeAndWait?.();
   // app 关闭时 host 需要等 agent 进程树完成 graceful + force 清理。
   // 旧的同步 dispose 会在 host 退出时丢掉强杀 timer，导致 zcode-cli/app-server 变成孤儿进程。
   const disposableServices = [

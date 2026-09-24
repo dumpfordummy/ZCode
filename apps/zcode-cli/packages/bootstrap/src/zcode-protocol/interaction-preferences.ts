@@ -13,7 +13,10 @@ export async function updateInteractionPreferences(
   const enabled = params.preferences.askUserQuestionAutoResolutionEnabled;
   context.appRuntimePreferences.askUserQuestionAutoResolutionEnabled = enabled;
   const snoozedInteractionCount =
-    await context.v4Interactions.setAskUserQuestionAutoResolutionEnabled(enabled);
+    await context.v4Interactions.setAskUserQuestionAutoResolutionEnabled(
+      enabled,
+      params.protectedSessionIds,
+    );
 
   return {
     workspace: params.workspace,

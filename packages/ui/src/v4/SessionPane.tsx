@@ -1,5 +1,6 @@
 import { resolveSelectionSideInheritedModel } from "@/lib/selectionSideInheritedModel.js";
 import { useStartPlanRecommendation } from "@/hooks/useStartPlanRecommendation.js";
+import { useGraphSessionOwnership } from "@/hooks/useGraphEngineering.js";
 import type { SessionCreateSource } from "@zcode/shared";
 import { reportSessionCreate } from "@/lib/sessionCreateTelemetry.js";
 import { getLocalTtftObserver } from "@/v4/telemetry/localTtftObserver.js";
@@ -556,6 +557,10 @@ export function SessionPane({
   const { conversationShareService, modelSelectionService, zcodeSessionService, zcodeTaskService } =
     useServices();
   const { intl, locale } = useZCodeIntl();
+  const graphOwnsInput = useGraphSessionOwnership(
+    { workspacePath, workspaceIdentity, remoteSessionId },
+    sessionId,
+  );
   const slashCommands = useSlashCommands(workspacePath, workspaceIdentity);
   const baseWorkspaceServices = useBaseWorkspaceServices();
   const workspaceHomePath = useWorkspaceHomePath({
@@ -3413,6 +3418,8 @@ export function SessionPane({
   // 在 Submission 真正开跑（Guide 为下一次 model-step）时由 CLI/Core 更新。
   const handleSelectModel = useCallback(
     (modelProvider: string, model: string, sourceModel: ModelSelectionSource | null) => {
+      // 已打开的 picker 也不能在图任务持有输入时修改下一次提交配置。
+      if (graphOwnsInput) return;
       const resolvedProvider =
         modelProvider || draftConfigRef.current.provider || sourceModel?.provider || "";
       logger.debug("[v4-pane] onSelectModel", {
@@ -3422,18 +3429,20 @@ export function SessionPane({
       });
       handleDraftSelectModel(resolvedProvider, model);
     },
-    [draftConfigRef, handleDraftSelectModel],
+    [draftConfigRef, graphOwnsInput, handleDraftSelectModel],
   );
 
   const handleSelectThought = useCallback(
     (thought: string, _modelContext: { provider: string; model: string }) => {
+      if (graphOwnsInput) return;
       handleDraftSelectThought(thought);
     },
-    [handleDraftSelectThought],
+    [graphOwnsInput, handleDraftSelectThought],
   );
 
   const handleRecoverCustomModelSelection = useCallback(
     async (value: string, sourceModel: ModelSelectionSource | null) => {
+      if (graphOwnsInput) return;
       const decoded = decodeCustomModelValue(value);
       if (!decoded?.providerId) {
         return;
@@ -3516,6 +3525,7 @@ export function SessionPane({
     },
     [
       provider,
+      graphOwnsInput,
       handleDraftSelectModel,
       sessionId,
       showModelChangeNotice,
@@ -3529,9 +3539,10 @@ export function SessionPane({
   // 模式与模型一样属于下一次 Submission；选择时只更新 Composer。
   const handleSwitchMode = useCallback(
     (mode: string) => {
+      if (graphOwnsInput) return;
       handleDraftSwitchMode(mode);
     },
-    [handleDraftSwitchMode],
+    [graphOwnsInput, handleDraftSwitchMode],
   );
 
   // context usage 面板的压缩入口（命令文本 = "/compact"，复用 slash 解析路径）。
@@ -3686,12 +3697,15 @@ export function SessionPane({
   });
   // retry 的产品裁决属于行级权威投影。这里仅提供命令能力，入口是否展示
   // 完全读取 row.actions.canRetry，禁止再用 pane phase 形成第二套 guard。
-  const retryActionsEnabled = !readOnly && !selectionSideChat && Boolean(sessionId);
+  // 图任务额外遵守 Host 的输入所有权；这是原生 admission guard 的提示投影，不按运行 phase 猜测。
+  const retryActionsEnabled =
+    !readOnly && !selectionSideChat && !graphOwnsInput && Boolean(sessionId);
   // fork 可用性完全由 row.actions.canFork（CLI stable resolver 投影）裁决；pane 只提供命令回调。
   const forkActionsEnabled = !readOnly && !selectionSideChat && Boolean(sessionId);
   // editUserQuery 已由 command 层防御 latest real user query，并在 running
   // 提交时先 stop barrier 再 rewind/rerun；UI 不应再用 completed gate 把入口整轮隐藏。
-  const editActionsEnabled = !readOnly && !selectionSideChat && Boolean(sessionId);
+  const editActionsEnabled =
+    !readOnly && !selectionSideChat && !graphOwnsInput && Boolean(sessionId);
   const isDraft = sessionId === null;
   // 滚动恢复必须使用与 sessionId 匹配的 lease projection。切换 session 的 render 与
   // passive effect 不在同一时刻，旧 lease 的 rows 若提前交给 timeline，会让新记忆按旧
@@ -4387,6 +4401,7 @@ export function SessionPane({
       onExternalTextInsertApplied={handleExternalTextInsertApplied}
       autoFocusEnabled={focused}
       disabled={
+        graphOwnsInput ||
         connecting ||
         draftRuntimeRebuilding ||
         queueEditActiveForCurrentComposer ||
@@ -4550,6 +4565,15 @@ export function SessionPane({
           provider={provider}
           snapshot={snapshot}
         />
+      ) : null}
+      {graphOwnsInput ? (
+        <p
+          role="status"
+          data-testid="graph-input-owned"
+          className="mx-4 mb-2 rounded-lg bg-surface px-3 py-2 text-ui-sm text-foreground-subtle"
+        >
+          {intl.formatMessage({ id: "graph.inputOwned" })}
+        </p>
       ) : null}
       {composerNode}
       {/* 办公模式显示主动任务推荐；编程模式保留原有小型场景入口。 */}

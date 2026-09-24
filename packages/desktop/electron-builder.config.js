@@ -1,6 +1,6 @@
 /* eslint-disable max-lines -- Electron Builder config keeps related packaging hooks together so build order stays explicit. */
 import { cpSync, existsSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
-import { readdir, writeFile } from "node:fs/promises";
+import { cp, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { createRequire } from "node:module";
@@ -457,9 +457,14 @@ export default {
   // Linux deb 打包（fpm）会校验 package metadata 中的 homepage、author.email、maintainer。
   // CI 环境下若这些字段缺失会在产物阶段直接失败。这里统一在构建配置补齐，避免依赖外部注入。
   extraMetadata: {
+    main:
+      desktopProductIdentity.flavor === "graph" ? "out/main/graph-entry.mjs" : "out/main/index.js",
     version: buildMetadata.appVersion,
     zcodeProductFlavor: desktopProductIdentity.flavor,
-    homepage: "https://zcode.z.ai",
+    homepage:
+      desktopProductIdentity.flavor === "graph"
+        ? "https://github.com/dumpfordummy/ZCode"
+        : "https://zcode.z.ai",
     author: {
       name: "ZCode",
       email: "dev@zcode.z.ai",
@@ -503,6 +508,14 @@ export default {
     `node_modules/node-pty/prebuilds/${targetPlatform.key}/**`,
   ],
   beforePack: async (context) => {
+    if (desktopProductIdentity.flavor === "graph") {
+      for (const name of ["graph-entry.mjs", "graph-profile.mjs"]) {
+        await cp(
+          resolve(desktopPackageRoot, "scripts", name),
+          resolve(desktopPackageRoot, "out/main", name),
+        );
+      }
+    }
     runTimedSync("beforePack:restoreTargetNodePtyPrebuild", () =>
       restoreTargetNodePtyPrebuild({ desktopPackageRoot, targetPlatform }),
     );
@@ -649,14 +662,17 @@ export default {
   // 打包阶段统一复用安装时准备好的原生文件，避免 electron-builder 再触发一轮不受控的本地编译。
   npmRebuild: false,
   // OAuth deep link 协议注册（macOS 打包后需要 Info.plist 中声明 CFBundleURLTypes）
-  protocols: [
-    {
-      // 协议处理器的展示名之前使用小写 scheme，打包产物里的协议描述无法体现产品名。
-      // 展示名跟随安装包身份；scheme 仍保持 zcode，因此两个应用中最后注册者会成为默认 handler。
-      name: desktopProductIdentity.productName,
-      schemes: ["zcode"],
-    },
-  ],
+  protocols:
+    desktopProductIdentity.flavor === "graph"
+      ? []
+      : [
+          {
+            // 协议处理器的展示名之前使用小写 scheme，打包产物里的协议描述无法体现产品名。
+            // 展示名跟随安装包身份；scheme 仍保持 zcode，因此两个应用中最后注册者会成为默认 handler。
+            name: desktopProductIdentity.productName,
+            schemes: ["zcode"],
+          },
+        ],
   mac: {
     target: ["dmg", "zip"],
     category: "public.app-category.developer-tools",

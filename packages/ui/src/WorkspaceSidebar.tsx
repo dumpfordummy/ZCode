@@ -19,6 +19,7 @@ import {
   Cloud,
   Folder,
   FolderOpen,
+  GitFork,
   Hash,
   ListFilter,
   Maximize2,
@@ -259,8 +260,10 @@ export const WorkspaceSidebar = memo(function WorkspaceSidebarComponent({
   onOpenCommandCenter,
   onOpenAutomations,
   onOpenPluginStore,
+  onOpenGraphEngineering,
   automationsActive = false,
   pluginStoreActive = false,
+  graphEngineeringActive = false,
   onFileTreeOpenChange,
 }: {
   workspacePath: string;
@@ -311,8 +314,10 @@ export const WorkspaceSidebar = memo(function WorkspaceSidebarComponent({
   onOpenCommandCenter: () => void;
   onOpenAutomations?: () => void;
   onOpenPluginStore?: () => void;
+  onOpenGraphEngineering?: () => void;
   automationsActive?: boolean;
   pluginStoreActive?: boolean;
+  graphEngineeringActive?: boolean;
   onFileTreeOpenChange?: (open: boolean) => void;
 }) {
   const { intl, localePreference, setLocalePreference } = useZCodeIntl();
@@ -1316,6 +1321,21 @@ export const WorkspaceSidebar = memo(function WorkspaceSidebarComponent({
                 }
               />
             ) : null} */}
+            <Button
+              variant="ghost"
+              onClick={onOpenGraphEngineering}
+              data-icon="inline-start"
+              data-testid="graph-engineering-open"
+              size="lg"
+              aria-pressed={graphEngineeringActive}
+              className={cn(
+                "w-full justify-start gap-2 text-foreground hover:bg-surface-hover hover:text-foreground",
+                graphEngineeringActive && "bg-selected text-foreground",
+              )}
+            >
+              <GitFork className="size-4" />
+              {intl.formatMessage({ id: "graph.title" })}
+            </Button>
             <Button
               variant="ghost"
               onClick={handleOpenAutomationsMain}

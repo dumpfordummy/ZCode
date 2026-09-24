@@ -8,6 +8,7 @@ import {
   type OAuthProviderId,
   type OAuthStateRegistration,
   PlatformChannels,
+  ZCODE_PRODUCT_FLAVOR,
 } from "@zcode/shared";
 import {
   extractWorkspaceOpenPath,
@@ -403,6 +404,7 @@ export function registerDeepLinkProtocol(
   options: { iconPath?: string } = {},
 ) {
   const scheme = "zcode";
+  if (ZCODE_PRODUCT_FLAVOR === "graph") return;
 
   if (process.defaultApp && process.argv.length >= 2) {
     const entry = resolve(process.argv[1]!);

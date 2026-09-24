@@ -1,0 +1,36 @@
+{
+  "mode": "graph",
+  "scenario": "cancel",
+  "home": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790198114704-551465",
+  "workspace": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790198114704-551465\\workspace",
+  "assertions": [
+    "An independent ordinary native chat is waiting on its own AskUserQuestion before Graph cancellation",
+    "Native tab, instructions/name and keyboard layout persist after navigation",
+    "Before Run, Graph displays the effective native fixture provider and model",
+    "Exact graph attempt cancelled through native stop while permission pending; file unchanged",
+    "Open conversation selects the cancelled attempt's exact native session",
+    "Cancelling Graph leaves the distinct ordinary native session waiting; its original question accepts one explicit answer and completes without file changes",
+    "Completing the unrelated native chat leaves the original graph attempt Cancelled"
+  ],
+  "screenshots": [
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790198114704-551465\\companion-waiting-before-cancel.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790198114704-551465\\graph-saved.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790198114704-551465\\graph-waiting-permission.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790198114704-551465\\graph-cancelled.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790198114704-551465\\companion-still-waiting-after-cancel.png",
+    "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790198114704-551465\\companion-completed-after-cancel.png"
+  ],
+  "companionSessionId": "sess_c41a1e57-7a56-48c8-ade4-d35cbda5ee7b",
+  "sessionId": "sess_7827f095-2b7a-46f5-98df-1c4b8bac4e65",
+  "inputId": "94e375d1-8e97-4185-af56-0c8fd45f4b51",
+  "companionToolResult": {
+    "id": "z1_companion_question",
+    "output": "User has answered your questions: \"Confirm this unrelated native chat still waits after cancelling the graph.\"=\"Complete companion\". You can now continue with the user's answers in mind."
+  },
+  "runtimeOwnershipEvidence": {
+    "kind": "source plus session continuity",
+    "source": "packages/services/src/zcode-agent/zcodeAgentProcessManager.ts: workspace-scoped primary runtime; Graph uses the same existing agent/session services",
+    "limitation": "The native UI does not expose the Agent process identity; exact PID continuity is not asserted."
+  },
+  "status": "PASS"
+}

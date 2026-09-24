@@ -2189,6 +2189,8 @@ export const zcodeWorkspaceUpdateInteractionPreferencesParamsSchema = z
   .object({
     workspace: zcodeWorkspaceRefSchema,
     preferences: zcodeInteractionPreferencesSchema,
+    /** Runtime-only exclusions; omission preserves prior protection for legacy senders. */
+    protectedSessionIds: z.array(nonEmptyString).optional(),
   })
   .strict();
 export type ZCodeWorkspaceUpdateInteractionPreferencesParams = z.infer<

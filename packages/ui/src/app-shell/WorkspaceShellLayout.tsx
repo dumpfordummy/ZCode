@@ -1,5 +1,5 @@
 /* eslint-disable max-lines -- workspace shell 当前集中编排 sidebar、chat、terminal 和 browser pane 的布局联动，先保持单文件收口，避免为满足行数限制打散关键布局状态。*/
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   CSSProperties,
   KeyboardEvent as ReactKeyboardEvent,
@@ -186,6 +186,8 @@ function persistWorkspaceSidebarWidthPx(widthPx: number) {
     // ignore
   }
 }
+
+const GraphEngineeringPanel = lazy(() => import("@/graph-engineering/GraphEngineeringPanel.js"));
 
 export const WorkspaceShellLayout = memo(function WorkspaceShellLayoutComponent({
   services,
@@ -1491,8 +1493,7 @@ export const WorkspaceShellLayout = memo(function WorkspaceShellLayoutComponent(
   // Draft 之前维护一套独立轻量 header，导致 side pane、caption 安全区和拖拽入口
   // 与 Task Header 分叉。桌面端统一复用 WorkspaceHeader，只由 variant 裁剪 task 专属内容；
   // 手机远控无 active task 时仍不渲染桌面 chrome，继续遵守 replayable overlay 边界。
-  const shouldRenderMainViewHeader =
-    workspaceMainView !== "automations" && workspaceMainView !== "plugin-store";
+  const shouldRenderMainViewHeader = workspaceMainView === "chat";
   const shouldRenderWorkspaceHeader =
     shouldRenderMainViewHeader && (activeTaskId !== null || isDesktop);
   // ErrorBoundary resetKeys 的数组如果每次 render 都重新创建，
@@ -1600,6 +1601,8 @@ export const WorkspaceShellLayout = memo(function WorkspaceShellLayoutComponent(
                     automationsActive={workspaceMainView === "automations"}
                     onOpenPluginStore={handleOpenPluginStore}
                     pluginStoreActive={workspaceMainView === "plugin-store"}
+                    onOpenGraphEngineering={() => onWorkspaceMainViewChange("graph-engineering")}
+                    graphEngineeringActive={workspaceMainView === "graph-engineering"}
                     onFileTreeOpenChange={setIsSidebarFileTreeOpen}
                   />
                 </WorkflowRunOpenProvider>
@@ -1744,7 +1747,26 @@ export const WorkspaceShellLayout = memo(function WorkspaceShellLayoutComponent(
                       </ScopedErrorBoundary>
                     ) : null}
                     <div className="min-h-0 flex-1 overflow-hidden">
-                      {workspaceMainView === "automations" ? (
+                      {workspaceMainView === "graph-engineering" ? (
+                        <Suspense
+                          fallback={
+                            <p role="status" className="p-4 text-ui-base">
+                              {intl.formatMessage({ id: "graph.loading" })}
+                            </p>
+                          }
+                        >
+                          <GraphEngineeringPanel
+                            key={workspaceKey}
+                            workspacePath={workspaceAbsPath}
+                            workspaceIdentity={workspaceIdentity}
+                            remoteSessionId={workspaceRemoteSessionId}
+                            remoteTarget={workspaceRemoteTarget}
+                            readOnlyReason={workspaceReadOnlyReason}
+                            onBack={showChatMainView}
+                            onOpenConversation={handleSelectTaskInChat}
+                          />
+                        </Suspense>
+                      ) : workspaceMainView === "automations" ? (
                         <main
                           id={AUTOMATIONS_TOAST_ANCHOR_ID}
                           className="flex h-full min-h-0 flex-1 flex-col bg-background"
@@ -1899,7 +1921,7 @@ export const WorkspaceShellLayout = memo(function WorkspaceShellLayoutComponent(
                     </div>
                   </section>
                 </ResizablePanel>
-                {workspaceMainView !== "automations" && workspaceMainView !== "plugin-store" ? (
+                {workspaceMainView === "chat" ? (
                   <AnimatedTerminalPanel
                     frameClassName={cn(
                       isSidePaneVisible

@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "scope": "Controlled native cancellation with a separate ordinary Chat waiting in the same synthetic workspace; finite log capture ends before normal fixture-owned app shutdown.",
+  "profile": ".tmp/z1-native-1790198114704-551465",
+  "log": ".tmp\\z1-native-1790198114704-551465\\native.log",
+  "agentPid": 36308,
+  "hostPid": 37152,
+  "uniqueWorkspaceAgentStartCount": 1,
+  "processExitStopRestartLogMatches": 0,
+  "startEvidence": [
+    {
+      "line": 368,
+      "text": "[2026-09-24 05:15:18.663] [pid:18864] [main] [host-log] (local-1) [host] [2026-09-24 05:15:18.661] [pid:37152] [zcode-agent] ZCode agent process started {\"workspaceKey\":\"C:\\\\Users\\\\USER\\\\Desktop\\\\Personal\\\\ZCode\\\\.tmp\\\\z1-native-1790198114704-551465\\\\workspace\",\"command\":\"C:\\\\Users\\\\USER\\\\Desktop\\\\Personal\\\\ZCode\\\\node_modules\\\\electron\\\\dist\\\\electron.exe\",\"cwd\":\"C:\\\\Users\\\\USER\\\\Desktop\\\\Personal\\\\ZCode\\\\.tmp\\\\z1-native-1790198114704-551465\\\\workspace\",\"pid\":36308,\"durationMs\":24}"
+    }
+  ],
+  "graphMetadataSource": ".tmp\\z1-native-1790198114704-551465\\data\\.zcode\\v2\\graph-engineering\\9d0d6f470491d388fc967af975daffd5a9b568b6ee5272ddb3bf25ba81ddd64f.json",
+  "graph": {
+    "sessionId": "sess_7827f095-2b7a-46f5-98df-1c4b8bac4e65",
+    "inputId": "94e375d1-8e97-4185-af56-0c8fd45f4b51",
+    "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790198114704-551465\\workspace:1:36308",
+    "foregroundExecutionId": "runtime_command_2",
+    "status": "Cancelled",
+    "terminalProof": {
+      "sourceCommandId": "94e375d1-8e97-4185-af56-0c8fd45f4b51",
+      "state": "completedInterrupted",
+      "logEpoch": "muelqnhd-lyy62wn0",
+      "seq": 43
+    }
+  },
+  "companion": {
+    "sessionId": "sess_c41a1e57-7a56-48c8-ade4-d35cbda5ee7b",
+    "questionResult": {
+      "id": "z1_companion_question",
+      "output": "User has answered your questions: \"Confirm this unrelated native chat still waits after cancelling the graph.\"=\"Complete companion\". You can now continue with the user's answers in mind."
+    }
+  },
+  "interpretation": "One workspace Agent start is logged; Graph metadata binds that Agent PID, and the preexisting companion question resumes and completes after Graph cancellation. This is native log + stored metadata + UI/tool evidence, not a PID exposed by the UI or a system-wide process audit."
+}
