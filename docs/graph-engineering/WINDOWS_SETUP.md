@@ -5,7 +5,7 @@ ZCode Graph is this fork's Windows x64 distribution of native Z1: Start → Agen
 ## Install and use
 
 1. Open [this fork's Releases](https://github.com/dumpfordummy/ZCode/releases) and select a **ZCode Graph** prerelease. Download `ZCode Graph-<version>-win-x64.exe` and `SHA256SUMS.txt` from the same release.
-2. In PowerShell, run `Get-FileHash -Algorithm SHA256 '.\ZCode Graph-3.14.0-z1.1-win-x64.exe'` (substitute the downloaded version) and compare its hash with `SHA256SUMS.txt`.
+2. In PowerShell, run `Get-FileHash -Algorithm SHA256 '.\ZCode Graph-3.14.0-z1.2-win-x64.exe'` (substitute the downloaded version) and compare its hash with `SHA256SUMS.txt`.
 3. Run the installer and launch **ZCode Graph**. This prerelease is unsigned; Windows may show an unknown-publisher warning. Verify the source and checksum before choosing to run it. Code-signing/SmartScreen reputation is not certified.
 4. Use **Use API key** and configure your own supported provider/model through ordinary ZCode settings. No account or model balance is included. Account OAuth callbacks using the shared `zcode:` URL protocol are outside this distribution's acceptance scope.
 5. Open a local test workspace. Select a model in ordinary Chat, then open **Graph Engineering** in the workspace sidebar. Set the graph/task name and instructions, **Save**, then **Run**.
@@ -30,7 +30,7 @@ node --test scripts/graph-engineering/distribution.test.mjs
 pnpm typecheck
 pnpm lint
 pnpm architecture:check --changed
-node scripts/graph-engineering/build-windows.mjs 3.14.0-z1.1
+node scripts/graph-engineering/build-windows.mjs 3.14.0-z1.2
 node scripts/graph-engineering/packaged-smoke.mjs
 ```
 

@@ -38,6 +38,17 @@ const summary = {
   screenshots: [],
 };
 let window;
+const waitForSaved = () =>
+  window.waitForFunction(() => {
+    const name = document.querySelector('[data-testid="graph-name"]');
+    const save = document.querySelector('[data-testid="graph-save"]');
+    return (
+      name &&
+      !name.disabled &&
+      save?.disabled &&
+      [...document.querySelectorAll('[role="status"]')].some((node) => node.textContent === "Saved")
+    );
+  });
 const capture = async (name) => {
   await window.evaluate(() => document.fonts.ready);
   const file = path.join(isolation.home, `${name}.png`);
@@ -89,23 +100,27 @@ try {
     await window.getByTestId("v4-composer-input").fill(instruction);
     await window.getByTestId("v4-composer-send").click();
   } else {
+    summary.stage = "edit definition";
     await window.getByTestId("graph-engineering-open").click();
     await window.getByTestId("graph-name").fill("Z1 synthetic verification");
     await window.getByTestId("graph-instructions").fill(taskInstruction);
+    summary.stage = "save definition";
     await window.getByTestId("graph-save").click();
-    await window.getByTestId("graph-save").waitFor({ state: "visible" });
-    await window.waitForFunction(
-      () => document.querySelector('[data-testid="graph-save"]')?.disabled === true,
-    );
+    // 原因：Save 在 pending 时也 disabled；仅等待 disabled 会在 Host ACK 前向禁用画布发键。
+    // 依据 UI 状态等待 Saved 和输入重新启用，再等待节点选中；不靠固定延时掩盖竞态。
+    await waitForSaved();
     const task = window.locator('.react-flow__node[data-id="task"]');
     const before = await task.getAttribute("style");
+    summary.stage = "select and move node";
     await task.focus();
     await task.press("Enter");
-    await task.press("ArrowDown");
-    await window.getByTestId("graph-save").click();
-    await window.waitForFunction(
-      () => document.querySelector('[data-testid="graph-save"]')?.disabled === true,
+    await window.waitForFunction(() =>
+      document.querySelector('.react-flow__node[data-id="task"]')?.classList.contains("selected"),
     );
+    await task.press("ArrowDown");
+    summary.stage = "save layout";
+    await window.getByTestId("graph-save").click();
+    await waitForSaved();
     await window.getByRole("button", { name: "Back to chat", exact: true }).click();
     await window.getByTestId("graph-engineering-open").click();
     assert.equal(await window.getByTestId("graph-name").inputValue(), "Z1 synthetic verification");
@@ -114,6 +129,7 @@ try {
     summary.assertions.push(
       "Native tab, instructions/name and keyboard layout persist after navigation",
     );
+    summary.stage = "native scenario";
     await capture("graph-saved");
     if (mode === "no-provider") {
       assert.equal(await window.getByTestId("graph-run-button").isDisabled(), true);
@@ -322,7 +338,7 @@ try {
   summary.status = "PASS";
 } catch (error) {
   summary.status = "FAIL";
-  summary.error = String(error);
+  summary.error = error instanceof Error ? error.stack : String(error);
   if (window) {
     summary.body = await window
       .locator("body")

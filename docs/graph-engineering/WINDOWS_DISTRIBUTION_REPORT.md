@@ -45,6 +45,8 @@ Graph still uses the original Host/session/Agent services and provider settings.
 
 The installer build emitted existing pnpm hoist/dependency warnings and the existing Windows shell-spawn deprecation warning. Final package dependency gates and actual startup passed. No global dependency or formatting cleanup was performed.
 
+Additional launch check: **PASS** with only Windows system directories on the packaged app's PATH (no Node, pnpm or Git). The Graph editor opened and retained its no-provider guard. This proves launch without the development toolchain, not execution of arbitrary project commands. See [minimal-path.json](evidence/windows/minimal-path.json).
+
 ## Packaged native evidence
 
 The complete `win-unpacked` folder was copied into a new OS temporary directory outside the checkout. Playwright launched **ZCode Graph.exe** directly, using its packaged entry rather than the development bootstrap. Each scenario used a new synthetic Git workspace, empty inherited account environment, private profile and loopback provider. The app reported `isPackaged: true`, `name: ZCode Graph`, version `3.14.0-z1.1`, and home/userData under the expected private root. No repository `node_modules` fallback was available through the app's parent directory.
@@ -67,4 +69,6 @@ These are synthetic-fixture results, not real-provider acceptance or a clean-PC 
 
 ## Remote publication
 
-Pending the authorized scoped commit/push and tag workflow; the published Release and workflow result will be verified before reporting distribution complete.
+The implementation commit `80f1692b4561c0b6578402c81354187d04a82062` and tag `graph-v3.14.0-z1.1` were pushed to the user's fork. [The first clean-runner workflow](https://github.com/dumpfordummy/ZCode/actions/runs/35964313014) passed installation, 55 source tests, typecheck/lint/architecture and packaging. Complete and no-provider native scenarios passed. The question scenario failed during the earlier editor keyboard-layout check: the test clicked Save while it stayed disabled. Publication was correctly skipped; no 1.1 Release was published.
+
+The harness incorrectly used disabled Save as acknowledgement, although it is also disabled during the pending Host request. Keyboard events could therefore arrive while the canvas was disabled. The corrected test awaits Saved plus re-enabled inputs and selected-node state, without adding delays or loosening assertions. Failed packaged scenarios now retain summaries, screenshots and synthetic logs before CI cleanup. The app's production code did not change for this correction. A new immutable `graph-v3.14.0-z1.2` tag will carry the corrected gate; its final result is recorded after remote verification.

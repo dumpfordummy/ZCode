@@ -15,7 +15,7 @@ for (const args of [
   ["--cancel"],
   ["--restart-interrupted"],
 ]) {
-  const result = await new Promise((resolve, reject) => {
+  const { result, exitCode } = await new Promise((resolve, reject) => {
     const child = spawn(
       process.execPath,
       [path.join(import.meta.dirname, "native-smoke.mjs"), ...args],
@@ -32,10 +32,16 @@ for (const args of [
       process.stdout.write(data);
     });
     child.on("error", reject);
-    child.on("exit", (code) => {
-      if (code !== 0)
-        return reject(new Error(`Packaged smoke exited ${code}; detached app: ${detached}`));
-      resolve(JSON.parse(stdout));
+    child.on("close", (code) => {
+      try {
+        resolve({ result: JSON.parse(stdout), exitCode: code });
+      } catch (error) {
+        reject(
+          new Error(`No valid packaged summary (exit ${code}); detached app: ${detached}`, {
+            cause: error,
+          }),
+        );
+      }
     });
   });
   results.push(result);
@@ -46,9 +52,14 @@ for (const args of [
     path.join(evidence, "summary.json"),
     await readFile(path.join(result.home, "summary.json")),
   );
+  await writeFile(
+    path.join(output, "packaged-smoke.json"),
+    JSON.stringify({ detached, results }, null, 2),
+  );
+  if (exitCode !== 0 || result.status !== "PASS") {
+    // 失败也先保存原始合成日志和截图，避免 CI 清理临时目录后无法定位真实失败阶段。
+    await cp(path.join(result.home, "native.log"), path.join(evidence, "native.log"));
+    throw new Error(`Packaged smoke exited ${exitCode}; evidence: ${evidence}`);
+  }
 }
-await writeFile(
-  path.join(output, "packaged-smoke.json"),
-  JSON.stringify({ detached, results }, null, 2),
-);
 process.stdout.write(`Packaged acceptance PASS; evidence: ${output}\n`);

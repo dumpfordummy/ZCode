@@ -31,6 +31,8 @@ These are executable operator scenarios for the isolated desktop application, no
 
 ## Focused source-layer tests
 
+Automation must wait for the native Save acknowledgement: the name input is enabled again, the status reads Saved, and Save is disabled because there are no pending changes. Save being disabled alone also occurs while the Host request is pending and is not acknowledgement. After Enter selects a canvas node, wait for its selected state before sending an arrow key. Retain failing scenario summaries/screenshots before terminating packaged acceptance; do not increase timeouts or bypass publication gates to hide a missing state transition.
+
 ```powershell
 . .\.tmp\z1-env.ps1
 node node_modules/tsx/dist/cli.mjs --test packages/ui/test/graphEngineeringView.test.ts
