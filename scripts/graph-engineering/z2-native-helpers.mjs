@@ -173,6 +173,8 @@ export async function addBinding(window, alias, source, index) {
 export async function createSequentialGraph(window, summary) {
   await window.getByTestId("graph-engineering-open").click();
   await window.getByTestId("graph-upgrade").click();
+  // Guided 模式为默认值且不渲染 instruction-mode 等高级控件；切换到 Advanced 后才能操作。
+  await window.getByTestId("graph-editor-advanced").click();
   await window.getByTestId("graph-name").fill("Z2 synthetic Analyze / Implement / Verify");
   await selectNode(window, "start");
   await window.getByTestId("graph-start-input").fill(Z2_START);
