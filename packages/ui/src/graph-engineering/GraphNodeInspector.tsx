@@ -11,7 +11,12 @@ import { GraphToolEditor } from "./GraphToolEditor.js";
 import type { GraphRecipeSnapshot } from "@zcode/services";
 import { GraphConditionEditor } from "./GraphConditionEditor.js";
 import { GraphApprovalEditor } from "./GraphApprovalEditor.js";
-import { connectGraphNodes, removeGraphTask, updateGraphNode } from "./graphEditing.js";
+import { connectGraphNodes, updateGraphNode } from "./graphEditing.js";
+import { useGraphEditorMode } from "./GraphEditorMode.js";
+import { GraphGuidedTask } from "./GraphGuidedTask.js";
+import { GraphDeleteNode } from "./GraphDeleteNode.js";
+import { GraphGuidedCondition } from "./GraphGuidedCondition.js";
+import { GraphReferenceBindings } from "./GraphReferenceBindings.js";
 
 export function GraphNodeInspector({
   definition,
@@ -33,6 +38,8 @@ export function GraphNodeInspector({
   recipes: GraphRecipeSnapshot | null;
 }) {
   const { intl } = useZCodeIntl();
+  const workspaceKey = workspaceIdentity?.trim() || workspacePath;
+  const editorMode = useGraphEditorMode(workspaceKey);
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
   const update = (next: GraphNode) => {
     if (!disabled) onChange(updateGraphNode(definition, next));
@@ -49,8 +56,35 @@ export function GraphNodeInspector({
     <section className="space-y-4" data-testid="graph-node-inspector" data-node-id={node.id}>
       <h3 className="text-ui-base font-medium">{label(node)}</h3>
       <p className="break-all font-mono text-ui-xs text-foreground-subtlest">{node.id}</p>
+      {definition.template ? (
+        <GraphReferenceBindings
+          key={`references:${node.id}`}
+          contextKey={JSON.stringify(definition)}
+          target={{ workspacePath, workspaceIdentity }}
+          roles={definition.template.references.filter((reference) =>
+            reference.nodeIds.includes(node.id),
+          )}
+          bindings={definition.template.bindings}
+          disabled={disabled}
+          onChange={(bindings) =>
+            onChange({ ...definition, template: { ...definition.template!, bindings } })
+          }
+        />
+      ) : null}
+      {/* 原生回归复现条件编辑器与删除控件共用 node ID key 后遗留重复表单；同级 key 必须同时区分角色和节点。 */}
       {node.type === "condition" ? (
-        <GraphConditionEditor key={node.id} node={node} disabled={disabled} onChange={update} />
+        editorMode === "advanced" ? (
+          <GraphConditionEditor
+            key={`condition-advanced:${node.id}`}
+            {...{ node, disabled, workspaceKey }}
+            onChange={update}
+          />
+        ) : (
+          <GraphGuidedCondition
+            key={`condition-guided:${node.id}`}
+            {...{ node, definition, disabled, workspaceKey, onChange }}
+          />
+        )
       ) : null}
       {node.type === "approval" ? (
         <GraphApprovalEditor {...{ node, definition, disabled }} onChange={update} />
@@ -88,7 +122,20 @@ export function GraphNodeInspector({
           onChange={(value) => update({ ...node, outputNodeId: value === "none" ? null : value })}
         />
       ) : null}
-      {node.type === "task" ? (
+      {node.type === "task" && editorMode === "guided" ? (
+        <>
+          <GraphGuidedTask
+            key={`task-guided:${node.id}`}
+            {...{ definition, node, disabled, recipes, workspaceKey, onChange }}
+          />
+          <GraphNodeConfiguration
+            key={`settings:${node.id}`}
+            {...{ workspacePath, workspaceIdentity, defaults, disabled, node }}
+            onChange={update}
+          />
+        </>
+      ) : null}
+      {node.type === "task" && editorMode === "advanced" ? (
         <>
           <label className="block space-y-1 text-ui-sm text-foreground-subtle">
             <span>{t("taskName")}</span>
@@ -200,7 +247,7 @@ export function GraphNodeInspector({
           {/* 同级编辑器不能复用 key；原生回归显示重复 key 会在切换节点后遗留输出面板。 */}
           <GraphStructuredOutput
             key={`output:${node.id}`}
-            {...{ node, disabled }}
+            {...{ node, disabled, workspaceKey }}
             onChange={update}
           />
           <GraphNodeConfiguration
@@ -260,23 +307,7 @@ export function GraphNodeInspector({
       node.type === "approval" ||
       node.type === "tool" ||
       node.type === "condition" ? (
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={disabled}
-          data-testid="graph-delete-node"
-          onClick={() => onChange(removeGraphTask(definition, node.id))}
-        >
-          {t(
-            node.type === "condition"
-              ? "z5.deleteCondition"
-              : node.type === "approval"
-                ? "approval.deleteNode"
-                : node.type === "tool"
-                  ? "z4.deleteTool"
-                  : "deleteNode",
-          )}
-        </Button>
+        <GraphDeleteNode key={`delete:${node.id}`} {...{ definition, node, disabled, onChange }} />
       ) : null}
     </section>
   );

@@ -21,6 +21,7 @@ import type {
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { graphSelectedAttempt } from "./graphRoutingView.js";
 import { connectGraphNodes } from "./graphEditing.js";
+import { graphEdgeKey } from "./graphEditorGuidance.js";
 import "@xyflow/react/dist/style.css";
 import "./GraphCanvas.css";
 
@@ -101,6 +102,8 @@ export function GraphCanvas({
   selectedAttemptId,
   selectedRegionId,
   onSelectRegion,
+  selectedEdgeKey,
+  onSelectEdge,
 }: {
   definition: GraphDefinition;
   onChange: (definition: GraphDefinition) => void;
@@ -114,6 +117,8 @@ export function GraphCanvas({
   selectedAttemptId?: string;
   selectedRegionId?: string;
   onSelectRegion?: (id: string) => void;
+  selectedEdgeKey?: string;
+  onSelectEdge?: (key: string) => void;
 }) {
   const { intl } = useZCodeIntl();
   const editable = !disabled && definition.version !== undefined;
@@ -210,6 +215,7 @@ export function GraphCanvas({
         return {
           ...edge,
           id: `graph-edge-${index}`,
+          selected: graphEdgeKey(edge) === selectedEdgeKey,
           sourceHandle: port,
           label: port,
           style: {
@@ -220,7 +226,7 @@ export function GraphCanvas({
           markerEnd: { type: MarkerType.ArrowClosed, color },
         };
       }),
-    [definition.edges, run, selectedId, selectedAttemptId],
+    [definition.edges, run, selectedId, selectedAttemptId, selectedEdgeKey],
   );
   const selectCanvasNode = (id: string) =>
     id.startsWith("repair-group:") ? onSelectRegion?.(id.slice(13)) : onSelect(id);
@@ -245,6 +251,16 @@ export function GraphCanvas({
         maxZoom={1.5}
         proOptions={{ hideAttribution: false }}
         onNodeClick={(_, node) => selectCanvasNode(node.id)}
+        onEdgeClick={(_, edge) => {
+          if (editable)
+            onSelectEdge?.(
+              graphEdgeKey({
+                source: edge.source,
+                target: edge.target,
+                sourcePort: edge.sourceHandle ?? undefined,
+              }),
+            );
+        }}
         onConnect={(connection) => {
           if (
             editable &&

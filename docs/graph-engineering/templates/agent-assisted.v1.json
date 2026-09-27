@@ -1,0 +1,205 @@
+{
+  "format": "zcode-workflow",
+  "version": 1,
+  "name": "Agent-assisted task",
+  "description": "Analyze, implement and review through native sessions, then require final human approval. Verification: agent-led review; configured test evidence not included. No project checks required.",
+  "graph": {
+    "version": 5,
+    "revision": 0,
+    "name": "Agent-assisted task",
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 40,
+          "y": 100
+        },
+        "request": ""
+      },
+      {
+        "id": "analyze",
+        "type": "task",
+        "name": "Analyze",
+        "position": {
+          "x": 300,
+          "y": 100
+        },
+        "instructions": "Workflow task: analyze.\nInspect the explicit request, relevant native project instructions and source. Identify a bounded implementation and acceptance criteria. Preserve unrelated work. Do not edit or execute commands. Missing requirements remain questions.\nrequest:\n{{inputs.request}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "implement",
+        "type": "task",
+        "name": "Implement",
+        "position": {
+          "x": 560,
+          "y": 100
+        },
+        "instructions": "Workflow task: implement.\nImplement the explicit request using the supplied analysis and normal native tools and permissions. Read current source first and preserve unrelated work. Report actual edits, checks performed, limitations and unresolved questions. This workflow has no configured machine-test verification; never claim one exists. Do not commit, merge or publish.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
+          {
+            "alias": "analyze",
+            "source": {
+              "kind": "node",
+              "nodeId": "analyze"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "review",
+        "type": "task",
+        "name": "Review",
+        "position": {
+          "x": 820,
+          "y": 100
+        },
+        "instructions": "Workflow task: review.\nInspect the actual changes against the explicit request, analysis and implementation handoff. Do not edit or execute commands. Distinguish observed source findings from agent-reported checks. Report remaining issues and what a human should inspect. Verification is agent-led; configured test evidence is not included. Agent prose cannot establish machine-verified success.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}\n\nimplement:\n{{inputs.implement}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
+          {
+            "alias": "analyze",
+            "source": {
+              "kind": "node",
+              "nodeId": "analyze"
+            }
+          },
+          {
+            "alias": "implement",
+            "source": {
+              "kind": "node",
+              "nodeId": "implement"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "final-gate",
+        "type": "approval",
+        "name": "Final human review",
+        "position": {
+          "x": 1080,
+          "y": 100
+        },
+        "reviewInstructions": "Review the actual changes, agent findings and unresolved questions. Verification is agent-led; configured test evidence is not included. Approval does not establish that tests passed or authorize commit, merge or publication.",
+        "evidence": [
+          {
+            "alias": "review",
+            "source": {
+              "kind": "node",
+              "nodeId": "review"
+            }
+          },
+          {
+            "alias": "implementation",
+            "source": {
+              "kind": "node",
+              "nodeId": "implement"
+            }
+          },
+          {
+            "alias": "source",
+            "source": {
+              "kind": "source"
+            }
+          }
+        ],
+        "commentPolicy": "required"
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 1340,
+          "y": 100
+        },
+        "outputNodeId": "review"
+      }
+    ],
+    "edges": [
+      {
+        "source": "start",
+        "target": "analyze"
+      },
+      {
+        "source": "analyze",
+        "target": "implement"
+      },
+      {
+        "source": "implement",
+        "target": "review"
+      },
+      {
+        "source": "review",
+        "target": "final-gate"
+      },
+      {
+        "source": "final-gate",
+        "target": "end"
+      }
+    ],
+    "routing": {
+      "finalGateId": "final-gate",
+      "limits": {
+        "maxNodeAdmissions": 24,
+        "deadlineMs": 1800000
+      }
+    }
+  },
+  "parameters": [
+    {
+      "id": "request",
+      "label": "Explicit run request",
+      "type": "string",
+      "required": true
+    }
+  ],
+  "references": [
+    {
+      "id": "instructions",
+      "label": "Additional project instructions",
+      "kind": "instruction",
+      "required": false,
+      "nodeIds": ["analyze", "implement", "review"]
+    },
+    {
+      "id": "skill",
+      "label": "Existing native skill",
+      "kind": "skill",
+      "required": false,
+      "nodeIds": ["implement"]
+    }
+  ],
+  "optionalNodes": []
+}

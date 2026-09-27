@@ -1,3 +1,4 @@
+import { assertGraphInputAllowed } from "./input-guard.js";
 import { armRoutingDeadline } from "./routing-deadline.js";
 import { modelSelectionSchema } from "@zcode/shared";
 import { submissionModeSchema } from "@zcode/shared/zcode-protocol-v4";
@@ -14,7 +15,7 @@ import {
   validateDefinition,
   validateReadiness,
 } from "../domain/definition.js";
-import { nativeExecution, runFingerprint } from "./attempts.js";
+import { runFingerprint } from "./attempts.js";
 import { GraphRecovery } from "./recovery.js";
 import { createRunPlan } from "./run-plan.js";
 import { GraphSequencer } from "./sequencer.js";
@@ -25,6 +26,8 @@ import { parallelUnresolved } from "../domain/parallel.js";
 import { assertParallelAdmission, parallelGuardedRuns } from "./parallel-guard.js";
 
 import type { GraphInputGuardRequest } from "./ports.js";
+import { checksStartSchema } from "../domain/checks-record.js";
+import { GRAPH_CHECKS_ADMISSION_REJECTED } from "../checks-types.js";
 export type { GraphInputGuardRequest } from "./ports.js";
 export class GraphEngineeringService implements IGraphEngineeringService {
   readonly parallelService: GraphParallelService;
@@ -116,11 +119,14 @@ export class GraphEngineeringService implements IGraphEngineeringService {
       };
       if (typeof defaults.planEnabled !== "boolean")
         throw new Error("Plan mode must be a boolean.");
+      const checks =
+        params.action === "checks" ? checksStartSchema.parse(params.checks) : undefined;
       const fingerprint = runFingerprint({
         target,
         revision: params.revision,
         ...defaults,
-        ...(params.preflight ? { preflight: params.preflight } : {}),
+        ...(checks ? { checks } : {}),
+        ...("preflight" in params && params.preflight ? { preflight: params.preflight } : {}),
       });
       const duplicate = record.runs.find((run) => run.requestId === params.requestId);
       if (duplicate) {
@@ -140,58 +146,102 @@ export class GraphEngineeringService implements IGraphEngineeringService {
           );
         return structuredClone(duplicate);
       }
-      if (record.runs.some((run) => !isConfirmedTerminal(run)))
-        throw new Error(
-          "This workspace has an unresolved Graph Engineering attempt. Inspect or safely release it before starting additional work.",
+      let run: GraphRun;
+      try {
+        if (record.runs.some((run) => !isConfirmedTerminal(run)))
+          throw new Error(
+            "This workspace has an unresolved Graph Engineering attempt. Inspect or safely release it before starting additional work.",
+          );
+        await assertParallelAdmission(
+          this.state,
+          record,
+          target,
+          { requestId: params.requestId, revision: params.revision, settings: defaults },
+          this.parallelService.owner.live,
         );
-      await assertParallelAdmission(
-        this.state,
-        record,
-        target,
-        { requestId: params.requestId, revision: params.revision, settings: defaults },
-        this.parallelService.owner.live,
-      );
-      if (record.definition.revision !== params.revision)
-        throw new Error("Graph revision changed; save and reload before running.");
-      const definition = validateDefinition(record.definition);
-      const ready = validateReadiness(definition);
-      if (ready.errors.length) throw new Error(ready.errors.join("\n"));
-      const toolOnly =
-        (definition.version ?? 0) >= 4 && !definition.nodes.some((n) => n.type === "task");
-      const availability =
-        toolOnly && this.state.options.tools
-          ? await this.state.options.tools.available()
-          : await this.state.options.native.available();
-      if (!availability.available)
-        throw new Error(availability.reason ?? "Native agent unavailable.");
-      const run = await createRunPlan(this.state.options, {
-        definition,
-        target,
-        requestId: params.requestId,
-        fingerprint,
-        defaults,
-        path: ready.path,
-      });
-      if (run.version === 5 && run.definition.template) {
-        const preflight = this.state.options.preflight;
-        if (!preflight || !params.preflight?.digest)
-          throw new Error("Review the native execution preflight before starting this workflow.");
-        const captured = await preflight.capture(target, run.definition, defaults);
-        if (captured.digest !== params.preflight.digest)
+        if (record.definition.revision !== params.revision)
+          throw new Error("Graph revision changed; save and reload before running.");
+        const checksPort = this.state.options.checks;
+        if (checks && !checksPort)
+          throw new Error("Project-check calibration is unavailable on this host.");
+        const checksPreview = checks
+          ? await checksPort!.capture(
+              target,
+              params.revision,
+              checks.selection,
+              checks.expectedDigest,
+            )
+          : undefined;
+        if (
+          checksPreview &&
+          (checksPreview.digest !== checks!.digest ||
+            (checksPreview.unknowns.length && !checks!.acknowledgedUnknowns))
+        )
           throw new Error(
-            "Workflow references or configuration changed; prepare and review a new run.",
+            "Project checks or source/environment changed, or Unknown effects were not acknowledged. Prepare and review again.",
           );
-        if (captured.unknowns.length && params.preflight.acknowledgedUnknowns !== true)
-          throw new Error(
-            "An explicit operational acknowledgment of Unknown destinations is required.",
-          );
-        run.provenance = {
-          ...captured,
-          operationalDecision: {
-            acknowledgedUnknowns: params.preflight.acknowledgedUnknowns,
-            acceptedAt: this.state.options.now(),
-          },
-        };
+        const definition = validateDefinition(checksPreview?.definition ?? record.definition);
+        const ready = validateReadiness(definition);
+        if (ready.errors.length) throw new Error(ready.errors.join("\n"));
+        const toolOnly =
+          (definition.version ?? 0) >= 4 && !definition.nodes.some((n) => n.type === "task");
+        const availability =
+          toolOnly && this.state.options.tools
+            ? await this.state.options.tools.available()
+            : await this.state.options.native.available();
+        if (!availability.available)
+          throw new Error(availability.reason ?? "Native agent unavailable.");
+        run = await createRunPlan(this.state.options, {
+          definition,
+          target,
+          requestId: params.requestId,
+          fingerprint,
+          defaults,
+          path: ready.path,
+          ...(checksPreview
+            ? {
+                capturedRecipes: {
+                  recipes: checksPreview.recipes,
+                  digest: checksPreview.recipeDigest,
+                },
+              }
+            : {}),
+        });
+        if (checksPreview && run.version !== undefined) {
+          const { definition: _definition, ...preview } = checksPreview;
+          run.purpose = {
+            kind: "checks",
+            preview,
+            acceptedAt: run.createdAt,
+            acknowledgedUnknowns: checks!.acknowledgedUnknowns,
+          };
+        }
+        if (params.action !== "checks" && run.version === 5 && run.definition.template) {
+          const preflight = this.state.options.preflight;
+          if (!preflight || !params.preflight?.digest)
+            throw new Error("Review the native execution preflight before starting this workflow.");
+          const captured = await preflight.capture(target, run.definition, defaults);
+          if (captured.digest !== params.preflight.digest)
+            throw new Error(
+              "Workflow references or configuration changed; prepare and review a new run.",
+            );
+          if (captured.unknowns.length && params.preflight.acknowledgedUnknowns !== true)
+            throw new Error(
+              "An explicit operational acknowledgment of Unknown destinations is required.",
+            );
+          run.provenance = {
+            ...captured,
+            operationalDecision: {
+              acknowledgedUnknowns: params.preflight.acknowledgedUnknowns,
+              acceptedAt: this.state.options.now(),
+            },
+          };
+        }
+      } catch (error) {
+        // 只有已排除重复请求且尚未尝试落盘时才明确拒绝；写入/ACK 丢失仍必须保留原请求对账。
+        if (params.action === "checks" && error instanceof Error)
+          error.name = GRAPH_CHECKS_ADMISSION_REJECTED;
+        throw error;
       }
       // 首次持久化成功才发布占位；失败时零 native 调用，同 request 可安全重试。
       await this.state.commit(target, { ...record, runs: [...record.runs, run] });
@@ -308,84 +358,7 @@ export class GraphEngineeringService implements IGraphEngineeringService {
     );
   }
   async assertInputAllowed(params: GraphInputGuardRequest): Promise<void> {
-    for (const run of await parallelGuardedRuns(this.state, params)) {
-      const tool =
-        run.version !== undefined && run.version >= 4
-          ? run.toolAttempts?.find((t) => t.sessionId === params.sessionId)
-          : undefined;
-      if (tool) {
-        const expected = {
-          operationId: tool.operationId,
-          recipe: {
-            id: tool.recipe.id,
-            executable: tool.recipe.executable,
-            args: tool.resolvedArgs,
-            cwdRelative: tool.recipe.cwd,
-            timeoutMs: tool.recipe.timeoutMs,
-            ...(tool.recipe.redactEnvironmentVariables
-              ? { redactEnvironmentVariables: tool.recipe.redactEnvironmentVariables }
-              : {}),
-          },
-        };
-        if (
-          !(
-            tool.dispatchPhase === "sending" &&
-            this.state.liveRuns.has(run.id) &&
-            this.state.dispatching.has(tool.operationId) &&
-            run.version !== undefined &&
-            run.version >= 4 &&
-            run.cancelRequestedAt === undefined &&
-            params.commandType === "startRecipe" &&
-            params.commandId === tool.operationId &&
-            params.expectedRuntimeIdentity === tool.runtimeIdentity &&
-            runFingerprint(params.request) === runFingerprint(expected)
-          )
-        )
-          throw new Error(
-            "Graph owns this Tool session; only its exact live operation dispatch is authorized.",
-          );
-        this.state.dispatching.delete(tool.operationId);
-        continue;
-      }
-      const node =
-        run.version !== undefined
-          ? run.nodeAttempts.find((n) => n.sessionId === params.sessionId)
-          : run.sessionId === params.sessionId
-            ? run
-            : undefined;
-      if (!node) continue;
-      const execution = nativeExecution(run, node.attemptId);
-      const expectedPayload = {
-        text: execution.instructions,
-        modelSelection: execution.modelSelection,
-        mode: execution.mode,
-        planEnabled: execution.planEnabled,
-      };
-      const sending =
-        run.version !== undefined
-          ? "dispatchPhase" in node &&
-            node.dispatchPhase === "sending" &&
-            !node.terminalProof &&
-            run.cancelRequestedAt === undefined
-          : run.status === "Starting";
-      // 落盘 sending 在崩溃后仍存在，不能充当重发许可证；只放行当前调用的一次原运行时/原载荷。
-      if (
-        !(
-          sending &&
-          this.state.liveRuns.has(run.id) &&
-          this.state.dispatching.has(node.commandId) &&
-          params.commandType === "sendText" &&
-          params.commandId === node.commandId &&
-          params.expectedRuntimeIdentity === node.runtimeIdentity &&
-          params.envelope?.clientId === `graph:${node.attemptId}` &&
-          runFingerprint(params.envelope.payload) === runFingerprint(expectedPayload)
-        )
-      )
-        throw new Error(
-          "Graph Engineering owns this run. Additional prompts and model/mode changes are blocked until completion or confirmed-inactive release; native permission and question responses remain available.",
-        );
-      this.state.dispatching.delete(node.commandId);
-    }
+    return assertGraphInputAllowed(this.state, params);
   }
   dispose(): void {
     this.parallelService.dispose();

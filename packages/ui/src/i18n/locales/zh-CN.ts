@@ -1,5 +1,13 @@
+import { graphPreZ8Zh } from "./graphPreZ8.js";
+import { graphProjectSetupZh } from "./graphProjectSetup.js";
+import { graphEditorGuidanceZh } from "./graphEditorGuidance.js";
+import { graphRunClarityZh } from "./graphRunClarity.js";
 /** 中文翻译 */
 const zhCN: Record<string, string> = {
+  ...graphPreZ8Zh,
+  ...graphProjectSetupZh,
+  ...graphEditorGuidanceZh,
+  ...graphRunClarityZh,
   "graph.node.approval": "人工审批",
   "graph.status.WaitingForApproval": "等待审批",
   "graph.status.AwaitingContinuation": "等待明确继续",

@@ -6,9 +6,7 @@ import type {
   GraphSequentialDefinition,
   GraphNativeSettings,
   GraphReadiness,
-  GraphWorkspaceView,
   GraphRecipe,
-  GraphRecipeSnapshot,
   GraphRunProvenance,
 } from "@zcode/services";
 import type { ModelSelection } from "@zcode/shared";
@@ -30,6 +28,14 @@ import {
 } from "@/graph-engineering/graphApprovalView.js";
 
 import { captureGraphContinuation } from "@/graph-engineering/graphRoutingView.js";
+import {
+  graphWorkspaceReadState,
+  readGraphWorkspaceProjection,
+  type GraphWorkspaceReadProjection,
+} from "@/graph-engineering/graphWorkspaceRead.js";
+import { useGraphRecipes } from "./useGraphRecipes.js";
+import { useGraphChecks } from "./useGraphChecks.js";
+import { useGraphEvidence } from "./useGraphEvidence.js";
 
 interface GraphScope {
   workspacePath: string;
@@ -58,11 +64,31 @@ export function useGraphEngineering(scope: GraphScope) {
     [scope.workspacePath, scope.workspaceIdentity],
   );
   const targetKey = target.workspaceIdentity?.trim() || target.workspacePath;
-  const [view, setView] = useState<GraphWorkspaceView | null>(null);
-  const [recipes, setRecipes] = useState<GraphRecipeSnapshot | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [pending, setPending] = useState(false);
+  const readScope = useMemo(() => ({ sequence: 0 }), [service, target]);
+  const currentReadScope = useRef(readScope);
+  currentReadScope.current = readScope;
+  const [storedRead, setStoredRead] = useState<GraphWorkspaceReadProjection>();
+  const {
+    view,
+    error: readError,
+    loading,
+  } = graphWorkspaceReadState(readScope, storedRead, Boolean(service));
+  const [actionError, setActionError] = useState<{ scope: typeof readScope; error: string }>();
+  const error = actionError?.scope === readScope ? actionError.error : readError;
+  const publishRead = useCallback(
+    (patch: Partial<GraphWorkspaceReadProjection["state"]>) => {
+      if (currentReadScope.current !== readScope) return;
+      setStoredRead((stored) => ({
+        scope: readScope,
+        state: { ...graphWorkspaceReadState(readScope, stored, Boolean(service)), ...patch },
+      }));
+    },
+    [readScope, service],
+  );
+  const recipeProjection = useGraphRecipes(service, target);
+  const evidence = useGraphEvidence(service, target);
+  const [busy, setPending] = useState(false);
+  const pending = storedRead?.scope === readScope && busy;
   const flight = useRef<number | null>(null);
   const submission = useRef<GraphSubmission | null>(null);
   const submissionDefinition = useRef<GraphDefinition | null>(null);
@@ -70,40 +96,35 @@ export function useGraphEngineering(scope: GraphScope) {
   const continuations = useRef(new Map<string, GraphRunContinueCommand>());
   const decisions = useRef(new Map<string, GraphDecisionIntent>());
   const generation = useRef(0);
-  const readSequence = useRef(0);
+  const owns = useCallback(
+    (owner: number) => owner === generation.current && currentReadScope.current === readScope,
+    [readScope],
+  );
   const reload = useCallback(async () => {
     if (!service) return;
     const owner = generation.current;
-    const sequence = ++readSequence.current;
-    try {
-      const next = await service.getWorkspace(target);
-      if (owner === generation.current && sequence === readSequence.current) {
-        setView(next);
-        setLoading(false);
-        // Host 已返回该 request 的持久化事实，丢失的 ACK 已得到对账；后续 Run 才是新意图。
-        if (
-          submission.current &&
-          next.runs.some((run) => run.requestId === submission.current?.requestId)
-        ) {
-          submission.current = null;
-          submissionDefinition.current = null;
-          confirmationProvenance.current = null;
-        }
-      }
-    } catch (cause) {
-      if (owner === generation.current && sequence === readSequence.current) {
-        setError(cause instanceof Error ? cause.message : String(cause));
-        setLoading(false);
-      }
+    const next = await readGraphWorkspaceProjection({
+      scope: readScope,
+      isCurrent: () => owns(owner),
+      read: () => service.getWorkspace(target),
+      publish: publishRead,
+    });
+    // Host 已返回该 request 的持久化事实，丢失的 ACK 已得到对账；后续 Run 才是新意图。
+    if (
+      next &&
+      submission.current &&
+      next.runs.some((run) => run.requestId === submission.current?.requestId)
+    ) {
+      submission.current = null;
+      submissionDefinition.current = null;
+      confirmationProvenance.current = null;
     }
-  }, [service, target]);
+  }, [service, target, readScope, owns, publishRead]);
 
   useEffect(() => {
     generation.current += 1;
-    setView(null);
-    setRecipes(null);
-    setError(null);
-    setLoading(Boolean(service));
+    publishRead({ view: null, error: null, loading: Boolean(service) });
+    setActionError(undefined);
     setPending(false);
     submission.current = null;
     submissionDefinition.current = null;
@@ -119,30 +140,36 @@ export function useGraphEngineering(scope: GraphScope) {
       generation.current += 1;
       subscription.dispose();
     };
-  }, [service, target, targetKey, reload]);
+  }, [service, target, targetKey, reload, publishRead]);
 
   const act = useCallback(
     async <T>(operation: () => Promise<T>): Promise<T | undefined> => {
       const owner = generation.current;
-      if (flight.current === owner) return;
+      if (!owns(owner) || flight.current === owner) return;
       flight.current = owner;
       setPending(true);
-      setError(null);
+      setActionError(undefined);
+      let result: T | undefined;
       try {
-        return await operation();
+        result = await operation();
       } catch (cause) {
-        if (owner === generation.current)
-          setError(cause instanceof Error ? cause.message : String(cause));
+        if (owns(owner))
+          setActionError({
+            scope: readScope,
+            error: cause instanceof Error ? cause.message : String(cause),
+          });
       } finally {
-        if (owner === generation.current) {
+        if (owns(owner)) {
           await reload();
-          if (owner === generation.current) setPending(false);
+          if (owns(owner)) setPending(false);
         }
         // 切 workspace 后旧 RPC 才完成，不能清除新 workspace 的动作或锁住新编辑器。
         if (flight.current === owner) flight.current = null;
       }
+      // reload 期间仍可能切 workspace；直到最后一个 await 后才允许回执返回给表单。
+      return owns(owner) ? result : undefined;
     },
-    [reload],
+    [reload, owns, readScope],
   );
 
   const save = useCallback(
@@ -188,18 +215,18 @@ export function useGraphEngineering(scope: GraphScope) {
             service.saveDefinition({ target, definition: draft, expectedRevision: draft.revision }),
         });
         // 保存期间切工作区后不再派发；丢失 Run ACK 时保留同一 revision/config/request，禁止重新保存后重试。
-        if (owner !== generation.current) return;
+        if (!owns(owner)) return;
         if (!submission.current) submissionDefinition.current = confirmedDefinition;
         submission.current = request;
         const run = await service.run(request);
-        if (owner === generation.current && submission.current === request) {
+        if (owns(owner) && submission.current === request) {
           submission.current = null;
           submissionDefinition.current = null;
           confirmationProvenance.current = null;
         }
-        return owner === generation.current ? run.id : undefined;
+        return owns(owner) ? run.id : undefined;
       }),
-    [act, service, target],
+    [act, service, target, owns],
   );
 
   const cancel = useCallback(
@@ -211,8 +238,10 @@ export function useGraphEngineering(scope: GraphScope) {
   );
 
   return {
+    runChecks: useGraphChecks(service, target, act, view),
     view,
-    recipes,
+    recipes: recipeProjection.recipes,
+    recipeReadState: recipeProjection.recipeReadState,
     loading,
     pending,
     error,
@@ -245,25 +274,15 @@ export function useGraphEngineering(scope: GraphScope) {
               });
             },
           });
-          if (owner === generation.current && captured?.provenance)
+          if (owns(owner) && captured?.provenance)
             confirmationProvenance.current = captured.provenance;
-          return owner === generation.current ? captured : undefined;
+          return owns(owner) ? captured : undefined;
         }),
-      [act, service, workflowService, target],
+      [act, service, workflowService, target, owns],
     ),
     run,
     cancel,
-    readRecipes: useCallback(
-      () =>
-        act(async () => {
-          if (!service) return;
-          const owner = generation.current;
-          const value = await service.recipes({ target, action: "read" });
-          if (owner === generation.current) setRecipes(value);
-          return value;
-        }),
-      [act, service, target],
-    ),
+    readRecipes: recipeProjection.readRecipes,
     saveRecipes: useCallback(
       (values: GraphRecipe[], expectedDigest: string) =>
         act(async () => {
@@ -275,27 +294,13 @@ export function useGraphEngineering(scope: GraphScope) {
             recipes: values,
             expectedDigest,
           });
-          if (owner === generation.current) setRecipes(value);
+          if (!owns(owner)) return;
+          recipeProjection.acceptRecipes(value);
           return value;
         }),
-      [act, service, target],
+      [act, service, target, recipeProjection.acceptRecipes, owns],
     ),
-    readArtifact: useCallback(
-      (runId: string, artifactId: string) =>
-        act(async () => {
-          const value = await service?.artifact({ target, runId, artifactId, action: "read" });
-          return value?.kind === "content" ? value : undefined;
-        }),
-      [act, service, target],
-    ),
-    exportManifest: useCallback(
-      (runId: string) =>
-        act(async () => {
-          const value = await service?.artifact({ target, runId, action: "manifest" });
-          return value?.kind === "manifest" ? value.text : undefined;
-        }),
-      [act, service, target],
-    ),
+    ...evidence,
     retainedDecision: useCallback(
       (command: GraphApprovalCommand) => decisions.current.get(graphApprovalKey(command)),
       [],
@@ -314,10 +319,9 @@ export function useGraphEngineering(scope: GraphScope) {
           });
           decisions.current.set(key, intent);
           await service.decideApproval(intent);
-          if (owner === generation.current && decisions.current.get(key) === intent)
-            decisions.current.delete(key);
+          if (owns(owner) && decisions.current.get(key) === intent) decisions.current.delete(key);
         }),
-      [act, service],
+      [act, service, owns],
     ),
     continueRouting: useCallback(
       (runId: string, checkpointId: string, checkpointDigest: string) =>
@@ -335,10 +339,10 @@ export function useGraphEngineering(scope: GraphScope) {
           });
           continuations.current.set(key, intent);
           await service.run(intent);
-          if (owner === generation.current && continuations.current.get(key) === intent)
+          if (owns(owner) && continuations.current.get(key) === intent)
             continuations.current.delete(key);
         }),
-      [act, service, target],
+      [act, service, target, owns],
     ),
     continueApproval: useCallback(
       (command: GraphApprovalCommand) =>

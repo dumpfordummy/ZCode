@@ -3,13 +3,13 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test, { type TestContext } from "node:test";
-import { unknownExecutionEnvironment } from "@zcode/shared";
+import { unknownExecutionEnvironment, type ZCodeExecutionEnvironmentPreview } from "@zcode/shared";
 import type { IModelSelectionService, IZCodeAgentService } from "../../index.js";
 import type { GraphRecipe } from "../artifact-types.js";
 import { instantiateTemplate } from "../domain/workflow.js";
 import { builtinTemplates } from "../domain/workflow-samples.js";
 import { createGraphRecipeStore } from "./recipes.js";
-import { createWorkflowPreflight } from "./workflow-preflight.js";
+import { createWorkflowPreflight, workflowDigest } from "./workflow-preflight.js";
 import { workflowToolQueries } from "./workflow-tools.js";
 
 const settings = {
@@ -49,7 +49,7 @@ const recipes: GraphRecipe[] = [
   },
 ];
 
-async function fixture(t: TestContext) {
+async function fixture(t: TestContext, agentOnly = false) {
   const root = await mkdtemp(join(tmpdir(), "z6-preflight-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   const target = { workspacePath: root, workspaceIdentity: `fixture:${root}` };
@@ -58,16 +58,23 @@ async function fixture(t: TestContext) {
   await writeFile(join(root, "instructions.md"), "PROJECT_CONTENT_SECRET: preserve fixture");
   await writeFile(join(root, ".zcode", "config.json"), JSON.stringify({ graphRecipes: recipes }));
   const definition = instantiateTemplate(
-    "generic",
-    { version: 1, digest: "a".repeat(64), createdAt: 1, template: builtinTemplates[0]!.template },
+    agentOnly ? "agent-assisted" : "generic",
+    {
+      version: 1,
+      digest: "a".repeat(64),
+      createdAt: 1,
+      template: builtinTemplates.find(
+        (entry) => entry.id === (agentOnly ? "agent-assisted" : "generic"),
+      )!.template,
+    },
     { request: "Implement the synthetic edge behavior" },
     {
       references: { instructions: "instructions.md", skill: "fixture-skill" },
-      recipes: { build: "build-recipe", test: "test-recipe" },
+      recipes: agentOnly ? {} : { build: "build-recipe", test: "test-recipe" },
       sourcePaths: [],
     },
   );
-  const environment = {
+  const environment: ZCodeExecutionEnvironmentPreview = {
     ...unknownExecutionEnvironment("Subagent runtime destinations remain Unknown."),
     status: "available" as "available" | "unknown",
     configDigest: "b".repeat(64),
@@ -106,7 +113,7 @@ async function fixture(t: TestContext) {
   const preflight = createWorkflowPreflight({
     agentService: {
       async previewExecutionEnvironment(received: unknown) {
-        assert.deepEqual(received, { ...target, executables: [process.execPath] });
+        assert.deepEqual(received, { ...target, executables: agentOnly ? [] : [process.execPath] });
         calls++;
         return structuredClone(environment);
       },
@@ -135,6 +142,56 @@ async function fixture(t: TestContext) {
     },
   };
 }
+
+test("agent-assisted preflight ignores unrelated invalid recipes while preserving native and reference capture", async (t) => {
+  const f = await fixture(t, true);
+  await writeFile(
+    join(f.root, ".zcode", "config.json"),
+    JSON.stringify({ graphRecipes: "invalid but unrelated" }),
+  );
+  const capture = await f.capture();
+  assert.equal(capture.recipes.length, 0);
+  assert.equal(capture.models.length, 3);
+  assert.equal(capture.references.length, 2);
+  assert.equal(f.calls(), 1);
+  await writeFile(
+    join(f.root, ".zcode", "config.json"),
+    JSON.stringify({ graphRecipes: [{ broken: true }] }),
+  );
+  assert.equal((await f.capture()).digest, capture.digest);
+});
+
+test("guided native-aware references are opt-in, exact and revalidated while legacy provenance stays unchanged", async (t) => {
+  const f = await fixture(t, true);
+  const content = await readFile(join(f.root, "instructions.md"), "utf8");
+  f.environment.instructions = [
+    {
+      scope: "workspace",
+      path: join(f.root, "instructions.md"),
+      digest: workflowDigest(content),
+      bytes: Buffer.byteLength(content),
+      truncated: false,
+    },
+  ];
+  const legacy = await f.capture();
+  assert.ok(legacy.references.every((ref) => !Object.hasOwn(ref, "delivery")));
+  assert.equal((await f.capture()).digest, legacy.digest);
+  f.definition.template!.bindings.referencePolicy = "native-aware-v1";
+  const guided = await f.capture();
+  assert.deepEqual(
+    guided.references.map((ref) => ref.delivery),
+    ["native-instructions", "native-skill"],
+  );
+  assert.notEqual(guided.digest, legacy.digest);
+  f.environment.instructions[0]!.truncated = true;
+  assert.equal((await f.capture()).references[0]!.delivery, "explicit-read");
+  f.environment.instructions[0]!.truncated = false;
+  await writeFile(join(f.root, "instructions.md"), "New independent guidance");
+  assert.equal((await f.capture()).references[0]!.delivery, "explicit-read");
+  await writeFile(join(f.root, "instructions.md"), content);
+  delete f.definition.template!.bindings.referencePolicy;
+  assert.equal((await f.capture()).digest, legacy.digest);
+});
 
 test("Z6 preflight inventories an explicit native setup without execution or raw credentials/content", async (t) => {
   const f = await fixture(t);
@@ -221,12 +278,12 @@ test("Z6 preflight rejects a changed native selection and mismatched Build/Test 
     [{ ...recipes[0]!, verifier: { kind: "command" } }, recipes[1]!],
     (await store.read(f.target)).digest,
   );
-  await assert.rejects(f.capture(), /Build slot requires a Build verifier/);
+  await assert.rejects(f.capture(), /requires a Build check/);
   const testRecipe = structuredClone(recipes[1]!);
   assert.equal(testRecipe.verifier.kind, "test");
   if (testRecipe.verifier.kind === "test") testRecipe.verifier.buildNodeId = "unrelated-build";
   await store.save(f.target, [recipes[0]!, testRecipe], (await store.read(f.target)).digest);
-  await assert.rejects(f.capture(), /independent Test verifier tied to Build/);
+  await assert.rejects(f.capture(), /Build reference does not resolve/);
   await store.save(f.target, recipes, (await store.read(f.target)).digest);
   f.invalidateSelection();
   await assert.rejects(f.capture(), /selected native model changed or is unavailable/);

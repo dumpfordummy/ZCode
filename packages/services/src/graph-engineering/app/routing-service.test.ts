@@ -192,7 +192,35 @@ test("deadline crossing async verification or durable sending intent never calls
   for (const boundary of ["verify", "sending"] as const) {
     const f = routingFixture();
     try {
-      await f.prepare();
+      const definition = routingDefinition();
+      // 此用例需要真实配方依赖，才能覆盖配方异步读取跨过截止点而不是已删除的无 Tool 读取。
+      definition.nodes.push({
+        id: "check",
+        type: "tool",
+        name: "Check",
+        recipeId: "check",
+        position: { x: 0, y: 0 },
+      });
+      definition.edges.find((edge) => edge.source === "merge")!.target = "check";
+      definition.edges.push({ source: "check", target: "gate" });
+      const readRecipes = f.options.recipes!.read;
+      f.options.recipes!.read = async (target) => ({
+        ...(await readRecipes(target)),
+        recipes: [
+          {
+            id: "check",
+            name: "Check",
+            executable: "fixture-native",
+            args: [],
+            cwd: ".",
+            timeoutMs: 1000,
+            sourcePaths: ["fixture.ts"],
+            expectedOutputs: [],
+            verifier: { kind: "command" },
+          },
+        ],
+      });
+      await f.prepare(definition);
       if (boundary === "verify") {
         const create = f.options.native.create;
         f.options.native.create = async (input) => {

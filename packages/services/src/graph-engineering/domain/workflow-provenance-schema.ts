@@ -12,8 +12,11 @@ export const parameterValueSchema = z.union([
 ]);
 export const templateBindingsSchema = z
   .object({
+    referencePolicy: z.literal("native-aware-v1").optional(),
     references: z.record(id, text),
     recipes: z.record(id, id),
+    recipeGroups: z.record(id, z.array(id).min(1).max(8)).optional(),
+    buildMappings: z.record(id, id).optional(),
     sourcePaths: z.array(text).max(64),
   })
   .strict();
@@ -56,7 +59,15 @@ export const runProvenanceSchema = z
     references: z
       .array(
         z
-          .object({ id, kind, path: text, digest, origin: text, nativeName: text.optional() })
+          .object({
+            id,
+            kind,
+            path: text,
+            digest,
+            origin: text,
+            nativeName: text.optional(),
+            delivery: z.enum(["native-instructions", "explicit-read", "native-skill"]).optional(),
+          })
           .strict(),
       )
       .max(32),

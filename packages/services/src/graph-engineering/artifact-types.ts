@@ -1,4 +1,6 @@
 import type { GraphWorkspaceTarget } from "./approval-types.js";
+import type { GraphDotnetBuildTarget, GraphDotnetTestTarget } from "./dotnet-types.js";
+export type * from "./dotnet-types.js";
 
 export type GraphJsonValue =
   | null
@@ -77,10 +79,20 @@ export interface GraphArtifactStore {
 }
 export type GraphRecipeVerifier =
   | { kind: "command" }
-  | { kind: "build" }
+  | { kind: "build"; dotnet?: GraphDotnetBuildTarget }
   | {
       kind: "test";
       format: "zcode-json-v1";
+      reportPath: string;
+      minimumTests: number;
+      expectedTests?: number;
+      requiredTests: string[];
+      buildNodeId: string;
+    }
+  | {
+      kind: "test";
+      format: "dotnet-vstest-trx-v1";
+      target: GraphDotnetTestTarget;
       reportPath: string;
       minimumTests: number;
       expectedTests?: number;

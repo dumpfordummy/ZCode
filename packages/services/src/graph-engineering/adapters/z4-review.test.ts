@@ -114,8 +114,9 @@ test("Build cannot combine one output digest with freshness observed from change
     },
   });
   await f.run();
+  const startedAt = Date.now();
   await writeFile(join(f.target.workspacePath, "build.bin"), "first build bytes");
-  f.finishTool();
+  f.finishTool(0, 0, { startedAt, completedAt: Date.now() });
   const run = await f.wait((r) => r.toolAttempts?.[0]?.verification !== undefined);
   assert.equal(run.toolAttempts?.[0]?.verification?.acceptancePassed, false);
   assert.equal(f.starts.length, 1);
@@ -125,8 +126,9 @@ test("Build cannot combine one output digest with freshness observed from change
 test("Test freshness fingerprint must describe the exact retained report bytes", async (t) => {
   const f = await buildAndTestFixture(t);
   await f.run();
+  const startedAt = Date.now();
   await writeFile(join(f.target.workspacePath, "build.bin"), "real bounded build bytes");
-  f.finishTool();
+  f.finishTool(0, 0, { startedAt, completedAt: Date.now() });
   const running = await f.wait((r) => r.toolAttempts?.[1]?.status === "WaitingForPermission");
   const attempt = running.toolAttempts![1]!;
   const report = {
@@ -313,7 +315,7 @@ test("real file observations reject a no-op Build reusing stale output and accep
     await utimes(path, 1000, 1000);
     await f.run();
     if (refresh) await utimes(path, 2000, 2000);
-    f.finishTool();
+    f.finishTool(0, 0, { startedAt: 1_500_000, completedAt: 2_500_000 });
     const run = await f.wait((r) => r.toolAttempts?.[0]?.verification !== undefined);
     assert.equal(run.toolAttempts?.[0]?.verification?.acceptancePassed, refresh);
     if (refresh) await f.wait((r) => r.toolAttempts?.[1]?.status === "WaitingForPermission");

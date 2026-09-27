@@ -15,6 +15,9 @@ import {
 } from "../domain/workflow.js";
 import { localTarget } from "../domain/definition.js";
 import { runFingerprint } from "./attempts.js";
+import { graphRecipeCompatibility } from "../domain/recipe-compatibility.js";
+import type { GraphProjectPort } from "./project-ports.js";
+import { projectSetup } from "./project-setup.js";
 
 export class GraphWorkflowService implements IGraphWorkflowService {
   constructor(
@@ -22,11 +25,15 @@ export class GraphWorkflowService implements IGraphWorkflowService {
       store: GraphLibraryStore;
       graph: IGraphEngineeringService;
       preflight: GraphPreflightPort;
+      project?: GraphProjectPort;
       digest(value: string): string;
       id(): string;
       now(): number;
     },
   ) {}
+  async projectSetup(params: Parameters<IGraphWorkflowService["projectSetup"]>[0]) {
+    return projectSetup(params, this.options);
+  }
   async list() {
     const stored = await this.options.store.read();
     const builtins: GraphLibraryEntry[] = builtinTemplates.map(({ id, template }) => ({
@@ -97,6 +104,19 @@ export class GraphWorkflowService implements IGraphWorkflowService {
       params.parameters,
       params.bindings,
     );
+    const tools = definition.nodes.filter((node) => node.type === "tool");
+    if (tools.length) {
+      const snapshot = await this.options.graph.recipes({ target, action: "read" });
+      for (const node of tools) {
+        const recipe = snapshot.recipes.find((item) => item.id === node.recipeId);
+        if (!recipe)
+          throw new Error(
+            `${node.name}: saved project check is missing. Open Project setup and refresh the checks.`,
+          );
+        const compatibility = graphRecipeCompatibility(definition, node.id, recipe);
+        if (!compatibility.compatible) throw new Error(compatibility.issues.join("\n"));
+      }
+    }
     return (await this.options.graph.saveDefinition({
       target,
       definition,

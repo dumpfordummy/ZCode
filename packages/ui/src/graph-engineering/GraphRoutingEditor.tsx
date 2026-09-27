@@ -4,7 +4,22 @@ import { Input } from "@/components/ui/input.js";
 import { Textarea } from "@/components/ui/textarea.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphSelect } from "./GraphSelect.js";
-export function GraphRoutingEditor({
+import { useGraphEditorMode } from "./GraphEditorMode.js";
+import { GraphGuidedRepair } from "./GraphGuidedRepair.js";
+export function GraphRoutingEditor(props: {
+  definition: GraphSequentialDefinition;
+  disabled: boolean;
+  onChange(value: GraphSequentialDefinition): void;
+  workspaceKey: string;
+}) {
+  const mode = useGraphEditorMode(props.workspaceKey);
+  return mode === "advanced" ? (
+    <GraphRoutingAdvanced {...props} />
+  ) : (
+    <GraphGuidedRepair {...props} />
+  );
+}
+function GraphRoutingAdvanced({
   definition,
   disabled,
   onChange,

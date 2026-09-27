@@ -9,6 +9,10 @@ import { graphSettingsSchema } from "../domain/sequential.js";
 import { localTarget, validateReadiness } from "../domain/definition.js";
 import { runProvenanceSchema } from "../domain/workflow-provenance-schema.js";
 import { workflowToolQueries, checkWorkflowTools } from "./workflow-tools.js";
+import { graphRecipeCompatibility } from "../domain/recipe-compatibility.js";
+import { noProjectRecipes, usesProjectRecipes } from "../domain/recipe-dependency.js";
+import { effectiveGraphRecipe } from "../domain/effective-recipe.js";
+import { readProjectReference, nativeReferenceDelivery } from "./project-references.js";
 
 export const workflowDigest = (value: unknown): string =>
   createHash("sha256")
@@ -36,7 +40,9 @@ export function createWorkflowPreflight(options: {
         throw new Error("An explicit versioned workflow instance is required.");
       const ready = validateReadiness(definition);
       if (ready.errors.length) throw new Error(ready.errors.join("\n"));
-      const configured = await recipes.read(target);
+      const configured = usesProjectRecipes(definition)
+        ? await recipes.read(target)
+        : { recipes: [], digest: workflowDigest(noProjectRecipes) };
       const tooling = workflowToolQueries(target, definition, configured.recipes);
       const environment = await options.agentService.previewExecutionEnvironment({
         ...target,
@@ -82,8 +88,23 @@ export function createWorkflowPreflight(options: {
             digest: skill.digest,
             origin: `${skill.scope}:${skill.plugin ?? skill.name}${skill.version ? `@${skill.version}` : ""}`,
             nativeName: skill.name,
+            ...(template.bindings.referencePolicy === "native-aware-v1"
+              ? { delivery: "native-skill" as const }
+              : {}),
           });
         } else {
+          if (template.bindings.referencePolicy === "native-aware-v1") {
+            const reference = await readProjectReference(target, binding);
+            result.references.push({
+              id: ref.id,
+              kind: ref.kind,
+              path: reference.path,
+              digest: reference.digest,
+              origin: "explicit workspace reference",
+              delivery: nativeReferenceDelivery(target, reference, environment),
+            });
+            continue;
+          }
           const bytes = await readDeclaredFile(target, binding, 100 * 1024);
           if (!bytes.length) throw new Error(`Reference ${ref.id} is empty.`);
           result.references.push({
@@ -133,18 +154,14 @@ export function createWorkflowPreflight(options: {
           });
         }
         if (node.type === "tool") {
-          const recipe = configured.recipes.find((r) => r.id === node.recipeId);
-          if (!recipe)
+          const savedRecipe = configured.recipes.find((r) => r.id === node.recipeId);
+          if (!savedRecipe)
             throw new Error(
               `Node ${node.name}: choose an existing project recipe (${node.recipeId}).`,
             );
-          if (node.id === "build" && recipe.verifier.kind !== "build")
-            throw new Error("Build slot requires a Build verifier.");
-          if (
-            node.id === "test" &&
-            (recipe.verifier.kind !== "test" || recipe.verifier.buildNodeId !== "build")
-          )
-            throw new Error("Test slot requires an independent Test verifier tied to Build.");
+          const compatibility = graphRecipeCompatibility(definition, node.id, savedRecipe);
+          if (!compatibility.compatible) throw new Error(compatibility.issues.join("\n"));
+          const recipe = effectiveGraphRecipe(definition, node.id, savedRecipe);
           await recipes.fingerprint(target, recipe.sourcePaths);
           result.recipes.push({
             nodeId: node.id,

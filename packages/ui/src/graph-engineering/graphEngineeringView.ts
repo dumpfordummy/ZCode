@@ -41,7 +41,8 @@ export function reconcileGraphDraft(
   current: GraphDraftState,
   incoming: GraphDefinition,
 ): GraphDraftState {
-  if (current.base.revision === incoming.revision) return current;
+  // 保存确认先于 workspace 投影到达时，旧投影不能回退已经确认的 revision 和草稿。
+  if (current.base.revision >= incoming.revision) return current;
   // 本地保存的确认可以推进 revision；其他编辑器保存不能抹去尚未提交的本地指令。
   if (
     graphDefinitionContent(current.draft) === graphDefinitionContent(current.base) ||

@@ -122,6 +122,14 @@ export async function readDeclaredFile(
 ): Promise<Buffer> {
   return (await streamDeclaredFile(target, path, maximum, true)).content!;
 }
+export async function readDeclaredFileSnapshot(
+  target: GraphWorkspaceTarget,
+  path: string,
+  maximum: number,
+) {
+  const snapshot = await streamDeclaredFile(target, path, maximum, true);
+  return { ...snapshot, content: snapshot.content! };
+}
 export async function fingerprintDeclaredFiles(
   target: GraphWorkspaceTarget,
   paths: string[],

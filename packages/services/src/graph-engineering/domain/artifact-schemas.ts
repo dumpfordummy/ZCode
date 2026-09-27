@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { GraphRecipe } from "../artifact-types.js";
 import { GRAPH_ARTIFACT_BYTES } from "./artifacts.js";
+import { dotnetRecipeIssues } from "./dotnet-command.js";
 
 const hasControl = (value: string) => Array.from(value).some((char) => char.charCodeAt(0) < 32);
 
@@ -50,17 +51,46 @@ const paths = z
   .array(relativePath)
   .max(32)
   .refine((value) => new Set(value).size === value.length, "Duplicate declared paths.");
-const testVerifier = z
+const dotnetScope = {
+  project: relativePath,
+  configuration: z.string().regex(/^[A-Za-z0-9_.-]{1,80}$/),
+  framework: z.string().regex(/^[A-Za-z0-9_.-]{1,80}$/),
+  runtime: z
+    .string()
+    .regex(/^[A-Za-z0-9_.-]{1,80}$/)
+    .optional(),
+};
+export const dotnetTestTargetSchema = z
   .object({
-    kind: z.literal("test"),
-    format: z.literal("zcode-json-v1"),
-    reportPath: relativePath,
-    minimumTests: z.number().int().min(1).max(1000),
-    expectedTests: z.number().int().min(1).max(1000).optional(),
-    requiredTests: z.array(z.string().min(1).max(200)).max(256),
-    buildNodeId: identity,
+    ...dotnetScope,
+    filter: z
+      .string()
+      .min(1)
+      .max(2000)
+      .refine((value) => !hasControl(value))
+      .optional(),
+    assembly: relativePath,
   })
-  .strict()
+  .strict();
+const testFields = {
+  kind: z.literal("test"),
+  reportPath: relativePath,
+  minimumTests: z.number().int().min(1).max(1000),
+  expectedTests: z.number().int().min(1).max(1000).optional(),
+  requiredTests: z.array(z.string().min(1).max(200)).max(256),
+  buildNodeId: identity,
+};
+const testVerifier = z
+  .union([
+    z.object({ ...testFields, format: z.literal("zcode-json-v1") }).strict(),
+    z
+      .object({
+        ...testFields,
+        format: z.literal("dotnet-vstest-trx-v1"),
+        target: dotnetTestTargetSchema,
+      })
+      .strict(),
+  ])
   .superRefine((value, ctx) => {
     if (
       (value.expectedTests !== undefined && value.expectedTests < value.minimumTests) ||
@@ -111,12 +141,25 @@ export const graphRecipeSchema = z
       .optional(),
     verifier: z.union([
       z.object({ kind: z.literal("command") }).strict(),
-      z.object({ kind: z.literal("build") }).strict(),
+      z
+        .object({
+          kind: z.literal("build"),
+          dotnet: z
+            .object({
+              ...dotnetScope,
+              framework: dotnetScope.framework.optional(),
+              restore: z.enum(["disabled", "explicit"]),
+            })
+            .strict()
+            .optional(),
+        })
+        .strict(),
       testVerifier,
     ]),
   })
   .strict()
   .superRefine((value, ctx) => {
+    for (const message of dotnetRecipeIssues(value)) ctx.addIssue({ code: "custom", message });
     if (
       value.expectedOutputs.some((path) => ["command", "test"].includes(path)) ||
       (value.verifier.kind === "test" &&

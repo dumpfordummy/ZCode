@@ -19,6 +19,8 @@ import { createWorkflowPreflight, workflowDigest } from "./adapters/workflow-pre
 import { createWorkflowStore } from "./adapters/workflow-store.js";
 import { GraphWorkflowService } from "./app/workflow-service.js";
 import { createGraphParallelPort } from "./adapters/parallel-workspaces.js";
+import { createProjectSetupPort } from "./adapters/project-checks.js";
+import { createGraphReportCapture } from "./adapters/trx-capture.js";
 
 export function createGraphEngineeringService(options: {
   directory: string;
@@ -30,13 +32,16 @@ export function createGraphEngineeringService(options: {
   cleanupWorkspace?: (workspace: GitGraphWorkspace) => Promise<GitGraphWorkspace>;
 }) {
   const preflight = createWorkflowPreflight(options);
+  const project = createProjectSetupPort(options);
   const graph = new GraphEngineeringService({
     parallel: createGraphParallelPort(options),
     preflight,
+    checks: project,
     repository: createGraphRepository(options.directory),
     native: createGraphNativePort(options),
     evidence: createGraphEvidencePort(options.gitService),
     artifacts: createGraphArtifactStore(options.directory),
+    reports: createGraphReportCapture(),
     recipes: {
       ...createGraphRecipeStore(),
       async validatePaths(target, paths) {
@@ -51,6 +56,7 @@ export function createGraphEngineeringService(options: {
     store: createWorkflowStore(options.directory),
     graph,
     preflight,
+    project,
     digest: workflowDigest,
     id: randomUUID,
     now: Date.now,

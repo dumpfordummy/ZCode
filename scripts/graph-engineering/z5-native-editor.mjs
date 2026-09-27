@@ -62,6 +62,7 @@ export async function outputSchema(window, schema) {
 async function begin(window, name) {
   await window.getByTestId("graph-engineering-open").click();
   await window.getByTestId("graph-upgrade").click();
+  await window.getByTestId("graph-editor-advanced").click();
   await window.getByTestId("graph-upgrade-routing").click();
   await window.getByTestId("graph-name").fill(name);
 }
@@ -81,9 +82,16 @@ async function approval(window, name, nodeId, selector) {
 }
 async function recipes(window, isolation, buildId) {
   const value = fixtureRecipes(buildId);
-  const details = window.getByTestId("graph-project-recipes");
-  await details.locator(":scope > summary").click();
+  await window.getByTestId("graph-view-setup").click();
+  await window.getByTestId("graph-project-recipes").waitFor();
   await window.getByTestId("graph-load-recipes").click();
+  await window.locator('[data-testid="graph-recipe-read-state"][data-state="ready"]').waitFor();
+  for (const details of await window
+    .getByTestId("graph-recipes-json")
+    .locator("xpath=ancestor::details")
+    .all())
+    if ((await details.getAttribute("open")) === null)
+      await details.locator(":scope > summary").click();
   await window.getByTestId("graph-recipes-json").fill(JSON.stringify(value, null, 2));
   await window.getByTestId("graph-save-recipes").click();
   await window.getByTestId("graph-recipes-saved").waitFor();
@@ -92,7 +100,7 @@ async function recipes(window, isolation, buildId) {
       .graphRecipes,
     value,
   );
-  await details.locator(":scope > summary").click();
+  await window.getByTestId("graph-view-design").click();
 }
 async function routingSettings(window, finalGate, admissions, deadline) {
   const details = window.getByTestId("graph-routing-settings");

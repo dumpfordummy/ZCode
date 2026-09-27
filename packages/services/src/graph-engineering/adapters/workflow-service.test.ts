@@ -14,6 +14,41 @@ import type { GraphRunProvenance } from "../workflow-provenance.js";
 test("library version edits/duplicates/archive and bad imports cannot mutate a chosen workspace or historic pin", async (t) => {
   const directory = await mkdtemp(join(tmpdir(), "z6-workflow-owner-"));
   const f = routingFixture();
+  f.options.recipes!.read = async () => ({
+    sourcePath: ".zcode/config.json",
+    digest: "a".repeat(64),
+    recipes: [
+      {
+        id: "build",
+        name: "Build",
+        executable: "dotnet",
+        args: ["build"],
+        cwd: ".",
+        timeoutMs: 120000,
+        sourcePaths: ["App.csproj"],
+        expectedOutputs: ["bin/App.dll"],
+        verifier: { kind: "build" },
+      },
+      {
+        id: "test",
+        name: "Test",
+        executable: "dotnet",
+        args: ["test"],
+        cwd: ".",
+        timeoutMs: 120000,
+        sourcePaths: ["App.csproj"],
+        expectedOutputs: [],
+        verifier: {
+          kind: "test",
+          format: "zcode-json-v1",
+          reportPath: "test.json",
+          minimumTests: 1,
+          requiredTests: [],
+          buildNodeId: "build",
+        },
+      },
+    ],
+  });
   t.after(async () => {
     await f.service.disposeAndWait();
     await rm(directory, { recursive: true, force: true });
@@ -40,6 +75,20 @@ test("library version edits/duplicates/archive and bad imports cannot mutate a c
     expectedRevision: 0,
   });
   const entry = first.entries.find((e) => !e.builtin)!;
+  const beforeInvalid = (await f.service.getWorkspace(target)).definition;
+  await assert.rejects(
+    service.instantiate({
+      target,
+      id: entry.id,
+      version: 1,
+      expectedRevision: 0,
+      parameters: { request: "Synthetic explicit request" },
+      bindings: { references: {}, recipes: { build: "build", test: "build" }, sourcePaths: [] },
+    }),
+    /requires a Test check/,
+  );
+  assert.deepEqual((await f.service.getWorkspace(target)).definition, beforeInvalid);
+  assert.equal(f.creates.length, 0);
   const graph = await service.instantiate({
     target,
     id: entry.id,

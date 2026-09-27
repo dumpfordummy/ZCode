@@ -14,6 +14,8 @@ import type {
   GraphToolAttempt,
   GraphToolOperation,
   GraphFileObservation,
+  GraphTrxReport,
+  GraphDotnetTestTarget,
 } from "../contract.js";
 import type { ModelSelection } from "@zcode/shared";
 import type { SubmissionMode } from "@zcode/shared/zcode-protocol-v4";
@@ -44,6 +46,20 @@ export interface GraphToolPort {
   cancel(target: GraphWorkspaceTarget, attempt: GraphToolAttempt): Promise<GraphToolOperation>;
 }
 export interface GraphArtifactOptions {
+  reports?: {
+    captureTrx(
+      target: GraphWorkspaceTarget,
+      path: string,
+      scope: GraphDotnetTestTarget,
+      startedAt: number,
+      completedAt: number,
+    ): Promise<{
+      content: string;
+      original: { digest: string; bytes: number; modifiedAt: number };
+      report?: GraphTrxReport;
+      issue?: string;
+    }>;
+  };
   artifacts?: GraphArtifactStore;
   recipes?: GraphRecipePort;
   tools?: GraphToolPort;

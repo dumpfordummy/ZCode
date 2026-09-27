@@ -10,7 +10,23 @@ import type {
 } from "./workflow-provenance.js";
 import { ServiceChannels } from "@zcode/shared";
 import { createServiceDescriptor } from "../descriptors.js";
+import type { GraphProjectSetupRequest, GraphProjectSetupResult } from "./project-setup-types.js";
 export type * from "./workflow-provenance.js";
+export type * from "./project-setup-types.js";
+export type * from "./editor-types.js";
+export { GRAPH_CHECKS_ADMISSION_REJECTED } from "./checks-types.js";
+export {
+  graphRecipeCompatibility,
+  graphRequiredRecipeKind,
+} from "./domain/recipe-compatibility.js";
+export { graphContextCandidates, addGraphContextBinding } from "./domain/editor-context.js";
+export { previewGraphTaskPrompt } from "./domain/editor-prompt.js";
+export { graphInstructionParts } from "./domain/prompt-parts.js";
+export {
+  applyGraphConditionPreset,
+  graphRepairPreset,
+  applyGraphRepairPolicy,
+} from "./domain/editor-routing.js";
 
 export interface GraphPortableTemplate {
   format: "zcode-workflow";
@@ -64,6 +80,7 @@ export type GraphLibraryMutation =
   | { action: "duplicate"; id: string; version: number; name: string }
   | { action: "archive"; id: string; archived: boolean };
 export interface IGraphWorkflowService {
+  projectSetup(params: GraphProjectSetupRequest): Promise<GraphProjectSetupResult>;
   list(): Promise<GraphLibraryView>;
   mutate(params: GraphLibraryMutation & { expectedRevision: number }): Promise<GraphLibraryView>;
   preview(

@@ -1,4 +1,6 @@
 import type { GraphTemplateInstance, GraphRunProvenance } from "./workflow-provenance.js";
+import type { GraphChecksPurpose } from "./checks-types.js";
+export type * from "./checks-types.js";
 import type {
   GraphWorkspaceTarget,
   GraphNodeBase,
@@ -43,6 +45,8 @@ import type {
   GraphInputBinding,
   GraphTerminalProof,
   GraphFinalOutput,
+  GraphRecoveryInspection,
+  GraphReleaseAudit,
 } from "./base-types.js";
 import type {
   GraphConditionNode,
@@ -50,6 +54,7 @@ import type {
   GraphRoutingState,
   GraphRunContinueCommand,
   GraphRunStartCommand,
+  GraphRunChecksCommand,
 } from "./routing-types.js";
 export type * from "./routing-types.js";
 export type {
@@ -59,6 +64,9 @@ export type {
   GraphInputBinding,
   GraphTerminalProof,
   GraphFinalOutput,
+  GraphInactivityProof,
+  GraphRecoveryInspection,
+  GraphReleaseAudit,
 } from "./base-types.js";
 export type * from "./artifact-types.js";
 export type * from "./tool-types.js";
@@ -171,43 +179,8 @@ export interface GraphNodeAttempt {
   outputValidation?: { status: "valid" | "invalid"; issues: string[] };
   message?: string;
 }
-export type GraphInactivityProof =
-  | {
-      kind: "tool-terminal";
-      runtimeIdentity: string;
-      sessionId: string;
-      operationId: string;
-      completedAt: number;
-      status: "completed" | "failed" | "cancelled";
-    }
-  | {
-      kind: "input-terminal";
-      runtimeIdentity: string;
-      sessionId: string;
-      inputId: string;
-      commandId: string;
-      terminalProof: GraphTerminalProof;
-    }
-  | { kind: "runtime-retired"; runtimeIdentity: string; workspaceKey: string; retiredAt: number }
-  | { kind: "never-submitted"; commandId: string; dispatchPhase: GraphDispatchPhase };
-export interface GraphRecoveryInspection {
-  inspectedAt: number;
-  state: "inactive" | "active" | "unknown";
-  reason: string;
-  attempts: Array<{
-    attemptId: string;
-    state: "inactive" | "active" | "unknown";
-    reason: string;
-    proof?: GraphInactivityProof;
-    foregroundExecutionId?: string;
-  }>;
-}
-export interface GraphReleaseAudit {
-  releasedAt: number;
-  reason: string;
-  inspection: GraphRecoveryInspection;
-}
 export interface GraphSequentialRun {
+  purpose?: GraphChecksPurpose;
   provenance?: GraphRunProvenance;
   version: 2 | 3 | 4 | 5;
   routing?: GraphRoutingState;
@@ -280,7 +253,9 @@ export interface IGraphEngineeringService {
     definition: GraphDefinition;
     expectedRevision: number;
   }): Promise<GraphDefinition>;
-  run(params: GraphRunStartCommand | GraphRunContinueCommand): Promise<GraphRun>;
+  run(
+    params: GraphRunStartCommand | GraphRunContinueCommand | GraphRunChecksCommand,
+  ): Promise<GraphRun>;
   cancel(params: { target: GraphWorkspaceTarget; runId: string }): Promise<GraphRun>;
   inspectRecovery(params: { target: GraphWorkspaceTarget; runId: string }): Promise<GraphRun>;
   releaseInterrupted(params: {

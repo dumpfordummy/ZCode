@@ -1,11 +1,13 @@
 import type { GraphRunProvenance } from "@zcode/services";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
+import { useGraphEditorText } from "./GraphEditorMode.js";
 
 /** Captured metadata only: showing references never opens, installs or enables them. */
 export function GraphWorkflowProvenance({ provenance }: { provenance: GraphRunProvenance }) {
   const { intl } = useZCodeIntl(),
     t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
   const environment = provenance.environment;
+  const u = useGraphEditorText();
   return (
     <section className="space-y-3 break-words text-ui-sm" data-testid="graph-workflow-provenance">
       <h3 className="font-medium text-ui-base">{t("provenance")}</h3>
@@ -58,6 +60,24 @@ export function GraphWorkflowProvenance({ provenance }: { provenance: GraphRunPr
       </details>
       <details>
         <summary>{t("references")}</summary>
+        {provenance.references
+          .filter((reference) => reference.delivery)
+          .map((reference) => (
+            <p
+              key={reference.id}
+              data-testid={`graph-reference-delivery-${reference.id}`}
+              data-delivery={reference.delivery}
+            >
+              {reference.id}:{" "}
+              {u(
+                reference.delivery === "native-instructions"
+                  ? "nativeInstructions"
+                  : reference.delivery === "native-skill"
+                    ? "nativeSkill"
+                    : "explicitRead",
+              )}
+            </p>
+          ))}
         <Json value={provenance.references} />
       </details>
       <details>

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { graphRecipeSchema } from "./artifact-schemas.js";
 import type { GraphSequentialRun } from "../contract.js";
 import { workspaceKey } from "./definition.js";
+import { trxAttemptRecordErrors } from "./trx-receipt.js";
 
 const id = z.string().min(1).max(200),
   time = z.number().finite().nonnegative();
@@ -86,6 +87,8 @@ export const toolAttemptSchema = z
     outputDigest: digest.optional(),
     resolvedArgs: z.array(z.string()).max(64).optional(),
     beforeReportDigest: digest.optional(),
+    resolvedReportPath: z.string().min(1).max(1024).optional(),
+    normalizationReceiptId: id.optional(),
     outputsBefore: z
       .array(
         z.union([
@@ -162,6 +165,7 @@ export function toolRecordErrors(run: GraphSequentialRun): string[] {
   )
     issues.push("Tool attempts do not match the frozen path.");
   for (const a of tools) {
+    issues.push(...trxAttemptRecordErrors(run, a));
     const node = run.definition.nodes.find((n) => n.id === a.nodeId);
     if (
       node?.type !== "tool" ||
@@ -205,7 +209,7 @@ export function toolRecordErrors(run: GraphSequentialRun): string[] {
       const counts = { passed: 0, failed: 0, skipped: 0 };
       for (const test of tests) counts[test.status]++;
       if (
-        run.version !== 5 ||
+        (run.version !== 5 && !run.purpose) ||
         a.recipe.verifier.kind !== "test" ||
         v.classification !== "test" ||
         !v.processKnown ||

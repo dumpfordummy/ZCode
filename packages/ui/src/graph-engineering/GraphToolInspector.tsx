@@ -1,6 +1,8 @@
 import type { GraphSequentialRun, GraphToolAttempt } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
+import { graphRunCheck } from "./graphRunEvidence.js";
+import { useGraphRunText } from "./GraphRunText.js";
 
 export function GraphToolInspector({
   run,
@@ -14,6 +16,8 @@ export function GraphToolInspector({
   const { intl } = useZCodeIntl(),
     t = (id: string) => intl.formatMessage({ id: `graph.z4.${id}` });
   const verify = attempt.verification;
+  const u = useGraphRunText(),
+    check = graphRunCheck(run, attempt);
   // 报告只属于 Test 验证器；Build 的 false 默认值不应显示成缺失报告或验证失败。
   const hasTestReport = attempt.recipe.verifier.kind === "test";
   const facts: [string, boolean | null | undefined][] = [
@@ -33,9 +37,26 @@ export function GraphToolInspector({
       data-status={attempt.status}
     >
       <p role="status" className="text-ui-sm">
-        {intl.formatMessage({ id: `graph.status.${attempt.status}` })}
+        {u(`execution.${attempt.status}`)}
+      </p>
+      <p
+        data-testid="graph-tool-evidence"
+        data-state={check.state}
+        className="text-ui-sm font-medium"
+      >
+        {u(`check.${check.state}`)}
       </p>
       <p className="text-ui-sm text-foreground-subtle">{t("toolMeaning")}</p>
+      {check.issues.map((issue) => (
+        <p key={issue} className="text-ui-sm text-warning">
+          {u(`issue.${issue}`)}
+        </p>
+      ))}
+      {verify?.issues.map((issue, index) => (
+        <p key={index} className="break-words text-ui-sm text-warning">
+          {issue}
+        </p>
+      ))}
       {attempt.sessionId ? (
         <Button
           size="sm"
@@ -71,7 +92,7 @@ export function GraphToolInspector({
           </div>
         ))}
         <dt>{t("classification")}</dt>
-        <dd>{verify?.classification ?? attempt.recipe.verifier.kind}</dd>
+        <dd>{u(`kind.${verify?.classification ?? attempt.recipe.verifier.kind}`)}</dd>
         <dt>{t("counts")}</dt>
         <dd>
           {verify
@@ -79,11 +100,6 @@ export function GraphToolInspector({
             : "—"}
         </dd>
       </dl>
-      {verify?.issues.map((issue, index) => (
-        <p key={index} className="text-ui-sm text-warning">
-          {issue}
-        </p>
-      ))}
       <details className="text-ui-sm">
         <summary>{t("operation")}</summary>
         <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-xs">
@@ -100,6 +116,7 @@ export function GraphToolInspector({
               buildDigest: attempt.buildDigest,
               outputDigest: attempt.outputDigest,
               operation: attempt.operation,
+              verification: attempt.verification,
             },
             null,
             2,

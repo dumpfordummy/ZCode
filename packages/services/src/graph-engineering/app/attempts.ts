@@ -68,17 +68,4 @@ export function skipPending(run: GraphSequentialRun, now: number): void {
       node.updatedAt = now;
     }
 }
-export function runFingerprint(value: unknown): string {
-  const canonical = (input: unknown): unknown => {
-    if (Array.isArray(input)) return input.map(canonical);
-    if (input && typeof input === "object")
-      return Object.fromEntries(
-        Object.entries(input)
-          .filter(([, v]) => v !== undefined)
-          .sort(([a], [b]) => a.localeCompare(b))
-          .map(([k, v]) => [k, canonical(v)]),
-      );
-    return input;
-  };
-  return JSON.stringify(canonical(value));
-}
+export { graphCanonical as runFingerprint } from "../domain/canonical.js";

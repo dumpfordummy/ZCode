@@ -3,6 +3,9 @@ import { GraphArtifacts } from "./artifacts.js";
 import { GraphState } from "./state.js";
 import { verifyToolReport } from "../domain/tool-verification.js";
 import { currentToolAttempt } from "../domain/routing.js";
+import { assertReviewedChecks } from "./checks-preflight.js";
+import { captureToolCommand, toolArtifactBase } from "./tool-command-evidence.js";
+import { captureToolReport } from "./tool-report-evidence.js";
 
 /** Observes declared files; it never executes recipes or reads paths from agent output. */
 export class GraphToolEvidence {
@@ -11,9 +14,15 @@ export class GraphToolEvidence {
     private readonly artifacts: GraphArtifacts,
   ) {}
   async prepare(run: GraphSequentialRun, attempt: GraphToolAttempt): Promise<void> {
+    await assertReviewedChecks(this.state, run);
     const recipes = this.state.options.recipes!;
     const recipe = attempt.recipe;
-    const reportPath = recipe.verifier.kind === "test" ? recipe.verifier.reportPath : "";
+    const reportPath =
+      recipe.verifier.kind === "test"
+        ? recipe.verifier.reportPath.replaceAll("{operationId}", attempt.operationId)
+        : "";
+    if (recipe.verifier.kind === "test" && recipe.verifier.format === "dotnet-vstest-trx-v1")
+      attempt.resolvedReportPath = reportPath;
     await recipes.validatePaths(run.target, [
       ...recipe.expectedOutputs,
       ...(reportPath ? [reportPath] : []),
@@ -37,11 +46,18 @@ export class GraphToolEvidence {
       ).digest;
       if (attempt.buildDigest !== build.outputDigest)
         throw new Error("Build outputs changed before this test invocation.");
+      if (
+        recipe.verifier.format === "dotnet-vstest-trx-v1" &&
+        !build.recipe.expectedOutputs.includes(recipe.verifier.target.assembly)
+      )
+        throw new Error("The captured Build does not include this exact test assembly.");
       try {
         attempt.beforeReportDigest = (await recipes.fingerprint(run.target, [reportPath])).digest;
       } catch (error) {
         if ((error as { code?: string }).code !== "ENOENT") throw error;
       }
+      if (recipe.verifier.format === "dotnet-vstest-trx-v1" && attempt.beforeReportDigest)
+        throw new Error("The operation-owned TRX destination already exists; it cannot be reused.");
     }
     const values: Record<string, string> = {
       operationId: attempt.operationId,
@@ -67,7 +83,11 @@ export class GraphToolEvidence {
         operation.status === "completed" &&
         result?.status === "completed" &&
         result.exitCode === 0 &&
-        result.processExitObserved === true,
+        result.processExitObserved === true &&
+        // 原生取消、超时或信号与成功退出互斥；不能只相信零退出码和摘要状态。
+        !result.cancelled &&
+        !result.timedOut &&
+        !result.signal,
       reportFresh: false,
       reportParsed: false,
       acceptancePassed: false,
@@ -83,28 +103,9 @@ export class GraphToolEvidence {
     if (!verification.exitSuccessful) issues.push("The native command did not exit successfully.");
     if (result?.stdout.truncated || result?.stderr.truncated)
       issues.push("Native output exceeded its cap; command evidence is incomplete.");
-    const base = {
-      target: run.target,
-      runId: run.id,
-      nodeId: attempt.nodeId,
-      attemptId: attempt.attemptId,
-      operationId: attempt.operationId,
-      sessionId: attempt.sessionId,
-      sourceBaseline: attempt.sourceDigest,
-      capturedAt: this.state.options.now(),
-    };
+    const base = toolArtifactBase(this.state, run, attempt);
     const store = this.state.options.artifacts!;
-    // 绝对 cwd 已由同一工作区/原生操作身份保留；内容使用声明的相对目录，避免隐私路径脱敏改变验证载荷。
-    const command = await store.put({
-      ...base,
-      artifactId: this.state.options.id(),
-      type: "command",
-      provenance: "native-command",
-      content: JSON.stringify({ ...operation, cwd: undefined, cwdRelative: recipe.cwd }),
-      validation: issues.length ? "invalid" : "valid",
-      ...(issues.length ? { issue: issues.join("\n") } : {}),
-    });
-    this.artifacts.add(run, command, "command");
+    const command = await captureToolCommand(this.state, this.artifacts, run, attempt, issues);
     if (command.validation !== "valid")
       issues.push(command.issue ?? "Command artifact is incomplete.");
     const commandIssueCount = issues.length;
@@ -147,6 +148,7 @@ export class GraphToolEvidence {
             !before ||
             !file.exists ||
             file.modifiedAt < (operation.startedAt ?? Infinity) ||
+            Math.floor(file.modifiedAt) > (operation.completedAt ?? -Infinity) ||
             (before.exists && file.modifiedAt === before.modifiedAt)
           )
             issues.push(`Build output ${file.path} was not freshly produced by this invocation.`);
@@ -160,41 +162,33 @@ export class GraphToolEvidence {
             .digest !== attempt.buildDigest
         )
           issues.push("Build outputs changed during the test.");
-        const report = await store.captureFile({
-          ...base,
-          artifactId: this.state.options.id(),
-          path: verifier.reportPath,
-        });
-        this.artifacts.add(run, report, verifier.reportPath);
-        if (report.validation !== "valid")
-          throw new Error(report.issue ?? "Test report is incomplete.");
-        const reportFingerprint = await this.state.options.recipes!.fingerprint(run.target, [
-          verifier.reportPath,
-        ]);
-        const reportFile = reportFingerprint.files[0];
-        const sameReport =
-          reportFingerprint.files.length === 1 &&
-          reportFile?.path === verifier.reportPath &&
-          reportFile.bytes === report.bytes &&
-          reportFile.digest === report.digest;
-        if (!sameReport)
-          issues.push(
-            "Test report bytes changed between retained capture and freshness observation.",
-          );
-        verification.reportFresh =
-          sameReport && reportFingerprint.digest !== attempt.beforeReportDigest;
-        if (!verification.reportFresh)
-          issues.push("Test report is unchanged from before this invocation.");
-        const content = await this.artifacts.read(run, report.id);
-        const checked = verifyToolReport(content.content, {
-          ...verifier,
-          operationId: attempt.operationId,
-          sourceDigest: attempt.sourceDigest!,
-          buildDigest: attempt.buildDigest!,
-        });
+        const authoritative =
+          verification.processKnown &&
+          issues.length === commandIssueCount &&
+          !!result &&
+          ["completed", "failed"].includes(result.status) &&
+          ["completed", "failed"].includes(operation.status) &&
+          Number.isInteger(result.exitCode) &&
+          !result.timedOut &&
+          !result.cancelled &&
+          !result.signal &&
+          !result.stdout.truncated &&
+          !result.stderr.truncated &&
+          !command.redacted &&
+          command.validation !== "incomplete";
+        const captured = await captureToolReport(
+          this.state,
+          this.artifacts,
+          run,
+          attempt,
+          authoritative,
+        );
+        const { report, checked } = captured;
+        verification.reportFresh = captured.fresh;
+        issues.push(...captured.issues);
         // 失败断言与基础设施不确定性分开判定；非零退出码本身不能授权修复。
         if (
-          run.version === 5 &&
+          (run.version === 5 || run.purpose?.kind === "checks") &&
           checked.provenanceValid &&
           checked.outcome !== "invalid" &&
           verification.processKnown &&

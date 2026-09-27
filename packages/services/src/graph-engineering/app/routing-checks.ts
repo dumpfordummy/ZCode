@@ -3,6 +3,8 @@ import { currentIteration } from "../domain/routing.js";
 import { GraphState } from "./state.js";
 import { runFingerprint, skipPending } from "./attempts.js";
 import { frozenRoutingConfiguration } from "./routing-plan.js";
+import { noProjectRecipes, usesProjectRecipes } from "../domain/recipe-dependency.js";
+import { assertReviewedChecks } from "./checks-preflight.js";
 
 export class GraphRoutingChecks {
   constructor(private readonly state: GraphState) {}
@@ -16,6 +18,7 @@ export class GraphRoutingChecks {
       : undefined;
   }
   async verify(run: GraphSequentialRun, reserve = false): Promise<boolean> {
+    if (run.purpose) return this.checksCurrent(run, false);
     if (run.version !== 5) return true;
     if (run.routing!.stopReason || run.cancelRequestedAt !== undefined) return false;
     const routing = run.routing!;
@@ -43,11 +46,15 @@ export class GraphRoutingChecks {
           );
       }
       const record = await this.state.load(run.target);
+      const withoutRecipes =
+        !usesProjectRecipes(run.definition) &&
+        routing.recipeConfigurationDigest === this.state.options.evidence!.digest(noProjectRecipes);
       if (
         runFingerprint(record.definition) !== runFingerprint(run.definition) ||
         this.digest(frozenRoutingConfiguration(run)) !== routing.configurationDigest ||
-        (await this.state.options.recipes!.read(run.target)).digest !==
-          routing.recipeConfigurationDigest
+        (!withoutRecipes &&
+          (await this.state.options.recipes!.read(run.target)).digest !==
+            routing.recipeConfigurationDigest)
       )
         throw new Error(
           "Saved graph, frozen settings or project recipes changed; start a newly reviewed run.",
@@ -91,6 +98,7 @@ export class GraphRoutingChecks {
     return true;
   }
   async beforeEffect(run: GraphSequentialRun): Promise<boolean> {
+    if (run.purpose) return this.checksCurrent(run, true);
     if (run.version !== 5 || this.state.options.now() < run.routing!.deadlineAt) return true;
     // sending 落盘可能跨过截止时刻；不发送，也不回退意图伪造安全续跑，保留待审计所有权。
     run.routing!.stopReason = {
@@ -105,6 +113,23 @@ export class GraphRoutingChecks {
     await this.state.put(run);
     this.state.liveRuns.delete(run.id);
     return false;
+  }
+  private async checksCurrent(run: GraphSequentialRun, afterIntent: boolean): Promise<boolean> {
+    if (run.cancelRequestedAt !== undefined || !this.state.liveRuns.has(run.id)) return false;
+    try {
+      await assertReviewedChecks(this.state, run);
+      return true;
+    } catch (error) {
+      // sending 已落盘且会话已创建时不能伪造安全失败；保留原身份供保守恢复，绝不重试。
+      run.status = afterIntent ? "Unknown" : "Failed";
+      if (afterIntent) run.cancelRequestedAt = this.state.options.now();
+      run.message = error instanceof Error ? error.message : "Checks review could not be verified.";
+      run.updatedAt = this.state.options.now();
+      skipPending(run, run.updatedAt);
+      await this.state.put(run);
+      this.state.liveRuns.delete(run.id);
+      return false;
+    }
   }
   async stop(
     run: GraphSequentialRun,

@@ -1,49 +1,101 @@
-import { useState } from "react";
+import { useEffect, useMemo } from "react";
 import type {
   GraphParameterValue,
   GraphTemplateBindings as TemplateBindings,
   GraphTemplateVersion,
-  GraphRecipeSnapshot,
 } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import { Input } from "@/components/ui/input.js";
 import { Textarea } from "@/components/ui/textarea.js";
 import { Checkbox } from "@/components/ui/checkbox.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
-import { GraphSelect } from "./GraphSelect.js";
+import { useGraphDraftStore, type GraphTemplateFormDraft } from "@/store/graphDraftStore.js";
+import { GraphTemplateRecipeBindings } from "./GraphTemplateRecipeBindings.js";
+import { GraphRecipeReadStatus } from "./GraphRecipeReadStatus.js";
+import type { GraphRecipeReadState } from "./graphRecipeRead.js";
 import { initialTemplateParameters, templateBindingErrors } from "./graphWorkflowView.js";
+import { GraphReferenceBindings } from "./GraphReferenceBindings.js";
 
 export function GraphTemplateBindings({
   version,
-  recipes,
+  workspaceKey,
+  workspacePath,
+  workspaceIdentity,
+  templateKey,
+  recipeReadState,
   disabled,
-  dirty,
+  disabledReason,
   onLoadRecipes,
+  onOpenSetup,
   onInstantiate,
 }: {
   version: GraphTemplateVersion;
-  recipes: GraphRecipeSnapshot | null;
+  workspaceKey: string;
+  workspacePath: string;
+  workspaceIdentity?: string;
+  templateKey: string;
+  recipeReadState: GraphRecipeReadState;
   disabled: boolean;
-  dirty: boolean;
+  disabledReason?: string;
   onLoadRecipes(): void;
+  onOpenSetup(): void;
   onInstantiate(parameters: Record<string, GraphParameterValue>, bindings: TemplateBindings): void;
 }) {
-  const { intl } = useZCodeIntl(),
-    t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
+  const { intl } = useZCodeIntl();
+  const t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
+  const u = (key: string) => intl.formatMessage({ id: `graph.preZ8.${key}` });
   const template = version.template;
-  const [parameters, setParameters] = useState(() => initialTemplateParameters(template));
-  const [bindings, setBindings] = useState<TemplateBindings>({
-    references: {},
-    recipes: {},
-    sourcePaths: [],
-  });
-  const [replace, setReplace] = useState(false);
-  const errors = templateBindingErrors(template, parameters, bindings);
+  const initial = useMemo<GraphTemplateFormDraft>(
+    () => ({
+      parameters: initialTemplateParameters(template),
+      bindings: { references: {}, recipes: {}, sourcePaths: [] },
+    }),
+    [template],
+  );
+  const retained = useGraphDraftStore(
+    (state) => state.workspaces[workspaceKey]?.templates[templateKey],
+  );
+  const { parameters, bindings } = retained ?? initial;
+  const change = (update: (current: GraphTemplateFormDraft) => GraphTemplateFormDraft) => {
+    const store = useGraphDraftStore.getState();
+    store.setTemplateDraft(
+      workspaceKey,
+      templateKey,
+      update(store.workspaces[workspaceKey]?.templates[templateKey] ?? initial),
+    );
+  };
+  const tools = template.graph.nodes.filter((node) => node.type === "tool");
+  const hasTools = tools.length > 0;
+  const recipes = recipeReadState.status === "ready" ? recipeReadState.snapshot : null;
+  const errors = templateBindingErrors(template, parameters, bindings, recipes);
+  const readBlocked = hasTools && recipeReadState.status !== "ready";
+  useEffect(() => {
+    if (hasTools && recipeReadState.status === "not-loaded") onLoadRecipes();
+  }, [hasTools, recipeReadState.status, onLoadRecipes]);
+  const fields = [
+    ...template.parameters.map((item) => [item.label, `parameter-${item.id}`]),
+    ...template.references.map((item) => [item.label, `reference-${item.id}`]),
+    ...tools.map((node) => [node.name, `recipe-${node.id}`]),
+    ["sourcePaths", "source-paths"],
+  ];
+  const focusIssue = (label: string) => {
+    const id = fields.find(([name]) => name === label)?.[1];
+    const field = id ? document.getElementById(`graph-template-field-${id}`) : null;
+    const disclosure = field?.closest("details");
+    if (disclosure) disclosure.open = true;
+    field?.querySelector<HTMLElement>("input,textarea,button")?.focus();
+  };
   return (
     <section className="space-y-3" data-testid="graph-template-bindings">
-      <p className="text-ui-sm text-foreground-subtle">{t("bindingHelp")}</p>
+      <p className="rounded-lg bg-surface p-3 text-ui-sm" data-testid="graph-template-verification">
+        {u(hasTools ? "configuredChecks" : "agentLed")}
+      </p>
       {template.parameters.map((parameter) => (
-        <label className="block space-y-1 text-ui-sm" key={parameter.id}>
+        <label
+          className="block space-y-1 text-ui-sm"
+          key={parameter.id}
+          id={`graph-template-field-parameter-${parameter.id}`}
+        >
           <span>
             {parameter.label}
             {parameter.required ? " *" : ""}
@@ -54,14 +106,16 @@ export function GraphTemplateBindings({
                 aria-label={parameter.label}
                 data-testid={`graph-template-parameter-${parameter.id}`}
                 disabled={disabled}
-                // 未提供默认值的布尔参数仍需显式选择；不能把未选择误标为已排除。
                 checked={
                   parameters[parameter.id] === undefined
                     ? "indeterminate"
                     : parameters[parameter.id] === true
                 }
                 onCheckedChange={(value) =>
-                  setParameters((current) => ({ ...current, [parameter.id]: value === true }))
+                  change((current) => ({
+                    ...current,
+                    parameters: { ...current.parameters, [parameter.id]: value === true },
+                  }))
                 }
               />
               <span>
@@ -72,6 +126,19 @@ export function GraphTemplateBindings({
                     : t("excluded")}
               </span>
             </div>
+          ) : parameter.type === "string" && parameter.id === "request" ? (
+            <Textarea
+              rows={4}
+              data-testid={`graph-template-parameter-${parameter.id}`}
+              disabled={disabled}
+              value={String(parameters[parameter.id] ?? "")}
+              onChange={(event) =>
+                change((current) => ({
+                  ...current,
+                  parameters: { ...current.parameters, [parameter.id]: event.target.value },
+                }))
+              }
+            />
           ) : (
             <Input
               data-testid={`graph-template-parameter-${parameter.id}`}
@@ -80,77 +147,42 @@ export function GraphTemplateBindings({
               value={parameters[parameter.id] === undefined ? "" : String(parameters[parameter.id])}
               onChange={(event) => {
                 const text = event.target.value;
-                setParameters((current) => {
-                  const next = { ...current };
-                  if (text === "") delete next[parameter.id];
+                change((current) => {
+                  const next = { ...current.parameters };
+                  if (!text) delete next[parameter.id];
                   else next[parameter.id] = parameter.type === "number" ? Number(text) : text;
-                  return next;
+                  return { ...current, parameters: next };
                 });
               }}
             />
           )}
         </label>
       ))}
-      {template.references.map((reference) => (
-        <label className="block space-y-1 text-ui-sm" key={reference.id}>
-          <span>
-            {reference.label}
-            {reference.required ? " *" : ""} · {reference.kind}
-          </span>
-          <Input
-            data-testid={`graph-template-reference-${reference.id}`}
-            disabled={disabled}
-            placeholder={t(reference.kind === "skill" ? "skillId" : "relativePath")}
-            value={bindings.references[reference.id] ?? ""}
-            onChange={(event) =>
-              setBindings((current) => ({
-                ...current,
-                references: { ...current.references, [reference.id]: event.target.value },
-              }))
-            }
-          />
-          <span className="block text-foreground-subtle">
-            {t("appliesTo")}: {reference.nodeIds.join(", ")}
-          </span>
-        </label>
-      ))}
-      {template.graph.nodes.some((node) => node.type === "tool") ? (
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={disabled}
-          onClick={onLoadRecipes}
-          data-testid="graph-template-load-recipes"
-        >
-          {t("loadRecipes")}
-        </Button>
+      <GraphReferenceBindings
+        target={{ workspacePath, workspaceIdentity }}
+        roles={template.references}
+        bindings={bindings}
+        disabled={disabled}
+        onChange={(bindings) => change((current) => ({ ...current, bindings }))}
+      />
+      {hasTools ? (
+        <GraphRecipeReadStatus
+          state={recipeReadState}
+          onRead={onLoadRecipes}
+          onSetup={onOpenSetup}
+        />
       ) : null}
-      {template.graph.nodes
-        .filter((node) => node.type === "tool")
-        .map((node) => (
-          <GraphSelect
-            key={node.id}
-            label={`${node.name} · ${node.id}`}
-            testId={`graph-template-recipe-${node.id}`}
-            disabled={disabled}
-            value={bindings.recipes[node.id] || "unbound"}
-            options={[
-              { value: "unbound", label: t("unresolved") },
-              ...(recipes?.recipes ?? []).map((recipe) => ({
-                value: recipe.id,
-                label: `${recipe.name} · ${recipe.id}`,
-              })),
-            ]}
-            onChange={(value) =>
-              setBindings((current) => ({
-                ...current,
-                recipes: { ...current.recipes, [node.id]: value === "unbound" ? "" : value },
-              }))
-            }
-          />
-        ))}
+      <GraphTemplateRecipeBindings
+        template={template}
+        bindings={bindings}
+        snapshot={recipes}
+        disabled={disabled || readBlocked}
+        onChange={(update) =>
+          change((current) => ({ ...current, bindings: update(current.bindings) }))
+        }
+      />
       {template.graph.routing?.region ? (
-        <label className="block space-y-1 text-ui-sm">
+        <label className="block space-y-1 text-ui-sm" id="graph-template-field-source-paths">
           <span>{t("sourcePaths")}</span>
           <Textarea
             rows={3}
@@ -158,37 +190,53 @@ export function GraphTemplateBindings({
             value={bindings.sourcePaths.join("\n")}
             disabled={disabled}
             onChange={(event) =>
-              setBindings((current) => ({
+              change((current) => ({
                 ...current,
-                sourcePaths: event.target.value.split("\n"),
+                bindings: { ...current.bindings, sourcePaths: event.target.value.split("\n") },
               }))
             }
           />
         </label>
       ) : null}
-      {dirty ? (
-        <label className="flex items-start gap-2 text-ui-sm text-warning">
-          <Checkbox
-            checked={replace}
-            disabled={disabled}
-            onCheckedChange={(value) => setReplace(value === true)}
-            data-testid="graph-template-replace-draft"
-          />
-          {t("replaceDirty")}
-        </label>
-      ) : null}
+      <div className="space-y-1 text-ui-sm" data-testid="graph-template-step-preview">
+        <p className="font-medium">{u("workflowPreview")}</p>
+        <p className="text-foreground-subtle">
+          {template.graph.nodes
+            .filter((node) => "name" in node)
+            .map((node) => ("name" in node ? node.name : ""))
+            .join(" → ")}
+        </p>
+      </div>
       {errors.length ? (
-        <p
-          role="status"
-          className="text-ui-sm text-warning"
+        <div
+          className="space-y-1 text-ui-sm text-warning"
           data-testid="graph-template-unresolved"
+          role="status"
         >
-          {t("required")}: {errors.join(", ")}
+          <p>{u("correctFields")}</p>
+          <div className="flex flex-wrap gap-2">
+            {errors.map((error, index) => (
+              <Button
+                key={`${error}:${index}`}
+                variant="ghost"
+                size="sm"
+                onClick={() => focusIssue(error)}
+              >
+                {error === "sourcePaths" ? t("sourcePaths") : error}
+              </Button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      {disabled || readBlocked ? (
+        <p id="graph-template-create-reason" role="status" className="text-ui-sm text-warning">
+          {disabled ? disabledReason || u("creationLocked") : u("readChecksFirst")}
         </p>
       ) : null}
       <Button
         size="sm"
-        disabled={disabled || errors.length > 0 || (dirty && !replace)}
+        disabled={disabled || readBlocked || errors.length > 0}
+        aria-describedby="graph-template-create-reason"
         data-testid="graph-library-instantiate"
         onClick={() =>
           onInstantiate(parameters, {
@@ -197,7 +245,7 @@ export function GraphTemplateBindings({
           })
         }
       >
-        {t("instantiate")}
+        {u("createWorkflow")}
       </Button>
     </section>
   );

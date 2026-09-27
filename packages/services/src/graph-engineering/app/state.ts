@@ -18,6 +18,7 @@ export interface GraphOptions extends GraphArtifactOptions {
   native: GraphNativePort;
   evidence?: GraphEvidencePort;
   preflight?: GraphPreflightPort;
+  checks?: import("./project-ports.js").GraphChecksPort;
   id(): string;
   now(): number;
 }

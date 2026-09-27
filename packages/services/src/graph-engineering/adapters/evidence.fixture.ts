@@ -191,14 +191,19 @@ export async function evidenceFixture(
       mode: "edit",
       planEnabled: false,
     });
-  const finishTool = (index = 0, exitCode = 0) => {
+  const finishTool = (
+    index = 0,
+    exitCode = 0,
+    nativeWindow?: { startedAt: number; completedAt: number },
+  ) => {
     const id = starts[index]!;
     const op = operations.get(id)!;
     Object.assign(op, {
       status: exitCode ? "failed" : "completed",
       processStarted: true,
-      startedAt: ++sequence,
-      completedAt: ++sequence,
+      // 使用真实文件的用例显式传入同一时钟窗口，不能把序号时钟冒充文件修改时间。
+      startedAt: nativeWindow?.startedAt ?? ++sequence,
+      completedAt: nativeWindow?.completedAt ?? ++sequence,
       result: {
         status: exitCode ? "failed" : "completed",
         exitCode,

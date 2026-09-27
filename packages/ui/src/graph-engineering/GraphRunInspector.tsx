@@ -8,6 +8,7 @@ import { graphNodeAttempts, graphSelectedAttempt } from "./graphRoutingView.js";
 import { GraphConditionInspector } from "./GraphRoutingInspector.js";
 import { GraphToolInspector } from "./GraphToolInspector.js";
 import { GraphArtifactInspector, type GraphEvidenceActions } from "./GraphArtifactInspector.js";
+import { useGraphRunText } from "./GraphRunText.js";
 
 export function GraphRunInspector({
   run,
@@ -32,6 +33,7 @@ export function GraphRunInspector({
 }) {
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
+  const u = useGraphRunText();
   const node = run.definition.nodes.find((item) => item.id === nodeId);
   const choices = nodeId ? graphNodeAttempts(run, nodeId) : [];
   const selected = nodeId ? graphSelectedAttempt(run, nodeId, selectedAttemptId) : undefined;
@@ -47,6 +49,7 @@ export function GraphRunInspector({
   });
   return (
     <section
+      tabIndex={-1}
       className="space-y-3"
       data-testid="graph-node-inspector"
       data-node-id={nodeId ?? ""}
@@ -76,7 +79,7 @@ export function GraphRunInspector({
             ...(!selected ? [{ value: "none", label: t("z5.selectAttempt") }] : []),
             ...choices.map((item) => ({
               value: item.attemptId,
-              label: `${t("z5.iteration")} ${item.iteration ?? 0} · ${t(`status.${item.status}`)} · ${item.attemptId}`,
+              label: `${t("z5.iteration")} ${item.iteration ?? 0} · ${u(`execution.${item.status}`)} · ${item.attemptId}`,
             })),
           ]}
           onChange={(value) => {
@@ -108,7 +111,7 @@ export function GraphRunInspector({
       {attempt && node?.type === "task" ? (
         <>
           <p role="status" className="text-ui-sm">
-            {t(`status.${attempt.status}`)}
+            {u(`execution.${attempt.status}`)}
           </p>
           {attempt.message ? (
             <p className="break-words text-ui-sm text-foreground-subtle">{attempt.message}</p>
@@ -207,7 +210,6 @@ export function GraphRunInspector({
           nodeId={nodeId}
           attemptId={selected?.attemptId}
           actions={evidenceActions}
-          disabled={approvalActions.disabled}
         />
       ) : null}
     </section>

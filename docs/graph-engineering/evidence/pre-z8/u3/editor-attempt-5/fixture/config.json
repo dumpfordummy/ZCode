@@ -1,0 +1,71 @@
+{
+  "graphRecipes": [
+    {
+      "id": "u3-build",
+      "name": "Inert editor Build binding",
+      "executable": "dotnet",
+      "args": [
+        "--version"
+      ],
+      "cwd": ".",
+      "timeoutMs": 1000,
+      "sourcePaths": [
+        "fixture.mjs"
+      ],
+      "expectedOutputs": [
+        "never-executed-output.txt"
+      ],
+      "verifier": {
+        "kind": "build"
+      }
+    },
+    {
+      "id": "u3-test-1",
+      "name": "Inert editor Test 1 binding",
+      "executable": "dotnet",
+      "args": [
+        "--version"
+      ],
+      "cwd": ".",
+      "timeoutMs": 1000,
+      "sourcePaths": [
+        "fixture.mjs"
+      ],
+      "expectedOutputs": [],
+      "verifier": {
+        "kind": "test",
+        "format": "zcode-json-v1",
+        "reportPath": "never-executed-report-1.json",
+        "minimumTests": 1,
+        "requiredTests": [
+          "inert-test-1"
+        ],
+        "buildNodeId": "build"
+      }
+    },
+    {
+      "id": "u3-test-2",
+      "name": "Inert editor Test 2 binding",
+      "executable": "dotnet",
+      "args": [
+        "--version"
+      ],
+      "cwd": ".",
+      "timeoutMs": 1000,
+      "sourcePaths": [
+        "fixture.mjs"
+      ],
+      "expectedOutputs": [],
+      "verifier": {
+        "kind": "test",
+        "format": "zcode-json-v1",
+        "reportPath": "never-executed-report-2.json",
+        "minimumTests": 1,
+        "requiredTests": [
+          "inert-test-2"
+        ],
+        "buildNodeId": "build"
+      }
+    }
+  ]
+}

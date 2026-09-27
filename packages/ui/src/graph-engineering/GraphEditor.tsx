@@ -1,6 +1,5 @@
-import { GraphRunPanel } from "./GraphRunPanel.js";
 import { GraphRunHistory } from "./GraphRunHistory.js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { GraphDefinition, GraphNativeSettings, GraphWorkspaceView } from "@zcode/services";
 import { submissionModeSchema } from "@zcode/shared/zcode-protocol-v4";
 import { Play, Save, Settings } from "lucide-react";
@@ -11,10 +10,12 @@ import { useSettings } from "@/hooks/useSettingService.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useTabStore } from "@/store/TabStoreProvider.js";
 import { useGraphEngineeringViewStore } from "@/store/graphEngineeringViewStore.js";
+import { useGraphDraftStore } from "@/store/graphDraftStore.js";
 import { setPendingSettingsSectionIntent } from "@/lib/settingsNavigation.js";
-import { GraphCanvas } from "./GraphCanvas.js";
 import { GraphConfiguration, useGraphConfiguration } from "./GraphConfiguration.js";
-import { GraphNodeInspector } from "./GraphNodeInspector.js";
+import { GraphEditorNavigation } from "./GraphEditorNavigation.js";
+import { GraphEditorSurface } from "./GraphEditorSurface.js";
+import { GraphDesignReadiness } from "./GraphDesignReadiness.js";
 import {
   graphDefinitionContent,
   reconcileGraphDraft,
@@ -26,10 +27,9 @@ import { GraphProjectRecipes } from "./GraphProjectRecipes.js";
 
 import { GraphRoutingEditor } from "./GraphRoutingEditor.js";
 import { GraphRunConfirmation } from "./GraphRunConfirmation.js";
-import { LegacyInspector } from "./GraphLegacyInspector.js";
 import { GraphLibrary } from "./GraphLibrary.js";
-import { GraphNodeNavigation } from "./GraphNodeNavigation.js";
 import type { GraphRunConfirmationSnapshot, GraphSubmission } from "./graphSubmission.js";
+import { graphFocusClass } from "./graphFocus.js";
 
 export function GraphEditor({
   workspacePath,
@@ -44,20 +44,32 @@ export function GraphEditor({
 }) {
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
+  const u = (id: string) => intl.formatMessage({ id: `graph.preZ8.${id}` });
   const config = useGraphConfiguration(workspacePath, workspaceIdentity);
   const { settings } = useSettings();
   const openSettingsTab = useTabStore((state) => state.openSettingsTab);
   const workspaceKey = workspaceIdentity?.trim() || workspacePath;
   const navigation = useGraphEngineeringViewStore((state) => state.selections[workspaceKey]);
   const select = useGraphEngineeringViewStore((state) => state.select);
-  const showingRuns = navigation?.mode === "runs";
+  const destination = navigation?.mode ?? "design";
+  const showingRuns = destination === "runs";
+  const showingDesign = destination === "design";
+  const showingWorkflows = destination === "workflows";
+  const showingSetup = destination === "setup";
   const [confirmation, setConfirmation] = useState<GraphRunConfirmationSnapshot | null>(null);
-  const [editor, setEditor] = useState({ base: view.definition, draft: view.definition });
+  const retainedEditor = useGraphDraftStore((state) => state.workspaces[workspaceKey]?.definition);
+  const observeDefinition = useGraphDraftStore((state) => state.observeDefinition);
+  const acceptDefinition = useGraphDraftStore((state) => state.acceptDefinition);
+  const editor = retainedEditor ?? { base: view.definition, draft: view.definition };
   const reconciled = reconcileGraphDraft(editor, view.definition);
-  if (reconciled !== editor) setEditor(reconciled);
+  useEffect(
+    () => observeDefinition(workspaceKey, view.definition),
+    [observeDefinition, workspaceKey, view.definition],
+  );
   const displayed = reconciled.draft;
   const conflicted = reconciled.base.revision !== view.definition.revision;
-  const setDefinition = (draft: GraphDefinition) => setEditor((current) => ({ ...current, draft }));
+  const setDefinition = (draft: GraphDefinition) =>
+    useGraphDraftStore.getState().editDefinition(workspaceKey, draft, reconciled.base);
   const dirty = graphDefinitionContent(displayed) !== graphDefinitionContent(view.definition);
   const activeRun = view.runs.find(graphRunIsUnresolved);
   const selectedRun = view.runs.find((run) => run.id === navigation?.runId) ?? view.runs[0];
@@ -66,10 +78,6 @@ export function GraphEditor({
     definition.nodes.find((node) => node.id === navigation?.nodeId) ??
     definition.nodes.find((node) => node.type === "task") ??
     definition.nodes[0];
-  const editableNode =
-    displayed.version !== undefined
-      ? displayed.nodes.find((node) => node.id === selectedNode?.id)
-      : undefined;
   const selection = config.draftConfig.modelSelection;
   const toolOnly =
     displayed.version !== undefined &&
@@ -98,6 +106,27 @@ export function GraphEditor({
     defaults !== null &&
     readiness !== null &&
     readiness.errors.length === 0;
+  const creationReason = graph.pending
+    ? u("busy")
+    : (readOnlyReason ??
+      (view.readOnly
+        ? t("readOnlyHost")
+        : conflicted
+          ? t("conflict")
+          : activeRun
+            ? u("existingRun")
+            : undefined));
+  const runReason =
+    creationReason ??
+    (!view.availability.available
+      ? view.availability.reason || t("prerequisite")
+      : !modelReady || !defaults
+        ? t("noModel")
+        : !readiness
+          ? u("checking")
+          : readiness.errors.length
+            ? u("designIssues")
+            : undefined);
   const openSettings = (section: "general" | "modelProvider") => {
     setPendingSettingsSectionIntent(section);
     openSettingsTab();
@@ -127,46 +156,39 @@ export function GraphEditor({
       });
   return (
     <div
-      className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto p-3"
-      data-view={showingRuns ? "run" : "design"}
+      className={`${graphFocusClass} flex min-h-0 flex-1 flex-col gap-3 overflow-auto p-3`}
+      data-view={showingRuns ? "run" : destination}
     >
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          size="sm"
-          variant={showingRuns ? "ghost" : "secondary"}
-          data-testid="graph-view-design"
-          onClick={() => select(workspaceKey, { mode: "design" })}
-        >
-          {t("design")}
-        </Button>
-        <Button
-          size="sm"
-          variant={showingRuns ? "secondary" : "ghost"}
-          data-testid="graph-view-runs"
-          onClick={() => select(workspaceKey, { mode: "runs" })}
-        >
-          {t("runs")}
-        </Button>
-        <span className="text-ui-sm text-foreground-subtle">
-          {showingRuns ? t("frozenRun") : t("designHelp")}
-        </span>
-        {!showingRuns ? (
-          <GraphLibrary
-            workspacePath={workspacePath}
-            workspaceIdentity={workspaceIdentity}
-            definition={displayed}
-            dirty={dirty}
-            disabled={disabled || conflicted || Boolean(activeRun)}
-            recipes={graph.recipes}
-            onLoadRecipes={() => void graph.readRecipes()}
-            onInstantiated={(saved) => {
-              setEditor({ base: saved, draft: saved });
-              setConfirmation(null);
-              void graph.reload();
-            }}
-          />
-        ) : null}
-      </div>
+      <GraphEditorNavigation
+        name={showingRuns && selectedRun ? selectedRun.definition.name : displayed.name}
+        destination={destination}
+        dirty={dirty}
+        conflicted={conflicted}
+        onSelect={(mode) => select(workspaceKey, { mode })}
+      />
+      {showingDesign || showingWorkflows ? (
+        <GraphLibrary
+          workspacePath={workspacePath}
+          workspaceIdentity={workspaceIdentity}
+          definition={displayed}
+          dirty={dirty}
+          disabled={disabled || conflicted || Boolean(activeRun)}
+          inline={showingWorkflows}
+          disabledReason={creationReason}
+          pending={graph.pending}
+          error={graph.error}
+          recipeReadState={graph.recipeReadState}
+          onLoadRecipes={graph.readRecipes}
+          onOpenSetup={() => select(workspaceKey, { mode: "setup", returnToWorkflow: true })}
+          onSaveDesign={graph.save}
+          onInstantiated={(saved) => {
+            acceptDefinition(workspaceKey, saved);
+            setConfirmation(null);
+            select(workspaceKey, { mode: "design", returnToWorkflow: false });
+            void graph.reload();
+          }}
+        />
+      ) : null}
       {showingRuns ? (
         <GraphRunHistory
           runs={view.runs}
@@ -175,7 +197,7 @@ export function GraphEditor({
             select(workspaceKey, { runId, attemptId: undefined, regionId: undefined })
           }
         />
-      ) : (
+      ) : showingDesign ? (
         <div className="flex flex-wrap items-center gap-2">
           <Input
             className="min-w-40 flex-1"
@@ -195,6 +217,7 @@ export function GraphEditor({
             variant="outline"
             size="sm"
             disabled={disabled || !dirty || conflicted}
+            title={u("saveBlocked")}
             data-testid="graph-save"
             onClick={() => void graph.save(displayed)}
           >
@@ -204,6 +227,7 @@ export function GraphEditor({
           <Button
             size="sm"
             disabled={!canRun}
+            aria-describedby={runReason ? "graph-run-reason" : undefined}
             data-testid="graph-run-button"
             onClick={() => {
               if (!defaults) return;
@@ -221,8 +245,16 @@ export function GraphEditor({
             {graph.pending ? t("saving") : dirty ? t("unsaved") : t("saved")}
           </span>
         </div>
-      )}
-      {!showingRuns ? (
+      ) : null}
+      {showingDesign ? (
+        <GraphDesignReadiness
+          reason={runReason}
+          errors={readiness?.errors ?? []}
+          activeRunId={activeRun?.id}
+          onOpenRun={(runId) => select(workspaceKey, { mode: "runs", runId })}
+        />
+      ) : null}
+      {showingDesign ? (
         <details className="shrink-0 text-ui-sm" data-testid="graph-default-configuration">
           <summary className="cursor-pointer">{t("workspaceDefaults")}</summary>
           <div className="mt-2 space-y-2">
@@ -231,7 +263,7 @@ export function GraphEditor({
           </div>
         </details>
       ) : null}
-      {!showingRuns && !modelReady ? (
+      {showingDesign && !modelReady ? (
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-ui-sm text-foreground-subtle">{t("noModel")}</p>
           <Button variant="outline" size="sm" onClick={() => openSettings("modelProvider")}>
@@ -240,7 +272,7 @@ export function GraphEditor({
           </Button>
         </div>
       ) : null}
-      {!showingRuns && !view.availability.available ? (
+      {showingDesign && !view.availability.available ? (
         <div className="flex flex-wrap items-center gap-2 text-ui-sm">
           <p role="status" className="text-warning">
             {view.availability.reason || t("prerequisite")}
@@ -265,7 +297,7 @@ export function GraphEditor({
           {readOnlyReason ?? t("readOnlyHost")}
         </p>
       ) : null}
-      {conflicted && !showingRuns ? (
+      {conflicted && showingDesign ? (
         <div className="flex flex-wrap items-center gap-2">
           <p role="alert" className="text-ui-sm text-warning">
             {t("conflict")}
@@ -273,29 +305,22 @@ export function GraphEditor({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setEditor({ base: view.definition, draft: view.definition })}
+            onClick={() => acceptDefinition(workspaceKey, view.definition)}
           >
             {t("reloadSaved")}
           </Button>
         </div>
       ) : null}
-      {!showingRuns && readiness?.errors.length ? (
-        <details
-          className="max-h-32 shrink-0 overflow-auto text-ui-sm"
-          open
-          data-testid="graph-readiness-errors"
-        >
-          <summary className="text-warning">{t("notReady")}</summary>
-          <ul className="list-disc pl-5">
-            {readiness.errors.map((error, index) => (
-              <li key={index}>{error}</li>
-            ))}
-          </ul>
-        </details>
+      {showingDesign || showingRuns ? (
+        <p className="shrink-0 text-ui-sm text-foreground-subtle">{t("concurrentEdits")}</p>
       ) : null}
-      <p className="shrink-0 text-ui-sm text-foreground-subtle">{t("concurrentEdits")}</p>
-      {!showingRuns && displayed.version === 5 ? (
-        <GraphRoutingEditor definition={displayed} disabled={disabled} onChange={setDefinition} />
+      {showingDesign && displayed.version === 5 ? (
+        <GraphRoutingEditor
+          definition={displayed}
+          disabled={disabled}
+          onChange={setDefinition}
+          workspaceKey={workspaceKey}
+        />
       ) : null}
       {confirmation ? (
         <GraphRunConfirmation
@@ -310,87 +335,63 @@ export function GraphEditor({
           }
         />
       ) : null}
-      {!showingRuns ? <GraphProjectRecipes graph={graph} disabled={disabled} /> : null}
-      {showingRuns && !selectedRun ? null : (
-        // 窄屏纵向堆叠时保留画布、节点控制和检查器的自然高度，避免 flex 压缩后内容重叠。
-        <div className="flex shrink-0 flex-col gap-3 lg:min-h-0 lg:flex-1 lg:shrink lg:flex-row">
-          <div className="flex min-h-80 min-w-0 shrink-0 flex-col gap-2 lg:flex-1 lg:shrink">
-            <div className="h-80 shrink-0 lg:h-auto lg:min-h-80 lg:flex-1 lg:shrink">
-              <GraphCanvas
-                definition={definition}
-                disabled={disabled || showingRuns}
-                selectedId={navigation?.regionId ? undefined : selectedNode?.id}
-                selectedRegionId={navigation?.regionId}
-                selectedAttemptId={navigation?.attemptId}
-                run={showingRuns && selectedRun?.version !== undefined ? selectedRun : undefined}
-                onSelectRegion={(regionId) =>
-                  select(workspaceKey, { regionId, attemptId: undefined })
-                }
-                onSelect={selectNode}
-                onChange={setDefinition}
-                attempts={
-                  showingRuns && selectedRun?.version !== undefined
-                    ? selectedRun.nodeAttempts
-                    : undefined
-                }
-                approvals={
-                  showingRuns && selectedRun?.version !== undefined
-                    ? selectedRun.approvalAttempts
-                    : undefined
-                }
-                tools={
-                  showingRuns && selectedRun?.version !== undefined
-                    ? selectedRun.toolAttempts
-                    : undefined
-                }
-              />
-            </div>
-            <GraphNodeNavigation
-              definition={definition}
-              selectedNodeId={selectedNode?.id}
-              regionId={navigation?.regionId}
-              onSelect={selectNode}
-              onSelectRegion={(regionId) =>
-                select(workspaceKey, { regionId, attemptId: undefined })
-              }
-            />
-            <p className="text-ui-sm text-foreground-subtlest">{t("layoutHelp")}</p>
-          </div>
-          <aside
-            className="w-full shrink-0 space-y-4 border-t border-border p-3 lg:min-h-0 lg:w-80 lg:overflow-auto lg:border-t-0 lg:border-l"
-            aria-label={t("inspector")}
-          >
-            {showingRuns && selectedRun ? (
-              <GraphRunPanel
-                selectedRun={selectedRun}
-                nodeId={selectedNode?.id}
-                selectedAttemptId={navigation?.attemptId}
-                regionSelected={Boolean(navigation?.regionId)}
-                onSelectAttempt={(attemptId) => select(workspaceKey, { attemptId })}
-                onOpenConversation={onOpenConversation}
-                graph={graph}
-                disabled={disabled}
-              />
-            ) : displayed.version !== undefined && editableNode ? (
-              <GraphNodeInspector
-                definition={displayed}
-                node={editableNode}
-                onChange={setDefinition}
-                disabled={disabled}
-                defaults={defaults}
-                workspacePath={workspacePath}
-                workspaceIdentity={workspaceIdentity}
-                recipes={graph.recipes}
-              />
-            ) : displayed.version === undefined ? (
-              <LegacyInspector
-                definition={displayed}
-                onChange={setDefinition}
-                disabled={disabled}
-              />
-            ) : null}
-          </aside>
-        </div>
+      {showingSetup ? (
+        <>
+          {navigation?.returnToWorkflow ? (
+            <Button
+              className="self-start"
+              variant="outline"
+              size="sm"
+              data-testid="graph-return-to-workflow"
+              onClick={() => select(workspaceKey, { mode: "workflows", returnToWorkflow: false })}
+            >
+              {u("returnToWorkflow")}
+            </Button>
+          ) : null}
+          <GraphProjectRecipes
+            graph={graph}
+            workspaceKey={workspaceKey}
+            workspacePath={workspacePath}
+            workspaceIdentity={workspaceIdentity}
+            disabled={disabled}
+            onRun={(runId) =>
+              select(workspaceKey, {
+                mode: "runs",
+                runId,
+                attemptId: undefined,
+                regionId: undefined,
+              })
+            }
+          />
+        </>
+      ) : null}
+      {showingRuns &&
+      selectedRun?.version !== undefined &&
+      !selectedRun.definition.nodes.some((node) => node.type === "tool") ? (
+        <p className="text-ui-sm text-foreground-subtle" data-testid="graph-run-verification">
+          {u("agentLed")}
+        </p>
+      ) : null}
+      {(!showingDesign && !showingRuns) || (showingRuns && !selectedRun) ? null : (
+        <GraphEditorSurface
+          definition={definition}
+          displayed={displayed}
+          showingRuns={showingRuns}
+          selectedRun={selectedRun}
+          selectedNodeId={selectedNode?.id}
+          regionId={navigation?.regionId}
+          attemptId={navigation?.attemptId}
+          defaults={defaults}
+          graph={graph}
+          disabled={disabled}
+          workspacePath={workspacePath}
+          workspaceIdentity={workspaceIdentity}
+          onSelectNode={selectNode}
+          onSelectRegion={(regionId) => select(workspaceKey, { regionId, attemptId: undefined })}
+          onSelectAttempt={(attemptId) => select(workspaceKey, { attemptId })}
+          onChange={setDefinition}
+          onOpenConversation={onOpenConversation}
+        />
       )}
     </div>
   );

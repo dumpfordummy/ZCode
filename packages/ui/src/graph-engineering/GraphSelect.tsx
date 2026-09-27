@@ -17,7 +17,7 @@ export function GraphSelect({
   label: string;
   value: string;
   onChange: (value: string) => void;
-  options: Array<{ value: string; label: string }>;
+  options: Array<{ value: string; label: string; disabled?: boolean }>;
   disabled?: boolean;
   testId?: string;
 }) {
@@ -30,7 +30,12 @@ export function GraphSelect({
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (
-            <SelectItem key={option.value} value={option.value} data-value={option.value}>
+            <SelectItem
+              key={option.value}
+              value={option.value}
+              disabled={option.disabled}
+              data-value={option.value}
+            >
               {option.label}
             </SelectItem>
           ))}

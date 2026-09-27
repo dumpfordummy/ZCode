@@ -8,6 +8,7 @@ import type { GraphSequentialDefinition } from "../contract.js";
 import { portableTemplateSchema } from "./workflow-schema.js";
 import { templateBindingsSchema } from "./workflow-provenance-schema.js";
 import { validateReadiness } from "./definition.js";
+import { applyWorkflowCheckGroups } from "./workflow-check-groups.js";
 
 function portableLiterals(value: unknown): void {
   if (typeof value === "string") {
@@ -176,6 +177,7 @@ export function instantiateTemplate(
       throw new Error("Required repair-region source paths are missing.");
     graph.routing.region.sourcePaths = [...bindings.sourcePaths];
   }
+  applyWorkflowCheckGroups(graph, bindings);
   graph.template = {
     id,
     name: template.name,

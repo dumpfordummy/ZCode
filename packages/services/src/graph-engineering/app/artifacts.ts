@@ -11,10 +11,50 @@ import { workspaceKey } from "../domain/definition.js";
 import { runFingerprint } from "./attempts.js";
 import { GraphState } from "./state.js";
 import { currentTaskAttempt, currentToolAttempt } from "../domain/routing.js";
+import { validateTrxReceipt } from "../domain/trx-receipt.js";
+import { verifyToolReport } from "../domain/tool-verification.js";
 
 export class GraphArtifacts {
   constructor(private readonly state: GraphState) {}
   async read(run: GraphSequentialRun, artifactId: string) {
+    const captured = await this.readCaptured(run, artifactId),
+      manifest = captured.artifact;
+    const tool = run.toolAttempts?.find((attempt) => attempt.attemptId === manifest.attemptId);
+    const selector = run.artifactBindings?.find(
+      (binding) => binding.artifactId === artifactId,
+    )?.selector;
+    if (
+      tool?.recipe.verifier.kind === "test" &&
+      tool.recipe.verifier.format === "dotnet-vstest-trx-v1" &&
+      manifest.validation === "valid" &&
+      ["test", "verification", "normalized-report", "normalization"].includes(selector ?? "")
+    ) {
+      if (!tool.normalizationReceiptId)
+        throw new Error("Trusted TRX assertions have no immutable normalization receipt.");
+      const retained = await this.readCaptured(run, tool.normalizationReceiptId);
+      if (retained.artifact.validation !== "valid" || retained.artifact.redacted)
+        throw new Error("TRX normalization receipt is incomplete.");
+      const receipt = validateTrxReceipt(parseBoundedGraphJson(retained.content), run, tool);
+      await this.readCaptured(run, receipt.preview.artifactId);
+      const normalized = await this.readCaptured(run, receipt.normalized.artifactId);
+      const checked = verifyToolReport(normalized.content, {
+        ...tool.recipe.verifier,
+        operationId: tool.operationId,
+        sourceDigest: tool.sourceDigest!,
+        buildDigest: tool.buildDigest!,
+      });
+      if (
+        !checked.provenanceValid ||
+        checked.outcome === "invalid" ||
+        (tool.verification?.observationValid &&
+          (checked.outcome !== tool.verification.outcome ||
+            runFingerprint(checked.tests) !== runFingerprint(tool.verification.tests)))
+      )
+        throw new Error("Trusted TRX normalization no longer establishes the retained assertions.");
+    }
+    return captured;
+  }
+  private async readCaptured(run: GraphSequentialRun, artifactId: string) {
     const store = this.state.options.artifacts;
     const manifest = run.artifacts?.find((a) => a.id === artifactId);
     if (

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button.js";
 import { Textarea } from "@/components/ui/textarea.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphApprovalEvidence } from "./GraphApprovalEvidence.js";
+import { useGraphRunText } from "./GraphRunText.js";
 import {
   graphApprovalActionState,
   graphApprovalCommand,
@@ -42,6 +43,7 @@ export function GraphApprovalInspector({
 }) {
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.approval.${id}` });
+  const u = useGraphRunText();
   const [comment, setComment] = useState("");
   const request = gate.request;
   const frozenNode = run.definition.nodes.find(
@@ -111,6 +113,9 @@ export function GraphApprovalInspector({
               {request.id} · v{request.version}
             </dd>
           </dl>
+          <p className="text-ui-sm text-foreground-subtle" data-testid="graph-approval-impact">
+            {u(successor?.type === "end" ? "approvalTerminal" : "approvalImpact")}
+          </p>
           <details className="text-ui-sm">
             <summary>{t("requestCorrelation")}</summary>
             <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-xs">

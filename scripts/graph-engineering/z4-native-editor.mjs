@@ -29,10 +29,16 @@ export async function configureStructuredOutput(window) {
   await window.getByTestId("graph-apply-schema").click();
 }
 async function saveRecipes(window, isolation, recipes) {
-  const details = window.getByTestId("graph-project-recipes");
-  if ((await details.getAttribute("open")) === null)
-    await details.locator(":scope > summary").click();
+  await window.getByTestId("graph-view-setup").click();
+  await window.getByTestId("graph-project-recipes").waitFor();
   await window.getByTestId("graph-load-recipes").click();
+  await window.locator('[data-testid="graph-recipe-read-state"][data-state="ready"]').waitFor();
+  for (const details of await window
+    .getByTestId("graph-recipes-json")
+    .locator("xpath=ancestor::details")
+    .all())
+    if ((await details.getAttribute("open")) === null)
+      await details.locator(":scope > summary").click();
   await window.getByTestId("graph-recipes-json").fill(JSON.stringify(recipes, null, 2));
   await window.getByTestId("graph-save-recipes").click();
   await window.getByTestId("graph-recipes-saved").waitFor();
@@ -40,7 +46,7 @@ async function saveRecipes(window, isolation, recipes) {
     await readFile(path.join(isolation.workspace, ".zcode/config.json"), "utf8"),
   );
   assert.deepEqual(saved.graphRecipes, recipes);
-  await details.locator(":scope > summary").click();
+  await window.getByTestId("graph-view-design").click();
 }
 async function approval(window, name, source, selector) {
   const id = await addNode(window, "approval");
@@ -61,6 +67,7 @@ async function approval(window, name, source, selector) {
 export async function createNativeToolGraph(window, isolation, summary, scenario) {
   await window.getByTestId("graph-engineering-open").click();
   await window.getByTestId("graph-upgrade").click();
+  await window.getByTestId("graph-editor-advanced").click();
   await window.getByTestId("graph-name").fill(`Z4 isolated C# ${scenario}`);
   const build = await addNode(window, "tool");
   assert.equal(await window.getByTestId("graph-tool-node-id").inputValue(), build);
@@ -89,7 +96,15 @@ export async function createNativeToolGraph(window, isolation, summary, scenario
       gates.push(await approval(window, "Review code", `artifact:${agent}`, "structured"));
       gates.push(await approval(window, "Review evidence", `artifact:${test}`, "test"));
     }
-  } else await window.getByTestId("graph-delete-node").click();
+  } else {
+    await window.getByTestId("graph-delete-node").click();
+    await window.getByTestId("graph-delete-impact").waitFor();
+    await window.getByTestId("graph-delete-cancel").click();
+    assert.equal(await window.getByTestId("graph-select-node-task").count(), 1);
+    await window.getByTestId("graph-delete-node").click();
+    await window.getByTestId("graph-delete-confirm").click();
+    await window.getByTestId("graph-delete-impact").waitFor({ state: "hidden" });
+  }
   let consumer;
   if (scenario === "tool-agent") {
     consumer = await addNode(window, "task");
@@ -115,6 +130,7 @@ export async function createNativeToolGraph(window, isolation, summary, scenario
 export async function createOutputGraph(window, summary, pointer = "/summary") {
   await window.getByTestId("graph-engineering-open").click();
   await window.getByTestId("graph-upgrade").click();
+  await window.getByTestId("graph-editor-advanced").click();
   await window.getByTestId("graph-name").fill("Z4 exact structured artifact handoff");
   await selectNode(window, "task");
   await window.getByTestId("graph-node-name").fill("Structured review");

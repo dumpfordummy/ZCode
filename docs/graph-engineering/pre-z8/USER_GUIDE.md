@@ -1,0 +1,102 @@
+# Pre-Z8 Graph Engineering guide
+
+This guide describes implemented pre-Z8 controls in this working tree. See `EXECUTION_PLAN.md` and retained test receipts for actual verification status. The supported target is supervised local Windows sequential workflows; the separate parallel editor is experimental. Existing native provider, session, permission and question controls remain in use.
+
+U1–U3 have passed their recorded automated native checkpoints. The U4 run controls described below are implemented in the working tree; their combined build, native acceptance and layout checks are pending at this guide checkpoint. Pure tests do not establish native or human-pilot acceptance. U5–U6 improvements are not presented here as available controls or completed evidence. User-operated and live human-pilot checks remain NOT RUN.
+
+## Start an agent-assisted task
+
+1. Open a local workspace in native Chat and select the intended model/settings. Open Graph Engineering. The header shows the workspace where operations will happen.
+2. Open **Workflows** and choose **Agent-assisted task**. Enter a concrete request. Optional references are under **Documents, native guidance and skills**. The workflow preview shows Analyze, Implement, Review and final approval.
+3. Choose **Create workflow**. This saves a version-pinned definition; it does not submit tasks. If the design has unsaved changes, explicitly choose Save and replace, Discard and replace, or Cancel. A failed save or Cancel keeps the original draft.
+4. In **Design**, inspect the steps, request and native settings. Start the run only after reviewing the captured preflight and its unknowns. Creating a workflow does not approve later native tools.
+5. In **Runs**, open the exact native conversation to answer native questions or permissions. The final Graph gate is a separate decision over captured evidence and requires a comment.
+6. Inspect the source changes and agent findings. This path is **agent-led review; configured test evidence is not included**. Completion or human approval is not a machine-tested result or permission to commit, merge or publish.
+
+## Project checks and existing verified templates
+
+Verified engineering templates retain required Build/Test bindings. If checks are missing, use **Project setup** and return to the workflow; the typed request is retained. Recipe loading, no configured checks, failed reads and incompatible checks are separate states with corrective actions. Retry a failed read explicitly.
+
+Project setup offers Guided fields and an Advanced recipe JSON view of the same draft. Arguments are an ordered list, including empty or multiline arguments. Unknown/unsupported declarations remain intact in Advanced; toggling views never simplifies them. **Check configuration** validates the current draft; **Save project checks** persists it without execution. A conflicting save requires reloading/reconciling the external configuration and does not replace your draft. Command-only entries do not satisfy verified Test slots. Choose the separately named agent-assisted workflow when that is the intended policy; the app never converts a verified workflow automatically.
+
+## Configure and calibrate .NET checks
+
+1. Choose **Scan project** to read bounded local metadata. Inspect every candidate and its runner, target frameworks, source coverage and unresolved imports. Scan never evaluates MSBuild, restores packages or executes project code. Cancellation stops only that read job. A name such as `Tests` or `IsTestProject` alone does not establish VSTest compatibility.
+2. Open the .NET preset, select explicit projects/frameworks and review the complete source/output manifest. When discovery cannot establish the project, manual reviewed fields remain available; this does not change the discovery result into verified support. Add up to seven explicit Test scopes after one Build. Each scope needs its exact test assembly and acceptance counts/required identities. The preset rejects identity collisions instead of overwriting existing checks.
+3. Inspect the generated Build/Test arguments before applying them to the draft. The preset uses Rebuild with restore disabled and Test with both build and restore disabled. Existing restored SDK/package assets are required. Confirm the source/output manifest, apply, validate and save. No step here starts a process.
+4. **Check tool availability** reads existing native environment metadata. Availability does not prove the SDK version, private-home policy, package/feed readiness or network behavior. If the native environment is unavailable, open an empty task in native Chat with a configured provider/model to initialize this workspace, then try again; no prompt submission is required. The current native Chat prewarm does not initialize a profile with no configured model. The separately selected SDK probe runs exactly the reviewed `dotnet --version` through the ordinary native permission path and makes no model request.
+5. In **Run checks now**, choose checks in execution order and map each Test to an earlier selected Build. A calibration accepts at most eight Tool checks. Review exact executable/arguments/cwd, source/output scopes, configuration and remaining unknowns; acknowledge them explicitly and start. New source/configuration/environment changes invalidate the old review. Answer the actual Tool permission in its existing conversation.
+6. Inspect the appended calibration run. Calibration preserves the current saved workflow and its unsaved draft. A passing report requires fresh native execution, the same source and captured Build, adequate genuine assertions and a complete normalization receipt. A valid profile can still produce failing assertions; it need not pass before Save is allowed.
+
+The initial supported report profile is bounded VSTest TRX with one explicit project/framework per invocation. Every invocation gets a unique report path. Multiple selected Tests stay separate and can bind to one verified template through ordered Test groups and an explicit Build slot. The pure parser accepts at most 256 KiB and 1,000 test results; excess is rejected, never truncated into success. Zero results, all skipped, missing required tests, stale outputs, crashes and incomplete evidence do not pass. Only the fixture-proven VSTest exit codes 0 (pass) and 1 (failed assertions) can establish assertion authority.
+
+Original reports often contain private absolute paths. Their visible previews can therefore be redacted/incomplete. The retained receipt separately identifies original bytes, the safe preview and normalized evidence; those are different digests. Missing/corrupt proof is not recreated from preview text. Current tested compatibility is the pinned package-free SDK 8.0.425 / VSTest 17.11.1 synthetic fixture. MTP, private/RTP harnesses, shell wrappers, arbitrary MSBuild extensions and company projects are not established by this evidence. Missing feed credentials or dependencies require the project's separately authorized setup; Graph does not copy credentials or install tools.
+
+## Edit a workflow in Guided or Advanced
+
+Open **Design** and choose a step on the canvas or in the keyboard-accessible step list. **Guided** is the initial view; **Advanced** exposes the existing instruction mode, aliases, bindings, schema JSON and detailed routing declarations. Both views edit the same graph draft. Switching between them does not save, execute or rewrite the definition.
+
+For a supported Agent Task, Guided shows editable instruction text separated by context chips. Editing one text area preserves the other text, token order and bindings. Open **Context sources** to select the original request, an eligible earlier step's final text or structured output, a configured Test's verification result, or declared repair feedback. The choices show their output kind, run/iteration scope and why an unavailable source cannot be selected. These selections create actual graph input bindings; a step being nearby on the canvas does not make it a dependency. A source must be available on the relevant execution paths, including the repair path where applicable.
+
+Selecting an already selected source is idempotent. **Remove** on a supported chip removes that binding and its corresponding token; it does not delete the producer step or reconnect the graph. Instructions containing repeated, malformed or unmatched tokens, or unused bindings that cannot be represented by the Guided view, remain read-only with a specific reason and a nearby **Advanced** action. Literal instructions containing double braces are preserved literally; adding a binding will not silently reinterpret them. Use Advanced to make that conversion explicitly if it is intended.
+
+Structured output schemas are shown intact in Guided and edited through **Advanced**. Schema and condition JSON text is retained by workspace and stable node ID when you change nodes, switch views or navigate away. Invalid or incomplete text is an unapplied editor buffer, not the saved graph or execution authority. Correct it and use **Apply schema** or **Apply condition** before saving the intended definition. If canonical content changes while a dirty buffer is retained, review the visible conflict instead of assuming the buffer was rebased. Guided marks a section with pending Advanced text so it cannot silently replace that text.
+
+## Preview a draft and inspect an actual run input
+
+On an Agent Task, expand **Draft input preview — future results are unresolved**. It shows the current request where it can be resolved and clearly marked placeholders for future step, artifact and repair results. Substitution is one pass: braces inside the request or an inserted result are data, not a second set of instructions to interpolate. **Technical details** shows the tagged segments, input bindings, selected references and unresolved issues. This preview does not create attempts or evidence.
+
+After execution, choose the exact run, step and iteration/attempt in **Runs**. Its resolved instructions and captured bindings are the input actually recorded for that attempt. Later conversation messages and changes to the current Design do not replace that captured prompt. A future-output placeholder in the draft is not a failed check or proof of what a native task will produce.
+
+## Select documents, native guidance and skills
+
+Reference controls edit roles already declared by the selected template or its pinned instance. The controls show the affected node IDs. An unrelated custom graph is not given a fabricated template reference role.
+
+1. Expand **Documents, native guidance and skills**. **Read available native guidance and skills** reads metadata from an existing native environment. It does not start a cold runtime, submit a model request, install a skill or open a new MCP connection. A missing catalog is shown as **Unknown** with the available explanation; opening the catalog alone does not change any binding.
+2. For a document or instruction role, enter a filename in **Find workspace file**, choose **Search**, then select a result. On a platform that can return a local file path, **Choose file…** opens the native picker. The service validates the explicit selection within this workspace and stores its relative path. Missing, outside-workspace, linked, empty, oversized or invalid-text files are rejected. Cancellation, a failed validation, a newer selection or a changed workspace/draft leaves the previous binding intact.
+3. For an instruction role, available native guidance can also be selected from the catalog. The returned status distinguishes **Already delivered as native instructions** from **Explicit read reference**. Matching uses the validated content and native metadata, not merely a filename. Valid file selection can still show metadata Unknown warnings; these do not turn it into verified native guidance.
+4. For a skill role, choose an available enabled skill with a verifiable catalog digest. Names, stable IDs and origin are visible; disabled, missing and unverifiable choices remain visible without being selected automatically. Technical details retain the catalog metadata. The saved stable ID and the native Skill tool name have different purposes, and preflight validates the selection again.
+
+Explicitly changing a Guided reference opts that binding set into native-aware delivery. Already loaded native instructions are reused rather than requested again, other documents remain explicit native Read references, and skills continue through the existing native Skill tool. The frozen preflight/run provenance records the delivery marker when this policy applies. Existing references are not converted merely by opening the editor or catalog. Each role also has an **Advanced** disclosure for its existing raw path or skill-ID field; raw editing does not perform the Guided selection validation, and preflight remains authoritative.
+
+## Change connections, delete a step and choose End output
+
+Use the canvas connection or the **Connection to insert into** selector to choose one exact edge. **Insert Task on selected connection** splits that edge and retains its named branch exit; other branches and the selected End output remain unchanged. Existing successor selectors provide a keyboard alternative to reconnecting canvas handles. Node/edge limits are checked, and an outdated or over-limit insertion is rejected with an explanation.
+
+**Delete step** opens **Review deletion**. It lists affected connections, task/condition inputs, approval evidence, verification requirements, End output, final gate or repair references, template roles and Test-to-Build mappings. **Cancel** changes nothing. **Delete step and connections** removes the step and its incident edges; semantic references remain visible and unresolved for explicit correction. The editor does not silently reassign evidence, pick a replacement End output or repair the route. Start and End cannot be deleted, and the keyboard Delete key inside a text field cannot delete a graph node.
+
+Select End and choose its output explicitly. Review and resolve missing dependencies before Run; the existing Host readiness check remains the execution gate. The editor has no undo control that reverses native file changes or commands.
+
+## Configure existing condition and repair policies
+
+For a supported scalar Condition in Guided, choose its existing matching exit, an existing input and declared scalar field, comparison, typed JSON scalar value where required, and Otherwise exit. **Apply** validates the declaration through the existing graph rules. It preserves other branches and verification requirements. Unsupported predicate trees stay read-only with an Advanced action. Missing required data, type errors and invalid evidence stop for human attention; they do not silently take Otherwise.
+
+For the existing verified repair workflow, expand **Bounded repair policy**. The current defaults are one initial pass plus **two additional repairs**, **30 minutes** and **24 total Task / Tool admissions**. Guided accepts 0–5 additional repairs, a positive deadline up to 1,440 minutes and 1–64 total Task / Tool admissions. The deadline and admission cap are independent limits; allowing five repairs does not promise that all five fit within the other budgets. **Stop when there is no progress** retains the existing no-progress stop behavior.
+
+Review the listed required Test steps and final gate before **Apply**. Expanded multiple-Test dependencies remain explicit. Custom or invalid repair declarations remain Advanced-only, with an explanation. Unknown process state, missing/invalid evidence and permission waits do not become an automatic failure or repair trigger. These controls configure the existing runtime policy; they do not add another scheduler or automatic retry path.
+
+## Drafts, versions and history
+
+Workflows, Design, Runs and Project setup are destinations within Graph Engineering. Unsaved drafts are retained in the current Renderer by workspace identity and template version, including navigation to setup and back. They are not an execution queue. If the saved definition changes elsewhere, resolve the visible revision conflict before replacing it.
+
+New workflow selections default to a compatible non-archived version. Existing instances and historical runs stay pinned. Duplicate, archive, version hashes and advanced transfer controls are in library management/details. The Runs view inspects a captured definition, not current editor settings.
+
+## Understand a captured run and its next action
+
+Select a run in **Runs**. The selected-run card shows the captured request, result or its absence, execution workspace and current step. Expand the request or result to read its complete text. The three separately labelled fields answer different questions:
+
+- **Execution** reports whether the captured route is running, waiting, stopped or completed. Execution completed does not certify the edits or tests.
+- **Test evidence** distinguishes no configured Tests, checks not run, agent-reported output, command/Build results only, accepted passing Test evidence, accepted failing Test evidence, and incomplete/invalid evidence. Expand **Individual checks** to see each required Test, including a failing check alongside a different invalid check. Every required captured Test in the relevant current iteration must have accepted passing evidence; a result from a previous repair cannot substitute.
+- **Human decision** shows whether a decision is required, pending, approved or rejected. Approval is tied to the exact saved request, version and digest. It remains separate from native tool permission and Test evidence.
+
+**Next action for this run** opens the existing native conversation for a permission or question. Opening it submits no new input. Gate, check, step, checkpoint and recovery actions select the existing controls and the exact retained attempt where available. Review the stated successor before approving a gate. Approval can admit that successor under the captured request; a final End gate records consent without publishing or certifying the work.
+
+**Cancel** requests a stop for the run's owned native work. **Stop requested — awaiting confirmation** remains visible while authoritative stop proof is unavailable, including an unresolved Unknown/Interrupted outcome after a stop request. Already-written files remain, and unrelated conversations continue. Unknown work is never automatically replayed. Inspect the native conversation and the existing recovery evidence; audited release is available only under the existing inactivity rules.
+
+Expand **Captured file changes** to see the paths, capture scope and completeness from saved approval source snapshots. Its review action opens that exact captured gate evidence. No new live diff or source-freshness check runs when history opens. **Technical identities and captured facts** reveals the full read-only summary projection; the selected step inspector retains actual instructions, bindings, operation details and terminal proof.
+
+Artifact content and manifest reads show their own loading or error state. Selecting another artifact clears the previously displayed content while the new read is pending; an older response cannot replace the current selection. Missing or corrupt retained evidence produces a visible read failure. This does not rewrite historical acceptance or establish the current workspace's validity. Retry the specific read explicitly after correcting the underlying issue.
+
+History displays 25 run controls per page and the total count. **Previous runs** and **Next runs** change only the visible page; the selected run remains selected. **Show selected run in history** returns to its page. All retained canonical history remains available, and buttons support ordinary keyboard focus and activation.
+
+Inspect recovery before deciding what to do. Unknown execution is not replayed automatically. Stop requested and confirmed terminal state differ; native ownership/inactivity rules remain authoritative. Parallel transfer is unavailable and its editor is experimental; sequential export cannot preserve a parallel plan.

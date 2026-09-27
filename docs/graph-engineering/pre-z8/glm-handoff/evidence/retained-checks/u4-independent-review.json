@@ -1,0 +1,77 @@
+{
+  "layer": "independent read-only U4 source review plus pure synthetic reproduction; no new native claim",
+  "reviewer": "/root/u0_dotnet_audit",
+  "inspected": [
+    "packages/ui/src/hooks/useGraphEvidence.ts",
+    "packages/ui/src/hooks/useGraphEngineering.ts",
+    "packages/ui/src/hooks/useGraphInspectionRead.ts",
+    "packages/ui/src/graph-engineering/graphEvidenceRead.ts",
+    "packages/ui/src/graph-engineering/graphInspectionRead.ts",
+    "packages/ui/src/graph-engineering/GraphEngineeringPanel.tsx",
+    "packages/ui/src/graph-engineering/GraphEditor.tsx",
+    "packages/ui/src/graph-engineering/GraphEditorSurface.tsx",
+    "packages/ui/src/graph-engineering/GraphRunOverview.tsx",
+    "packages/ui/src/graph-engineering/GraphRunActions.tsx",
+    "packages/ui/src/graph-engineering/GraphRunCapturedDetails.tsx",
+    "packages/ui/src/graph-engineering/GraphRunHistory.tsx",
+    "packages/ui/src/graph-engineering/graphRunHistoryView.ts",
+    "packages/ui/src/graph-engineering/GraphRunPanel.tsx",
+    "packages/ui/src/graph-engineering/GraphRunInspector.tsx",
+    "packages/ui/src/graph-engineering/GraphToolInspector.tsx",
+    "packages/ui/src/graph-engineering/GraphArtifactInspector.tsx",
+    "packages/ui/src/graph-engineering/GraphApprovalInspector.tsx",
+    "packages/ui/src/graph-engineering/GraphApprovalEvidence.tsx",
+    "packages/ui/src/graph-engineering/GraphRoutingInspector.tsx",
+    "packages/ui/src/graph-engineering/GraphRecovery.tsx",
+    "packages/ui/src/graph-engineering/GraphRunDetails.tsx",
+    "packages/ui/src/graph-engineering/graphApprovalView.ts",
+    "packages/ui/src/graph-engineering/graphRoutingView.ts",
+    "packages/ui/src/i18n/locales/graphRunClarity.ts",
+    "packages/services/src/graph-engineering/app/approvals.ts",
+    "packages/services/src/graph-engineering/app/state.ts",
+    "packages/services/src/graph-engineering/app/routing.ts",
+    "packages/services/src/graph-engineering/app/routing-checks.ts",
+    "packages/services/src/graph-engineering/domain/approvals.ts",
+    "packages/services/src/graph-engineering/domain/routing.ts"
+  ],
+  "findings": [
+    {
+      "id": "U4-R1",
+      "file": "GraphRunOverview.tsx:48-53",
+      "fact": "pending Build has configuredTestCount=0 but evidence.not-run claims required Tests",
+      "status": "resolved in source; independent rereview of helper/component wiring and regression cases complete; UI owner reports 115 PASS"
+    },
+    {
+      "id": "U4-R2",
+      "file": "GraphArtifactInspector.tsx:39",
+      "fact": "missing current v5 attempt falls back to every older node artifact",
+      "status": "resolved in source; independent rereview of helper/component wiring and regression cases complete; UI owner reports 115 PASS"
+    },
+    {
+      "id": "U4-R3",
+      "file": "GraphRunActions.tsx:47-49,87-90",
+      "fact": "genuine failed assertions receive invalid-configuration/new-request guidance",
+      "status": "resolved in source; independent rereview of helper/component wiring and regression cases complete; UI owner reports 115 PASS"
+    }
+  ],
+  "reproduction": ".tmp/pre-z8-current/u4-review-label-history.log",
+  "noAdditionalActionableFinding": [
+    "service and target stale-read suppression",
+    "same-view request sequence",
+    "independent artifact and manifest reads",
+    "historical Tool inspection uses retained exact attempt",
+    "summary navigation preserves exact run/node/attempt",
+    "Unknown Stop requested remains until proof",
+    "approval and recovery use existing service admission"
+  ],
+  "scopeLimits": [
+    "source was active during review",
+    "fix verification remains with UI owner and coordinator",
+    "no new mounted hook or native execution in this review",
+    "no emitting builds or product edits"
+  ],
+  "followupInspected": [
+    "packages/ui/src/graph-engineering/graphRunPresentation.ts",
+    "packages/ui/test/graphRunPresentation.test.ts"
+  ]
+}

@@ -1,6 +1,7 @@
 import type { GraphNodeBase, GraphWorkspaceTarget } from "./approval-types.js";
 import type { GraphInputBinding, GraphNativeSettings } from "./base-types.js";
 import type { GraphJsonValue } from "./artifact-types.js";
+import type { GraphChecksSelection } from "./checks-types.js";
 
 export type GraphPredicate =
   | {
@@ -107,4 +108,13 @@ export interface GraphRunContinueCommand {
   requestId: string;
   checkpointId: string;
   checkpointDigest: string;
+}
+export interface GraphRunChecksCommand extends Omit<GraphRunStartCommand, "action" | "preflight"> {
+  action: "checks";
+  checks: {
+    selection: GraphChecksSelection;
+    expectedDigest: string;
+    digest: string;
+    acknowledgedUnknowns: boolean;
+  };
 }

@@ -2,15 +2,12 @@ import type {
   GraphDefinition,
   GraphSequentialDefinition,
   GraphNativeSettings,
-  IGraphEngineeringService,
+  GraphRunStartCommand,
   GraphRunProvenance,
 } from "@zcode/services";
 import { graphDefinitionContent } from "./graphEngineeringView.js";
 
-export type GraphSubmission = Exclude<
-  Parameters<IGraphEngineeringService["run"]>[0],
-  { action: "continue" }
->;
+export type GraphSubmission = GraphRunStartCommand;
 export interface GraphRunConfirmationSnapshot {
   definition: GraphSequentialDefinition;
   settings: GraphNativeSettings;

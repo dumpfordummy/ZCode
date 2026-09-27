@@ -1,4 +1,5 @@
 import type { GraphPortableTemplate } from "../workflow-contract.js";
+import { agentAssistedTemplate } from "./workflow-agent-assisted.js";
 import {
   request,
   from,
@@ -227,4 +228,5 @@ export const builtinTemplates: Array<{ id: string; template: GraphPortableTempla
   { id: "generic", template: generic },
   { id: "bugfix", template: bugfix },
   { id: "slot", template: slot },
+  { id: "agent-assisted", template: agentAssistedTemplate },
 ];

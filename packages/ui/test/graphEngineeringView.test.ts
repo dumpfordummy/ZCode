@@ -63,6 +63,20 @@ test("conversation navigation retains the frozen attempt target and native sessi
   assert.equal(graphConversationTarget(null), null);
 });
 
+test("an older view cannot roll back a just-acknowledged saved definition", () => {
+  const previous = {
+    revision: 3,
+    name: "Old",
+    taskName: "Task",
+    instructions: "old",
+    nodes: [],
+    edges: [],
+  };
+  const accepted = { ...previous, revision: 4, name: "Created workflow" };
+  const current = { base: accepted, draft: accepted };
+  assert.equal(reconcileGraphDraft(current, previous), current);
+});
+
 test("schema-normalized property order acknowledges a sequential save without a false conflict", () => {
   const base = {
     revision: 0,

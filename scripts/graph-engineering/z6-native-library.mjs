@@ -22,11 +22,17 @@ const libraryPath = path.join(
 );
 const library = async () => JSON.parse(await readFile(libraryPath, "utf8"));
 let window, failure;
+async function management() {
+  const panel = window.getByTestId("graph-library-management");
+  if ((await panel.getAttribute("open")) === null) await panel.locator(":scope > summary").click();
+}
 async function choose(id, version) {
   await selectValue(window, "graph-library-entry", id);
+  await management();
   await selectValue(window, "graph-library-version", String(version));
 }
 async function transfer() {
+  await management();
   const panel = window.getByTestId("graph-template-transfer");
   if ((await panel.getAttribute("open")) === null) await panel.locator(":scope > summary").click();
 }
@@ -167,16 +173,30 @@ try {
   await window.getByTestId("graph-library-open").click();
   await choose(saved.id, 2);
   await bind();
-  assert.equal(await window.getByTestId("graph-library-instantiate").isDisabled(), true);
-  await screenshot("z6-dirty-draft-explicit-replacement");
-  await window.getByTestId("graph-template-replace-draft").setChecked(true);
+  assert.equal(await window.getByTestId("graph-library-instantiate").isEnabled(), true);
   await window.getByTestId("graph-library-instantiate").click();
+  await window.getByTestId("graph-replace-dialog").waitFor();
+  assert.deepEqual(await readGraphRecord(isolation), pinned);
+  await screenshot("z6-dirty-draft-explicit-replacement");
+  await window.getByTestId("graph-replace-cancel").click();
+  await closeLibrary();
+  assert.equal(await window.getByTestId("graph-name").inputValue(), "UNSAVED_DRAFT_SENTINEL");
+  assert.deepEqual(await readGraphRecord(isolation), pinned);
+  await window.getByTestId("graph-library-open").click();
+  await choose(saved.id, 2);
+  assert.equal(
+    await window.getByTestId("graph-template-parameter-request").inputValue(),
+    "PRIVATE_RUN_DATA_123: verify independent synthetic fixture only.",
+  );
+  await window.getByTestId("graph-library-instantiate").click();
+  await window.getByTestId("graph-replace-dialog").waitFor();
+  await window.getByTestId("graph-replace-discard").click();
   await window.getByTestId("graph-library-dialog").waitFor({ state: "hidden" });
   const second = await readGraphRecord(isolation);
   assert.equal(second.definition.template.version, 2);
   assert.equal(second.definition.template.digest, saved.versions[1].digest);
   summary.assertions.push(
-    "Malformed, unsupported, secret and private-path packages stay dry errors; current saved and unsaved drafts are preserved. A selected newer version replaces the draft only after explicit acknowledgment.",
+    "Malformed, unsupported, secret and private-path packages stay dry errors; current saved and unsaved drafts are preserved. Cancel preserves the draft and typed task; only explicit Discard replaces it with the selected immutable version.",
   );
 
   await window.getByTestId("graph-library-open").click();
@@ -238,6 +258,12 @@ try {
   summary.assertions.push(
     "An unset required boolean is visibly indeterminate/Not selected; explicit include and exclude choices become checked and unchecked without changing other unset choices.",
   );
+  for (const details of await window
+    .getByTestId("graph-template-reference-gameDoc")
+    .locator("xpath=ancestor::details")
+    .all())
+    if ((await details.getAttribute("open")) === null)
+      await details.locator(":scope > summary").click();
   await window.getByTestId("graph-template-reference-gameDoc").scrollIntoViewIfNeeded();
   await screenshot("z6-chinese-light-narrow-bindings");
   summary.viewport = await window.evaluate(() => ({

@@ -7,6 +7,7 @@ export interface GraphToolNode extends GraphNodeBase {
   type: "tool";
   name: string;
   recipeId: string;
+  verification?: { kind: "build" } | { kind: "test"; buildNodeId: string };
 }
 export interface GraphCommandResult {
   status: "completed" | "failed" | "timed_out" | "cancelled" | "spawn_error";
@@ -67,6 +68,8 @@ export interface GraphToolAttempt {
   outputDigest?: string;
   resolvedArgs?: string[];
   beforeReportDigest?: string;
+  resolvedReportPath?: string;
+  normalizationReceiptId?: string;
   outputsBefore?: GraphFileObservation[];
   operation?: GraphToolOperation;
   verification?: GraphToolVerification;

@@ -1,11 +1,16 @@
 import { create } from "zustand";
 
+export type GraphViewMode = "workflows" | "design" | "runs" | "setup";
+
 interface GraphViewSelection {
-  mode: "design" | "runs";
+  mode: GraphViewMode;
+  returnToWorkflow?: boolean;
   runId?: string;
   nodeId?: string;
   attemptId?: string;
   regionId?: string;
+  editorMode?: "guided" | "advanced";
+  edgeKey?: string;
 }
 
 /** Renderer-local navigation only. Accepted graphs, attempts and settings remain Host facts. */

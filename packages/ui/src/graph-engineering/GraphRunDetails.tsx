@@ -2,16 +2,13 @@ import type { GraphLegacyRun } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { graphConversationTarget } from "./graphEngineeringView.js";
+import { useGraphRunText } from "./GraphRunText.js";
 
 export function GraphRunDetails({
   run,
-  disabled,
-  onCancel,
   onOpenConversation,
 }: {
   run: GraphLegacyRun;
-  disabled: boolean;
-  onCancel: (runId: string) => void;
   onOpenConversation: (
     workspacePath: string,
     sessionId: string,
@@ -20,9 +17,7 @@ export function GraphRunDetails({
 }) {
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
-  const cancellable = ["Starting", "Running", "WaitingForPermission", "WaitingForUser"].includes(
-    run.status,
-  );
+  const u = useGraphRunText();
   const conversation = graphConversationTarget({
     workspacePath: run.target.workspacePath,
     workspaceIdentity: run.target.workspaceIdentity,
@@ -39,7 +34,7 @@ export function GraphRunDetails({
         <div className="min-w-0">
           <h3 className="text-ui-base font-medium">{run.definition.taskName}</h3>
           <p role="status" className="text-ui-sm text-foreground-subtle">
-            {t(`status.${run.status}`)}
+            {u(`execution.${run.status}`)}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -59,23 +54,10 @@ export function GraphRunDetails({
               {t("openConversation")}
             </Button>
           ) : null}
-          {cancellable ? (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={disabled}
-              onClick={() => onCancel(run.id)}
-            >
-              {t("cancel")}
-            </Button>
-          ) : null}
         </div>
       </div>
       {run.message && run.status !== "Completed" ? (
         <p className="break-words text-ui-sm text-foreground-subtle">{run.message}</p>
-      ) : null}
-      {run.status === "Completed" ? (
-        <p className="text-ui-sm text-foreground-subtle">{t("completionMeaning")}</p>
       ) : null}
       {["WaitingForPermission", "WaitingForUser"].includes(run.status) ? (
         <p className="text-ui-sm text-foreground-subtle">{t("waitingHelp")}</p>

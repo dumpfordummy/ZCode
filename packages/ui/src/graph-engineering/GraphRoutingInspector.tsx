@@ -20,6 +20,7 @@ export function GraphRoutingInspector({
   const checkpoint = routing.checkpoints.find((item) => item.resumeRequired && !item.consumedAt);
   return (
     <section
+      tabIndex={-1}
       className="space-y-3 text-ui-sm"
       data-testid="graph-region-inspector"
       data-current-iteration-id={routing.currentIterationId}

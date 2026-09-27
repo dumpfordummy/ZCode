@@ -11,6 +11,10 @@ import { runFingerprint } from "./attempts.js";
 import type { GraphOptions } from "./state.js";
 import { appendIteration, frozenRoutingConfiguration } from "./routing-plan.js";
 import { routingTopology } from "../domain/routing-topology.js";
+import { noProjectRecipes, usesProjectRecipes } from "../domain/recipe-dependency.js";
+import { effectiveGraphRecipe } from "../domain/effective-recipe.js";
+import { graphRecipeCompatibility } from "../domain/recipe-compatibility.js";
+import type { GraphRecipe } from "../artifact-types.js";
 
 interface RunPlanInput {
   definition: GraphDefinition;
@@ -19,12 +23,13 @@ interface RunPlanInput {
   fingerprint: string;
   defaults: GraphNativeSettings;
   path: string[];
+  capturedRecipes?: { recipes: GraphRecipe[]; digest: string };
 }
 
 /** Build the immutable admission plan; GraphState remains the only persistence owner. */
 export async function createRunPlan(
   options: GraphOptions,
-  { definition, target, requestId, fingerprint, defaults, path }: RunPlanInput,
+  { definition, target, requestId, fingerprint, defaults, path, capturedRecipes }: RunPlanInput,
 ): Promise<GraphRun> {
   let run: GraphRun;
   const now = options.now();
@@ -93,15 +98,22 @@ export async function createRunPlan(
     } satisfies GraphSequentialRun;
     if (definition.version >= 4) {
       const recipes = options.recipes;
-      if (!recipes || !options.tools || !options.artifacts)
+      const recipeDependent = usesProjectRecipes(definition);
+      if ((recipeDependent && (!recipes || !options.tools)) || !options.artifacts)
         throw new Error("Native Tool/artifact services are unavailable.");
-      const configured = await recipes.read(target);
+      // Agent-only 路径没有配方依赖；无关的坏配置不应阻止原生任务或在后续节点制造漂移。
+      const configured = recipeDependent
+        ? (capturedRecipes ?? (await recipes!.read(target)))
+        : { recipes: [], digest: options.evidence!.digest(noProjectRecipes) };
       run.toolAttempts = path.flatMap((nodeId) => {
         const node = definition.nodes.find((n) => n.id === nodeId)!;
         if (node.type !== "tool") return [];
-        const recipe = configured.recipes.find((r) => r.id === node.recipeId);
-        if (!recipe)
+        const savedRecipe = configured.recipes.find((r) => r.id === node.recipeId);
+        if (!savedRecipe)
           throw new Error(`Tool ${node.name}: configured recipe ${node.recipeId} is missing.`);
+        const compatibility = graphRecipeCompatibility(definition, node.id, savedRecipe);
+        if (!compatibility.compatible) throw new Error(compatibility.issues.join("\n"));
+        const recipe = effectiveGraphRecipe(definition, node.id, savedRecipe);
         if (recipe.verifier.kind === "test") {
           const buildId = recipe.verifier.buildNodeId;
           const predecessor = definition.nodes.find((n) => n.id === buildId);
@@ -168,7 +180,7 @@ export async function createRunPlan(
         };
         const iteration = appendIteration(run, options);
         if (region)
-          iteration.sourceDigest = (await recipes.fingerprint(target, region.sourcePaths)).digest;
+          iteration.sourceDigest = (await recipes!.fingerprint(target, region.sourcePaths)).digest;
         run.routing.configurationDigest = options.evidence!.digest(
           runFingerprint(frozenRoutingConfiguration(run)),
         );

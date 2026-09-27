@@ -44,3 +44,39 @@ export type GraphRunStatus =
   | "Interrupted"
   | "Unknown";
 export type GraphDispatchPhase = "planned" | "creating" | "created" | "sending" | "accepted";
+export type GraphInactivityProof =
+  | {
+      kind: "tool-terminal";
+      runtimeIdentity: string;
+      sessionId: string;
+      operationId: string;
+      completedAt: number;
+      status: "completed" | "failed" | "cancelled";
+    }
+  | {
+      kind: "input-terminal";
+      runtimeIdentity: string;
+      sessionId: string;
+      inputId: string;
+      commandId: string;
+      terminalProof: GraphTerminalProof;
+    }
+  | { kind: "runtime-retired"; runtimeIdentity: string; workspaceKey: string; retiredAt: number }
+  | { kind: "never-submitted"; commandId: string; dispatchPhase: GraphDispatchPhase };
+export interface GraphRecoveryInspection {
+  inspectedAt: number;
+  state: "inactive" | "active" | "unknown";
+  reason: string;
+  attempts: Array<{
+    attemptId: string;
+    state: "inactive" | "active" | "unknown";
+    reason: string;
+    proof?: GraphInactivityProof;
+    foregroundExecutionId?: string;
+  }>;
+}
+export interface GraphReleaseAudit {
+  releasedAt: number;
+  reason: string;
+  inspection: GraphRecoveryInspection;
+}

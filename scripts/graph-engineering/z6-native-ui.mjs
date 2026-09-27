@@ -50,11 +50,19 @@ async function captureDialog(isolation, window, summary, name) {
 export async function instantiateNativeTemplate(isolation, window, summary, scenario) {
   await window.getByTestId("graph-engineering-open").click();
   await window.getByTestId("graph-upgrade").click();
+  await window.getByTestId("graph-editor-advanced").click();
   await window.getByTestId("graph-upgrade-routing").click();
   const recipes = scenario === "slot" ? slotRecipes() : fixtureRecipes("build");
-  const details = window.getByTestId("graph-project-recipes");
-  await details.locator(":scope > summary").click();
+  await window.getByTestId("graph-view-setup").click();
+  await window.getByTestId("graph-project-recipes").waitFor();
   await window.getByTestId("graph-load-recipes").click();
+  await window.locator('[data-testid="graph-recipe-read-state"][data-state="ready"]').waitFor();
+  for (const details of await window
+    .getByTestId("graph-recipes-json")
+    .locator("xpath=ancestor::details")
+    .all())
+    if ((await details.getAttribute("open")) === null)
+      await details.locator(":scope > summary").click();
   await window.getByTestId("graph-recipes-json").fill(JSON.stringify(recipes, null, 2));
   await window.getByTestId("graph-save-recipes").click();
   await window.getByTestId("graph-recipes-saved").waitFor();
@@ -63,11 +71,14 @@ export async function instantiateNativeTemplate(isolation, window, summary, scen
       .graphRecipes,
     recipes,
   );
-  await details.locator(":scope > summary").click();
+  await window.getByTestId("graph-view-design").click();
   const before = await ledger(isolation),
     models = modelCount(isolation);
   await window.getByTestId("graph-library-open").click();
   await selectValue(window, "graph-library-entry", scenario);
+  const management = window.getByTestId("graph-library-management");
+  if ((await management.getAttribute("open")) === null)
+    await management.locator(":scope > summary").click();
   await selectValue(window, "graph-library-version", "1");
   await window
     .getByTestId("graph-template-parameter-request")
@@ -94,10 +105,28 @@ export async function instantiateNativeTemplate(isolation, window, summary, scen
       await checkbox.setChecked(true);
       await checkbox.setChecked(false);
     }
+    for (const details of await window
+      .getByTestId("graph-template-reference-gameDoc")
+      .locator("xpath=ancestor::details")
+      .all())
+      if ((await details.getAttribute("open")) === null)
+        await details.locator(":scope > summary").click();
     await window.getByTestId("graph-template-reference-gameDoc").fill("GameDoc.md");
   }
   if (scenario === "generic") {
+    for (const details of await window
+      .getByTestId("graph-template-reference-instructions")
+      .locator("xpath=ancestor::details")
+      .all())
+      if ((await details.getAttribute("open")) === null)
+        await details.locator(":scope > summary").click();
     await window.getByTestId("graph-template-reference-instructions").fill("ExtraInstructions.md");
+    for (const details of await window
+      .getByTestId("graph-template-reference-skill")
+      .locator("xpath=ancestor::details")
+      .all())
+      if ((await details.getAttribute("open")) === null)
+        await details.locator(":scope > summary").click();
     await window
       .getByTestId("graph-template-reference-skill")
       .fill(
@@ -117,10 +146,24 @@ export async function instantiateNativeTemplate(isolation, window, summary, scen
   );
   if (scenario === "bugfix")
     await window.getByTestId("graph-template-source-paths").fill(SOURCE_PATHS.join("\n"));
-  if (await window.getByTestId("graph-template-replace-draft").isVisible())
-    await window.getByTestId("graph-template-replace-draft").setChecked(true);
   await captureDialog(isolation, window, summary, "z6-explicit-template-bindings");
+  const savedBeforeReplacement = await readGraphRecord(isolation);
+  const draftName = await window.getByTestId("graph-name").inputValue();
+  const typedRequest = await window.getByTestId("graph-template-parameter-request").inputValue();
   await window.getByTestId("graph-library-instantiate").click();
+  await window.getByTestId("graph-replace-dialog").waitFor();
+  assert.deepEqual(await readGraphRecord(isolation), savedBeforeReplacement);
+  await window.getByTestId("graph-replace-cancel").click();
+  assert.equal(await window.getByTestId("graph-name").inputValue(), draftName);
+  assert.equal(
+    await window.getByTestId("graph-template-parameter-request").inputValue(),
+    typedRequest,
+  );
+  assert.deepEqual(await ledger(isolation), before);
+  assert.equal(modelCount(isolation), models);
+  await window.getByTestId("graph-library-instantiate").click();
+  await window.getByTestId("graph-replace-dialog").waitFor();
+  await window.getByTestId("graph-replace-discard").click();
   await window.getByTestId("graph-library-dialog").waitFor({ state: "hidden", timeout: 30000 });
   const record = await readGraphRecord(isolation);
   assert.equal(record.definition.template.id, scenario);

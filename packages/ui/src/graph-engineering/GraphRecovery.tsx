@@ -45,7 +45,11 @@ export function GraphRecovery({
   )
     return null;
   return (
-    <section className="space-y-3 border-t border-border pt-3" data-testid="graph-recovery">
+    <section
+      tabIndex={-1}
+      className="space-y-3 border-t border-border pt-3"
+      data-testid="graph-recovery"
+    >
       <h3 className="text-ui-base font-medium">{t("recovery")}</h3>
       {["Unknown", "Interrupted", "CancelRequested"].includes(run.status) ? (
         <p className="text-ui-sm text-warning">{t("uncertainHelp")}</p>

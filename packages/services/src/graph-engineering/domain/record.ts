@@ -16,6 +16,7 @@ import { graphArtifactSchema } from "./artifact-schemas.js";
 import { routingStateSchema } from "./routing-record-schema.js";
 import { runProvenanceSchema } from "./workflow-provenance-schema.js";
 import { routingRecordErrors } from "./routing-record.js";
+import { checksPurposeSchema, checksRecordErrors } from "./checks-record.js";
 import {
   definitionSchema,
   legacyDefinitionSchema,
@@ -153,6 +154,7 @@ const sequentialRunSchema = z
     version: z.union([z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
     routing: routingStateSchema.optional(),
     provenance: runProvenanceSchema.optional(),
+    purpose: checksPurposeSchema.optional(),
     requestFingerprint: z.string().min(1),
     definition: sequentialDefinitionSchema,
     defaults: graphSettingsSchema,
@@ -184,6 +186,7 @@ const sequentialRunSchema = z
     const readiness = sequentialReadiness(run.definition);
     for (const message of approvalRecordErrors(run)) ctx.addIssue({ code: "custom", message });
     for (const message of toolRecordErrors(run)) ctx.addIssue({ code: "custom", message });
+    for (const message of checksRecordErrors(run)) ctx.addIssue({ code: "custom", message });
     if (run.version === 5) {
       if (
         Boolean(run.definition.template) !== Boolean(run.provenance) ||
@@ -208,12 +211,13 @@ const sequentialRunSchema = z
       [...run.nodeAttempts, ...(run.toolAttempts ?? []), ...(run.approvalAttempts ?? [])].some(
         (a) => a.iterationId !== undefined || a.iteration !== undefined,
       ) ||
-      run.toolAttempts?.some(
-        (a) =>
-          a.verification?.observationValid !== undefined ||
-          a.verification?.outcome !== undefined ||
-          a.verification?.tests !== undefined,
-      ) ||
+      (!run.purpose &&
+        run.toolAttempts?.some(
+          (a) =>
+            a.verification?.observationValid !== undefined ||
+            a.verification?.outcome !== undefined ||
+            a.verification?.tests !== undefined,
+        )) ||
       ["NeedsHuman", "BudgetExhausted", "NoProgress"].includes(run.status)
     )
       ctx.addIssue({

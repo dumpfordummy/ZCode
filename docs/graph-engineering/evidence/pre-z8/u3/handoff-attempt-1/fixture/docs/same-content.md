@@ -1,0 +1,1 @@
+PRE_Z8_U3_NATIVE_GUIDANCE: Synthetic isolated workspace. Read and edit only fixture.mjs as explicitly requested. Preserve fixture.test.mjs and all unrelated source. Do not execute commands, tests, installs, commits or publication. Do not inspect parent directories or external files. Graph-selected native guidance does not require a duplicate Read.

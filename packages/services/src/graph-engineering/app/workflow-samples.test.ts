@@ -7,7 +7,7 @@ import { validateDefinition, validateReadiness } from "../domain/definition.js";
 test("shipped portable workflows preserve actual v5 readiness, exact samples and native boundaries", async () => {
   assert.deepEqual(
     builtinTemplates.map((item) => item.id),
-    ["generic", "bugfix", "slot"],
+    ["generic", "bugfix", "slot", "agent-assisted"],
   );
   for (const { id, template } of builtinTemplates) {
     assert.equal(template.format, "zcode-workflow");

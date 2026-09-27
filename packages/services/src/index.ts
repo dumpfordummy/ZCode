@@ -37,6 +37,7 @@ export type {
   GraphRouteCheckpoint,
   GraphRoutingState,
   GraphRunStartCommand,
+  GraphRunChecksCommand,
   GraphRunContinueCommand,
 } from "./graph-engineering/contract.js";
 export type {

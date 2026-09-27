@@ -24,14 +24,19 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
         </Button>
         <h2 className="text-ui-base font-medium">{t("title")}</h2>
         {graph.local ? (
-          <Button
-            variant={parallel ? "secondary" : "outline"}
-            size="sm"
-            onClick={() => setParallel((value) => !value)}
-            data-testid="graph-parallel-toggle"
-          >
-            {t(parallel ? "z7.sequential" : "z7.title")}
-          </Button>
+          <details className="text-ui-sm" data-testid="graph-advanced">
+            <summary className="cursor-pointer">
+              {intl.formatMessage({ id: "graph.preZ8.experimental" })}
+            </summary>
+            <Button
+              variant={parallel ? "secondary" : "outline"}
+              size="sm"
+              onClick={() => setParallel((value) => !value)}
+              data-testid="graph-parallel-toggle"
+            >
+              {t(parallel ? "z7.sequential" : "z7.title")}
+            </Button>
+          </details>
         ) : null}
         <p
           className="min-w-0 flex-1 break-all font-mono text-ui-sm text-foreground-subtle"
@@ -40,6 +45,11 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
           {props.workspacePath}
         </p>
       </header>
+      {parallel ? (
+        <p className="px-3 pt-3 text-ui-sm text-warning" data-testid="graph-parallel-experimental">
+          {intl.formatMessage({ id: "graph.preZ8.parallelLimit" })}
+        </p>
+      ) : null}
       {!graph.local ? (
         <p className="p-4 text-ui-base" role="status">
           {t("localOnly")}
