@@ -1,0 +1,2295 @@
+{
+  "scenario": "pre-z8-u4-source-drift",
+  "home": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f",
+  "workspace": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace",
+  "startedAt": 1790496090478,
+  "assertions": [
+    "Advanced removal plus Guided context selection preserves custom text, maps the actual Analyze source to one alias/token and is idempotent. The future Review source is disabled with a reason; draft preview resolves only Start and labels future output unresolved without attempt/artifact evidence.",
+    "Readable Guided context controls and draft preview heading are captured with technical JSON collapsed at both supported acceptance sizes.",
+    "Source drift after evidence capture blocks approval: the run and gate become StaleEvidence, the gate message names the source/evidence drift, the approve control is disabled, and the frozen evidence cannot be approved as current.",
+    "Restoring the exact source bytes after StaleEvidence does not auto-recover the run or re-freeze evidence; the stale gate stays blocked and a fresh reviewed run is required. No stale bypass or blind replay.",
+    "Controlled fixture.mjs mutation after evidence capture is detected at the approval boundary: the product blocks the decision with StaleEvidence, the stale gate does not auto-recover after the exact source restore, and no blind replay or stale bypass is possible."
+  ],
+  "screenshots": [
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u3-guided-context-draft-1280.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u3-guided-context-draft-1920.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-guided-controls-1280.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-guided-controls-1920.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-WaitingForUser-summary-1280.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-WaitingForUser-summary-1920.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-native-question.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-WaitingForPermission-summary-1280.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-WaitingForPermission-summary-1920.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-native-edit-permission.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-source-drift-gate-pending-1280.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-source-drift-gate-pending-1920.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-source-drift-stale-blocked-1280.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-source-drift-stale-blocked-1920.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-source-drift-restored-no-recovery-1280.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-source-drift-restored-no-recovery-1920.png"
+  ],
+  "notRun": [
+    "Human novice/live-provider/company-project pilot",
+    "Actual OS dialog interaction",
+    "Installed artifact, OS scaling and cross-platform qualification",
+    "fixture.test.mjs execution",
+    "Z8"
+  ],
+  "testedBuild": [
+    {
+      "file": "apps/zcode-cli/packages/cli/dist/zcode.cjs",
+      "sha256": "8a3d061fc217212d561a639b090e7152e6f2f44bfb1ac42ab88edf40bfd61332"
+    },
+    {
+      "file": "packages/desktop/out/main/index.js",
+      "sha256": "8313a1774afa18719ef60467924861d9eed76dcbcc7fc585f7bad8fde6889b74"
+    },
+    {
+      "file": "packages/desktop/out/host/index.js",
+      "sha256": "c28816f71fc5f51deef3d443dbb24a71c28312640fff38da66d2576caeb949c3"
+    },
+    {
+      "file": "packages/desktop/out/renderer/index.html",
+      "sha256": "7ce34d94428365c4da1fb0bb568fa1dbd0a32299bf769dd44b9070d4a6c4addf"
+    }
+  ],
+  "owner": {
+    "kind": "pre-z8-u4-native",
+    "version": 1,
+    "nonce": "0679587d-d4fc-4d0e-a9e8-13d6309ac477",
+    "createdAt": 1790496090594,
+    "workspace": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace"
+  },
+  "fixture": {
+    "references": {
+      "executedCommands": 0,
+      "outside": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\outside-reference.md",
+      "files": [
+        {
+          "path": "workspace\\AGENTS.md",
+          "bytes": 350,
+          "sha256": "d9db39e4df4b81e35734a6a24e6f379f78f344c7cbf903ede83bf0a72d2abf6d"
+        },
+        {
+          "path": "workspace\\docs\\context-note.md",
+          "bytes": 128,
+          "sha256": "fb2fd3820262edc43419584dae2c7bc3540126453d632ee652a5064489df9d95"
+        },
+        {
+          "path": "workspace\\docs\\same-content.md",
+          "bytes": 350,
+          "sha256": "d9db39e4df4b81e35734a6a24e6f379f78f344c7cbf903ede83bf0a72d2abf6d"
+        },
+        {
+          "path": "outside-reference.md",
+          "bytes": 70,
+          "sha256": "25f474834075584c3948d7f32953bbd3f5c458a19f7513767a791c3e3418e29a"
+        }
+      ]
+    },
+    "source": {
+      "head": "f51c366eb21aab89309485afd3b54e9573d21b1b",
+      "initialIndex": "2a53af17d4a4de070a71d07bdbed21d135d04087",
+      "note": "Z3 synthetic untracked review note: inspect this exact snapshot.\n",
+      "kind": "text"
+    }
+  },
+  "nativeInitialization": {
+    "publicEntry": "task-new-button",
+    "promptSubmitted": false,
+    "nativeDraftProjectionObserved": true
+  },
+  "referenceCatalog": {
+    "status": "available",
+    "instructions": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace\\AGENTS.md · workspace",
+    "skills": [
+      {
+        "value": "none",
+        "disabled": false,
+        "text": "—"
+      },
+      {
+        "value": "glm:plugin:D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+        "disabled": false,
+        "text": "browser-use:control-browser (glm:plugin:D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md · plugin)"
+      },
+      {
+        "value": "glm:plugin:D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+        "disabled": false,
+        "text": "browser-use:web-gui-tester (glm:plugin:D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md · plugin)"
+      }
+    ]
+  },
+  "viewportEvidence": [
+    {
+      "name": "pre-z8-u3-guided-context-draft-1280",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u3-guided-context-draft-1920",
+      "requested": [
+        1920,
+        1080
+      ],
+      "actual": {
+        "width": 1920,
+        "height": 1080,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u4-guided-controls-1280",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u4-guided-controls-1920",
+      "requested": [
+        1920,
+        1080
+      ],
+      "actual": {
+        "width": 1920,
+        "height": 1080,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u4-WaitingForUser-summary-1280",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u4-WaitingForUser-summary-1920",
+      "requested": [
+        1920,
+        1080
+      ],
+      "actual": {
+        "width": 1920,
+        "height": 1080,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u4-native-question",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u4-WaitingForPermission-summary-1280",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u4-WaitingForPermission-summary-1920",
+      "requested": [
+        1920,
+        1080
+      ],
+      "actual": {
+        "width": 1920,
+        "height": 1080,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u4-native-edit-permission",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u4-source-drift-gate-pending-1280",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u4-source-drift-gate-pending-1920",
+      "requested": [
+        1920,
+        1080
+      ],
+      "actual": {
+        "width": 1920,
+        "height": 1080,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u4-source-drift-stale-blocked-1280",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u4-source-drift-stale-blocked-1920",
+      "requested": [
+        1920,
+        1080
+      ],
+      "actual": {
+        "width": 1920,
+        "height": 1080,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u4-source-drift-restored-no-recovery-1280",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u4-source-drift-restored-no-recovery-1920",
+      "requested": [
+        1920,
+        1080
+      ],
+      "actual": {
+        "width": 1920,
+        "height": 1080,
+        "devicePixelRatio": 1
+      }
+    }
+  ],
+  "context": {
+    "removedAlias": "analyze",
+    "selected": {
+      "id": "graph-context-add-1",
+      "source": {
+        "kind": "node",
+        "nodeId": "analyze"
+      },
+      "disabled": false,
+      "explanation": "Analyze · Final text · Current iterationAdd context"
+    },
+    "future": {
+      "id": "graph-context-add-3",
+      "source": {
+        "kind": "node",
+        "nodeId": "review"
+      },
+      "disabled": true,
+      "explanation": "Review · Final text · Current iterationNode implement: binding review is not available on every selected route.Add context"
+    },
+    "binding": {
+      "alias": "result",
+      "source": {
+        "kind": "node",
+        "nodeId": "analyze"
+      }
+    },
+    "preview": {
+      "kind": "draft",
+      "segments": [
+        {
+          "kind": "text",
+          "text": "Workflow task: implement.\nImplement the explicit request using the supplied analysis and normal native tools and permissions. Read current source first and preserve unrelated work. Report actual edits, checks performed, limitations and unresolved questions. This workflow has no configured machine-test verification; never claim one exists. Do not commit, merge or publish.\nrequest:\n"
+        },
+        {
+          "kind": "text",
+          "text": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+        },
+        {
+          "kind": "text",
+          "text": "\n\nanalyze:\n\n\n"
+        },
+        {
+          "kind": "unresolved",
+          "alias": "result",
+          "token": "{{inputs.result}}",
+          "reason": "Resolved only from the selected run's captured input or evidence at execution."
+        },
+        {
+          "kind": "text",
+          "text": "\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"AGENTS.md\"}]\nReferences marked native-instructions are already supplied by native project guidance; do not read or inject them again. Read only explicit-read references through native Read. Load native-skill references using nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. References without a delivery marker remain unresolved until preparation. Cite reference IDs; missing source is a question, never an invented rule."
+        }
+      ],
+      "bindings": [
+        {
+          "alias": "request",
+          "source": {
+            "kind": "start"
+          },
+          "status": "resolved-start",
+          "text": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+        },
+        {
+          "alias": "result",
+          "source": {
+            "kind": "node",
+            "nodeId": "analyze"
+          },
+          "status": "unresolved"
+        }
+      ],
+      "references": [
+        {
+          "id": "instructions",
+          "kind": "instruction",
+          "selected": "AGENTS.md"
+        }
+      ],
+      "issues": [
+        "Reference instructions delivery is unresolved until verified preparation."
+      ]
+    },
+    "beforeInstructions": "Workflow task: implement.\nImplement the explicit request using the supplied analysis and normal native tools and permissions. Read current source first and preserve unrelated work. Report actual edits, checks performed, limitations and unresolved questions. This workflow has no configured machine-test verification; never claim one exists. Do not commit, merge or publish.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+    "afterInstructions": "Workflow task: implement.\nImplement the explicit request using the supplied analysis and normal native tools and permissions. Read current source first and preserve unrelated work. Report actual edits, checks performed, limitations and unresolved questions. This workflow has no configured machine-test verification; never claim one exists. Do not commit, merge or publish.\nrequest:\n{{inputs.request}}\n\nanalyze:\n\n\n{{inputs.result}}"
+  },
+  "preRunBoundary": {
+    "definitionRevision": 3,
+    "templateId": "agent-assisted",
+    "referenceSelection": {
+      "instructions": "AGENTS.md"
+    },
+    "sourceSha256": "214b6a19128b174be81c6b45174a2ce3d799cf95af29138cb0877827fa091b2c",
+    "nativeInputs": 0,
+    "modelRequests": 0,
+    "designSelectedAt": 1790496103683
+  },
+  "confirmedSnapshot": {
+    "definition": {
+      "version": 5,
+      "revision": 4,
+      "name": "Agent-assisted task",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+        },
+        {
+          "id": "analyze",
+          "position": {
+            "x": 300,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Analyze",
+          "instructions": "Workflow task: analyze.\nInspect the explicit request, relevant native project instructions and source. Identify a bounded implementation and acceptance criteria. Preserve unrelated work. Do not edit or execute commands. Missing requirements remain questions.\nrequest:\n{{inputs.request}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "implement",
+          "position": {
+            "x": 560,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Implement",
+          "instructions": "Workflow task: implement.\nImplement the explicit request using the supplied analysis and normal native tools and permissions. Read current source first and preserve unrelated work. Report actual edits, checks performed, limitations and unresolved questions. This workflow has no configured machine-test verification; never claim one exists. Do not commit, merge or publish.\nrequest:\n{{inputs.request}}\n\nanalyze:\n\n\n{{inputs.result}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            },
+            {
+              "alias": "result",
+              "source": {
+                "kind": "node",
+                "nodeId": "analyze"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "review",
+          "position": {
+            "x": 820,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Review",
+          "instructions": "Workflow task: review.\nInspect the actual changes against the explicit request, analysis and implementation handoff. Do not edit or execute commands. Distinguish observed source findings from agent-reported checks. Report remaining issues and what a human should inspect. Verification is agent-led; configured test evidence is not included. Agent prose cannot establish machine-verified success.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}\n\nimplement:\n{{inputs.implement}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            },
+            {
+              "alias": "analyze",
+              "source": {
+                "kind": "node",
+                "nodeId": "analyze"
+              }
+            },
+            {
+              "alias": "implement",
+              "source": {
+                "kind": "node",
+                "nodeId": "implement"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "final-gate",
+          "position": {
+            "x": 1080,
+            "y": 100
+          },
+          "type": "approval",
+          "name": "Final human review",
+          "reviewInstructions": "Review the actual changes, agent findings and unresolved questions. Verification is agent-led; configured test evidence is not included. Approval does not establish that tests passed or authorize commit, merge or publication.",
+          "evidence": [
+            {
+              "alias": "review",
+              "source": {
+                "kind": "node",
+                "nodeId": "review"
+              }
+            },
+            {
+              "alias": "implementation",
+              "source": {
+                "kind": "node",
+                "nodeId": "implement"
+              }
+            },
+            {
+              "alias": "source",
+              "source": {
+                "kind": "source"
+              }
+            }
+          ],
+          "commentPolicy": "required"
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 1340,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "review"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "analyze"
+        },
+        {
+          "source": "analyze",
+          "target": "implement"
+        },
+        {
+          "source": "implement",
+          "target": "review"
+        },
+        {
+          "source": "review",
+          "target": "final-gate"
+        },
+        {
+          "source": "final-gate",
+          "target": "end"
+        }
+      ],
+      "routing": {
+        "finalGateId": "final-gate",
+        "limits": {
+          "maxNodeAdmissions": 24,
+          "deadlineMs": 1800000
+        }
+      },
+      "template": {
+        "id": "agent-assisted",
+        "name": "Agent-assisted task",
+        "version": 1,
+        "digest": "7e91f56e4af8fe7f2986b5e15066abef41246cd2e97d8c53fd7501f6f8462db2",
+        "parameters": {
+          "request": "Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged."
+        },
+        "bindings": {
+          "referencePolicy": "native-aware-v1",
+          "references": {
+            "instructions": "AGENTS.md"
+          },
+          "recipes": {},
+          "sourcePaths": []
+        },
+        "references": [
+          {
+            "id": "instructions",
+            "kind": "instruction",
+            "nodeIds": [
+              "analyze",
+              "implement",
+              "review"
+            ]
+          }
+        ],
+        "excluded": []
+      }
+    },
+    "settings": {
+      "modelSelection": {
+        "providerId": "z1-local-fixture",
+        "modelId": "z1-fixture",
+        "options": {
+          "reasoningLevel": "enabled"
+        }
+      },
+      "mode": "build",
+      "planEnabled": false
+    },
+    "provenance": {
+      "digest": "bce951430d24d59744f4c26a011b2b5d4be6b854f80310e27d61b34a6ca23559",
+      "template": {
+        "id": "agent-assisted",
+        "name": "Agent-assisted task",
+        "version": 1,
+        "digest": "7e91f56e4af8fe7f2986b5e15066abef41246cd2e97d8c53fd7501f6f8462db2",
+        "parameters": {
+          "request": "Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged."
+        },
+        "bindings": {
+          "referencePolicy": "native-aware-v1",
+          "references": {
+            "instructions": "AGENTS.md"
+          },
+          "recipes": {},
+          "sourcePaths": []
+        },
+        "references": [
+          {
+            "id": "instructions",
+            "kind": "instruction",
+            "nodeIds": [
+              "analyze",
+              "implement",
+              "review"
+            ]
+          }
+        ],
+        "excluded": []
+      },
+      "environment": {
+        "version": 1,
+        "status": "available",
+        "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+        "executables": [],
+        "instructions": [
+          {
+            "scope": "workspace",
+            "path": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace\\AGENTS.md",
+            "digest": "d9db39e4df4b81e35734a6a24e6f379f78f344c7cbf903ede83bf0a72d2abf6d",
+            "bytes": 350,
+            "truncated": false
+          }
+        ],
+        "skills": [
+          {
+            "id": "glm:plugin:D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+            "name": "browser-use:control-browser",
+            "path": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+            "scope": "plugin",
+            "enabled": true,
+            "plugin": "browser-use",
+            "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+          },
+          {
+            "id": "glm:plugin:D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+            "name": "browser-use:web-gui-tester",
+            "path": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+            "scope": "plugin",
+            "enabled": true,
+            "plugin": "browser-use",
+            "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+          }
+        ],
+        "plugins": [
+          {
+            "id": "node-repl-host@zcode-plugins-official",
+            "name": "node-repl-host",
+            "enabled": true,
+            "source": "official",
+            "version": "0.6.0"
+          },
+          {
+            "id": "browser-use@zcode-plugins-official",
+            "name": "browser-use",
+            "enabled": true,
+            "source": "official",
+            "version": "0.5.1"
+          }
+        ],
+        "hooks": [],
+        "mcp": [],
+        "unknowns": [
+          "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+          "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+          "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+          "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+        ]
+      },
+      "models": [
+        {
+          "nodeId": "analyze",
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "type": "openai-chat-completions",
+          "destination": "http://127.0.0.1:58896",
+          "configurationDigest": "ff09467e26f6d657e595a15009d728afc4d6ae09d77369d048e61f74c8f2737d"
+        },
+        {
+          "nodeId": "implement",
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "type": "openai-chat-completions",
+          "destination": "http://127.0.0.1:58896",
+          "configurationDigest": "ff09467e26f6d657e595a15009d728afc4d6ae09d77369d048e61f74c8f2737d"
+        },
+        {
+          "nodeId": "review",
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "type": "openai-chat-completions",
+          "destination": "http://127.0.0.1:58896",
+          "configurationDigest": "ff09467e26f6d657e595a15009d728afc4d6ae09d77369d048e61f74c8f2737d"
+        }
+      ],
+      "auxiliary": [
+        "Native title generation uses each session's selected primary model (Graph supplies no title-model override)."
+      ],
+      "references": [
+        {
+          "id": "instructions",
+          "kind": "instruction",
+          "path": "AGENTS.md",
+          "digest": "d9db39e4df4b81e35734a6a24e6f379f78f344c7cbf903ede83bf0a72d2abf6d",
+          "origin": "explicit workspace reference",
+          "delivery": "native-instructions"
+        }
+      ],
+      "recipes": [],
+      "permissions": [
+        {
+          "nodeId": "analyze",
+          "mode": "build",
+          "planEnabled": false
+        },
+        {
+          "nodeId": "implement",
+          "mode": "build",
+          "planEnabled": false
+        },
+        {
+          "nodeId": "review",
+          "mode": "build",
+          "planEnabled": false
+        }
+      ],
+      "unknowns": [
+        "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+        "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+        "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+        "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+        "Executable availability does not verify its SDK version, script contents or network behavior; review the existing project toolchain and recipes.",
+        "Provider redirects, backend routing and external tools cannot be established from local configuration.",
+        "Native web/search, memory and delegated-tool behavior may contact additional destinations; primary endpoint locality is not a traffic guarantee."
+      ]
+    }
+  },
+  "summaryProofs": [
+    {
+      "observedAt": 1790496107160,
+      "runId": "68874734-8dc1-49c4-ad1e-10689f4d9046",
+      "target": {
+        "workspacePath": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace"
+      },
+      "requestText": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.",
+      "result": {
+        "kind": "absent"
+      },
+      "execution": {
+        "status": "WaitingForUser",
+        "stopRequested": false,
+        "currentStep": {
+          "nodeId": "implement",
+          "name": "Implement",
+          "kind": "task",
+          "attemptId": "c819c8ef-9dde-4809-9d16-51493f9e00cb",
+          "status": "WaitingForUser"
+        }
+      },
+      "evidence": {
+        "state": "agent-reported",
+        "configuredTestCount": 0,
+        "checks": [],
+        "issues": []
+      },
+      "human": {
+        "state": "pending",
+        "gates": [
+          {
+            "nodeId": "final-gate",
+            "name": "Final human review",
+            "state": "pending",
+            "complete": false,
+            "issues": [
+              "missing-approval-request"
+            ],
+            "attemptId": "c770b466-14f5-4889-bcf6-134faec743f4",
+            "status": "Pending",
+            "canDecide": false,
+            "canContinue": false
+          }
+        ],
+        "issues": [
+          "missing-approval-request"
+        ]
+      },
+      "sourceChanges": [],
+      "actionableSessions": [
+        {
+          "nodeId": "implement",
+          "name": "Implement",
+          "attemptId": "c819c8ef-9dde-4809-9d16-51493f9e00cb",
+          "sessionId": "sess_51322774-419c-4aa6-9ff9-f539c6448b52",
+          "kind": "task",
+          "status": "WaitingForUser"
+        }
+      ]
+    },
+    {
+      "observedAt": 1790496109796,
+      "runId": "68874734-8dc1-49c4-ad1e-10689f4d9046",
+      "target": {
+        "workspacePath": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace"
+      },
+      "requestText": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.",
+      "result": {
+        "kind": "absent"
+      },
+      "execution": {
+        "status": "WaitingForPermission",
+        "stopRequested": false,
+        "currentStep": {
+          "nodeId": "implement",
+          "name": "Implement",
+          "kind": "task",
+          "attemptId": "c819c8ef-9dde-4809-9d16-51493f9e00cb",
+          "status": "WaitingForPermission"
+        }
+      },
+      "evidence": {
+        "state": "agent-reported",
+        "configuredTestCount": 0,
+        "checks": [],
+        "issues": []
+      },
+      "human": {
+        "state": "pending",
+        "gates": [
+          {
+            "nodeId": "final-gate",
+            "name": "Final human review",
+            "state": "pending",
+            "complete": false,
+            "issues": [
+              "missing-approval-request"
+            ],
+            "attemptId": "c770b466-14f5-4889-bcf6-134faec743f4",
+            "status": "Pending",
+            "canDecide": false,
+            "canContinue": false
+          }
+        ],
+        "issues": [
+          "missing-approval-request"
+        ]
+      },
+      "sourceChanges": [],
+      "actionableSessions": [
+        {
+          "nodeId": "implement",
+          "name": "Implement",
+          "attemptId": "c819c8ef-9dde-4809-9d16-51493f9e00cb",
+          "sessionId": "sess_51322774-419c-4aa6-9ff9-f539c6448b52",
+          "kind": "task",
+          "status": "WaitingForPermission"
+        }
+      ]
+    },
+    {
+      "observedAt": 1790496112813,
+      "runId": "68874734-8dc1-49c4-ad1e-10689f4d9046",
+      "target": {
+        "workspacePath": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace"
+      },
+      "requestText": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.",
+      "result": {
+        "kind": "absent"
+      },
+      "execution": {
+        "status": "WaitingForApproval",
+        "stopRequested": false,
+        "currentStep": {
+          "nodeId": "final-gate",
+          "name": "Final human review",
+          "kind": "approval",
+          "attemptId": "c770b466-14f5-4889-bcf6-134faec743f4",
+          "status": "WaitingForApproval"
+        }
+      },
+      "evidence": {
+        "state": "agent-reported",
+        "configuredTestCount": 0,
+        "checks": [],
+        "issues": []
+      },
+      "human": {
+        "state": "pending",
+        "gates": [
+          {
+            "nodeId": "final-gate",
+            "name": "Final human review",
+            "state": "pending",
+            "complete": true,
+            "issues": [],
+            "attemptId": "c770b466-14f5-4889-bcf6-134faec743f4",
+            "status": "WaitingForApproval",
+            "requestId": "f24b3507-b69d-4938-9a3f-e76e562d0d99",
+            "requestVersion": 1,
+            "requestDigest": "0607763205e420529c65968779bb71af0c375c01f0838af027f38c9b87471702",
+            "canDecide": true,
+            "canContinue": false
+          }
+        ],
+        "issues": []
+      },
+      "sourceChanges": [
+        {
+          "nodeId": "final-gate",
+          "attemptId": "c770b466-14f5-4889-bcf6-134faec743f4",
+          "requestId": "f24b3507-b69d-4938-9a3f-e76e562d0d99",
+          "alias": "source",
+          "capturedAt": 1790496112579,
+          "snapshot": {
+            "baseline": "{\"version\":1,\"head\":\"f51c366eb21aab89309485afd3b54e9573d21b1b\",\"index\":\"2ea24d4e47cfd4125e0c4ec4befa3ab8cca42abc15de9d8f6462624c260e063a\",\"status\":\"0fa16477ea7443861abe22da6d604cf7dc49c3b0224e1282879bedf89a2c0eef\"}",
+            "scope": "Git changes and non-ignored untracked paths in the captured workspace; ignored and unchanged contents excluded. Limits: 64 paths, 128 KiB/text, 256 KiB/diff, 1 MiB retained content, 512 KiB/manifest.",
+            "files": [
+              {
+                "path": "docs/context-note.md",
+                "status": "untracked",
+                "beforeText": "",
+                "afterText": "PRE_Z8_U3_EXPLICIT_REFERENCE: Additional inert synthetic review context. No command or installation is authorized by this file.\n"
+              },
+              {
+                "path": "docs/same-content.md",
+                "status": "untracked",
+                "beforeText": "",
+                "afterText": "PRE_Z8_U3_NATIVE_GUIDANCE: Synthetic isolated workspace. Read and edit only fixture.mjs as explicitly requested. Preserve fixture.test.mjs and all unrelated source. Do not execute commands, tests, installs, commits or publication. Do not inspect parent directories or external files. Graph-selected native guidance does not require a duplicate Read.\n"
+              },
+              {
+                "path": "fixture.mjs",
+                "status": "unstaged:M",
+                "beforeText": "export const marker = 'Z1_BEFORE_7391';\n",
+                "afterText": "export const marker = 'Z1_AFTER_7391';\n",
+                "diff": "diff --git a/fixture.mjs b/fixture.mjs\nindex f188caa..700bad8 100644\n--- a/fixture.mjs\n+++ b/fixture.mjs\n@@ -1 +1 @@\n-export const marker = 'Z1_BEFORE_7391';\n+export const marker = 'Z1_AFTER_7391';\n"
+              },
+              {
+                "path": "review-note.txt",
+                "status": "untracked",
+                "beforeText": "",
+                "afterText": "Z3 synthetic untracked review note: inspect this exact snapshot.\n"
+              }
+            ],
+            "complete": true,
+            "issues": []
+          }
+        }
+      ],
+      "actionableSessions": []
+    }
+  ],
+  "persistentActions": [
+    {
+      "kind": "native",
+      "runId": "68874734-8dc1-49c4-ad1e-10689f4d9046",
+      "nodeId": "implement",
+      "attemptId": "c819c8ef-9dde-4809-9d16-51493f9e00cb",
+      "sessionId": "sess_51322774-419c-4aa6-9ff9-f539c6448b52",
+      "inputId": "80ba3f52-1a64-4d71-8c12-279ec84af18f",
+      "nativeInputsBefore": 2,
+      "modelRequestsBefore": 5
+    },
+    {
+      "kind": "native",
+      "runId": "68874734-8dc1-49c4-ad1e-10689f4d9046",
+      "nodeId": "implement",
+      "attemptId": "c819c8ef-9dde-4809-9d16-51493f9e00cb",
+      "sessionId": "sess_51322774-419c-4aa6-9ff9-f539c6448b52",
+      "inputId": "80ba3f52-1a64-4d71-8c12-279ec84af18f",
+      "nativeInputsBefore": 2,
+      "modelRequestsBefore": 6
+    }
+  ],
+  "runId": "68874734-8dc1-49c4-ad1e-10689f4d9046",
+  "persistentGateAction": {
+    "runId": "68874734-8dc1-49c4-ad1e-10689f4d9046",
+    "requestId": "f24b3507-b69d-4938-9a3f-e76e562d0d99",
+    "requestVersion": 1,
+    "requestDigest": "0607763205e420529c65968779bb71af0c375c01f0838af027f38c9b87471702",
+    "attemptId": "c770b466-14f5-4889-bcf6-134faec743f4"
+  },
+  "staleEvidence": {
+    "runId": "68874734-8dc1-49c4-ad1e-10689f4d9046",
+    "runStatus": "StaleEvidence",
+    "gateStatus": "StaleEvidence",
+    "gateMessage": "Relevant evidence or source state changed after review.",
+    "resumeRequired": false,
+    "uiBlocked": true
+  },
+  "permissionBoundaryRestoration": {
+    "kind": "u4-source-drift",
+    "path": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace\\fixture.mjs",
+    "beforeSha256": "3705f9f48c18865e0816b08c10c234f102e4b4d4543253c7e6ace929b30338f3",
+    "mutatedSha256": "9620b49db0195f43762ba038458431bb5946d82fd6498319b2512b218821f301",
+    "backupPath": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-source-drift-f1e3fb5e-5c85-4a3d-ac75-ff4a0543a98b.original",
+    "receiptPath": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-source-drift-f1e3fb5e-5c85-4a3d-ac75-ff4a0543a98b.json",
+    "startedAt": 1790496113380,
+    "restoration": "restored-exact-bytes",
+    "afterSha256": "3705f9f48c18865e0816b08c10c234f102e4b4d4543253c7e6ace929b30338f3",
+    "completedAt": 1790496114455
+  },
+  "status": "PASS",
+  "finalRecord": {
+    "version": 5,
+    "workspaceKey": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace",
+    "definition": {
+      "version": 5,
+      "revision": 4,
+      "name": "Agent-assisted task",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+        },
+        {
+          "id": "analyze",
+          "position": {
+            "x": 300,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Analyze",
+          "instructions": "Workflow task: analyze.\nInspect the explicit request, relevant native project instructions and source. Identify a bounded implementation and acceptance criteria. Preserve unrelated work. Do not edit or execute commands. Missing requirements remain questions.\nrequest:\n{{inputs.request}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "implement",
+          "position": {
+            "x": 560,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Implement",
+          "instructions": "Workflow task: implement.\nImplement the explicit request using the supplied analysis and normal native tools and permissions. Read current source first and preserve unrelated work. Report actual edits, checks performed, limitations and unresolved questions. This workflow has no configured machine-test verification; never claim one exists. Do not commit, merge or publish.\nrequest:\n{{inputs.request}}\n\nanalyze:\n\n\n{{inputs.result}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            },
+            {
+              "alias": "result",
+              "source": {
+                "kind": "node",
+                "nodeId": "analyze"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "review",
+          "position": {
+            "x": 820,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Review",
+          "instructions": "Workflow task: review.\nInspect the actual changes against the explicit request, analysis and implementation handoff. Do not edit or execute commands. Distinguish observed source findings from agent-reported checks. Report remaining issues and what a human should inspect. Verification is agent-led; configured test evidence is not included. Agent prose cannot establish machine-verified success.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}\n\nimplement:\n{{inputs.implement}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            },
+            {
+              "alias": "analyze",
+              "source": {
+                "kind": "node",
+                "nodeId": "analyze"
+              }
+            },
+            {
+              "alias": "implement",
+              "source": {
+                "kind": "node",
+                "nodeId": "implement"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "final-gate",
+          "position": {
+            "x": 1080,
+            "y": 100
+          },
+          "type": "approval",
+          "name": "Final human review",
+          "reviewInstructions": "Review the actual changes, agent findings and unresolved questions. Verification is agent-led; configured test evidence is not included. Approval does not establish that tests passed or authorize commit, merge or publication.",
+          "evidence": [
+            {
+              "alias": "review",
+              "source": {
+                "kind": "node",
+                "nodeId": "review"
+              }
+            },
+            {
+              "alias": "implementation",
+              "source": {
+                "kind": "node",
+                "nodeId": "implement"
+              }
+            },
+            {
+              "alias": "source",
+              "source": {
+                "kind": "source"
+              }
+            }
+          ],
+          "commentPolicy": "required"
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 1340,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "review"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "analyze"
+        },
+        {
+          "source": "analyze",
+          "target": "implement"
+        },
+        {
+          "source": "implement",
+          "target": "review"
+        },
+        {
+          "source": "review",
+          "target": "final-gate"
+        },
+        {
+          "source": "final-gate",
+          "target": "end"
+        }
+      ],
+      "routing": {
+        "finalGateId": "final-gate",
+        "limits": {
+          "maxNodeAdmissions": 24,
+          "deadlineMs": 1800000
+        }
+      },
+      "template": {
+        "id": "agent-assisted",
+        "name": "Agent-assisted task",
+        "version": 1,
+        "digest": "7e91f56e4af8fe7f2986b5e15066abef41246cd2e97d8c53fd7501f6f8462db2",
+        "parameters": {
+          "request": "Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged."
+        },
+        "bindings": {
+          "referencePolicy": "native-aware-v1",
+          "references": {
+            "instructions": "AGENTS.md"
+          },
+          "recipes": {},
+          "sourcePaths": []
+        },
+        "references": [
+          {
+            "id": "instructions",
+            "kind": "instruction",
+            "nodeIds": [
+              "analyze",
+              "implement",
+              "review"
+            ]
+          }
+        ],
+        "excluded": []
+      }
+    },
+    "runs": [
+      {
+        "id": "68874734-8dc1-49c4-ad1e-10689f4d9046",
+        "requestId": "abe1a552-23be-43b5-bdfb-b17b8cbf422f",
+        "target": {
+          "workspacePath": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace"
+        },
+        "status": "StaleEvidence",
+        "createdAt": 1790496104590,
+        "updatedAt": 1790496113859,
+        "message": "Relevant evidence or source state changed after review.",
+        "version": 5,
+        "routing": {
+          "configurationDigest": "ea104608400ade133ab50f25539e3a20f2d802e14f049d2862a9fb1094646462",
+          "recipeConfigurationDigest": "fb49a8ad61f7fd01eca21d942ffe87b3f51015a51130cb2173068da66544ee1c",
+          "currentIterationId": "14a5b49e-96cf-42b8-ab6b-fc85739f2b30",
+          "cursorNodeId": "final-gate",
+          "iterations": [
+            {
+              "id": "14a5b49e-96cf-42b8-ab6b-fc85739f2b30",
+              "index": 0,
+              "createdAt": 1790496104603,
+              "attemptIds": {
+                "analyze": "7dab11b8-84fe-4dd8-b290-6fc9f00ef8fb",
+                "implement": "c819c8ef-9dde-4809-9d16-51493f9e00cb",
+                "review": "e1daa227-c473-410b-a237-53ff47121bbb",
+                "final-gate": "c770b466-14f5-4889-bcf6-134faec743f4"
+              },
+              "visitedNodeIds": [
+                "analyze",
+                "implement",
+                "review"
+              ]
+            }
+          ],
+          "conditionAttempts": [],
+          "admissions": 3,
+          "deadlineAt": 1790497904590,
+          "checkpoints": [],
+          "continuations": []
+        },
+        "provenance": {
+          "operationalDecision": {
+            "acknowledgedUnknowns": true,
+            "acceptedAt": 1790496104621
+          },
+          "digest": "bce951430d24d59744f4c26a011b2b5d4be6b854f80310e27d61b34a6ca23559",
+          "template": {
+            "id": "agent-assisted",
+            "name": "Agent-assisted task",
+            "version": 1,
+            "digest": "7e91f56e4af8fe7f2986b5e15066abef41246cd2e97d8c53fd7501f6f8462db2",
+            "parameters": {
+              "request": "Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged."
+            },
+            "bindings": {
+              "referencePolicy": "native-aware-v1",
+              "references": {
+                "instructions": "AGENTS.md"
+              },
+              "recipes": {},
+              "sourcePaths": []
+            },
+            "references": [
+              {
+                "id": "instructions",
+                "kind": "instruction",
+                "nodeIds": [
+                  "analyze",
+                  "implement",
+                  "review"
+                ]
+              }
+            ],
+            "excluded": []
+          },
+          "environment": {
+            "version": 1,
+            "status": "available",
+            "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+            "executables": [],
+            "instructions": [
+              {
+                "scope": "workspace",
+                "path": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace\\AGENTS.md",
+                "digest": "d9db39e4df4b81e35734a6a24e6f379f78f344c7cbf903ede83bf0a72d2abf6d",
+                "bytes": 350,
+                "truncated": false
+              }
+            ],
+            "skills": [
+              {
+                "id": "glm:plugin:D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "name": "browser-use:control-browser",
+                "path": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+              },
+              {
+                "id": "glm:plugin:D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "name": "browser-use:web-gui-tester",
+                "path": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+              }
+            ],
+            "plugins": [
+              {
+                "id": "node-repl-host@zcode-plugins-official",
+                "name": "node-repl-host",
+                "enabled": true,
+                "source": "official",
+                "version": "0.6.0"
+              },
+              {
+                "id": "browser-use@zcode-plugins-official",
+                "name": "browser-use",
+                "enabled": true,
+                "source": "official",
+                "version": "0.5.1"
+              }
+            ],
+            "hooks": [],
+            "mcp": [],
+            "unknowns": [
+              "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+              "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+              "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+              "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+            ]
+          },
+          "models": [
+            {
+              "nodeId": "analyze",
+              "providerId": "z1-local-fixture",
+              "modelId": "z1-fixture",
+              "type": "openai-chat-completions",
+              "destination": "http://127.0.0.1:58896",
+              "configurationDigest": "ff09467e26f6d657e595a15009d728afc4d6ae09d77369d048e61f74c8f2737d"
+            },
+            {
+              "nodeId": "implement",
+              "providerId": "z1-local-fixture",
+              "modelId": "z1-fixture",
+              "type": "openai-chat-completions",
+              "destination": "http://127.0.0.1:58896",
+              "configurationDigest": "ff09467e26f6d657e595a15009d728afc4d6ae09d77369d048e61f74c8f2737d"
+            },
+            {
+              "nodeId": "review",
+              "providerId": "z1-local-fixture",
+              "modelId": "z1-fixture",
+              "type": "openai-chat-completions",
+              "destination": "http://127.0.0.1:58896",
+              "configurationDigest": "ff09467e26f6d657e595a15009d728afc4d6ae09d77369d048e61f74c8f2737d"
+            }
+          ],
+          "auxiliary": [
+            "Native title generation uses each session's selected primary model (Graph supplies no title-model override)."
+          ],
+          "references": [
+            {
+              "id": "instructions",
+              "kind": "instruction",
+              "path": "AGENTS.md",
+              "digest": "d9db39e4df4b81e35734a6a24e6f379f78f344c7cbf903ede83bf0a72d2abf6d",
+              "origin": "explicit workspace reference",
+              "delivery": "native-instructions"
+            }
+          ],
+          "recipes": [],
+          "permissions": [
+            {
+              "nodeId": "analyze",
+              "mode": "build",
+              "planEnabled": false
+            },
+            {
+              "nodeId": "implement",
+              "mode": "build",
+              "planEnabled": false
+            },
+            {
+              "nodeId": "review",
+              "mode": "build",
+              "planEnabled": false
+            }
+          ],
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+            "Executable availability does not verify its SDK version, script contents or network behavior; review the existing project toolchain and recipes.",
+            "Provider redirects, backend routing and external tools cannot be established from local configuration.",
+            "Native web/search, memory and delegated-tool behavior may contact additional destinations; primary endpoint locality is not a traffic guarantee."
+          ]
+        },
+        "requestFingerprint": "{\"mode\":\"build\",\"modelSelection\":{\"modelId\":\"z1-fixture\",\"options\":{\"reasoningLevel\":\"enabled\"},\"providerId\":\"z1-local-fixture\"},\"planEnabled\":false,\"preflight\":{\"acknowledgedUnknowns\":true,\"digest\":\"bce951430d24d59744f4c26a011b2b5d4be6b854f80310e27d61b34a6ca23559\"},\"revision\":4,\"target\":{\"workspacePath\":\"D:\\\\Playground\\\\ZCode\\\\.tmp\\\\z1-native-1790496090405-cbd47f\\\\workspace\"}}",
+        "definition": {
+          "version": 5,
+          "revision": 4,
+          "name": "Agent-assisted task",
+          "nodes": [
+            {
+              "id": "start",
+              "position": {
+                "x": 40,
+                "y": 100
+              },
+              "type": "start",
+              "request": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+            },
+            {
+              "id": "analyze",
+              "position": {
+                "x": 300,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Analyze",
+              "instructions": "Workflow task: analyze.\nInspect the explicit request, relevant native project instructions and source. Identify a bounded implementation and acceptance criteria. Preserve unrelated work. Do not edit or execute commands. Missing requirements remain questions.\nrequest:\n{{inputs.request}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "request",
+                  "source": {
+                    "kind": "start"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "implement",
+              "position": {
+                "x": 560,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Implement",
+              "instructions": "Workflow task: implement.\nImplement the explicit request using the supplied analysis and normal native tools and permissions. Read current source first and preserve unrelated work. Report actual edits, checks performed, limitations and unresolved questions. This workflow has no configured machine-test verification; never claim one exists. Do not commit, merge or publish.\nrequest:\n{{inputs.request}}\n\nanalyze:\n\n\n{{inputs.result}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "request",
+                  "source": {
+                    "kind": "start"
+                  }
+                },
+                {
+                  "alias": "result",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "analyze"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "review",
+              "position": {
+                "x": 820,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Review",
+              "instructions": "Workflow task: review.\nInspect the actual changes against the explicit request, analysis and implementation handoff. Do not edit or execute commands. Distinguish observed source findings from agent-reported checks. Report remaining issues and what a human should inspect. Verification is agent-led; configured test evidence is not included. Agent prose cannot establish machine-verified success.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}\n\nimplement:\n{{inputs.implement}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "request",
+                  "source": {
+                    "kind": "start"
+                  }
+                },
+                {
+                  "alias": "analyze",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "analyze"
+                  }
+                },
+                {
+                  "alias": "implement",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "implement"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "final-gate",
+              "position": {
+                "x": 1080,
+                "y": 100
+              },
+              "type": "approval",
+              "name": "Final human review",
+              "reviewInstructions": "Review the actual changes, agent findings and unresolved questions. Verification is agent-led; configured test evidence is not included. Approval does not establish that tests passed or authorize commit, merge or publication.",
+              "evidence": [
+                {
+                  "alias": "review",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "review"
+                  }
+                },
+                {
+                  "alias": "implementation",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "implement"
+                  }
+                },
+                {
+                  "alias": "source",
+                  "source": {
+                    "kind": "source"
+                  }
+                }
+              ],
+              "commentPolicy": "required"
+            },
+            {
+              "id": "end",
+              "position": {
+                "x": 1340,
+                "y": 100
+              },
+              "type": "end",
+              "outputNodeId": "review"
+            }
+          ],
+          "edges": [
+            {
+              "source": "start",
+              "target": "analyze"
+            },
+            {
+              "source": "analyze",
+              "target": "implement"
+            },
+            {
+              "source": "implement",
+              "target": "review"
+            },
+            {
+              "source": "review",
+              "target": "final-gate"
+            },
+            {
+              "source": "final-gate",
+              "target": "end"
+            }
+          ],
+          "routing": {
+            "finalGateId": "final-gate",
+            "limits": {
+              "maxNodeAdmissions": 24,
+              "deadlineMs": 1800000
+            }
+          },
+          "template": {
+            "id": "agent-assisted",
+            "name": "Agent-assisted task",
+            "version": 1,
+            "digest": "7e91f56e4af8fe7f2986b5e15066abef41246cd2e97d8c53fd7501f6f8462db2",
+            "parameters": {
+              "request": "Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged."
+            },
+            "bindings": {
+              "referencePolicy": "native-aware-v1",
+              "references": {
+                "instructions": "AGENTS.md"
+              },
+              "recipes": {},
+              "sourcePaths": []
+            },
+            "references": [
+              {
+                "id": "instructions",
+                "kind": "instruction",
+                "nodeIds": [
+                  "analyze",
+                  "implement",
+                  "review"
+                ]
+              }
+            ],
+            "excluded": []
+          }
+        },
+        "defaults": {
+          "modelSelection": {
+            "providerId": "z1-local-fixture",
+            "modelId": "z1-fixture",
+            "options": {
+              "reasoningLevel": "enabled"
+            }
+          },
+          "mode": "build",
+          "planEnabled": false
+        },
+        "plannedPath": [
+          "analyze",
+          "implement",
+          "review",
+          "final-gate"
+        ],
+        "startInput": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.",
+        "nodeAttempts": [
+          {
+            "iterationId": "14a5b49e-96cf-42b8-ab6b-fc85739f2b30",
+            "iteration": 0,
+            "nodeId": "analyze",
+            "attemptId": "7dab11b8-84fe-4dd8-b290-6fc9f00ef8fb",
+            "commandId": "232ec897-915c-482b-bc3b-85c75de60d58",
+            "inputId": "232ec897-915c-482b-bc3b-85c75de60d58",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790496104590,
+            "updatedAt": 1790496105938,
+            "sessionId": "sess_881abd55-da93-4965-b8d7-d98434aef477",
+            "runtimeIdentity": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace:1:18360:agent-cc7af9f1-d138-4f83-8d05-e226731a2c61",
+            "foregroundExecutionId": "runtime_command_1",
+            "observationEpoch": "mujj5gf8-vdgcxlgl",
+            "resolvedInstructions": "Workflow task: analyze.\nInspect the explicit request, relevant native project instructions and source. Identify a bounded implementation and acceptance criteria. Preserve unrelated work. Do not edit or execute commands. Missing requirements remain questions.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"AGENTS.md\",\"delivery\":\"native-instructions\"}]\nReferences marked native-instructions are already supplied by native project guidance; do not read or inject them again. Read only explicit-read references through native Read. Load native-skill references using nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. References without a delivery marker remain unresolved until preparation. Cite reference IDs; missing source is a question, never an invented rule.",
+            "bindings": [
+              {
+                "alias": "request",
+                "source": {
+                  "kind": "start"
+                },
+                "text": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+              }
+            ],
+            "terminalProof": {
+              "sourceCommandId": "232ec897-915c-482b-bc3b-85c75de60d58",
+              "state": "completedSuccess",
+              "logEpoch": "mujj5gf8-vdgcxlgl",
+              "seq": 35,
+              "turnId": "msg_mujj5gur_eb4ce137-91cf-4ca5-b9d4-f542f41b7e72"
+            },
+            "finalOutput": {
+              "text": "PRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_ANALYSIS: Native Read observed Z1_BEFORE_7391 in fixture.mjs. Change only that marker to Z1_AFTER_7391 and preserve fixture.test.mjs. Configured tests are not included.\nLiteral predecessor data {{inputs.not_bound}} and {{nested braces}}.",
+              "turnId": "msg_mujj5gur_eb4ce137-91cf-4ca5-b9d4-f542f41b7e72",
+              "rowId": 4,
+              "entityId": "msg_mujj5h59_9759a384-b819-4a96-b435-9cb3da575b54",
+              "assistantResponseId": "msg_mujj5h59_9759a384-b819-4a96-b435-9cb3da575b54"
+            },
+            "outputValidation": {
+              "status": "valid",
+              "issues": []
+            }
+          },
+          {
+            "iterationId": "14a5b49e-96cf-42b8-ab6b-fc85739f2b30",
+            "iteration": 0,
+            "nodeId": "implement",
+            "attemptId": "c819c8ef-9dde-4809-9d16-51493f9e00cb",
+            "commandId": "80ba3f52-1a64-4d71-8c12-279ec84af18f",
+            "inputId": "80ba3f52-1a64-4d71-8c12-279ec84af18f",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790496104590,
+            "updatedAt": 1790496111147,
+            "sessionId": "sess_51322774-419c-4aa6-9ff9-f539c6448b52",
+            "runtimeIdentity": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace:1:18360:agent-cc7af9f1-d138-4f83-8d05-e226731a2c61",
+            "foregroundExecutionId": "runtime_command_2",
+            "observationEpoch": "mujj5hgb-x0vs4009",
+            "resolvedInstructions": "Workflow task: implement.\nImplement the explicit request using the supplied analysis and normal native tools and permissions. Read current source first and preserve unrelated work. Report actual edits, checks performed, limitations and unresolved questions. This workflow has no configured machine-test verification; never claim one exists. Do not commit, merge or publish.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nanalyze:\n\n\nPRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_ANALYSIS: Native Read observed Z1_BEFORE_7391 in fixture.mjs. Change only that marker to Z1_AFTER_7391 and preserve fixture.test.mjs. Configured tests are not included.\nLiteral predecessor data {{inputs.not_bound}} and {{nested braces}}.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"AGENTS.md\",\"delivery\":\"native-instructions\"}]\nReferences marked native-instructions are already supplied by native project guidance; do not read or inject them again. Read only explicit-read references through native Read. Load native-skill references using nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. References without a delivery marker remain unresolved until preparation. Cite reference IDs; missing source is a question, never an invented rule.",
+            "bindings": [
+              {
+                "alias": "request",
+                "source": {
+                  "kind": "start"
+                },
+                "text": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+              },
+              {
+                "alias": "result",
+                "source": {
+                  "kind": "node",
+                  "nodeId": "analyze"
+                },
+                "text": "PRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_ANALYSIS: Native Read observed Z1_BEFORE_7391 in fixture.mjs. Change only that marker to Z1_AFTER_7391 and preserve fixture.test.mjs. Configured tests are not included.\nLiteral predecessor data {{inputs.not_bound}} and {{nested braces}}.",
+                "sourceSessionId": "sess_881abd55-da93-4965-b8d7-d98434aef477",
+                "sourceInputId": "232ec897-915c-482b-bc3b-85c75de60d58",
+                "sourceCommandId": "232ec897-915c-482b-bc3b-85c75de60d58"
+              }
+            ],
+            "terminalProof": {
+              "sourceCommandId": "80ba3f52-1a64-4d71-8c12-279ec84af18f",
+              "state": "completedSuccess",
+              "logEpoch": "mujj5hgb-x0vs4009",
+              "seq": 78,
+              "turnId": "msg_mujj5hti_b86b88b8-2bb1-4167-bd8a-5a34cf4c016f"
+            },
+            "finalOutput": {
+              "text": "PRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_IMPLEMENTED: Native Edit confirmed the requested marker change in fixture.mjs. No test command ran; configured tests are not included. Independent source review is still required.",
+              "turnId": "msg_mujj5hti_b86b88b8-2bb1-4167-bd8a-5a34cf4c016f",
+              "rowId": 6,
+              "entityId": "msg_mujj5l8r_4efd7a9b-8698-4a59-a947-52437d5ba868",
+              "assistantResponseId": "msg_mujj5l8r_4efd7a9b-8698-4a59-a947-52437d5ba868"
+            },
+            "outputValidation": {
+              "status": "valid",
+              "issues": []
+            }
+          },
+          {
+            "iterationId": "14a5b49e-96cf-42b8-ab6b-fc85739f2b30",
+            "iteration": 0,
+            "nodeId": "review",
+            "attemptId": "e1daa227-c473-410b-a237-53ff47121bbb",
+            "commandId": "7c44fdd9-211d-40b0-a9f1-a7d0959e51f2",
+            "inputId": "7c44fdd9-211d-40b0-a9f1-a7d0959e51f2",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790496104590,
+            "updatedAt": 1790496112083,
+            "sessionId": "sess_847524f8-f4f0-4505-b737-3612b8ebee63",
+            "runtimeIdentity": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace:1:18360:agent-cc7af9f1-d138-4f83-8d05-e226731a2c61",
+            "foregroundExecutionId": "runtime_command_3",
+            "observationEpoch": "mujj5lgx-nyjp237t",
+            "resolvedInstructions": "Workflow task: review.\nInspect the actual changes against the explicit request, analysis and implementation handoff. Do not edit or execute commands. Distinguish observed source findings from agent-reported checks. Report remaining issues and what a human should inspect. Verification is agent-led; configured test evidence is not included. Agent prose cannot establish machine-verified success.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nanalyze:\nPRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_ANALYSIS: Native Read observed Z1_BEFORE_7391 in fixture.mjs. Change only that marker to Z1_AFTER_7391 and preserve fixture.test.mjs. Configured tests are not included.\nLiteral predecessor data {{inputs.not_bound}} and {{nested braces}}.\n\nimplement:\nPRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_IMPLEMENTED: Native Edit confirmed the requested marker change in fixture.mjs. No test command ran; configured tests are not included. Independent source review is still required.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"AGENTS.md\",\"delivery\":\"native-instructions\"}]\nReferences marked native-instructions are already supplied by native project guidance; do not read or inject them again. Read only explicit-read references through native Read. Load native-skill references using nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. References without a delivery marker remain unresolved until preparation. Cite reference IDs; missing source is a question, never an invented rule.",
+            "bindings": [
+              {
+                "alias": "request",
+                "source": {
+                  "kind": "start"
+                },
+                "text": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+              },
+              {
+                "alias": "analyze",
+                "source": {
+                  "kind": "node",
+                  "nodeId": "analyze"
+                },
+                "text": "PRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_ANALYSIS: Native Read observed Z1_BEFORE_7391 in fixture.mjs. Change only that marker to Z1_AFTER_7391 and preserve fixture.test.mjs. Configured tests are not included.\nLiteral predecessor data {{inputs.not_bound}} and {{nested braces}}.",
+                "sourceSessionId": "sess_881abd55-da93-4965-b8d7-d98434aef477",
+                "sourceInputId": "232ec897-915c-482b-bc3b-85c75de60d58",
+                "sourceCommandId": "232ec897-915c-482b-bc3b-85c75de60d58"
+              },
+              {
+                "alias": "implement",
+                "source": {
+                  "kind": "node",
+                  "nodeId": "implement"
+                },
+                "text": "PRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_IMPLEMENTED: Native Edit confirmed the requested marker change in fixture.mjs. No test command ran; configured tests are not included. Independent source review is still required.",
+                "sourceSessionId": "sess_51322774-419c-4aa6-9ff9-f539c6448b52",
+                "sourceInputId": "80ba3f52-1a64-4d71-8c12-279ec84af18f",
+                "sourceCommandId": "80ba3f52-1a64-4d71-8c12-279ec84af18f"
+              }
+            ],
+            "terminalProof": {
+              "sourceCommandId": "7c44fdd9-211d-40b0-a9f1-a7d0959e51f2",
+              "state": "completedSuccess",
+              "logEpoch": "mujj5lgx-nyjp237t",
+              "seq": 35,
+              "turnId": "msg_mujj5lvp_2958fe0f-044a-492a-8ebd-c2cf2fdcfefe"
+            },
+            "finalOutput": {
+              "text": "PRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_REVIEW: Fresh native Read observed the requested Z1_AFTER_7391 source. Agent-led source review only. Tests are not configured and were not run. Human review is still required.",
+              "turnId": "msg_mujj5lvp_2958fe0f-044a-492a-8ebd-c2cf2fdcfefe",
+              "rowId": 4,
+              "entityId": "msg_mujj5lyu_ccdb0d5f-40ff-4e30-a1af-c9e905a0fd2c",
+              "assistantResponseId": "msg_mujj5lyu_ccdb0d5f-40ff-4e30-a1af-c9e905a0fd2c"
+            },
+            "outputValidation": {
+              "status": "valid",
+              "issues": []
+            }
+          }
+        ],
+        "approvalAttempts": [
+          {
+            "iterationId": "14a5b49e-96cf-42b8-ab6b-fc85739f2b30",
+            "iteration": 0,
+            "nodeId": "final-gate",
+            "attemptId": "c770b466-14f5-4889-bcf6-134faec743f4",
+            "status": "StaleEvidence",
+            "createdAt": 1790496104590,
+            "updatedAt": 1790496113859,
+            "resumeRequired": false,
+            "message": "Relevant evidence or source state changed after review.",
+            "request": {
+              "id": "f24b3507-b69d-4938-9a3f-e76e562d0d99",
+              "version": 1,
+              "runId": "68874734-8dc1-49c4-ad1e-10689f4d9046",
+              "nodeId": "final-gate",
+              "attemptId": "c770b466-14f5-4889-bcf6-134faec743f4",
+              "target": {
+                "workspacePath": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace"
+              },
+              "graphDigest": "ea104608400ade133ab50f25539e3a20f2d802e14f049d2862a9fb1094646462",
+              "digest": "0607763205e420529c65968779bb71af0c375c01f0838af027f38c9b87471702",
+              "title": "Final human review",
+              "reviewText": "Review the actual changes, agent findings and unresolved questions. Verification is agent-led; configured test evidence is not included. Approval does not establish that tests passed or authorize commit, merge or publication.",
+              "commentPolicy": "required",
+              "successorNodeId": "end",
+              "evidence": [
+                {
+                  "alias": "review",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "review"
+                  },
+                  "digest": "7a9f52e8537f4faf440ce495d8782a6dee46c9f075b7f14236c16a52eff3c073",
+                  "text": "PRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_REVIEW: Fresh native Read observed the requested Z1_AFTER_7391 source. Agent-led source review only. Tests are not configured and were not run. Human review is still required.",
+                  "sourceSessionId": "sess_847524f8-f4f0-4505-b737-3612b8ebee63",
+                  "sourceInputId": "7c44fdd9-211d-40b0-a9f1-a7d0959e51f2",
+                  "sourceCommandId": "7c44fdd9-211d-40b0-a9f1-a7d0959e51f2"
+                },
+                {
+                  "alias": "implementation",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "implement"
+                  },
+                  "digest": "21975ef8e2759f9d57eaeeddee0ab29bbf259c641a183ae079d27e562882de94",
+                  "text": "PRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_IMPLEMENTED: Native Edit confirmed the requested marker change in fixture.mjs. No test command ran; configured tests are not included. Independent source review is still required.",
+                  "sourceSessionId": "sess_51322774-419c-4aa6-9ff9-f539c6448b52",
+                  "sourceInputId": "80ba3f52-1a64-4d71-8c12-279ec84af18f",
+                  "sourceCommandId": "80ba3f52-1a64-4d71-8c12-279ec84af18f"
+                },
+                {
+                  "alias": "source",
+                  "source": {
+                    "kind": "source"
+                  },
+                  "digest": "b2c73af4f505128eefb2e9b49b58b822b556e8f98be56ff6690dcf162c7093e7",
+                  "snapshot": {
+                    "baseline": "{\"version\":1,\"head\":\"f51c366eb21aab89309485afd3b54e9573d21b1b\",\"index\":\"2ea24d4e47cfd4125e0c4ec4befa3ab8cca42abc15de9d8f6462624c260e063a\",\"status\":\"0fa16477ea7443861abe22da6d604cf7dc49c3b0224e1282879bedf89a2c0eef\"}",
+                    "scope": "Git changes and non-ignored untracked paths in the captured workspace; ignored and unchanged contents excluded. Limits: 64 paths, 128 KiB/text, 256 KiB/diff, 1 MiB retained content, 512 KiB/manifest.",
+                    "complete": true,
+                    "issues": [],
+                    "files": [
+                      {
+                        "path": "docs/context-note.md",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "PRE_Z8_U3_EXPLICIT_REFERENCE: Additional inert synthetic review context. No command or installation is authorized by this file.\n"
+                      },
+                      {
+                        "path": "docs/same-content.md",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "PRE_Z8_U3_NATIVE_GUIDANCE: Synthetic isolated workspace. Read and edit only fixture.mjs as explicitly requested. Preserve fixture.test.mjs and all unrelated source. Do not execute commands, tests, installs, commits or publication. Do not inspect parent directories or external files. Graph-selected native guidance does not require a duplicate Read.\n"
+                      },
+                      {
+                        "path": "fixture.mjs",
+                        "status": "unstaged:M",
+                        "beforeText": "export const marker = 'Z1_BEFORE_7391';\n",
+                        "afterText": "export const marker = 'Z1_AFTER_7391';\n",
+                        "diff": "diff --git a/fixture.mjs b/fixture.mjs\nindex f188caa..700bad8 100644\n--- a/fixture.mjs\n+++ b/fixture.mjs\n@@ -1 +1 @@\n-export const marker = 'Z1_BEFORE_7391';\n+export const marker = 'Z1_AFTER_7391';\n"
+                      },
+                      {
+                        "path": "review-note.txt",
+                        "status": "untracked",
+                        "beforeText": "",
+                        "afterText": "Z3 synthetic untracked review note: inspect this exact snapshot.\n"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "complete": true,
+              "issues": [],
+              "createdAt": 1790496112579
+            }
+          }
+        ],
+        "toolAttempts": [],
+        "artifacts": [
+          {
+            "id": "8556f156-8ac4-4524-bc4e-db701b082746",
+            "runId": "68874734-8dc1-49c4-ad1e-10689f4d9046",
+            "nodeId": "analyze",
+            "attemptId": "7dab11b8-84fe-4dd8-b290-6fc9f00ef8fb",
+            "workspaceKey": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace",
+            "type": "text",
+            "provenance": "native-agent-final",
+            "bytes": 284,
+            "digest": "62cbf767632cf37c71d60dce60a031c94088cf6923de87b0f80d68482e48459c",
+            "capturedAt": 1790496105938,
+            "validation": "valid",
+            "sessionId": "sess_881abd55-da93-4965-b8d7-d98434aef477",
+            "inputId": "232ec897-915c-482b-bc3b-85c75de60d58",
+            "commandId": "232ec897-915c-482b-bc3b-85c75de60d58"
+          },
+          {
+            "id": "ec9334eb-7299-4d3f-9ae9-a50542be19d1",
+            "runId": "68874734-8dc1-49c4-ad1e-10689f4d9046",
+            "nodeId": "implement",
+            "attemptId": "c819c8ef-9dde-4809-9d16-51493f9e00cb",
+            "workspaceKey": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace",
+            "type": "text",
+            "provenance": "native-agent-final",
+            "bytes": 226,
+            "digest": "56f935695ee5abd866b7ea6dc36fa166bef47044dd4efbbff2f2b97b3920ab31",
+            "capturedAt": 1790496111147,
+            "validation": "valid",
+            "sessionId": "sess_51322774-419c-4aa6-9ff9-f539c6448b52",
+            "inputId": "80ba3f52-1a64-4d71-8c12-279ec84af18f",
+            "commandId": "80ba3f52-1a64-4d71-8c12-279ec84af18f"
+          },
+          {
+            "id": "b48b6cdd-5da0-4197-b3cb-2b7fc4a97d7e",
+            "runId": "68874734-8dc1-49c4-ad1e-10689f4d9046",
+            "nodeId": "review",
+            "attemptId": "e1daa227-c473-410b-a237-53ff47121bbb",
+            "workspaceKey": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace",
+            "type": "text",
+            "provenance": "native-agent-final",
+            "bytes": 222,
+            "digest": "b1b96d81a21b797f51499c8fd01b2fa85cfca8da7246f164f80cdf06039431e7",
+            "capturedAt": 1790496112083,
+            "validation": "valid",
+            "sessionId": "sess_847524f8-f4f0-4505-b737-3612b8ebee63",
+            "inputId": "7c44fdd9-211d-40b0-a9f1-a7d0959e51f2",
+            "commandId": "7c44fdd9-211d-40b0-a9f1-a7d0959e51f2"
+          }
+        ],
+        "artifactBindings": [
+          {
+            "nodeId": "analyze",
+            "attemptId": "7dab11b8-84fe-4dd8-b290-6fc9f00ef8fb",
+            "selector": "final",
+            "artifactId": "8556f156-8ac4-4524-bc4e-db701b082746"
+          },
+          {
+            "nodeId": "implement",
+            "attemptId": "c819c8ef-9dde-4809-9d16-51493f9e00cb",
+            "selector": "final",
+            "artifactId": "ec9334eb-7299-4d3f-9ae9-a50542be19d1"
+          },
+          {
+            "nodeId": "review",
+            "attemptId": "e1daa227-c473-410b-a237-53ff47121bbb",
+            "selector": "final",
+            "artifactId": "b48b6cdd-5da0-4197-b3cb-2b7fc4a97d7e"
+          }
+        ]
+      }
+    ]
+  },
+  "nativeLedger": [
+    {
+      "id": "queue_232ec897-915c-482b-bc3b-85c75de60d58",
+      "session_id": "sess_881abd55-da93-4965-b8d7-d98434aef477",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Workflow task: analyze.\nInspect the explicit request, relevant native project instructions and source. Identify a bounded implementation and acceptance criteria. Preserve unrelated work. Do not edit or execute commands. Missing requirements remain questions.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"AGENTS.md\",\"delivery\":\"native-instructions\"}]\nReferences marked native-instructions are already supplied by native project guidance; do not read or inject them again. Read only explicit-read references through native Read. Load native-skill references using nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. References without a delivery marker remain unresolved until preparation. Cite reference IDs; missing source is a question, never an invented rule.",
+        "intent": {
+          "sourceCommandId": "232ec897-915c-482b-bc3b-85c75de60d58",
+          "queueItemId": "queue_232ec897-915c-482b-bc3b-85c75de60d58",
+          "clientId": "graph:7dab11b8-84fe-4dd8-b290-6fc9f00ef8fb",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790496104851,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "232ec897-915c-482b-bc3b-85c75de60d58",
+          "queueItemId": "queue_232ec897-915c-482b-bc3b-85c75de60d58",
+          "clientId": "graph:7dab11b8-84fe-4dd8-b290-6fc9f00ef8fb",
+          "kind": "sendText",
+          "text": "Workflow task: analyze.\nInspect the explicit request, relevant native project instructions and source. Identify a bounded implementation and acceptance criteria. Preserve unrelated work. Do not edit or execute commands. Missing requirements remain questions.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"AGENTS.md\",\"delivery\":\"native-instructions\"}]\nReferences marked native-instructions are already supplied by native project guidance; do not read or inject them again. Read only explicit-read references through native Read. Load native-skill references using nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. References without a delivery marker remain unresolved until preparation. Cite reference IDs; missing source is a question, never an invented rule.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790496104851
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790496104868,
+      "time_updated": 1790496105378
+    },
+    {
+      "id": "queue_80ba3f52-1a64-4d71-8c12-279ec84af18f",
+      "session_id": "sess_51322774-419c-4aa6-9ff9-f539c6448b52",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Workflow task: implement.\nImplement the explicit request using the supplied analysis and normal native tools and permissions. Read current source first and preserve unrelated work. Report actual edits, checks performed, limitations and unresolved questions. This workflow has no configured machine-test verification; never claim one exists. Do not commit, merge or publish.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nanalyze:\n\n\nPRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_ANALYSIS: Native Read observed Z1_BEFORE_7391 in fixture.mjs. Change only that marker to Z1_AFTER_7391 and preserve fixture.test.mjs. Configured tests are not included.\nLiteral predecessor data {{inputs.not_bound}} and {{nested braces}}.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"AGENTS.md\",\"delivery\":\"native-instructions\"}]\nReferences marked native-instructions are already supplied by native project guidance; do not read or inject them again. Read only explicit-read references through native Read. Load native-skill references using nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. References without a delivery marker remain unresolved until preparation. Cite reference IDs; missing source is a question, never an invented rule.",
+        "intent": {
+          "sourceCommandId": "80ba3f52-1a64-4d71-8c12-279ec84af18f",
+          "queueItemId": "queue_80ba3f52-1a64-4d71-8c12-279ec84af18f",
+          "clientId": "graph:c819c8ef-9dde-4809-9d16-51493f9e00cb",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790496106167,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "80ba3f52-1a64-4d71-8c12-279ec84af18f",
+          "queueItemId": "queue_80ba3f52-1a64-4d71-8c12-279ec84af18f",
+          "clientId": "graph:c819c8ef-9dde-4809-9d16-51493f9e00cb",
+          "kind": "sendText",
+          "text": "Workflow task: implement.\nImplement the explicit request using the supplied analysis and normal native tools and permissions. Read current source first and preserve unrelated work. Report actual edits, checks performed, limitations and unresolved questions. This workflow has no configured machine-test verification; never claim one exists. Do not commit, merge or publish.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nanalyze:\n\n\nPRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_ANALYSIS: Native Read observed Z1_BEFORE_7391 in fixture.mjs. Change only that marker to Z1_AFTER_7391 and preserve fixture.test.mjs. Configured tests are not included.\nLiteral predecessor data {{inputs.not_bound}} and {{nested braces}}.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"AGENTS.md\",\"delivery\":\"native-instructions\"}]\nReferences marked native-instructions are already supplied by native project guidance; do not read or inject them again. Read only explicit-read references through native Read. Load native-skill references using nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. References without a delivery marker remain unresolved until preparation. Cite reference IDs; missing source is a question, never an invented rule.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790496106167
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790496106173,
+      "time_updated": 1790496106622
+    },
+    {
+      "id": "queue_7c44fdd9-211d-40b0-a9f1-a7d0959e51f2",
+      "session_id": "sess_847524f8-f4f0-4505-b737-3612b8ebee63",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Workflow task: review.\nInspect the actual changes against the explicit request, analysis and implementation handoff. Do not edit or execute commands. Distinguish observed source findings from agent-reported checks. Report remaining issues and what a human should inspect. Verification is agent-led; configured test evidence is not included. Agent prose cannot establish machine-verified success.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nanalyze:\nPRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_ANALYSIS: Native Read observed Z1_BEFORE_7391 in fixture.mjs. Change only that marker to Z1_AFTER_7391 and preserve fixture.test.mjs. Configured tests are not included.\nLiteral predecessor data {{inputs.not_bound}} and {{nested braces}}.\n\nimplement:\nPRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_IMPLEMENTED: Native Edit confirmed the requested marker change in fixture.mjs. No test command ran; configured tests are not included. Independent source review is still required.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"AGENTS.md\",\"delivery\":\"native-instructions\"}]\nReferences marked native-instructions are already supplied by native project guidance; do not read or inject them again. Read only explicit-read references through native Read. Load native-skill references using nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. References without a delivery marker remain unresolved until preparation. Cite reference IDs; missing source is a question, never an invented rule.",
+        "intent": {
+          "sourceCommandId": "7c44fdd9-211d-40b0-a9f1-a7d0959e51f2",
+          "queueItemId": "queue_7c44fdd9-211d-40b0-a9f1-a7d0959e51f2",
+          "clientId": "graph:e1daa227-c473-410b-a237-53ff47121bbb",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790496111378,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "7c44fdd9-211d-40b0-a9f1-a7d0959e51f2",
+          "queueItemId": "queue_7c44fdd9-211d-40b0-a9f1-a7d0959e51f2",
+          "clientId": "graph:e1daa227-c473-410b-a237-53ff47121bbb",
+          "kind": "sendText",
+          "text": "Workflow task: review.\nInspect the actual changes against the explicit request, analysis and implementation handoff. Do not edit or execute commands. Distinguish observed source findings from agent-reported checks. Report remaining issues and what a human should inspect. Verification is agent-led; configured test evidence is not included. Agent prose cannot establish machine-verified success.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nanalyze:\nPRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_ANALYSIS: Native Read observed Z1_BEFORE_7391 in fixture.mjs. Change only that marker to Z1_AFTER_7391 and preserve fixture.test.mjs. Configured tests are not included.\nLiteral predecessor data {{inputs.not_bound}} and {{nested braces}}.\n\nimplement:\nPRE_Z8_U3_746fe522-5073-4805-aa20-92585298f34d_IMPLEMENTED: Native Edit confirmed the requested marker change in fixture.mjs. No test command ran; configured tests are not included. Independent source review is still required.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"AGENTS.md\",\"delivery\":\"native-instructions\"}]\nReferences marked native-instructions are already supplied by native project guidance; do not read or inject them again. Read only explicit-read references through native Read. Load native-skill references using nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. References without a delivery marker remain unresolved until preparation. Cite reference IDs; missing source is a question, never an invented rule.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790496111378
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790496111385,
+      "time_updated": 1790496111886
+    }
+  ],
+  "nativeSessions": [
+    {
+      "id": "sess_881abd55-da93-4965-b8d7-d98434aef477",
+      "directory": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace",
+      "parent_id": null,
+      "workspace_id": null
+    },
+    {
+      "id": "sess_51322774-419c-4aa6-9ff9-f539c6448b52",
+      "directory": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace",
+      "parent_id": null,
+      "workspace_id": null
+    },
+    {
+      "id": "sess_847524f8-f4f0-4505-b737-3612b8ebee63",
+      "directory": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace",
+      "parent_id": null,
+      "workspace_id": null
+    }
+  ],
+  "modelRequests": 11,
+  "nativeToolCalls": [
+    {
+      "id": "pre_z8_u1_analyze_read",
+      "type": "function",
+      "function": {
+        "name": "Read",
+        "arguments": "{\"file_path\":\"D:/Playground/ZCode/.tmp/z1-native-1790496090405-cbd47f/workspace/fixture.mjs\"}"
+      },
+      "observedAt": 1790496105777
+    },
+    {
+      "id": "pre_z8_u1_implement_read",
+      "type": "function",
+      "function": {
+        "name": "Read",
+        "arguments": "{\"file_path\":\"D:/Playground/ZCode/.tmp/z1-native-1790496090405-cbd47f/workspace/fixture.mjs\"}"
+      },
+      "observedAt": 1790496106743
+    },
+    {
+      "id": "pre_z8_u1_implement_question",
+      "type": "function",
+      "function": {
+        "name": "AskUserQuestion",
+        "arguments": "{\"questions\":[{\"question\":\"Allow the requested synthetic marker edit without running commands or tests?\",\"header\":\"Marker edit\",\"options\":[{\"label\":\"Apply the synthetic edit\",\"description\":\"Change only fixture.mjs using the native Edit tool.\"},{\"label\":\"Keep waiting\",\"description\":\"Do not authorize this synthetic edit yet.\"}],\"multiSelect\":false}]}"
+      },
+      "observedAt": 1790496108951
+    },
+    {
+      "id": "pre_z8_u1_implement_edit",
+      "type": "function",
+      "function": {
+        "name": "Edit",
+        "arguments": "{\"file_path\":\"D:/Playground/ZCode/.tmp/z1-native-1790496090405-cbd47f/workspace/fixture.mjs\",\"old_string\":\"Z1_BEFORE_7391\",\"new_string\":\"Z1_AFTER_7391\"}"
+      },
+      "observedAt": 1790496111065
+    },
+    {
+      "id": "pre_z8_u1_review_read",
+      "type": "function",
+      "function": {
+        "name": "Read",
+        "arguments": "{\"file_path\":\"D:/Playground/ZCode/.tmp/z1-native-1790496090405-cbd47f/workspace/fixture.mjs\"}"
+      },
+      "observedAt": 1790496112003
+    }
+  ],
+  "nativeToolResults": [
+    {
+      "id": "pre_z8_u1_analyze_read",
+      "output": "1\texport const marker = 'Z1_BEFORE_7391';\n2\t",
+      "observedAt": 1790496105777
+    },
+    {
+      "id": "pre_z8_u1_implement_read",
+      "output": "1\texport const marker = 'Z1_BEFORE_7391';\n2\t",
+      "observedAt": 1790496106743
+    },
+    {
+      "id": "pre_z8_u1_implement_question",
+      "output": "User has answered your questions: \"Allow the requested synthetic marker edit without running commands or tests?\"=\"Apply the synthetic edit\". You can now continue with the user's answers in mind.",
+      "observedAt": 1790496108951
+    },
+    {
+      "id": "pre_z8_u1_implement_edit",
+      "output": "The file D:/Playground/ZCode/.tmp/z1-native-1790496090405-cbd47f/workspace/fixture.mjs has been updated successfully. (file state is current in your context — no need to Read it back)",
+      "observedAt": 1790496111065
+    },
+    {
+      "id": "pre_z8_u1_review_read",
+      "output": "1\texport const marker = 'Z1_AFTER_7391';\n2\t",
+      "observedAt": 1790496112003
+    }
+  ],
+  "fixtureErrors": [],
+  "completedAt": 1790496114877
+}

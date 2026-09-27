@@ -35,17 +35,27 @@ import {
   startU4Companion,
 } from "./pre-z8-u4-cancel.mjs";
 import { assertU4Summary, captureU4Guided, captureU4Summary, openU4Gate } from "./pre-z8-u4-ui.mjs";
+import {
+  assertU4CompanionWaiting,
+  completeU4ConcurrentCompanion,
+} from "./pre-z8-u4-concurrent.mjs";
+import { driveU4SourceDrift } from "./pre-z8-u4-source-drift.mjs";
 
 const scenario =
   process.argv.find((value) => value.startsWith("--scenario="))?.split("=")[1] ?? "cancel";
-assert.ok(["cancel", "complete"].includes(scenario));
+assert.ok(["cancel", "complete", "concurrent-chat", "source-drift"].includes(scenario));
 assert.equal(
   process.env.Z1_PACKAGED_EXE,
   undefined,
   "Refusing inherited installed executable override.",
 );
 const isolation = await createIsolation({
-  fixtureFactory: scenario === "cancel" ? startU4Fixture : startU3Fixture,
+  fixtureFactory:
+    scenario === "cancel"
+      ? startU4Fixture
+      : scenario === "concurrent-chat"
+        ? (workspace) => startU4Fixture(workspace, { holdEnabled: false })
+        : startU3Fixture,
 });
 const summary = {
   scenario: `pre-z8-u4-${scenario}`,
@@ -89,10 +99,32 @@ try {
   await verifyU3Context(isolation, window, summary);
   await captureU4Guided(isolation, window, summary);
   await assertU3Idle(isolation, "entire U4 setup and Guided read-only preparation");
+  // Capture the prepared definition/source/test before the independent companion detour.
+  const preparedRecord = await readGraphRecord(isolation);
+  const preparedSource = await isolation.readFixture();
   const companion =
-    scenario === "cancel" ? await startU4Companion(isolation, window, summary) : undefined;
+    scenario === "cancel" || scenario === "concurrent-chat"
+      ? await startU4Companion(isolation, window, summary)
+      : undefined;
   const beforeInputs = await ledger(isolation),
     requestsBefore = modelCount(isolation);
+  // 伴随会话通过 showGraph 返回时会停留在 Runs 视图，而 Run 按钮仅在 Design 视图渲染；
+  // 因此必须在此显式切回 Design，并确认切换这一只读导航未改变已准备的定义、源码/测试与单条伴随输入。
+  await window.getByTestId("graph-view-design").click();
+  await window.getByTestId("graph-run-button").waitFor();
+  assert.deepEqual((await readGraphRecord(isolation)).definition, preparedRecord.definition);
+  await assertU3FixturePreserved(isolation, originalTest, preparedSource);
+  assert.deepEqual(await ledger(isolation), beforeInputs);
+  assert.equal(modelCount(isolation), requestsBefore);
+  summary.preRunBoundary = {
+    definitionRevision: preparedRecord.definition.revision,
+    templateId: preparedRecord.definition.template.id,
+    referenceSelection: preparedRecord.definition.template.bindings.references,
+    sourceSha256: u3Sha256(preparedSource),
+    nativeInputs: beforeInputs.length,
+    modelRequests: requestsBefore,
+    designSelectedAt: Date.now(),
+  };
   await window.getByTestId("graph-run-button").click();
   await window.getByTestId("graph-run-confirmation").waitFor();
   const snapshot = JSON.parse(
@@ -140,6 +172,55 @@ try {
     await captureU4Summary(isolation, window, summary, "pre-z8-u4-cancelled-reopened-no-replay");
     summary.assertions.push(
       "Restart selects the same terminal cancelled history with its exact native proof and preserved source, without replay, recovery admission or another model request.",
+    );
+  } else if (scenario === "concurrent-chat") {
+    // The 3 Graph captured prompts are proven by complete-attempt-2; this scenario focuses on the
+    // new concurrent-isolation assertion: the companion Chat stays unanswered while the Graph run
+    // COMPLETES its final gate and terminal proof (not just cancellation), then completes only
+    // after its explicit answer with no cross-talk.
+    await assertU4CompanionWaiting(isolation, window, summary, companion, "gate-pending");
+    await openU4Gate(isolation, window, summary, boundary);
+    await captureU4Summary(isolation, window, summary, "pre-z8-u4-concurrent-gate-pending");
+    const completed = await finishU3Graph(isolation, window, summary, boundary);
+    summary.terminalRun = completed;
+    await assertU4CompanionWaiting(isolation, window, summary, companion, "completed");
+    const projection = await assertU4Summary(window, summary, completed, {
+      evidence: "agent-reported",
+      human: "approved",
+    });
+    assert.equal(projection.evidence.configuredTestCount, 0);
+    assert.equal(projection.sourceChanges.length, 1);
+    assert.ok(
+      projection.sourceChanges[0].snapshot.files.some((item) => item.path === "fixture.mjs"),
+    );
+    await captureU4Summary(
+      isolation,
+      window,
+      summary,
+      "pre-z8-u4-concurrent-completed-approved",
+    );
+    await completeU4ConcurrentCompanion(
+      isolation,
+      window,
+      summary,
+      completed,
+      companion,
+      originalTest,
+    );
+    await assertU3FixturePreserved(isolation, originalTest, AFTER_SOURCE);
+    summary.assertions.push(
+      "Concurrent ordinary Chat: an independent Chat stays at its original native question while the Graph run completes its final gate and terminal proof, then completes only after its explicit answer with no cross-talk between the two sessions.",
+    );
+  } else if (scenario === "source-drift") {
+    // The 3 captured prompts are proven by complete-attempt-2; this scenario mutates fixture.mjs at
+    // the approval boundary and proves the product's StaleEvidence contract blocks the frozen
+    // evidence from being approved as current, with no auto-recovery after source restore.
+    await openU4Gate(isolation, window, summary, boundary);
+    await captureU4Summary(isolation, window, summary, "pre-z8-u4-source-drift-gate-pending");
+    await driveU4SourceDrift(isolation, window, summary, boundary, "final-gate");
+    await assertU3FixturePreserved(isolation, originalTest, AFTER_SOURCE);
+    summary.assertions.push(
+      "Controlled fixture.mjs mutation after evidence capture is detected at the approval boundary: the product blocks the decision with StaleEvidence, the stale gate does not auto-recover after the exact source restore, and no blind replay or stale bypass is possible.",
     );
   } else {
     const inputs = await assertU3CapturedPrompts(isolation, summary, boundary);

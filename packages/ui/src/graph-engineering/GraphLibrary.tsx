@@ -240,6 +240,7 @@ export function GraphLibrary({
         entry={entry}
         version={version}
         disabled={locked}
+        target={target}
         onVersion={(nextVersion) => {
           if (entry) choose(workspaceKey, { id: entry.id, version: nextVersion });
           setReplacement(null);

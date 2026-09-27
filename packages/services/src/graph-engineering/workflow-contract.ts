@@ -27,6 +27,14 @@ export {
   graphRepairPreset,
   applyGraphRepairPolicy,
 } from "./domain/editor-routing.js";
+export { applyGraphRunRequest } from "./domain/workflow-request.js";
+export {
+  TRANSFER_BYTE_LIMIT,
+  IMPORT_READ_BOUND,
+  assertStatUnchanged,
+  decodeImportBytes,
+} from "./domain/workflow-transfer.js";
+export type { TransferStatSnapshot } from "./domain/workflow-transfer.js";
 
 export interface GraphPortableTemplate {
   format: "zcode-workflow";

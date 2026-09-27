@@ -79,6 +79,15 @@ export async function configureDotnetEnvironment(isolation) {
     DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE: "true",
     DOTNET_CLI_USE_MSBUILD_SERVER: "0",
   });
+  // 当系统未安装 fixture 固定的 SDK 版本时，允许通过 PRE_Z8_DOTNET_ROOT 显式指定本地 SDK 根目录；
+  // 仅设置 DOTNET_ROOT 与 PATH 前缀，不放宽 global.json 的 rollForward 或版本断言。
+  // 准确版本仍由 prepareU2OfflineAssets/createVstestFixture 的 --version 与 sdkPath basename 断言独立验证。
+  const localSdkRoot = process.env.PRE_Z8_DOTNET_ROOT;
+  if (localSdkRoot) {
+    const resolvedRoot = await realpath(localSdkRoot);
+    isolation.env.DOTNET_ROOT = resolvedRoot;
+    isolation.env.PATH = `${resolvedRoot}${path.delimiter}${isolation.env.PATH ?? ""}`;
+  }
 }
 
 export async function prepareCSharpFixture(isolation, { buggy = false } = {}) {

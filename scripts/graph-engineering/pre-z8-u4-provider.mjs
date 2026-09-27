@@ -9,10 +9,13 @@ export const U4_COMPANION_OPTION = "Complete the unrelated U4 Chat";
 export const U4_COMPANION_TOOL = "pre_z8_u4_companion_question";
 export const U4_COMPANION_OUTPUT =
   "PRE_Z8_U4_COMPANION_COMPLETED: The same unrelated native Chat received its explicit answer after Graph cancellation. No source or command action was taken.";
+// concurrent-chat 场景下 Graph 运行是完成而非取消；配套 Chat 的结果文本必须与实际经过一致，不能复用 cancel 文案。
+export const U4_COMPANION_OUTPUT_CONCURRENT =
+  "PRE_Z8_U4_COMPANION_COMPLETED: The same unrelated native Chat received its explicit answer after Graph completion. No source or command action was taken.";
 const messageText = (message) =>
   typeof message.content === "string" ? message.content : JSON.stringify(message.content);
 
-export function u4Response({ body, workspace, outputs }) {
+export function u4Response({ body, workspace, outputs, holdEnabled = true }) {
   const users = (body.messages ?? []).filter((message) => message.role === "user").map(messageText);
   if (!body.tools?.length) return { content: "Pre-Z8 controlled U4 fixture" };
   if (users.at(-1) === U4_COMPANION_INPUT) {
@@ -24,7 +27,9 @@ export function u4Response({ body, workspace, outputs }) {
         typeof result.content === "string" && result.content.includes(U4_COMPANION_OPTION),
         "The explicit companion answer is unavailable.",
       );
-      return { content: U4_COMPANION_OUTPUT };
+      return {
+        content: holdEnabled ? U4_COMPANION_OUTPUT : U4_COMPANION_OUTPUT_CONCURRENT,
+      };
     }
     const name = body.tools.find((tool) => tool.function.name.toLowerCase() === "askuserquestion")
       ?.function.name;
@@ -36,8 +41,9 @@ export function u4Response({ body, workspace, outputs }) {
         arguments: {
           questions: [
             {
-              question:
-                "Complete this unrelated Chat only after verifying Graph cancellation preserved it?",
+              question: holdEnabled
+                ? "Complete this unrelated Chat only after verifying Graph cancellation preserved it?"
+                : "Complete this unrelated Chat only after verifying Graph completion preserved it?",
               header: "U4 companion",
               options: [
                 {
@@ -59,13 +65,17 @@ export function u4Response({ body, workspace, outputs }) {
   );
   const prompt = users.join("\n");
   const response = nativeResponse({ body, prompt, workspace, outputs });
-  return stageOf(prompt) === "implement" && response.content === outputs.implement
+  // The hold pauses the run after the exact successful native Edit so cancellation can be tested.
+  // concurrent-chat disables it so the run proceeds through review and the final gate to completion.
+  return holdEnabled &&
+    stageOf(prompt) === "implement" &&
+    response.content === outputs.implement
     ? { ...response, hold: true }
     : response;
 }
 
 /** Only provider response delivery is held; all source, tools and terminal facts are native-owned. */
-export async function startU4Fixture(workspace) {
+export async function startU4Fixture(workspace, { holdEnabled = true } = {}) {
   const requests = [],
     toolResults = [],
     toolCalls = [],
@@ -126,7 +136,7 @@ export async function startU4Fixture(workspace) {
       return;
     }
     try {
-      const decision = u4Response({ body, workspace, outputs });
+      const decision = u4Response({ body, workspace, outputs, holdEnabled });
       if (decision.hold) {
         const entry = {
           id: randomUUID(),

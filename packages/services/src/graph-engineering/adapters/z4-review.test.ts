@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { writeFile, utimes } from "node:fs/promises";
+import { writeFile, utimes, stat } from "node:fs/promises";
 import { join } from "node:path";
 import {
   evidenceFixture,
@@ -126,9 +126,16 @@ test("Build cannot combine one output digest with freshness observed from change
 test("Test freshness fingerprint must describe the exact retained report bytes", async (t) => {
   const f = await buildAndTestFixture(t);
   await f.run();
-  const startedAt = Date.now();
-  await writeFile(join(f.target.workspacePath, "build.bin"), "real bounded build bytes");
-  f.finishTool(0, 0, { startedAt, completedAt: Date.now() });
+  // 真实文件新鲜度需要非零执行窗口。Windows 上 fs.Stats.mtimeMs 返回亚毫秒浮点，
+  // 而 Date.now() 截断为整数毫秒；写入后立即取 Date.now() 可能小于文件 mtimeMs，
+  // 使 tool-evidence.ts:151 的 Math.floor(mtimeMs) > completedAt 误判（与 D1 同类）。
+  // 真实构建进程在退出前写入产物，退出时间 ≥ 写入时间；这里用文件实际 mtimeMs 作为
+  // completedAt，使窗口严格包含写入时刻，产品新鲜度判定不变。
+  const startedAt = Date.now() - 1000;
+  const buildBinPath = join(f.target.workspacePath, "build.bin");
+  await writeFile(buildBinPath, "real bounded build bytes");
+  const completedAt = (await stat(buildBinPath)).mtimeMs;
+  f.finishTool(0, 0, { startedAt, completedAt });
   const running = await f.wait((r) => r.toolAttempts?.[1]?.status === "WaitingForPermission");
   const attempt = running.toolAttempts![1]!;
   const report = {

@@ -1,5 +1,14 @@
 import assert from "node:assert/strict";
 
+/**
+ * Native session_input.id is the queue-row identity `queue_<commandId>`, constructed
+ * deterministically by the runtime CommandInbox (command-inbox.ts:75-77). Defined
+ * locally rather than imported from the runtime to preserve harness layer boundaries.
+ */
+function nativeQueueItemId(commandId) {
+  return `queue_${commandId}`;
+}
+
 /** This checks observed owner facts. It never creates a terminal event or changes a run. */
 export function assertU4Cancellation(run, owned, inputs, companion) {
   assert.equal(run.status, "Cancelled");
@@ -32,10 +41,19 @@ export function assertU4Cancellation(run, owned, inputs, companion) {
     "Only Analyze, Implement and the independent Chat may be admitted.",
   );
   for (const item of admitted) {
-    const matching = inputs.filter((input) => input.id === item.inputId);
+    // Graph assigns inputId === commandId (run-plan.ts:58); the native ledger row id
+    // is a separate queue-row identity `queue_<commandId>` (command-inbox.ts:75-77).
+    // Correlate via the exact owning session and the original source command, then
+    // validate the queue-row id mapping independently. Never match by prefix stripping.
+    const matching = inputs.filter(
+      (input) =>
+        input.session_id === item.sessionId &&
+        input.payload?.intent?.sourceCommandId === item.commandId,
+    );
     assert.equal(matching.length, 1);
-    assert.equal(matching[0].session_id, item.sessionId);
-    assert.equal(matching[0].payload.intent.sourceCommandId, item.commandId);
+    const match = matching[0];
+    assert.equal(match.id, nativeQueueItemId(item.commandId));
+    assert.equal(match.payload.intent.sourceCommandId, item.commandId);
     assert.notEqual(item.sessionId, companion.session_id);
   }
   const preserved = inputs.find((input) => input.id === companion.id);

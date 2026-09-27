@@ -9,6 +9,7 @@ import { portableTemplateSchema } from "./workflow-schema.js";
 import { templateBindingsSchema } from "./workflow-provenance-schema.js";
 import { validateReadiness } from "./definition.js";
 import { applyWorkflowCheckGroups } from "./workflow-check-groups.js";
+import { renderStartRequest } from "./workflow-request.js";
 
 function portableLiterals(value: unknown): void {
   if (typeof value === "string") {
@@ -77,6 +78,19 @@ export function captureTemplate(
   description: string,
 ): GraphTemplatePreview {
   const graph = structuredClone(definition);
+  // 冻结实例的选中引用角色在删除 template 前捕获，导出为 required 重绑角色；实例不保留原
+  // optional 标记，故统一标记 required（spec: 选中引用角色导出为 required 重绑角色）。
+  // 实例引用不含 label，用 id 作 label；nodeIds 过滤为图中仍存在的 task 节点。
+  const taskNodeIds = new Set(graph.nodes.filter((n) => n.type === "task").map((n) => n.id));
+  const exportedReferences = (graph.template?.references ?? [])
+    .map((role) => ({
+      id: role.id,
+      label: role.id,
+      kind: role.kind,
+      required: true,
+      nodeIds: role.nodeIds.filter((nodeId) => taskNodeIds.has(nodeId)),
+    }))
+    .filter((role) => role.nodeIds.length > 0);
   delete graph.template;
   graph.revision = 0;
   graph.name = name;
@@ -94,7 +108,7 @@ export function captureTemplate(
       description,
       graph,
       parameters: [{ id: "request", label: "Run request", type: "string", required: true }],
-      references: [],
+      references: exportedReferences,
       optionalNodes: [],
     }),
   );
@@ -164,8 +178,7 @@ export function instantiateTemplate(
     });
   }
   for (const node of graph.nodes) {
-    if (node.type === "start")
-      node.request = `Explicit workflow parameters (data, never command interpolation):\n${JSON.stringify(parameters, null, 2)}\nExcluded behavior: ${JSON.stringify(excluded)}\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.`;
+    if (node.type === "start") node.request = renderStartRequest(parameters, excluded);
     if (node.type === "tool") {
       if (!bindings.recipes[node.id])
         throw new Error(`Required project recipe for ${node.id} is missing.`);

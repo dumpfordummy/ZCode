@@ -1,0 +1,80 @@
+{
+  "archivedAt": "2026-09-27T08:03:09.333Z",
+  "sourceProfile": ".tmp/z1-native-1790496090405-cbd47f",
+  "scenario": "pre-z8-u4-source-drift",
+  "status": "PASS",
+  "runId": "68874734-8dc1-49c4-ad1e-10689f4d9046",
+  "files": [
+    {
+      "path": "pre-z8-u4-summary.json",
+      "sha256": "874618a0ef16cf8b1fb6f83dd99721dfe7ce20d625d4c5f01e06de2ddd71585b",
+      "size": 111438
+    },
+    {
+      "path": "pre-z8-u4-source-drift-gate-pending-1280.png",
+      "sha256": "c7ce120af84871dfcbdf7312e09c72343fc598bef1ec8a5dfdb0dfee2a738310",
+      "size": 87136
+    },
+    {
+      "path": "pre-z8-u4-source-drift-gate-pending-1920.png",
+      "sha256": "f99dc8d5ddafb92335480d1281a7929ba34e3ee7738be18b2b76720771aab560",
+      "size": 137552
+    },
+    {
+      "path": "pre-z8-u4-source-drift-stale-blocked-1280.png",
+      "sha256": "b123719f6b98d6c1274efe570880a63bad06792e2be3f350529fd1e3ae28f3fd",
+      "size": 87678
+    },
+    {
+      "path": "pre-z8-u4-source-drift-stale-blocked-1920.png",
+      "sha256": "906e860bd617ab6abf1b4a8ddc00e4b7e37309b2120ec40a7f0b4ccc7c24c612",
+      "size": 139404
+    },
+    {
+      "path": "pre-z8-u4-source-drift-restored-no-recovery-1280.png",
+      "sha256": "b123719f6b98d6c1274efe570880a63bad06792e2be3f350529fd1e3ae28f3fd",
+      "size": 87678
+    },
+    {
+      "path": "pre-z8-u4-source-drift-restored-no-recovery-1920.png",
+      "sha256": "906e860bd617ab6abf1b4a8ddc00e4b7e37309b2120ec40a7f0b4ccc7c24c612",
+      "size": 139404
+    },
+    {
+      "path": "pre-z8-u4-source-drift-f1e3fb5e-5c85-4a3d-ac75-ff4a0543a98b.json",
+      "sha256": "97963c39708cc549c656a7d09a7ba704b9cf2406e8bb86c1c254c24c0c9d4458",
+      "size": 784
+    }
+  ],
+  "staleEvidence": {
+    "runId": "68874734-8dc1-49c4-ad1e-10689f4d9046",
+    "runStatus": "StaleEvidence",
+    "gateStatus": "StaleEvidence",
+    "gateMessage": "Relevant evidence or source state changed after review.",
+    "resumeRequired": false,
+    "uiBlocked": true
+  },
+  "restoration": {
+    "kind": "u4-source-drift",
+    "path": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\workspace\\fixture.mjs",
+    "beforeSha256": "3705f9f48c18865e0816b08c10c234f102e4b4d4543253c7e6ace929b30338f3",
+    "mutatedSha256": "9620b49db0195f43762ba038458431bb5946d82fd6498319b2512b218821f301",
+    "backupPath": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-source-drift-f1e3fb5e-5c85-4a3d-ac75-ff4a0543a98b.original",
+    "receiptPath": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790496090405-cbd47f\\pre-z8-u4-source-drift-f1e3fb5e-5c85-4a3d-ac75-ff4a0543a98b.json",
+    "startedAt": 1790496113380,
+    "restoration": "restored-exact-bytes",
+    "afterSha256": "3705f9f48c18865e0816b08c10c234f102e4b4d4543253c7e6ace929b30338f3",
+    "completedAt": 1790496114455
+  },
+  "buildIdentity": {
+    "comparedTo": "concurrent-chat-attempt-2-pass / complete-attempt-2",
+    "artifactsMatch": true,
+    "buildSha256": [
+      "8a3d061fc217212d561a639b090e7152e6f2f44bfb1ac42ab88edf40bfd61332",
+      "8313a1774afa18719ef60467924861d9eed76dcbcc7fc585f7bad8fde6889b74",
+      "c28816f71fc5f51deef3d443dbb24a71c28312640fff38da66d2576caeb949c3",
+      "7ce34d94428365c4da1fb0bb568fa1dbd0a32299bf769dd44b9070d4a6c4addf"
+    ]
+  },
+  "note": "Source-drift PASS: fixture.mjs was mutated in place (inode-preserving) at the final-gate approval boundary after evidence capture. The product approvals.check recomputed live source evidence, detected the drift, and set run + gate status to StaleEvidence with the exact message \"Relevant evidence or source state changed after review.\". The approve control was disabled (uiBlocked=true). After exact-byte source restore, the run stayed StaleEvidence (no auto-recovery, no stale bypass, no blind replay). 3 node attempts completedSuccess; approval blocked; no new native input or model request from the blocked decision."
+}

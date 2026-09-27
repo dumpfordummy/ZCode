@@ -7199,6 +7199,16 @@ const enUS: Record<string, string> = {
   "graph.z6.create": "Create workflow",
   "graph.z6.saveVersion": "Save new version of selected workflow",
   "graph.z6.saved": "Immutable version saved. Existing instances and runs stay pinned.",
+  "graph.z6.importFile": "Import file",
+  "graph.z6.exportFile": "Export to file",
+  "graph.z6.fileSaved": "File saved.",
+  "graph.z6.fileUnavailable": "File transfer is unavailable in this environment. Use the JSON path.",
+  "graph.z6.repeatRequest": "New request",
+  "graph.z6.repeatRequestHelp":
+    "Apply a new request to the current design. This does not start a run or change prior runs.",
+  "graph.z6.applyRequest": "Apply request",
+  "graph.z6.requestAdvancedOnly":
+    "This pinned instance has no editable string request parameter. Use the Advanced JSON path to change the request.",
   "graph.z6.provenance": "Frozen workflow provenance",
   "graph.z6.parameters": "Parameter values",
   "graph.z6.excludedNodes": "Explicitly excluded nodes",

@@ -138,6 +138,33 @@ export async function verifyU2BuildBoundary(isolation, summary, run) {
   summary.buildAtTestPermission = { operationId: build.operationId, source, outputs };
 }
 
+/**
+ * 断言工件预览的脱敏结果与预期一致。预期（clean/sensitive）由调用方根据已知 fixture
+ * 内容独立判定，不依赖被测脱敏函数的输出。两种预期都拒绝标志/digest 不一致的中间态：
+ *  - clean：redacted 未置位、validation=valid、digest 与 original 一致（产品不得误脱敏干净内容）。
+ *  - sensitive：redacted=true、validation=incomplete、digest 与 original 漂移（产品不得漏脱敏敏感内容）。
+ * 这样 proof 不会因为产品返回 redacted 与否就选择一条总能接受当前输出的分支。
+ */
+export function assertArtifactRedaction(rawPreview, receipt, expected) {
+  if (expected === "sensitive") {
+    assert.equal(rawPreview.redacted, true, "sensitive content must be marked redacted");
+    assert.equal(rawPreview.validation, "incomplete", "sensitive content must be incomplete");
+    assert.notEqual(
+      rawPreview.digest,
+      receipt.original.digest,
+      "sensitive content digest must drift from original",
+    );
+  } else {
+    assert.notEqual(rawPreview.redacted, true, "clean content must not be marked redacted");
+    assert.equal(rawPreview.validation, "valid", "clean content must remain valid");
+    assert.equal(
+      rawPreview.digest,
+      receipt.original.digest,
+      "clean content digest must match original",
+    );
+  }
+}
+
 export async function verifyU2Result(
   isolation,
   window,
@@ -309,9 +336,10 @@ async function verifyU2Test(isolation, window, summary, run, build, test, scenar
     assert.equal(rawPreview.digest, receipt.preview.digest);
     assert.equal(normalized.digest, receipt.normalized.digest);
     assert.equal(normalized.validation, "valid");
-    assert.equal(rawPreview.redacted, true);
-    assert.equal(rawPreview.validation, "incomplete");
-    assert.notEqual(rawPreview.digest, receipt.original.digest);
+    // 合成 fixture 的 TRX 来自已知无敏感字段的 Cases.cs/Adapter.cs（assertU2Preserved
+    // 已断言源码等于静态常量），预览必须保持未脱敏。预期 clean 由 fixture 已知内容独立判定，
+    // 不依赖产品脱敏输出；若产品误脱敏或 digest 漂移，proof 拒绝而非接受另一分支。
+    assertArtifactRedaction(rawPreview, receipt, "clean");
     const normalizedValue = JSON.parse(await readArtifactUi(window, run, normalized));
     assert.equal(normalizedValue.format, "zcode-test-v1");
     assert.equal(normalizedValue.operationId, test.operationId);

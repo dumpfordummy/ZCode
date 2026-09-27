@@ -1,0 +1,51 @@
+{
+  "archivedAt": "2026-09-27T07:55:06.847Z",
+  "sourceProfile": ".tmp/z1-native-1790495603125-a92bbe",
+  "scenario": "pre-z8-u4-concurrent-chat",
+  "status": "FAIL",
+  "runId": "76c50b55-7387-4a81-b6bc-3b7590ec1d0b",
+  "defect": "harness-assertion",
+  "files": [
+    {
+      "path": "pre-z8-u4-summary.json",
+      "sha256": "c3dcd634774550271daf4d80289ecd899c94449b78c8cd107374f781d4641116",
+      "size": 172391
+    },
+    {
+      "path": "requests.json",
+      "sha256": "b0c05d69da65f95cecc513030f2fe6fa120bf40b41e213c45b2b826c7fa3fb68",
+      "size": 168179
+    },
+    {
+      "path": "pre-z8-u4-concurrent-companion-waiting-gate-pending.png",
+      "sha256": "8766399810a6332e6ab95140e1b986bff7db37f3a5a468ad195f1f8370551007",
+      "size": 80507
+    },
+    {
+      "path": "pre-z8-u4-concurrent-companion-waiting-completed.png",
+      "sha256": "e9dd33f48e537b3024fbcc03ca233f58b6c191d3a7f83a6edb21dc24fb5e2caa",
+      "size": 83079
+    },
+    {
+      "path": "pre-z8-u4-concurrent-companion-still-waiting.png",
+      "sha256": "1aac1692f9412df432f836ee1e93c76801ae707a81164bf034b0ebc5e4e034f5",
+      "size": 69429
+    },
+    {
+      "path": "pre-z8-u4-concurrent-completed-approved-1280.png",
+      "sha256": "0a562b8231563786c510d1ef592e9b48778d7e607b526fdf42d74bef25353da8",
+      "size": 83097
+    },
+    {
+      "path": "pre-z8-u4-concurrent-gate-pending-1280.png",
+      "sha256": "55bae32520bd8a21db754d797a6cfacbcb5a8d559b1fbadd85e5cc30ee4fb983",
+      "size": 81387
+    },
+    {
+      "path": "pre-z8-u4-failure.png",
+      "sha256": "a870d3d56241d3a5eade0692506dc95ba014b613c6a9d4a1964a4e151a8777ea",
+      "size": 84820
+    }
+  ],
+  "note": "HARNESS DEFECT, not a product/concurrency failure. The concurrency assertions (assertU4CompanionWaiting at gate-pending AND completed phases) PASSED: companion stayed at exactly 1 input, no tool result, exactly 1 companion provider request throughout the completing run. The run reached Completed with 3 node attempts + Approved gate. The sole failure was a wrong harness expectation: completeU4ConcurrentCompanion asserted native review-stage provider requests === 1, but the review node legitimately makes 2 (Read tool-call request + final-text request after the Read result). Fix: capture the review-request count before answering the companion and assert it is unchanged after, proving the companion answer triggers no extra Graph review. Product behavior was correct; no rerun of product code needed."
+}

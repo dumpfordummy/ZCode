@@ -25,7 +25,7 @@ import { graphRunIsUnresolved, graphToolOnlySettings } from "./graphEditing.js";
 import { GraphAddNodes } from "./GraphAddNodes.js";
 import { GraphProjectRecipes } from "./GraphProjectRecipes.js";
 
-import { GraphRoutingEditor } from "./GraphRoutingEditor.js";
+import { GraphDesignSections } from "./GraphDesignSections.js";
 import { GraphRunConfirmation } from "./GraphRunConfirmation.js";
 import { GraphLibrary } from "./GraphLibrary.js";
 import type { GraphRunConfirmationSnapshot, GraphSubmission } from "./graphSubmission.js";
@@ -315,7 +315,7 @@ export function GraphEditor({
         <p className="shrink-0 text-ui-sm text-foreground-subtle">{t("concurrentEdits")}</p>
       ) : null}
       {showingDesign && displayed.version === 5 ? (
-        <GraphRoutingEditor
+        <GraphDesignSections
           definition={displayed}
           disabled={disabled}
           onChange={setDefinition}

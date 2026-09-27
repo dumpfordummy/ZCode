@@ -2,7 +2,7 @@
 
 This guide describes implemented pre-Z8 controls in this working tree. See `EXECUTION_PLAN.md` and retained test receipts for actual verification status. The supported target is supervised local Windows sequential workflows; the separate parallel editor is experimental. Existing native provider, session, permission and question controls remain in use.
 
-U1–U3 have passed their recorded automated native checkpoints. The U4 run controls described below are implemented in the working tree; their combined build, native acceptance and layout checks are pending at this guide checkpoint. Pure tests do not establish native or human-pilot acceptance. U5–U6 improvements are not presented here as available controls or completed evidence. User-operated and live human-pilot checks remain NOT RUN.
+U1–U5 have passed their recorded automated native checkpoints on the current build (HEAD `6f41ad53`, build `3.14.0`). U4 run/approval/cancellation/stale-evidence and U5 file transfer/repeat-request/run-identity are verified through the real built desktop app with controlled providers. The U2 .NET matrix (8 scenarios) and dotnet-fixture are BLOCKED on missing SDK 8.0.425 — not skipped or relaxed. Pure tests do not establish human-pilot or live-provider acceptance. User-operated and live human-pilot checks remain NOT RUN; see `HUMAN_PILOT_CHECKLIST.md` for prepared journeys.
 
 ## Start an agent-assisted task
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { GraphDefinition, GraphLibraryEntry } from "@zcode/services";
+import type { GraphDefinition, GraphLibraryEntry, GraphWorkspaceTarget } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import { Input } from "@/components/ui/input.js";
 import type { useGraphWorkflow } from "@/hooks/useGraphWorkflow.js";
@@ -13,6 +13,7 @@ export function GraphLibraryManagement({
   entry,
   version,
   disabled,
+  target,
   onVersion,
 }: {
   workflow: ReturnType<typeof useGraphWorkflow>;
@@ -20,6 +21,7 @@ export function GraphLibraryManagement({
   entry?: GraphLibraryEntry;
   version?: GraphLibraryEntry["versions"][number];
   disabled: boolean;
+  target: GraphWorkspaceTarget;
   onVersion(version: number): void;
 }) {
   const { intl } = useZCodeIntl();
@@ -124,6 +126,7 @@ export function GraphLibraryManagement({
           version={version?.version}
           revision={workflow.view.revision}
           disabled={disabled}
+          target={target}
         />
       ) : null}
     </details>

@@ -1,6 +1,12 @@
-import { useState } from "react";
-import type { GraphDefinition, GraphLibraryEntry, GraphTemplatePreview } from "@zcode/services";
+import { useEffect, useRef, useState } from "react";
+import type {
+  GraphDefinition,
+  GraphLibraryEntry,
+  GraphTemplatePreview,
+  GraphWorkspaceTarget,
+} from "@zcode/services";
 import type { useGraphWorkflow } from "@/hooks/useGraphWorkflow.js";
+import { useGraphTemplateFiles } from "@/hooks/useGraphTemplateFiles.js";
 import { Button } from "@/components/ui/button.js";
 import { Checkbox } from "@/components/ui/checkbox.js";
 import { Input } from "@/components/ui/input.js";
@@ -15,6 +21,7 @@ export function GraphTemplateTransfer({
   version,
   revision,
   disabled,
+  target,
 }: {
   workflow: ReturnType<typeof useGraphWorkflow>;
   definition: GraphDefinition;
@@ -22,6 +29,7 @@ export function GraphTemplateTransfer({
   version?: number;
   revision: number;
   disabled: boolean;
+  target: GraphWorkspaceTarget;
 }) {
   const { intl } = useZCodeIntl(),
     t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
@@ -32,11 +40,23 @@ export function GraphTemplateTransfer({
   const [reviewed, setReviewed] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [saved, setSaved] = useState(false);
+  const files = useGraphTemplateFiles(target);
+  const alive = useRef(true);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+  const [fileError, setFileError] = useState("");
+  const [fileSaved, setFileSaved] = useState(false);
   const acceptPreview = (value: GraphTemplatePreview | undefined, exportMode = false) => {
     if (!value) return;
     setPreview(value);
     setReviewed(false);
     setSaved(false);
+    setFileSaved(false);
+    setFileError("");
     setExporting(exportMode);
     if (value.json) setJson(value.json);
   };
@@ -55,6 +75,41 @@ export function GraphTemplateTransfer({
           setSaved(true);
           setReviewed(false);
         }
+      });
+  };
+  // 导入文件：selectFile → 有界读取 → 致命 UTF-8 解码 → 现有 import 预览。取消或 scope
+  // 失效返回 undefined；格式/编码错误抛出并显示在 fileError，不覆盖未保存的设计。
+  const importFromFile = () => {
+    setFileError("");
+    setFileSaved(false);
+    void files
+      .importFile(() => alive.current)
+      .then((result) => {
+        if (!result) return;
+        setJson(result.json);
+        void workflow
+          .preview({ action: "import", json: result.json })
+          .then((value) => acceptPreview(value));
+      })
+      .catch((error) => {
+        setFileError(error instanceof Error ? error.message : String(error));
+      });
+  };
+  // 导出文件：仅对已审阅的可移植 JSON 调用 saveFile；保存失败显示在 fileError。
+  const exportToFile = () => {
+    if (!preview?.json) return;
+    setFileError("");
+    void files
+      .exportFile(preview.json, () => alive.current)
+      .then((result) => {
+        // saveFile 在取消时返回 { success: false, canceled: true }、在写入失败时返回
+        // { success: false, error }；二者都是真值对象，不能仅用 if (result) 判断成功，
+        // 否则取消会被误判为已保存。只有 success 为 true 才代表真正落盘成功。
+        if (result?.success) setFileSaved(true);
+        else if (result?.error) setFileError(result.error);
+      })
+      .catch((error) => {
+        setFileError(error instanceof Error ? error.message : String(error));
       });
   };
   return (
@@ -130,20 +185,35 @@ export function GraphTemplateTransfer({
             setReviewed(false);
             setExporting(false);
             setSaved(false);
+            setFileSaved(false);
+            setFileError("");
           }}
         />
       </label>
-      <Button
-        size="sm"
-        variant="outline"
-        disabled={disabled || !json.trim()}
-        data-testid="graph-template-preview"
-        onClick={() =>
-          void workflow.preview({ action: "import", json }).then((value) => acceptPreview(value))
-        }
-      >
-        {t("dryPreview")}
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={disabled || !json.trim()}
+          data-testid="graph-template-preview"
+          onClick={() =>
+            void workflow.preview({ action: "import", json }).then((value) => acceptPreview(value))
+          }
+        >
+          {t("dryPreview")}
+        </Button>
+        {files.canImportFile ? (
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={disabled}
+            data-testid="graph-template-import-file"
+            onClick={importFromFile}
+          >
+            {t("importFile")}
+          </Button>
+        ) : null}
+      </div>
       {preview ? (
         <div className="space-y-2" data-testid="graph-template-preview-result">
           {preview.errors.map((error, index) => (
@@ -175,9 +245,27 @@ export function GraphTemplateTransfer({
         </div>
       ) : null}
       {exporting ? (
-        <p role="status" className="text-foreground-subtle">
-          {reviewed ? t("exportReviewed") : t("exportReviewRequired")}
-        </p>
+        <div className="space-y-2">
+          <p role="status" className="text-foreground-subtle">
+            {reviewed ? t("exportReviewed") : t("exportReviewRequired")}
+          </p>
+          {reviewed && files.canExportFile && preview?.json ? (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={disabled}
+              data-testid="graph-template-export-file"
+              onClick={exportToFile}
+            >
+              {t("exportFile")}
+            </Button>
+          ) : null}
+          {fileSaved ? (
+            <p role="status" data-testid="graph-template-file-saved">
+              {t("fileSaved")}
+            </p>
+          ) : null}
+        </div>
       ) : (
         <div className="flex flex-wrap gap-2">
           <Button
@@ -199,6 +287,14 @@ export function GraphTemplateTransfer({
           </Button>
         </div>
       )}
+      {fileError ? (
+        <p role="alert" className="text-destructive" data-testid="graph-template-file-error">
+          {fileError}
+        </p>
+      ) : null}
+      {!files.canImportFile && !files.canExportFile ? (
+        <p className="text-foreground-subtle">{t("fileUnavailable")}</p>
+      ) : null}
       {saved ? (
         <p role="status" data-testid="graph-template-saved">
           {t("saved")}

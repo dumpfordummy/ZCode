@@ -47,7 +47,14 @@ export async function verifyU4ArtifactErrors(isolation, window, summary, run) {
     assert.equal(await window.getByTestId("graph-artifact-read-error").count(), 0);
   }
   await window.getByTestId("graph-export-manifest").click();
-  await window.locator('[data-testid="graph-manifest-read-state"][data-state="ready"]').waitFor();
+  // ReadState renders an intentionally empty (zero-size) <div data-state="ready"> when the
+  // manifest read completes, so a visibility wait can never succeed. The [data-state="ready"]
+  // attribute selector itself excludes loading/error; "attached" only confirms the element is
+  // in the DOM with that state, not that it is visible. This mirrors the hidden-tolerant
+  // getAttribute("data-state") check used for graph-artifact-read-state above.
+  await window
+    .locator('[data-testid="graph-manifest-read-state"][data-state="ready"]')
+    .waitFor({ state: "attached" });
   const manifestText = await window.getByTestId("graph-artifact-manifest").inputValue();
   const manifest = JSON.parse(manifestText);
   assert.equal(manifest.runId, run.id);

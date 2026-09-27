@@ -1,0 +1,1211 @@
+{
+  "scenario": "pre-z8-u5-transfer",
+  "home": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d",
+  "workspace": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\workspace",
+  "startedAt": 1790508472381,
+  "assertions": [
+    "Advanced removal plus Guided context selection preserves custom text, maps the actual Analyze source to one alias/token and is idempotent. The future Review source is disabled with a reason; draft preview resolves only Start and labels future output unresolved without attempt/artifact evidence.",
+    "Zero-side-effect: import/export/preview/capture/repeat-request operations produced no Agent input, tool command, worker workspace, plugin install, or MCP connection. The only model request is the explicit run in scenario 4c."
+  ],
+  "screenshots": [
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\u5-unpinned-repeat-request.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\pre-z8-u3-guided-context-draft-1280.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\pre-z8-u3-guided-context-draft-1920.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\u5-export-preview-reviewed.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\u5-import-preview.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\u5-imported-created.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\u5-failure-protection.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\u5-async-lifecycle.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\u5-pinned-repeat-request.png",
+    "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\u5-run-identity.png"
+  ],
+  "scenarios": [
+    {
+      "name": "4b-unpinned-repeat-request",
+      "status": "PASS",
+      "assertions": [
+        "Unpinned v5 draft (no template pin): repeat-request updates Start text via applyGraphRunRequest, no error, no run."
+      ]
+    },
+    {
+      "name": "1-export-import-round-trip",
+      "status": "PASS",
+      "assertions": [
+        "Export wrote 5530 bytes to disk (SHA-256 e161b9bac7d5…); independent read confirms zcode-workflow v1 envelope with matching nodes/edges.",
+        "Import preview surfaces 1 unresolved reference role(s) — local bindings not silently inherited.",
+        "Import→create preserves nodes/edges/parameters/references/optionalNodes; local template bindings cleared; no run records transferred."
+      ]
+    },
+    {
+      "name": "2-cancel-failure",
+      "status": "PASS",
+      "assertions": [
+        "File-selection cancel: no error, no design change.",
+        "Invalid JSON: preview error shown, design preserved.",
+        "Unsupported version: preview error shown, design preserved.",
+        "Oversize file (>256 KB): rejected with transfer-limit error.",
+        "Invalid UTF-8: rejected with encoding error.",
+        "Read failure (non-existent path): file error shown, design preserved.",
+        "Save-dialog cancel: preview preserved, no file saved.",
+        "Save failure: error propagated, design preserved."
+      ]
+    },
+    {
+      "name": "3-async-lifecycle",
+      "status": "PASS",
+      "assertions": [
+        "Unmount during pending import: late result does not refill draft or show error.",
+        "Consecutive import clicks: no duplicate dialog corruption; valid single preview.",
+        "Version switch: old export preview cleared (review state did not survive)."
+      ]
+    },
+    {
+      "name": "4a-pinned-repeat-request",
+      "status": "PASS",
+      "assertions": [
+        "Pinned repeat-request: template.parameters.request updated; bindings/references/version unchanged; no run created."
+      ]
+    },
+    {
+      "name": "4c-run-identity",
+      "status": "PASS",
+      "assertions": [
+        "Preflight snapshot contains the new request sentinel.",
+        "Controlled provider captured a new model request containing the new request sentinel — the actually-sent request is new content.",
+        "New run has a new durable ID and Cancelled status; no Unknown/Interrupted input replayed; pre-new-request workspace state not claimed as restored baseline."
+      ]
+    }
+  ],
+  "notRun": [
+    "Human OS dialog ergonomics pilot (controlled seam replaces real dialog return)",
+    "Mobile/web platform file transfer (desktop-only IFileService capability)",
+    "Z8"
+  ],
+  "testedBuild": [
+    {
+      "file": "apps/zcode-cli/packages/cli/dist/zcode.cjs",
+      "sha256": "8a3d061fc217212d561a639b090e7152e6f2f44bfb1ac42ab88edf40bfd61332"
+    },
+    {
+      "file": "packages/desktop/out/main/index.js",
+      "sha256": "621a6bf0261a7d60438cd0199ea49dfae5e5fd1cff45ed2987cc6228ca04f3f8"
+    },
+    {
+      "file": "packages/desktop/out/host/index.js",
+      "sha256": "d71f517e26cfac50987ce075b0464bc0118d3f62285ddddecca416104dff85e8"
+    },
+    {
+      "file": "packages/desktop/out/renderer/index.html",
+      "sha256": "404e4b7366172b9deae00144430dad4a755691781847ed1ef37be63df7a19ed1"
+    }
+  ],
+  "nativeInitialization": {
+    "publicEntry": "task-new-button",
+    "promptSubmitted": false,
+    "nativeDraftProjectionObserved": true
+  },
+  "baseline": {
+    "nativeInputs": 0,
+    "modelRequests": 0,
+    "toolCalls": 0,
+    "note": "Recorded after initializeU3Workspace; separates app-startup from tested-operation activity."
+  },
+  "viewportEvidence": [
+    {
+      "name": "u5-unpinned-repeat-request",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u3-guided-context-draft-1280",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "pre-z8-u3-guided-context-draft-1920",
+      "requested": [
+        1920,
+        1080
+      ],
+      "actual": {
+        "width": 1920,
+        "height": 1080,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "u5-export-preview-reviewed",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "u5-import-preview",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "u5-imported-created",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "u5-failure-protection",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "u5-async-lifecycle",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "u5-pinned-repeat-request",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    },
+    {
+      "name": "u5-run-identity",
+      "requested": [
+        1280,
+        720
+      ],
+      "actual": {
+        "width": 1280,
+        "height": 720,
+        "devicePixelRatio": 1
+      }
+    }
+  ],
+  "referenceCatalog": {
+    "status": "available",
+    "instructions": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\workspace\\AGENTS.md · workspace",
+    "skills": [
+      {
+        "value": "none",
+        "disabled": false,
+        "text": "—"
+      },
+      {
+        "value": "glm:plugin:D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+        "disabled": false,
+        "text": "browser-use:control-browser (glm:plugin:D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md · plugin)"
+      },
+      {
+        "value": "glm:plugin:D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+        "disabled": false,
+        "text": "browser-use:web-gui-tester (glm:plugin:D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md · plugin)"
+      }
+    ]
+  },
+  "context": {
+    "removedAlias": "analyze",
+    "selected": {
+      "id": "graph-context-add-1",
+      "source": {
+        "kind": "node",
+        "nodeId": "analyze"
+      },
+      "disabled": false,
+      "explanation": "Analyze · Final text · Current iterationAdd context"
+    },
+    "future": {
+      "id": "graph-context-add-3",
+      "source": {
+        "kind": "node",
+        "nodeId": "review"
+      },
+      "disabled": true,
+      "explanation": "Review · Final text · Current iterationNode implement: binding review is not available on every selected route.Add context"
+    },
+    "binding": {
+      "alias": "result",
+      "source": {
+        "kind": "node",
+        "nodeId": "analyze"
+      }
+    },
+    "preview": {
+      "kind": "draft",
+      "segments": [
+        {
+          "kind": "text",
+          "text": "Workflow task: implement.\nImplement the explicit request using the supplied analysis and normal native tools and permissions. Read current source first and preserve unrelated work. Report actual edits, checks performed, limitations and unresolved questions. This workflow has no configured machine-test verification; never claim one exists. Do not commit, merge or publish.\nrequest:\n"
+        },
+        {
+          "kind": "text",
+          "text": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+        },
+        {
+          "kind": "text",
+          "text": "\n\nanalyze:\n\n\n"
+        },
+        {
+          "kind": "unresolved",
+          "alias": "result",
+          "token": "{{inputs.result}}",
+          "reason": "Resolved only from the selected run's captured input or evidence at execution."
+        },
+        {
+          "kind": "text",
+          "text": "\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"AGENTS.md\"}]\nReferences marked native-instructions are already supplied by native project guidance; do not read or inject them again. Read only explicit-read references through native Read. Load native-skill references using nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. References without a delivery marker remain unresolved until preparation. Cite reference IDs; missing source is a question, never an invented rule."
+        }
+      ],
+      "bindings": [
+        {
+          "alias": "request",
+          "source": {
+            "kind": "start"
+          },
+          "status": "resolved-start",
+          "text": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Change only fixture.mjs from Z1_BEFORE_7391 to Z1_AFTER_7391. Preserve fixture.test.mjs and all unrelated source. Ask before the edit. This is agent-led review: no configured tests, commands, installs, commits or publication.\\nLiteral Start data: {{inputs.not_an_alias}} and {{literal braces}} stay unchanged.\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+        },
+        {
+          "alias": "result",
+          "source": {
+            "kind": "node",
+            "nodeId": "analyze"
+          },
+          "status": "unresolved"
+        }
+      ],
+      "references": [
+        {
+          "id": "instructions",
+          "kind": "instruction",
+          "selected": "AGENTS.md"
+        }
+      ],
+      "issues": [
+        "Reference instructions delivery is unresolved until verified preparation."
+      ]
+    },
+    "beforeInstructions": "Workflow task: implement.\nImplement the explicit request using the supplied analysis and normal native tools and permissions. Read current source first and preserve unrelated work. Report actual edits, checks performed, limitations and unresolved questions. This workflow has no configured machine-test verification; never claim one exists. Do not commit, merge or publish.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+    "afterInstructions": "Workflow task: implement.\nImplement the explicit request using the supplied analysis and normal native tools and permissions. Read current source first and preserve unrelated work. Report actual edits, checks performed, limitations and unresolved questions. This workflow has no configured machine-test verification; never claim one exists. Do not commit, merge or publish.\nrequest:\n{{inputs.request}}\n\nanalyze:\n\n\n{{inputs.result}}"
+  },
+  "exportedTemplate": {
+    "path": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\exported-template.json",
+    "sha256": "e161b9bac7d5f4544bf860607c53d91311b7da8c230851b2c1bdb85da453e822",
+    "bytes": 5530,
+    "format": "zcode-workflow",
+    "version": 1,
+    "nodeCount": 6,
+    "edgeCount": 5
+  },
+  "zeroSideEffectProof": {
+    "transferOperations": {
+      "nativeInputs": 1,
+      "modelRequests": 3,
+      "toolCalls": 1,
+      "toolResults": 1,
+      "note": "All transfer/import/export/preview/repeat-request operations (scenarios 1-4a) produced zero Agent input, tool execution, or plugin/MCP activity. The only model request is from scenario 4c's explicit controlled-provider run, which is a deliberate separate action."
+    },
+    "fixtureErrors": []
+  },
+  "status": "PASS",
+  "finalRecord": {
+    "version": 5,
+    "workspaceKey": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\workspace",
+    "definition": {
+      "version": 5,
+      "revision": 7,
+      "name": "Agent-assisted task",
+      "nodes": [
+        {
+          "id": "start",
+          "position": {
+            "x": 40,
+            "y": 100
+          },
+          "type": "start",
+          "request": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"RUN_IDENTITY_NEW_SENTINEL_7391\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+        },
+        {
+          "id": "analyze",
+          "position": {
+            "x": 300,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Analyze",
+          "instructions": "Workflow task: analyze.\nInspect the explicit request, relevant native project instructions and source. Identify a bounded implementation and acceptance criteria. Preserve unrelated work. Do not edit or execute commands. Missing requirements remain questions.\nrequest:\n{{inputs.request}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "implement",
+          "position": {
+            "x": 560,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Implement",
+          "instructions": "Workflow task: implement.\nImplement the explicit request using the supplied analysis and normal native tools and permissions. Read current source first and preserve unrelated work. Report actual edits, checks performed, limitations and unresolved questions. This workflow has no configured machine-test verification; never claim one exists. Do not commit, merge or publish.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            },
+            {
+              "alias": "analyze",
+              "source": {
+                "kind": "node",
+                "nodeId": "analyze"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "review",
+          "position": {
+            "x": 820,
+            "y": 100
+          },
+          "type": "task",
+          "name": "Review",
+          "instructions": "Workflow task: review.\nInspect the actual changes against the explicit request, analysis and implementation handoff. Do not edit or execute commands. Distinguish observed source findings from agent-reported checks. Report remaining issues and what a human should inspect. Verification is agent-led; configured test evidence is not included. Agent prose cannot establish machine-verified success.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}\n\nimplement:\n{{inputs.implement}}",
+          "instructionMode": "bound",
+          "inputs": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              }
+            },
+            {
+              "alias": "analyze",
+              "source": {
+                "kind": "node",
+                "nodeId": "analyze"
+              }
+            },
+            {
+              "alias": "implement",
+              "source": {
+                "kind": "node",
+                "nodeId": "implement"
+              }
+            }
+          ],
+          "configuration": {
+            "kind": "inherit"
+          }
+        },
+        {
+          "id": "final-gate",
+          "position": {
+            "x": 1080,
+            "y": 100
+          },
+          "type": "approval",
+          "name": "Final human review",
+          "reviewInstructions": "Review the actual changes, agent findings and unresolved questions. Verification is agent-led; configured test evidence is not included. Approval does not establish that tests passed or authorize commit, merge or publication.",
+          "evidence": [
+            {
+              "alias": "review",
+              "source": {
+                "kind": "node",
+                "nodeId": "review"
+              }
+            },
+            {
+              "alias": "implementation",
+              "source": {
+                "kind": "node",
+                "nodeId": "implement"
+              }
+            },
+            {
+              "alias": "source",
+              "source": {
+                "kind": "source"
+              }
+            }
+          ],
+          "commentPolicy": "required"
+        },
+        {
+          "id": "end",
+          "position": {
+            "x": 1340,
+            "y": 100
+          },
+          "type": "end",
+          "outputNodeId": "review"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "analyze"
+        },
+        {
+          "source": "analyze",
+          "target": "implement"
+        },
+        {
+          "source": "implement",
+          "target": "review"
+        },
+        {
+          "source": "review",
+          "target": "final-gate"
+        },
+        {
+          "source": "final-gate",
+          "target": "end"
+        }
+      ],
+      "routing": {
+        "finalGateId": "final-gate",
+        "limits": {
+          "maxNodeAdmissions": 24,
+          "deadlineMs": 1800000
+        }
+      },
+      "template": {
+        "id": "agent-assisted",
+        "name": "Agent-assisted task",
+        "version": 1,
+        "digest": "7e91f56e4af8fe7f2986b5e15066abef41246cd2e97d8c53fd7501f6f8462db2",
+        "parameters": {
+          "request": "RUN_IDENTITY_NEW_SENTINEL_7391"
+        },
+        "bindings": {
+          "referencePolicy": "native-aware-v1",
+          "references": {
+            "instructions": "AGENTS.md"
+          },
+          "recipes": {},
+          "sourcePaths": []
+        },
+        "references": [
+          {
+            "id": "instructions",
+            "kind": "instruction",
+            "nodeIds": [
+              "analyze",
+              "implement",
+              "review"
+            ]
+          }
+        ],
+        "excluded": []
+      }
+    },
+    "runs": [
+      {
+        "id": "c24cc93a-ab80-44e2-a962-dc53b20f85b0",
+        "requestId": "1bbe8c47-5d09-4efe-86a9-06620c9a00ed",
+        "target": {
+          "workspacePath": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\workspace"
+        },
+        "status": "Cancelled",
+        "createdAt": 1790508510644,
+        "updatedAt": 1790508512217,
+        "version": 5,
+        "routing": {
+          "configurationDigest": "f9512d4d39fe15229be2993781ddd57265f64b88f13369a54dedb61143f9e9c0",
+          "recipeConfigurationDigest": "fb49a8ad61f7fd01eca21d942ffe87b3f51015a51130cb2173068da66544ee1c",
+          "currentIterationId": "0f3b3b5e-e450-496b-895c-375e4dceacc4",
+          "cursorNodeId": "analyze",
+          "iterations": [
+            {
+              "id": "0f3b3b5e-e450-496b-895c-375e4dceacc4",
+              "index": 0,
+              "createdAt": 1790508510651,
+              "attemptIds": {
+                "analyze": "a36ec9e7-d7d4-42c0-b47e-c673b4f2ab67",
+                "implement": "e3b56170-fc8e-495a-b890-b44968b42191",
+                "review": "3298e075-2d28-4551-af37-67c09bc03f05",
+                "final-gate": "52dfc4a1-9182-4791-bda9-1670bc90de35"
+              },
+              "visitedNodeIds": [
+                "analyze"
+              ]
+            }
+          ],
+          "conditionAttempts": [],
+          "admissions": 1,
+          "deadlineAt": 1790510310644,
+          "checkpoints": [],
+          "continuations": []
+        },
+        "provenance": {
+          "operationalDecision": {
+            "acknowledgedUnknowns": true,
+            "acceptedAt": 1790508510678
+          },
+          "digest": "00ffd2213db6033227a3ad79a57659a64e5d9e8d66d5c6649221e71543e903cd",
+          "template": {
+            "id": "agent-assisted",
+            "name": "Agent-assisted task",
+            "version": 1,
+            "digest": "7e91f56e4af8fe7f2986b5e15066abef41246cd2e97d8c53fd7501f6f8462db2",
+            "parameters": {
+              "request": "RUN_IDENTITY_NEW_SENTINEL_7391"
+            },
+            "bindings": {
+              "referencePolicy": "native-aware-v1",
+              "references": {
+                "instructions": "AGENTS.md"
+              },
+              "recipes": {},
+              "sourcePaths": []
+            },
+            "references": [
+              {
+                "id": "instructions",
+                "kind": "instruction",
+                "nodeIds": [
+                  "analyze",
+                  "implement",
+                  "review"
+                ]
+              }
+            ],
+            "excluded": []
+          },
+          "environment": {
+            "version": 1,
+            "status": "available",
+            "configDigest": "ba65e3a5d6135ae2ef1567f6d65db7d85c649bda42baed2289b0b8b3e887b6b3",
+            "executables": [],
+            "instructions": [
+              {
+                "scope": "workspace",
+                "path": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\workspace\\AGENTS.md",
+                "digest": "d9db39e4df4b81e35734a6a24e6f379f78f344c7cbf903ede83bf0a72d2abf6d",
+                "bytes": 350,
+                "truncated": false
+              }
+            ],
+            "skills": [
+              {
+                "id": "glm:plugin:D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "name": "browser-use:control-browser",
+                "path": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "242994e2732bce599e52398c535e0f38a32dae02cfbf7cc208d21527fd3d9385"
+              },
+              {
+                "id": "glm:plugin:D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "name": "browser-use:web-gui-tester",
+                "path": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md",
+                "scope": "plugin",
+                "enabled": true,
+                "plugin": "browser-use",
+                "digest": "9c02d66665ce3a4322086eba57a42df904b157c4a804cdcbe949a49088e57968"
+              }
+            ],
+            "plugins": [
+              {
+                "id": "node-repl-host@zcode-plugins-official",
+                "name": "node-repl-host",
+                "enabled": true,
+                "source": "official",
+                "version": "0.6.0"
+              },
+              {
+                "id": "browser-use@zcode-plugins-official",
+                "name": "browser-use",
+                "enabled": true,
+                "source": "official",
+                "version": "0.5.1"
+              }
+            ],
+            "hooks": [],
+            "mcp": [],
+            "unknowns": [
+              "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+              "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+              "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+              "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety."
+            ]
+          },
+          "models": [
+            {
+              "nodeId": "analyze",
+              "providerId": "z1-local-fixture",
+              "modelId": "z1-fixture",
+              "type": "openai-chat-completions",
+              "destination": "http://127.0.0.1:54000",
+              "configurationDigest": "c68b1240f54adbfa11e16c22f6ecad79897e7bc2e3d6f4cbd144407c6d59af23"
+            },
+            {
+              "nodeId": "implement",
+              "providerId": "z1-local-fixture",
+              "modelId": "z1-fixture",
+              "type": "openai-chat-completions",
+              "destination": "http://127.0.0.1:54000",
+              "configurationDigest": "c68b1240f54adbfa11e16c22f6ecad79897e7bc2e3d6f4cbd144407c6d59af23"
+            },
+            {
+              "nodeId": "review",
+              "providerId": "z1-local-fixture",
+              "modelId": "z1-fixture",
+              "type": "openai-chat-completions",
+              "destination": "http://127.0.0.1:54000",
+              "configurationDigest": "c68b1240f54adbfa11e16c22f6ecad79897e7bc2e3d6f4cbd144407c6d59af23"
+            }
+          ],
+          "auxiliary": [
+            "Native title generation uses each session's selected primary model (Graph supplies no title-model override)."
+          ],
+          "references": [
+            {
+              "id": "instructions",
+              "kind": "instruction",
+              "path": "AGENTS.md",
+              "digest": "d9db39e4df4b81e35734a6a24e6f379f78f344c7cbf903ede83bf0a72d2abf6d",
+              "origin": "explicit workspace reference",
+              "delivery": "native-instructions"
+            }
+          ],
+          "recipes": [],
+          "permissions": [
+            {
+              "nodeId": "analyze",
+              "mode": "build",
+              "planEnabled": false
+            },
+            {
+              "nodeId": "implement",
+              "mode": "build",
+              "planEnabled": false
+            },
+            {
+              "nodeId": "review",
+              "mode": "build",
+              "planEnabled": false
+            }
+          ],
+          "unknowns": [
+            "Provider-side routing, web destinations and script behavior are not verified by local metadata.",
+            "Native subagent model overrides and runtime-added integrations are not inventoried; no migration or connection was attempted.",
+            "Bundled assets are not seeded by preview; missing caches and disabled-plugin skill contents remain unknown.",
+            "Hook trust and MCP live connections are unknown; configured declarations do not establish execution safety.",
+            "Executable availability does not verify its SDK version, script contents or network behavior; review the existing project toolchain and recipes.",
+            "Provider redirects, backend routing and external tools cannot be established from local configuration.",
+            "Native web/search, memory and delegated-tool behavior may contact additional destinations; primary endpoint locality is not a traffic guarantee."
+          ]
+        },
+        "requestFingerprint": "{\"mode\":\"build\",\"modelSelection\":{\"modelId\":\"z1-fixture\",\"options\":{\"reasoningLevel\":\"enabled\"},\"providerId\":\"z1-local-fixture\"},\"planEnabled\":false,\"preflight\":{\"acknowledgedUnknowns\":true,\"digest\":\"00ffd2213db6033227a3ad79a57659a64e5d9e8d66d5c6649221e71543e903cd\"},\"revision\":7,\"target\":{\"workspacePath\":\"D:\\\\Playground\\\\ZCode\\\\.tmp\\\\z1-native-1790508472309-fd250d\\\\workspace\"}}",
+        "definition": {
+          "version": 5,
+          "revision": 7,
+          "name": "Agent-assisted task",
+          "nodes": [
+            {
+              "id": "start",
+              "position": {
+                "x": 40,
+                "y": 100
+              },
+              "type": "start",
+              "request": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"RUN_IDENTITY_NEW_SENTINEL_7391\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+            },
+            {
+              "id": "analyze",
+              "position": {
+                "x": 300,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Analyze",
+              "instructions": "Workflow task: analyze.\nInspect the explicit request, relevant native project instructions and source. Identify a bounded implementation and acceptance criteria. Preserve unrelated work. Do not edit or execute commands. Missing requirements remain questions.\nrequest:\n{{inputs.request}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "request",
+                  "source": {
+                    "kind": "start"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "implement",
+              "position": {
+                "x": 560,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Implement",
+              "instructions": "Workflow task: implement.\nImplement the explicit request using the supplied analysis and normal native tools and permissions. Read current source first and preserve unrelated work. Report actual edits, checks performed, limitations and unresolved questions. This workflow has no configured machine-test verification; never claim one exists. Do not commit, merge or publish.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "request",
+                  "source": {
+                    "kind": "start"
+                  }
+                },
+                {
+                  "alias": "analyze",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "analyze"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "review",
+              "position": {
+                "x": 820,
+                "y": 100
+              },
+              "type": "task",
+              "name": "Review",
+              "instructions": "Workflow task: review.\nInspect the actual changes against the explicit request, analysis and implementation handoff. Do not edit or execute commands. Distinguish observed source findings from agent-reported checks. Report remaining issues and what a human should inspect. Verification is agent-led; configured test evidence is not included. Agent prose cannot establish machine-verified success.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}\n\nimplement:\n{{inputs.implement}}",
+              "instructionMode": "bound",
+              "inputs": [
+                {
+                  "alias": "request",
+                  "source": {
+                    "kind": "start"
+                  }
+                },
+                {
+                  "alias": "analyze",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "analyze"
+                  }
+                },
+                {
+                  "alias": "implement",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "implement"
+                  }
+                }
+              ],
+              "configuration": {
+                "kind": "inherit"
+              }
+            },
+            {
+              "id": "final-gate",
+              "position": {
+                "x": 1080,
+                "y": 100
+              },
+              "type": "approval",
+              "name": "Final human review",
+              "reviewInstructions": "Review the actual changes, agent findings and unresolved questions. Verification is agent-led; configured test evidence is not included. Approval does not establish that tests passed or authorize commit, merge or publication.",
+              "evidence": [
+                {
+                  "alias": "review",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "review"
+                  }
+                },
+                {
+                  "alias": "implementation",
+                  "source": {
+                    "kind": "node",
+                    "nodeId": "implement"
+                  }
+                },
+                {
+                  "alias": "source",
+                  "source": {
+                    "kind": "source"
+                  }
+                }
+              ],
+              "commentPolicy": "required"
+            },
+            {
+              "id": "end",
+              "position": {
+                "x": 1340,
+                "y": 100
+              },
+              "type": "end",
+              "outputNodeId": "review"
+            }
+          ],
+          "edges": [
+            {
+              "source": "start",
+              "target": "analyze"
+            },
+            {
+              "source": "analyze",
+              "target": "implement"
+            },
+            {
+              "source": "implement",
+              "target": "review"
+            },
+            {
+              "source": "review",
+              "target": "final-gate"
+            },
+            {
+              "source": "final-gate",
+              "target": "end"
+            }
+          ],
+          "routing": {
+            "finalGateId": "final-gate",
+            "limits": {
+              "maxNodeAdmissions": 24,
+              "deadlineMs": 1800000
+            }
+          },
+          "template": {
+            "id": "agent-assisted",
+            "name": "Agent-assisted task",
+            "version": 1,
+            "digest": "7e91f56e4af8fe7f2986b5e15066abef41246cd2e97d8c53fd7501f6f8462db2",
+            "parameters": {
+              "request": "RUN_IDENTITY_NEW_SENTINEL_7391"
+            },
+            "bindings": {
+              "referencePolicy": "native-aware-v1",
+              "references": {
+                "instructions": "AGENTS.md"
+              },
+              "recipes": {},
+              "sourcePaths": []
+            },
+            "references": [
+              {
+                "id": "instructions",
+                "kind": "instruction",
+                "nodeIds": [
+                  "analyze",
+                  "implement",
+                  "review"
+                ]
+              }
+            ],
+            "excluded": []
+          }
+        },
+        "defaults": {
+          "modelSelection": {
+            "providerId": "z1-local-fixture",
+            "modelId": "z1-fixture",
+            "options": {
+              "reasoningLevel": "enabled"
+            }
+          },
+          "mode": "build",
+          "planEnabled": false
+        },
+        "plannedPath": [
+          "analyze",
+          "implement",
+          "review",
+          "final-gate"
+        ],
+        "startInput": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"RUN_IDENTITY_NEW_SENTINEL_7391\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.",
+        "nodeAttempts": [
+          {
+            "iterationId": "0f3b3b5e-e450-496b-895c-375e4dceacc4",
+            "iteration": 0,
+            "nodeId": "analyze",
+            "attemptId": "a36ec9e7-d7d4-42c0-b47e-c673b4f2ab67",
+            "commandId": "e1d9800c-4317-4d5f-b2ac-6d59ca62ed84",
+            "inputId": "e1d9800c-4317-4d5f-b2ac-6d59ca62ed84",
+            "status": "Completed",
+            "dispatchPhase": "accepted",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790508510644,
+            "updatedAt": 1790508512217,
+            "sessionId": "sess_d8259197-df63-469b-a98b-e54d1f7786bc",
+            "runtimeIdentity": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\workspace:1:9668:agent-8992dc2d-cbd6-43c6-a6de-b7b1ef239857",
+            "foregroundExecutionId": "runtime_command_1",
+            "observationEpoch": "mujqjd3z-8j0pd4ux",
+            "resolvedInstructions": "Workflow task: analyze.\nInspect the explicit request, relevant native project instructions and source. Identify a bounded implementation and acceptance criteria. Preserve unrelated work. Do not edit or execute commands. Missing requirements remain questions.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"RUN_IDENTITY_NEW_SENTINEL_7391\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"AGENTS.md\",\"delivery\":\"native-instructions\"}]\nReferences marked native-instructions are already supplied by native project guidance; do not read or inject them again. Read only explicit-read references through native Read. Load native-skill references using nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. References without a delivery marker remain unresolved until preparation. Cite reference IDs; missing source is a question, never an invented rule.",
+            "bindings": [
+              {
+                "alias": "request",
+                "source": {
+                  "kind": "start"
+                },
+                "text": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"RUN_IDENTITY_NEW_SENTINEL_7391\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+              }
+            ],
+            "terminalProof": {
+              "sourceCommandId": "e1d9800c-4317-4d5f-b2ac-6d59ca62ed84",
+              "state": "completedSuccess",
+              "logEpoch": "mujqjd3z-8j0pd4ux",
+              "seq": 35,
+              "turnId": "msg_mujqjdkh_80160e12-4c5b-4e57-addd-85bf7b4f3262"
+            },
+            "finalOutput": {
+              "text": "PRE_Z8_U3_c5e96a60-8f6a-446a-a758-18a87ae9f024_ANALYSIS: Native Read observed Z1_BEFORE_7391 in fixture.mjs. Change only that marker to Z1_AFTER_7391 and preserve fixture.test.mjs. Configured tests are not included.\nLiteral predecessor data {{inputs.not_bound}} and {{nested braces}}.",
+              "turnId": "msg_mujqjdkh_80160e12-4c5b-4e57-addd-85bf7b4f3262",
+              "rowId": 4,
+              "entityId": "msg_mujqjdvp_c84bf905-7206-450a-b8ab-6b1917d8d4f2",
+              "assistantResponseId": "msg_mujqjdvp_c84bf905-7206-450a-b8ab-6b1917d8d4f2"
+            },
+            "outputValidation": {
+              "status": "valid",
+              "issues": []
+            }
+          },
+          {
+            "iterationId": "0f3b3b5e-e450-496b-895c-375e4dceacc4",
+            "iteration": 0,
+            "nodeId": "implement",
+            "attemptId": "e3b56170-fc8e-495a-b890-b44968b42191",
+            "commandId": "a9240342-ac3f-44f2-a9fc-841710193791",
+            "inputId": "a9240342-ac3f-44f2-a9fc-841710193791",
+            "status": "Skipped",
+            "dispatchPhase": "planned",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790508510644,
+            "updatedAt": 1790508511969
+          },
+          {
+            "iterationId": "0f3b3b5e-e450-496b-895c-375e4dceacc4",
+            "iteration": 0,
+            "nodeId": "review",
+            "attemptId": "3298e075-2d28-4551-af37-67c09bc03f05",
+            "commandId": "839fc951-a42e-488c-a10b-4e080b0b7d7f",
+            "inputId": "839fc951-a42e-488c-a10b-4e080b0b7d7f",
+            "status": "Skipped",
+            "dispatchPhase": "planned",
+            "settings": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "source": "workspace"
+            },
+            "createdAt": 1790508510644,
+            "updatedAt": 1790508511969
+          }
+        ],
+        "approvalAttempts": [
+          {
+            "iterationId": "0f3b3b5e-e450-496b-895c-375e4dceacc4",
+            "iteration": 0,
+            "nodeId": "final-gate",
+            "attemptId": "52dfc4a1-9182-4791-bda9-1670bc90de35",
+            "status": "Skipped",
+            "createdAt": 1790508510644,
+            "updatedAt": 1790508511969
+          }
+        ],
+        "toolAttempts": [],
+        "artifacts": [
+          {
+            "id": "03709fbf-3f54-4310-bfdd-f9c817df1bab",
+            "runId": "c24cc93a-ab80-44e2-a962-dc53b20f85b0",
+            "nodeId": "analyze",
+            "attemptId": "a36ec9e7-d7d4-42c0-b47e-c673b4f2ab67",
+            "workspaceKey": "D:\\Playground\\ZCode\\.tmp\\z1-native-1790508472309-fd250d\\workspace",
+            "type": "text",
+            "provenance": "native-agent-final",
+            "bytes": 284,
+            "digest": "78416183257c34aeaa1e5d2df963734cf7425762a7e400c86efaf0ba1814e426",
+            "capturedAt": 1790508512217,
+            "validation": "valid",
+            "sessionId": "sess_d8259197-df63-469b-a98b-e54d1f7786bc",
+            "inputId": "e1d9800c-4317-4d5f-b2ac-6d59ca62ed84",
+            "commandId": "e1d9800c-4317-4d5f-b2ac-6d59ca62ed84"
+          }
+        ],
+        "artifactBindings": [
+          {
+            "nodeId": "analyze",
+            "attemptId": "a36ec9e7-d7d4-42c0-b47e-c673b4f2ab67",
+            "selector": "final",
+            "artifactId": "03709fbf-3f54-4310-bfdd-f9c817df1bab"
+          }
+        ],
+        "cancelRequestedAt": 1790508511969
+      }
+    ]
+  },
+  "nativeLedger": [
+    {
+      "id": "queue_e1d9800c-4317-4d5f-b2ac-6d59ca62ed84",
+      "session_id": "sess_d8259197-df63-469b-a98b-e54d1f7786bc",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Workflow task: analyze.\nInspect the explicit request, relevant native project instructions and source. Identify a bounded implementation and acceptance criteria. Preserve unrelated work. Do not edit or execute commands. Missing requirements remain questions.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"RUN_IDENTITY_NEW_SENTINEL_7391\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"AGENTS.md\",\"delivery\":\"native-instructions\"}]\nReferences marked native-instructions are already supplied by native project guidance; do not read or inject them again. Read only explicit-read references through native Read. Load native-skill references using nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. References without a delivery marker remain unresolved until preparation. Cite reference IDs; missing source is a question, never an invented rule.",
+        "intent": {
+          "sourceCommandId": "e1d9800c-4317-4d5f-b2ac-6d59ca62ed84",
+          "queueItemId": "queue_e1d9800c-4317-4d5f-b2ac-6d59ca62ed84",
+          "clientId": "graph:a36ec9e7-d7d4-42c0-b47e-c673b4f2ab67",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790508511066,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "e1d9800c-4317-4d5f-b2ac-6d59ca62ed84",
+          "queueItemId": "queue_e1d9800c-4317-4d5f-b2ac-6d59ca62ed84",
+          "clientId": "graph:a36ec9e7-d7d4-42c0-b47e-c673b4f2ab67",
+          "kind": "sendText",
+          "text": "Workflow task: analyze.\nInspect the explicit request, relevant native project instructions and source. Identify a bounded implementation and acceptance criteria. Preserve unrelated work. Do not edit or execute commands. Missing requirements remain questions.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"RUN_IDENTITY_NEW_SENTINEL_7391\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"AGENTS.md\",\"delivery\":\"native-instructions\"}]\nReferences marked native-instructions are already supplied by native project guidance; do not read or inject them again. Read only explicit-read references through native Read. Load native-skill references using nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. References without a delivery marker remain unresolved until preparation. Cite reference IDs; missing source is a question, never an invented rule.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790508511066
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790508511088,
+      "time_updated": 1790508511617
+    }
+  ],
+  "modelRequests": 3,
+  "nativeToolCalls": [
+    {
+      "id": "pre_z8_u1_analyze_read",
+      "type": "function",
+      "function": {
+        "name": "Read",
+        "arguments": "{\"file_path\":\"D:/Playground/ZCode/.tmp/z1-native-1790508472309-fd250d/workspace/fixture.mjs\"}"
+      },
+      "observedAt": 1790508512038
+    }
+  ],
+  "nativeToolResults": [
+    {
+      "id": "pre_z8_u1_analyze_read",
+      "output": "1\texport const marker = 'Z1_BEFORE_7391';\n2\t",
+      "observedAt": 1790508512038
+    }
+  ],
+  "fixtureErrors": [],
+  "completedAt": 1790508512425,
+  "counts": {
+    "pass": 6,
+    "fail": 0,
+    "skip": 0
+  }
+}

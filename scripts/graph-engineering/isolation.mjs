@@ -17,6 +17,7 @@ export async function createIsolation({
   noProvider = false,
   profile,
   fixtureFactory = startFixture,
+  extraEnv = {},
 } = {}) {
   const packagedExe = process.env.Z1_PACKAGED_EXE;
   if (packagedExe && (manual || profile))
@@ -134,6 +135,7 @@ export async function createIsolation({
     ZAI_OAUTH_ORIGIN: fixture.origin,
     ZAI_BUSINESS_BASE_URL: fixture.origin,
     BIGMODEL_API_BASE_URL: fixture.origin,
+    ...extraEnv,
     ...(manual
       ? { Z1_ALLOW_PROVIDER_NETWORK: "1" }
       : {
