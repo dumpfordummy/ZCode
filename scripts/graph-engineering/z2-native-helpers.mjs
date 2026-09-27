@@ -215,6 +215,9 @@ export async function createSequentialGraph(window, summary) {
   await window.getByTestId("graph-add-task").click();
   await window.getByTestId("graph-node-name").fill("Temporary task to remove");
   await window.getByTestId("graph-delete-node").click();
+  // 删除控件在 Pre-Z8 重构后改为两步：先开 impact 对话框，再确认删除。
+  await window.getByTestId("graph-delete-confirm").click();
+  await window.getByTestId("graph-delete-impact").waitFor({ state: "hidden" });
   assert.equal(await window.locator(".react-flow__node").count(), 5);
   // Explicitly connect in the inspector; positions never select execution order.
   for (const [from, to] of [

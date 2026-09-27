@@ -1,4 +1,4 @@
-# ZCode Graph 3.14.0-z7.4 — Pre-Z8 Usability Preview (Windows x64)
+# ZCode Graph 3.14.0-z7.5 — Pre-Z8 Usability Preview (Windows x64)
 
 This prerelease contains the committed pre-Z8 Graph Engineering improvements through U6: editable sequential Agent Tasks with Guided/Advanced context controls, human review, artifacts and native Build/Test tools, bounded conditional/repair workflows, a versioned sequential workflow library with portable export/import, repeat-request reuse, run-status/approval/cancellation/stale-evidence controls, and optional two-worker Fork/Join with separate owned workspaces and reviewed integration. Graph uses ZCode's existing native agent/session services. Conversation links open the actual existing sessions; native Chat, permissions, questions, configuration and history retain their existing owners.
 
@@ -38,7 +38,7 @@ Fork/Join is opt-in and limited to two workers against a clean committed local G
 
 ## Installation
 
-Download the Windows x64 `.exe` installer and compare its SHA256 hash with `SHA256SUMS.txt`. GitHub changes the space in the build filename to a dot (`ZCode.Graph-3.14.0-z7.4-win-x64.exe`); the checksum line retains the original build filename. No Git checkout is needed to install. Each user supplies their own model provider configuration and project development tools.
+Download the Windows x64 `.exe` installer and compare its SHA256 hash with `SHA256SUMS.txt`. GitHub changes the space in the build filename to a dot (`ZCode.Graph-3.14.0-z7.5-win-x64.exe`); the checksum line retains the original build filename. No Git checkout is needed to install. Each user supplies their own model provider configuration and project development tools.
 
 The separate **ZCode Graph** app uses `%USERPROFILE%\.zcode-graph-engineering`, with a private home for the application and its tools. It does not copy an existing ZCode/Codex profile, take over the upstream URL handler/Explorer menu, or install upstream updates. Existing Graph users update manually by downloading and running this newer Graph installer. This remains an **unsigned prerelease**; upstream OAuth callbacks and signing reputation are not covered.
 
