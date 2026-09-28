@@ -8,7 +8,7 @@ Focused native reviewer acceptance is complete. No publication or Z8 work is aut
 - Pre-handoff HEAD: `ffe9f48ef89a6bbea4ea8ddfdb7fe23875f78a93` (`Audit`), on `main`.
 - Origin: `https://github.com/dumpfordummy/ZCode.git`.
 - Handoff branch: `handoff/graph-pre-z8-codex`.
-- Handoff payload commit: recorded in the final receipt below after creation. Resolve the checked-out transfer tip with `git rev-parse HEAD`; verify it against `git ls-remote origin refs/heads/handoff/graph-pre-z8-codex`.
+- Handoff payload commit: `fc265a34172f88f3146e54ad669ea56e006f71ae` (`handoff: complete Graph reviewer native acceptance`). A subsequent documentation-only receipt commit records this immutable SHA. The final transfer tip includes that receipt; obtain its full SHA with `git rev-parse HEAD` and compare it with `git ls-remote origin refs/heads/handoff/graph-pre-z8-codex`. A commit cannot literally contain its own hash, so the final tip is verified through Git rather than a self-referential field.
 
 At handoff start, status and both staged/unstaged diffs were empty. The required freshness fetch confirmed local main equals origin/main. The intervening Audit commit already contains all acceptance source, tests, reports and 319 next-iteration evidence files. It also contains the earlier documentation-only changes under `docs/graph-engineering/pre-z8/glm-handoff/`: BACKLOG.md, HANDOFF.md, and evidence/document-format-check.log, handoff-validation.json, work-time-estimate.json. Those are unrelated prior work and remain untouched.
 
