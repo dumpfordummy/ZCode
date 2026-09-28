@@ -1,0 +1,1830 @@
+diff --git a/architecture-policy.yaml b/architecture-policy.yaml
+index 159f09c..593fde2 100644
+--- a/architecture-policy.yaml
++++ b/architecture-policy.yaml
+@@ -78,10 +78,4 @@ global:
+   forbidDeepImports: true
+   managedOnly: true
+ 
+-exceptions:
+-  # Part A reviewer reproduction: comprehensive end-to-end fixture + 7 scenarios
+-  # in a single file. Splitting would fragment the reproduction narrative.
+-  - id: reviewer-reproduction-test
+-    rule: max-file-lines
+-    paths:
+-      - packages/services/src/graph-engineering/adapters/reviewer-reproduction.test.ts
++exceptions: []
+diff --git a/docs/graph-engineering/pre-z8/glm-handoff/BACKLOG.md b/docs/graph-engineering/pre-z8/glm-handoff/BACKLOG.md
+index 803d18a..9d9926c 100644
+--- a/docs/graph-engineering/pre-z8/glm-handoff/BACKLOG.md
++++ b/docs/graph-engineering/pre-z8/glm-handoff/BACKLOG.md
+@@ -80,7 +80,7 @@ Independent tests should compare known template semantics and immutable input sn
+ 
+ ## 4. U5 file transfer and retained review state
+ 
+-Reuse `packages/ui/src/graph-engineering/GraphTemplateTransfer.tsx`, `GraphLibraryManagement.tsx`, `packages/ui/src/store/graphDraftStore.ts`, existing workflow `preview`/`create`/`save-version` operations, public `IPlatformService` and `IFileService`. Current transfer UI uses component-local name/description/JSON/preview/review state and raw JSON; it is not the requested reviewed file flow. Pass workspace identity explicitly where needed rather than introduce another registry.
++Reuse `packages/ui/src/graph-engineering/GraphTemplateTransfer.tsx`, `GraphLibraryManagement.tsx`, `packages/ui/src/store/graphDraftStore.ts`, existing `IGraphWorkflowService.preview(...)` and `mutate({ action: "create" | "version", ... })` operations, public `IPlatformService` and `IFileService`. These method/discriminant names come from `workflow-contract.ts`; `graph-library-save-version` is a UI selector, not a service operation. Current transfer UI uses component-local name/description/JSON/preview/review state and raw JSON; it is not the requested reviewed file flow. Pass workspace identity explicitly where needed rather than introduce another registry.
+ 
+ The planned hook belongs under `packages/ui/src/hooks/`. Exact contract from `U5_REUSE_SPEC.md`:
+ 
+diff --git a/docs/graph-engineering/pre-z8/glm-handoff/HANDOFF.md b/docs/graph-engineering/pre-z8/glm-handoff/HANDOFF.md
+index a9b3f8d..c7c6b4b 100644
+--- a/docs/graph-engineering/pre-z8/glm-handoff/HANDOFF.md
++++ b/docs/graph-engineering/pre-z8/glm-handoff/HANDOFF.md
+@@ -211,3 +211,5 @@ On this machine, sandboxed Electron/Edge startup previously failed before DOM/mo
+ TASK_001 is ready to implement with existing abstractions and no product redesign. After it passes, U4 still needs the complete/no-tests/approval/artifact-read scenario and current-build U2 pass/fail/source-drift presentation checks, review and durable archival. Only then begin U5 contracts/implementation. [BACKLOG.md](BACKLOG.md) retains the remaining dependency order and human/live blockers.
+ 
+ Every new result must name its layer, source/artifact identity, command, exit status, receipt and limits. Preserve failed receipts and original evidence. Do not stage, commit, push, publish, begin Z8, or claim the user-operated pilot is complete.
++
++Handoff-only verification is recorded in [handoff-validation.json](evidence/handoff-validation.json): document formatting, local links/source anchors, copied-evidence integrity, independent review and preservation checks. These checks do not add a product test/build PASS. The requested work-time estimate is separately recorded in [work-time-estimate.json](evidence/work-time-estimate.json), with logged windows and exclusions rather than invented active-time accounting.
+diff --git a/packages/services/src/graph-engineering/adapters/reviewer-reproduction.test.ts b/packages/services/src/graph-engineering/adapters/reviewer-reproduction.test.ts
+index afb5021..1dc16aa 100644
+--- a/packages/services/src/graph-engineering/adapters/reviewer-reproduction.test.ts
++++ b/packages/services/src/graph-engineering/adapters/reviewer-reproduction.test.ts
+@@ -1,530 +1,24 @@
+-/**
+- * Part A — Sequential Engineering reviewer reproduction.
+- *
+- * Isolated service-level reproduction of the reported reviewer workflow using
+- * the corrected built-in generic template (BUILTIN_TEMPLATE_VERSION = 2).
+- *
+- * Request: "Modify zz-demo.txt file content to after"
+- *
+- * Build/Test use Node scripts (build.js / test.js) through the existing
+- * recipe/report contract (zcode-json-v1 / zcode-test-v1). The tool port
+- * genuinely executes the scripts via child_process; the agent port uses a
+- * controlled provider that returns canned responses and is labelled as such.
+- *
+- * Five reviewer exercises:
+- *   1. Genuine passing Test + valid reviewer JSON → final human-review gate.
+- *   2. Prose/fenced JSON → reviewer output-validation failure.
+- *   3. Unbound report reference → rejected without weakening ownership checks.
+- *   4. Valid needs_changes → distinguishable from malformed output.
+- *   5. Genuine failing Test → cannot become approved; Test stop prevents reviewer.
+- *
+- * Plus: reviewer-request content assertion and library v1→v2 fallback check.
+- */
++// Service-level integration only: simulated native ports are not Desktop execution evidence.
+ import assert from "node:assert/strict";
+ import test from "node:test";
+-import { spawnSync } from "node:child_process";
+-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+-import { writeFileSync } from "node:fs";
++import { mkdtemp, rm } from "node:fs/promises";
+ import { tmpdir } from "node:os";
+ import { join } from "node:path";
+-import { createHash } from "node:crypto";
+-import type { TestContext } from "node:test";
+-
+-import { builtinTemplates } from "../domain/workflow-samples.js";
+-import { instantiateTemplate } from "../domain/workflow.js";
+-import { fingerprintDeclaredFiles, observeDeclaredFiles } from "./artifact-files.js";
+-import { createGraphArtifactStore } from "./artifacts.js";
+-import { GraphEngineeringService } from "../app/service.js";
+-import { runFingerprint } from "../app/attempts.js";
+-import { recordSchema } from "../domain/record.js";
+-import type {
+-  GraphSequentialDefinition,
+-  GraphSequentialRun,
+-  GraphRecipe,
+-  GraphToolOperation,
+-  GraphToolAttempt,
+-} from "../contract.js";
+-import type {
+-  GraphNativeFact,
+-  GraphNativeExecution,
+-  GraphRecord,
+-} from "../app/ports.js";
+-import type { GraphRunProvenance } from "../workflow-provenance.js";
+-import type { GraphWorkspaceTarget } from "../contract.js";
+-
+-const sha256 = (value: string) => createHash("sha256").update(value).digest("hex");
+-const BUILTIN_TEMPLATE_VERSION = 2;
+-const RUN_REQUEST = "Modify zz-demo.txt file content to after";
+-
+-// ─── Fixture scripts (written into the temp workspace) ─────────────────────
+-
+-const BUILD_JS = `\
+-// build.js — produces a declared output file within the operation window.
+-const fs = require("fs");
+-const operationId = process.argv[2] || "";
+-const sourceDigest = process.argv[3] || "";
+-fs.writeFileSync("build.out", operationId + ":" + sourceDigest + "\\n");
+-process.exit(0);
+-`;
+-
+-const TEST_JS = `\
+-// test.js — reads zz-demo.txt, evaluates assertion, writes zcode-test-v1 report.
+-const fs = require("fs");
+-const operationId = process.argv[2] || "";
+-const sourceDigest = process.argv[3] || "";
+-const buildDigest = process.argv[4] || "";
+-const reportPath = process.argv[5] || "report.json";
+-const content = fs.readFileSync("zz-demo.txt", "utf8");
+-const passed = content.includes("after");
+-const report = {
+-  format: "zcode-test-v1",
+-  operationId: operationId,
+-  sourceDigest: sourceDigest,
+-  buildDigest: buildDigest,
+-  tests: [
+-    {
+-      name: "contains-after",
+-      status: passed ? "passed" : "failed",
+-      message: passed
+-        ? "zz-demo.txt contains 'after'"
+-        : "zz-demo.txt does not contain 'after'; content: " + content.trim(),
+-    },
+-  ],
+-};
+-fs.writeFileSync(reportPath, JSON.stringify(report));
+-process.exit(passed ? 0 : 1);
+-`;
+-
+-// ─── Recipe declarations ────────────────────────────────────────────────────
+-
+-function nodeRecipes(): GraphRecipe[] {
+-  return [
+-    {
+-      id: "build",
+-      name: "Node build",
+-      executable: "node",
+-      args: ["build.js", "{operationId}", "{sourceDigest}"],
+-      cwd: ".",
+-      timeoutMs: 30000,
+-      sourcePaths: ["zz-demo.txt"],
+-      expectedOutputs: ["build.out"],
+-      verifier: { kind: "build" },
+-    },
+-    {
+-      id: "test",
+-      name: "Node test",
+-      executable: "node",
+-      args: [
+-        "test.js",
+-        "{operationId}",
+-        "{sourceDigest}",
+-        "{buildDigest}",
+-        "{reportPath}",
+-      ],
+-      cwd: ".",
+-      timeoutMs: 30000,
+-      sourcePaths: ["zz-demo.txt"],
+-      expectedOutputs: [],
+-      verifier: {
+-        kind: "test",
+-        format: "zcode-json-v1",
+-        reportPath: "report.json",
+-        minimumTests: 1,
+-        expectedTests: 1,
+-        requiredTests: ["contains-after"],
+-        buildNodeId: "build",
+-      },
+-    },
+-  ];
+-}
+-
+-// ─── Instantiate the built-in generic template ──────────────────────────────
+-
+-function instantiateGeneric(request: string): GraphSequentialDefinition {
+-  const entry = builtinTemplates.find((e) => e.id === "generic")!;
+-  const selected = {
+-    version: BUILTIN_TEMPLATE_VERSION,
+-    digest: sha256(runFingerprint(entry.template)),
+-    createdAt: 0,
+-    template: structuredClone(entry.template),
+-  };
+-  return instantiateTemplate(
+-    "generic",
+-    selected,
+-    { request },
+-    {
+-      references: {},
+-      recipes: { build: "build", test: "test" },
+-      sourcePaths: [],
+-    },
+-  );
+-}
+-
+-// ─── Controlled provider fixture ─────────────────────────────────────────────
+-
+-interface ReproductionFixture {
+-  service: GraphEngineeringService;
+-  target: GraphWorkspaceTarget;
+-  /** All native execution instructions captured, keyed by node prefix. */
+-  capturedInstructions: Map<string, string>;
+-  /** Wait for a run state predicate. */
+-  wait(predicate: (run: GraphSequentialRun) => boolean): Promise<GraphSequentialRun>;
+-  /** Current run. */
+-  current(): Promise<GraphSequentialRun>;
+-  /** Saved record (for inspection). */
+-  saved(): GraphRecord;
+-  dispose(): Promise<void>;
+-}
+-
+-async function buildReproductionFixture(
+-  t: TestContext,
+-  definition: GraphSequentialDefinition,
+-  root: string,
+-  provider: {
+-    /** Mutable holder — update .text before the reviewer runs to change output. */
+-    reviewerOutput: { text: string };
+-    /** Whether the implement node edits zz-demo.txt to "after". */
+-    modifyFile: boolean;
+-  },
+-): Promise<ReproductionFixture> {
+-  const target = { workspacePath: root };
+-  const recipes = nodeRecipes();
+-  let saved: GraphRecord = { definition, runs: [] };
+-  let sequence = 0;
+-  const facts = new Map<string, (fact: GraphNativeFact) => void>();
+-  const sends: GraphNativeExecution[] = [];
+-  const capturedInstructions = new Map<string, string>();
+-  const operations = new Map<string, GraphToolOperation>();
+-
+-  // Preflight stub — returns a minimal valid provenance whose digest matches
+-  // what the caller passes in params.preflight.digest.
+-  const preflightDigest = sha256("repro-preflight-" + definition.revision);
+-  const preflight = {
+-    async capture(
+-      _target: GraphWorkspaceTarget,
+-      def: GraphSequentialDefinition,
+-      _settings: unknown,
+-    ): Promise<GraphRunProvenance> {
+-      const template = def.template!;
+-      const provenance: GraphRunProvenance = {
+-        digest: preflightDigest,
+-        template: {
+-          id: template.id,
+-          name: template.name,
+-          version: template.version,
+-          digest: template.digest,
+-          parameters: template.parameters,
+-          bindings: template.bindings,
+-          references: template.references,
+-          excluded: template.excluded,
+-        },
+-        environment: {
+-          version: 1 as const,
+-          status: "available" as const,
+-          configDigest: sha256("env"),
+-          executables: [],
+-          instructions: [],
+-          skills: [],
+-          plugins: [],
+-          hooks: [],
+-          mcp: [],
+-          unknowns: [],
+-        },
+-        models: def.nodes
+-          .filter((n) => n.type === "task")
+-          .map((n) => ({
+-            nodeId: n.id,
+-            providerId: "fixture",
+-            modelId: "test-only",
+-            type: "Unknown",
+-            destination: "Unknown",
+-            configurationDigest: sha256("model-" + n.id),
+-          })),
+-        auxiliary: [],
+-        references: [],
+-        recipes: recipes.map((r) => ({
+-          nodeId: r.id,
+-          id: r.id,
+-          digest: sha256(runFingerprint(r)),
+-          command: JSON.stringify([r.executable, ...r.args]),
+-          cwd: r.cwd,
+-        })),
+-        permissions: def.nodes
+-          .filter((n) => n.type === "task")
+-          .map((n) => ({ nodeId: n.id, mode: "edit", planEnabled: false })),
+-        unknowns: [],
+-      };
+-      return provenance;
+-    },
+-  };
+-
+-  const options = {
+-    repository: {
+-      async read() {
+-        return structuredClone(saved);
+-      },
+-      async write(_target: unknown, record: GraphRecord) {
+-        recordSchema.parse({ version: 5, workspaceKey: root, ...record });
+-        saved = structuredClone(record);
+-      },
+-    },
+-    evidence: {
+-      digest: sha256,
+-      async captureSource() {
+-        return {
+-          baseline: sha256("source"),
+-          scope: "none" as const,
+-          files: [],
+-          complete: true,
+-          issues: [],
+-        };
+-      },
+-    },
+-    artifacts: createGraphArtifactStore(join(root, "data")),
+-    recipes: {
+-      async read() {
+-        return {
+-          recipes: recipes.map((r) => structuredClone(r)),
+-          digest: sha256("repro-recipes"),
+-          sourcePath: ".zcode/config.json" as const,
+-        };
+-      },
+-      async save() {
+-        throw new Error("unused");
+-      },
+-      fingerprint: fingerprintDeclaredFiles,
+-      observeFiles: observeDeclaredFiles,
+-      async validatePaths() {},
+-    },
+-    native: {
+-      async available() {
+-        return { available: true };
+-      },
+-      async validateSelection() {},
+-      async create() {
+-        return {
+-          sessionId: `agent-session-${++sequence}`,
+-          runtimeIdentity: "controlled-provider",
+-        };
+-      },
+-      async observe(
+-        execution: GraphNativeExecution,
+-        callback: (fact: GraphNativeFact) => void,
+-        _lost: (reason: string) => void,
+-      ) {
+-        facts.set(execution.attemptId, callback);
+-        return { dispose() { facts.delete(execution.attemptId); } };
+-      },
+-      async send(execution: GraphNativeExecution) {
+-        sends.push(execution);
+-        // Controlled provider: detect node by instruction prefix, emit canned
+-        // fact asynchronously so the serial lock is released first.
+-        const { attemptId, commandId, instructions } = execution;
+-        const emit = (text: string) => {
+-          const cb = facts.get(attemptId);
+-          if (!cb) return;
+-          cb({
+-            sourceCommandId: commandId,
+-            state: "completedSuccess",
+-            logEpoch: "epoch",
+-            seq: ++sequence,
+-            turnId: `turn-${attemptId}`,
+-            finalOutput: { text, turnId: `turn-${attemptId}`, rowId: 1 },
+-          });
+-        };
+-        if (instructions.startsWith("Workflow task: analyze.")) {
+-          capturedInstructions.set("analyze", instructions);
+-          setTimeout(() => emit(
+-            "Analysis: The request asks to modify zz-demo.txt so its content becomes 'after'. " +
+-            "The file currently contains 'before'. No additional acceptance criteria are stated.",
+-          ), 0);
+-        } else if (instructions.startsWith("Workflow task: implement.")) {
+-          capturedInstructions.set("implement", instructions);
+-          setTimeout(() => {
+-            if (provider.modifyFile)
+-              writeFileSync(join(root, "zz-demo.txt"), "after");
+-            emit(
+-              "Implementation: Modified zz-demo.txt to contain 'after'. No other files were changed.",
+-            );
+-          }, 0);
+-        } else if (instructions.startsWith("Workflow task: reviewer.")) {
+-          capturedInstructions.set("reviewer", instructions);
+-          // Poll until the test sets reviewerOutput.text — this lets the test
+-          // extract the permitted artifact IDs from the captured instructions
+-          // before the reviewer's canned output is emitted.
+-          const poll = () => {
+-            if (provider.reviewerOutput.text === "") {
+-              setTimeout(poll, 10);
+-              return;
+-            }
+-            emit(provider.reviewerOutput.text);
+-          };
+-          setTimeout(poll, 0);
+-        } else {
+-          setTimeout(() => emit("Controlled provider: unrecognized node."), 0);
+-        }
+-        return { accepted: true };
+-      },
+-      async cancel() {
+-        throw new Error("Must not cancel an agent for a Tool.");
+-      },
+-      async reconcile() {
+-        return "same-runtime" as const;
+-      },
+-      async inspect() {
+-        return { kind: "unknown" as const, reason: "controlled-provider" };
+-      },
+-    },
+-    tools: {
+-      async available() {
+-        return { available: true };
+-      },
+-      async create() {
+-        return {
+-          sessionId: `tool-session-${++sequence}`,
+-          runtimeIdentity: "controlled-provider",
+-        };
+-      },
+-      async start(
+-        _target: GraphWorkspaceTarget,
+-        attempt: GraphToolAttempt,
+-      ): Promise<GraphToolOperation> {
+-        const stored = (saved.runs.at(-1) as GraphSequentialRun).toolAttempts!.find(
+-          (a) => a.operationId === attempt.operationId,
+-        )!;
+-        if (stored.dispatchPhase !== "sending")
+-          throw new Error("Intent was not persisted before native effect");
+-
+-        // Genuinely execute the Node script via child_process.
+-        const exe = attempt.recipe.executable;
+-        const args = attempt.resolvedArgs ?? attempt.recipe.args;
+-        const cwd = root;
+-        const startedAt = Date.now();
+-        const result = spawnSync(exe, args, {
+-          cwd,
+-          encoding: "utf8",
+-          timeout: 30000,
+-          windowsHide: true,
+-        });
+-        const completedAt = Date.now();
+-        const exitCode = result.status ?? -1;
+-        const stdout = result.stdout ?? "";
+-        const stderr = result.stderr ?? "";
+-
+-        const op: GraphToolOperation = {
+-          operationId: attempt.operationId,
+-          sessionId: attempt.sessionId!,
+-          requestDigest: sha256(attempt.operationId),
+-          recipeId: attempt.recipe.id,
+-          cwd,
+-          status: exitCode === 0 ? "completed" : "failed",
+-          processStarted: true,
+-          startedAt,
+-          completedAt,
+-          result: {
+-            status: exitCode === 0 ? "completed" : "failed",
+-            exitCode,
+-            processExitObserved: true,
+-            stdout: { text: stdout, bytes: Buffer.byteLength(stdout), truncated: false },
+-            stderr: { text: stderr, bytes: Buffer.byteLength(stderr), truncated: false },
+-            durationMs: completedAt - startedAt,
+-            timedOut: result.signal === "SIGTERM",
+-            cancelled: false,
+-            signal: result.signal ?? undefined,
+-          },
+-        };
+-        operations.set(op.operationId, op);
+-        return structuredClone(op);
+-      },
+-      async inspect(_target: GraphWorkspaceTarget, attempt: GraphToolAttempt) {
+-        return structuredClone(operations.get(attempt.operationId)!);
+-      },
+-      async cancel(_target: GraphWorkspaceTarget, attempt: GraphToolAttempt) {
+-        const op = operations.get(attempt.operationId)!;
+-        Object.assign(op, { status: "cancelled", completedAt: Date.now() });
+-        return structuredClone(op);
+-      },
+-    },
+-    preflight,
+-    id: () => `repro-${++sequence}`,
+-    now: () => ++sequence,
+-  };
+-
+-  const service = new GraphEngineeringService(options as any);
+-
+-  const current = async () =>
+-    (await service.getWorkspace(target)).runs.at(-1) as GraphSequentialRun;
+-  const wait = async (predicate: (run: GraphSequentialRun) => boolean) => {
+-    for (let i = 0; i < 300; i++) {
+-      const value = await current();
+-      if (value && predicate(value)) return value;
+-      await new Promise((resolve) => setTimeout(resolve, 20));
+-    }
+-    throw new Error("Expected state not observed: " + JSON.stringify(await current()));
+-  };
+-
+-  t.after(async () => {
+-    await service.disposeAndWait();
+-  });
+-
+-  return { service, target, capturedInstructions, wait, current, saved: () => structuredClone(saved), dispose: async () => { await service.disposeAndWait(); } };
+-}
+-
+-// ─── Helper: extract permitted artifact IDs from reviewer instructions ──────
+-
+-function extractPermittedIds(instructions: string): string[] {
+-  const match = instructions.match(
+-    /Permitted evidence artifact IDs for evidenceReferences: \[([^\]]*)\]/,
+-  );
+-  if (!match) return [];
+-  return match[1]!
+-    .split(",")
+-    .map((s) => s.trim().replace(/"/g, ""))
+-    .filter(Boolean);
+-}
+-
+-// ─── Helper: run the generic template through the service ───────────────────
+-
+-async function runGeneric(f: ReproductionFixture, definition: GraphSequentialDefinition) {
+-  const preflightDigest = sha256("repro-preflight-" + definition.revision);
+-  await f.service.run({
+-    target: f.target,
+-    requestId: "repro-" + Math.random().toString(36).slice(2),
+-    revision: definition.revision,
+-    modelSelection: { providerId: "fixture", modelId: "test-only" },
+-    mode: "edit",
+-    planEnabled: false,
+-    action: "run",
+-    preflight: { digest: preflightDigest, acknowledgedUnknowns: true },
+-  } as any);
+-}
+-
+-// ─── Helpers ────────────────────────────────────────────────────────────────
+-
+-const TERMINAL_STATUSES = new Set([
+-  "Completed", "Failed", "Cancelled", "NeedsHuman",
+-  "BudgetExhausted", "NoProgress", "Rejected",
+-  "Interrupted", "Unknown", "StaleEvidence",
+-]);
+-function isTerminal(run: GraphSequentialRun): boolean {
+-  return TERMINAL_STATUSES.has(run.status);
+-}
+-/** The run has reached the final human-review approval gate and is waiting for a decision. */
+-function isAwaitingGate(run: GraphSequentialRun): boolean {
+-  return run.status === "WaitingForApproval";
+-}
+-
+-async function prepareWorkspace(root: string) {
+-  await writeFile(join(root, "zz-demo.txt"), "before");
+-  await writeFile(join(root, "build.js"), BUILD_JS);
+-  await writeFile(join(root, "test.js"), TEST_JS);
+-}
+-
+-// ─── Scenario 1: passing Test + valid reviewer JSON → final gate ────────────
++import { buildReproductionFixture } from "./reviewer-reproduction.fixture.js";
++import { instantiateGeneric, RUN_REQUEST } from "./reviewer-reproduction-data.fixture.js";
++import {
++  extractPermittedIds,
++  runGeneric,
++  isTerminal,
++  isAwaitingGate,
++  prepareWorkspace,
++} from "./reviewer-reproduction-helpers.fixture.js";
+ 
+ test("scenario 1: genuine passing Test + valid reviewer JSON reaches final human-review gate", async (t) => {
+   const root = await mkdtemp(join(tmpdir(), "zcode-repro-s1-"));
+-  t.after(async () => { await rm(root, { recursive: true, force: true }); });
++  t.after(async () => {
++    await rm(root, { recursive: true, force: true });
++  });
+   await prepareWorkspace(root);
+ 
+   const definition = instantiateGeneric(RUN_REQUEST);
+@@ -576,12 +70,14 @@ test("scenario 2: prose and fenced JSON output is rejected by strict reviewer va
+     "```json\n" +
+       JSON.stringify({ outcome: "pass", findings: [], evidenceReferences: [] }) +
+       "\n```",
+-    'I think this looks good. The test passed.',
++    "I think this looks good. The test passed.",
+   ];
+ 
+   for (const badOutput of badOutputs) {
+     const root = await mkdtemp(join(tmpdir(), "zcode-repro-s2-"));
+-    t.after(async () => { await rm(root, { recursive: true, force: true }); });
++    t.after(async () => {
++      await rm(root, { recursive: true, force: true });
++    });
+     await prepareWorkspace(root);
+ 
+     const definition = instantiateGeneric(RUN_REQUEST);
+@@ -624,7 +120,9 @@ test("scenario 2: prose and fenced JSON output is rejected by strict reviewer va
+ 
+ test("scenario 3: unbound evidence reference is rejected without weakening ownership checks", async (t) => {
+   const root = await mkdtemp(join(tmpdir(), "zcode-repro-s3-"));
+-  t.after(async () => { await rm(root, { recursive: true, force: true }); });
++  t.after(async () => {
++    await rm(root, { recursive: true, force: true });
++  });
+   await prepareWorkspace(root);
+ 
+   const definition = instantiateGeneric(RUN_REQUEST);
+@@ -664,251 +162,3 @@ test("scenario 3: unbound evidence reference is rejected without weakening owner
+ });
+ 
+ // ─── Scenario 4: valid needs_changes → distinguishable from malformed ───────
+-
+-test("scenario 4: valid needs_changes outcome is distinguishable from malformed output", async (t) => {
+-  const root = await mkdtemp(join(tmpdir(), "zcode-repro-s4-"));
+-  t.after(async () => { await rm(root, { recursive: true, force: true }); });
+-  await prepareWorkspace(root);
+-
+-  const definition = instantiateGeneric(RUN_REQUEST);
+-  const reviewerOutput = { text: "" };
+-  const f = await buildReproductionFixture(t, definition, root, {
+-    reviewerOutput,
+-    modifyFile: true,
+-  });
+-
+-  await runGeneric(f, definition);
+-
+-  await f.wait((r) => f.capturedInstructions.has("reviewer") || isTerminal(r));
+-  assert.ok(f.capturedInstructions.has("reviewer"));
+-
+-  const permittedIds = extractPermittedIds(f.capturedInstructions.get("reviewer")!);
+-  reviewerOutput.text = JSON.stringify({
+-    outcome: "needs_changes",
+-    findings: [
+-      {
+-        code: "REVIEW-001",
+-        message: "The test verifies content but the request scope may need additional review.",
+-      },
+-    ],
+-    evidenceReferences: permittedIds,
+-  });
+-
+-  const final = await f.wait((r) => isAwaitingGate(r) || isTerminal(r));
+-
+-  // needs_changes is a VALID reviewer outcome (not malformed). Output validation
+-  // should pass — this is distinguishable from scenario 2 (malformed output).
+-  const reviewerAttempt = final.nodeAttempts.find((a) => a.nodeId === "reviewer")!;
+-  assert.equal(
+-    reviewerAttempt.outputValidation?.status,
+-    "valid",
+-    "needs_changes is valid; output validation should pass, unlike malformed output",
+-  );
+-  assert.equal(reviewerAttempt.status, "Completed");
+-
+-  // The structured output should contain outcome: "needs_changes".
+-  // selector lives on artifactBindings, not on the artifact itself.
+-  const structuredBinding = final.artifactBindings?.find(
+-    (b) => b.nodeId === "reviewer" && b.selector === "structured",
+-  );
+-  assert.ok(structuredBinding, "reviewer structured artifact binding should exist");
+-  const structuredArtifact = final.artifacts?.find(
+-    (a) => a.id === structuredBinding!.artifactId,
+-  );
+-  assert.ok(structuredArtifact, "reviewer structured artifact should exist");
+-  assert.equal(structuredArtifact!.type, "json");
+-  assert.equal(structuredArtifact!.validation, "valid");
+-  // The raw JSON is on the attempt's finalOutput; the artifact store holds the content.
+-  const parsed = JSON.parse(reviewerAttempt.finalOutput!.text);
+-  assert.equal(parsed.outcome, "needs_changes");
+-
+-  // The workflow should reach the final-gate, NOT stop at the reviewer.
+-  assert.ok(
+-    isAwaitingGate(final),
+-    "Valid needs_changes should reach the final-gate for human decision, got " + final.status,
+-  );
+-});
+-
+-// ─── Scenario 5: failing Test → cannot become approved ──────────────────────
+-
+-test("scenario 5: genuine failing Test stops the workflow before the reviewer runs", async (t) => {
+-  const root = await mkdtemp(join(tmpdir(), "zcode-repro-s5-"));
+-  t.after(async () => { await rm(root, { recursive: true, force: true }); });
+-  await prepareWorkspace(root);
+-
+-  const definition = instantiateGeneric(RUN_REQUEST);
+-  const reviewerOutput = { text: "" };
+-  const f = await buildReproductionFixture(t, definition, root, {
+-    reviewerOutput,
+-    modifyFile: false, // zz-demo.txt stays "before" → test fails
+-  });
+-
+-  await runGeneric(f, definition);
+-
+-  const final = await f.wait((r) => isTerminal(r));
+-
+-  // The test genuinely fails (zz-demo.txt still contains "before").
+-  // Per the template's routing contract, a failing Test stops with NeedsHuman.
+-  // The reviewer is NOT forced to execute.
+-  assert.equal(
+-    final.status,
+-    "NeedsHuman",
+-    "Failing Test should stop the workflow with NeedsHuman, got " + final.status,
+-  );
+-
+-  const testAttempt = final.toolAttempts?.find((a) => a.nodeId === "test");
+-  assert.ok(testAttempt, "test tool attempt should exist");
+-  assert.equal(testAttempt!.status, "Failed");
+-  assert.equal(testAttempt!.verification?.acceptancePassed, false);
+-  assert.equal(testAttempt!.verification?.outcome, "fail");
+-
+-  // The reviewer node must NOT have been dispatched. When the test fails,
+-  // skipPending marks remaining nodes as Skipped (not Pending).
+-  const reviewerAttempt = final.nodeAttempts.find((a) => a.nodeId === "reviewer");
+-  assert.ok(
+-    reviewerAttempt?.status === "Pending" || reviewerAttempt?.status === "Skipped",
+-    "Reviewer must not run when Test failure stops the workflow, got " + reviewerAttempt?.status,
+-  );
+-  assert.equal(
+-    f.capturedInstructions.has("reviewer"),
+-    false,
+-    "Reviewer instructions must not be captured when Test stops first",
+-  );
+-
+-  // The final-gate must NOT be reached.
+-  const gate = final.approvalAttempts?.find((a) => a.nodeId === "final-gate");
+-  assert.notEqual(gate?.status, "Approved");
+-});
+-
+-// ─── Reviewer request content assertion ─────────────────────────────────────
+-
+-test("reviewer request contains original task, current verification, permitted artifact refs, and strict output contract", async (t) => {
+-  const root = await mkdtemp(join(tmpdir(), "zcode-repro-req-"));
+-  t.after(async () => { await rm(root, { recursive: true, force: true }); });
+-  await prepareWorkspace(root);
+-
+-  const definition = instantiateGeneric(RUN_REQUEST);
+-  const reviewerOutput = { text: "" };
+-  const f = await buildReproductionFixture(t, definition, root, {
+-    reviewerOutput,
+-    modifyFile: true,
+-  });
+-
+-  await runGeneric(f, definition);
+-
+-  await f.wait((r) => f.capturedInstructions.has("reviewer") || isTerminal(r));
+-  assert.ok(f.capturedInstructions.has("reviewer"), "Reviewer must be dispatched");
+-
+-  const instructions = f.capturedInstructions.get("reviewer")!;
+-
+-  // 1. The original task.
+-  assert.ok(instructions.includes(RUN_REQUEST), "Must contain the original task text");
+-
+-  // 2. The current verification (test verification artifact content).
+-  assert.ok(instructions.includes("verification"), "Must include the verification input");
+-  assert.ok(
+-    instructions.includes('"outcome"') || instructions.includes("outcome"),
+-    "Must contain the verification outcome",
+-  );
+-
+-  // 3. The exact permitted artifact references.
+-  const permittedIds = extractPermittedIds(instructions);
+-  assert.ok(permittedIds.length >= 1, "Permitted list must contain at least the verification artifact ID");
+-
+-  const run = await f.current();
+-  // selector lives on artifactBindings, not on the artifact itself.
+-  const verificationBinding = run.artifactBindings?.find(
+-    (b) => b.nodeId === "test" && b.selector === "verification",
+-  );
+-  assert.ok(verificationBinding, "Verification artifact binding must exist");
+-  const verificationArtifact = run.artifacts?.find(
+-    (a) => a.id === verificationBinding!.artifactId,
+-  );
+-  assert.ok(verificationArtifact, "Verification artifact must exist");
+-  assert.equal(verificationArtifact!.validation, "valid");
+-  assert.ok(
+-    permittedIds.includes(verificationArtifact!.id),
+-    "Permitted list must contain the actual verification artifact ID",
+-  );
+-
+-  // 4. The declared strict output contract.
+-  assert.ok(instructions.includes("no prose before or after"), "Must prohibit prose");
+-  assert.ok(instructions.includes("no Markdown fence"), "Must prohibit fences");
+-  assert.ok(instructions.includes("no additional properties"), "Must prohibit extra properties");
+-  assert.ok(instructions.includes("A failed Test can never be pass"), "Must state failed-Test rule");
+-  assert.ok(
+-    /do not require Git-tracked or committed source/i.test(instructions),
+-    "Must not require Git tracking",
+-  );
+-
+-  // Clean up: set valid output and let it finish.
+-  reviewerOutput.text = JSON.stringify({
+-    outcome: "pass",
+-    findings: [],
+-    evidenceReferences: permittedIds,
+-  });
+-});
+-
+-// ─── Library v1→v2 fallback is explicit ─────────────────────────────────────
+-
+-test("library version selection is exact — no silent fallback from v1 to v2", async () => {
+-  // The built-in library only publishes version 2 (BUILTIN_TEMPLATE_VERSION).
+-  // Requesting version 1 (an old pin that no longer exists) must throw —
+-  // the service does NOT silently fall back to version 2.
+-  const { GraphWorkflowService } = await import("../app/workflow-service.js");
+-  const entry = builtinTemplates.find((e) => e.id === "generic")!;
+-  const v2Digest = sha256(runFingerprint(entry.template));
+-
+-  const store = {
+-    async read() {
+-      return { revision: 0, entries: [] };
+-    },
+-    async change() {
+-      throw new Error("unused");
+-    },
+-  };
+-  const svc = new GraphWorkflowService({
+-    store: store as any,
+-    graph: {} as any, // not reached when selected() throws
+-    preflight: {} as any,
+-    digest: sha256,
+-    id: () => "lib-test",
+-    now: () => 1,
+-  });
+-
+-  // Version 1 does not exist in the builtin library (only version 2).
+-  await assert.rejects(
+-    svc.instantiate({
+-      target: { workspacePath: "/tmp" },
+-      id: "generic",
+-      version: 1,
+-      expectedRevision: 0,
+-      parameters: { request: RUN_REQUEST },
+-      bindings: {
+-        references: {},
+-        recipes: { build: "build", test: "test" },
+-        sourcePaths: [],
+-      },
+-    }),
+-    /existing immutable workflow version/i,
+-    "Requesting old v1 must not silently fall back to v2",
+-  );
+-
+-  // Version 2 with the correct digest is accepted by selected().
+-  // (We cannot fully exercise instantiate without a real graph service,
+-  // but we can verify selected() accepts v2 and rejects a wrong digest.)
+-  const list = await svc.list();
+-  const genericEntry = list.entries.find((e) => e.id === "generic")!;
+-  assert.ok(genericEntry, "generic template must be in the library");
+-  const v2 = genericEntry.versions.find((v) => v.version === BUILTIN_TEMPLATE_VERSION);
+-  assert.ok(v2, "version 2 must exist");
+-  assert.equal(v2!.digest, v2Digest);
+-
+-  // Only version 2 exists — no v1.
+-  assert.equal(
+-    genericEntry.versions.length,
+-    1,
+-    "Builtin library must publish exactly one version (v2)",
+-  );
+-  assert.equal(genericEntry.versions[0]!.version, BUILTIN_TEMPLATE_VERSION);
+-});
+diff --git a/packages/ui/src/graph-engineering/GraphCanvas.tsx b/packages/ui/src/graph-engineering/GraphCanvas.tsx
+index 047069b..a4163f6 100644
+--- a/packages/ui/src/graph-engineering/GraphCanvas.tsx
++++ b/packages/ui/src/graph-engineering/GraphCanvas.tsx
+@@ -7,6 +7,9 @@ import {
+   Position,
+   ReactFlow,
+   useUpdateNodeInternals,
++  useInternalNode,
++  useReactFlow,
++  useStore,
+   type Node,
+   type NodeProps,
+   type NodePositionChange,
+@@ -89,6 +92,40 @@ const GraphNode = memo(function GraphNode({ id, data, selected }: NodeProps<Canv
+ });
+ const nodeTypes = { graph: GraphNode };
+ 
++function SelectedNodeFocus({ id }: { id?: string }) {
++  const selected = useInternalNode(id ?? "");
++  const nodeWidth = selected?.measured?.width;
++  const nodeHeight = selected?.measured?.height;
++  const width = useStore((state) => state.width);
++  const height = useStore((state) => state.height);
++  const { getInternalNode, getZoom, setCenter, viewportInitialized } = useReactFlow();
++  useEffect(() => {
++    const node =
++      id && nodeWidth && nodeHeight && viewportInitialized && width && height
++        ? getInternalNode(id)
++        : undefined;
++    if (!node || !nodeWidth || !nodeHeight) return;
++    // 全图适配曾把顺序节点压成小字；选中节点只调整视口，不改写保存位置或连接关系。
++    // 受控定义不保存测量尺寸，不能等待全图定义的 initialized；读取选中节点的实际测量并响应窗口尺寸。
++    void setCenter(
++      node.internals.positionAbsolute.x + nodeWidth / 2,
++      node.internals.positionAbsolute.y + nodeHeight / 2,
++      { zoom: Math.max(0.85, getZoom()), duration: 0 },
++    );
++  }, [
++    id,
++    nodeWidth,
++    nodeHeight,
++    viewportInitialized,
++    width,
++    height,
++    getInternalNode,
++    getZoom,
++    setCenter,
++  ]);
++  return null;
++}
++
+ export function GraphCanvas({
+   definition,
+   onChange,
+@@ -247,8 +284,8 @@ export function GraphCanvas({
+         edgesReconnectable={editable}
+         deleteKeyCode={null}
+         fitView
+-        fitViewOptions={{ minZoom: 0.5, padding: 0.15 }}
+-        minZoom={0.3}
++        minZoom={0.85}
++        fitViewOptions={{ minZoom: 0.85, maxZoom: 1, padding: 0.15 }}
+         maxZoom={1.5}
+         proOptions={{ hideAttribution: false }}
+         onNodeClick={(_, node) => selectCanvasNode(node.id)}
+@@ -315,6 +352,7 @@ export function GraphCanvas({
+         }}
+       >
+         <Background color="var(--color-border)" />
++        <SelectedNodeFocus id={selectedId} />
+         <Controls showInteractive={false} />
+       </ReactFlow>
+     </div>
+diff --git a/packages/ui/src/graph-engineering/GraphRunActions.tsx b/packages/ui/src/graph-engineering/GraphRunActions.tsx
+index 247d90a..e01a934 100644
+--- a/packages/ui/src/graph-engineering/GraphRunActions.tsx
++++ b/packages/ui/src/graph-engineering/GraphRunActions.tsx
+@@ -6,6 +6,7 @@ import type { GraphRunSummary } from "./graphRunSummaryTypes.js";
+ import type { GraphPanelProps } from "./graphEngineeringView.js";
+ import { useGraphRunText } from "./GraphRunText.js";
+ import { graphEvidenceActionLabels } from "./graphRunPresentation.js";
++import { graphRunOutputs } from "./graphRunOutputs.js";
+ 
+ export type GraphRunInspection =
+   | { kind: "node"; nodeId: string; attemptId?: string }
+@@ -41,32 +42,25 @@ export function GraphRunActions({
+     ].includes(run.status) ||
+       run.recovery?.state === "active");
+   const uncertain =
+-    ["Unknown", "Interrupted", "CancelRequested"].includes(run.status) &&
+-    !run.release;
++    ["Unknown", "Interrupted", "CancelRequested"].includes(run.status) && !run.release;
+   const gates = summary.human.gates.filter(
+-    (gate) =>
+-      gate.canDecide || gate.canContinue || gate.status === "StaleEvidence",
+-  );
+-  // 区分测试失败（真实断言失败）与证据无效（输出校验失败，如审阅者返回畸形 JSON），
+-  // 二者使用不同 testid 与标签，便于用户快速定位根因。
+-  const failedChecks = summary.evidence.checks.filter(
+-    (check) => check.state === "failed",
+-  );
+-  const invalidChecks = summary.evidence.checks.filter(
+-    (check) => check.state === "invalid",
++    (gate) => gate.canDecide || gate.canContinue || gate.status === "StaleEvidence",
+   );
++  // 机器检查失败/证据无效与 reviewer 输出校验属于不同结果，不能用 invalidChecks 推断 JSON 解析失败。
++  const failedChecks = summary.evidence.checks.filter((check) => check.state === "failed");
++  const invalidChecks = summary.evidence.checks.filter((check) => check.state === "invalid");
+   const step = summary.execution.currentStep;
++  const invalidOutputs = graphRunOutputs(run).filter((output) => output.state === "invalid");
+   const evidenceActionLabels = graphEvidenceActionLabels(summary.evidence);
+   const stepButton =
+     step &&
+     !gates.length &&
+-    ![...failedChecks, ...invalidChecks].some(
+-      (check) => check.nodeId === step.nodeId,
+-    );
++    ![...failedChecks, ...invalidChecks].some((check) => check.nodeId === step.nodeId);
+   const hasActions =
+     summary.actionableSessions.length > 0 ||
+     uncertain ||
+     invalidChecks.length > 0 ||
++    invalidOutputs.length > 0 ||
+     evidenceActionLabels.length > 0 ||
+     gates.length > 0 ||
+     failedChecks.length > 0 ||
+@@ -80,10 +74,7 @@ export function GraphRunActions({
+     >
+       <h4 className="text-ui-sm font-medium">{u("actions")}</h4>
+       {!hasActions ? (
+-        <p
+-          className="text-ui-sm text-foreground-subtle"
+-          data-testid="graph-run-no-action"
+-        >
++        <p className="text-ui-sm text-foreground-subtle" data-testid="graph-run-no-action">
+           {u("noActionRequired")}
+         </p>
+       ) : null}
+@@ -108,24 +99,17 @@ export function GraphRunActions({
+               >
+                 {session.name} · {u("openNative")}
+               </Button>
+-              {session.status === "WaitingForPermission" ||
+-              session.status === "WaitingForUser" ? (
++              {session.status === "WaitingForPermission" || session.status === "WaitingForUser" ? (
+                 <p className="max-w-lg text-ui-xs text-foreground-subtle">
+-                  {u(
+-                    session.status === "WaitingForPermission"
+-                      ? "permissionHelp"
+-                      : "questionHelp",
+-                  )}
++                  {u(session.status === "WaitingForPermission" ? "permissionHelp" : "questionHelp")}
+                 </p>
+               ) : null}
+             </div>
+           ))}
+         </div>
+       ) : null}
+-      {uncertain ? (
+-        <p className="text-ui-sm text-warning">{u("inspectUnknown")}</p>
+-      ) : null}
+-      {invalidChecks.length ? (
++      {uncertain ? <p className="text-ui-sm text-warning">{u("inspectUnknown")}</p> : null}
++      {invalidOutputs.length ? (
+         <p
+           role="alert"
+           data-testid="graph-run-output-validation-failed"
+@@ -140,6 +124,19 @@ export function GraphRunActions({
+         </p>
+       ))}
+       <div className="flex flex-wrap gap-2">
++        {invalidOutputs.map((output) => (
++          <Button
++            key={output.attemptId}
++            size="sm"
++            variant="outline"
++            data-testid="graph-run-inspect-output"
++            onClick={() =>
++              onInspect({ kind: "node", nodeId: output.nodeId, attemptId: output.attemptId })
++            }
++          >
++            {output.name} · {u("inspectInvalidEvidence")}
++          </Button>
++        ))}
+         {gates.map((gate) => (
+           <Button
+             key={gate.nodeId}
+@@ -246,9 +243,7 @@ export function GraphRunActions({
+           </Button>
+         ) : null}
+       </div>
+-      {cancellable ||
+-      summary.execution.stopRequested ||
+-      run.status === "Cancelled" ? (
++      {cancellable || summary.execution.stopRequested || run.status === "Cancelled" ? (
+         <p className="text-ui-xs text-foreground-subtle">{u("stopMeaning")}</p>
+       ) : null}
+     </section>
+diff --git a/packages/ui/src/graph-engineering/GraphRunHistory.tsx b/packages/ui/src/graph-engineering/GraphRunHistory.tsx
+index ff56eb0..a110647 100644
+--- a/packages/ui/src/graph-engineering/GraphRunHistory.tsx
++++ b/packages/ui/src/graph-engineering/GraphRunHistory.tsx
+@@ -6,12 +6,12 @@ import { graphHistoryPage } from "./graphRunHistoryView.js";
+ import { useGraphRunText } from "./GraphRunText.js";
+ import { graphRunEvidence } from "./graphRunEvidence.js";
+ import { graphFocusClass } from "./graphFocus.js";
++import { graphRequestText } from "./graphRequestText.js";
+ 
+ /** 历史列表中显示的请求预览：取首行非空文本，与概览面板的 requestText 来源保持一致。 */
+ function runRequestPreview(run: GraphRun): string {
+-  const text =
+-    run.version === undefined ? run.definition.instructions : run.startInput;
+-  return text.trim().split(/\r?\n/, 1)[0] ?? "";
++  const text = run.version === undefined ? run.definition.instructions : run.startInput;
++  return graphRequestText(run.definition, text).trim().split(/\r?\n/, 1)[0] ?? "";
+ }
+ 
+ export function GraphRunHistory({
+@@ -31,10 +31,7 @@ export function GraphRunHistory({
+   );
+   const page = graphHistoryPage(runs, requestedPage, selectedRunId);
+   return (
+-    <nav
+-      className={`${graphFocusClass} shrink-0 space-y-2`}
+-      aria-label={t("runs")}
+-    >
++    <nav className={`${graphFocusClass} shrink-0 space-y-2`} aria-label={t("runs")}>
+       {runs.length ? (
+         <div
+           className="max-h-56 overflow-auto rounded-lg border border-border"
+@@ -43,18 +40,10 @@ export function GraphRunHistory({
+           <table className="w-full border-collapse text-ui-sm">
+             <thead className="sticky top-0 z-10 bg-surface-hover text-ui-xs text-foreground-subtle">
+               <tr>
+-                <th className="px-3 py-2 text-left font-medium">
+-                  {u("historyTitle")}
+-                </th>
+-                <th className="px-3 py-2 text-left font-medium">
+-                  {u("historyTime")}
+-                </th>
+-                <th className="px-3 py-2 text-left font-medium">
+-                  {u("historyStatus")}
+-                </th>
+-                <th className="px-3 py-2 text-left font-medium">
+-                  {u("historyEvidence")}
+-                </th>
++                <th className="px-3 py-2 text-left font-medium">{u("historyTitle")}</th>
++                <th className="px-3 py-2 text-left font-medium">{u("historyTime")}</th>
++                <th className="px-3 py-2 text-left font-medium">{u("historyStatus")}</th>
++                <th className="px-3 py-2 text-left font-medium">{u("historyEvidence")}</th>
+               </tr>
+             </thead>
+             <tbody>
+@@ -65,19 +54,23 @@ export function GraphRunHistory({
+                   <tr
+                     key={run.id}
+                     className={`cursor-pointer border-t border-border transition-colors ${
+-                      selected
+-                        ? "bg-primary/10 font-medium"
+-                        : "hover:bg-surface-hover"
++                      selected ? "bg-primary/10 font-medium" : "hover:bg-surface-hover"
+                     }`}
+                     data-testid="graph-run"
+                     data-run-id={run.id}
+                     data-status={run.status}
+                     data-evidence-state={evidence.state}
+-                    data-session-id={
+-                      run.version !== undefined ? "" : (run.sessionId ?? "")
+-                    }
++                    data-session-id={run.version !== undefined ? "" : (run.sessionId ?? "")}
+                     data-input-id={run.version !== undefined ? "" : run.inputId}
+                     aria-current={selected ? "true" : undefined}
++                    tabIndex={0}
++                    onKeyDown={(event) => {
++                      // 表格替换按钮列表后仍须保留键盘选择；Space 不应只滚动页面。
++                      if (event.key === "Enter" || event.key === " ") {
++                        event.preventDefault();
++                        onSelect(run.id);
++                      }
++                    }}
+                     onClick={() => onSelect(run.id)}
+                   >
+                     <td className="max-w-xs px-3 py-2">
+@@ -97,9 +90,7 @@ export function GraphRunHistory({
+                     <td className="whitespace-nowrap px-3 py-2 text-foreground-subtle">
+                       {new Date(run.createdAt).toLocaleString()}
+                     </td>
+-                    <td className="whitespace-nowrap px-3 py-2">
+-                      {u(`execution.${run.status}`)}
+-                    </td>
++                    <td className="whitespace-nowrap px-3 py-2">{u(`execution.${run.status}`)}</td>
+                     <td className="whitespace-nowrap px-3 py-2 text-foreground-subtle">
+                       {evidence.configuredTestCount
+                         ? u(`evidence.${evidence.state}`)
+@@ -143,8 +134,7 @@ export function GraphRunHistory({
+           >
+             {u("historyNext")}
+           </Button>
+-          {page.selectedPage !== undefined &&
+-          page.selectedPage !== page.page ? (
++          {page.selectedPage !== undefined && page.selectedPage !== page.page ? (
+             <Button
+               size="sm"
+               variant="ghost"
+diff --git a/packages/ui/src/graph-engineering/GraphRunOverview.tsx b/packages/ui/src/graph-engineering/GraphRunOverview.tsx
+index 84d18ff..390d7fb 100644
+--- a/packages/ui/src/graph-engineering/GraphRunOverview.tsx
++++ b/packages/ui/src/graph-engineering/GraphRunOverview.tsx
+@@ -6,6 +6,8 @@ import { GraphRunActions, type GraphRunInspection } from "./GraphRunActions.js";
+ import { GraphRunCapturedDetails } from "./GraphRunCapturedDetails.js";
+ import type { GraphPanelProps } from "./graphEngineeringView.js";
+ import { graphEvidenceLabels } from "./graphRunPresentation.js";
++import { graphRequestText } from "./graphRequestText.js";
++import { graphRunOutputs } from "./graphRunOutputs.js";
+ 
+ export function GraphRunOverview({
+   run,
+@@ -23,6 +25,7 @@ export function GraphRunOverview({
+   const u = useGraphRunText();
+   const summary = useMemo(() => graphRunSummary(run), [run]);
+   const evidenceLabels = graphEvidenceLabels(summary.evidence);
++  const outputs = graphRunOutputs(run);
+   return (
+     <section
+       className="shrink-0 space-y-3 rounded-xl border border-border bg-surface p-3"
+@@ -77,7 +80,12 @@ export function GraphRunOverview({
+         </p>
+       ) : null}
+       <div className="grid gap-2 text-ui-sm sm:grid-cols-2">
+-        <CapturedText label={u("request")} text={summary.requestText} testId="graph-run-request" />
++        <CapturedText
++          label={u("request")}
++          text={summary.requestText}
++          preview={graphRequestText(run.definition, summary.requestText)}
++          testId="graph-run-request"
++        />
+         <CapturedText
+           label={u("result")}
+           text={
+@@ -88,6 +96,28 @@ export function GraphRunOverview({
+           testId="graph-run-result"
+         />
+       </div>
++      {outputs.map((output) => (
++        <div
++          key={output.attemptId}
++          data-testid="graph-run-structured-output"
++          data-state={output.state}
++          className="space-y-1 text-ui-sm"
++        >
++          <p className={output.state === "invalid" ? "text-warning" : "text-foreground"}>
++            {output.name}:{" "}
++            {u(
++              output.state === "invalid"
++                ? "outputValidationFailed"
++                : `reviewOutcome.${output.state}`,
++            )}
++          </p>
++          {output.issues.map((issue) => (
++            <p key={issue} className="break-words text-ui-xs text-foreground-subtle">
++              {issue}
++            </p>
++          ))}
++        </div>
++      ))}
+       <p className="text-ui-xs text-foreground-subtle">{u("capturedMeaning")}</p>
+       <GraphRunActions {...{ run, summary, disabled, onInspect, onCancel, onOpenConversation }} />
+       <GraphRunCapturedDetails {...{ summary, onInspect }} />
+@@ -121,12 +151,24 @@ function Axis({
+   );
+ }
+ 
+-function CapturedText({ label, text, testId }: { label: string; text: string; testId: string }) {
++function CapturedText({
++  label,
++  text,
++  preview = text,
++  testId,
++}: {
++  label: string;
++  text: string;
++  preview?: string;
++  testId: string;
++}) {
+   return (
+     <details className="min-w-0" data-testid={testId}>
+       <summary className="cursor-pointer">
+         {label}
+-        <span className="block truncate text-foreground-subtle">{text.split(/\r?\n/, 1)[0]}</span>
++        <span className="block truncate text-foreground-subtle">
++          {preview.split(/\r?\n/, 1)[0]}
++        </span>
+       </summary>
+       <p className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words text-foreground-subtle">
+         {text}
+diff --git a/packages/ui/src/graph-engineering/GraphWorkflowSummary.tsx b/packages/ui/src/graph-engineering/GraphWorkflowSummary.tsx
+index 9134d15..0194d4e 100644
+--- a/packages/ui/src/graph-engineering/GraphWorkflowSummary.tsx
++++ b/packages/ui/src/graph-engineering/GraphWorkflowSummary.tsx
+@@ -4,6 +4,7 @@ import { Play, Settings } from "lucide-react";
+ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
+ import { GraphDesignReadiness } from "./GraphDesignReadiness.js";
+ import type { GraphRecipeReadState } from "./graphRecipeRead.js";
++import { graphWorkflowSummaryData } from "./graphWorkflowSummaryData.js";
+ 
+ export function GraphWorkflowSummary({
+   definition,
+@@ -28,52 +29,41 @@ export function GraphWorkflowSummary({
+ }) {
+   const { intl } = useZCodeIntl();
+   const u = (id: string) => intl.formatMessage({ id: `graph.preZ8.${id}` });
+-  const t = (id: string) => intl.formatMessage({ id: `graph.z4.${id}` });
+ 
+   const toolNodes = definition.nodes.filter((node) => node.type === "tool");
+-  const startNode = definition.nodes.find((n) => n.type === "start");
+-  const contextText =
+-    "instructions" in definition
+-      ? definition.instructions
+-      : startNode && "request" in startNode
+-        ? startNode.request
+-        : "";
+-  const snapshot =
+-    recipeReadState.status === "ready" ? recipeReadState.snapshot : null;
++  const { request, references } = graphWorkflowSummaryData(definition);
++  const snapshot = recipeReadState.status === "ready" ? recipeReadState.snapshot : null;
+   const recipes = snapshot?.recipes ?? [];
+-  const buildChecks = recipes.filter(
+-    (recipe) => recipe.verifier.kind === "build",
+-  );
+-  const testChecks = recipes.filter(
+-    (recipe) => recipe.verifier.kind === "test",
+-  );
++  const buildChecks = recipes.filter((recipe) => recipe.verifier.kind === "build");
++  const testChecks = recipes.filter((recipe) => recipe.verifier.kind === "test");
+ 
+   return (
+     <section className="space-y-3" data-testid="graph-workflow-summary">
++      <div className="space-y-1">
++        <p className="text-ui-xs font-medium text-foreground-subtle">{u("taskRequest")}</p>
++        <p
++          className="whitespace-pre-wrap break-words text-ui-sm"
++          data-testid="graph-workflow-request"
++        >
++          {request || u("noRequest")}
++        </p>
++      </div>
+       {/* 紧凑摘要：上下文 / 构建 / 测试，附编辑操作 */}
+-      <div
+-        className="grid gap-3 sm:grid-cols-3"
+-        data-testid="graph-workflow-summary-grid"
+-      >
++      <div className="grid gap-3 sm:grid-cols-3" data-testid="graph-workflow-summary-grid">
+         <div className="space-y-1 rounded-lg border border-border p-3">
+-          <p className="text-ui-xs font-medium text-foreground-subtle">
+-            {u("contextLabel")}
+-          </p>
+-          {contextText ? (
+-            <p
+-              className="line-clamp-3 break-words text-ui-sm"
+-              data-testid="graph-workflow-context"
+-            >
+-              {contextText}
+-            </p>
++          <p className="text-ui-xs font-medium text-foreground-subtle">{u("contextLabel")}</p>
++          {references.length ? (
++            <ul className="break-words text-ui-sm" data-testid="graph-workflow-context">
++              {references.map((reference) => (
++                <li key={reference.id}>{reference.path}</li>
++              ))}
++            </ul>
+           ) : (
+             <p className="text-ui-sm text-foreground-subtle">{u("noContext")}</p>
+           )}
+         </div>
+         <div className="space-y-1 rounded-lg border border-border p-3">
+-          <p className="text-ui-xs font-medium text-foreground-subtle">
+-            {u("buildChecks")}
+-          </p>
++          <p className="text-ui-xs font-medium text-foreground-subtle">{u("buildChecks")}</p>
+           {buildChecks.length ? (
+             <ul className="text-ui-sm">
+               {buildChecks.map((check) => (
+@@ -87,9 +77,7 @@ export function GraphWorkflowSummary({
+           )}
+         </div>
+         <div className="space-y-1 rounded-lg border border-border p-3">
+-          <p className="text-ui-xs font-medium text-foreground-subtle">
+-            {u("testChecks")}
+-          </p>
++          <p className="text-ui-xs font-medium text-foreground-subtle">{u("testChecks")}</p>
+           {testChecks.length ? (
+             <ul className="text-ui-sm">
+               {testChecks.map((check) => (
+@@ -103,14 +91,15 @@ export function GraphWorkflowSummary({
+           )}
+         </div>
+       </div>
++      <p className="text-ui-xs text-foreground-subtle" data-testid="graph-workflow-saved-checks">
++        {u("savedChecksNotRun")}
++      </p>
+ 
+       {/* 工具节点摘要 */}
+       {toolNodes.length ? (
+         <p className="text-ui-sm text-foreground-subtle">
+           {u("toolSteps")}:{" "}
+-          {toolNodes
+-            .map((node) => ("name" in node ? node.name : "") || node.id)
+-            .join(", ")}
++          {toolNodes.map((node) => ("name" in node ? node.name : "") || node.id).join(", ")}
+         </p>
+       ) : null}
+ 
+@@ -133,7 +122,8 @@ export function GraphWorkflowSummary({
+           onClick={onRun}
+         >
+           <Play className="size-4" />
+-          {t("run")}
++          {/* 原键 graph.z4.run 不存在；复用已有运行操作的双语文案，仍由原 preflight 流程处理。 */}
++          {intl.formatMessage({ id: "graph.run" })}
+         </Button>
+         <span role="status" className="text-ui-sm text-foreground-subtle">
+           {recipeReadState.status === "loading"
+diff --git a/packages/ui/src/i18n/locales/graphPreZ8.ts b/packages/ui/src/i18n/locales/graphPreZ8.ts
+index fc1423a..c043b9f 100644
+--- a/packages/ui/src/i18n/locales/graphPreZ8.ts
++++ b/packages/ui/src/i18n/locales/graphPreZ8.ts
+@@ -4,8 +4,7 @@ export const graphPreZ8En: Record<string, string> = {
+   "graph.preZ8.useWorkflow": "Use a workflow",
+   "graph.preZ8.workflowHelp":
+     "Choose a workflow, enter the task, and review its steps. Creating a workflow does not start it.",
+-  "graph.preZ8.agentLed":
+-    "Agent-led review; configured test evidence not included",
++  "graph.preZ8.agentLed": "Agent-led review; configured test evidence not included",
+   "graph.preZ8.configuredChecks":
+     "Configured project checks required. Evidence depends on each check type and is available after execution.",
+   "graph.preZ8.context": "Additional context and instructions",
+@@ -35,8 +34,7 @@ export const graphPreZ8En: Record<string, string> = {
+     "Wait for a successful project-check read before creating this workflow.",
+   "graph.preZ8.correctFields": "Complete or correct these fields:",
+   "graph.preZ8.createWorkflow": "Create workflow",
+-  "graph.preZ8.creationLocked":
+-    "Resolve the workspace restriction before creating a workflow.",
++  "graph.preZ8.creationLocked": "Resolve the workspace restriction before creating a workflow.",
+   "graph.preZ8.replaceTitle": "Replace the unsaved design?",
+   "graph.preZ8.replaceHelp":
+     "Save the current design before replacing it, or discard its edits when the new workflow is created. Cancel keeps both forms.",
+@@ -46,12 +44,10 @@ export const graphPreZ8En: Record<string, string> = {
+   "graph.preZ8.changedConsent":
+     "The draft or template changed. Cancel and review the current workflow before replacing it.",
+   "graph.preZ8.busy": "An operation is in progress.",
+-  "graph.preZ8.existingRun":
+-    "An existing run still owns this workspace. Open Runs to inspect it.",
++  "graph.preZ8.existingRun": "An existing run still owns this workspace. Open Runs to inspect it.",
+   "graph.preZ8.openRuns": "Inspect existing run",
+   "graph.preZ8.checking": "Checking the workflow definition…",
+-  "graph.preZ8.designIssues":
+-    "Correct the workflow fields listed below before starting.",
++  "graph.preZ8.designIssues": "Correct the workflow fields listed below before starting.",
+   "graph.preZ8.openDesign": "Review design fields",
+   "graph.preZ8.saveBlocked":
+     "Save becomes available after you edit this design. Conflicts and read-only workspaces must be resolved first.",
+@@ -61,8 +57,7 @@ export const graphPreZ8En: Record<string, string> = {
+   "graph.preZ8.recipeConflict":
+     "Project checks changed outside this form. Your draft is retained. Review the current saved configuration before discarding or merging your edits.",
+   "graph.preZ8.useSavedChecks": "Discard edits and use loaded checks",
+-  "graph.preZ8.unsavedChecks":
+-    "Unsaved project-check edits are retained for this workspace.",
++  "graph.preZ8.unsavedChecks": "Unsaved project-check edits are retained for this workspace.",
+   "graph.preZ8.recipeSaveBlocked":
+     "Load project checks before saving; a failed read or an external conflict must be resolved first.",
+   "graph.preZ8.showSavedChecks": "Show current saved checks",
+@@ -73,6 +68,9 @@ export const graphPreZ8En: Record<string, string> = {
+   "graph.preZ8.taskSteps": "Task steps",
+   "graph.preZ8.noTaskSteps": "No task steps",
+   "graph.preZ8.contextLabel": "Context",
++  "graph.preZ8.taskRequest": "Task request",
++  "graph.preZ8.noRequest": "No task request set",
++  "graph.preZ8.savedChecksNotRun": "Saved checks only. Results appear in Runs after execution.",
+   "graph.preZ8.noContext": "No context set",
+   "graph.preZ8.buildChecks": "Build checks",
+   "graph.preZ8.testChecks": "Test checks",
+@@ -83,32 +81,25 @@ export const graphPreZ8Zh: Record<string, string> = {
+   "graph.preZ8.workflows": "工作流",
+   "graph.preZ8.setup": "项目设置",
+   "graph.preZ8.useWorkflow": "使用工作流",
+-  "graph.preZ8.workflowHelp":
+-    "选择工作流、填写任务并审阅步骤。创建工作流不会启动执行。",
++  "graph.preZ8.workflowHelp": "选择工作流、填写任务并审阅步骤。创建工作流不会启动执行。",
+   "graph.preZ8.agentLed": "智能体审阅；不包含已配置的测试证据",
+-  "graph.preZ8.configuredChecks":
+-    "需要配置项目检查。证据取决于检查类型，仅在实际执行后提供。",
++  "graph.preZ8.configuredChecks": "需要配置项目检查。证据取决于检查类型，仅在实际执行后提供。",
+   "graph.preZ8.context": "补充上下文与指令",
+   "graph.preZ8.management": "管理版本与导入导出",
+   "graph.preZ8.details": "版本详情",
+-  "graph.preZ8.versionPinned":
+-    "此工作流使用版本 {version}。已有工作流和运行保留其捕获的版本。",
+-  "graph.preZ8.noCompatibleVersion":
+-    "没有受支持且未归档的版本。请选择其他工作流或查看详情。",
++  "graph.preZ8.versionPinned": "此工作流使用版本 {version}。已有工作流和运行保留其捕获的版本。",
++  "graph.preZ8.noCompatibleVersion": "没有受支持且未归档的版本。请选择其他工作流或查看详情。",
+   "graph.preZ8.notLoaded": "尚未加载项目检查。",
+   "graph.preZ8.loadingChecks": "正在加载项目检查…",
+   "graph.preZ8.noChecks": "尚未配置项目检查。",
+-  "graph.preZ8.checksLoaded":
+-    "已加载 {count} 个项目检查。配置本身不表示已执行或通过。",
++  "graph.preZ8.checksLoaded": "已加载 {count} 个项目检查。配置本身不表示已执行或通过。",
+   "graph.preZ8.readFailed": "无法读取项目检查。请重试读取，以使用当前配置。",
+   "graph.preZ8.retryRead": "重试读取",
+   "graph.preZ8.refreshChecks": "刷新项目检查",
+   "graph.preZ8.setupChecks": "设置构建与测试检查",
+   "graph.preZ8.returnToWorkflow": "返回工作流设置",
+-  "graph.preZ8.incompatible":
+-    "此步骤没有兼容的检查。请在项目设置中配置所需检查。",
+-  "graph.preZ8.staleSelection":
+-    "所选检查已不存在或不兼容。请刷新并重新选择兼容检查。",
++  "graph.preZ8.incompatible": "此步骤没有兼容的检查。请在项目设置中配置所需检查。",
++  "graph.preZ8.staleSelection": "所选检查已不存在或不兼容。请刷新并重新选择兼容检查。",
+   "graph.preZ8.selectCheck": "选择兼容检查",
+   "graph.preZ8.readChecksFirst": "成功读取项目检查后，才能创建此工作流。",
+   "graph.preZ8.correctFields": "请补全或修正以下字段：",
+@@ -120,16 +111,14 @@ export const graphPreZ8Zh: Record<string, string> = {
+   "graph.preZ8.saveReplace": "保存并替换",
+   "graph.preZ8.discardReplace": "丢弃并替换",
+   "graph.preZ8.cancel": "取消",
+-  "graph.preZ8.changedConsent":
+-    "草稿或模板已改变。请取消并审阅当前工作流后再替换。",
++  "graph.preZ8.changedConsent": "草稿或模板已改变。请取消并审阅当前工作流后再替换。",
+   "graph.preZ8.busy": "正在处理操作。",
+   "graph.preZ8.existingRun": "已有运行仍拥有此工作区。请打开运行页面检查。",
+   "graph.preZ8.openRuns": "检查已有运行",
+   "graph.preZ8.checking": "正在检查工作流定义…",
+   "graph.preZ8.designIssues": "开始前，请修正下方列出的工作流字段。",
+   "graph.preZ8.openDesign": "检查设计字段",
+-  "graph.preZ8.saveBlocked":
+-    "编辑设计后即可保存。请先解决冲突或只读工作区限制。",
++  "graph.preZ8.saveBlocked": "编辑设计后即可保存。请先解决冲突或只读工作区限制。",
+   "graph.preZ8.setupHelp":
+     "加载并保存此工作区的检查。请审阅可执行程序、参数、文件范围及结果规则。保存配置不会执行命令。",
+   "graph.preZ8.rawChecks": "高级项目检查配置",
+@@ -137,8 +126,7 @@ export const graphPreZ8Zh: Record<string, string> = {
+     "项目检查已在此表单之外改变。草稿已保留；丢弃或合并编辑前，请审阅当前已保存配置。",
+   "graph.preZ8.useSavedChecks": "丢弃编辑并使用已加载检查",
+   "graph.preZ8.unsavedChecks": "此工作区的未保存项目检查编辑已保留。",
+-  "graph.preZ8.recipeSaveBlocked":
+-    "请先加载项目检查；读取失败或外部冲突需先解决。",
++  "graph.preZ8.recipeSaveBlocked": "请先加载项目检查；读取失败或外部冲突需先解决。",
+   "graph.preZ8.showSavedChecks": "查看当前已保存检查",
+   "graph.preZ8.experimental": "高级：实验性并行工作流",
+   "graph.preZ8.parallelLimit":
+@@ -147,6 +135,9 @@ export const graphPreZ8Zh: Record<string, string> = {
+   "graph.preZ8.taskSteps": "任务步骤",
+   "graph.preZ8.noTaskSteps": "无任务步骤",
+   "graph.preZ8.contextLabel": "上下文",
++  "graph.preZ8.taskRequest": "任务请求",
++  "graph.preZ8.noRequest": "未设置任务请求",
++  "graph.preZ8.savedChecksNotRun": "此处仅显示已保存检查。执行后请在运行记录中查看结果。",
+   "graph.preZ8.noContext": "未设置上下文",
+   "graph.preZ8.buildChecks": "构建检查",
+   "graph.preZ8.testChecks": "测试检查",
+diff --git a/packages/ui/src/i18n/locales/graphRunClarity.ts b/packages/ui/src/i18n/locales/graphRunClarity.ts
+index d3bb576..b251dc6 100644
+--- a/packages/ui/src/i18n/locales/graphRunClarity.ts
++++ b/packages/ui/src/i18n/locales/graphRunClarity.ts
+@@ -10,42 +10,18 @@ const messages: Record<string, [string, string]> = {
+   "execution.Completed": ["Execution completed", "执行完成"],
+   "execution.Failed": ["Execution failed", "执行失败"],
+   "execution.Cancelled": ["Execution stopped", "执行已停止"],
+-  "execution.CancelRequested": [
+-    "Stop requested — awaiting confirmation",
+-    "已请求停止——等待确认",
+-  ],
+-  "execution.Interrupted": [
+-    "Execution interrupted; outcome unconfirmed",
+-    "执行中断；结果未确认",
+-  ],
++  "execution.CancelRequested": ["Stop requested — awaiting confirmation", "已请求停止——等待确认"],
++  "execution.Interrupted": ["Execution interrupted; outcome unconfirmed", "执行中断；结果未确认"],
+   "execution.Unknown": ["Execution outcome unknown", "执行结果未知"],
+-  "execution.WaitingForPermission": [
+-    "Waiting for native permission",
+-    "等待原生权限",
+-  ],
+-  "execution.WaitingForUser": [
+-    "Waiting for a native conversation response",
+-    "等待原生对话答复",
+-  ],
+-  "execution.WaitingForApproval": [
+-    "Waiting for human decision",
+-    "等待人工决定",
+-  ],
+-  "execution.AwaitingContinuation": [
+-    "Waiting for explicit Continue",
+-    "等待明确继续",
+-  ],
++  "execution.WaitingForPermission": ["Waiting for native permission", "等待原生权限"],
++  "execution.WaitingForUser": ["Waiting for a native conversation response", "等待原生对话答复"],
++  "execution.WaitingForApproval": ["Waiting for human decision", "等待人工决定"],
++  "execution.AwaitingContinuation": ["Waiting for explicit Continue", "等待明确继续"],
+   "execution.StaleEvidence": ["Stopped at stale evidence", "因过期证据停止"],
+   "execution.Rejected": ["Stopped after human rejection", "人工拒绝后停止"],
+   "execution.NeedsHuman": ["Stopped for human review", "停止并等待人工审阅"],
+-  "execution.BudgetExhausted": [
+-    "Stopped at the configured budget",
+-    "达到配置预算后停止",
+-  ],
+-  "execution.NoProgress": [
+-    "Stopped because no progress was observed",
+-    "因未观察到进展停止",
+-  ],
++  "execution.BudgetExhausted": ["Stopped at the configured budget", "达到配置预算后停止"],
++  "execution.NoProgress": ["Stopped because no progress was observed", "因未观察到进展停止"],
+   "execution.Pending": ["Not started", "尚未开始"],
+   "execution.Skipped": ["Skipped", "已跳过"],
+   "execution.Approved": ["Approval step recorded", "审批步骤已记录"],
+@@ -62,22 +38,10 @@ const messages: Record<string, [string, string]> = {
+     "Agent-reported result; no Test evidence",
+     "智能体报告结果；无测试证据",
+   ],
+-  "evidence.command-only": [
+-    "Command / Build results only",
+-    "仅有命令／生成结果",
+-  ],
+-  "evidence.tests-passed": [
+-    "Captured Test evidence passed",
+-    "捕获的测试证据通过",
+-  ],
+-  "evidence.tests-failed": [
+-    "Captured Test evidence failed",
+-    "捕获的测试证据失败",
+-  ],
+-  "evidence.invalid": [
+-    "Test evidence incomplete or invalid",
+-    "测试证据不完整或无效",
+-  ],
++  "evidence.command-only": ["Command / Build results only", "仅有命令／生成结果"],
++  "evidence.tests-passed": ["Captured Test evidence passed", "捕获的测试证据通过"],
++  "evidence.tests-failed": ["Captured Test evidence failed", "捕获的测试证据失败"],
++  "evidence.invalid": ["Test evidence incomplete or invalid", "测试证据不完整或无效"],
+   "human.not-required": ["Not required", "无需人工决定"],
+   "human.pending": ["Pending", "待决定"],
+   "human.approved": ["Captured request approved", "捕获的请求已批准"],
+@@ -86,10 +50,7 @@ const messages: Record<string, [string, string]> = {
+     "These facts describe this captured run. Opening history does not verify the current workspace or rerun source-freshness checks.",
+     "这些事实描述本次捕获的运行。打开历史记录不会验证当前工作区或重新检查源文件新鲜度。",
+   ],
+-  stopRequested: [
+-    "Stop requested — awaiting confirmation",
+-    "已请求停止——等待确认",
+-  ],
++  stopRequested: ["Stop requested — awaiting confirmation", "已请求停止——等待确认"],
+   stopMeaning: [
+     "Stopping affects only this run's owned native work. Already-written files remain; unrelated conversations continue.",
+     "停止仅影响本次运行拥有的原生任务。已写入的文件会保留，无关对话会继续。",
+@@ -99,10 +60,7 @@ const messages: Record<string, [string, string]> = {
+   request: ["Captured request", "捕获的请求"],
+   result: ["Captured result", "捕获的结果"],
+   noResult: ["No captured final result", "没有捕获的最终结果"],
+-  artifactResult: [
+-    "Final result is a retained artifact",
+-    "最终结果为保留的工件",
+-  ],
++  artifactResult: ["Final result is a retained artifact", "最终结果为保留的工件"],
+   actions: ["Next action for this run", "本次运行的下一步操作"],
+   openNative: ["Open existing native conversation", "打开现有原生对话"],
+   permissionHelp: [
+@@ -126,10 +84,7 @@ const messages: Record<string, [string, string]> = {
+     "测试捕获了失败断言。开始另一请求前，请检查失败和本次运行记录的修复或停止状态。",
+   ],
+   reviewGate: ["Review captured approval request", "审阅捕获的审批请求"],
+-  showCheckpoint: [
+-    "Inspect offered continuation checkpoint",
+-    "检查提供的继续执行检查点",
+-  ],
++  showCheckpoint: ["Inspect offered continuation checkpoint", "检查提供的继续执行检查点"],
+   showRecovery: ["Inspect recovery controls", "检查恢复控制"],
+   showStep: ["Inspect step", "检查步骤"],
+   sessions: ["Owned native session targets", "拥有的原生会话目标"],
+@@ -146,10 +101,7 @@ const messages: Record<string, [string, string]> = {
+   ],
+   snapshotComplete: ["Complete captured scope", "完整捕获范围"],
+   snapshotIncomplete: ["Incomplete captured scope", "不完整捕获范围"],
+-  technical: [
+-    "Technical identities and captured facts",
+-    "技术标识与捕获的事实",
+-  ],
++  technical: ["Technical identities and captured facts", "技术标识与捕获的事实"],
+   approvalImpact: [
+     "Approving authorizes the displayed successor under this exact request and evidence. It is separate from native tool permission and does not certify tests.",
+     "批准会基于此确切请求和证据授权显示的后继步骤。它独立于原生工具权限，且不证明测试通过。",
+@@ -172,6 +124,15 @@ const messages: Record<string, [string, string]> = {
+   historyEvidence: ["Evidence", "证据"],
+   inspectFailedTest: ["Test failed — inspect", "测试失败——检查"],
+   inspectInvalidEvidence: ["Evidence invalid — inspect", "证据无效——检查"],
++  "reviewOutcome.pass": ["Valid reviewer decision: pass", "有效审阅结论：通过"],
++  "reviewOutcome.needs_changes": [
++    "Valid reviewer decision: needs changes",
++    "有效审阅结论：需要修改",
++  ],
++  "reviewOutcome.needs_human": [
++    "Valid reviewer decision: needs human judgment",
++    "有效审阅结论：需要人工判断",
++  ],
+   outputValidationFailed: [
+     "Structured output validation failed for this step. The reviewer did not produce a valid decision; this is not a needs_changes verdict.",
+     "此步骤的结构化输出校验失败。审阅者未产生有效决定；这不是 needs_changes 结论。",
+@@ -191,14 +152,8 @@ const messages: Record<string, [string, string]> = {
+   ],
+ };
+ export const graphRunClarityEn = Object.fromEntries(
+-  Object.entries(messages).map(([key, value]) => [
+-    `graph.run.${key}`,
+-    value[0],
+-  ]),
++  Object.entries(messages).map(([key, value]) => [`graph.run.${key}`, value[0]]),
+ );
+ export const graphRunClarityZh = Object.fromEntries(
+-  Object.entries(messages).map(([key, value]) => [
+-    `graph.run.${key}`,
+-    value[1],
+-  ]),
++  Object.entries(messages).map(([key, value]) => [`graph.run.${key}`, value[1]]),
+ );
+diff --git a/scripts/graph-engineering/pre-z8-u1-ui.mjs b/scripts/graph-engineering/pre-z8-u1-ui.mjs
+index 1a4e31f..0c75772 100644
+--- a/scripts/graph-engineering/pre-z8-u1-ui.mjs
++++ b/scripts/graph-engineering/pre-z8-u1-ui.mjs
+@@ -50,12 +50,22 @@ export async function assertNoNativeWork(isolation, label) {
+   assert.equal(modelCount(isolation), 0, `${label}: unexpected model request.`);
+   assert.deepEqual(isolation.fixture.toolResults, [], `${label}: unexpected native tool result.`);
+ }
+-export async function captureU1(isolation, window, summary, name, size = [1280, 720]) {
++export async function captureU1(
++  isolation,
++  window,
++  summary,
++  name,
++  size = [1280, 720],
++  contentSize = false,
++) {
+   const nativeWindow = await isolation.app.browserWindow(window);
+   try {
+     await nativeWindow.evaluate(
+-      (browserWindow, [width, height]) => browserWindow.setSize(width, height),
+-      size,
++      (browserWindow, { size: [width, height], contentSize }) =>
++        contentSize
++          ? browserWindow.setContentSize(width, height)
++          : browserWindow.setSize(width, height),
++      { size, contentSize },
+     );
+     await window.waitForFunction(
+       () =>
+diff --git a/scripts/graph-engineering/pre-z8-u2-proof.mjs b/scripts/graph-engineering/pre-z8-u2-proof.mjs
+index 9616cf3..a955895 100644
+--- a/scripts/graph-engineering/pre-z8-u2-proof.mjs
++++ b/scripts/graph-engineering/pre-z8-u2-proof.mjs
+@@ -165,6 +165,11 @@ export function assertArtifactRedaction(rawPreview, receipt, expected) {
+   }
+ }
+ 
++export function fixtureTrxRedactionExpectation(original) {
++  // VSTest 会在固定 fixture 源码之外写入绝对程序集路径；按原始报告判断，不能从 redacted 标志反推预期。
++  return /(?:\/(?:Users|home)\/|[a-z]:\\Users\\)[^\s"'<>]+/i.test(original) ? "sensitive" : "clean";
++}
++
+ export async function verifyU2Result(
+   isolation,
+   window,
+@@ -336,10 +341,14 @@ async function verifyU2Test(isolation, window, summary, run, build, test, scenar
+     assert.equal(rawPreview.digest, receipt.preview.digest);
+     assert.equal(normalized.digest, receipt.normalized.digest);
+     assert.equal(normalized.validation, "valid");
+-    // 合成 fixture 的 TRX 来自已知无敏感字段的 Cases.cs/Adapter.cs（assertU2Preserved
+-    // 已断言源码等于静态常量），预览必须保持未脱敏。预期 clean 由 fixture 已知内容独立判定，
+-    // 不依赖产品脱敏输出；若产品误脱敏或 digest 漂移，proof 拒绝而非接受另一分支。
+-    assertArtifactRedaction(rawPreview, receipt, "clean");
++    // 固定源码没有秘密并不代表生成报告没有用户路径；只修正 proof，保留现有隐私与证据契约。
++    const expectedRedaction = fixtureTrxRedactionExpectation(original.toString("utf8"));
++    assertArtifactRedaction(rawPreview, receipt, expectedRedaction);
++    const previewText = await readArtifactUi(window, run, rawPreview);
++    if (expectedRedaction === "sensitive") {
++      assert.equal(fixtureTrxRedactionExpectation(previewText), "clean");
++      assert.ok(previewText.includes("[USER_PATH]"));
++    }
+     const normalizedValue = JSON.parse(await readArtifactUi(window, run, normalized));
+     assert.equal(normalizedValue.format, "zcode-test-v1");
+     assert.equal(normalizedValue.operationId, test.operationId);
+diff --git a/scripts/graph-engineering/pre-z8-u2-proof.test.mjs b/scripts/graph-engineering/pre-z8-u2-proof.test.mjs
+index c3cf15e..9ca154f 100644
+--- a/scripts/graph-engineering/pre-z8-u2-proof.test.mjs
++++ b/scripts/graph-engineering/pre-z8-u2-proof.test.mjs
+@@ -1,6 +1,25 @@
+ import assert from "node:assert/strict";
+ import test from "node:test";
+-import { assertArtifactRedaction } from "./pre-z8-u2-proof.mjs";
++import { assertArtifactRedaction, fixtureTrxRedactionExpectation } from "./pre-z8-u2-proof.mjs";
++
++test("generated TRX classification includes native user-directory assembly metadata", () => {
++  assert.equal(
++    fixtureTrxRedactionExpectation(
++      '<TestMethod codeBase="C:\\Users\\Fixture\\work\\bin\\Fixture.Tests.dll" />',
++    ),
++    "sensitive",
++  );
++  assert.equal(
++    fixtureTrxRedactionExpectation(
++      '<TestMethod codeBase="/home/fixture/work/bin/Fixture.Tests.dll" />',
++    ),
++    "sensitive",
++  );
++  assert.equal(
++    fixtureTrxRedactionExpectation('<TestMethod codeBase="/tmp/fixture/bin/Fixture.Tests.dll" />'),
++    "clean",
++  );
++});
+ 
+ // 预定的工件收据与预览。内容敏感性由测试作者根据产品声明的脱敏规则独立判定
+ // （feedbackPrivacy.ts:4 的 sensitiveKey 含 password/secret/token 等），不调用被测
+diff --git a/scripts/graph-engineering/z6-provider-fixture.mjs b/scripts/graph-engineering/z6-provider-fixture.mjs
+index 20b3e69..41df303 100644
+--- a/scripts/graph-engineering/z6-provider-fixture.mjs
++++ b/scripts/graph-engineering/z6-provider-fixture.mjs
+@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
+ import { nativeResponse, stageOf } from "./z6-provider-responses.mjs";
+ 
+ /** Model test replies only: existing native sessions own every real tool operation. */
+-export async function startZ6Fixture(workspace, scenario) {
++export async function startZ6Fixture(workspace, scenario, responder = nativeResponse) {
+   const requests = [],
+     toolResults = [],
+     errors = [],
+@@ -26,7 +26,16 @@ export async function startZ6Fixture(workspace, scenario) {
+       .join("\n");
+     const stage = stageOf(prompt),
+       native = (body.tools?.length ?? 0) > 0;
+-    requests.push({ path: request.url, model: body.model, stage, native, prompt, at: Date.now() });
++    const receipt = {
++      path: request.url,
++      model: body.model,
++      stage,
++      native,
++      prompt,
++      at: Date.now(),
++      tools: body.tools?.map((tool) => tool.function.name) ?? [],
++    };
++    requests.push(receipt);
+     for (const message of body.messages ?? [])
+       if (
+         message.role === "tool" &&
+@@ -46,7 +55,9 @@ export async function startZ6Fixture(workspace, scenario) {
+       return;
+     }
+     try {
+-      respond(response, body.stream, nativeResponse({ body, prompt, stage, workspace, scenario }));
++      const reply = responder({ body, prompt, stage, workspace, scenario });
++      receipt.reply = reply;
++      respond(response, body.stream, reply);
+     } catch (error) {
+       errors.push(error instanceof Error ? error.message : String(error));
+       response.writeHead(400, { "Content-Type": "application/json" });

@@ -50,12 +50,22 @@ export async function assertNoNativeWork(isolation, label) {
   assert.equal(modelCount(isolation), 0, `${label}: unexpected model request.`);
   assert.deepEqual(isolation.fixture.toolResults, [], `${label}: unexpected native tool result.`);
 }
-export async function captureU1(isolation, window, summary, name, size = [1280, 720]) {
+export async function captureU1(
+  isolation,
+  window,
+  summary,
+  name,
+  size = [1280, 720],
+  contentSize = false,
+) {
   const nativeWindow = await isolation.app.browserWindow(window);
   try {
     await nativeWindow.evaluate(
-      (browserWindow, [width, height]) => browserWindow.setSize(width, height),
-      size,
+      (browserWindow, { size: [width, height], contentSize }) =>
+        contentSize
+          ? browserWindow.setContentSize(width, height)
+          : browserWindow.setSize(width, height),
+      { size, contentSize },
     );
     await window.waitForFunction(
       () =>

@@ -165,6 +165,11 @@ export function assertArtifactRedaction(rawPreview, receipt, expected) {
   }
 }
 
+export function fixtureTrxRedactionExpectation(original) {
+  // VSTest 会在固定 fixture 源码之外写入绝对程序集路径；按原始报告判断，不能从 redacted 标志反推预期。
+  return /(?:\/(?:Users|home)\/|[a-z]:\\Users\\)[^\s"'<>]+/i.test(original) ? "sensitive" : "clean";
+}
+
 export async function verifyU2Result(
   isolation,
   window,
@@ -336,10 +341,14 @@ async function verifyU2Test(isolation, window, summary, run, build, test, scenar
     assert.equal(rawPreview.digest, receipt.preview.digest);
     assert.equal(normalized.digest, receipt.normalized.digest);
     assert.equal(normalized.validation, "valid");
-    // 合成 fixture 的 TRX 来自已知无敏感字段的 Cases.cs/Adapter.cs（assertU2Preserved
-    // 已断言源码等于静态常量），预览必须保持未脱敏。预期 clean 由 fixture 已知内容独立判定，
-    // 不依赖产品脱敏输出；若产品误脱敏或 digest 漂移，proof 拒绝而非接受另一分支。
-    assertArtifactRedaction(rawPreview, receipt, "clean");
+    // 固定源码没有秘密并不代表生成报告没有用户路径；只修正 proof，保留现有隐私与证据契约。
+    const expectedRedaction = fixtureTrxRedactionExpectation(original.toString("utf8"));
+    assertArtifactRedaction(rawPreview, receipt, expectedRedaction);
+    const previewText = await readArtifactUi(window, run, rawPreview);
+    if (expectedRedaction === "sensitive") {
+      assert.equal(fixtureTrxRedactionExpectation(previewText), "clean");
+      assert.ok(previewText.includes("[USER_PATH]"));
+    }
     const normalizedValue = JSON.parse(await readArtifactUi(window, run, normalized));
     assert.equal(normalizedValue.format, "zcode-test-v1");
     assert.equal(normalizedValue.operationId, test.operationId);

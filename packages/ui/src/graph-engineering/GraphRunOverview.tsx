@@ -6,6 +6,8 @@ import { GraphRunActions, type GraphRunInspection } from "./GraphRunActions.js";
 import { GraphRunCapturedDetails } from "./GraphRunCapturedDetails.js";
 import type { GraphPanelProps } from "./graphEngineeringView.js";
 import { graphEvidenceLabels } from "./graphRunPresentation.js";
+import { graphRequestText } from "./graphRequestText.js";
+import { graphRunOutputs } from "./graphRunOutputs.js";
 
 export function GraphRunOverview({
   run,
@@ -23,6 +25,7 @@ export function GraphRunOverview({
   const u = useGraphRunText();
   const summary = useMemo(() => graphRunSummary(run), [run]);
   const evidenceLabels = graphEvidenceLabels(summary.evidence);
+  const outputs = graphRunOutputs(run);
   return (
     <section
       className="shrink-0 space-y-3 rounded-xl border border-border bg-surface p-3"
@@ -77,7 +80,12 @@ export function GraphRunOverview({
         </p>
       ) : null}
       <div className="grid gap-2 text-ui-sm sm:grid-cols-2">
-        <CapturedText label={u("request")} text={summary.requestText} testId="graph-run-request" />
+        <CapturedText
+          label={u("request")}
+          text={summary.requestText}
+          preview={graphRequestText(run.definition, summary.requestText)}
+          testId="graph-run-request"
+        />
         <CapturedText
           label={u("result")}
           text={
@@ -88,6 +96,28 @@ export function GraphRunOverview({
           testId="graph-run-result"
         />
       </div>
+      {outputs.map((output) => (
+        <div
+          key={output.attemptId}
+          data-testid="graph-run-structured-output"
+          data-state={output.state}
+          className="space-y-1 text-ui-sm"
+        >
+          <p className={output.state === "invalid" ? "text-warning" : "text-foreground"}>
+            {output.name}:{" "}
+            {u(
+              output.state === "invalid"
+                ? "outputValidationFailed"
+                : `reviewOutcome.${output.state}`,
+            )}
+          </p>
+          {output.issues.map((issue) => (
+            <p key={issue} className="break-words text-ui-xs text-foreground-subtle">
+              {issue}
+            </p>
+          ))}
+        </div>
+      ))}
       <p className="text-ui-xs text-foreground-subtle">{u("capturedMeaning")}</p>
       <GraphRunActions {...{ run, summary, disabled, onInspect, onCancel, onOpenConversation }} />
       <GraphRunCapturedDetails {...{ summary, onInspect }} />
@@ -121,12 +151,24 @@ function Axis({
   );
 }
 
-function CapturedText({ label, text, testId }: { label: string; text: string; testId: string }) {
+function CapturedText({
+  label,
+  text,
+  preview = text,
+  testId,
+}: {
+  label: string;
+  text: string;
+  preview?: string;
+  testId: string;
+}) {
   return (
     <details className="min-w-0" data-testid={testId}>
       <summary className="cursor-pointer">
         {label}
-        <span className="block truncate text-foreground-subtle">{text.split(/\r?\n/, 1)[0]}</span>
+        <span className="block truncate text-foreground-subtle">
+          {preview.split(/\r?\n/, 1)[0]}
+        </span>
       </summary>
       <p className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words text-foreground-subtle">
         {text}

@@ -10,42 +10,18 @@ const messages: Record<string, [string, string]> = {
   "execution.Completed": ["Execution completed", "执行完成"],
   "execution.Failed": ["Execution failed", "执行失败"],
   "execution.Cancelled": ["Execution stopped", "执行已停止"],
-  "execution.CancelRequested": [
-    "Stop requested — awaiting confirmation",
-    "已请求停止——等待确认",
-  ],
-  "execution.Interrupted": [
-    "Execution interrupted; outcome unconfirmed",
-    "执行中断；结果未确认",
-  ],
+  "execution.CancelRequested": ["Stop requested — awaiting confirmation", "已请求停止——等待确认"],
+  "execution.Interrupted": ["Execution interrupted; outcome unconfirmed", "执行中断；结果未确认"],
   "execution.Unknown": ["Execution outcome unknown", "执行结果未知"],
-  "execution.WaitingForPermission": [
-    "Waiting for native permission",
-    "等待原生权限",
-  ],
-  "execution.WaitingForUser": [
-    "Waiting for a native conversation response",
-    "等待原生对话答复",
-  ],
-  "execution.WaitingForApproval": [
-    "Waiting for human decision",
-    "等待人工决定",
-  ],
-  "execution.AwaitingContinuation": [
-    "Waiting for explicit Continue",
-    "等待明确继续",
-  ],
+  "execution.WaitingForPermission": ["Waiting for native permission", "等待原生权限"],
+  "execution.WaitingForUser": ["Waiting for a native conversation response", "等待原生对话答复"],
+  "execution.WaitingForApproval": ["Waiting for human decision", "等待人工决定"],
+  "execution.AwaitingContinuation": ["Waiting for explicit Continue", "等待明确继续"],
   "execution.StaleEvidence": ["Stopped at stale evidence", "因过期证据停止"],
   "execution.Rejected": ["Stopped after human rejection", "人工拒绝后停止"],
   "execution.NeedsHuman": ["Stopped for human review", "停止并等待人工审阅"],
-  "execution.BudgetExhausted": [
-    "Stopped at the configured budget",
-    "达到配置预算后停止",
-  ],
-  "execution.NoProgress": [
-    "Stopped because no progress was observed",
-    "因未观察到进展停止",
-  ],
+  "execution.BudgetExhausted": ["Stopped at the configured budget", "达到配置预算后停止"],
+  "execution.NoProgress": ["Stopped because no progress was observed", "因未观察到进展停止"],
   "execution.Pending": ["Not started", "尚未开始"],
   "execution.Skipped": ["Skipped", "已跳过"],
   "execution.Approved": ["Approval step recorded", "审批步骤已记录"],
@@ -62,22 +38,10 @@ const messages: Record<string, [string, string]> = {
     "Agent-reported result; no Test evidence",
     "智能体报告结果；无测试证据",
   ],
-  "evidence.command-only": [
-    "Command / Build results only",
-    "仅有命令／生成结果",
-  ],
-  "evidence.tests-passed": [
-    "Captured Test evidence passed",
-    "捕获的测试证据通过",
-  ],
-  "evidence.tests-failed": [
-    "Captured Test evidence failed",
-    "捕获的测试证据失败",
-  ],
-  "evidence.invalid": [
-    "Test evidence incomplete or invalid",
-    "测试证据不完整或无效",
-  ],
+  "evidence.command-only": ["Command / Build results only", "仅有命令／生成结果"],
+  "evidence.tests-passed": ["Captured Test evidence passed", "捕获的测试证据通过"],
+  "evidence.tests-failed": ["Captured Test evidence failed", "捕获的测试证据失败"],
+  "evidence.invalid": ["Test evidence incomplete or invalid", "测试证据不完整或无效"],
   "human.not-required": ["Not required", "无需人工决定"],
   "human.pending": ["Pending", "待决定"],
   "human.approved": ["Captured request approved", "捕获的请求已批准"],
@@ -86,10 +50,7 @@ const messages: Record<string, [string, string]> = {
     "These facts describe this captured run. Opening history does not verify the current workspace or rerun source-freshness checks.",
     "这些事实描述本次捕获的运行。打开历史记录不会验证当前工作区或重新检查源文件新鲜度。",
   ],
-  stopRequested: [
-    "Stop requested — awaiting confirmation",
-    "已请求停止——等待确认",
-  ],
+  stopRequested: ["Stop requested — awaiting confirmation", "已请求停止——等待确认"],
   stopMeaning: [
     "Stopping affects only this run's owned native work. Already-written files remain; unrelated conversations continue.",
     "停止仅影响本次运行拥有的原生任务。已写入的文件会保留，无关对话会继续。",
@@ -99,10 +60,7 @@ const messages: Record<string, [string, string]> = {
   request: ["Captured request", "捕获的请求"],
   result: ["Captured result", "捕获的结果"],
   noResult: ["No captured final result", "没有捕获的最终结果"],
-  artifactResult: [
-    "Final result is a retained artifact",
-    "最终结果为保留的工件",
-  ],
+  artifactResult: ["Final result is a retained artifact", "最终结果为保留的工件"],
   actions: ["Next action for this run", "本次运行的下一步操作"],
   openNative: ["Open existing native conversation", "打开现有原生对话"],
   permissionHelp: [
@@ -126,10 +84,7 @@ const messages: Record<string, [string, string]> = {
     "测试捕获了失败断言。开始另一请求前，请检查失败和本次运行记录的修复或停止状态。",
   ],
   reviewGate: ["Review captured approval request", "审阅捕获的审批请求"],
-  showCheckpoint: [
-    "Inspect offered continuation checkpoint",
-    "检查提供的继续执行检查点",
-  ],
+  showCheckpoint: ["Inspect offered continuation checkpoint", "检查提供的继续执行检查点"],
   showRecovery: ["Inspect recovery controls", "检查恢复控制"],
   showStep: ["Inspect step", "检查步骤"],
   sessions: ["Owned native session targets", "拥有的原生会话目标"],
@@ -146,10 +101,7 @@ const messages: Record<string, [string, string]> = {
   ],
   snapshotComplete: ["Complete captured scope", "完整捕获范围"],
   snapshotIncomplete: ["Incomplete captured scope", "不完整捕获范围"],
-  technical: [
-    "Technical identities and captured facts",
-    "技术标识与捕获的事实",
-  ],
+  technical: ["Technical identities and captured facts", "技术标识与捕获的事实"],
   approvalImpact: [
     "Approving authorizes the displayed successor under this exact request and evidence. It is separate from native tool permission and does not certify tests.",
     "批准会基于此确切请求和证据授权显示的后继步骤。它独立于原生工具权限，且不证明测试通过。",
@@ -172,6 +124,15 @@ const messages: Record<string, [string, string]> = {
   historyEvidence: ["Evidence", "证据"],
   inspectFailedTest: ["Test failed — inspect", "测试失败——检查"],
   inspectInvalidEvidence: ["Evidence invalid — inspect", "证据无效——检查"],
+  "reviewOutcome.pass": ["Valid reviewer decision: pass", "有效审阅结论：通过"],
+  "reviewOutcome.needs_changes": [
+    "Valid reviewer decision: needs changes",
+    "有效审阅结论：需要修改",
+  ],
+  "reviewOutcome.needs_human": [
+    "Valid reviewer decision: needs human judgment",
+    "有效审阅结论：需要人工判断",
+  ],
   outputValidationFailed: [
     "Structured output validation failed for this step. The reviewer did not produce a valid decision; this is not a needs_changes verdict.",
     "此步骤的结构化输出校验失败。审阅者未产生有效决定；这不是 needs_changes 结论。",
@@ -191,14 +152,8 @@ const messages: Record<string, [string, string]> = {
   ],
 };
 export const graphRunClarityEn = Object.fromEntries(
-  Object.entries(messages).map(([key, value]) => [
-    `graph.run.${key}`,
-    value[0],
-  ]),
+  Object.entries(messages).map(([key, value]) => [`graph.run.${key}`, value[0]]),
 );
 export const graphRunClarityZh = Object.fromEntries(
-  Object.entries(messages).map(([key, value]) => [
-    `graph.run.${key}`,
-    value[1],
-  ]),
+  Object.entries(messages).map(([key, value]) => [`graph.run.${key}`, value[1]]),
 );

@@ -7,6 +7,9 @@ import {
   Position,
   ReactFlow,
   useUpdateNodeInternals,
+  useInternalNode,
+  useReactFlow,
+  useStore,
   type Node,
   type NodeProps,
   type NodePositionChange,
@@ -88,6 +91,40 @@ const GraphNode = memo(function GraphNode({ id, data, selected }: NodeProps<Canv
   );
 });
 const nodeTypes = { graph: GraphNode };
+
+function SelectedNodeFocus({ id }: { id?: string }) {
+  const selected = useInternalNode(id ?? "");
+  const nodeWidth = selected?.measured?.width;
+  const nodeHeight = selected?.measured?.height;
+  const width = useStore((state) => state.width);
+  const height = useStore((state) => state.height);
+  const { getInternalNode, getZoom, setCenter, viewportInitialized } = useReactFlow();
+  useEffect(() => {
+    const node =
+      id && nodeWidth && nodeHeight && viewportInitialized && width && height
+        ? getInternalNode(id)
+        : undefined;
+    if (!node || !nodeWidth || !nodeHeight) return;
+    // 全图适配曾把顺序节点压成小字；选中节点只调整视口，不改写保存位置或连接关系。
+    // 受控定义不保存测量尺寸，不能等待全图定义的 initialized；读取选中节点的实际测量并响应窗口尺寸。
+    void setCenter(
+      node.internals.positionAbsolute.x + nodeWidth / 2,
+      node.internals.positionAbsolute.y + nodeHeight / 2,
+      { zoom: Math.max(0.85, getZoom()), duration: 0 },
+    );
+  }, [
+    id,
+    nodeWidth,
+    nodeHeight,
+    viewportInitialized,
+    width,
+    height,
+    getInternalNode,
+    getZoom,
+    setCenter,
+  ]);
+  return null;
+}
 
 export function GraphCanvas({
   definition,
@@ -247,8 +284,8 @@ export function GraphCanvas({
         edgesReconnectable={editable}
         deleteKeyCode={null}
         fitView
-        fitViewOptions={{ minZoom: 0.5, padding: 0.15 }}
-        minZoom={0.3}
+        minZoom={0.85}
+        fitViewOptions={{ minZoom: 0.85, maxZoom: 1, padding: 0.15 }}
         maxZoom={1.5}
         proOptions={{ hideAttribution: false }}
         onNodeClick={(_, node) => selectCanvasNode(node.id)}
@@ -315,6 +352,7 @@ export function GraphCanvas({
         }}
       >
         <Background color="var(--color-border)" />
+        <SelectedNodeFocus id={selectedId} />
         <Controls showInteractive={false} />
       </ReactFlow>
     </div>

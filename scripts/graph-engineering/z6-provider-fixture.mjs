@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { nativeResponse, stageOf } from "./z6-provider-responses.mjs";
 
 /** Model test replies only: existing native sessions own every real tool operation. */
-export async function startZ6Fixture(workspace, scenario) {
+export async function startZ6Fixture(workspace, scenario, responder = nativeResponse) {
   const requests = [],
     toolResults = [],
     errors = [],
@@ -26,7 +26,16 @@ export async function startZ6Fixture(workspace, scenario) {
       .join("\n");
     const stage = stageOf(prompt),
       native = (body.tools?.length ?? 0) > 0;
-    requests.push({ path: request.url, model: body.model, stage, native, prompt, at: Date.now() });
+    const receipt = {
+      path: request.url,
+      model: body.model,
+      stage,
+      native,
+      prompt,
+      at: Date.now(),
+      tools: body.tools?.map((tool) => tool.function.name) ?? [],
+    };
+    requests.push(receipt);
     for (const message of body.messages ?? [])
       if (
         message.role === "tool" &&
@@ -46,7 +55,9 @@ export async function startZ6Fixture(workspace, scenario) {
       return;
     }
     try {
-      respond(response, body.stream, nativeResponse({ body, prompt, stage, workspace, scenario }));
+      const reply = responder({ body, prompt, stage, workspace, scenario });
+      receipt.reply = reply;
+      respond(response, body.stream, reply);
     } catch (error) {
       errors.push(error instanceof Error ? error.message : String(error));
       response.writeHead(400, { "Content-Type": "application/json" });

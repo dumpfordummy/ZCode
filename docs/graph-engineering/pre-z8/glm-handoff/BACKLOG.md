@@ -80,7 +80,7 @@ Independent tests should compare known template semantics and immutable input sn
 
 ## 4. U5 file transfer and retained review state
 
-Reuse `packages/ui/src/graph-engineering/GraphTemplateTransfer.tsx`, `GraphLibraryManagement.tsx`, `packages/ui/src/store/graphDraftStore.ts`, existing workflow `preview`/`create`/`save-version` operations, public `IPlatformService` and `IFileService`. Current transfer UI uses component-local name/description/JSON/preview/review state and raw JSON; it is not the requested reviewed file flow. Pass workspace identity explicitly where needed rather than introduce another registry.
+Reuse `packages/ui/src/graph-engineering/GraphTemplateTransfer.tsx`, `GraphLibraryManagement.tsx`, `packages/ui/src/store/graphDraftStore.ts`, existing `IGraphWorkflowService.preview(...)` and `mutate({ action: "create" | "version", ... })` operations, public `IPlatformService` and `IFileService`. These method/discriminant names come from `workflow-contract.ts`; `graph-library-save-version` is a UI selector, not a service operation. Current transfer UI uses component-local name/description/JSON/preview/review state and raw JSON; it is not the requested reviewed file flow. Pass workspace identity explicitly where needed rather than introduce another registry.
 
 The planned hook belongs under `packages/ui/src/hooks/`. Exact contract from `U5_REUSE_SPEC.md`:
 

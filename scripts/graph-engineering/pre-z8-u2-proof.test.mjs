@@ -1,6 +1,25 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assertArtifactRedaction } from "./pre-z8-u2-proof.mjs";
+import { assertArtifactRedaction, fixtureTrxRedactionExpectation } from "./pre-z8-u2-proof.mjs";
+
+test("generated TRX classification includes native user-directory assembly metadata", () => {
+  assert.equal(
+    fixtureTrxRedactionExpectation(
+      '<TestMethod codeBase="C:\\Users\\Fixture\\work\\bin\\Fixture.Tests.dll" />',
+    ),
+    "sensitive",
+  );
+  assert.equal(
+    fixtureTrxRedactionExpectation(
+      '<TestMethod codeBase="/home/fixture/work/bin/Fixture.Tests.dll" />',
+    ),
+    "sensitive",
+  );
+  assert.equal(
+    fixtureTrxRedactionExpectation('<TestMethod codeBase="/tmp/fixture/bin/Fixture.Tests.dll" />'),
+    "clean",
+  );
+});
 
 // 预定的工件收据与预览。内容敏感性由测试作者根据产品声明的脱敏规则独立判定
 // （feedbackPrivacy.ts:4 的 sensitiveKey 含 password/secret/token 等），不调用被测

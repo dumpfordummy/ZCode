@@ -1,0 +1,1374 @@
+{
+  "runId": "2535e508-4717-46e0-ab9b-9391b2301d68",
+  "definition": {
+    "version": 5,
+    "revision": 2,
+    "name": "Sequential engineering",
+    "nodes": [
+      {
+        "id": "start",
+        "position": {
+          "x": 40,
+          "y": 100
+        },
+        "type": "start",
+        "request": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+      },
+      {
+        "id": "analyze",
+        "position": {
+          "x": 300,
+          "y": 100
+        },
+        "type": "task",
+        "name": "Analyze",
+        "instructions": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\n{{inputs.request}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "implement",
+        "position": {
+          "x": 560,
+          "y": 100
+        },
+        "type": "task",
+        "name": "Implement",
+        "instructions": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
+          {
+            "alias": "analyze",
+            "source": {
+              "kind": "node",
+              "nodeId": "analyze"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "build",
+        "position": {
+          "x": 820,
+          "y": 100
+        },
+        "type": "tool",
+        "name": "Build",
+        "recipeId": "reviewer-build"
+      },
+      {
+        "id": "test",
+        "position": {
+          "x": 1080,
+          "y": 100
+        },
+        "type": "tool",
+        "name": "Test configured criteria",
+        "recipeId": "reviewer-test"
+      },
+      {
+        "id": "reviewer",
+        "position": {
+          "x": 1340,
+          "y": 100
+        },
+        "type": "task",
+        "name": "Review current verification",
+        "instructions": "Workflow task: reviewer.\nReview the explicit request against the current Test verification supplied as evidence. Decide whether the verified machine result satisfies the request's stated acceptance criteria. Return exactly one JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing only the permitted evidence artifact IDs supplied below. A failed Test can never be pass. A passing Test is evidence of the machine check, not a guarantee that the requested change is correct; return needs_changes only for a concrete issue grounded in the supplied request and verification evidence, otherwise pass. Do not invent acceptance criteria the request did not state; in particular, do not require Git-tracked or committed source unless an explicit supplied criterion says so. Unsupported uncertainty must be needs_human, not an invented blocking rule. Do not edit files or run commands; the verification artifact already contains the machine result.\nrequest:\n{{inputs.request}}\n\nverification:\n{{inputs.verification}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
+          {
+            "alias": "verification",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "test",
+              "selector": "verification"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        },
+        "output": {
+          "kind": "json",
+          "schema": {
+            "type": "object",
+            "required": [
+              "outcome",
+              "findings",
+              "evidenceReferences"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "enum": [
+                  "pass",
+                  "needs_changes",
+                  "needs_human"
+                ]
+              },
+              "findings": {
+                "type": "array",
+                "maxItems": 10,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  }
+                }
+              },
+              "evidenceReferences": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 8,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "final-gate",
+        "position": {
+          "x": 40,
+          "y": 320
+        },
+        "type": "approval",
+        "name": "Final human review",
+        "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+        "evidence": [
+          {
+            "alias": "evidence",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "test",
+              "selector": "test"
+            }
+          },
+          {
+            "alias": "review",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "reviewer",
+              "selector": "structured"
+            }
+          },
+          {
+            "alias": "source",
+            "source": {
+              "kind": "source"
+            }
+          }
+        ],
+        "commentPolicy": "required"
+      },
+      {
+        "id": "end",
+        "position": {
+          "x": 300,
+          "y": 320
+        },
+        "type": "end",
+        "outputNodeId": "test"
+      }
+    ],
+    "edges": [
+      {
+        "source": "start",
+        "target": "analyze"
+      },
+      {
+        "source": "analyze",
+        "target": "implement"
+      },
+      {
+        "source": "implement",
+        "target": "build"
+      },
+      {
+        "source": "build",
+        "target": "test"
+      },
+      {
+        "source": "test",
+        "target": "reviewer"
+      },
+      {
+        "source": "reviewer",
+        "target": "final-gate"
+      },
+      {
+        "source": "final-gate",
+        "target": "end"
+      }
+    ],
+    "routing": {
+      "finalGateId": "final-gate",
+      "limits": {
+        "maxNodeAdmissions": 24,
+        "deadlineMs": 1800000
+      }
+    },
+    "template": {
+      "id": "generic",
+      "name": "Sequential engineering",
+      "version": 2,
+      "digest": "7307e6439e16b1a0006845f6ac5d66d80b747b2982c9411ff92294a619b853a4",
+      "parameters": {
+        "request": "Modify zz-demo.txt file content to after"
+      },
+      "bindings": {
+        "references": {
+          "instructions": "Context.md"
+        },
+        "recipes": {
+          "build": "reviewer-build",
+          "test": "reviewer-test"
+        },
+        "sourcePaths": []
+      },
+      "references": [
+        {
+          "id": "instructions",
+          "kind": "instruction",
+          "nodeIds": [
+            "analyze",
+            "implement"
+          ]
+        }
+      ],
+      "excluded": []
+    }
+  },
+  "startInput": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.",
+  "agents": [
+    {
+      "iterationId": "9181e16d-726c-4b1d-8eb6-836d8c1f2289",
+      "iteration": 0,
+      "nodeId": "analyze",
+      "attemptId": "de23061b-0992-45f5-8d08-21e30797c30c",
+      "commandId": "6d701d96-cf8e-4325-96fb-7dc097dde153",
+      "inputId": "6d701d96-cf8e-4325-96fb-7dc097dde153",
+      "status": "Completed",
+      "dispatchPhase": "accepted",
+      "settings": {
+        "modelSelection": {
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "options": {
+            "reasoningLevel": "enabled"
+          }
+        },
+        "mode": "build",
+        "planEnabled": false,
+        "source": "workspace"
+      },
+      "createdAt": 1790566595754,
+      "updatedAt": 1790566596737,
+      "sessionId": "sess_734c5147-6409-43fe-9d07-f3880e49e8ae",
+      "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace:1:2956:agent-0a6ed43a-071d-430d-af87-6e1d7c3cd95d",
+      "foregroundExecutionId": "runtime_command_1",
+      "observationEpoch": "mukp4brl-w9srovxa",
+      "resolvedInstructions": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"Context.md\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+      "bindings": [
+        {
+          "alias": "request",
+          "source": {
+            "kind": "start"
+          },
+          "text": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+        }
+      ],
+      "terminalProof": {
+        "sourceCommandId": "6d701d96-cf8e-4325-96fb-7dc097dde153",
+        "state": "completedSuccess",
+        "logEpoch": "mukp4brl-w9srovxa",
+        "seq": 35,
+        "turnId": "msg_mukp4c5a_ff0ce71e-9271-4f13-82fa-784e05cb824b"
+      },
+      "finalOutput": {
+        "text": "Acceptance: zz-demo.txt must contain exactly after. Only this local file changes. Preserve the configured Build/Test scripts. Git tracking is not an acceptance requirement.",
+        "turnId": "msg_mukp4c5a_ff0ce71e-9271-4f13-82fa-784e05cb824b",
+        "rowId": 4,
+        "entityId": "msg_mukp4c9z_bcc89913-bd3e-440f-a740-58b37648a5ce",
+        "assistantResponseId": "msg_mukp4c9z_bcc89913-bd3e-440f-a740-58b37648a5ce"
+      },
+      "outputValidation": {
+        "status": "valid",
+        "issues": []
+      }
+    },
+    {
+      "iterationId": "9181e16d-726c-4b1d-8eb6-836d8c1f2289",
+      "iteration": 0,
+      "nodeId": "implement",
+      "attemptId": "9d7ff01e-fdd0-457b-a806-1f3742cf9757",
+      "commandId": "82005406-94fe-48d4-a16f-48ebfd89de00",
+      "inputId": "82005406-94fe-48d4-a16f-48ebfd89de00",
+      "status": "Completed",
+      "dispatchPhase": "accepted",
+      "settings": {
+        "modelSelection": {
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "options": {
+            "reasoningLevel": "enabled"
+          }
+        },
+        "mode": "build",
+        "planEnabled": false,
+        "source": "workspace"
+      },
+      "createdAt": 1790566595754,
+      "updatedAt": 1790566598187,
+      "sessionId": "sess_f9497e91-6a27-46f8-8a4e-0beeb83a6dc7",
+      "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace:1:2956:agent-0a6ed43a-071d-430d-af87-6e1d7c3cd95d",
+      "foregroundExecutionId": "runtime_command_2",
+      "observationEpoch": "mukp4cib-4emrp3yj",
+      "resolvedInstructions": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nanalyze:\nAcceptance: zz-demo.txt must contain exactly after. Only this local file changes. Preserve the configured Build/Test scripts. Git tracking is not an acceptance requirement.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"Context.md\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+      "bindings": [
+        {
+          "alias": "request",
+          "source": {
+            "kind": "start"
+          },
+          "text": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+        },
+        {
+          "alias": "analyze",
+          "source": {
+            "kind": "node",
+            "nodeId": "analyze"
+          },
+          "text": "Acceptance: zz-demo.txt must contain exactly after. Only this local file changes. Preserve the configured Build/Test scripts. Git tracking is not an acceptance requirement.",
+          "sourceSessionId": "sess_734c5147-6409-43fe-9d07-f3880e49e8ae",
+          "sourceInputId": "6d701d96-cf8e-4325-96fb-7dc097dde153",
+          "sourceCommandId": "6d701d96-cf8e-4325-96fb-7dc097dde153"
+        }
+      ],
+      "terminalProof": {
+        "sourceCommandId": "82005406-94fe-48d4-a16f-48ebfd89de00",
+        "state": "completedSuccess",
+        "logEpoch": "mukp4cib-4emrp3yj",
+        "seq": 57,
+        "turnId": "msg_mukp4cu1_d1d0becd-f16d-432a-aa87-742ac8bb651c"
+      },
+      "finalOutput": {
+        "text": "Native Edit returned. Graph must now execute the saved Build and Test checks; this reply does not establish a machine result.",
+        "turnId": "msg_mukp4cu1_d1d0becd-f16d-432a-aa87-742ac8bb651c",
+        "rowId": 5,
+        "entityId": "msg_mukp4dej_b8e6c84c-8b9d-4f9e-bc03-3754a2bc718b",
+        "assistantResponseId": "msg_mukp4dej_b8e6c84c-8b9d-4f9e-bc03-3754a2bc718b"
+      },
+      "outputValidation": {
+        "status": "valid",
+        "issues": []
+      }
+    },
+    {
+      "iterationId": "9181e16d-726c-4b1d-8eb6-836d8c1f2289",
+      "iteration": 0,
+      "nodeId": "reviewer",
+      "attemptId": "f7ff6ccd-a803-4749-82ac-f4fd303bab8a",
+      "commandId": "9706ada6-2d1c-4ba1-ab90-5107490d199a",
+      "inputId": "9706ada6-2d1c-4ba1-ab90-5107490d199a",
+      "status": "Completed",
+      "dispatchPhase": "accepted",
+      "settings": {
+        "modelSelection": {
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "options": {
+            "reasoningLevel": "enabled"
+          }
+        },
+        "mode": "build",
+        "planEnabled": false,
+        "source": "workspace"
+      },
+      "createdAt": 1790566595754,
+      "updatedAt": 1790566601159,
+      "sessionId": "sess_eb2f317c-0034-45b5-a573-7abda6c7330d",
+      "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace:1:2956:agent-0a6ed43a-071d-430d-af87-6e1d7c3cd95d",
+      "foregroundExecutionId": "runtime_command_3",
+      "observationEpoch": "mukp4fce-ihr1mrv3",
+      "resolvedInstructions": "Workflow task: reviewer.\nReview the explicit request against the current Test verification supplied as evidence. Decide whether the verified machine result satisfies the request's stated acceptance criteria. Return exactly one JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing only the permitted evidence artifact IDs supplied below. A failed Test can never be pass. A passing Test is evidence of the machine check, not a guarantee that the requested change is correct; return needs_changes only for a concrete issue grounded in the supplied request and verification evidence, otherwise pass. Do not invent acceptance criteria the request did not state; in particular, do not require Git-tracked or committed source unless an explicit supplied criterion says so. Unsupported uncertainty must be needs_human, not an invented blocking rule. Do not edit files or run commands; the verification artifact already contains the machine result.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nverification:\n{\"artifactId\":\"aae5f8ed-506b-4dda-80ba-d633dcd38161\",\"runId\":\"2535e508-4717-46e0-ab9b-9391b2301d68\",\"nodeId\":\"test\",\"attemptId\":\"c97ffb0b-8c8f-4854-aa5c-3f69123a6234\",\"iterationId\":\"9181e16d-726c-4b1d-8eb6-836d8c1f2289\",\"operationId\":\"ff26ca31-01f8-4e8b-a7e7-f468c6a976e3\",\"sourceDigest\":\"faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2\",\"buildDigest\":\"f8a9afa8a79925b1f8518eb6dab20ed4400927eeecb0b3a261c49930ecef3463\",\"reportArtifactId\":\"b34348e0-819b-4b94-85a8-463a17fb0f19\",\"outcome\":\"pass\",\"tests\":[{\"name\":\"zz-demo contains after\",\"status\":\"passed\",\"message\":\"Current source and build contain exactly after\"}],\"testCount\":1,\"passed\":1,\"failed\":0,\"skipped\":0}\n\nPermitted evidence artifact IDs for evidenceReferences: [\"aae5f8ed-506b-4dda-80ba-d633dcd38161\"]\nReturn exactly one JSON object: no prose before or after, no Markdown fence, no additional properties. evidenceReferences must contain only IDs from the permitted list above. A failed Test can never be pass. A passing Test is evidence, not a guarantee of correctness; return needs_changes only for a concrete issue grounded in the supplied request and evidence, otherwise pass. Do not invent acceptance criteria the request did not state; in particular, do not require Git-tracked or committed source unless an explicit supplied criterion says so. Unsupported uncertainty must be needs_human, not an invented blocking rule. Do not edit files or run commands.",
+      "bindings": [
+        {
+          "alias": "request",
+          "source": {
+            "kind": "start"
+          },
+          "text": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+        },
+        {
+          "alias": "verification",
+          "source": {
+            "kind": "artifact",
+            "nodeId": "test",
+            "selector": "verification"
+          },
+          "text": "{\"artifactId\":\"aae5f8ed-506b-4dda-80ba-d633dcd38161\",\"runId\":\"2535e508-4717-46e0-ab9b-9391b2301d68\",\"nodeId\":\"test\",\"attemptId\":\"c97ffb0b-8c8f-4854-aa5c-3f69123a6234\",\"iterationId\":\"9181e16d-726c-4b1d-8eb6-836d8c1f2289\",\"operationId\":\"ff26ca31-01f8-4e8b-a7e7-f468c6a976e3\",\"sourceDigest\":\"faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2\",\"buildDigest\":\"f8a9afa8a79925b1f8518eb6dab20ed4400927eeecb0b3a261c49930ecef3463\",\"reportArtifactId\":\"b34348e0-819b-4b94-85a8-463a17fb0f19\",\"outcome\":\"pass\",\"tests\":[{\"name\":\"zz-demo contains after\",\"status\":\"passed\",\"message\":\"Current source and build contain exactly after\"}],\"testCount\":1,\"passed\":1,\"failed\":0,\"skipped\":0}",
+          "sourceSessionId": "sess_16ae2802-1a90-4b61-a300-660c140b87c5",
+          "artifactId": "aae5f8ed-506b-4dda-80ba-d633dcd38161"
+        }
+      ],
+      "terminalProof": {
+        "sourceCommandId": "9706ada6-2d1c-4ba1-ab90-5107490d199a",
+        "state": "completedSuccess",
+        "logEpoch": "mukp4fce-ihr1mrv3",
+        "seq": 16,
+        "turnId": "msg_mukp4foe_1aa61b94-a9af-4627-875f-087736107126"
+      },
+      "finalOutput": {
+        "text": "{\"outcome\":\"pass\",\"findings\":[],\"evidenceReferences\":[\"aae5f8ed-506b-4dda-80ba-d633dcd38161\"]}",
+        "turnId": "msg_mukp4foe_1aa61b94-a9af-4627-875f-087736107126",
+        "rowId": 3,
+        "entityId": "msg_mukp4fos_a119c5c0-6699-4f7a-ba5a-c3080f0f5dfb",
+        "assistantResponseId": "msg_mukp4fos_a119c5c0-6699-4f7a-ba5a-c3080f0f5dfb"
+      },
+      "outputValidation": {
+        "status": "valid",
+        "issues": []
+      }
+    }
+  ],
+  "tools": [
+    {
+      "iterationId": "9181e16d-726c-4b1d-8eb6-836d8c1f2289",
+      "iteration": 0,
+      "nodeId": "build",
+      "attemptId": "9cd99812-937b-4703-ade8-585f16c39633",
+      "operationId": "94a1336d-db9a-43a1-96a5-b2bbd635e7dd",
+      "recipe": {
+        "id": "reviewer-build",
+        "name": "Build demo",
+        "executable": "node",
+        "args": [
+          "build.mjs",
+          "{operationId}",
+          "{sourceDigest}"
+        ],
+        "cwd": ".",
+        "timeoutMs": 30000,
+        "sourcePaths": [
+          "zz-demo.txt",
+          "build.mjs",
+          "test.mjs"
+        ],
+        "expectedOutputs": [
+          "build.out"
+        ],
+        "verifier": {
+          "kind": "build"
+        }
+      },
+      "recipeDigest": "b3fc5ca08d629e42ea0c592954fe012a775f364a08733451ff8da4d733a88657",
+      "status": "Completed",
+      "dispatchPhase": "accepted",
+      "createdAt": 1790566595754,
+      "updatedAt": 1790566599337,
+      "sessionId": "sess_3b256886-0faf-4678-87e7-cac2279134a2",
+      "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace:1:2956:agent-0a6ed43a-071d-430d-af87-6e1d7c3cd95d",
+      "sourceDigest": "faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2",
+      "outputDigest": "f8a9afa8a79925b1f8518eb6dab20ed4400927eeecb0b3a261c49930ecef3463",
+      "resolvedArgs": [
+        "build.mjs",
+        "94a1336d-db9a-43a1-96a5-b2bbd635e7dd",
+        "faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2"
+      ],
+      "outputsBefore": [
+        {
+          "path": "build.out",
+          "exists": false
+        }
+      ],
+      "operation": {
+        "operationId": "94a1336d-db9a-43a1-96a5-b2bbd635e7dd",
+        "sessionId": "sess_3b256886-0faf-4678-87e7-cac2279134a2",
+        "requestDigest": "e534b58d2e43240c480fad9bd79b4334d22799062d330a1c17adeaa998b13f23",
+        "recipeId": "reviewer-build",
+        "cwd": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace",
+        "status": "completed",
+        "processStarted": true,
+        "startedAt": 1790566599140,
+        "completedAt": 1790566599237,
+        "result": {
+          "status": "completed",
+          "exitCode": 0,
+          "stdout": {
+            "text": "{\"operationId\":\"94a1336d-db9a-43a1-96a5-b2bbd635e7dd\",\"sourceDigest\":\"faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2\",\"built\":\"build.out\"}",
+            "bytes": 157,
+            "truncated": false
+          },
+          "stderr": {
+            "text": "",
+            "bytes": 0,
+            "truncated": false
+          },
+          "durationMs": 93,
+          "timedOut": false,
+          "cancelled": false,
+          "processExitObserved": true
+        }
+      },
+      "verification": {
+        "processKnown": true,
+        "exitSuccessful": true,
+        "reportFresh": false,
+        "reportParsed": false,
+        "acceptancePassed": true,
+        "classification": "build",
+        "issues": []
+      }
+    },
+    {
+      "iterationId": "9181e16d-726c-4b1d-8eb6-836d8c1f2289",
+      "iteration": 0,
+      "nodeId": "test",
+      "attemptId": "c97ffb0b-8c8f-4854-aa5c-3f69123a6234",
+      "operationId": "ff26ca31-01f8-4e8b-a7e7-f468c6a976e3",
+      "recipe": {
+        "id": "reviewer-test",
+        "name": "Test demo content",
+        "executable": "node",
+        "args": [
+          "test.mjs",
+          "{operationId}",
+          "{sourceDigest}",
+          "{buildDigest}",
+          "{reportPath}"
+        ],
+        "cwd": ".",
+        "timeoutMs": 30000,
+        "sourcePaths": [
+          "zz-demo.txt",
+          "build.mjs",
+          "test.mjs"
+        ],
+        "expectedOutputs": [],
+        "verifier": {
+          "kind": "test",
+          "reportPath": "results/report.json",
+          "minimumTests": 1,
+          "expectedTests": 1,
+          "requiredTests": [
+            "zz-demo contains after"
+          ],
+          "buildNodeId": "build",
+          "format": "zcode-json-v1"
+        }
+      },
+      "recipeDigest": "8dc2b997716345197f5aadaa57ef22612365af27b1b2292fb8281d77c171fef1",
+      "status": "Completed",
+      "dispatchPhase": "accepted",
+      "createdAt": 1790566595754,
+      "updatedAt": 1790566600427,
+      "sessionId": "sess_16ae2802-1a90-4b61-a300-660c140b87c5",
+      "runtimeIdentity": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace:1:2956:agent-0a6ed43a-071d-430d-af87-6e1d7c3cd95d",
+      "sourceDigest": "faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2",
+      "buildDigest": "f8a9afa8a79925b1f8518eb6dab20ed4400927eeecb0b3a261c49930ecef3463",
+      "resolvedArgs": [
+        "test.mjs",
+        "ff26ca31-01f8-4e8b-a7e7-f468c6a976e3",
+        "faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2",
+        "f8a9afa8a79925b1f8518eb6dab20ed4400927eeecb0b3a261c49930ecef3463",
+        "results/report.json"
+      ],
+      "operation": {
+        "operationId": "ff26ca31-01f8-4e8b-a7e7-f468c6a976e3",
+        "sessionId": "sess_16ae2802-1a90-4b61-a300-660c140b87c5",
+        "requestDigest": "66a846d7c24c1440857242921910114f5eb0ddebe99a87050c0890c3710f205a",
+        "recipeId": "reviewer-test",
+        "cwd": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace",
+        "status": "completed",
+        "processStarted": true,
+        "startedAt": 1790566600124,
+        "completedAt": 1790566600232,
+        "result": {
+          "status": "completed",
+          "exitCode": 0,
+          "stdout": {
+            "text": "{\"operationId\":\"ff26ca31-01f8-4e8b-a7e7-f468c6a976e3\",\"sourceDigest\":\"faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2\",\"buildDigest\":\"f8a9afa8a79925b1f8518eb6dab20ed4400927eeecb0b3a261c49930ecef3463\",\"reportPath\":\"results/report.json\",\"passed\":true}",
+            "bytes": 267,
+            "truncated": false
+          },
+          "stderr": {
+            "text": "",
+            "bytes": 0,
+            "truncated": false
+          },
+          "durationMs": 104,
+          "timedOut": false,
+          "cancelled": false,
+          "processExitObserved": true
+        }
+      },
+      "verification": {
+        "observationValid": true,
+        "outcome": "pass",
+        "tests": [
+          {
+            "name": "zz-demo contains after",
+            "status": "passed",
+            "message": "Current source and build contain exactly after"
+          }
+        ],
+        "processKnown": true,
+        "exitSuccessful": true,
+        "reportFresh": true,
+        "reportParsed": true,
+        "acceptancePassed": true,
+        "classification": "test",
+        "testCount": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "issues": []
+      }
+    }
+  ],
+  "finalGate": {
+    "iterationId": "9181e16d-726c-4b1d-8eb6-836d8c1f2289",
+    "iteration": 0,
+    "nodeId": "final-gate",
+    "attemptId": "38c9f4a2-02d0-4956-b06d-f963beaec1bf",
+    "status": "WaitingForApproval",
+    "createdAt": 1790566595754,
+    "updatedAt": 1790566601526,
+    "request": {
+      "id": "559eb24b-b346-4f75-b484-e6832ac9617c",
+      "version": 1,
+      "runId": "2535e508-4717-46e0-ab9b-9391b2301d68",
+      "nodeId": "final-gate",
+      "attemptId": "38c9f4a2-02d0-4956-b06d-f963beaec1bf",
+      "target": {
+        "workspacePath": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace"
+      },
+      "graphDigest": "735d42f13dc1cfa231792e829375b7d0e7c8fe6af4c80bb04def190f3aab8e14",
+      "digest": "958548e694e5c1c1814fd1ec31af10d1dbc235a9e5864d859ec19093a820c742",
+      "title": "Final human review",
+      "reviewText": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+      "commentPolicy": "required",
+      "successorNodeId": "end",
+      "evidence": [
+        {
+          "alias": "evidence",
+          "source": {
+            "kind": "artifact",
+            "nodeId": "test",
+            "selector": "test"
+          },
+          "digest": "6ef4b272de0c4699151a5aa0f11e1da4e2349a0dc509ce32813901740faccb62",
+          "text": "{\"operationId\":\"ff26ca31-01f8-4e8b-a7e7-f468c6a976e3\",\"reportArtifactId\":\"b34348e0-819b-4b94-85a8-463a17fb0f19\",\"reportParsed\":true,\"provenanceValid\":true,\"outcome\":\"pass\",\"tests\":[{\"name\":\"zz-demo contains after\",\"status\":\"passed\",\"message\":\"Current source and build contain exactly after\"}],\"testCount\":1,\"passed\":1,\"failed\":0,\"skipped\":0,\"issues\":[]}",
+          "sourceSessionId": "sess_16ae2802-1a90-4b61-a300-660c140b87c5",
+          "artifactId": "699477cc-a11a-4a65-bb9e-77b0cde595a4"
+        },
+        {
+          "alias": "review",
+          "source": {
+            "kind": "artifact",
+            "nodeId": "reviewer",
+            "selector": "structured"
+          },
+          "digest": "fd19a3f5e2415a6fd8d6e822c8210bfedde076ef248d36fa368addeb85382bb4",
+          "text": "{\"outcome\":\"pass\",\"findings\":[],\"evidenceReferences\":[\"aae5f8ed-506b-4dda-80ba-d633dcd38161\"]}",
+          "sourceSessionId": "sess_eb2f317c-0034-45b5-a573-7abda6c7330d",
+          "sourceInputId": "9706ada6-2d1c-4ba1-ab90-5107490d199a",
+          "sourceCommandId": "9706ada6-2d1c-4ba1-ab90-5107490d199a",
+          "artifactId": "be1e41e9-e371-4173-b5ef-6b6ef5efd926"
+        },
+        {
+          "alias": "source",
+          "source": {
+            "kind": "source"
+          },
+          "digest": "c00a9cfa8b59af2a8b810bceda842134944f9e8db60be62504dbe5bf2f1201e2",
+          "snapshot": {
+            "baseline": "{\"version\":1,\"head\":\"unborn\",\"index\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"status\":\"839d9039eb20821fb23cf2f638344b0367f9e4aa7d67d5b64c04a345f3767fbd\"}",
+            "scope": "Git changes and non-ignored untracked paths in the captured workspace; ignored and unchanged contents excluded. Limits: 64 paths, 128 KiB/text, 256 KiB/diff, 1 MiB retained content, 512 KiB/manifest.",
+            "complete": true,
+            "issues": [],
+            "files": [
+              {
+                "path": ".env",
+                "status": "untracked",
+                "beforeText": "",
+                "afterText": ""
+              },
+              {
+                "path": ".gitignore",
+                "status": "untracked",
+                "beforeText": "",
+                "afterText": "zz-demo.txt\nbuild.out\nresults/\n.zcode/\n"
+              },
+              {
+                "path": "AGENTS.md",
+                "status": "untracked",
+                "beforeText": "",
+                "afterText": "Synthetic reviewer acceptance. Read zz-demo.txt; change only that file to the requested content. Preserve build.mjs and test.mjs. Graph executes the configured Build/Test. No external files, commands, credentials or network.\n"
+              },
+              {
+                "path": "Context.md",
+                "status": "untracked",
+                "beforeText": "",
+                "afterText": "Local file contents are the acceptance scope. Git tracking is not required. The configured check asserts that zz-demo.txt is exactly after.\n"
+              },
+              {
+                "path": "build.mjs",
+                "status": "untracked",
+                "beforeText": "",
+                "afterText": "import { readFile, writeFile } from 'node:fs/promises';\nconst [operationId, sourceDigest] = process.argv.slice(2);\nconst content = await readFile('zz-demo.txt', 'utf8');\nawait writeFile('build.out', JSON.stringify({ operationId, sourceDigest, content }));\nconsole.log(JSON.stringify({ operationId, sourceDigest, built: 'build.out' }));\n"
+              },
+              {
+                "path": "fixture.mjs",
+                "status": "untracked",
+                "beforeText": "",
+                "afterText": "export const marker = 'Z1_BEFORE_7391';\n"
+              },
+              {
+                "path": "fixture.test.mjs",
+                "status": "untracked",
+                "beforeText": "",
+                "afterText": "import assert from 'node:assert/strict';\nimport test from 'node:test';\nimport { marker } from './fixture.mjs';\ntest('synthetic marker', () => assert.equal(marker, 'Z1_AFTER_7391'));\n"
+              },
+              {
+                "path": "test.mjs",
+                "status": "untracked",
+                "beforeText": "",
+                "afterText": "import { readFile, mkdir, writeFile } from 'node:fs/promises';\nimport path from 'node:path';\nconst [operationId, sourceDigest, buildDigest, reportPath] = process.argv.slice(2);\nconst content = await readFile('zz-demo.txt', 'utf8');\nconst built = JSON.parse(await readFile('build.out', 'utf8'));\nconst passed = content === 'after' && built.content === content && built.sourceDigest === sourceDigest;\nconst report = { format: 'zcode-test-v1', operationId, sourceDigest, buildDigest,\n  tests: [{ name: \"zz-demo contains after\", status: passed ? 'passed' : 'failed',\n    message: passed ? 'Current source and build contain exactly after' : 'Expected exactly after in current source and build' }] };\nawait mkdir(path.dirname(reportPath), { recursive: true });\nawait writeFile(reportPath, JSON.stringify(report));\nconsole.log(JSON.stringify({ operationId, sourceDigest, buildDigest, reportPath, passed }));\nprocess.exitCode = passed ? 0 : 1;\n"
+              }
+            ]
+          }
+        }
+      ],
+      "complete": true,
+      "issues": [],
+      "createdAt": 1790566601526
+    }
+  },
+  "nativeLedger": [
+    {
+      "id": "queue_6d701d96-cf8e-4325-96fb-7dc097dde153",
+      "session_id": "sess_734c5147-6409-43fe-9d07-f3880e49e8ae",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"Context.md\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+        "intent": {
+          "sourceCommandId": "6d701d96-cf8e-4325-96fb-7dc097dde153",
+          "queueItemId": "queue_6d701d96-cf8e-4325-96fb-7dc097dde153",
+          "clientId": "graph:de23061b-0992-45f5-8d08-21e30797c30c",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790566596047,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "6d701d96-cf8e-4325-96fb-7dc097dde153",
+          "queueItemId": "queue_6d701d96-cf8e-4325-96fb-7dc097dde153",
+          "clientId": "graph:de23061b-0992-45f5-8d08-21e30797c30c",
+          "kind": "sendText",
+          "text": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"Context.md\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790566596047
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790566596060,
+      "time_updated": 1790566596490
+    },
+    {
+      "id": "queue_82005406-94fe-48d4-a16f-48ebfd89de00",
+      "session_id": "sess_f9497e91-6a27-46f8-8a4e-0beeb83a6dc7",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nanalyze:\nAcceptance: zz-demo.txt must contain exactly after. Only this local file changes. Preserve the configured Build/Test scripts. Git tracking is not an acceptance requirement.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"Context.md\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+        "intent": {
+          "sourceCommandId": "82005406-94fe-48d4-a16f-48ebfd89de00",
+          "queueItemId": "queue_82005406-94fe-48d4-a16f-48ebfd89de00",
+          "clientId": "graph:9d7ff01e-fdd0-457b-a806-1f3742cf9757",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790566596981,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "82005406-94fe-48d4-a16f-48ebfd89de00",
+          "queueItemId": "queue_82005406-94fe-48d4-a16f-48ebfd89de00",
+          "clientId": "graph:9d7ff01e-fdd0-457b-a806-1f3742cf9757",
+          "kind": "sendText",
+          "text": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nanalyze:\nAcceptance: zz-demo.txt must contain exactly after. Only this local file changes. Preserve the configured Build/Test scripts. Git tracking is not an acceptance requirement.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"Context.md\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790566596981
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790566596987,
+      "time_updated": 1790566597378
+    },
+    {
+      "id": "queue_9706ada6-2d1c-4ba1-ab90-5107490d199a",
+      "session_id": "sess_eb2f317c-0034-45b5-a573-7abda6c7330d",
+      "kind": "sendText",
+      "delivery": "startNow",
+      "payload": {
+        "text": "Workflow task: reviewer.\nReview the explicit request against the current Test verification supplied as evidence. Decide whether the verified machine result satisfies the request's stated acceptance criteria. Return exactly one JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing only the permitted evidence artifact IDs supplied below. A failed Test can never be pass. A passing Test is evidence of the machine check, not a guarantee that the requested change is correct; return needs_changes only for a concrete issue grounded in the supplied request and verification evidence, otherwise pass. Do not invent acceptance criteria the request did not state; in particular, do not require Git-tracked or committed source unless an explicit supplied criterion says so. Unsupported uncertainty must be needs_human, not an invented blocking rule. Do not edit files or run commands; the verification artifact already contains the machine result.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nverification:\n{\"artifactId\":\"aae5f8ed-506b-4dda-80ba-d633dcd38161\",\"runId\":\"2535e508-4717-46e0-ab9b-9391b2301d68\",\"nodeId\":\"test\",\"attemptId\":\"c97ffb0b-8c8f-4854-aa5c-3f69123a6234\",\"iterationId\":\"9181e16d-726c-4b1d-8eb6-836d8c1f2289\",\"operationId\":\"ff26ca31-01f8-4e8b-a7e7-f468c6a976e3\",\"sourceDigest\":\"faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2\",\"buildDigest\":\"f8a9afa8a79925b1f8518eb6dab20ed4400927eeecb0b3a261c49930ecef3463\",\"reportArtifactId\":\"b34348e0-819b-4b94-85a8-463a17fb0f19\",\"outcome\":\"pass\",\"tests\":[{\"name\":\"zz-demo contains after\",\"status\":\"passed\",\"message\":\"Current source and build contain exactly after\"}],\"testCount\":1,\"passed\":1,\"failed\":0,\"skipped\":0}\n\nPermitted evidence artifact IDs for evidenceReferences: [\"aae5f8ed-506b-4dda-80ba-d633dcd38161\"]\nReturn exactly one JSON object: no prose before or after, no Markdown fence, no additional properties. evidenceReferences must contain only IDs from the permitted list above. A failed Test can never be pass. A passing Test is evidence, not a guarantee of correctness; return needs_changes only for a concrete issue grounded in the supplied request and evidence, otherwise pass. Do not invent acceptance criteria the request did not state; in particular, do not require Git-tracked or committed source unless an explicit supplied criterion says so. Unsupported uncertainty must be needs_human, not an invented blocking rule. Do not edit files or run commands.",
+        "intent": {
+          "sourceCommandId": "9706ada6-2d1c-4ba1-ab90-5107490d199a",
+          "queueItemId": "queue_9706ada6-2d1c-4ba1-ab90-5107490d199a",
+          "clientId": "graph:f7ff6ccd-a803-4749-82ac-f4fd303bab8a",
+          "kind": "sendText",
+          "admissionSeq": 1,
+          "admittedAt": 1790566600656,
+          "requestedDelivery": "startNow",
+          "admittedDelivery": "startNow",
+          "attachmentRefs": []
+        },
+        "conversationInputIntent": {
+          "sourceCommandId": "9706ada6-2d1c-4ba1-ab90-5107490d199a",
+          "queueItemId": "queue_9706ada6-2d1c-4ba1-ab90-5107490d199a",
+          "clientId": "graph:f7ff6ccd-a803-4749-82ac-f4fd303bab8a",
+          "kind": "sendText",
+          "text": "Workflow task: reviewer.\nReview the explicit request against the current Test verification supplied as evidence. Decide whether the verified machine result satisfies the request's stated acceptance criteria. Return exactly one JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing only the permitted evidence artifact IDs supplied below. A failed Test can never be pass. A passing Test is evidence of the machine check, not a guarantee that the requested change is correct; return needs_changes only for a concrete issue grounded in the supplied request and verification evidence, otherwise pass. Do not invent acceptance criteria the request did not state; in particular, do not require Git-tracked or committed source unless an explicit supplied criterion says so. Unsupported uncertainty must be needs_human, not an invented blocking rule. Do not edit files or run commands; the verification artifact already contains the machine result.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nverification:\n{\"artifactId\":\"aae5f8ed-506b-4dda-80ba-d633dcd38161\",\"runId\":\"2535e508-4717-46e0-ab9b-9391b2301d68\",\"nodeId\":\"test\",\"attemptId\":\"c97ffb0b-8c8f-4854-aa5c-3f69123a6234\",\"iterationId\":\"9181e16d-726c-4b1d-8eb6-836d8c1f2289\",\"operationId\":\"ff26ca31-01f8-4e8b-a7e7-f468c6a976e3\",\"sourceDigest\":\"faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2\",\"buildDigest\":\"f8a9afa8a79925b1f8518eb6dab20ed4400927eeecb0b3a261c49930ecef3463\",\"reportArtifactId\":\"b34348e0-819b-4b94-85a8-463a17fb0f19\",\"outcome\":\"pass\",\"tests\":[{\"name\":\"zz-demo contains after\",\"status\":\"passed\",\"message\":\"Current source and build contain exactly after\"}],\"testCount\":1,\"passed\":1,\"failed\":0,\"skipped\":0}\n\nPermitted evidence artifact IDs for evidenceReferences: [\"aae5f8ed-506b-4dda-80ba-d633dcd38161\"]\nReturn exactly one JSON object: no prose before or after, no Markdown fence, no additional properties. evidenceReferences must contain only IDs from the permitted list above. A failed Test can never be pass. A passing Test is evidence, not a guarantee of correctness; return needs_changes only for a concrete issue grounded in the supplied request and evidence, otherwise pass. Do not invent acceptance criteria the request did not state; in particular, do not require Git-tracked or committed source unless an explicit supplied criterion says so. Unsupported uncertainty must be needs_human, not an invented blocking rule. Do not edit files or run commands.",
+          "attachments": [],
+          "delivery": {
+            "requested": "startNow",
+            "admitted": "startNow"
+          },
+          "order": {
+            "admissionSeq": 1
+          },
+          "steer": {
+            "state": "notRequested"
+          },
+          "dispatch": {
+            "state": "admitted"
+          },
+          "admittedAt": 1790566600656
+        },
+        "attachments": [],
+        "sourceCommandType": "sendText"
+      },
+      "status": "promoted",
+      "time_created": 1790566600661,
+      "time_updated": 1790566601063
+    }
+  ],
+  "nativeSessions": [
+    {
+      "id": "sess_734c5147-6409-43fe-9d07-f3880e49e8ae",
+      "directory": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace",
+      "parent_id": null,
+      "workspace_id": null
+    },
+    {
+      "id": "sess_f9497e91-6a27-46f8-8a4e-0beeb83a6dc7",
+      "directory": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace",
+      "parent_id": null,
+      "workspace_id": null
+    },
+    {
+      "id": "sess_eb2f317c-0034-45b5-a573-7abda6c7330d",
+      "directory": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace",
+      "parent_id": null,
+      "workspace_id": null
+    },
+    {
+      "id": "sess_3b256886-0faf-4678-87e7-cac2279134a2",
+      "directory": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace",
+      "parent_id": null,
+      "workspace_id": null
+    },
+    {
+      "id": "sess_16ae2802-1a90-4b61-a300-660c140b87c5",
+      "directory": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace",
+      "parent_id": null,
+      "workspace_id": null
+    }
+  ],
+  "providerRequests": [
+    {
+      "path": "/api/v1/client/configs?app_version=3.14.0&platform=win32-x64",
+      "stage": "other",
+      "native": false,
+      "prompt": "",
+      "at": 1790566590313,
+      "tools": []
+    },
+    {
+      "path": "/api/v1/client/configs?app_version=3.14.0&platform=win32-x64",
+      "stage": "other",
+      "native": false,
+      "prompt": "",
+      "at": 1790566590682,
+      "tools": []
+    },
+    {
+      "path": "/api/v1/client/configs?app_version=3.14.0&platform=win32-x64",
+      "stage": "other",
+      "native": false,
+      "prompt": "",
+      "at": 1790566592834,
+      "tools": []
+    },
+    {
+      "path": "/api/v1/client/configs?app_version=3.14.0&platform=windows-x86_64",
+      "stage": "other",
+      "native": false,
+      "prompt": "",
+      "at": 1790566592905,
+      "tools": []
+    },
+    {
+      "path": "/api/v1/client/configs?app_version=3.14.0&platform=windows-x86_64",
+      "stage": "other",
+      "native": false,
+      "prompt": "",
+      "at": 1790566592997,
+      "tools": []
+    },
+    {
+      "path": "/api/v1/client/scenes",
+      "stage": "other",
+      "native": false,
+      "prompt": "",
+      "at": 1790566593248,
+      "tools": []
+    },
+    {
+      "path": "/api/v1/client/configs?app_version=3.14.0&platform=win32-x64",
+      "stage": "other",
+      "native": false,
+      "prompt": "",
+      "at": 1790566593273,
+      "tools": []
+    },
+    {
+      "path": "/v1/chat/completions",
+      "model": "z1-fixture",
+      "stage": "analyze",
+      "native": true,
+      "prompt": "<system-reminder>\nThe following skills are available for use with the Skill tool:\n\n- browser-use:control-browser: Use when opening, navigating, inspecting, testing, clicking, typing, filling, screenshotting, or verifying web pages and local HTTP targets (localhost, 127.0.0.1, ::1) inside ZCode, including browser/web-UI automation, rendered-page scraping, fronte... (also loadable as control-browser) (file: C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md)\n- browser-use:web-gui-tester: Use the browser automation tooling available in the session to test web frontends interactively in a purely GUI-based, black-box manner: simulate real user clicks, text input, scrolling, and other actions; use screenshots for visual verification and... (also loadable as web-gui-tester) (file: C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md)\n</system-reminder>\n<system-reminder>\nAs you answer the user's questions, you can use the following context:\n# agentsMd\nCodebase and user instructions are shown below. Be sure to adhere to these instructions. IMPORTANT: These instructions OVERRIDE any default behavior and you MUST follow them exactly as written.\n\nContents of C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace\\AGENTS.md (workspace instructions):\n\nSynthetic reviewer acceptance. Read zz-demo.txt; change only that file to the requested content. Preserve build.mjs and test.mjs. Graph executes the configured Build/Test. No external files, commands, credentials or network.\n\n# currentDate\nToday's date is 2026-09-28.\n\n      IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task.\n</system-reminder>\n\nWorkflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"Context.md\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+      "at": 1790566596562,
+      "tools": [
+        "Agent",
+        "AskUserQuestion",
+        "Bash",
+        "CronCreate",
+        "CronDelete",
+        "CronList",
+        "CronUpdate",
+        "Edit",
+        "EnterPlanMode",
+        "ExitPlanMode",
+        "Read",
+        "Skill",
+        "TaskOutput",
+        "TaskStop",
+        "TodoRead",
+        "TodoWrite",
+        "WebFetch",
+        "Write",
+        "OffPeakCreate",
+        "OffPeakList",
+        "SendMessage",
+        "ReadSessionContext",
+        "mcp__node_repl__js"
+      ],
+      "reply": {
+        "call": {
+          "id": "z6_repro_analyze_read",
+          "name": "Read",
+          "arguments": {
+            "file_path": "C:/Users/USER/Desktop/Personal/ZCode/.tmp/z1-native-1790566588657-b664be/workspace/zz-demo.txt"
+          }
+        }
+      }
+    },
+    {
+      "path": "/v1/chat/completions",
+      "model": "z1-fixture",
+      "stage": "analyze",
+      "native": true,
+      "prompt": "<system-reminder>\nThe following skills are available for use with the Skill tool:\n\n- browser-use:control-browser: Use when opening, navigating, inspecting, testing, clicking, typing, filling, screenshotting, or verifying web pages and local HTTP targets (localhost, 127.0.0.1, ::1) inside ZCode, including browser/web-UI automation, rendered-page scraping, fronte... (also loadable as control-browser) (file: C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md)\n- browser-use:web-gui-tester: Use the browser automation tooling available in the session to test web frontends interactively in a purely GUI-based, black-box manner: simulate real user clicks, text input, scrolling, and other actions; use screenshots for visual verification and... (also loadable as web-gui-tester) (file: C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md)\n</system-reminder>\n<system-reminder>\nAs you answer the user's questions, you can use the following context:\n# agentsMd\nCodebase and user instructions are shown below. Be sure to adhere to these instructions. IMPORTANT: These instructions OVERRIDE any default behavior and you MUST follow them exactly as written.\n\nContents of C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace\\AGENTS.md (workspace instructions):\n\nSynthetic reviewer acceptance. Read zz-demo.txt; change only that file to the requested content. Preserve build.mjs and test.mjs. Graph executes the configured Build/Test. No external files, commands, credentials or network.\n\n# currentDate\nToday's date is 2026-09-28.\n\n      IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task.\n</system-reminder>\n\nWorkflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"Context.md\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+      "at": 1790566596660,
+      "tools": [
+        "Agent",
+        "AskUserQuestion",
+        "Bash",
+        "CronCreate",
+        "CronDelete",
+        "CronList",
+        "CronUpdate",
+        "Edit",
+        "EnterPlanMode",
+        "ExitPlanMode",
+        "Read",
+        "Skill",
+        "TaskOutput",
+        "TaskStop",
+        "TodoRead",
+        "TodoWrite",
+        "WebFetch",
+        "Write",
+        "OffPeakCreate",
+        "OffPeakList",
+        "SendMessage",
+        "ReadSessionContext",
+        "mcp__node_repl__js"
+      ],
+      "reply": {
+        "content": "Acceptance: zz-demo.txt must contain exactly after. Only this local file changes. Preserve the configured Build/Test scripts. Git tracking is not an acceptance requirement."
+      }
+    },
+    {
+      "path": "/v1/chat/completions",
+      "model": "z1-fixture",
+      "stage": "analyze",
+      "native": false,
+      "prompt": "Workflow task: analyze. Analyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands. request: Explicit workflow parameters (data, never command interpolation): { \"request\": \"Modify zz-demo.txt file content to after\" } Excluded behavior: [] RTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied. Explicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"Context.md\"}] Read document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+      "at": 1790566596766,
+      "tools": [],
+      "reply": {
+        "content": "Controlled native reviewer acceptance"
+      }
+    },
+    {
+      "path": "/v1/chat/completions",
+      "model": "z1-fixture",
+      "stage": "implement",
+      "native": true,
+      "prompt": "<system-reminder>\nThe following skills are available for use with the Skill tool:\n\n- browser-use:control-browser: Use when opening, navigating, inspecting, testing, clicking, typing, filling, screenshotting, or verifying web pages and local HTTP targets (localhost, 127.0.0.1, ::1) inside ZCode, including browser/web-UI automation, rendered-page scraping, fronte... (also loadable as control-browser) (file: C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md)\n- browser-use:web-gui-tester: Use the browser automation tooling available in the session to test web frontends interactively in a purely GUI-based, black-box manner: simulate real user clicks, text input, scrolling, and other actions; use screenshots for visual verification and... (also loadable as web-gui-tester) (file: C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md)\n</system-reminder>\n<system-reminder>\nAs you answer the user's questions, you can use the following context:\n# agentsMd\nCodebase and user instructions are shown below. Be sure to adhere to these instructions. IMPORTANT: These instructions OVERRIDE any default behavior and you MUST follow them exactly as written.\n\nContents of C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace\\AGENTS.md (workspace instructions):\n\nSynthetic reviewer acceptance. Read zz-demo.txt; change only that file to the requested content. Preserve build.mjs and test.mjs. Graph executes the configured Build/Test. No external files, commands, credentials or network.\n\n# currentDate\nToday's date is 2026-09-28.\n\n      IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task.\n</system-reminder>\n\nWorkflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nanalyze:\nAcceptance: zz-demo.txt must contain exactly after. Only this local file changes. Preserve the configured Build/Test scripts. Git tracking is not an acceptance requirement.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"Context.md\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+      "at": 1790566597393,
+      "tools": [
+        "Agent",
+        "AskUserQuestion",
+        "Bash",
+        "CronCreate",
+        "CronDelete",
+        "CronList",
+        "CronUpdate",
+        "Edit",
+        "EnterPlanMode",
+        "ExitPlanMode",
+        "Read",
+        "Skill",
+        "TaskOutput",
+        "TaskStop",
+        "TodoRead",
+        "TodoWrite",
+        "WebFetch",
+        "Write",
+        "OffPeakCreate",
+        "OffPeakList",
+        "SendMessage",
+        "ReadSessionContext",
+        "mcp__node_repl__js"
+      ],
+      "reply": {
+        "call": {
+          "id": "z6_repro_implement_read",
+          "name": "Read",
+          "arguments": {
+            "file_path": "C:/Users/USER/Desktop/Personal/ZCode/.tmp/z1-native-1790566588657-b664be/workspace/zz-demo.txt"
+          }
+        }
+      }
+    },
+    {
+      "path": "/v1/chat/completions",
+      "model": "z1-fixture",
+      "stage": "implement",
+      "native": true,
+      "prompt": "<system-reminder>\nThe following skills are available for use with the Skill tool:\n\n- browser-use:control-browser: Use when opening, navigating, inspecting, testing, clicking, typing, filling, screenshotting, or verifying web pages and local HTTP targets (localhost, 127.0.0.1, ::1) inside ZCode, including browser/web-UI automation, rendered-page scraping, fronte... (also loadable as control-browser) (file: C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md)\n- browser-use:web-gui-tester: Use the browser automation tooling available in the session to test web frontends interactively in a purely GUI-based, black-box manner: simulate real user clicks, text input, scrolling, and other actions; use screenshots for visual verification and... (also loadable as web-gui-tester) (file: C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md)\n</system-reminder>\n<system-reminder>\nAs you answer the user's questions, you can use the following context:\n# agentsMd\nCodebase and user instructions are shown below. Be sure to adhere to these instructions. IMPORTANT: These instructions OVERRIDE any default behavior and you MUST follow them exactly as written.\n\nContents of C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace\\AGENTS.md (workspace instructions):\n\nSynthetic reviewer acceptance. Read zz-demo.txt; change only that file to the requested content. Preserve build.mjs and test.mjs. Graph executes the configured Build/Test. No external files, commands, credentials or network.\n\n# currentDate\nToday's date is 2026-09-28.\n\n      IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task.\n</system-reminder>\n\nWorkflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nanalyze:\nAcceptance: zz-demo.txt must contain exactly after. Only this local file changes. Preserve the configured Build/Test scripts. Git tracking is not an acceptance requirement.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"Context.md\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+      "at": 1790566597472,
+      "tools": [
+        "Agent",
+        "AskUserQuestion",
+        "Bash",
+        "CronCreate",
+        "CronDelete",
+        "CronList",
+        "CronUpdate",
+        "Edit",
+        "EnterPlanMode",
+        "ExitPlanMode",
+        "Read",
+        "Skill",
+        "TaskOutput",
+        "TaskStop",
+        "TodoRead",
+        "TodoWrite",
+        "WebFetch",
+        "Write",
+        "OffPeakCreate",
+        "OffPeakList",
+        "SendMessage",
+        "ReadSessionContext",
+        "mcp__node_repl__js"
+      ],
+      "reply": {
+        "call": {
+          "id": "z6_repro_implement_edit",
+          "name": "Edit",
+          "arguments": {
+            "file_path": "C:/Users/USER/Desktop/Personal/ZCode/.tmp/z1-native-1790566588657-b664be/workspace/zz-demo.txt",
+            "old_string": "before",
+            "new_string": "after"
+          }
+        }
+      }
+    },
+    {
+      "path": "/v1/chat/completions",
+      "model": "z1-fixture",
+      "stage": "implement",
+      "native": true,
+      "prompt": "<system-reminder>\nThe following skills are available for use with the Skill tool:\n\n- browser-use:control-browser: Use when opening, navigating, inspecting, testing, clicking, typing, filling, screenshotting, or verifying web pages and local HTTP targets (localhost, 127.0.0.1, ::1) inside ZCode, including browser/web-UI automation, rendered-page scraping, fronte... (also loadable as control-browser) (file: C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md)\n- browser-use:web-gui-tester: Use the browser automation tooling available in the session to test web frontends interactively in a purely GUI-based, black-box manner: simulate real user clicks, text input, scrolling, and other actions; use screenshots for visual verification and... (also loadable as web-gui-tester) (file: C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md)\n</system-reminder>\n<system-reminder>\nAs you answer the user's questions, you can use the following context:\n# agentsMd\nCodebase and user instructions are shown below. Be sure to adhere to these instructions. IMPORTANT: These instructions OVERRIDE any default behavior and you MUST follow them exactly as written.\n\nContents of C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace\\AGENTS.md (workspace instructions):\n\nSynthetic reviewer acceptance. Read zz-demo.txt; change only that file to the requested content. Preserve build.mjs and test.mjs. Graph executes the configured Build/Test. No external files, commands, credentials or network.\n\n# currentDate\nToday's date is 2026-09-28.\n\n      IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task.\n</system-reminder>\n\nWorkflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nanalyze:\nAcceptance: zz-demo.txt must contain exactly after. Only this local file changes. Preserve the configured Build/Test scripts. Git tracking is not an acceptance requirement.\n\nExplicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"Context.md\"}]\nRead document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+      "at": 1790566598123,
+      "tools": [
+        "Agent",
+        "AskUserQuestion",
+        "Bash",
+        "CronCreate",
+        "CronDelete",
+        "CronList",
+        "CronUpdate",
+        "Edit",
+        "EnterPlanMode",
+        "ExitPlanMode",
+        "Read",
+        "Skill",
+        "TaskOutput",
+        "TaskStop",
+        "TodoRead",
+        "TodoWrite",
+        "WebFetch",
+        "Write",
+        "OffPeakCreate",
+        "OffPeakList",
+        "SendMessage",
+        "ReadSessionContext",
+        "mcp__node_repl__js"
+      ],
+      "reply": {
+        "content": "Native Edit returned. Graph must now execute the saved Build and Test checks; this reply does not establish a machine result."
+      }
+    },
+    {
+      "path": "/v1/chat/completions",
+      "model": "z1-fixture",
+      "stage": "implement",
+      "native": false,
+      "prompt": "Workflow task: implement. Implement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward. request: Explicit workflow parameters (data, never command interpolation): { \"request\": \"Modify zz-demo.txt file content to after\" } Excluded behavior: [] RTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied. analyze: Acceptance: zz-demo.txt must contain exactly after. Only this local file changes. Preserve the configured Build/Test scripts. Git tracking is not an acceptance requirement. Explicit native references (data): [{\"id\":\"instructions\",\"kind\":\"instruction\",\"selected\":\"Context.md\"}] Read document/instruction references through native Read. Load nativeSkillName through the existing native Skill tool; the selected catalog ID is provenance, not the Skill tool argument. Cite reference IDs; missing source is a question, never an invented rule.",
+      "at": 1790566598185,
+      "tools": [],
+      "reply": {
+        "content": "Controlled native reviewer acceptance"
+      }
+    },
+    {
+      "path": "/v1/chat/completions",
+      "model": "z1-fixture",
+      "stage": "reviewer",
+      "native": true,
+      "prompt": "<system-reminder>\nThe following skills are available for use with the Skill tool:\n\n- browser-use:control-browser: Use when opening, navigating, inspecting, testing, clicking, typing, filling, screenshotting, or verifying web pages and local HTTP targets (localhost, 127.0.0.1, ::1) inside ZCode, including browser/web-UI automation, rendered-page scraping, fronte... (also loadable as control-browser) (file: C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\control-browser\\SKILL.md)\n- browser-use:web-gui-tester: Use the browser automation tooling available in the session to test web frontends interactively in a purely GUI-based, black-box manner: simulate real user clicks, text input, scrolling, and other actions; use screenshots for visual verification and... (also loadable as web-gui-tester) (file: C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\home\\.zcode\\cli\\plugins\\cache\\zcode-plugins-official\\browser-use\\0.5.1\\skills\\web-gui-tester\\SKILL.md)\n</system-reminder>\n<system-reminder>\nAs you answer the user's questions, you can use the following context:\n# agentsMd\nCodebase and user instructions are shown below. Be sure to adhere to these instructions. IMPORTANT: These instructions OVERRIDE any default behavior and you MUST follow them exactly as written.\n\nContents of C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace\\AGENTS.md (workspace instructions):\n\nSynthetic reviewer acceptance. Read zz-demo.txt; change only that file to the requested content. Preserve build.mjs and test.mjs. Graph executes the configured Build/Test. No external files, commands, credentials or network.\n\n# currentDate\nToday's date is 2026-09-28.\n\n      IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task.\n</system-reminder>\n\nWorkflow task: reviewer.\nReview the explicit request against the current Test verification supplied as evidence. Decide whether the verified machine result satisfies the request's stated acceptance criteria. Return exactly one JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing only the permitted evidence artifact IDs supplied below. A failed Test can never be pass. A passing Test is evidence of the machine check, not a guarantee that the requested change is correct; return needs_changes only for a concrete issue grounded in the supplied request and verification evidence, otherwise pass. Do not invent acceptance criteria the request did not state; in particular, do not require Git-tracked or committed source unless an explicit supplied criterion says so. Unsupported uncertainty must be needs_human, not an invented blocking rule. Do not edit files or run commands; the verification artifact already contains the machine result.\nrequest:\nExplicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied.\n\nverification:\n{\"artifactId\":\"aae5f8ed-506b-4dda-80ba-d633dcd38161\",\"runId\":\"2535e508-4717-46e0-ab9b-9391b2301d68\",\"nodeId\":\"test\",\"attemptId\":\"c97ffb0b-8c8f-4854-aa5c-3f69123a6234\",\"iterationId\":\"9181e16d-726c-4b1d-8eb6-836d8c1f2289\",\"operationId\":\"ff26ca31-01f8-4e8b-a7e7-f468c6a976e3\",\"sourceDigest\":\"faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2\",\"buildDigest\":\"f8a9afa8a79925b1f8518eb6dab20ed4400927eeecb0b3a261c49930ecef3463\",\"reportArtifactId\":\"b34348e0-819b-4b94-85a8-463a17fb0f19\",\"outcome\":\"pass\",\"tests\":[{\"name\":\"zz-demo contains after\",\"status\":\"passed\",\"message\":\"Current source and build contain exactly after\"}],\"testCount\":1,\"passed\":1,\"failed\":0,\"skipped\":0}\n\nPermitted evidence artifact IDs for evidenceReferences: [\"aae5f8ed-506b-4dda-80ba-d633dcd38161\"]\nReturn exactly one JSON object: no prose before or after, no Markdown fence, no additional properties. evidenceReferences must contain only IDs from the permitted list above. A failed Test can never be pass. A passing Test is evidence, not a guarantee of correctness; return needs_changes only for a concrete issue grounded in the supplied request and evidence, otherwise pass. Do not invent acceptance criteria the request did not state; in particular, do not require Git-tracked or committed source unless an explicit supplied criterion says so. Unsupported uncertainty must be needs_human, not an invented blocking rule. Do not edit files or run commands.",
+      "at": 1790566601079,
+      "tools": [
+        "Agent",
+        "AskUserQuestion",
+        "Bash",
+        "CronCreate",
+        "CronDelete",
+        "CronList",
+        "CronUpdate",
+        "Edit",
+        "EnterPlanMode",
+        "ExitPlanMode",
+        "Read",
+        "Skill",
+        "TaskOutput",
+        "TaskStop",
+        "TodoRead",
+        "TodoWrite",
+        "WebFetch",
+        "Write",
+        "OffPeakCreate",
+        "OffPeakList",
+        "SendMessage",
+        "ReadSessionContext",
+        "mcp__node_repl__js"
+      ],
+      "reply": {
+        "content": "{\"outcome\":\"pass\",\"findings\":[],\"evidenceReferences\":[\"aae5f8ed-506b-4dda-80ba-d633dcd38161\"]}"
+      }
+    },
+    {
+      "path": "/v1/chat/completions",
+      "model": "z1-fixture",
+      "stage": "reviewer",
+      "native": false,
+      "prompt": "Workflow task: reviewer. Review the explicit request against the current Test verification supplied as evidence. Decide whether the verified machine result satisfies the request's stated acceptance criteria. Return exactly one JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing only the permitted evidence artifact IDs supplied below. A failed Test can never be pass. A passing Test is evidence of the machine check, not a guarantee that the requested change is correct; return needs_changes only for a concrete issue grounded in the supplied request and verification evidence, otherwise pass. Do not invent acceptance criteria the request did not state; in particular, do not require Git-tracked or committed source unless an explicit supplied criterion says so. Unsupported uncertainty must be needs_human, not an invented blocking rule. Do not edit files or run commands; the verification artifact already contains the machine result. request: Explicit workflow parameters (data, never command interpolation): { \"request\": \"Modify zz-demo.txt file content to after\" } Excluded behavior: [] RTP comparison is N/A unles",
+      "at": 1790566601158,
+      "tools": [],
+      "reply": {
+        "content": "Controlled native reviewer acceptance"
+      }
+    }
+  ],
+  "verification": {
+    "artifact": {
+      "id": "aae5f8ed-506b-4dda-80ba-d633dcd38161",
+      "runId": "2535e508-4717-46e0-ab9b-9391b2301d68",
+      "nodeId": "test",
+      "attemptId": "c97ffb0b-8c8f-4854-aa5c-3f69123a6234",
+      "workspaceKey": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace",
+      "type": "json",
+      "provenance": "native-test",
+      "bytes": 680,
+      "digest": "85513cc44fca3db65f0ccc991e8dd86722a6683eae902d58aa8fab2c91b4c28d",
+      "capturedAt": 1790566600427,
+      "validation": "valid",
+      "sourceBaseline": "faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2",
+      "sessionId": "sess_16ae2802-1a90-4b61-a300-660c140b87c5",
+      "operationId": "ff26ca31-01f8-4e8b-a7e7-f468c6a976e3"
+    },
+    "content": "{\"artifactId\":\"aae5f8ed-506b-4dda-80ba-d633dcd38161\",\"runId\":\"2535e508-4717-46e0-ab9b-9391b2301d68\",\"nodeId\":\"test\",\"attemptId\":\"c97ffb0b-8c8f-4854-aa5c-3f69123a6234\",\"iterationId\":\"9181e16d-726c-4b1d-8eb6-836d8c1f2289\",\"operationId\":\"ff26ca31-01f8-4e8b-a7e7-f468c6a976e3\",\"sourceDigest\":\"faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2\",\"buildDigest\":\"f8a9afa8a79925b1f8518eb6dab20ed4400927eeecb0b3a261c49930ecef3463\",\"reportArtifactId\":\"b34348e0-819b-4b94-85a8-463a17fb0f19\",\"outcome\":\"pass\",\"tests\":[{\"name\":\"zz-demo contains after\",\"status\":\"passed\",\"message\":\"Current source and build contain exactly after\"}],\"testCount\":1,\"passed\":1,\"failed\":0,\"skipped\":0}",
+    "value": {
+      "artifactId": "aae5f8ed-506b-4dda-80ba-d633dcd38161",
+      "runId": "2535e508-4717-46e0-ab9b-9391b2301d68",
+      "nodeId": "test",
+      "attemptId": "c97ffb0b-8c8f-4854-aa5c-3f69123a6234",
+      "iterationId": "9181e16d-726c-4b1d-8eb6-836d8c1f2289",
+      "operationId": "ff26ca31-01f8-4e8b-a7e7-f468c6a976e3",
+      "sourceDigest": "faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2",
+      "buildDigest": "f8a9afa8a79925b1f8518eb6dab20ed4400927eeecb0b3a261c49930ecef3463",
+      "reportArtifactId": "b34348e0-819b-4b94-85a8-463a17fb0f19",
+      "outcome": "pass",
+      "tests": [
+        {
+          "name": "zz-demo contains after",
+          "status": "passed",
+          "message": "Current source and build contain exactly after"
+        }
+      ],
+      "testCount": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "report": {
+    "artifact": {
+      "id": "b34348e0-819b-4b94-85a8-463a17fb0f19",
+      "runId": "2535e508-4717-46e0-ab9b-9391b2301d68",
+      "nodeId": "test",
+      "attemptId": "c97ffb0b-8c8f-4854-aa5c-3f69123a6234",
+      "workspaceKey": "C:\\Users\\USER\\Desktop\\Personal\\ZCode\\.tmp\\z1-native-1790566588657-b664be\\workspace",
+      "type": "file",
+      "provenance": "workspace-file",
+      "bytes": 363,
+      "digest": "ecd70af8c278e30299db80a2335e47403ae95b31f0d176373a4722ce8bae86a9",
+      "capturedAt": 1790566600436,
+      "validation": "valid",
+      "sourceBaseline": "faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2",
+      "sourcePath": "results/report.json",
+      "sessionId": "sess_16ae2802-1a90-4b61-a300-660c140b87c5",
+      "operationId": "ff26ca31-01f8-4e8b-a7e7-f468c6a976e3"
+    },
+    "content": "{\"format\":\"zcode-test-v1\",\"operationId\":\"ff26ca31-01f8-4e8b-a7e7-f468c6a976e3\",\"sourceDigest\":\"faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2\",\"buildDigest\":\"f8a9afa8a79925b1f8518eb6dab20ed4400927eeecb0b3a261c49930ecef3463\",\"tests\":[{\"name\":\"zz-demo contains after\",\"status\":\"passed\",\"message\":\"Current source and build contain exactly after\"}]}",
+    "value": {
+      "format": "zcode-test-v1",
+      "operationId": "ff26ca31-01f8-4e8b-a7e7-f468c6a976e3",
+      "sourceDigest": "faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2",
+      "buildDigest": "f8a9afa8a79925b1f8518eb6dab20ed4400927eeecb0b3a261c49930ecef3463",
+      "tests": [
+        {
+          "name": "zz-demo contains after",
+          "status": "passed",
+          "message": "Current source and build contain exactly after"
+        }
+      ]
+    }
+  }
+}
