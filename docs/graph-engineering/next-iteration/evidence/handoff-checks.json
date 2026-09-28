@@ -1,0 +1,40 @@
+{
+  "date": "2026-09-28",
+  "preHandoffHead": "ffe9f48ef89a6bbea4ea8ddfdb7fe23875f78a93",
+  "branch": "handoff/graph-pre-z8-codex",
+  "sourceReceiptEntries": 35,
+  "sourceHashMismatches": 0,
+  "nativeRerun": false,
+  "nativeRerunReason": "No product source changed since accepted native runs",
+  "checks": [
+    {
+      "command": "node scripts/check-workspace-freshness.mjs",
+      "result": "main equals origin/main",
+      "exit": 0
+    },
+    {
+      "command": "pnpm typecheck",
+      "exit": 0
+    },
+    {
+      "command": "pnpm lint",
+      "warnings": 75,
+      "errors": 0,
+      "exit": 0
+    },
+    {
+      "command": "pnpm architecture:check --changed",
+      "violations": 0,
+      "new": 0,
+      "baseline": 0,
+      "exit": 0
+    },
+    {
+      "command": "node --import tsx --test packages/services/src/graph-engineering/adapters/reviewer-reproduction.test.ts packages/services/src/graph-engineering/adapters/reviewer-decisions.test.ts packages/services/src/graph-engineering/adapters/reviewer-version.test.ts",
+      "failed": 0,
+      "skipped": 0,
+      "exit": 0,
+      "passed": 7
+    }
+  ]
+}
