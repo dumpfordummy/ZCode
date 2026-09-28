@@ -40,10 +40,11 @@ const service = new GraphWorkflowService({
 const bindings = { references: {}, recipes: { build: "build", test: "test" }, sourcePaths: [] };
 const observations = [];
 try {
+  // 内置 generic 已升至 library v2（修正 reviewer 契约）；实例化须选用 v2。
   const sourceGraph = await service.instantiate({
     target,
     id: "generic",
-    version: 1,
+    version: 2,
     expectedRevision: 0,
     parameters: { request: "Synthetic source draft" },
     bindings,

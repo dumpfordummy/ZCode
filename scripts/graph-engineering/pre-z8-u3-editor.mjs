@@ -115,6 +115,8 @@ export async function verifyU3InvalidBuffers(isolation, window, summary, seconda
   };
   await window.getByTestId("graph-editor-advanced").click();
   await selectNode(window, "reviewer");
+  // 新版 inspector 使用标签页，结构化输出位于 Output 标签。
+  await window.getByTestId("graph-inspector-tab-output").click();
   await window.getByTestId("graph-output-schema").fill(malformed.schema);
   await window.getByTestId("graph-apply-schema").click();
   await window.getByTestId("graph-node-inspector").getByRole("alert").waitFor();
@@ -145,6 +147,8 @@ export async function verifyU3InvalidBuffers(isolation, window, summary, seconda
   await window.getByTestId("graph-view-design").click();
   await window.getByTestId("graph-editor-advanced").click();
   await selectNode(window, "reviewer");
+  // 新版 inspector 使用标签页，结构化输出位于 Output 标签。
+  await window.getByTestId("graph-inspector-tab-output").click();
   assert.equal(await window.getByTestId("graph-output-schema").count(), 1);
   assert.equal(await window.getByTestId("graph-output-schema").inputValue(), malformed.schema);
   await selectNode(window, "decision");
@@ -160,6 +164,8 @@ export async function verifyU3InvalidBuffers(isolation, window, summary, seconda
     await window.getByTestId(`graph-condition-${key}`).fill(JSON.stringify(decision[key], null, 2));
   await window.getByTestId("graph-condition-apply").click();
   await selectNode(window, "reviewer");
+  // 新版 inspector 使用标签页，结构化输出位于 Output 标签。
+  await window.getByTestId("graph-inspector-tab-output").click();
   await window
     .getByTestId("graph-output-schema")
     .fill(JSON.stringify(reviewer.output.schema, null, 2));

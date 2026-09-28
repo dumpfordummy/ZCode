@@ -175,9 +175,15 @@ export function GraphGuidedTask({
           <p className="font-medium">{t("output")}</p>
           <p>{t(pendingSchema ? "bufferPending" : "schemaAdvanced")}</p>
           {node.output ? (
-            <pre className="whitespace-pre-wrap break-all" data-testid="graph-guided-output-schema">
-              {JSON.stringify(node.output.schema, null, 2)}
-            </pre>
+            <details>
+              <summary className="cursor-pointer">{t("technical")}</summary>
+              <pre
+                className="mt-2 whitespace-pre-wrap break-all"
+                data-testid="graph-guided-output-schema"
+              >
+                {JSON.stringify(node.output.schema, null, 2)}
+              </pre>
+            </details>
           ) : null}
           <GraphOpenAdvanced workspaceKey={workspaceKey} />
         </div>

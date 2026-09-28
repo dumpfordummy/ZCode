@@ -15,6 +15,9 @@ async function addNode(window, type) {
   const id = (await nodes()).find((candidate) => !before.has(candidate));
   assert.ok(id, `Native editor must create its ${type} node.`);
   await selectNode(window, id);
+  // 新版 inspector 使用标签页，调用方在 addNode 后填写名称等 Task 标签字段。
+  // configureStructuredOutput 等前置操作可能将活动标签切到 Output，需切回 Task。
+  await window.getByTestId("graph-inspector-tab-task").click();
   return id;
 }
 async function connect(window, route) {
@@ -24,6 +27,8 @@ async function connect(window, route) {
   }
 }
 export async function configureStructuredOutput(window) {
+  // 新版 inspector 使用标签页，结构化输出位于 Output 标签。
+  await window.getByTestId("graph-inspector-tab-output").click();
   await selectValue(window, "graph-output-mode", "json");
   await window.getByTestId("graph-output-schema").fill(JSON.stringify(OUTPUT_SCHEMA, null, 2));
   await window.getByTestId("graph-apply-schema").click();
@@ -31,14 +36,15 @@ export async function configureStructuredOutput(window) {
 async function saveRecipes(window, isolation, recipes) {
   await window.getByTestId("graph-view-setup").click();
   await window.getByTestId("graph-project-recipes").waitFor();
-  await window.getByTestId("graph-load-recipes").click();
-  await window.locator('[data-testid="graph-recipe-read-state"][data-state="ready"]').waitFor();
+  // 原始配方 JSON 位于默认收起的 <details> 中，需先展开才能访问 load-recipes 和 recipes-json。
   for (const details of await window
     .getByTestId("graph-recipes-json")
     .locator("xpath=ancestor::details")
     .all())
     if ((await details.getAttribute("open")) === null)
       await details.locator(":scope > summary").click();
+  await window.getByTestId("graph-load-recipes").click();
+  await window.locator('[data-testid="graph-recipe-read-state"][data-state="ready"]').waitFor();
   await window.getByTestId("graph-recipes-json").fill(JSON.stringify(recipes, null, 2));
   await window.getByTestId("graph-save-recipes").click();
   await window.getByTestId("graph-recipes-saved").waitFor();

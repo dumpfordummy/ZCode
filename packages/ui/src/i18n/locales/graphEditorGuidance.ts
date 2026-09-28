@@ -17,6 +17,12 @@ const messages: Record<string, [string, string]> = {
   "scope.current-iteration": ["Current iteration", "当前迭代"],
   guided: ["Guided", "引导"],
   advanced: ["Advanced", "高级"],
+  "tab.task": ["Task", "任务"],
+  "tab.inputs": ["Inputs", "输入"],
+  "tab.output": ["Output", "输出"],
+  "tab.advanced": ["Advanced", "高级"],
+  effectiveSettings: ["Effective settings", "有效设置"],
+  editSettings: ["Edit", "编辑"],
   modeHelp: [
     "Both views edit the same draft. Switching views never rewrites it.",
     "两种视图编辑同一草稿，切换视图不会重写内容。",
@@ -96,7 +102,10 @@ const messages: Record<string, [string, string]> = {
     "首次执行后的额外修复次数（0–5）",
   ],
   minutes: ["Deadline in minutes (up to 1440)", "截止时间分钟数（最多 1440）"],
-  admissions: ["Total Task / Tool admissions (1–64)", "任务／工具总接收次数（1–64）"],
+  admissions: [
+    "Total Task / Tool admissions (1–64)",
+    "任务／工具总接收次数（1–64）",
+  ],
   noProgress: ["Stop when there is no progress", "无进展时停止"],
   apply: ["Apply", "应用"],
   repairHelp: [
@@ -107,7 +116,10 @@ const messages: Record<string, [string, string]> = {
   tests: ["Required Test steps", "必需测试步骤"],
   condition: ["Typed condition", "类型化条件"],
   alias: ["Input", "输入"],
-  pointer: ["Declared scalar field (JSON Pointer)", "已声明标量字段（JSON Pointer）"],
+  pointer: [
+    "Declared scalar field (JSON Pointer)",
+    "已声明标量字段（JSON Pointer）",
+  ],
   operator: ["Comparison", "比较"],
   value: ["Typed scalar value (JSON)", "类型化标量值（JSON）"],
   exit: ["Matching exit", "匹配出口"],
@@ -117,7 +129,10 @@ const messages: Record<string, [string, string]> = {
     "有效观测匹配后选择命名出口。缺少必需数据、类型错误和无效证据会停止等待人工处理，不会静默选择否则出口。",
   ],
   references: ["Documents, native guidance and skills", "文档、原生指导与技能"],
-  catalogLoad: ["Read available native guidance and skills", "读取可用原生指导与技能"],
+  catalogLoad: [
+    "Read available native guidance and skills",
+    "读取可用原生指导与技能",
+  ],
   catalogHelp: [
     "Uses metadata from an existing native session only. Unknown means no catalog was available; loading this list does not start a model or read document contents.",
     "只使用现有原生会话的元数据。未知表示没有可用目录；读取列表不会启动模型或读取文档正文。",
@@ -133,14 +148,23 @@ const messages: Record<string, [string, string]> = {
     "An explicit selection is validated within this workspace. Already loaded native instructions are reused; other documents remain explicit read references. Cancellation or validation failure preserves the previous binding.",
     "明确选择会在此工作区内验证。已加载的原生指令会复用，其他文档保留为明确读取引用。取消或验证失败会保留原绑定。",
   ],
-  nativeInstructions: ["Already delivered as native instructions", "已作为原生指令提供"],
+  nativeInstructions: [
+    "Already delivered as native instructions",
+    "已作为原生指令提供",
+  ],
   explicitRead: ["Explicit read reference", "明确读取引用"],
   nativeSkill: ["Available native skill", "可用原生技能"],
   loading: ["Reading…", "读取中…"],
 };
 export const graphEditorGuidanceEn = Object.fromEntries(
-  Object.entries(messages).map(([key, value]) => [`graph.editor.${key}`, value[0]]),
+  Object.entries(messages).map(([key, value]) => [
+    `graph.editor.${key}`,
+    value[0],
+  ]),
 );
 export const graphEditorGuidanceZh = Object.fromEntries(
-  Object.entries(messages).map(([key, value]) => [`graph.editor.${key}`, value[1]]),
+  Object.entries(messages).map(([key, value]) => [
+    `graph.editor.${key}`,
+    value[1],
+  ]),
 );

@@ -1,14 +1,21 @@
-import { GraphSetupField, GraphSetupList, useGraphSetupText } from "./GraphSetupFields.js";
+import {
+  GraphSetupField,
+  GraphSetupList,
+  useGraphSetupText,
+} from "./GraphSetupFields.js";
+import { GraphSelect } from "./GraphSelect.js";
 import type { GraphRecipeDraftObject } from "./graphRecipeDraftForm.js";
 
 export function GraphRecipeVerifierForm({
   verifier,
   index,
+  buildOptions,
   disabled,
   onChange,
 }: {
   verifier: GraphRecipeDraftObject;
   index: number;
+  buildOptions: Array<{ value: string; label: string }>;
   disabled: boolean;
   onChange(path: string[], value: unknown): void;
 }) {
@@ -23,7 +30,23 @@ export function GraphRecipeVerifierForm({
       </p>
       {verifier.kind === "test" ? (
         <>
-          {["reportPath", "buildNodeId", "minimumTests", "expectedTests"].map((key) => (
+          {/* buildNodeId 是 Test 检查的必需映射，使用下拉选择而非原始 ID 文本框。
+              Radix Select 禁止 Select.Item 的 value 为空字符串，用 "none" 哨兵表示
+              无映射并在显示/保存时双向转换。 */}
+          <GraphSelect
+            label={t("buildMapping")}
+            value={verifier["buildNodeId"] ? String(verifier["buildNodeId"]) : "none"}
+            options={[
+              { value: "none", label: t("noBuildMapping") },
+              ...buildOptions,
+            ]}
+            disabled={disabled}
+            testId={`graph-recipe-field-${index}-verifier-buildNodeId`}
+            onChange={(value) =>
+              onChange(["verifier", "buildNodeId"], value === "none" ? "" : value)
+            }
+          />
+          {["reportPath", "minimumTests", "expectedTests"].map((key) => (
             <GraphSetupField
               key={key}
               name={key}
@@ -48,7 +71,14 @@ export function GraphRecipeVerifierForm({
       {target || dotnet ? (
         <div className="grid gap-3 sm:grid-cols-2">
           {(target
-            ? ["project", "configuration", "framework", "runtime", "filter", "assembly"]
+            ? [
+                "project",
+                "configuration",
+                "framework",
+                "runtime",
+                "filter",
+                "assembly",
+              ]
             : ["project", "configuration", "framework", "runtime", "restore"]
           ).map((key) => (
             <GraphSetupField
@@ -56,9 +86,14 @@ export function GraphRecipeVerifierForm({
               name={key}
               value={(target ?? dotnet)?.[key]}
               disabled={disabled}
-              optional={["runtime", "filter"].includes(key) || (!target && key === "framework")}
+              optional={
+                ["runtime", "filter"].includes(key) ||
+                (!target && key === "framework")
+              }
               testId={`graph-recipe-field-${index}-verifier-${target ? "target" : "dotnet"}-${key}`}
-              onChange={(value) => onChange(["verifier", target ? "target" : "dotnet", key], value)}
+              onChange={(value) =>
+                onChange(["verifier", target ? "target" : "dotnet", key], value)
+              }
             />
           ))}
         </div>

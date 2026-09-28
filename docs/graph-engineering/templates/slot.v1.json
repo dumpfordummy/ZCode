@@ -268,9 +268,15 @@
           "x": 1340,
           "y": 320
         },
-        "instructions": "Workflow task: reviewer.\nReview the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.\nverification:\n{{inputs.verification}}",
+        "instructions": "Workflow task: reviewer.\nReview the explicit request against the current Test verification supplied as evidence. Decide whether the verified machine result satisfies the request's stated acceptance criteria. Return exactly one JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing only the permitted evidence artifact IDs supplied below. A failed Test can never be pass. A passing Test is evidence of the machine check, not a guarantee that the requested change is correct; return needs_changes only for a concrete issue grounded in the supplied request and verification evidence, otherwise pass. Do not invent acceptance criteria the request did not state; in particular, do not require Git-tracked or committed source unless an explicit supplied criterion says so. Unsupported uncertainty must be needs_human, not an invented blocking rule. Do not edit files or run commands; the verification artifact already contains the machine result.\nrequest:\n{{inputs.request}}\n\nverification:\n{{inputs.verification}}",
         "instructionMode": "bound",
         "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
           {
             "alias": "verification",
             "source": {
@@ -287,19 +293,30 @@
           "kind": "json",
           "schema": {
             "type": "object",
-            "required": ["outcome", "findings", "evidenceReferences"],
+            "required": [
+              "outcome",
+              "findings",
+              "evidenceReferences"
+            ],
             "additionalProperties": false,
             "properties": {
               "outcome": {
                 "type": "string",
-                "enum": ["pass", "needs_changes", "needs_human"]
+                "enum": [
+                  "pass",
+                  "needs_changes",
+                  "needs_human"
+                ]
               },
               "findings": {
                 "type": "array",
                 "maxItems": 10,
                 "items": {
                   "type": "object",
-                  "required": ["code", "message"],
+                  "required": [
+                    "code",
+                    "message"
+                  ],
                   "additionalProperties": false,
                   "properties": {
                     "code": {
@@ -498,21 +515,27 @@
       "label": "Authoritative GameDoc",
       "kind": "document",
       "required": true,
-      "nodeIds": ["analyze"]
+      "nodeIds": [
+        "analyze"
+      ]
     },
     {
       "id": "math",
       "label": "Authoritative math reference",
       "kind": "document",
       "required": false,
-      "nodeIds": ["analyze"]
+      "nodeIds": [
+        "analyze"
+      ]
     },
     {
       "id": "source",
       "label": "Source reference document",
       "kind": "document",
       "required": false,
-      "nodeIds": ["analyze"]
+      "nodeIds": [
+        "analyze"
+      ]
     }
   ],
   "optionalNodes": [

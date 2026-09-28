@@ -5,7 +5,11 @@ const messages: Record<string, [string, string]> = {
     "This declaration cannot be edited losslessly in Guided. Its text is preserved in Advanced.",
     "此声明无法在引导视图中无损编辑。原文保留在高级视图中。",
   ],
-  invalidDraft: ["Correct the JSON before using Guided forms.", "请先修正 JSON，再使用引导表单。"],
+  advancedFields: ["Advanced fields", "高级字段"],
+  invalidDraft: [
+    "Correct the JSON before using Guided forms.",
+    "请先修正 JSON，再使用引导表单。",
+  ],
   add: ["Add", "添加"],
   remove: ["Remove", "移除"],
   addCheck: ["Add check", "添加检查"],
@@ -17,12 +21,23 @@ const messages: Record<string, [string, string]> = {
   timeoutMs: ["Timeout (milliseconds)", "超时（毫秒）"],
   sourcePaths: ["Reviewed source/input files", "已审阅的源文件与输入"],
   expectedOutputs: ["Expected Build outputs", "预期生成输出"],
-  redactEnvironmentVariables: ["Environment variable names to redact", "需脱敏的环境变量名"],
-  reportPath: ["Report path / owned path template", "报告路径／操作专属路径模板"],
+  redactEnvironmentVariables: [
+    "Environment variable names to redact",
+    "需脱敏的环境变量名",
+  ],
+  reportPath: [
+    "Report path / owned path template",
+    "报告路径／操作专属路径模板",
+  ],
   minimumTests: ["Minimum executed tests", "最少执行测试数"],
   expectedTests: ["Expected tests (optional)", "预期测试数（可选）"],
   requiredTests: ["Required qualified test identities", "必需的限定测试标识"],
-  buildNodeId: ["Legacy Build node reference", "原有 Build 节点引用"],
+  buildNodeId: [
+    "Build check used before this Test",
+    "此测试前使用的 Build 检查",
+  ],
+  buildMapping: ["Mapped Build check", "映射的 Build 检查"],
+  noBuildMapping: ["No Build check mapped", "未映射 Build 检查"],
   project: ["Project path", "项目路径"],
   configuration: ["Configuration", "配置"],
   framework: ["Target framework", "目标框架"],
@@ -34,9 +49,15 @@ const messages: Record<string, [string, string]> = {
   build: ["Build", "构建"],
   test: ["Test", "测试"],
   validate: ["Validate configuration", "验证配置"],
-  valid: ["Configuration is valid. No command was executed.", "配置有效。尚未执行命令。"],
+  valid: [
+    "Configuration is valid. No command was executed.",
+    "配置有效。尚未执行命令。",
+  ],
   validating: ["Validating configuration…", "正在验证配置…"],
-  validateFirst: ["Validate the current draft before saving.", "保存前请验证当前草稿。"],
+  validateFirst: [
+    "Validate the current draft before saving.",
+    "保存前请验证当前草稿。",
+  ],
   discovery: ["Discover projects", "发现项目"],
   scan: ["Scan project metadata", "扫描项目元数据"],
   cancelScan: ["Cancel scan", "取消扫描"],
@@ -44,15 +65,27 @@ const messages: Record<string, [string, string]> = {
     "Reads bounded project metadata only. Does not evaluate MSBuild, restore, run scripts or start an agent.",
     "仅有界读取项目元数据。不求值 MSBuild、不还原、不运行脚本或启动代理。",
   ],
-  notScanned: ["Project metadata has not been scanned.", "尚未扫描项目元数据。"],
+  notScanned: [
+    "Project metadata has not been scanned.",
+    "尚未扫描项目元数据。",
+  ],
   scanning: ["Scanning project metadata…", "正在扫描项目元数据…"],
   complete: [
     "Metadata scan complete; source/output manifests still need review.",
     "元数据扫描完成；源文件与输出清单仍需审阅。",
   ],
-  limited: ["Scan reached a bound. Results are incomplete.", "扫描达到边界，结果不完整。"],
-  cancelled: ["Scan cancelled. No execution was started.", "扫描已取消。未启动执行。"],
-  noCandidates: ["No supported project candidates were found.", "未找到支持的候选项目。"],
+  limited: [
+    "Scan reached a bound. Results are incomplete.",
+    "扫描达到边界，结果不完整。",
+  ],
+  cancelled: [
+    "Scan cancelled. No execution was started.",
+    "扫描已取消。未启动执行。",
+  ],
+  noCandidates: [
+    "No supported project candidates were found.",
+    "未找到支持的候选项目。",
+  ],
   useBuild: ["Use as Build target", "用作构建目标"],
   addTest: ["Add explicit Test scope", "添加明确测试范围"],
   metadata: ["Provenance, exclusions and limits", "来源、排除项与边界"],
@@ -116,7 +149,10 @@ const messages: Record<string, [string, string]> = {
     "Read-only lookup in the existing native runtime. SDK version, packages, feed authentication, private-home and network policy remain unknown unless separately established.",
     "在已有原生运行时中只读查询。除非另行确证，SDK 版本、包、源认证、专属主目录与网络策略仍为未知。",
   ],
-  unavailable: ["The project-setup service is unavailable.", "项目设置服务不可用。"],
+  unavailable: [
+    "The project-setup service is unavailable.",
+    "项目设置服务不可用。",
+  ],
   idle: ["Not checked", "尚未检查"],
   loading: ["Loading…", "加载中…"],
   prepare: ["Review checks before running", "运行前审阅检查"],
@@ -149,17 +185,40 @@ const messages: Record<string, [string, string]> = {
     "Commands use existing native permission and sandbox controls. Missing dependencies may require a separate authorized restore; no tools, packages or credentials are installed or copied by setup.",
     "命令沿用原生权限与沙箱控制。缺少依赖可能需要另行授权还原；设置过程不会安装或复制工具、包或凭据。",
   ],
-  scopePreview: ["Frozen source/output and report scope", "已冻结源文件／输出与报告范围"],
-  reviewSnapshot: ["Exact reviewed snapshot (technical details)", "确切审阅快照（技术详情）"],
+  scopePreview: [
+    "Frozen source/output and report scope",
+    "已冻结源文件／输出与报告范围",
+  ],
+  reviewSnapshot: [
+    "Exact reviewed snapshot (technical details)",
+    "确切审阅快照（技术详情）",
+  ],
   multiTests: ["Additional compatible Tests", "其他兼容测试"],
   multiHelp: [
     "All selected checks become explicit Test steps and evidence dependencies. The service validates expansion and graph limits before creating.",
     "所有选定检查将成为明确 Test 步骤与证据依赖。服务会在创建前验证展开结果与图边界。",
   ],
+  checkList: ["Saved checks", "已保存检查"],
+  checkName: ["Name", "名称"],
+  checkType: ["Type", "类型"],
+  checkStatus: ["Configuration", "配置"],
+  checkConfigured: ["Configured", "已配置"],
+  checkNeedsAttention: ["Needs attention", "需关注"],
+  edit: ["Edit", "编辑"],
+  noChecks: [
+    "No checks configured yet. Use Add Build or Add Test below.",
+    "尚未配置检查。请使用下方添加 Build 或 Test。",
+  ],
 };
 export const graphProjectSetupEn = Object.fromEntries(
-  Object.entries(messages).map(([key, value]) => [`graph.setup.${key}`, value[0]]),
+  Object.entries(messages).map(([key, value]) => [
+    `graph.setup.${key}`,
+    value[0],
+  ]),
 );
 export const graphProjectSetupZh = Object.fromEntries(
-  Object.entries(messages).map(([key, value]) => [`graph.setup.${key}`, value[1]]),
+  Object.entries(messages).map(([key, value]) => [
+    `graph.setup.${key}`,
+    value[1],
+  ]),
 );

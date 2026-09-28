@@ -95,6 +95,8 @@ try {
   window = await isolation.launch();
   await showGraph(window);
   await window.getByTestId("graph-view-design").click();
+  // 重启后编辑器模式恢复为默认 guided，需切回 advanced 才能访问 GraphConditionEditor 的 inputs 字段。
+  await window.getByTestId("graph-editor-advanced").click();
   await selectNode(window, ids.decision);
   const handle = await isolation.app.browserWindow(window);
   try {

@@ -247,7 +247,8 @@ export function GraphCanvas({
         edgesReconnectable={editable}
         deleteKeyCode={null}
         fitView
-        minZoom={0.15}
+        fitViewOptions={{ minZoom: 0.5, padding: 0.15 }}
+        minZoom={0.3}
         maxZoom={1.5}
         proOptions={{ hideAttribution: false }}
         onNodeClick={(_, node) => selectCanvasNode(node.id)}

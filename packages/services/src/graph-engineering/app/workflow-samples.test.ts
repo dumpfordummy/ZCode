@@ -69,7 +69,10 @@ test("bugfix retains bounded repairs, current machine evidence and a required fi
   const reviewer = graph.nodes.find((node) => node.id === "reviewer");
   assert.equal(reviewer?.type, "task");
   if (reviewer?.type === "task")
+    // reviewer 同时绑定 request 与 verification：请求文本与当前 Test 机器证据同为评审输入，
+    // 证据 ID 由解析后追加的契约段显式列出（见 domain/bindings.ts graphEvidenceContractSuffix）。
     assert.deepEqual(reviewer.inputs, [
+      { alias: "request", source: { kind: "start" } },
       {
         alias: "verification",
         source: { kind: "artifact", nodeId: "test", selector: "verification" },

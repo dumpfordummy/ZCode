@@ -89,8 +89,10 @@ export function reviewer(): GraphTaskNode {
     ...task(
       "reviewer",
       "Review current verification",
-      "Review the actual current verification, source and report. Return only a JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing the exact verification artifactId. A failed test cannot be PASS. Link each finding to a supplied source reference or label it an assumption/question. Do not edit files or run commands.",
-      [verification],
+      // reviewer 仅评估显式请求与当前 Test 验证证据，不发明额外验收准则，也不把
+      // Git 跟踪当作通用前置条件；可引用的证据 ID 由解析后追加的契约段显式列出。
+      "Review the explicit request against the current Test verification supplied as evidence. Decide whether the verified machine result satisfies the request's stated acceptance criteria. Return exactly one JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing only the permitted evidence artifact IDs supplied below. A failed Test can never be pass. A passing Test is evidence of the machine check, not a guarantee that the requested change is correct; return needs_changes only for a concrete issue grounded in the supplied request and verification evidence, otherwise pass. Do not invent acceptance criteria the request did not state; in particular, do not require Git-tracked or committed source unless an explicit supplied criterion says so. Unsupported uncertainty must be needs_human, not an invented blocking rule. Do not edit files or run commands; the verification artifact already contains the machine result.",
+      [request, verification],
     ),
     output: { kind: "json", schema: reviewerSchema },
   };

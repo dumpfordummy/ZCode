@@ -162,6 +162,8 @@ try {
         await window
           .getByTestId("graph-instructions")
           .fill("FUTURE RUN ONLY: do not use this in the admitted run.");
+        // 模型配置位于 Advanced 标签。
+        await window.getByTestId("graph-inspector-tab-advanced").click();
         await window
           .getByTestId("graph-node-configuration")
           .getByTestId("chat-mode-select-trigger")

@@ -165,6 +165,8 @@ export async function selectValue(window, testId, value) {
 }
 
 export async function addBinding(window, alias, source, index) {
+  // 新版 inspector 使用标签页（Task / Inputs / Output / Advanced），绑定编辑器位于 Inputs 标签。
+  await window.getByTestId("graph-inspector-tab-inputs").click();
   await window.getByTestId("graph-add-binding").click();
   await window.getByTestId(`graph-binding-alias-${index}`).fill(alias);
   await selectValue(window, `graph-binding-source-${index}`, source);
@@ -211,7 +213,10 @@ export async function createSequentialGraph(window, summary) {
   await addBinding(window, "analysis", "node:task", 1);
   await selectNode(window, added.Verify);
   await addBinding(window, "implementation", `node:${added.Implement}`, 0);
+  // 模型配置位于 Advanced 标签，编辑完成后切回 Task 标签。
+  await window.getByTestId("graph-inspector-tab-advanced").click();
   await selectValue(window, "graph-configuration-source", "override");
+  await window.getByTestId("graph-inspector-tab-task").click();
   await window.getByTestId("graph-add-task").click();
   await window.getByTestId("graph-node-name").fill("Temporary task to remove");
   await window.getByTestId("graph-delete-node").click();

@@ -33,7 +33,8 @@ test("multiple tests expand actual Tools, bound reviewer prompts, final gate and
       ["b", "t1", "t2"],
     );
     const reviewer = graph.nodes.find((n) => n.id === "reviewer")!;
-    assert.equal(reviewer.type === "task" && reviewer.inputs.length, 2);
+    // reviewer 现绑定 [request, verification]；recipeGroups 展开 2 个 Test 检查追加 verification__check_2，共 3 个输入。
+    assert.equal(reviewer.type === "task" && reviewer.inputs.length, 3);
     if (reviewer.type === "task")
       for (const input of reviewer.inputs)
         assert.ok(reviewer.instructions.includes(`{{inputs.${input.alias}}}`));

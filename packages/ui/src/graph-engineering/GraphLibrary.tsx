@@ -189,9 +189,6 @@ export function GraphLibrary({
           <p className="whitespace-pre-wrap text-ui-sm text-foreground-subtle">
             {version.template.description}
           </p>
-          <p className="text-ui-sm text-foreground-subtle">
-            {u("versionPinned", { version: version.version })}
-          </p>
           <GraphTemplateBindings
             key={`${entry.id}:${version.version}`}
             version={version}

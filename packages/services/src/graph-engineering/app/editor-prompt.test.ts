@@ -40,7 +40,11 @@ test("draft Start resolves exactly once, while every future task and evidence to
     ),
   );
   const reviewer = previewGraphTaskPrompt(graph, "reviewer");
-  assert.equal(reviewer.bindings[0]!.status, "unresolved");
+  // reviewer 现绑定 [request, verification]：request 在草稿中解析自 Start，verification 仍未解析。
+  assert.equal(
+    reviewer.bindings.find((binding) => binding.alias === "verification")!.status,
+    "unresolved",
+  );
   assert.ok(reviewer.segments.some((part) => part.kind === "unresolved"));
 });
 

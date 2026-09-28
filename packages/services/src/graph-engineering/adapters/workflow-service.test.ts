@@ -9,7 +9,10 @@ import { createWorkflowStore } from "./workflow-store.js";
 import { workflowDigest } from "./workflow-preflight.js";
 import { routingDefinition, routingFixture } from "../app/routing.fixture.js";
 import { selection, target } from "../app/sequential.fixture.js";
+import { builtinTemplates } from "../domain/workflow-samples.js";
+import { reviewer, task } from "../domain/workflow-sample-nodes.js";
 import type { GraphRunProvenance } from "../workflow-provenance.js";
+import type { GraphTaskNode } from "../contract.js";
 
 test("library version edits/duplicates/archive and bad imports cannot mutate a chosen workspace or historic pin", async (t) => {
   const directory = await mkdtemp(join(tmpdir(), "z6-workflow-owner-"));
@@ -67,10 +70,11 @@ test("library version edits/duplicates/archive and bad imports cannot mutate a c
     now: () => 1,
   });
   const builtin = (await service.list()).entries.find((e) => e.id === "generic")!;
+  // 内置 generic 已升至 library v2（修正 reviewer 契约）；复制须选用 v2。
   const first = await service.mutate({
     action: "duplicate",
     id: "generic",
-    version: 1,
+    version: 2,
     name: "Local",
     expectedRevision: 0,
   });
@@ -193,4 +197,66 @@ test("Host admission pins reviewed preflight, idempotent retry sends once, refer
   assert.equal(f.sends.length, 1);
   assert.equal(stopped.provenance!.digest, "b".repeat(64));
   assert.deepEqual(stopped.provenance!.template, definition.template);
+});
+
+test("regression: saved old-reviewer definition stays unchanged while builtin v2 ships corrected inputs", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "z7-reviewer-version-"));
+  const f = routingFixture();
+  t.after(async () => {
+    await f.service.disposeAndWait();
+    await rm(directory, { recursive: true, force: true });
+  });
+  let id = 0;
+  const service = new GraphWorkflowService({
+    store: createWorkflowStore(directory),
+    graph: f.service,
+    preflight: {
+      capture: async () => {
+        throw new Error("Preview must never discover native environment");
+      },
+    },
+    digest: workflowDigest,
+    id: () => `old-${++id}`,
+    now: () => 1,
+  });
+  // 构造升级前的旧 reviewer：仅绑定 verification，旧式指令；schema 复用当前 reviewer 的未变 schema。
+  const oldReviewer: GraphTaskNode = {
+    ...task(
+      "reviewer",
+      "Review current verification",
+      "Review the actual current verification, source and report. Return one JSON object.",
+      [{ alias: "verification", source: { kind: "artifact", nodeId: "test", selector: "verification" } }],
+    ),
+    output: { kind: "json", schema: reviewer().output!.schema },
+  };
+  const oldTemplate = structuredClone(
+    builtinTemplates.find((item) => item.id === "generic")!.template,
+  );
+  const reviewerIdx = oldTemplate.graph.nodes.findIndex((n) => n.id === "reviewer");
+  oldTemplate.graph.nodes[reviewerIdx] = oldReviewer;
+  // 保存旧定义为一个 saved entry（不经过 instantiate，不触发 recipe 检查）。
+  const created = await service.mutate({ action: "create", template: oldTemplate, expectedRevision: 0 });
+  const savedEntry = created.entries.find((e) => !e.builtin)!;
+  const savedReviewer = savedEntry.versions[0]!.template.graph.nodes.find(
+    (n) => n.id === "reviewer",
+  ) as GraphTaskNode;
+  // 旧 saved 定义保持原样：仅 verification。
+  assert.deepEqual(savedReviewer.inputs.map((i) => i.alias), ["verification"]);
+  const savedDigestBefore = savedEntry.versions[0]!.digest;
+  // 内置 generic 现为 library v2，reviewer 已修正为 [request, verification]。
+  const builtin = (await service.list()).entries.find((e) => e.id === "generic")!;
+  assert.equal(builtin.versions[0]!.version, 2);
+  const builtinReviewer = builtin.versions[0]!.template.graph.nodes.find(
+    (n) => n.id === "reviewer",
+  ) as GraphTaskNode;
+  assert.deepEqual(builtinReviewer.inputs.map((i) => i.alias), ["request", "verification"]);
+  // 再次 list（builtin 重新合成）不污染已存储的 saved 旧定义：digest 与输入保持不变。
+  const savedAfter = (await service.list()).entries.find((e) => e.id === savedEntry.id)!;
+  assert.equal(savedAfter.versions[0]!.digest, savedDigestBefore);
+  assert.deepEqual(
+    (savedAfter.versions[0]!.template.graph.nodes.find((n) => n.id === "reviewer") as GraphTaskNode).inputs.map(
+      (i) => i.alias,
+    ),
+    ["verification"],
+  );
 });

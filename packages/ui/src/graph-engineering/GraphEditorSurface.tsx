@@ -142,7 +142,7 @@ export function GraphEditorSurface({
         <aside
           ref={inspectorRef}
           tabIndex={-1}
-          className="w-full shrink-0 space-y-4 border-t border-border p-3 lg:min-h-0 lg:w-80 lg:overflow-auto lg:border-t-0 lg:border-l"
+          className="w-full shrink-0 space-y-4 border-t border-border p-3 lg:min-h-0 lg:w-96 lg:overflow-auto lg:border-t-0 lg:border-l"
           aria-label={t("inspector")}
         >
           {showingRuns && selectedRun ? (

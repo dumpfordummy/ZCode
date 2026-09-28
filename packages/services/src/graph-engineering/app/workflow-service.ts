@@ -19,6 +19,10 @@ import { graphRecipeCompatibility } from "../domain/recipe-compatibility.js";
 import type { GraphProjectPort } from "./project-ports.js";
 import { projectSetup } from "./project-setup.js";
 
+// 内置模板随仓库发布；修正 reviewer 契约后从 1 升到 2，使已保存/历史版本保持不变，
+// 新运行显式选用修正后的定义。已保存副本与历史 run 内联定义不受此值影响。
+const BUILTIN_TEMPLATE_VERSION = 2;
+
 export class GraphWorkflowService implements IGraphWorkflowService {
   constructor(
     private readonly options: {
@@ -43,7 +47,7 @@ export class GraphWorkflowService implements IGraphWorkflowService {
       builtin: true,
       versions: [
         {
-          version: 1,
+          version: BUILTIN_TEMPLATE_VERSION,
           digest: this.options.digest(runFingerprint(template)),
           createdAt: 0,
           template: structuredClone(template),

@@ -78,4 +78,10 @@ global:
   forbidDeepImports: true
   managedOnly: true
 
-exceptions: []
+exceptions:
+  # Part A reviewer reproduction: comprehensive end-to-end fixture + 7 scenarios
+  # in a single file. Splitting would fragment the reproduction narrative.
+  - id: reviewer-reproduction-test
+    rule: max-file-lines
+    paths:
+      - packages/services/src/graph-engineering/adapters/reviewer-reproduction.test.ts

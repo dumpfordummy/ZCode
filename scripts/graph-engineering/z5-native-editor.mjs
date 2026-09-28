@@ -47,6 +47,9 @@ export async function addNode(window, type, name) {
   const id = after.find((value) => !before.has(value));
   assert.ok(id);
   await selectNode(window, id);
+  // 新版 inspector 使用标签页，名称字段位于 Task 标签。outputSchema/addBinding 等前置操作
+  // 可能将活动标签切到 Output/Inputs，添加节点后必须显式切回 Task 才能填写名称。
+  await window.getByTestId("graph-inspector-tab-task").click();
   await window.getByTestId(type === "task" ? "graph-node-name" : `graph-${type}-name`).fill(name);
   return id;
 }
@@ -55,6 +58,8 @@ export async function connect(window, from, to, port) {
   await selectValue(window, `graph-next-node-${from}${port ? `-${port}` : ""}`, to);
 }
 export async function outputSchema(window, schema) {
+  // 新版 inspector 使用标签页，结构化输出位于 Output 标签。
+  await window.getByTestId("graph-inspector-tab-output").click();
   await selectValue(window, "graph-output-mode", "json");
   await window.getByTestId("graph-output-schema").fill(JSON.stringify(schema, null, 2));
   await window.getByTestId("graph-apply-schema").click();
@@ -84,14 +89,15 @@ async function recipes(window, isolation, buildId) {
   const value = fixtureRecipes(buildId);
   await window.getByTestId("graph-view-setup").click();
   await window.getByTestId("graph-project-recipes").waitFor();
-  await window.getByTestId("graph-load-recipes").click();
-  await window.locator('[data-testid="graph-recipe-read-state"][data-state="ready"]').waitFor();
+  // 原始配方 JSON 位于默认收起的 <details> 中，需先展开才能访问 load-recipes 和 recipes-json。
   for (const details of await window
     .getByTestId("graph-recipes-json")
     .locator("xpath=ancestor::details")
     .all())
     if ((await details.getAttribute("open")) === null)
       await details.locator(":scope > summary").click();
+  await window.getByTestId("graph-load-recipes").click();
+  await window.locator('[data-testid="graph-recipe-read-state"][data-state="ready"]').waitFor();
   await window.getByTestId("graph-recipes-json").fill(JSON.stringify(value, null, 2));
   await window.getByTestId("graph-save-recipes").click();
   await window.getByTestId("graph-recipes-saved").waitFor();
@@ -287,12 +293,13 @@ export async function createConditionGraph(window, summary, scenario) {
     await connect(window, decision, id, port);
     await connect(window, id, merge);
   }
+  // 新版 inspector 使用标签页；Output 标签仅对高级模式 task 节点可见，条件/end 节点无此标签。
   await selectNode(window, decision);
-  assert.equal(await window.getByTestId("graph-output-mode").count(), 0);
+  assert.equal(await window.getByTestId("graph-inspector-tab-output").count(), 0);
   await selectNode(window, "task");
-  assert.equal(await window.getByTestId("graph-output-mode").count(), 1);
+  assert.equal(await window.getByTestId("graph-inspector-tab-output").count(), 1);
   await selectNode(window, "end");
-  assert.equal(await window.getByTestId("graph-output-mode").count(), 0);
+  assert.equal(await window.getByTestId("graph-inspector-tab-output").count(), 0);
   await selectValue(window, "graph-end-output", merge);
   await routingSettings(window, finalGate, 8, 600000);
   await window.getByTestId("graph-routing-settings").locator(":scope > summary").click();

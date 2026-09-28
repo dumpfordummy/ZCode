@@ -1,4 +1,4 @@
-import type { GraphSequentialRun } from "@zcode/services";
+import type { GraphNode, GraphSequentialRun } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { graphConversationTarget } from "./graphEngineeringView.js";
@@ -47,6 +47,18 @@ export function GraphRunInspector({
     ...run.target,
     sessionId: attempt?.sessionId ?? null,
   });
+  const nodeLabel = (item: GraphNode) =>
+    item.type === "task" ||
+    item.type === "approval" ||
+    item.type === "tool" ||
+    item.type === "condition"
+      ? item.name
+      : t(`node.${item.type}`);
+  // 人性化 end 节点的输出引用：解析为节点名称，找不到时回退到原始 ID。
+  const outputNode =
+    node?.type === "end"
+      ? run.definition.nodes.find((item) => item.id === node.outputNodeId)
+      : undefined;
   return (
     <section
       tabIndex={-1}
@@ -79,7 +91,7 @@ export function GraphRunInspector({
             ...(!selected ? [{ value: "none", label: t("z5.selectAttempt") }] : []),
             ...choices.map((item) => ({
               value: item.attemptId,
-              label: `${t("z5.iteration")} ${item.iteration ?? 0} · ${u(`execution.${item.status}`)} · ${item.attemptId}`,
+              label: `${t("z5.iteration")} ${item.iteration ?? 0} · ${u(`execution.${item.status}`)}`,
             })),
           ]}
           onChange={(value) => {
@@ -104,7 +116,9 @@ export function GraphRunInspector({
       ) : null}
       {node?.type === "end" ? (
         <>
-          <p className="break-all font-mono text-ui-sm">{node.outputNodeId}</p>
+          <p className="break-all text-ui-sm">
+            {outputNode ? nodeLabel(outputNode) : node.outputNodeId}
+          </p>
           <TextEvidence title={t("runResult")} text={run.result?.text ?? t("noOutput")} />
         </>
       ) : null}
@@ -135,35 +149,38 @@ export function GraphRunInspector({
           {["WaitingForPermission", "WaitingForUser"].includes(attempt.status) ? (
             <p className="text-ui-sm text-foreground-subtle">{t("waitingHelp")}</p>
           ) : null}
-          <dl className="grid grid-cols-1 gap-1 break-all text-ui-sm">
-            <dt className="text-foreground-subtle">{t("configurationSource")}</dt>
-            <dd>
-              {attempt.settings.source === "workspace"
-                ? t("inheritSettings")
-                : t("overrideSettings")}
-            </dd>
-            <dt className="text-foreground-subtle">{t("configuration")}</dt>
-            <dd>
-              {attempt.settings.modelSelection.providerId} /{" "}
-              {attempt.settings.modelSelection.modelId} · {attempt.settings.mode}
-              {attempt.settings.modelSelection.options?.reasoningLevel
-                ? ` · ${attempt.settings.modelSelection.options.reasoningLevel}`
-                : ""}
-              {attempt.settings.planEnabled ? ` · ${t("planEnabled")}` : ""}
-            </dd>
-            <dt className="text-foreground-subtle">{t("attempt")}</dt>
-            <dd className="font-mono">{attempt.attemptId}</dd>
-            <dt className="text-foreground-subtle">{t("session")}</dt>
-            <dd className="font-mono">{attempt.sessionId ?? "—"}</dd>
-            <dt className="text-foreground-subtle">{t("input")}</dt>
-            <dd className="font-mono">{attempt.inputId}</dd>
-            <dt className="text-foreground-subtle">{t("command")}</dt>
-            <dd className="font-mono">{attempt.commandId}</dd>
-            <dt className="text-foreground-subtle">{t("runtime")}</dt>
-            <dd className="font-mono">{attempt.runtimeIdentity ?? "—"}</dd>
-            <dt className="text-foreground-subtle">{t("dispatchPhase")}</dt>
-            <dd>{attempt.dispatchPhase}</dd>
-          </dl>
+          <details className="text-ui-sm">
+            <summary>{u("technical")}</summary>
+            <dl className="mt-2 grid grid-cols-1 gap-1 break-all text-ui-sm">
+              <dt className="text-foreground-subtle">{t("configurationSource")}</dt>
+              <dd>
+                {attempt.settings.source === "workspace"
+                  ? t("inheritSettings")
+                  : t("overrideSettings")}
+              </dd>
+              <dt className="text-foreground-subtle">{t("configuration")}</dt>
+              <dd>
+                {attempt.settings.modelSelection.providerId} /{" "}
+                {attempt.settings.modelSelection.modelId} · {attempt.settings.mode}
+                {attempt.settings.modelSelection.options?.reasoningLevel
+                  ? ` · ${attempt.settings.modelSelection.options.reasoningLevel}`
+                  : ""}
+                {attempt.settings.planEnabled ? ` · ${t("planEnabled")}` : ""}
+              </dd>
+              <dt className="text-foreground-subtle">{t("attempt")}</dt>
+              <dd className="font-mono">{attempt.attemptId}</dd>
+              <dt className="text-foreground-subtle">{t("session")}</dt>
+              <dd className="font-mono">{attempt.sessionId ?? "—"}</dd>
+              <dt className="text-foreground-subtle">{t("input")}</dt>
+              <dd className="font-mono">{attempt.inputId}</dd>
+              <dt className="text-foreground-subtle">{t("command")}</dt>
+              <dd className="font-mono">{attempt.commandId}</dd>
+              <dt className="text-foreground-subtle">{t("runtime")}</dt>
+              <dd className="font-mono">{attempt.runtimeIdentity ?? "—"}</dd>
+              <dt className="text-foreground-subtle">{t("dispatchPhase")}</dt>
+              <dd>{attempt.dispatchPhase}</dd>
+            </dl>
+          </details>
           <TextEvidence
             title={t("resolvedInstructions")}
             text={attempt.resolvedInstructions ?? t("notSubmitted")}

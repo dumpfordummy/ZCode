@@ -29,7 +29,11 @@ export async function verifyU3Context(isolation, window, summary) {
   assert.equal(original.instructions.split(token).length - 1, 1);
   const retained = original.instructions.replace(token, "");
   await window.getByTestId("graph-editor-advanced").click();
+  // 新版 inspector 使用标签页，绑定编辑器位于 Inputs 标签
+  await window.getByTestId("graph-inspector-tab-inputs").click();
   await window.getByTestId(`graph-binding-remove-${index}`).click();
+  // 指令编辑器位于 Task 标签，移除绑定后需切回。
+  await window.getByTestId("graph-inspector-tab-task").click();
   await window.getByTestId("graph-instructions").fill(retained);
   const removed = await saveU3Draft(isolation, window);
   assert.equal(

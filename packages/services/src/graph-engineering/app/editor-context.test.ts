@@ -112,7 +112,8 @@ test("same source chips reuse aliases and insert a missing token exactly once, p
   });
   task.instructions =
     "Custom prefix\r\n\r\nAdditional configured check second:\n{{inputs.second}}\nCustom trailing text";
-  const source = task.inputs[0]!.source;
+  // reviewer 现绑定 [request, verification]；按别名定位 verification 源，避免依赖输入位置。
+  const source = task.inputs.find((input) => input.alias === "verification")!.source;
   const before = structuredClone(graph);
   const edited = addGraphContextBinding(graph, task.id, source);
   assert.equal(edited.alias, "verification");
@@ -199,7 +200,9 @@ test("incomplete prompt fields do not disable otherwise valid topology, and bind
 test("whole-artifact empty pointer reuses the selected alias and preserves its original declaration", () => {
   const graph = editorFixture();
   const task = editorTask(graph, "reviewer");
-  task.inputs[0]!.source = {
+  // reviewer 现绑定 [request, verification]；把空 pointer 设到 verification 输入上，保持原意图。
+  const verificationInput = task.inputs.find((input) => input.alias === "verification")!;
+  verificationInput.source = {
     kind: "artifact",
     nodeId: "test",
     selector: "verification",

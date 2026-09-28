@@ -41,20 +41,52 @@ export function GraphRunActions({
     ].includes(run.status) ||
       run.recovery?.state === "active");
   const uncertain =
-    ["Unknown", "Interrupted", "CancelRequested"].includes(run.status) && !run.release;
+    ["Unknown", "Interrupted", "CancelRequested"].includes(run.status) &&
+    !run.release;
   const gates = summary.human.gates.filter(
-    (gate) => gate.canDecide || gate.canContinue || gate.status === "StaleEvidence",
+    (gate) =>
+      gate.canDecide || gate.canContinue || gate.status === "StaleEvidence",
   );
-  const problemChecks = summary.evidence.checks.filter(
-    (check) => check.state === "failed" || check.state === "invalid",
+  // 区分测试失败（真实断言失败）与证据无效（输出校验失败，如审阅者返回畸形 JSON），
+  // 二者使用不同 testid 与标签，便于用户快速定位根因。
+  const failedChecks = summary.evidence.checks.filter(
+    (check) => check.state === "failed",
+  );
+  const invalidChecks = summary.evidence.checks.filter(
+    (check) => check.state === "invalid",
   );
   const step = summary.execution.currentStep;
+  const evidenceActionLabels = graphEvidenceActionLabels(summary.evidence);
+  const stepButton =
+    step &&
+    !gates.length &&
+    ![...failedChecks, ...invalidChecks].some(
+      (check) => check.nodeId === step.nodeId,
+    );
+  const hasActions =
+    summary.actionableSessions.length > 0 ||
+    uncertain ||
+    invalidChecks.length > 0 ||
+    evidenceActionLabels.length > 0 ||
+    gates.length > 0 ||
+    failedChecks.length > 0 ||
+    Boolean(summary.checkpoint) ||
+    Boolean(stepButton) ||
+    cancellable;
   return (
     <section
       className="space-y-2 border-t border-border pt-2"
       data-testid="graph-run-required-actions"
     >
       <h4 className="text-ui-sm font-medium">{u("actions")}</h4>
+      {!hasActions ? (
+        <p
+          className="text-ui-sm text-foreground-subtle"
+          data-testid="graph-run-no-action"
+        >
+          {u("noActionRequired")}
+        </p>
+      ) : null}
       {summary.actionableSessions.length ? (
         <div className="flex flex-wrap gap-2">
           {summary.actionableSessions.map((session) => (
@@ -76,17 +108,33 @@ export function GraphRunActions({
               >
                 {session.name} · {u("openNative")}
               </Button>
-              {session.status === "WaitingForPermission" || session.status === "WaitingForUser" ? (
+              {session.status === "WaitingForPermission" ||
+              session.status === "WaitingForUser" ? (
                 <p className="max-w-lg text-ui-xs text-foreground-subtle">
-                  {u(session.status === "WaitingForPermission" ? "permissionHelp" : "questionHelp")}
+                  {u(
+                    session.status === "WaitingForPermission"
+                      ? "permissionHelp"
+                      : "questionHelp",
+                  )}
                 </p>
               ) : null}
             </div>
           ))}
         </div>
       ) : null}
-      {uncertain ? <p className="text-ui-sm text-warning">{u("inspectUnknown")}</p> : null}
-      {graphEvidenceActionLabels(summary.evidence).map((key) => (
+      {uncertain ? (
+        <p className="text-ui-sm text-warning">{u("inspectUnknown")}</p>
+      ) : null}
+      {invalidChecks.length ? (
+        <p
+          role="alert"
+          data-testid="graph-run-output-validation-failed"
+          className="text-ui-sm text-warning"
+        >
+          {u("outputValidationFailed")}
+        </p>
+      ) : null}
+      {evidenceActionLabels.map((key) => (
         <p key={key} className="text-ui-sm text-foreground-subtle">
           {u(key)}
         </p>
@@ -102,24 +150,50 @@ export function GraphRunActions({
             data-attempt-id={gate.attemptId ?? ""}
             data-request-id={gate.requestId ?? ""}
             onClick={() =>
-              onInspect({ kind: "node", nodeId: gate.nodeId, attemptId: gate.attemptId })
+              onInspect({
+                kind: "node",
+                nodeId: gate.nodeId,
+                attemptId: gate.attemptId,
+              })
             }
           >
             {gate.name} · {u("reviewGate")}
           </Button>
         ))}
-        {problemChecks.map((check) => (
+        {failedChecks.map((check) => (
           <Button
             key={check.nodeId}
             size="sm"
             variant="outline"
-            data-testid="graph-run-inspect-evidence"
+            data-testid="graph-run-inspect-failure"
             data-node-id={check.nodeId}
             onClick={() =>
-              onInspect({ kind: "node", nodeId: check.nodeId, attemptId: check.attemptId })
+              onInspect({
+                kind: "node",
+                nodeId: check.nodeId,
+                attemptId: check.attemptId,
+              })
             }
           >
-            {check.name} · {u("showStep")}
+            {check.name} · {u("inspectFailedTest")}
+          </Button>
+        ))}
+        {invalidChecks.map((check) => (
+          <Button
+            key={check.nodeId}
+            size="sm"
+            variant="outline"
+            data-testid="graph-run-inspect-invalid"
+            data-node-id={check.nodeId}
+            onClick={() =>
+              onInspect({
+                kind: "node",
+                nodeId: check.nodeId,
+                attemptId: check.attemptId,
+              })
+            }
+          >
+            {check.name} · {u("inspectInvalidEvidence")}
           </Button>
         ))}
         {summary.checkpoint ? (
@@ -144,13 +218,17 @@ export function GraphRunActions({
             {u("showRecovery")}
           </Button>
         ) : null}
-        {step && !gates.length && !problemChecks.some((check) => check.nodeId === step.nodeId) ? (
+        {stepButton ? (
           <Button
             size="sm"
             variant="outline"
             data-testid="graph-run-show-step"
             onClick={() =>
-              onInspect({ kind: "node", nodeId: step.nodeId, attemptId: step.attemptId })
+              onInspect({
+                kind: "node",
+                nodeId: step.nodeId,
+                attemptId: step.attemptId,
+              })
             }
           >
             {step.name} · {u("showStep")}
@@ -168,7 +246,9 @@ export function GraphRunActions({
           </Button>
         ) : null}
       </div>
-      {cancellable || summary.execution.stopRequested || run.status === "Cancelled" ? (
+      {cancellable ||
+      summary.execution.stopRequested ||
+      run.status === "Cancelled" ? (
         <p className="text-ui-xs text-foreground-subtle">{u("stopMeaning")}</p>
       ) : null}
     </section>
