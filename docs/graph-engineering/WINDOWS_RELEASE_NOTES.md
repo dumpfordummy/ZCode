@@ -1,57 +1,87 @@
-# ZCode Graph 3.14.0-z7.5 — Pre-Z8 Usability Preview (Windows x64)
+# ZCode Graph 3.14.0-z7.6 — Pre-Z8 Usability Preview (Windows x64)
 
-This prerelease contains the committed pre-Z8 Graph Engineering improvements through U6: editable sequential Agent Tasks with Guided/Advanced context controls, human review, artifacts and native Build/Test tools, bounded conditional/repair workflows, a versioned sequential workflow library with portable export/import, repeat-request reuse, run-status/approval/cancellation/stale-evidence controls, and optional two-worker Fork/Join with separate owned workspaces and reviewed integration. Graph uses ZCode's existing native agent/session services. Conversation links open the actual existing sessions; native Chat, permissions, questions, configuration and history retain their existing owners.
+This prerelease completes the corrected Sequential Engineering reviewer contract and the accompanying run/design clarity improvements. The built-in generic Sequential Engineering template is **version 2**; new instantiation pins it explicitly, while historical saved definitions and runs are preserved unchanged. Graph continues to use ZCode's existing native agent/session services, native Build/Test tools, and the existing native permission model. Conversation links open the actual existing sessions; native Chat, permissions, questions, configuration and history retain their existing owners.
 
-## Usability improvements in this prerelease
+## Reviewer contract in this prerelease
 
-- **Guided context controls**: select the original request, an eligible earlier step's final text or structured output, a configured Test's verification result, or declared repair feedback — all through Guided UI without JSON editing. Editing one text area preserves the other text, token order and bindings.
-- **Draft input preview**: expand to see the current request with clearly marked placeholders for future step, artifact and repair results. Substitution is one pass; braces inside results are data, not a second set of instructions.
-- **Portable workflow export/import**: export a versioned workflow definition to a `.zcode-workflow.json` file (envelope `format: "zcode-workflow"`, `version: 1`, byte limit 256,000). Import validates UTF-8, size, and stat-unchanged tamper check. Exported references carry `required: true`, `kind`, and non-empty `nodeIds` for explicit destination rebinding.
-- **Repeat-request reuse**: pinned and unpinned repeat-request through `applyGraphRunRequest` (pure transform, no revision/pin/binding mutation). Pinned instances sync `start.request` via shared `renderStartRequest`.
-- **Run status/approval/cancellation**: execution, test evidence, and human decision are separately labelled. Cancel requests a stop for the run's owned native work; already-written files remain. Stale evidence after source drift blocks approval and does not auto-recover.
-- **Bounded repair policy**: Guided controls for 0–5 additional repairs, positive deadline up to 1,440 minutes, 1–64 total Task/Tool admissions.
+- **Reviewer receives the original request plus the current Test verification.** Only the explicitly bound verification artifact ID is permitted as an evidence reference; a nested `reportArtifactId` does not establish a binding.
+- **Strict JSON output remains strict.** The reviewer must return exactly one schema-valid JSON object. Prose or fenced output is rejected as invalid output, distinguishable from a valid reviewer outcome.
+- **Valid `needs_changes` and `needs_human` remain valid review outcomes** that complete the reviewer attempt with valid output and reach the final human gate. Invalid output fails the reviewer attempt and routes the run to NeedsHuman without that gate. These are different facts despite similar labels.
+- **A genuine failed Test cannot become a passing reviewed workflow.** The generic template stops on a failed machine Test before reviewer dispatch; the run routes to NeedsHuman with no reviewer session and no final-gate request.
+- **Declared untracked/ignored local source does not automatically fail review.** Declared local source fingerprints use file paths and bytes; ignored/untracked source is valid when the selected check declares it. Git tracking is not a universal acceptance criterion.
+- **Historical saved definitions and runs are preserved.** Built-in generic Sequential Engineering version 2 is selected explicitly for new instantiation; old built-in-version pins fail explicitly rather than silently changing meaning. Existing inline saved definitions and run history are not rewritten or silently migrated.
+- **Reviewer "do not run commands" wording is prompt guidance**, not an enforced tool-capability boundary. Native reviewer requests contain ordinary tool definitions; no new permission model or Build/Test permission-policy change was introduced. Build/Test continue to use the existing native manual permission prompts.
+
+## UX clarity improvements
+
+- **Workflows**: the task request is shown separately from Context. Context lists only explicitly selected document/instruction/skill references, with an empty-state label otherwise. Saved Build/Test check names carry saved/not-run wording — they are configuration and do not imply execution. The run button uses the existing translated `graph.run` action.
+- **Project setup**: a saved-check list and a single focused editor; editing/restoring a check preserves the other check and the Build recipe association.
+- **Design**: readable minimum zoom (0.85) with a selection-centered viewport that responds to actual node measurements and canvas dimensions. Saved positions/topology are unchanged; users pan the long graph instead of shrinking every label. The selected node stays visible after mode/tab/window-size transitions.
+- **Runs**: the workflow name is distinct from the actual captured request, with expandable raw input retained. Runs distinguishes machine-evidence problems, reviewer-output validation failure, valid reviewer outcomes (`pass`/`needs_changes`/`needs_human`), and the final human decision. Actionable approval/failure states do not show "No action required." Reviewer output summaries select only the current iteration's exact attempt and use its persisted validation result.
+
+These are Renderer projections and harness/test-organization changes; no service state owner, permission model, or runtime contract was added or weakened.
 
 ## Verification performed
 
-Automated native regression on the current build (HEAD `6f41ad53`, app `3.14.0`):
+Acceptance was performed on the accepted source (Codex native reviewer closeout, 2026-09-28), integrated into `main` through the Graph pre-Z8 handoff with byte-identical product source. The happy path remains at **Final human review / WaitingForApproval**; it was not approved to manufacture a Completed result.
 
-- **U1** agent-assisted workflow: PASS (11 controlled requests, 3 native inputs).
-- **U2** eight-scenario .NET matrix: 8/8 PASS (pass/fail/zero/skipped/missing-required/source-drift/build-drift/multi) with SDK 8.0.425 restored via official `dotnet-install.ps1` and `PRE_Z8_DOTNET_ROOT` routing.
-- **U3** editor controls (Guided/Advanced, reference catalog, schema/condition JSON, repair policy, canvas): PASS (editor-only, 0 model requests).
-- **U4** run lifecycle: 4/4 PASS (cancel, complete, concurrent-chat, source-drift).
-- **U5** file transfer and repeat-request: 6/6 PASS (export/import round trip, cancel/failure protection, async lifecycle, pinned+unpinned repeat-request, run-identity proof).
-- **dotnet-fixture**: 7/8 PASS (1 known net6.0 baseline limitation — SDK 8.0.425 lacks 6.0.x ref packs; fixture is package-free; not a regression).
-- **Emitting checks**: typecheck exit 0; lint 0 errors / 75 pre-existing warnings; architecture 0 violations; graph-engineering test suite 341/343 (2 pre-existing skipped, 0 fail).
-- **CI workflow**: source tests, TypeScript, root lint, architecture, Windows build, and detached packaged Z1/Z2/ordinary Chat acceptance using actual native tools and controlled loopback providers.
+### Codex controlled-provider/native acceptance
 
-Production defects fixed in this checkpoint:
-- **D1**: `useGraphTemplateFiles.ts` mtimeMs integer check rejected Windows NTFS float mtimeMs, breaking file imports on Windows.
-- **D2**: `GraphTemplateTransfer.tsx` exportToFile treated cancel as success.
-- **D3**: `workflow-request.ts` pinned repeat-request did not sync `start.request`, so new request never reached model.
-- **D4**: `z4-review.test.ts` test timestamp construction caused intermittent freshness-check rejection on Windows (fixture construction fix; does not prove the same timing issue is impossible in production).
+Six native reviewer scenarios, each on a fresh isolated profile/workspace with **genuine native Read/Edit and Graph Tool Build/Test execution**; only model responses came from a controlled loopback provider. Every scenario exited 0.
 
-## Known limitation — Fork/Join export/import is not supported (Z7-A12 FAIL)
+1. **Happy pass** — Test 1 passed / 0 failed; reviewer Completed/valid `pass`; final human gate `WaitingForApproval`, no decision.
+2. **Prose + fenced JSON** — reviewer Failed; `outputValidation` invalid (strict JSON error); run NeedsHuman; no final-gate request.
+3. **Embedded unbound report reference** — reviewer Failed; evidence reference rejected; run NeedsHuman; no final-gate request.
+4. **Valid `needs_changes`** — reviewer Completed/valid; final human gate pending; no parser alert.
+5. **Valid `needs_human`** — reviewer Completed/valid; final human gate pending; no parser alert.
+6. **Genuine Test failure** — native Edit left wrong content; real Test exit 1 with one failed assertion; Test attempt Failed; run NeedsHuman; no reviewer session/provider request and no final-gate request.
 
-The portable workflow library exports only the sequential definition. It does not transfer the parallel plan's branch topology, concurrency limit, Join semantics or integration configuration. Do not use sequential export as a backup or transfer of a Fork/Join plan. Existing sequential imports and rejected unsupported payloads made zero native/workspace execution calls in the isolated service audit; a valid Fork/Join import cannot be tested until implemented. The expanded Z7 acceptance is incomplete.
+Passing these controlled scenarios proves native integration and validation behavior, not live-model adherence.
 
-Fork/Join is opt-in and limited to two workers against a clean committed local Git base. Workers and integration use distinct app-owned clones. Integration requires review and fresh combined Build/Test evidence followed by human approval. Interrupted work is not automatically replayed, workspaces are retained until explicit safe cleanup, and results are not automatically merged into the original project. This coordination is not an OS security sandbox.
+### Accepted .NET native regression
+
+System SDK **8.0.425** (fixture `global.json` pins 8.0.425, `rollForward: disable`); no SDK/package install or framework change. Native VSTest result: **4 discovered / 3 passed / 0 failed / 1 skipped**. The TRX redaction proof was corrected in the harness — VSTest adds absolute assembly paths even for synthetic source, so the proof now classifies original generated bytes independently of product redaction output, while still asserting redaction/validation/digest consistency and user-path removal. **Product redaction behavior was not weakened.** The initial run's harness assertion failure is retained as evidence; the corrected run passed.
+
+### Automated counts (frozen accepting build)
+
+- Graph services: **360 passed / 0 failed / 0 skipped**.
+- Graph UI: **118 passed / 0 failed / 0 skipped**.
+- U2 proof/fixture + z6 response helper tests: **19 passed / 0 failed / 0 skipped**.
+- Lint: **75 warnings / 0 errors**.
+- Architecture: **0 violations; `exceptions: []`** (no threshold/baseline weakening).
+- Root typecheck: exit 0.
+
+### Pre-release packaged smoke
+
+Detached packaged smoke against the locally built z7.6 installer (packaged identity `name: ZCode Graph`, `isPackaged: true`, version `3.14.0-z7.6`, Graph profile paths): all 11 cases passed — ordinary Chat, no-provider, Z1 literal compatibility, and eight Z2 scenarios (complete, question, cancel-question, cancel-permission, cancel-progress, restart-interrupted, restart-permission, persistence-recovery). These use actual native tools and controlled loopback providers in disposable profiles; no paid/live provider task was run. This is receiving-machine controlled smoke against the local pilot installer; GitHub CI runs its own packaged smoke against the freshly built installer.
+
+### User-operated live-model manual pilot
+
+**User-operated live-model manual pilot: PASS** through the disposable Sequential Engineering Node workflow, after the correct ZCode Graph z7.6 local package and a clean manual Node workspace were prepared. This is one user-operated manual pilot with a live model, recorded as manual acceptance. It is not an automated cross-provider conformance test, and it does not guarantee that every model/provider will follow the reviewer prompt. No provider/model name, run ID, latency, token counts, or screenshots are claimed beyond the user's PASS report.
+
+## Known limitations
+
+- This remains an **unsigned prerelease**: not Latest, not stable, not production-ready, not signed, and not Z8-complete. Windows x64 publication only.
+- No code-signing reputation qualification. No broad provider/model matrix. No non-Windows/mobile qualification. No Z8 work.
+- Build/Test continue to require the **existing native manual permission prompts**. Run-scoped Build/Test preauthorization is not implemented; it is a future UX/security-policy topic. Do not describe it as available.
+- Reviewer "do not run commands" wording is prompt guidance; there is no structural reviewer tool-capability restriction.
+- Fork/Join export/import remains unsupported (Z7-A12). The portable workflow library exports only the sequential definition; it does not transfer parallel branch topology, concurrency, Join semantics, or integration configuration. Do not use sequential export as a backup or transfer of a Fork/Join plan.
 
 ## Installation
 
-Download the Windows x64 `.exe` installer and compare its SHA256 hash with `SHA256SUMS.txt`. GitHub changes the space in the build filename to a dot (`ZCode.Graph-3.14.0-z7.5-win-x64.exe`); the checksum line retains the original build filename. No Git checkout is needed to install. Each user supplies their own model provider configuration and project development tools.
+Download the Windows x64 `.exe` installer and compare its SHA256 hash with `SHA256SUMS.txt`. GitHub normalizes the installer filename from `ZCode Graph-3.14.0-z7.6-win-x64.exe` to `ZCode.Graph-3.14.0-z7.6-win-x64.exe`; the file bytes and hash are unchanged. No Git checkout is needed to install. Each user supplies their own model provider configuration and project development tools.
 
-The separate **ZCode Graph** app uses `%USERPROFILE%\.zcode-graph-engineering`, with a private home for the application and its tools. It does not copy an existing ZCode/Codex profile, take over the upstream URL handler/Explorer menu, or install upstream updates. Existing Graph users update manually by downloading and running this newer Graph installer. This remains an **unsigned prerelease**; upstream OAuth callbacks and signing reputation are not covered.
+The separate **ZCode Graph** app uses `%USERPROFILE%\.zcode-graph-engineering`, with a private home for the application and its tools. It does not copy an existing ZCode/Codex profile, take over the upstream URL handler/Explorer menu, or install upstream updates. Existing Graph users update manually by downloading and running this newer Graph installer. App auto-update remains disabled.
 
 ## NOT RUN for this release
 
-- User-operated live-provider Read/Edit/test with a real paid model.
-- Real Windows OS file dialog ergonomics (the native tests use a controlled dialog seam, not real pickers).
+- Packaged Z3–Z7 native acceptance beyond ordinary Chat / Z1 / Z2 (CI runs those packaged smoke cases only).
 - A second physical PC/clean VM; installer upgrade/uninstall; code-signing reputation.
-- Packaged Z3–Z7 native acceptance (CI runs Z1/Z2/ordinary Chat packaged smoke only).
-- U3 native context handoff (prior-session evidence only; this checkpoint's U3 run is editor-only).
+- Real Windows OS file dialog ergonomics (native tests use a controlled dialog seam, not real pickers).
 - Mobile/remote/non-Windows Graph acceptance.
-- Zero Worker/Plugin/MCP activity is inferred from the absence of unexpected native inputs and tool calls, not from HTTP blocking alone — this is an explicit evidence gap.
+- Automated cross-provider reviewer conformance (one user-operated live-model pilot passed; not a matrix).
+- The full unrelated pre-Z8 regression matrix and Z8.
 
-No paid model or company-project checks were performed as part of publication. No Z8 work is included. This is a prerelease and is explicitly not Latest, not stable, not production-ready, not signed, and not Z8-complete.
+No Z8 work is included. This is a prerelease and is explicitly not Latest, not stable, not production-ready, not signed, and not Z8-complete.
 
 [Installation and manual updates](https://github.com/dumpfordummy/ZCode/blob/main/docs/graph-engineering/WINDOWS_SETUP.md) · [User guide](https://github.com/dumpfordummy/ZCode/blob/main/docs/graph-engineering/pre-z8/USER_GUIDE.md) · [Human pilot checklist](https://github.com/dumpfordummy/ZCode/blob/main/docs/graph-engineering/pre-z8/HUMAN_PILOT_CHECKLIST.md) · [Publishing instructions](https://github.com/dumpfordummy/ZCode/blob/main/docs/graph-engineering/PUBLISH.md)
