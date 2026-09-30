@@ -33,6 +33,8 @@ export function useGraphReferencePicker(target: GraphWorkspaceTarget, fingerprin
   const current = useRef({ scope, fingerprint });
   current.current = { scope, fingerprint };
   const [validationKey, setValidationKey] = useState("");
+  // UX-M2.3：当前校验属于哪个路径。组件据此只在校验确实属于本次尝试时显示失败，不把上一次的失败挂到新文件上。
+  const [validationPath, setValidationPath] = useState("");
   const [stored, setStored] = useState<{
     scope: object;
     query: string;
@@ -61,6 +63,7 @@ export function useGraphReferencePicker(target: GraphWorkspaceTarget, fingerprin
       validate: async (path) => {
         const key = `${captured}:${path}`;
         setValidationKey(key);
+        setValidationPath(path);
         const result = await setup.invoke({ action: "validate-reference", path }, key, owns);
         return result?.kind === "reference-validation" ? result : undefined;
       },
@@ -98,9 +101,19 @@ export function useGraphReferencePicker(target: GraphWorkspaceTarget, fingerprin
     supported: setup.supported,
     canSelectFile: platform.canSelectFilePath === true && !resolution.isRemoteTarget,
     select,
-    selectNative: () => select(() => platform.selectFile()),
+    /**
+     * UX-M2.3: `onPicked` receives what the native chooser returned (a path, or null when cancelled)
+     * before validation starts, so the UI can name the attempted file. A chooser error still rejects.
+     */
+    selectNative: (onPicked?: (path: string | null) => void) =>
+      select(async () => {
+        const path = await platform.selectFile();
+        onPicked?.(path || null);
+        return path;
+      }),
     search,
     searchState,
     validation: setup.state("validate-reference", validationKey),
+    validationPath,
   };
 }

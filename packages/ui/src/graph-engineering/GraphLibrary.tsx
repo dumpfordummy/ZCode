@@ -54,6 +54,8 @@ export function GraphLibrary({
   onViewCurrentRun,
   pending = false,
   error,
+  errorKind,
+  designError,
   recipeReadState,
   inline = false,
   onLoadRecipes,
@@ -73,6 +75,10 @@ export function GraphLibrary({
   onViewCurrentRun?(): void;
   pending?: boolean;
   error?: string | null;
+  /** UX-M2.3: how the New-run bar frames `error` (inline only). An instantiate failure is a review failure. */
+  errorKind?: "review" | "start";
+  /** UX-M2.3 (inline): a failed design save, shown in the replace dialog that caused it. */
+  designError?: string | null;
   recipeReadState: GraphRecipeReadState;
   inline?: boolean;
   onLoadRecipes(): void;
@@ -227,6 +233,7 @@ export function GraphLibrary({
             admissionReason={admissionReason}
             onViewCurrentRun={onViewCurrentRun}
             error={inline ? workflow.error || error || undefined : undefined}
+            errorKind={workflow.error ? "review" : errorKind}
             onLoadRecipes={onLoadRecipes}
             onOpenSetup={(checkId) => {
               setOpen(false);
@@ -352,9 +359,9 @@ export function GraphLibrary({
             <DialogTitle>{u("replaceTitle")}</DialogTitle>
             <DialogDescription>{u("replaceHelp")}</DialogDescription>
           </DialogHeader>
-          {replacementError || workflow.error || error ? (
+          {replacementError || workflow.error || error || designError ? (
             <p role="alert" className="text-ui-sm text-destructive">
-              {replacementError || workflow.error || error}
+              {replacementError || workflow.error || error || designError}
             </p>
           ) : null}
           <div className="flex flex-wrap gap-2">

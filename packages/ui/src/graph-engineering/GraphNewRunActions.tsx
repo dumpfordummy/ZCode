@@ -2,6 +2,7 @@ import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphM1Text } from "./GraphM1Text.js";
+import { GraphFailureText } from "./GraphFailureText.js";
 
 /**
  * 新建运行的操作栏：主操作、次要操作，以及紧邻它们的“为什么不可用”与去处。
@@ -18,6 +19,7 @@ export function GraphNewRunActions({
   onViewCurrentRun,
   onGoToFirstField,
   error,
+  errorKind = "review",
 }: {
   allowReview: boolean;
   blocked: boolean;
@@ -29,6 +31,8 @@ export function GraphNewRunActions({
   onGoToFirstField?(): void;
   /** A failed instantiate/preflight, shown here so it is seen next to the action that caused it. */
   error?: string;
+  /** UX-M2.3: which admission step failed, for the UI-owned framing above the verbatim message. */
+  errorKind?: "review" | "start";
 }) {
   const { intl } = useZCodeIntl();
   const u = (key: string) => intl.formatMessage({ id: `graph.preZ8.${key}` });
@@ -67,13 +71,11 @@ export function GraphNewRunActions({
         {u(allowReview ? "saveAsWorkflow" : "createWorkflow")}
       </Button>
       {error ? (
-        <p
-          role="alert"
-          className="basis-full break-words text-ui-sm text-destructive"
-          data-testid="graph-new-run-error"
-        >
-          {error}
-        </p>
+        <GraphFailureText
+          testId="graph-new-run-error"
+          framing={errorKind === "start" ? "startFailed" : "reviewFailed"}
+          message={error}
+        />
       ) : null}
       {reason ? (
         <div

@@ -38,6 +38,7 @@ export function GraphTemplateBindings({
   admissionReason,
   onViewCurrentRun,
   error,
+  errorKind,
   onLoadRecipes,
   onOpenSetup,
   allowReview = false,
@@ -57,6 +58,8 @@ export function GraphTemplateBindings({
   onViewCurrentRun?(): void;
   /** Failure of the last instantiate/preflight, shown beside the primary action. */
   error?: string;
+  /** UX-M2.3: how the New-run bar frames `error`. */
+  errorKind?: "review" | "start";
   onLoadRecipes(): void;
   onOpenSetup(checkId?: string): void;
   /** "review" = Review and run; "save" = create the workflow only (explicit, no preflight). */
@@ -342,6 +345,7 @@ export function GraphTemplateBindings({
         onSave={() => onInstantiate(parameters, normalizedBindings(bindings), "save")}
         onViewCurrentRun={onViewCurrentRun}
         error={error}
+        errorKind={errorKind}
         onGoToFirstField={errors[0] ? () => focusIssue(errors[0]!) : undefined}
       />
     </section>

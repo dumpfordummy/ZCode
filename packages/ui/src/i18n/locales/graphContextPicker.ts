@@ -59,10 +59,6 @@ const messages: Record<string, [string, string]> = {
   retry: ["Try again", "重试"],
   unsupported: ["Context search is unavailable for this workspace.", "此工作区不支持上下文搜索。"],
   checking: ["Checking {value}…", "正在检查 {value}…"],
-  selectionFailed: [
-    "Could not use {value}. The previous selection was kept.",
-    "无法使用 {value}，已保留原选择。",
-  ],
   announceAdded: ["{value} selected for {role}.", "已为“{role}”选择 {value}。"],
   announceReplaced: [
     "{value} replaced {previous} for {role}.",

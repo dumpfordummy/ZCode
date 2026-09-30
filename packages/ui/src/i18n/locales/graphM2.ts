@@ -80,6 +80,35 @@ const messages: Record<string, [string, string]> = {
     "Removed in unsaved edits; the saved check is still used",
     "已在未保存的编辑中删除；仍使用已保存的检查",
   ],
+  // UX-M2.3：失败说明（UI 自有）。其下原样显示 Host/校验/平台的诊断；文件名、路径与诊断不翻译。
+  couldNotUseKept: [
+    "Could not use {file}. The previous selection {previous} was kept.",
+    "无法使用 {file}。已保留原选择 {previous}。",
+  ],
+  couldNotUseNothing: [
+    "Could not use {file}. Nothing is selected for this slot.",
+    "无法使用 {file}。此槽位没有选择任何内容。",
+  ],
+  chooserFailedKept: [
+    "The file chooser did not return a file. The previous selection {previous} was kept.",
+    "文件选择器没有返回文件。已保留原选择 {previous}。",
+  ],
+  chooserFailedNothing: [
+    "The file chooser did not return a file. Nothing is selected for this slot.",
+    "文件选择器没有返回文件。此槽位没有选择任何内容。",
+  ],
+  checksSaveFailed: [
+    "The saved checks were not changed. Your unsaved edits are kept.",
+    "已保存的检查没有改变。未保存的编辑仍然保留。",
+  ],
+  reviewFailed: [
+    "Review could not be prepared. Nothing was started; your request, context and check choices are kept.",
+    "无法准备审阅。没有启动任何运行；请求、上下文和检查选择都会保留。",
+  ],
+  startFailed: [
+    "Start did not complete. Check the run list to see whether a run was admitted before you start again.",
+    "启动未完成。再次启动前，请在运行列表中确认是否已有运行被接纳。",
+  ],
 };
 export const graphM2En = Object.fromEntries(
   Object.entries(messages).map(([key, value]) => [`graph.m2.${key}`, value[0]]),

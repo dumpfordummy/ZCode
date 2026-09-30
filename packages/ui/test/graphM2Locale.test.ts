@@ -40,6 +40,13 @@ test("the graph-engineering components only read UX-M2 message ids that are defi
     "unsummarizable.invalid-json",
     "unsummarizable.missing-id",
     "unsummarizable.duplicate-id",
+    "couldNotUseKept",
+    "couldNotUseNothing",
+    "chooserFailedKept",
+    "chooserFailedNothing",
+    "checksSaveFailed",
+    "reviewFailed",
+    "startFailed",
   ])
     used.add(key);
   assert.ok(used.size >= 3, "the scan found UX-M2 keys in the components");

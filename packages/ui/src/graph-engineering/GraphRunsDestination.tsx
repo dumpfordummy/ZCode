@@ -7,6 +7,7 @@ import { GraphLibrary } from "./GraphLibrary.js";
 import { GraphRunConfirmation } from "./GraphRunConfirmation.js";
 import { GraphRunHistory } from "./GraphRunHistory.js";
 import type { GraphPanelProps } from "./graphEngineeringView.js";
+import { graphAdmissionFailure } from "./graphActionFailure.js";
 import type { GraphRunConfirmationSnapshot, GraphSubmission } from "./graphSubmission.js";
 
 type Run = GraphWorkspaceView["runs"][number];
@@ -59,7 +60,10 @@ export function GraphRunsDestination(props: {
 }) {
   const { view, graph, confirmation, selectedRun } = props;
   // UX-M1.4：检查保存失败属于 Checks 编辑器；返回新运行后不能显示在 Review and run 旁边。
-  const admissionError = graph.errorSource === "checks" ? undefined : (graph.error ?? undefined);
+  // UX-M2.3：更进一步，这两个操作栏只显示准入路径（预检、Start）的失败，其他操作的失败留在各自页面。
+  const admission = graphAdmissionFailure(graph.error, graph.errorSource);
+  // 设计保存失败（替换对话框里的“保存并替换”）仍显示在那个对话框中。
+  const designError = graph.errorSource === "design" ? graph.error : undefined;
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
   const u = (id: string) => intl.formatMessage({ id: `graph.preZ8.${id}` });
@@ -87,7 +91,8 @@ export function GraphRunsDestination(props: {
             canConfirm={props.canConfirm}
             onClose={props.onCloseConfirmation}
             onConfirm={props.onStart}
-            error={admissionError}
+            error={admission?.message}
+            errorKind={admission?.kind}
           />
         ) : props.newRunPane ? (
           <section className="space-y-3" data-testid="graph-new-run-pane">
@@ -109,7 +114,9 @@ export function GraphRunsDestination(props: {
                 props.activeRunId ? () => props.onViewRun(props.activeRunId!) : undefined
               }
               pending={graph.pending}
-              error={admissionError}
+              error={admission?.message}
+              errorKind={admission?.kind}
+              designError={designError}
               recipeReadState={graph.recipeReadState}
               onLoadRecipes={graph.readRecipes}
               onOpenSetup={props.onOpenSetup}

@@ -7,6 +7,7 @@ import { useGraphDraftStore } from "@/store/graphDraftStore.js";
 import { GraphRecipeReadStatus } from "./GraphRecipeReadStatus.js";
 import { GraphRecipeForm } from "./GraphRecipeForm.js";
 import { GraphRecipeList } from "./GraphRecipeList.js";
+import { GraphFailureText } from "./GraphFailureText.js";
 import { GraphDotnetPreset } from "./GraphDotnetPreset.js";
 import { GraphChecksSetup } from "./GraphChecksSetup.js";
 import { useGraphSetupText } from "./GraphSetupFields.js";
@@ -106,6 +107,7 @@ export function GraphProjectRecipes({
     setFocusOpened(false);
   }, [focusOpened, openIndex]);
   const dirty = Boolean(form && form.text !== form.baseText);
+  const checksError = error || (graph.errorSource === "checks" ? graph.error : undefined);
   const conflict = Boolean(form && readState.snapshot && form.digest !== readState.snapshot.digest);
   // 图运行未结束时 Host 拒绝保存检查；这里同样禁用并说明原因（编辑仍可继续，草稿保留）。
   const occupied = graphAdmission(graph.view?.runs ?? []).blocked;
@@ -262,10 +264,15 @@ export function GraphProjectRecipes({
           {t("recipesSaved")}
         </p>
       ) : null}
-      {error || graph.error ? (
-        <p role="alert" className="text-destructive">
-          {error || graph.error}
-        </p>
+      {/* UX-M2.3：只显示检查保存/校验的失败，先说明仍然成立的事实，再原样显示诊断。
+          其他操作的失败由编辑器的通用提示显示；这里不重复，也不冒充检查失败。 */}
+      {checksError ? (
+        <GraphFailureText
+          testId="graph-recipes-save-error"
+          framing="checksSaveFailed"
+          message={checksError}
+          className=""
+        />
       ) : null}
       {/* 添加检查：项目元数据扫描与 .NET 预设只用于新增，不占据已保存检查的主视图 */}
       <GraphDotnetPreset
