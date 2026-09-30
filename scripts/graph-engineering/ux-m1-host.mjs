@@ -22,6 +22,18 @@ import { createGraphRecipeStore } from "../../packages/services/src/graph-engine
 import { createContextPickerHost } from "./context-picker-host.mjs";
 import { resolved, runningRun } from "./ux-m1-runs.mjs";
 
+// 与 Host 的 isConfirmedTerminal 相同的判定（domain/definition.ts）：未结束的运行占用工作区。
+const TERMINAL = [
+  "Completed",
+  "Failed",
+  "Rejected",
+  "Cancelled",
+  "NeedsHuman",
+  "BudgetExhausted",
+  "NoProgress",
+];
+const confirmedTerminal = (run) => !run.release && TERMINAL.includes(run.status);
+
 const sha = (value) => createHash("sha256").update(value).digest("hex");
 
 export async function createUxM1Host() {
@@ -123,6 +135,9 @@ export async function createUxM1Host() {
         },
         async () => {
           if (params.action === "save") {
+            // 镜像真实 Host（app/service.ts）的规则：图运行未结束时拒绝保存检查。
+            if (graph[id].runs.some((run) => !confirmedTerminal(run)))
+              throw new Error("Project recipe edits are blocked while a graph is unresolved.");
             const saved = await store.save(params.target, params.recipes, params.expectedDigest);
             notify(id);
             return saved;
@@ -261,6 +276,18 @@ export async function createUxM1Host() {
     library,
     attachPage(target) {
       page = target;
+    },
+    /** Write saved checks straight into the workspace's real `.zcode/config.json` (as an external editor would). */
+    async seedRecipes(id, recipes) {
+      const folder = path.join(picker.workspaces[id], ".zcode");
+      await fs.mkdir(folder, { recursive: true });
+      await fs.writeFile(
+        path.join(folder, "config.json"),
+        JSON.stringify({ graphRecipes: recipes }, null, 2),
+      );
+    },
+    async readRecipes(id) {
+      return store.read({ workspacePath: picker.workspaces[id] });
     },
     setRuns(id, runs) {
       graph[id].runs = structuredClone(runs);

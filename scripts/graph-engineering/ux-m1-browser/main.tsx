@@ -151,7 +151,7 @@ function Harness() {
         <ServiceProvider services={services as never}>
           <PlatformProvider platform={platform as never}>
             <div
-              className={`${graphFocusClass} mx-auto flex min-h-screen w-full flex-col bg-background text-foreground`}
+              className={`${graphFocusClass} mx-auto flex h-screen w-full flex-col bg-background text-foreground`}
               style={{ maxWidth: 1200 }}
             >
               <Probe path={path} />
