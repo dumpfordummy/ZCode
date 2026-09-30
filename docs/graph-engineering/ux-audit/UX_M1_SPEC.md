@@ -2,6 +2,8 @@
 
 Status: **2026-09-30, written before implementation** (AGENTS.md: spec first). Plan: [UX_M1_MILESTONE.md](UX_M1_MILESTONE.md). Baseline: integration tip `b877f7f` (merge of PR #2, which contains the Context picker), branch `claude/graph-ux-m1`. Section 3 (UX-M1.1) is complete. Sections 4 (UX-M1.2) and 5 (UX-M1.3) are finalized in their own commits, before the behaviour they describe is implemented. Windows acceptance (UX-M1.4) is not claimed by anything here.
 
+**As-built note, 2026-09-30:** sections 3 to 5 are implemented on `claude/graph-ux-m1`; section 8 records where the build differs from the text above and what is still open. The sections above are kept as written before implementation.
+
 ## 1. Outcome and vocabulary
 
 A solo engineer can prepare the next task while a run occupies the workspace, adjust its context and checks without losing work, and return to the current run. Nothing about admission changes.
@@ -187,3 +189,16 @@ Real components and hooks are mounted in real Chromium with the repository's own
 ## 7. Out of scope (recorded, not implemented)
 
 Concurrent runs, queues, auto-start, permission policy, exact pending-permission payloads, reviewer retry, Chat "Run as a workflow…", new schemas or stores, persistence of drafts across restarts, and translation of executable instructions.
+
+## 8. As built: deviations and open items (2026-09-30)
+
+Where the implementation differs from, or adds to, the sections written before it. Nothing above was rewritten.
+
+1. **Errors beside the action (adds to 5.3 rule 3).** Observing the preflight-error state showed the message rendered below the fold while the primary action stayed visible in the sticky bar. A failed instantiate, preflight or Start is now shown inside the active sticky bar (the New-run bar, or the review commit bar), and the generic bottom alert is suppressed there so the error is announced once. Elsewhere the bottom alert is unchanged.
+2. **Sticky bars (adds to 5.3 rule 9).** Both bottom action bars and the new Back bar let scrolled content show in the 12px scroller padding beside them (sticky offsets exclude padding). They now use negative offsets and margins that cancel the padding. No new tokens.
+3. **`saveRecipes` hook guard (4.3 rule 6).** Implemented as `assertGraphAdmission` in the hook plus a handler-level refusal in the editor. The Host's own rule ("Project recipe edits are blocked while a graph is unresolved") remains authoritative; the fixture Host mirrors it so removing the renderer layers is caught.
+4. **Focus request shape (5.2, 5.3 rule 1).** One request per navigation, `"run" | "draft" | { checkId }`, stored on the view-store selection. `select` clears it unless the same call sets it; `selectRun` clears it and a second `select` sets `"run"`. The run summary consumes `"run"` from a `GraphEditor` effect (the summary renders in the same commit). The form consumes `"draft"` and `{ checkId }` on mount, because it mounts after the library loads. Back returns to the control of the check the editor was opened on; the missing-check **Open Checks** and **Set up checks** routes have no check to return to, so Back lands on the request field.
+5. **`GraphEditor` navigation** moved to `useGraphEditorNavigation` (the file would otherwise exceed the repository's 400-line limit); behaviour unchanged.
+6. **Harness fidelity.** The harness panel is now viewport-height so the editor scrolls internally as in the app (this exposed the sticky-bar offset in item 2). Colour transitions are disabled while capturing screenshots and when probing focus styles.
+7. **Not done, recorded.** Focus is not moved when a history row is selected (the row keeps focus). The Needs-you strip is not paged. No keyboard shortcut was added. Localization of the unresolved-fields list covers built-in template labels through the existing display map; a custom template's labels stay as authored. `Test configured criteria` and similar built-in step names are display-only translations, as before.
+8. **Pre-existing, unchanged.** `pnpm fmt:check` at the repository root reports files unrelated to this work (413 at the time); only changed files were checked. `pnpm lint` reports 75 warnings, none in changed files.
