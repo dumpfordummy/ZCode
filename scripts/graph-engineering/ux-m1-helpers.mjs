@@ -86,6 +86,10 @@ export function assertClean(host) {
 export async function shot(page, dir, name, viewport) {
   if (!dir) return;
   await page.setViewportSize(viewport);
+  // 切换主题后控件的颜色过渡还没走完，会拍到半透明的中间帧；截图前关掉过渡并等两帧。
+  await page.addStyleTag({
+    content: "*,*::before,*::after{transition:none !important;animation:none !important}",
+  });
   await flush(page);
   await page.screenshot({
     path: path.join(dir, `${name}-${viewport.width}x${viewport.height}.png`),
@@ -171,3 +175,37 @@ export const invokeHandler = (page, testId) =>
     const key = Object.keys(element).find((name) => name.startsWith("__reactProps"));
     element[key].onClick({ preventDefault() {}, stopPropagation() {}, currentTarget: element });
   }, testId);
+
+/** Press a key (Tab by default) until the element with this test id has focus; returns the ids passed on the way. */
+export async function pressUntilFocused(page, testId, key = "Tab", max = 60) {
+  const passed = [];
+  for (let index = 0; index < max; index += 1) {
+    await page.keyboard.press(key);
+    const now = await focused(page);
+    passed.push(now);
+    if (now === testId) return passed;
+  }
+  throw new Error(`Focus never reached ${testId} with ${key}; passed: ${passed.join(" > ")}`);
+}
+/** Does the focused element look different from the same element unfocused (the Graph focus treatment)? */
+export const hasFocusTreatment = (page) =>
+  page.evaluate(() => {
+    const element = document.activeElement;
+    // 控件带 transition：先关掉过渡，否则刚失焦时读到的仍是聚焦时的颜色（假阴性）。
+    if (!document.getElementById("no-transitions")) {
+      const style = document.createElement("style");
+      style.id = "no-transitions";
+      style.textContent =
+        "*,*::before,*::after{transition:none !important;animation:none !important}";
+      document.head.append(style);
+    }
+    const snapshot = () => {
+      const style = getComputedStyle(element);
+      return [style.borderTopColor, style.backgroundColor, style.textDecorationLine].join("|");
+    };
+    const focusedLook = snapshot();
+    element.blur();
+    const blurredLook = snapshot();
+    element.focus();
+    return focusedLook !== blurredLook;
+  });
