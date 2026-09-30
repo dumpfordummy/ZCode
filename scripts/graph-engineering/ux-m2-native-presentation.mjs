@@ -19,6 +19,7 @@ import {
   startFromNewRun,
   step,
 } from "./ux-m2-native-common.mjs";
+import { reloadToWorkspace } from "./ux-m1-native-common.mjs";
 import { back, editCheck, recipeFieldName } from "./ux-m1-native-checks-helpers.mjs";
 
 const HAN = /[一-鿿]/;
@@ -162,9 +163,7 @@ async function themePhase(ctx, tag, theme, locale, ids) {
   const { window } = ctx;
   if (theme) {
     await window.evaluate((value) => localStorage.setItem("zcode-theme", value), theme);
-    await window.reload();
-    await window.waitForLoadState("domcontentloaded");
-    await T(window, "graph-engineering-open").waitFor({ timeout: 45000 });
+    await reloadToWorkspace(window);
     assert.match(
       await window.evaluate(() => document.documentElement.className),
       theme === "zai-light" ? /light/ : /dark/,

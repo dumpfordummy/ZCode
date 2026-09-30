@@ -28,6 +28,7 @@ export const openAdvanced = (window) => openTab(window, "advanced");
 export const chooseEntry = (window, id) => selectValue(window, "graph-library-entry", id);
 /** Select exactly one version row of the selected workflow. */
 export async function chooseVersion(window, version) {
+  await openVersions(window);
   await window
     .locator(`[data-testid="graph-library-version-row"][data-version="${version}"] input`)
     .check();

@@ -112,6 +112,20 @@ export async function prepareUxWorkspace(isolation, { extraSkill = true } = {}) 
   return { outside: path.join(outside, OUTSIDE_NAME) };
 }
 
+export async function reloadToWorkspace(window) {
+  // 重新加载后应用有时先落在欢迎（连接账户）页，再次重新加载即可回到工作区；最多三次，仍回不来才算失败。
+  for (let attempt = 1; ; attempt += 1) {
+    await window.reload();
+    await window.waitForLoadState("domcontentloaded");
+    try {
+      await T(window, "graph-engineering-open").waitFor({ timeout: 20000 });
+      return;
+    } catch (error) {
+      if (attempt >= 3) throw error;
+    }
+  }
+}
+
 /** Launch one fresh isolated app. `scale` uses a Chromium switch inside the test process only. */
 export async function launchUx(journey, options = {}) {
   const {

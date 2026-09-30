@@ -33,6 +33,16 @@ import {
 } from "./ux-m3-native-common.mjs";
 
 const optionTexts = async (window, testId) => {
+  // UX-M4：对话框里的工作流是列表，文字读作“名称 · 内置/我的”（种类来自所在分组的标题）。
+  if (testId === "graph-library-entry" && (await T(window, "graph-library-list").count()))
+    return window
+      .locator('[data-testid="graph-library-entry-option"]')
+      .evaluateAll((items) =>
+        items.map(
+          (item) =>
+            `${item.innerText.replace(/\s+/g, " ").trim()} · ${item.parentElement.querySelector("p").innerText.trim()}`,
+        ),
+      );
   await T(window, testId).click();
   const labels = await window
     .locator("[role=option][data-value]")
@@ -113,11 +123,10 @@ export async function libraryJourney() {
       "L0b",
       "Every built-in offers its real, exact version set (read from what the Host offers; never a constant)",
       async () => {
-        await T(window, "graph-library-entry").click();
+        // UX-M4：工作流是列表，不是下拉框；读取 id 不能按 Esc（那会关掉对话框）。
         const ids = await window
-          .locator("[role=option][data-value]")
+          .locator('[data-testid="graph-library-entry-option"]')
           .evaluateAll((items) => items.map((item) => item.getAttribute("data-value")));
-        await window.keyboard.press("Escape");
         const offered = {};
         for (const id of ids) {
           await chooseEntry(window, id);

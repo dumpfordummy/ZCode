@@ -27,6 +27,7 @@ import {
   startFromNewRun,
   step,
 } from "./ux-m3-native-common.mjs";
+import { reloadToWorkspace } from "./ux-m1-native-common.mjs";
 
 const HAN = /[一-鿿]/;
 const reveal = (window, id) =>
@@ -82,6 +83,7 @@ async function surfaces(ctx, tag, zh, state) {
     async () => {
       await chooseEntry(window, state.mine.id);
       await chooseVersion(window, 1);
+      await openShare(window);
       await T(window, "graph-library-export").click();
       await T(window, "graph-export-preview-result").waitFor();
       await shotSizes(isolation, window, receipt, `${tag}-export`, async () => {
@@ -172,6 +174,7 @@ export async function presentationJourney(locale = "en-US") {
         await T(window, "graph-save-confirm").click();
         await T(window, "graph-library-result").waitFor({ timeout: 30000 });
         await chooseVersion(window, 1);
+        await openShare(window);
         await T(window, "graph-library-export").click();
         await T(window, "graph-export-reviewed").click();
         state.exported = path.join(
@@ -209,9 +212,7 @@ export async function presentationJourney(locale = "en-US") {
     await surfaces(ctx, `${name}-dark`, locale === "zh-CN", state);
     const { window } = ctx;
     await window.evaluate((value) => localStorage.setItem("zcode-theme", value), "zai-light");
-    await window.reload();
-    await window.waitForLoadState("domcontentloaded");
-    await T(window, "graph-engineering-open").waitFor({ timeout: 45000 });
+    await reloadToWorkspace(window);
     assert.match(await window.evaluate(() => document.documentElement.className), /light/);
     await surfaces(ctx, `${name}-light`, locale === "zh-CN", state);
   } catch (caught) {

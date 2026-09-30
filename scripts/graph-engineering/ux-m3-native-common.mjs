@@ -79,10 +79,12 @@ export const versionRows = (window) =>
     })),
   );
 export const chooseEntry = (window, id) => selectValue(window, "graph-library-entry", id);
-export const chooseVersion = (window, version) =>
-  window
+export const chooseVersion = async (window, version) => {
+  await openVersions(window);
+  await window
     .locator(`[data-testid="graph-library-version-row"][data-version="${version}"] input`)
     .check();
+};
 
 /** What the Host and the user's files hold, compared before and after a refused or read-only action. */
 export async function libraryFacts(isolation) {
