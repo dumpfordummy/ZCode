@@ -198,8 +198,10 @@ export function GraphContextPicker({
           : search && !search.loading && !search.error && !options.length
             ? t("noMatches")
             : null;
+  // 原生选择器返回路径之前还不知道取值：此时用通用的“读取中…”，不显示空白取值。
+  const checking = attempt?.value ? t("checking", { value: attempt.value }) : editor("loading");
   const live = busy
-    ? t("checking", { value: attempt?.value ?? "" })
+    ? checking
     : search?.loading
       ? editor("loading")
       : options.length || (search && !search.error)
@@ -348,7 +350,7 @@ export function GraphContextPicker({
       </div>
       {validation?.status === "loading" ? (
         <p role="status" data-testid="graph-context-validating">
-          {t("checking", { value: attempt?.value ?? "" })}
+          {checking}
         </p>
       ) : null}
       {validation?.status === "error" ? (
