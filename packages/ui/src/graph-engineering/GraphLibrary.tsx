@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type {
   GraphDefinition,
-  GraphParameterValue,
   GraphSequentialDefinition,
-  GraphTemplateBindings as TemplateBindings,
 } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import {
@@ -16,32 +14,35 @@ import {
 import { useGraphWorkflow } from "@/hooks/useGraphWorkflow.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphDraftStore } from "@/store/graphDraftStore.js";
-import { GraphSelect } from "./GraphSelect.js";
 import { useGraphTemplateText } from "./graphTemplateText.js";
 import { GraphTemplateBindings } from "./GraphTemplateBindings.js";
-import { GraphLibraryManagement } from "./GraphLibraryManagement.js";
+import { GraphLibraryAdvanced } from "./GraphLibraryAdvanced.js";
+import { GraphLibraryBlocked } from "./GraphLibraryBlocked.js";
+import { GraphLibraryManage } from "./GraphLibraryManage.js";
+import { GraphLibraryPicker } from "./GraphLibraryPicker.js";
+import { GraphLibraryReplace } from "./GraphLibraryReplace.js";
+import {
+  useGraphLibraryReplacement,
+  type ReplacementIntent,
+} from "./useGraphLibraryReplacement.js";
+import { GraphRunWorkflowVersion } from "./GraphRunWorkflowVersion.js";
+import { GraphLibrarySection } from "./GraphLibrarySections.js";
+import { GraphLibraryVersions } from "./GraphLibraryVersions.js";
+import { GraphTemplateTransfer } from "./GraphTemplateTransfer.js";
+import { useGraphM3Text } from "./GraphM3Text.js";
 import { graphDefinitionContent } from "./graphEngineeringView.js";
+import {
+  designPin,
+  libraryGates,
+  resolveLibrarySelection,
+  versionRows,
+} from "./graphLibraryView.js";
 import { latestCompatibleTemplateVersion } from "./graphWorkflowView.js";
-import { replaceGraphFromTemplate } from "./graphTemplateReplacement.js";
 import type { GraphRecipeReadState } from "./graphRecipeRead.js";
 import {
   graphInstantiationFingerprint,
   isRememberedGraphInstantiation,
-  rememberGraphInstantiation,
 } from "./graphInstantiationMemo.js";
-
-interface ReplacementIntent {
-  parameters: Record<string, GraphParameterValue>;
-  bindings: TemplateBindings;
-  definition: GraphDefinition;
-  entryId: string;
-  version: number;
-  digest: string;
-  formFingerprint: string;
-  /** "review" continues into the inline Review after the workflow is saved. */
-  continuation: "review" | "save";
-  instantiation: string;
-}
 
 export function GraphLibrary({
   workspacePath,
@@ -51,6 +52,7 @@ export function GraphLibrary({
   disabled,
   disabledReason,
   admissionReason,
+  hostReadOnlyReason,
   onViewCurrentRun,
   pending = false,
   error,
@@ -68,10 +70,13 @@ export function GraphLibrary({
   workspaceIdentity?: string;
   definition: GraphDefinition;
   dirty: boolean;
+  /** The design form cannot be edited (busy, read-only Host, design conflict, no model). Browsing stays available. */
   disabled: boolean;
   disabledReason?: string;
-  /** UX-M1: a run occupies the workspace. The form stays editable; instantiate/save/review are refused. */
+  /** UX-M1: a run occupies the workspace. The form stays editable; instantiate/save/review and every library mutation are refused. */
   admissionReason?: string;
+  /** UX-M3.1: another Host owns the workspace; browsing is fine, library mutations are refused. */
+  hostReadOnlyReason?: string;
   onViewCurrentRun?(): void;
   pending?: boolean;
   error?: string | null;
@@ -92,6 +97,7 @@ export function GraphLibrary({
   const t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
   const u = (key: string, values?: Record<string, string | number>) =>
     intl.formatMessage({ id: `graph.preZ8.${key}` }, values);
+  const m3 = useGraphM3Text();
   const target = useMemo(
     () => ({ workspacePath, ...(workspaceIdentity ? { workspaceIdentity } : {}) }),
     [workspacePath, workspaceIdentity],
@@ -102,21 +108,8 @@ export function GraphLibrary({
   const selection = useGraphDraftStore((state) => state.workspaces[workspaceKey]?.librarySelection);
   const choose = useGraphDraftStore((state) => state.selectLibrary);
   const [open, setOpen] = useState(false);
-  const [replacement, setReplacement] = useState<ReplacementIntent | null>(null);
-  const [replacementError, setReplacementError] = useState("");
   const entries = workflow.view?.entries ?? [];
-  const defaultEntry =
-    entries.find((item) => item.id === "agent-assisted" && latestCompatibleTemplateVersion(item)) ??
-    entries.find((item) => latestCompatibleTemplateVersion(item));
-  const entry = entries.find((item) => item.id === selection?.id) ?? defaultEntry;
-  const version =
-    entry?.versions.find(
-      (item) => entry.id === selection?.id && item.version === selection.version,
-    ) ?? (entry ? latestCompatibleTemplateVersion(entry) : undefined);
-  const defaultId = defaultEntry?.id;
-  const defaultVersion = defaultEntry
-    ? latestCompatibleTemplateVersion(defaultEntry)?.version
-    : undefined;
+  const { entry, version, defaultId, defaultVersion } = resolveLibrarySelection(entries, selection);
   useEffect(() => {
     // 默认选择只在新建意图首次读取后固定；刷新库不能让正在填写的表单自动漂移到新版本。
     if (!selection && defaultId && defaultVersion !== undefined)
@@ -125,186 +118,233 @@ export function GraphLibrary({
   useEffect(() => {
     if (inline) void workflow.read();
   }, [inline, workflow.read]);
-  const alive = useRef(true);
-  useEffect(() => {
-    alive.current = true;
-    return () => {
-      alive.current = false;
-    };
-  }, []);
   const locked = disabled || workflow.pending;
   // 表单编辑只受 locked 限制；创建/替换/审阅这类准入动作还受占用限制。
   const actionsLocked = locked || Boolean(admissionReason);
-  const latest = useRef({ workspaceKey, definition, entry, version, actionsLocked });
-  latest.current = { workspaceKey, definition, entry, version, actionsLocked };
+  // UX-M3.1：浏览与预览始终可用；库的所有修改在占用、只读 Host 或忙碌时被拒绝并说明原因。
+  const gates = libraryGates({
+    occupiedReason: admissionReason ? m3("blockedBrowse") : undefined,
+    hostReadOnlyReason,
+    busyReason: workflow.pending ? u("busy") : undefined,
+    exportOccupiedReason: m3("blockedExport"),
+  });
+  const blockedId = "graph-library-blocked-reason";
+  const {
+    replacement,
+    setReplacement,
+    replacementError,
+    setReplacementError,
+    apply,
+    formFingerprint,
+  } = useGraphLibraryReplacement({
+    workspaceKey,
+    definition,
+    entry,
+    version,
+    actionsLocked,
+    workflow,
+    onSaveDesign,
+    onInstantiated,
+    onDone: () => setOpen(false),
+  });
   const operationPending = pending || workflow.pending;
-  const formFingerprint = (id: string, versionNumber: number) =>
-    JSON.stringify(
-      useGraphDraftStore.getState().workspaces[workspaceKey]?.templates[`${id}:${versionNumber}`],
-    );
-  const apply = async (intent: ReplacementIntent, decision: "save" | "discard") => {
-    // 所有到达实例化/保存替换的路径（按钮、替换对话框、异步续接）都经过这里：占用时一律拒绝。
-    if (latest.current.actionsLocked) return;
-    setReplacementError("");
-    const stillCurrent = () =>
-      alive.current &&
-      latest.current.workspaceKey === workspaceKey &&
-      latest.current.entry?.id === intent.entryId &&
-      latest.current.version?.digest === intent.digest &&
-      graphDefinitionContent(latest.current.definition) ===
-        graphDefinitionContent(intent.definition) &&
-      formFingerprint(intent.entryId, intent.version) === intent.formFingerprint;
-    if (!stillCurrent()) {
-      setReplacementError(u("changedConsent"));
-      return;
-    }
-    const saved = await replaceGraphFromTemplate({
-      decision,
-      expectedRevision: intent.definition.revision,
-      stillCurrent,
-      save: () => onSaveDesign(intent.definition),
-      instantiate: (expectedRevision) =>
-        workflow.instantiate({
-          id: intent.entryId,
-          version: intent.version,
-          expectedRevision,
-          parameters: intent.parameters,
-          bindings: intent.bindings,
-        }),
-    });
-    if (saved && alive.current) {
-      rememberGraphInstantiation(workspaceKey, intent.instantiation, graphDefinitionContent(saved));
-      onInstantiated(saved, intent.continuation);
-      setReplacement(null);
-      setOpen(false);
-    } else if (!stillCurrent() && alive.current) setReplacementError(u("changedConsent"));
+  const select = (id: string, versionNumber?: number) => {
+    const next = entries.find((item) => item.id === id);
+    const chosen =
+      next?.versions.find((item) => item.version === versionNumber) ??
+      (next ? (latestCompatibleTemplateVersion(next) ?? next.versions.at(-1)) : undefined);
+    if (next && chosen) choose(workspaceKey, { id: next.id, version: chosen.version });
+    setReplacement(null);
   };
-  const content = (
-    <div className="space-y-4">
-      {inline ? null : (
-        <p
-          className="break-all font-mono text-ui-sm text-foreground-subtle"
-          data-testid="graph-library-workspace"
-        >
-          {workspacePath}
-        </p>
-      )}
-      {workflow.error && !inline ? (
-        <p role="alert" className="break-words text-ui-sm text-destructive">
-          {workflow.error}
-        </p>
-      ) : null}
-      <GraphSelect
-        label={t("workflow")}
-        testId="graph-library-entry"
-        value={entry?.id ?? "none"}
-        disabled={locked}
-        options={[
-          ...(!entry ? [{ value: "none", label: t("chooseWorkflow") }] : []),
-          ...entries.map((item) => ({
-            value: item.id,
-            label: `${display.entry(item.id, item.name)}${item.archived ? ` · ${t("archived")}` : ""}`,
-          })),
-        ]}
-        onChange={(id) => {
-          const next = entries.find((item) => item.id === id);
-          const chosen = next
-            ? (latestCompatibleTemplateVersion(next) ?? next.versions.at(-1))
-            : undefined;
-          if (next && chosen) choose(workspaceKey, { id: next.id, version: chosen.version });
-          setReplacement(null);
+  const rows = entry ? versionRows(entry, designPin(definition)) : [];
+  // 对话框里点“查看当前运行”要先关掉对话框，否则被查看的页面被遮住。
+  const viewCurrentRun = onViewCurrentRun
+    ? () => {
+        setOpen(false);
+        onViewCurrentRun();
+      }
+    : undefined;
+  const bindings =
+    version && entry ? (
+      <GraphTemplateBindings
+        key={`${entry.id}:${version.version}`}
+        version={version}
+        workspaceKey={workspaceKey}
+        workspacePath={workspacePath}
+        workspaceIdentity={workspaceIdentity}
+        templateKey={`${entry.id}:${version.version}`}
+        recipeReadState={recipeReadState}
+        disabled={locked || entry.archived}
+        disabledReason={entry.archived ? u("noCompatibleVersion") : disabledReason}
+        admissionReason={admissionReason}
+        onViewCurrentRun={viewCurrentRun}
+        error={inline ? workflow.error || error || undefined : undefined}
+        errorKind={workflow.error ? "review" : errorKind}
+        onLoadRecipes={onLoadRecipes}
+        onOpenSetup={(checkId) => {
+          setOpen(false);
+          onOpenSetup(checkId);
+        }}
+        allowReview={inline && Boolean(onReview)}
+        onInstantiate={(parameters, bindingValues, continuation) => {
+          if (actionsLocked) return;
+          const instantiation = graphInstantiationFingerprint({
+            id: entry.id,
+            version: version.version,
+            digest: version.digest,
+            parameters,
+            bindings: bindingValues,
+          });
+          // 表单与已保存设计没有变化：直接进入审阅，不再次创建定义，也不因重复点击产生新修订。
+          if (
+            continuation === "review" &&
+            !dirty &&
+            definition.version === 5 &&
+            isRememberedGraphInstantiation(
+              workspaceKey,
+              instantiation,
+              graphDefinitionContent(definition),
+            )
+          ) {
+            onReview?.(definition);
+            return;
+          }
+          const intent: ReplacementIntent = {
+            continuation,
+            instantiation,
+            parameters: structuredClone(parameters),
+            bindings: structuredClone(bindingValues),
+            definition: structuredClone(definition),
+            entryId: entry.id,
+            version: version.version,
+            digest: version.digest,
+            formFingerprint: formFingerprint(entry.id, version.version),
+          };
+          if (dirty) {
+            setReplacementError("");
+            setReplacement(intent);
+          } else void apply(intent, "discard");
         }}
       />
-      {version && entry ? (
-        <>
-          <p className="whitespace-pre-wrap text-ui-sm text-foreground-subtle">
-            {display.description(entry.id, version.template.description)}
-          </p>
-          <GraphTemplateBindings
-            key={`${entry.id}:${version.version}`}
-            version={version}
-            workspaceKey={workspaceKey}
-            workspacePath={workspacePath}
-            workspaceIdentity={workspaceIdentity}
-            templateKey={`${entry.id}:${version.version}`}
-            recipeReadState={recipeReadState}
-            disabled={locked || entry.archived}
-            disabledReason={entry.archived ? u("noCompatibleVersion") : disabledReason}
-            admissionReason={admissionReason}
-            onViewCurrentRun={onViewCurrentRun}
-            error={inline ? workflow.error || error || undefined : undefined}
-            errorKind={workflow.error ? "review" : errorKind}
-            onLoadRecipes={onLoadRecipes}
-            onOpenSetup={(checkId) => {
-              setOpen(false);
-              onOpenSetup(checkId);
-            }}
-            allowReview={inline && Boolean(onReview)}
-            onInstantiate={(parameters, bindings, continuation) => {
-              if (actionsLocked) return;
-              const instantiation = graphInstantiationFingerprint({
-                id: entry.id,
-                version: version.version,
-                digest: version.digest,
-                parameters,
-                bindings,
-              });
-              // 表单与已保存设计没有变化：直接进入审阅，不再次创建定义，也不因重复点击产生新修订。
-              if (
-                continuation === "review" &&
-                !dirty &&
-                definition.version === 5 &&
-                isRememberedGraphInstantiation(
-                  workspaceKey,
-                  instantiation,
-                  graphDefinitionContent(definition),
-                )
-              ) {
-                onReview?.(definition);
-                return;
-              }
-              const intent: ReplacementIntent = {
-                continuation,
-                instantiation,
-                parameters: structuredClone(parameters),
-                bindings: structuredClone(bindings),
-                definition: structuredClone(definition),
-                entryId: entry.id,
-                version: version.version,
-                digest: version.digest,
-                formFingerprint: formFingerprint(entry.id, version.version),
-              };
-              if (dirty) {
-                setReplacementError("");
-                setReplacement(intent);
-              } else void apply(intent, "discard");
-            }}
-          />
-        </>
-      ) : workflow.view ? (
-        <p role="status" className="text-ui-sm text-warning">
-          {u("noCompatibleVersion")}
-        </p>
-      ) : (
-        <p role="status" className="text-ui-sm">
-          {intl.formatMessage({ id: "graph.loading" })}
-        </p>
-      )}
-      {inline ? null : (
-        <GraphLibraryManagement
-          key={entry?.id ?? "new"}
-          workflow={workflow}
-          definition={definition}
+    ) : workflow.view ? (
+      <p role="status" className="text-ui-sm text-warning">
+        {u("noCompatibleVersion")}
+      </p>
+    ) : (
+      <p role="status" className="text-ui-sm">
+        {intl.formatMessage({ id: "graph.loading" })}
+      </p>
+    );
+  const description =
+    version && entry ? (
+      <p className="whitespace-pre-wrap text-ui-sm text-foreground-subtle">
+        {display.description(entry.id, version.template.description)}
+      </p>
+    ) : null;
+  const picker = (
+    <GraphLibraryPicker
+      entries={entries}
+      entry={entry}
+      disabled={workflow.pending}
+      onSelect={(id) => select(id)}
+    />
+  );
+  const content = inline ? (
+    <div className="space-y-4">
+      {picker}
+      {description}
+      {entry && version ? (
+        <GraphRunWorkflowVersion
           entry={entry}
           version={version}
-          disabled={locked}
-          target={target}
-          onVersion={(nextVersion) => {
-            if (entry) choose(workspaceKey, { id: entry.id, version: nextVersion });
-            setReplacement(null);
-          }}
+          rows={rows}
+          disabled={workflow.pending}
+          onSelect={(next) => select(entry.id, next)}
         />
-      )}
+      ) : null}
+      {bindings}
+    </div>
+  ) : (
+    <div className="space-y-5">
+      <p
+        className="break-all font-mono text-ui-sm text-foreground-subtle"
+        data-testid="graph-library-workspace"
+      >
+        {workspacePath}
+      </p>
+      {workflow.error ? (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center gap-2"
+          data-testid="graph-library-error"
+        >
+          <p className="min-w-0 flex-1 break-words text-ui-sm text-destructive">{workflow.error}</p>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={workflow.pending}
+            data-testid="graph-library-error-refresh"
+            onClick={() => void workflow.read()}
+          >
+            {t("refresh")}
+          </Button>
+        </div>
+      ) : null}
+      {admissionReason ? (
+        <GraphLibraryBlocked
+          id={blockedId}
+          reason={m3("blockedBrowse")}
+          onViewCurrentRun={viewCurrentRun}
+        />
+      ) : gates.mutation ? (
+        <GraphLibraryBlocked id={blockedId} reason={gates.mutation} />
+      ) : null}
+      <GraphLibrarySection id="workflow" title={m3("sectionWorkflow")}>
+        {picker}
+        {description}
+      </GraphLibrarySection>
+      {entry ? (
+        <GraphLibrarySection id="versions" title={m3("sectionVersions")}>
+          <GraphLibraryVersions
+            entry={entry}
+            rows={rows}
+            selected={version?.version}
+            disabled={workflow.pending}
+            onSelect={(next) => select(entry.id, next)}
+          />
+          <GraphLibraryManage
+            key={entry.id}
+            workflow={workflow}
+            entry={entry}
+            version={version?.version}
+            mutationBlocked={gates.mutation}
+            blockedId={blockedId}
+          />
+        </GraphLibrarySection>
+      ) : null}
+      <GraphLibrarySection id="use" title={m3("sectionUse")}>
+        {bindings}
+      </GraphLibrarySection>
+      <details className="space-y-3" data-testid="graph-library-share">
+        <summary className="cursor-pointer text-ui-sm font-medium">{m3("sectionShare")}</summary>
+        <p className="text-ui-sm text-foreground-subtle">{m3("shareIntro")}</p>
+        {workflow.view ? (
+          <GraphTemplateTransfer
+            key={`${entry?.id ?? "new"}:${version?.version ?? "none"}`}
+            workflow={workflow}
+            definition={definition}
+            entry={entry}
+            version={version?.version}
+            revision={workflow.view.revision}
+            disabled={workflow.pending}
+            mutationBlocked={gates.mutation}
+            exportBlocked={gates.exportToDisk}
+            blockedId={blockedId}
+            target={target}
+          />
+        ) : null}
+      </details>
+      <GraphLibraryAdvanced workflow={workflow} digest={version?.digest} entry={entry} />
     </div>
   );
   return (
@@ -340,7 +380,7 @@ export function GraphLibrary({
               data-testid="graph-library-dialog"
             >
               <DialogHeader>
-                <DialogTitle>{u("useWorkflow")}</DialogTitle>
+                <DialogTitle>{t("library")}</DialogTitle>
                 <DialogDescription>{u("workflowHelp")}</DialogDescription>
               </DialogHeader>
               {content}
@@ -348,53 +388,15 @@ export function GraphLibrary({
           </Dialog>
         </>
       )}
-      <Dialog
+      <GraphLibraryReplace
         open={Boolean(replacement)}
-        onOpenChange={(value) => {
-          if (!value && !operationPending) setReplacement(null);
-        }}
-      >
-        <DialogContent data-testid="graph-replace-dialog" showCloseButton={!operationPending}>
-          <DialogHeader>
-            <DialogTitle>{u("replaceTitle")}</DialogTitle>
-            <DialogDescription>{u("replaceHelp")}</DialogDescription>
-          </DialogHeader>
-          {replacementError || workflow.error || error || designError ? (
-            <p role="alert" className="text-ui-sm text-destructive">
-              {replacementError || workflow.error || error || designError}
-            </p>
-          ) : null}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              disabled={actionsLocked}
-              data-testid="graph-replace-save"
-              onClick={() => {
-                if (replacement) void apply(replacement, "save");
-              }}
-            >
-              {u("saveReplace")}
-            </Button>
-            <Button
-              variant="outline"
-              disabled={actionsLocked}
-              data-testid="graph-replace-discard"
-              onClick={() => {
-                if (replacement) void apply(replacement, "discard");
-              }}
-            >
-              {u("discardReplace")}
-            </Button>
-            <Button
-              variant="ghost"
-              disabled={operationPending}
-              data-testid="graph-replace-cancel"
-              onClick={() => setReplacement(null)}
-            >
-              {u("cancel")}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        error={replacementError || workflow.error || error || designError}
+        actionsLocked={actionsLocked}
+        operationPending={operationPending}
+        onSave={() => replacement && void apply(replacement, "save")}
+        onDiscard={() => replacement && void apply(replacement, "discard")}
+        onCancel={() => setReplacement(null)}
+      />
     </>
   );
 }

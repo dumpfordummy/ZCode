@@ -21,6 +21,9 @@ export function GraphTemplateTransfer({
   version,
   revision,
   disabled,
+  mutationBlocked,
+  exportBlocked,
+  blockedId,
   target,
 }: {
   workflow: ReturnType<typeof useGraphWorkflow>;
@@ -29,6 +32,12 @@ export function GraphTemplateTransfer({
   version?: number;
   revision: number;
   disabled: boolean;
+  /** UX-M3.1: why every library mutation is refused right now (occupied workspace, read-only Host). Previews stay available. */
+  mutationBlocked?: string;
+  /** UX-M3.1: why exporting to disk is refused right now. */
+  exportBlocked?: string;
+  /** The id of the paragraph that states the reason, for aria-describedby. */
+  blockedId: string;
   target: GraphWorkspaceTarget;
 }) {
   const { intl } = useZCodeIntl(),
@@ -62,7 +71,7 @@ export function GraphTemplateTransfer({
   };
   const template = reviewedTemplate(preview, reviewed);
   const save = (newVersion: boolean) => {
-    if (!template || (newVersion && (!entry || entry.builtin))) return;
+    if (mutationBlocked || !template || (newVersion && (!entry || entry.builtin))) return;
     void workflow
       .mutate(
         newVersion && entry
@@ -97,7 +106,7 @@ export function GraphTemplateTransfer({
   };
   // 导出文件：仅对已审阅的可移植 JSON 调用 saveFile；保存失败显示在 fileError。
   const exportToFile = () => {
-    if (!preview?.json) return;
+    if (exportBlocked || !preview?.json) return;
     setFileError("");
     void files
       .exportFile(preview.json, () => alive.current)
@@ -113,8 +122,7 @@ export function GraphTemplateTransfer({
       });
   };
   return (
-    <details className="space-y-3 text-ui-sm" data-testid="graph-template-transfer">
-      <summary className="cursor-pointer">{t("transfer")}</summary>
+    <div className="space-y-3 text-ui-sm" data-testid="graph-template-transfer">
       <p className="text-foreground-subtle">{t("transferHelp")}</p>
       <label className="block space-y-1">
         <span>{t("name")}</span>
@@ -253,12 +261,23 @@ export function GraphTemplateTransfer({
             <Button
               size="sm"
               variant="outline"
-              disabled={disabled}
+              disabled={disabled || Boolean(exportBlocked)}
+              aria-describedby={exportBlocked ? "graph-template-export-blocked" : undefined}
               data-testid="graph-template-export-file"
               onClick={exportToFile}
             >
               {t("exportFile")}
             </Button>
+          ) : null}
+          {reviewed && exportBlocked ? (
+            <p
+              id="graph-template-export-blocked"
+              role="status"
+              className="text-warning"
+              data-testid="graph-template-export-blocked"
+            >
+              {exportBlocked}
+            </p>
           ) : null}
           {fileSaved ? (
             <p role="status" data-testid="graph-template-file-saved">
@@ -270,7 +289,8 @@ export function GraphTemplateTransfer({
         <div className="flex flex-wrap gap-2">
           <Button
             size="sm"
-            disabled={disabled || !template}
+            disabled={disabled || Boolean(mutationBlocked) || !template}
+            aria-describedby={mutationBlocked ? blockedId : undefined}
             data-testid="graph-library-create"
             onClick={() => save(false)}
           >
@@ -279,7 +299,15 @@ export function GraphTemplateTransfer({
           <Button
             size="sm"
             variant="outline"
-            disabled={disabled || !template || !entry || entry.builtin || entry.archived}
+            disabled={
+              disabled ||
+              Boolean(mutationBlocked) ||
+              !template ||
+              !entry ||
+              entry.builtin ||
+              entry.archived
+            }
+            aria-describedby={mutationBlocked ? blockedId : undefined}
             data-testid="graph-library-save-version"
             onClick={() => save(true)}
           >
@@ -300,6 +328,6 @@ export function GraphTemplateTransfer({
           {t("saved")}
         </p>
       ) : null}
-    </details>
+    </div>
   );
 }

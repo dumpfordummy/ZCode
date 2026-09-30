@@ -27,6 +27,9 @@ const ALLOWED_OPS = new Set([
   "validate-reference",
   "searchWorkspaceFiles",
   "selectFile",
+  "stat",
+  "readFileRange",
+  "saveFile",
   "openConversation",
 ]);
 
@@ -115,8 +118,12 @@ export async function optionValues(page, testId) {
 }
 
 /** The retained draft of one template in one workspace (draft-store fact, not page text). */
-export const templateDraft = async (page, host, workspace = "A", key = host.library.key("generic")) =>
-  (await drafts(page))[host.workspaces[workspace]]?.templates[key];
+export const templateDraft = async (
+  page,
+  host,
+  workspace = "A",
+  key = host.library.key("generic"),
+) => (await drafts(page))[host.workspaces[workspace]]?.templates[key];
 export const recipesReady = (page) =>
   until(
     async () => (await T(page, "graph-recipe-read-state").getAttribute("data-state")) === "ready",

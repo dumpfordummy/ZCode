@@ -97,9 +97,22 @@ const graphWorkflowService = guard("graphWorkflowService", {
 const services = guard("services", {
   graphEngineeringService,
   graphWorkflowService,
-  fileService: guard("fileService", { searchWorkspaceFiles: ux("searchFiles") }),
+  fileService: guard("fileService", {
+    searchWorkspaceFiles: ux("searchFiles"),
+    stat: ux("stat"),
+    readFileRange: async (params: unknown) =>
+      new Uint8Array((await window.__ux.readFileRange!(params)) as number[]),
+  }),
 });
-const platform = guard("platform", { canSelectFilePath: true, selectFile: ux("pickFile") });
+const platform = guard("platform", {
+  canSelectFilePath: true,
+  selectFile: ux("pickFile"),
+  saveFile: (request: { data: ArrayBuffer; suggestedName?: string }) =>
+    window.__ux.saveFile!({
+      suggestedName: request.suggestedName,
+      bytes: Array.from(new Uint8Array(request.data)),
+    }),
+});
 
 function Probe({ path }: { path: string }) {
   // 第二个真实的 useGraphEngineering 实例：让测试不经过任何按钮直接调用 run / prepareRunConfirmation。

@@ -103,8 +103,32 @@ export async function createUxM1Host() {
   });
 
   await libraryFixture.warm();
+  // UX-M3：导入/导出的文件边界。stat 与 readFileRange 读真实的临时文件；saveFile 只记录调用者交来的字节（FIXTURE：没有真实的系统保存对话框）。
+  const saves = [];
+  let saveResult = { success: true, filePath: "saved-by-harness.json" };
   const bridge = {
     ...picker.bridge,
+    async stat({ path: file }) {
+      return op("stat", {}, async () => {
+        const info = await fs.stat(file);
+        return {
+          type: info.isFile() ? "file" : "directory",
+          size: info.size,
+          mtimeMs: info.mtimeMs,
+        };
+      });
+    },
+    async readFileRange({ path: file, offset, length }) {
+      return op("readFileRange", { offset, length }, async () =>
+        Array.from((await fs.readFile(file)).subarray(offset, offset + length)),
+      );
+    },
+    async saveFile({ suggestedName, bytes }) {
+      return op("saveFile", { suggestedName }, async () => {
+        saves.push({ suggestedName, text: Buffer.from(bytes).toString("utf8") });
+        return structuredClone(saveResult);
+      });
+    },
     async getWorkspace(target) {
       const id = idOf(target);
       return op("graph.getWorkspace", { workspace: id }, async () => ({
@@ -272,6 +296,17 @@ export async function createUxM1Host() {
     bridge,
     graph,
     library: libraryFixture,
+    /** What the page handed to the save dialog, in order. */
+    saves,
+    setSaveResult(result) {
+      saveResult = result;
+    },
+    /** A real file outside every workspace, for the import file chooser to return. */
+    async writeTemp(name, content) {
+      const file = path.join(picker.root, name);
+      await fs.writeFile(file, content);
+      return file;
+    },
     attachPage(target) {
       page = target;
     },
@@ -300,6 +335,8 @@ export async function createUxM1Host() {
       picker.reset();
       resetState();
       libraryFixture.reset();
+      saves.length = 0;
+      saveResult = { success: true, filePath: "saved-by-harness.json" };
       // 真实的检查存储把配置写在工作区的 .zcode/config.json：每个场景从干净状态开始。
       await Promise.all(
         ids.map((id) =>
