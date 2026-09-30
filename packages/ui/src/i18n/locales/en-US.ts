@@ -2,12 +2,14 @@ import { graphPreZ8En } from "./graphPreZ8.js";
 import { graphProjectSetupEn } from "./graphProjectSetup.js";
 import { graphEditorGuidanceEn } from "./graphEditorGuidance.js";
 import { graphRunClarityEn } from "./graphRunClarity.js";
+import { graphContextPickerEn } from "./graphContextPicker.js";
 /** English translations */
 const enUS: Record<string, string> = {
   ...graphPreZ8En,
   ...graphProjectSetupEn,
   ...graphEditorGuidanceEn,
   ...graphRunClarityEn,
+  ...graphContextPickerEn,
   "graph.node.approval": "Human Approval",
   "graph.status.WaitingForApproval": "Waiting for approval",
   "graph.status.AwaitingContinuation": "Waiting for explicit Continue",
