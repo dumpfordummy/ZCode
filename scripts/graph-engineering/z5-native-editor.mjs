@@ -66,6 +66,8 @@ export async function outputSchema(window, schema) {
 }
 async function begin(window, name) {
   await window.getByTestId("graph-engineering-open").click();
+  // UX 审计后默认落在 Runs → New run；设计与升级路由在 Workflows 页。
+  await window.getByTestId("graph-view-design").click();
   await window.getByTestId("graph-upgrade").click();
   await window.getByTestId("graph-editor-advanced").click();
   await window.getByTestId("graph-upgrade-routing").click();

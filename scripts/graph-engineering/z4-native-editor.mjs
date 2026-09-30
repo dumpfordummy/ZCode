@@ -72,6 +72,8 @@ async function approval(window, name, source, selector) {
 
 export async function createNativeToolGraph(window, isolation, summary, scenario) {
   await window.getByTestId("graph-engineering-open").click();
+  // UX 审计后默认落在 Runs → New run；设计与升级路由在 Workflows 页。
+  await window.getByTestId("graph-view-design").click();
   await window.getByTestId("graph-upgrade").click();
   await window.getByTestId("graph-editor-advanced").click();
   await window.getByTestId("graph-name").fill(`Z4 isolated C# ${scenario}`);
@@ -135,6 +137,8 @@ export async function createNativeToolGraph(window, isolation, summary, scenario
 
 export async function createOutputGraph(window, summary, pointer = "/summary") {
   await window.getByTestId("graph-engineering-open").click();
+  // UX 审计后默认落在 Runs → New run；设计与升级路由在 Workflows 页。
+  await window.getByTestId("graph-view-design").click();
   await window.getByTestId("graph-upgrade").click();
   await window.getByTestId("graph-editor-advanced").click();
   await window.getByTestId("graph-name").fill("Z4 exact structured artifact handoff");

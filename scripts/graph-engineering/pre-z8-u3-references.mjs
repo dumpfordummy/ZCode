@@ -149,7 +149,9 @@ export async function verifyU3References(isolation, window, summary, secondary) 
       "PRE_Z8_U3_SECONDARY_UNSAVED_DRAFT",
     );
     await selectU3Workspace(window, isolation.workspace);
-    await window.getByTestId("graph-view-workflows").click();
+    // UX 审计后 Workflows 标签只剩设计画布；旧的“Workflows”页签内容现在是 Runs → New run。
+    await window.getByTestId("graph-view-runs").click();
+    await window.getByTestId("graph-new-run").click();
     await openU3Details(window.getByTestId("graph-reference-bindings"));
     assert.equal(await selected(window), "AGENTS.md");
     summary.controlledDialogCalls = await dialog.calls();

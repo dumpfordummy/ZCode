@@ -240,6 +240,11 @@ try {
         false,
       );
     }
+    // UX 审计后此处停在 Runs → New run，运行图在所选运行的详情里且默认收起：
+    // 先选中这条运行，再按用户会做的方式展开运行图，然后选择区域。
+    await window.locator('[data-testid="graph-run"]').first().click();
+    if (!(await window.getByTestId("graph-region-select").isVisible()))
+      await window.getByTestId("graph-run-graph-toggle").click();
     await window.getByTestId("graph-region-select").click();
     await capture(isolation, window, summary, "z5-region-final-evidence");
     summary.assertions.push(

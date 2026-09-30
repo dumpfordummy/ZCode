@@ -8,7 +8,9 @@ import { captureNativeCheckpoint, openU2Details, U2_DIRTY_DESIGN } from "./pre-z
 export async function verifyU2TemplateGroup(isolation, window, summary, baseline, configuration) {
   const request =
     "Retain this synthetic multi-scope workflow draft; calibration alone is authorized to execute.";
-  await window.getByTestId("graph-view-workflows").click();
+  // UX 审计后 Workflows 标签只剩设计画布；旧的“Workflows”页签内容现在是 Runs → New run。
+  await window.getByTestId("graph-view-runs").click();
+  await window.getByTestId("graph-new-run").click();
   await selectValue(window, "graph-library-entry", "generic");
   await window.locator('[data-testid="graph-recipe-read-state"][data-state="ready"]').waitFor();
   await window.getByTestId("graph-template-parameter-request").fill(request);

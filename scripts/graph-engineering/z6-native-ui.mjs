@@ -1,3 +1,4 @@
+import { openRawChecks } from "./ux-m1-native-nav.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -52,12 +53,15 @@ async function captureDialog(isolation, window, summary, name) {
 }
 export async function instantiateNativeTemplate(isolation, window, summary, scenario) {
   await window.getByTestId("graph-engineering-open").click();
+  // UX 审计后默认落在 Runs → New run；设计与升级路由在 Workflows 页。
+  await window.getByTestId("graph-view-design").click();
   await window.getByTestId("graph-upgrade").click();
   await window.getByTestId("graph-editor-advanced").click();
   await window.getByTestId("graph-upgrade-routing").click();
   const recipes = scenario === "slot" ? slotRecipes() : fixtureRecipes("build");
   await window.getByTestId("graph-view-setup").click();
   await window.getByTestId("graph-project-recipes").waitFor();
+  await openRawChecks(window);
   await window.getByTestId("graph-load-recipes").click();
   await window.locator('[data-testid="graph-recipe-read-state"][data-state="ready"]').waitFor();
   for (const details of await window

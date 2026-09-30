@@ -71,7 +71,9 @@ export async function verifyU3LosslessTask(isolation, window, summary) {
 }
 
 export async function instantiateU3Repair(isolation, window, summary) {
-  await window.getByTestId("graph-view-workflows").click();
+  // UX 审计后 Workflows 标签只剩设计画布；旧的“Workflows”页签内容现在是 Runs → New run。
+  await window.getByTestId("graph-view-runs").click();
+  await window.getByTestId("graph-new-run").click();
   await selectValue(window, "graph-library-entry", "bugfix");
   await window.locator('[data-testid="graph-recipe-read-state"][data-state="ready"]').waitFor();
   await window

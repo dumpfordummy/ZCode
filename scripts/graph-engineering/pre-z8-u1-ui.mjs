@@ -1,3 +1,4 @@
+import { openRawChecks } from "./ux-m1-native-nav.mjs";
 import assert from "node:assert/strict";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -121,7 +122,9 @@ async function seedConfig(isolation, value) {
 
 export async function verifyRecipeStates(isolation, window, summary) {
   await window.getByTestId("graph-engineering-open").click();
-  await window.getByTestId("graph-view-workflows").click();
+  // UX 审计后 Workflows 标签只剩设计画布；旧的“Workflows”页签内容现在是 Runs → New run。
+  await window.getByTestId("graph-view-runs").click();
+  await window.getByTestId("graph-new-run").click();
   await selectValue(window, "graph-library-entry", "generic");
   await window.getByTestId("graph-template-parameter-request").fill(VERIFIED_REQUEST);
   await recipeState(window, "ready");
@@ -166,6 +169,7 @@ export async function verifyRecipeStates(isolation, window, summary) {
     (await project.getAttribute("open")) === null
   )
     await project.locator(":scope > summary").click();
+  await openRawChecks(window);
   await window.getByTestId("graph-load-recipes").click();
   await recipeState(window, "ready");
   const configured = [COMMAND_RECIPE, BUILD_RECIPE, TEST_RECIPE];
@@ -186,6 +190,7 @@ export async function verifyRecipeStates(isolation, window, summary) {
   );
   await assertNoNativeWork(isolation, "actual recipe digest conflict");
   await captureU1(isolation, window, summary, "pre-z8-u1-config-save-conflict");
+  await openRawChecks(window);
   await window.getByTestId("graph-load-recipes").click();
   await recipeState(window, "ready");
   await window.getByTestId("graph-recipes-use-saved").waitFor();
@@ -228,10 +233,8 @@ export async function verifyRecipeStates(isolation, window, summary) {
 
 export async function instantiateU1(isolation, window, summary) {
   await selectValue(window, "graph-library-entry", "agent-assisted");
-  assert.equal(
-    await window.getByTestId("graph-library-workspace").innerText(),
-    isolation.workspace,
-  );
+  // UX 审计后内联的新运行表单不再重复显示工作区路径；同一事实由面板头部的工作区行给出。
+  assert.equal(await window.getByTestId("graph-workspace").innerText(), isolation.workspace);
   const request = window.getByTestId("graph-template-parameter-request");
   await request.fill("   ");
   assert.equal(await window.getByTestId("graph-library-instantiate").isDisabled(), true);
@@ -269,13 +272,17 @@ export async function instantiateU1(isolation, window, summary) {
     idle: (label) => assertNoNativeWork(isolation, label),
   };
   await verifyWorkspaceDraftRetention(isolation, window, summary, boundaryOptions);
-  await window.getByTestId("graph-view-workflows").click();
+  // UX 审计后 Workflows 标签只剩设计画布；旧的“Workflows”页签内容现在是 Runs → New run。
+  await window.getByTestId("graph-view-runs").click();
+  await window.getByTestId("graph-new-run").click();
   await window.getByTestId("graph-library-instantiate").click();
   await window.getByTestId("graph-replace-dialog").waitFor();
   await window.getByTestId("graph-replace-cancel").click();
   await window.getByTestId("graph-view-design").click();
   assert.equal(await window.getByTestId("graph-name").inputValue(), "PRE_Z8_U1_UNSAVED_DESIGN");
-  await window.getByTestId("graph-view-workflows").click();
+  // UX 审计后 Workflows 标签只剩设计画布；旧的“Workflows”页签内容现在是 Runs → New run。
+  await window.getByTestId("graph-view-runs").click();
+  await window.getByTestId("graph-new-run").click();
   assert.equal(await request.inputValue(), REQUEST);
   await assertNoNativeWork(
     isolation,
