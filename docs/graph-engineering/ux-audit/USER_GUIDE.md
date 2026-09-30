@@ -6,11 +6,11 @@ Graph is for structured, repeatable, supervised work. Chat is for interactive wo
 
 ## Where things are
 
-| Destination   | What it is for                                                                                                                                                                                                     |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Runs**      | Start a run (**New run**), see what needs you, supervise, read results, repeat a request.                                                                                                                          |
+| Destination   | What it is for                                                                                                                                                                                                                                                                                                         |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Runs**      | Start a run (**New run**), see what needs you, supervise, read results, repeat a request.                                                                                                                                                                                                                              |
 | **Workflows** | Edit the graph: Guided/Advanced, canvas, bindings, conditions, bounded repair, the **Workflow library** (choose a workflow, inspect versions, save, export, import) and **New request** for the current design. It shows which workflow and version the current design started from. Node positions are not rewritten. |
-| **Checks**    | The saved project checks: a list plus **one** selected editor. Project scan and the .NET preset are under it, as ways to add checks.                                                                               |
+| **Checks**    | The saved project checks: a list plus **one** selected editor. Project scan and the .NET preset are under it, as ways to add checks.                                                                                                                                                                                   |
 
 A bar under the tabs always shows the effective model, mode and the saved-check status for the next run. Changing them is still done where it always was (Workflows → Workspace defaults).
 
