@@ -13,6 +13,7 @@ import type { ModelSelection } from "@zcode/shared";
 import type { SubmissionMode } from "@zcode/shared/zcode-protocol-v4";
 import { useWorkspaceServicesResolution } from "@/hooks/useWorkspaceServices.js";
 import {
+  graphDefinitionContent,
   graphWorkspaceTarget,
   isLocalGraphTarget,
 } from "@/graph-engineering/graphEngineeringView.js";
@@ -73,6 +74,9 @@ export function useGraphEngineering(scope: GraphScope) {
     error: readError,
     loading,
   } = graphWorkspaceReadState(readScope, storedRead, Boolean(service));
+  // 预检准备读取最新的 Host 投影，避免闭包里的旧修订。
+  const latestView = useRef(view);
+  latestView.current = view;
   const [actionError, setActionError] = useState<{ scope: typeof readScope; error: string }>();
   const error = actionError?.scope === readScope ? actionError.error : readError;
   const publishRead = useCallback(
@@ -259,12 +263,23 @@ export function useGraphEngineering(scope: GraphScope) {
             retained: submission.current,
             retainedDefinition: submissionDefinition.current,
             retainedProvenance: confirmationProvenance.current,
-            save: (draft) =>
-              service.saveDefinition({
+            save: async (draft) => {
+              // saveDefinition 对相同内容也会递增修订。草稿与 Host 当前定义同修订且内容一致时，
+              // 没有需要保存的东西：复用 Host 的副本，重复审阅不产生新修订。修订不一致仍由
+              // 运行准入的 expectedRevision 检查拒绝，行为不会更宽松。
+              const current = latestView.current?.definition;
+              if (
+                current &&
+                current.revision === draft.revision &&
+                graphDefinitionContent(current) === graphDefinitionContent(draft)
+              )
+                return structuredClone(current);
+              return service.saveDefinition({
                 target,
                 definition: draft,
                 expectedRevision: draft.revision,
-              }),
+              });
+            },
             prepare: async (saved, capturedSettings) => {
               if (!workflowService) throw new Error("Workflow preflight service is unavailable.");
               return workflowService.prepare({
@@ -378,4 +393,4 @@ export function useGraphEngineering(scope: GraphScope) {
 
 export { useGraphReadiness } from "./useGraphReadiness.js";
 
-export { useGraphSessionOwnership } from "./useGraphSessionOwnership.js";
+export { useGraphSessionOwnership, useGraphSessionOwner } from "./useGraphSessionOwnership.js";

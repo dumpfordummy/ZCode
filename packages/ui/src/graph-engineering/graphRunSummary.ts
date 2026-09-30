@@ -19,6 +19,14 @@ export type {
   GraphRunStep,
 } from "./graphRunSummaryTypes.js";
 
+const notRequestedOutcomes = new Set([
+  "Failed",
+  "NeedsHuman",
+  "Cancelled",
+  "BudgetExhausted",
+  "NoProgress",
+]);
+
 function gateProjection(run: GraphSequentialRun, node: GraphApprovalNode): GraphRunGate {
   const gate = graphSummaryAttempt(run, node.id, run.approvalAttempts),
     request = gate?.request,
@@ -61,18 +69,37 @@ function gateProjection(run: GraphSequentialRun, node: GraphApprovalNode): Graph
     decision.requestDigest === request.digest,
   );
   if (decision && !decisionMatches) issues.push("mismatched-approval-decision");
-  const state =
+  const approved =
     !issues.length &&
     decisionMatches &&
     gate?.status === "Approved" &&
-    decision?.value === "approve"
-      ? "approved"
-      : !issues.length &&
-          decisionMatches &&
-          gate?.status === "Rejected" &&
-          decision?.value === "reject"
-        ? "rejected"
-        : "pending";
+    decision?.value === "approve";
+  const rejected =
+    !issues.length &&
+    decisionMatches &&
+    gate?.status === "Rejected" &&
+    decision?.value === "reject";
+  // 从未派发：没有请求、没有决定，且尝试记录缺失或仍是 Pending/Skipped。
+  const neverDispatched =
+    !request && !decision && (!gate || ["Pending", "Skipped"].includes(gate.status));
+  const outcomeUnresolved = ["Unknown", "Interrupted", "StaleEvidence"].includes(run.status);
+  const active = graphRunIsUnresolved(run) && !outcomeUnresolved;
+  // Completed/Rejected 而没有闸门记录属于事实不一致，保守地标为 unknown，而不是“未请求”。
+  const state: GraphRunGate["state"] = approved
+    ? "approved"
+    : rejected
+      ? "rejected"
+      : neverDispatched && !outcomeUnresolved
+        ? active
+          ? "not-reached"
+          : notRequestedOutcomes.has(run.status)
+            ? "not-requested"
+            : "unknown"
+        : issues.length || outcomeUnresolved
+          ? "unknown"
+          : "pending";
+  // 尚未到达或未请求不是缺陷：不显示 missing-* 问题码。
+  if (state === "not-reached" || state === "not-requested") issues.length = 0;
   const actions = gate ? graphApprovalActionState(run, gate) : { decide: false, continue: false };
   return {
     nodeId: node.id,
@@ -88,6 +115,17 @@ function gateProjection(run: GraphSequentialRun, node: GraphApprovalNode): Graph
     canDecide: complete && !issues.length && actions.decide,
     canContinue: complete && !issues.length && actions.continue,
   };
+}
+
+/** rejected > approved(all) > pending > unknown > not-requested > not-reached. */
+function aggregateHumanState(gates: GraphRunGate[]): GraphRunSummary["human"]["state"] {
+  if (!gates.length) return "not-required";
+  const has = (state: GraphRunGate["state"]) => gates.some((gate) => gate.state === state);
+  if (has("rejected")) return "rejected";
+  if (gates.every((gate) => gate.state === "approved")) return "approved";
+  for (const state of ["pending", "unknown", "not-requested"] as const)
+    if (has(state)) return state;
+  return "not-reached";
 }
 
 function selectedGateNodes(run: GraphSequentialRun): GraphApprovalNode[] {
@@ -229,13 +267,7 @@ export function graphRunSummary(run: GraphRun): GraphRunSummary {
   result.execution.currentStep = currentStep(run);
   const gates = selectedGateNodes(run).map((node) => gateProjection(run, node));
   result.human = {
-    state: gates.some((gate) => gate.state === "rejected")
-      ? "rejected"
-      : !gates.length
-        ? "not-required"
-        : gates.every((gate) => gate.state === "approved")
-          ? "approved"
-          : "pending",
+    state: aggregateHumanState(gates),
     gates,
     issues: [...new Set(gates.flatMap((gate) => gate.issues))],
   };

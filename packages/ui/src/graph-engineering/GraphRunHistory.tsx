@@ -1,5 +1,6 @@
 import type { GraphRun } from "@zcode/services";
 import { useState } from "react";
+import { AlertTriangle, CheckCircle2, CircleDashed, Loader2, Plus, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { graphHistoryPage } from "./graphRunHistoryView.js";
@@ -14,14 +15,56 @@ function runRequestPreview(run: GraphRun): string {
   return graphRequestText(run.definition, text).trim().split(/\r?\n/, 1)[0] ?? "";
 }
 
+const failedStatuses = new Set([
+  "Failed",
+  "NeedsHuman",
+  "BudgetExhausted",
+  "NoProgress",
+  "Rejected",
+  "StaleEvidence",
+]);
+const waitingStatuses = new Set([
+  "WaitingForPermission",
+  "WaitingForUser",
+  "WaitingForApproval",
+  "AwaitingContinuation",
+]);
+
+/** Status is conveyed by icon and text together, never by colour alone. */
+function StatusIcon({ status }: { status: string }) {
+  const className = "mt-0.5 size-4 shrink-0";
+  if (status === "Completed")
+    return <CheckCircle2 className={`${className} text-success`} aria-hidden="true" />;
+  if (failedStatuses.has(status))
+    return <XCircle className={`${className} text-destructive`} aria-hidden="true" />;
+  if (waitingStatuses.has(status))
+    return <AlertTriangle className={`${className} text-warning`} aria-hidden="true" />;
+  if (["Starting", "Running", "CancelRequested"].includes(status))
+    return <Loader2 className={`${className} animate-spin`} aria-hidden="true" />;
+  return <CircleDashed className={`${className} text-foreground-subtle`} aria-hidden="true" />;
+}
+
+const noRuns: ReadonlySet<string> = new Set();
+
+/**
+ * Run activity list. Pagination is a display concern over the complete run list; the Needs-you
+ * badge comes from the complete projection (`needsYouRunIds`), so a pending run on another page
+ * is still discoverable through the strip and is badged when its page is shown.
+ */
 export function GraphRunHistory({
   runs,
   selectedRunId,
+  newRunSelected = false,
+  needsYouRunIds = noRuns,
   onSelect,
+  onNewRun,
 }: {
   runs: GraphRun[];
   selectedRunId?: string;
+  newRunSelected?: boolean;
+  needsYouRunIds?: ReadonlySet<string>;
   onSelect: (runId: string) => void;
+  onNewRun?: () => void;
 }) {
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
@@ -31,79 +74,83 @@ export function GraphRunHistory({
   );
   const page = graphHistoryPage(runs, requestedPage, selectedRunId);
   return (
-    <nav className={`${graphFocusClass} shrink-0 space-y-2`} aria-label={t("runs")}>
-      {runs.length ? (
-        <div
-          className="max-h-56 overflow-auto rounded-lg border border-border"
-          data-testid="graph-run-history"
+    <nav className={`${graphFocusClass} min-w-0 space-y-2`} aria-label={t("runs")}>
+      {onNewRun ? (
+        <Button
+          className="w-full"
+          size="lg"
+          variant={newRunSelected ? "secondary" : "default"}
+          aria-current={newRunSelected ? "page" : undefined}
+          data-testid="graph-new-run"
+          onClick={onNewRun}
         >
-          <table className="w-full border-collapse text-ui-sm">
-            <thead className="sticky top-0 z-10 bg-surface-hover text-ui-xs text-foreground-subtle">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium">{u("historyTitle")}</th>
-                <th className="px-3 py-2 text-left font-medium">{u("historyTime")}</th>
-                <th className="px-3 py-2 text-left font-medium">{u("historyStatus")}</th>
-                <th className="px-3 py-2 text-left font-medium">{u("historyEvidence")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {page.items.map((run) => {
-                const selected = run.id === selectedRunId;
-                const evidence = graphRunEvidence(run);
-                return (
-                  <tr
-                    key={run.id}
-                    className={`cursor-pointer border-t border-border transition-colors ${
-                      selected ? "bg-primary/10 font-medium" : "hover:bg-surface-hover"
-                    }`}
-                    data-testid="graph-run"
-                    data-run-id={run.id}
-                    data-status={run.status}
-                    data-evidence-state={evidence.state}
-                    data-session-id={run.version !== undefined ? "" : (run.sessionId ?? "")}
-                    data-input-id={run.version !== undefined ? "" : run.inputId}
-                    aria-current={selected ? "true" : undefined}
-                    tabIndex={0}
-                    onKeyDown={(event) => {
-                      // 表格替换按钮列表后仍须保留键盘选择；Space 不应只滚动页面。
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        onSelect(run.id);
-                      }
-                    }}
-                    onClick={() => onSelect(run.id)}
-                  >
-                    <td className="max-w-xs px-3 py-2">
-                      <div className="truncate font-medium">
-                        {run.definition.name}
-                        {run.release ? ` · ${t("released")}` : ""}
-                      </div>
-                      {runRequestPreview(run) ? (
-                        <div
-                          className="truncate text-ui-xs text-foreground-subtle"
-                          data-testid="graph-run-request-preview"
-                        >
-                          {runRequestPreview(run)}
-                        </div>
-                      ) : null}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-2 text-foreground-subtle">
-                      {new Date(run.createdAt).toLocaleString()}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-2">{u(`execution.${run.status}`)}</td>
-                    <td className="whitespace-nowrap px-3 py-2 text-foreground-subtle">
-                      {evidence.configuredTestCount
-                        ? u(`evidence.${evidence.state}`)
-                        : u("evidence.no-tests")}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+          <Plus className="size-4" />
+          {u("newRun")}
+        </Button>
+      ) : null}
+      {runs.length ? (
+        <ul className="space-y-1" data-testid="graph-run-history">
+          {page.items.map((run) => {
+            const selected = !newRunSelected && run.id === selectedRunId;
+            const evidence = graphRunEvidence(run);
+            const preview = runRequestPreview(run);
+            const needsYou = needsYouRunIds.has(run.id);
+            return (
+              <li
+                key={run.id}
+                className={`flex cursor-pointer gap-2 rounded-lg border p-2 transition-colors ${
+                  selected
+                    ? "border-border bg-selected"
+                    : "border-transparent hover:bg-surface-hover"
+                }`}
+                data-testid="graph-run"
+                data-run-id={run.id}
+                data-status={run.status}
+                data-evidence-state={evidence.state}
+                data-needs-you={needsYou ? "true" : undefined}
+                data-session-id={run.version !== undefined ? "" : (run.sessionId ?? "")}
+                data-input-id={run.version !== undefined ? "" : run.inputId}
+                aria-current={selected ? "true" : undefined}
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  // 列表项不是按钮：Enter/Space 必须保留键盘选择，Space 不应只滚动页面。
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    onSelect(run.id);
+                  }
+                }}
+                onClick={() => onSelect(run.id)}
+              >
+                <StatusIcon status={run.status} />
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  {preview ? (
+                    <div
+                      className="line-clamp-2 break-words text-ui-sm font-medium"
+                      data-testid="graph-run-request-preview"
+                    >
+                      {preview}
+                    </div>
+                  ) : null}
+                  <div className="break-words text-ui-xs text-foreground-subtle">
+                    {run.definition.name}
+                    {run.release ? ` · ${t("released")}` : ""} · {u(`execution.${run.status}`)}
+                  </div>
+                  <div className="text-ui-xs text-foreground-subtle">
+                    {new Date(run.createdAt).toLocaleString()} ·{" "}
+                    {evidence.configuredTestCount
+                      ? u(`evidence.${evidence.state}`)
+                      : u("evidence.no-tests")}
+                  </div>
+                  {needsYou ? (
+                    <div className="text-ui-xs font-medium text-warning">{u("needsYou")}</div>
+                  ) : null}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       ) : (
-        <p className="text-ui-sm text-foreground-subtle">{t("noRuns")}</p>
+        <p className="text-ui-sm text-foreground-subtle">{u("noRunsYet")}</p>
       )}
       {runs.length ? (
         <div className="flex flex-wrap items-center gap-2 text-ui-xs">

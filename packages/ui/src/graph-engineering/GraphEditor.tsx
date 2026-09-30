@@ -1,16 +1,8 @@
-import { GraphRunHistory } from "./GraphRunHistory.js";
-import { useEffect } from "react";
-import type {
-  GraphDefinition,
-  GraphNativeSettings,
-  GraphWorkspaceView,
-} from "@zcode/services";
+import { useEffect, useMemo } from "react";
+import type { GraphDefinition, GraphNativeSettings, GraphWorkspaceView } from "@zcode/services";
 import { submissionModeSchema } from "@zcode/shared/zcode-protocol-v4";
 import { Button } from "@/components/ui/button.js";
-import {
-  useGraphEngineering,
-  useGraphReadiness,
-} from "@/hooks/useGraphEngineering.js";
+import { useGraphEngineering, useGraphReadiness } from "@/hooks/useGraphEngineering.js";
 import { useSettings } from "@/hooks/useSettingService.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useTabStore } from "@/store/TabStoreProvider.js";
@@ -27,11 +19,14 @@ import {
   type GraphPanelProps,
 } from "./graphEngineeringView.js";
 import { graphRunIsUnresolved, graphToolOnlySettings } from "./graphEditing.js";
-import { GraphRunConfirmation } from "./GraphRunConfirmation.js";
 import { GraphLibrary } from "./GraphLibrary.js";
+import { GraphContextBar } from "./GraphContextBar.js";
+import { GraphNeedsYou } from "./GraphNeedsYou.js";
+import { GraphRunsDestination } from "./GraphRunsDestination.js";
 import { GraphSetupPanel } from "./GraphSetupPanel.js";
-import { GraphWorkflowSummary } from "./GraphWorkflowSummary.js";
 import { graphFocusClass } from "./graphFocus.js";
+import { graphNeedsYou, type GraphNeedsYouItem } from "./graphNeedsYouQueue.js";
+import { graphRunAgainDraft } from "./graphRunAgain.js";
 import { useGraphRunActions } from "./useGraphRunActions.js";
 
 export function GraphEditor({
@@ -52,24 +47,18 @@ export function GraphEditor({
   const { settings } = useSettings();
   const openSettingsTab = useTabStore((state) => state.openSettingsTab);
   const workspaceKey = workspaceIdentity?.trim() || workspacePath;
-  const navigation = useGraphEngineeringViewStore(
-    (state) => state.selections[workspaceKey],
-  );
+  const navigation = useGraphEngineeringViewStore((state) => state.selections[workspaceKey]);
   const select = useGraphEngineeringViewStore((state) => state.select);
-  const destination = navigation?.mode ?? "design";
+  const selectRun = useGraphEngineeringViewStore((state) => state.selectRun);
+  // 没有已存选择的工作区进入“运行 / 新建运行”，而不是空白设计草稿。
+  const destination = navigation?.mode ?? "runs";
   const showingRuns = destination === "runs";
   const showingDesign = destination === "design";
-  const showingWorkflows = destination === "workflows";
   const showingSetup = destination === "setup";
-  const retainedEditor = useGraphDraftStore(
-    (state) => state.workspaces[workspaceKey]?.definition,
-  );
-  const observeDefinition = useGraphDraftStore(
-    (state) => state.observeDefinition,
-  );
-  const acceptDefinition = useGraphDraftStore(
-    (state) => state.acceptDefinition,
-  );
+  const newRunPane = showingRuns && (navigation ? navigation.pane === "new" : true);
+  const retainedEditor = useGraphDraftStore((state) => state.workspaces[workspaceKey]?.definition);
+  const observeDefinition = useGraphDraftStore((state) => state.observeDefinition);
+  const acceptDefinition = useGraphDraftStore((state) => state.acceptDefinition);
   const editor = retainedEditor ?? {
     base: view.definition,
     draft: view.definition,
@@ -79,24 +68,19 @@ export function GraphEditor({
     () => observeDefinition(workspaceKey, view.definition),
     [observeDefinition, workspaceKey, view.definition],
   );
+  // 上下文栏、新建运行与 Checks 都依赖已保存检查的只读快照；读取是只读的，不执行任何东西。
   useEffect(() => {
-    if (showingWorkflows && graph.recipeReadState.status === "not-loaded")
-      void graph.readRecipes();
-  }, [showingWorkflows, graph.recipeReadState.status, graph.readRecipes]);
+    if (graph.recipeReadState.status === "not-loaded") void graph.readRecipes();
+  }, [graph.recipeReadState.status, graph.readRecipes]);
   const displayed = reconciled.draft;
   const conflicted = reconciled.base.revision !== view.definition.revision;
   const setDefinition = (draft: GraphDefinition) =>
-    useGraphDraftStore
-      .getState()
-      .editDefinition(workspaceKey, draft, reconciled.base);
-  const dirty =
-    graphDefinitionContent(displayed) !==
-    graphDefinitionContent(view.definition);
+    useGraphDraftStore.getState().editDefinition(workspaceKey, draft, reconciled.base);
+  const dirty = graphDefinitionContent(displayed) !== graphDefinitionContent(view.definition);
   const activeRun = view.runs.find(graphRunIsUnresolved);
   const selectedRun =
-    view.runs.find((run) => run.id === navigation?.runId) ?? view.runs[0];
-  const definition =
-    showingRuns && selectedRun ? selectedRun.definition : displayed;
+    showingRuns && !newRunPane ? view.runs.find((run) => run.id === navigation?.runId) : undefined;
+  const definition = selectedRun ? selectedRun.definition : displayed;
   const selectedNode =
     definition.nodes.find((node) => node.id === navigation?.nodeId) ??
     definition.nodes.find((node) => node.type === "task") ??
@@ -108,8 +92,7 @@ export function GraphEditor({
     !displayed.nodes.some((node) => node.type === "task");
   const mode = submissionModeSchema.safeParse(config.draftConfig.mode);
   const modelReady =
-    toolOnly ||
-    (config.modelSelectionRead.state.status === "ready" && Boolean(selection));
+    toolOnly || (config.modelSelectionRead.state.status === "ready" && Boolean(selection));
   const defaults: GraphNativeSettings | null = toolOnly
     ? graphToolOnlySettings()
     : selection && mode.success
@@ -119,8 +102,7 @@ export function GraphEditor({
           planEnabled: config.draftConfig.planEnabled ?? false,
         }
       : null;
-  const disabled =
-    graph.pending || Boolean(readOnlyReason) || view.readOnly === true;
+  const disabled = graph.pending || Boolean(readOnlyReason) || view.readOnly === true;
   const readiness = useGraphReadiness(displayed, graph.validate);
   const canRun =
     !disabled &&
@@ -152,6 +134,14 @@ export function GraphEditor({
           : readiness.errors.length
             ? u("designIssues")
             : undefined);
+  // 新建运行只依赖：可用性、模型和现有的准入限制；设计草稿的就绪问题属于 Workflows。
+  const newRunReason =
+    creationReason ??
+    (!view.availability.available
+      ? view.availability.reason || t("prerequisite")
+      : !modelReady || !defaults
+        ? t("noModel")
+        : undefined);
   const showGeneralSettingsButton =
     settings != null && settings.askUserQuestionAutoResolutionEnabled !== false;
   const openSettings = (section: "general" | "modelProvider") => {
@@ -160,109 +150,166 @@ export function GraphEditor({
   };
   const selectNode = (nodeId: string) =>
     select(workspaceKey, { nodeId, attemptId: undefined, regionId: undefined });
-  const { confirmation, setConfirmation, startRun, handleRun } =
-    useGraphRunActions({
-      graph,
-      displayed,
-      defaults,
-      workspaceKey,
-      select,
-    });
+  const { confirmation, setConfirmation, startRun, handleRun } = useGraphRunActions({
+    graph,
+    displayed,
+    defaults,
+    workspaceKey,
+    selectRun,
+  });
+  // Pending human actions come from the complete run list, never from the visible history page.
+  const needsYou = useMemo(() => graphNeedsYou(view.runs), [view.runs]);
+  const needsYouRunIds = useMemo(() => new Set(needsYou.map((item) => item.runId)), [needsYou]);
+  const goToRun = (item: GraphNeedsYouItem) => {
+    setConfirmation(null);
+    selectRun(workspaceKey, item.runId, { nodeId: item.nodeId, attemptId: item.attemptId });
+  };
+  /** Review always happens inline in Runs, whichever destination asked for it. */
+  const reviewAndRun = (target: GraphDefinition) => {
+    select(workspaceKey, { mode: "runs", pane: "new", returnToWorkflow: false });
+    handleRun(target);
+  };
+  const runAgain = (run: GraphWorkspaceView["runs"][number]) => {
+    const seed = graphRunAgainDraft(run);
+    if (!seed) return;
+    const drafts = useGraphDraftStore.getState();
+    drafts.selectLibrary(workspaceKey, seed.selection);
+    drafts.setTemplateDraft(workspaceKey, seed.templateKey, seed.form);
+    setConfirmation(null);
+    select(workspaceKey, { mode: "runs", pane: "new", returnToWorkflow: false });
+  };
   return (
     <div
       className={`${graphFocusClass} flex min-h-0 flex-1 flex-col gap-3 overflow-auto p-3`}
-      data-view={showingRuns ? "run" : destination}
+      data-view={selectedRun ? "run" : destination}
     >
       <GraphEditorNavigation
-        name={
-          showingRuns && selectedRun
-            ? selectedRun.definition.name
-            : displayed.name
-        }
+        name={selectedRun ? selectedRun.definition.name : displayed.name}
         destination={destination}
         dirty={dirty}
         conflicted={conflicted}
-        onSelect={(mode) => select(workspaceKey, { mode })}
+        runSelected={Boolean(selectedRun)}
+        onSelect={(mode) => {
+          // 内联审阅只属于当前意图；离开目的地即关闭快照，草稿与已保存设计不受影响。
+          setConfirmation(null);
+          select(workspaceKey, { mode });
+        }}
       />
-      {showingDesign || showingWorkflows ? (
-        <GraphLibrary
+      <GraphContextBar
+        modelSelection={selection}
+        mode={config.draftConfig.mode}
+        recipeReadState={graph.recipeReadState}
+        onOpenChecks={() => {
+          setConfirmation(null);
+          select(workspaceKey, { mode: "setup" });
+        }}
+      />
+      <GraphNeedsYou
+        items={needsYou}
+        onGoToRun={goToRun}
+        onOpenConversation={(item) => {
+          if (item.sessionId) onOpenConversation(workspacePath, item.sessionId, workspaceIdentity);
+        }}
+      />
+      {showingRuns ? (
+        <GraphRunsDestination
+          view={view}
+          graph={graph}
           workspacePath={workspacePath}
           workspaceIdentity={workspaceIdentity}
-          definition={displayed}
+          displayed={displayed}
+          definition={definition}
           dirty={dirty}
-          disabled={disabled || conflicted || Boolean(activeRun)}
-          inline={showingWorkflows}
-          disabledReason={creationReason}
-          pending={graph.pending}
-          error={graph.error}
-          recipeReadState={graph.recipeReadState}
-          onLoadRecipes={graph.readRecipes}
-          onOpenSetup={() =>
-            select(workspaceKey, { mode: "setup", returnToWorkflow: true })
+          disabled={disabled}
+          canConfirm={!disabled && !activeRun && !conflicted}
+          newRunReason={newRunReason}
+          activeRunId={activeRun?.id}
+          needsYouRunIds={needsYouRunIds}
+          newRunPane={newRunPane}
+          selectedRun={selectedRun}
+          selectedNodeId={selectedNode?.id}
+          regionId={navigation?.regionId}
+          attemptId={navigation?.attemptId}
+          defaults={defaults}
+          confirmation={confirmation}
+          onNewRun={() => {
+            setConfirmation(null);
+            select(workspaceKey, { mode: "runs", pane: "new" });
+          }}
+          onSelectRun={(runId) => {
+            setConfirmation(null);
+            selectRun(workspaceKey, runId);
+          }}
+          onCloseConfirmation={() => setConfirmation(null)}
+          onStart={(preflight) =>
+            confirmation &&
+            startRun(confirmation.definition, confirmation.settings, true, preflight)
           }
-          onSaveDesign={graph.save}
-          onInstantiated={(saved) => {
+          onOpenSetup={() => select(workspaceKey, { mode: "setup", returnToWorkflow: true })}
+          onReview={reviewAndRun}
+          onInstantiated={(saved, continuation) => {
             acceptDefinition(workspaceKey, saved);
             setConfirmation(null);
-            select(workspaceKey, { mode: "design", returnToWorkflow: false });
             void graph.reload();
+            if (continuation === "review") reviewAndRun(saved);
+            else select(workspaceKey, { mode: "design", returnToWorkflow: false });
           }}
-        />
-      ) : null}
-      {showingWorkflows ? (
-        <GraphWorkflowSummary
-          definition={displayed}
-          recipeReadState={graph.recipeReadState}
-          readinessErrors={readiness?.errors ?? []}
-          canRun={canRun}
-          runReason={runReason}
-          activeRunId={activeRun?.id}
-          onEditChecks={() =>
-            select(workspaceKey, { mode: "setup", returnToWorkflow: true })
-          }
-          onOpenRun={(runId) => select(workspaceKey, { mode: "runs", runId })}
-          onRun={handleRun}
-        />
-      ) : null}
-      {showingRuns ? (
-        <GraphRunHistory
-          runs={view.runs}
-          selectedRunId={selectedRun?.id}
-          onSelect={(runId) =>
-            select(workspaceKey, {
-              runId,
-              attemptId: undefined,
-              regionId: undefined,
-            })
-          }
+          onSelectNode={selectNode}
+          onSelectRegion={(regionId) => select(workspaceKey, { regionId, attemptId: undefined })}
+          onSelectAttempt={(attemptId) => select(workspaceKey, { attemptId })}
+          onChange={setDefinition}
+          onOpenConversation={onOpenConversation}
+          onRunAgain={runAgain}
         />
       ) : null}
       {showingDesign ? (
-        <GraphDesignPanel
-          displayed={displayed}
-          disabled={disabled}
-          dirty={dirty}
-          conflicted={conflicted}
-          canRun={canRun}
-          runReason={runReason}
-          pending={graph.pending}
-          modelReady={modelReady}
-          availability={view.availability}
-          showGeneralSettingsButton={showGeneralSettingsButton}
-          readinessErrors={readiness?.errors ?? []}
-          activeRunId={activeRun?.id}
-          workspacePath={workspacePath}
-          workspaceIdentity={workspaceIdentity}
-          config={config}
-          workspaceKey={workspaceKey}
-          onChange={setDefinition}
-          onSelectNode={selectNode}
-          onRun={handleRun}
-          onSave={() => void graph.save(displayed)}
-          onOpenSettings={openSettings}
-          onReload={() => void graph.reload()}
-          onOpenRun={(runId) => select(workspaceKey, { mode: "runs", runId })}
-        />
+        <>
+          <GraphLibrary
+            workspacePath={workspacePath}
+            workspaceIdentity={workspaceIdentity}
+            definition={displayed}
+            dirty={dirty}
+            disabled={disabled || conflicted || Boolean(activeRun)}
+            disabledReason={creationReason}
+            pending={graph.pending}
+            error={graph.error}
+            recipeReadState={graph.recipeReadState}
+            onLoadRecipes={graph.readRecipes}
+            onOpenSetup={() => select(workspaceKey, { mode: "setup", returnToWorkflow: true })}
+            onSaveDesign={graph.save}
+            onInstantiated={(saved) => {
+              acceptDefinition(workspaceKey, saved);
+              setConfirmation(null);
+              select(workspaceKey, { mode: "design", returnToWorkflow: false });
+              void graph.reload();
+            }}
+          />
+          <GraphDesignPanel
+            displayed={displayed}
+            disabled={disabled}
+            dirty={dirty}
+            conflicted={conflicted}
+            canRun={canRun}
+            runReason={runReason}
+            pending={graph.pending}
+            modelReady={modelReady}
+            availability={view.availability}
+            showGeneralSettingsButton={showGeneralSettingsButton}
+            readinessErrors={readiness?.errors ?? []}
+            activeRunId={activeRun?.id}
+            workspacePath={workspacePath}
+            workspaceIdentity={workspaceIdentity}
+            config={config}
+            workspaceKey={workspaceKey}
+            onChange={setDefinition}
+            onSelectNode={selectNode}
+            onRun={() => reviewAndRun(displayed)}
+            onSave={() => void graph.save(displayed)}
+            onOpenSettings={openSettings}
+            onReload={() => void graph.reload()}
+            onOpenRun={(runId) => selectRun(workspaceKey, runId)}
+          />
+        </>
       ) : null}
       {graph.error ? (
         <p role="alert" className="break-words text-ui-sm text-destructive">
@@ -288,28 +335,8 @@ export function GraphEditor({
           </Button>
         </div>
       ) : null}
-      {showingDesign || showingRuns ? (
-        <p className="shrink-0 text-ui-sm text-foreground-subtle">
-          {t("concurrentEdits")}
-        </p>
-      ) : null}
-      {confirmation ? (
-        <GraphRunConfirmation
-          key={`${confirmation.definition.revision}:${confirmation.provenance?.digest ?? "graph"}`}
-          snapshot={confirmation}
-          workspacePath={workspacePath}
-          disabled={graph.pending}
-          canConfirm={!disabled && !activeRun && !conflicted}
-          onClose={() => setConfirmation(null)}
-          onConfirm={(preflight) =>
-            startRun(
-              confirmation.definition,
-              confirmation.settings,
-              true,
-              preflight,
-            )
-          }
-        />
+      {showingDesign || (showingRuns && selectedRun && !confirmation) ? (
+        <p className="shrink-0 text-ui-sm text-foreground-subtle">{t("concurrentEdits")}</p>
       ) : null}
       {showingSetup ? (
         <GraphSetupPanel
@@ -321,37 +348,20 @@ export function GraphEditor({
           returnToWorkflow={navigation?.returnToWorkflow}
           onReturn={() =>
             select(workspaceKey, {
-              mode: "workflows",
+              mode: "runs",
+              pane: "new",
               returnToWorkflow: false,
             })
           }
-          onRun={(runId) =>
-            select(workspaceKey, {
-              mode: "runs",
-              runId,
-              attemptId: undefined,
-              regionId: undefined,
-            })
-          }
+          onRun={(runId) => selectRun(workspaceKey, runId)}
         />
       ) : null}
-      {showingRuns &&
-      selectedRun?.version !== undefined &&
-      !selectedRun.definition.nodes.some((node) => node.type === "tool") ? (
-        <p
-          className="text-ui-sm text-foreground-subtle"
-          data-testid="graph-run-verification"
-        >
-          {u("agentLed")}
-        </p>
-      ) : null}
-      {(!showingDesign && !showingRuns) ||
-      (showingRuns && !selectedRun) ? null : (
+      {showingDesign ? (
         <GraphEditorSurface
           definition={definition}
           displayed={displayed}
-          showingRuns={showingRuns}
-          selectedRun={selectedRun}
+          showingRuns={false}
+          selectedRun={undefined}
           selectedNodeId={selectedNode?.id}
           regionId={navigation?.regionId}
           attemptId={navigation?.attemptId}
@@ -361,14 +371,12 @@ export function GraphEditor({
           workspacePath={workspacePath}
           workspaceIdentity={workspaceIdentity}
           onSelectNode={selectNode}
-          onSelectRegion={(regionId) =>
-            select(workspaceKey, { regionId, attemptId: undefined })
-          }
+          onSelectRegion={(regionId) => select(workspaceKey, { regionId, attemptId: undefined })}
           onSelectAttempt={(attemptId) => select(workspaceKey, { attemptId })}
           onChange={setDefinition}
           onOpenConversation={onOpenConversation}
         />
-      )}
+      ) : null}
     </div>
   );
 }

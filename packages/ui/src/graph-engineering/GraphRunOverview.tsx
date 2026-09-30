@@ -8,6 +8,10 @@ import type { GraphPanelProps } from "./graphEngineeringView.js";
 import { graphEvidenceLabels } from "./graphRunPresentation.js";
 import { graphRequestText } from "./graphRequestText.js";
 import { graphRunOutputs } from "./graphRunOutputs.js";
+import { graphRunResult } from "./graphRunResult.js";
+import { GraphRunResultBlock } from "./GraphRunResultBlock.js";
+import { GraphRunPermissionBlock } from "./GraphRunPermissionBlock.js";
+import { graphPermissionInfo } from "./graphPermissionInfo.js";
 
 export function GraphRunOverview({
   run,
@@ -15,9 +19,11 @@ export function GraphRunOverview({
   onCancel,
   onInspect,
   onOpenConversation,
+  onRunAgain,
 }: {
   run: GraphRun;
   disabled: boolean;
+  onRunAgain?(run: GraphRun): void;
   onCancel(runId: string): void;
   onInspect(value: GraphRunInspection): void;
   onOpenConversation: GraphPanelProps["onOpenConversation"];
@@ -25,7 +31,8 @@ export function GraphRunOverview({
   const u = useGraphRunText();
   const summary = useMemo(() => graphRunSummary(run), [run]);
   const evidenceLabels = graphEvidenceLabels(summary.evidence);
-  const outputs = graphRunOutputs(run);
+  const outputs = graphRunOutputs(run).filter((output) => output.state !== "invalid");
+  const result = useMemo(() => graphRunResult(run, summary), [run, summary]);
   return (
     <section
       className="shrink-0 space-y-3 rounded-xl border border-border bg-surface p-3"
@@ -96,6 +103,7 @@ export function GraphRunOverview({
           testId="graph-run-result"
         />
       </div>
+      {/* 有效的审阅结论只是一行事实；无效输出、失败检查与其他停止统一在结果块中说明一次。 */}
       {outputs.map((output) => (
         <div
           key={output.attemptId}
@@ -103,23 +111,17 @@ export function GraphRunOverview({
           data-state={output.state}
           className="space-y-1 text-ui-sm"
         >
-          <p className={output.state === "invalid" ? "text-warning" : "text-foreground"}>
-            {output.name}:{" "}
-            {u(
-              output.state === "invalid"
-                ? "outputValidationFailed"
-                : `reviewOutcome.${output.state}`,
-            )}
+          <p className="text-foreground">
+            {output.name}: {u(`reviewOutcome.${output.state}`)}
           </p>
-          {output.issues.map((issue) => (
-            <p key={issue} className="break-words text-ui-xs text-foreground-subtle">
-              {issue}
-            </p>
-          ))}
         </div>
       ))}
+      <GraphRunPermissionBlock items={graphPermissionInfo(run, summary)} />
+      <GraphRunResultBlock result={result} />
       <p className="text-ui-xs text-foreground-subtle">{u("capturedMeaning")}</p>
-      <GraphRunActions {...{ run, summary, disabled, onInspect, onCancel, onOpenConversation }} />
+      <GraphRunActions
+        {...{ run, summary, result, disabled, onInspect, onCancel, onOpenConversation, onRunAgain }}
+      />
       <GraphRunCapturedDetails {...{ summary, onInspect }} />
     </section>
   );

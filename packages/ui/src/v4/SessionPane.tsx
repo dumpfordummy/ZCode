@@ -1,6 +1,9 @@
 import { resolveSelectionSideInheritedModel } from "@/lib/selectionSideInheritedModel.js";
 import { useStartPlanRecommendation } from "@/hooks/useStartPlanRecommendation.js";
-import { useGraphSessionOwnership } from "@/hooks/useGraphEngineering.js";
+import { useGraphSessionOwner, useGraphSessionOwnership } from "@/hooks/useGraphEngineering.js";
+import { Button } from "@/components/ui/button.js";
+import { graphFocusClass } from "@/graph-engineering/graphFocus.js";
+import { useGraphEngineeringViewStore } from "@/store/graphEngineeringViewStore.js";
 import type { SessionCreateSource } from "@zcode/shared";
 import { reportSessionCreate } from "@/lib/sessionCreateTelemetry.js";
 import { getLocalTtftObserver } from "@/v4/telemetry/localTtftObserver.js";
@@ -345,6 +348,7 @@ export interface SessionPaneProps {
   onOpenGitReview?: (sourceId?: GitChangeSourceId) => void;
   onOpenBrowserUrl?: (url: string) => void;
   onOpenAutomationsMain?: OpenAutomationsMain;
+  onReturnToGraphRun?: () => void;
   onOpenCodeViewer?: (source: CodeViewerSource) => void;
   onAutoOpenAssistantPptx?: (request: AssistantPreviewCardsAutoOpenRequest) => void;
   onOpenFileLink?: (target: MessageFileLinkTarget) => void;
@@ -521,6 +525,7 @@ export function SessionPane({
   onOpenGitReview,
   onOpenBrowserUrl,
   onOpenAutomationsMain,
+  onReturnToGraphRun,
   onOpenCodeViewer,
   onAutoOpenAssistantPptx,
   onOpenFileLink,
@@ -560,6 +565,12 @@ export function SessionPane({
   const graphOwnsInput = useGraphSessionOwnership(
     { workspacePath, workspaceIdentity, remoteSessionId },
     sessionId,
+  );
+  // 返回链接必须恢复到拥有此会话的 workspace / run / step，而不是只打开 Graph 首页。
+  const graphSessionOwner = useGraphSessionOwner(
+    { workspacePath, workspaceIdentity, remoteSessionId },
+    sessionId,
+    graphOwnsInput,
   );
   const slashCommands = useSlashCommands(workspacePath, workspaceIdentity);
   const baseWorkspaceServices = useBaseWorkspaceServices();
@@ -4567,13 +4578,35 @@ export function SessionPane({
         />
       ) : null}
       {graphOwnsInput ? (
-        <p
-          role="status"
+        <div
           data-testid="graph-input-owned"
-          className="mx-4 mb-2 rounded-lg bg-surface px-3 py-2 text-ui-sm text-foreground-subtle"
+          className={`${graphFocusClass} mx-4 mb-2 flex flex-wrap items-center gap-2 rounded-lg bg-surface px-3 py-2 text-ui-sm text-foreground-subtle`}
         >
-          {intl.formatMessage({ id: "graph.inputOwned" })}
-        </p>
+          <span role="status" className="min-w-0 flex-1">
+            {intl.formatMessage({ id: "graph.inputOwned" })}
+          </span>
+          {graphSessionOwner && onReturnToGraphRun ? (
+            <Button
+              size="sm"
+              variant="outline"
+              data-testid="graph-back-to-run"
+              data-run-id={graphSessionOwner.runId}
+              data-node-id={graphSessionOwner.nodeId}
+              data-attempt-id={graphSessionOwner.attemptId}
+              onClick={() => {
+                useGraphEngineeringViewStore
+                  .getState()
+                  .selectRun(workspaceIdentity?.trim() || workspacePath, graphSessionOwner.runId, {
+                    nodeId: graphSessionOwner.nodeId,
+                    attemptId: graphSessionOwner.attemptId,
+                  });
+                onReturnToGraphRun();
+              }}
+            >
+              {intl.formatMessage({ id: "graph.backToRun" })}
+            </Button>
+          ) : null}
+        </div>
       ) : null}
       {composerNode}
       {/* 办公模式显示主动任务推荐；编程模式保留原有小型场景入口。 */}

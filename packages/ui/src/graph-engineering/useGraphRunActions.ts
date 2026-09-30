@@ -2,35 +2,29 @@ import { useState } from "react";
 import type { GraphDefinition, GraphNativeSettings } from "@zcode/services";
 import type { useGraphEngineering } from "@/hooks/useGraphEngineering.js";
 import type { useGraphEngineeringViewStore } from "@/store/graphEngineeringViewStore.js";
-import type {
-  GraphRunConfirmationSnapshot,
-  GraphSubmission,
-} from "./graphSubmission.js";
+import type { GraphRunConfirmationSnapshot, GraphSubmission } from "./graphSubmission.js";
 
 type GraphHook = ReturnType<typeof useGraphEngineering>;
-type SelectFn = ReturnType<
-  typeof useGraphEngineeringViewStore.getState
->["select"];
+type SelectRunFn = ReturnType<typeof useGraphEngineeringViewStore.getState>["selectRun"];
 
 /**
  * 运行动作与确认快照状态。
- * 从 GraphEditor 抽取以控制单文件行数；行为与原内联实现完全一致。
+ * 准备确认只读取/保存设计并请求预检，不执行任何工作；只有 startRun（显式 Start）才提交运行。
  */
 export function useGraphRunActions({
   graph,
   displayed,
   defaults,
   workspaceKey,
-  select,
+  selectRun,
 }: {
   graph: GraphHook;
   displayed: GraphDefinition;
   defaults: GraphNativeSettings | null;
   workspaceKey: string;
-  select: SelectFn;
+  selectRun: SelectRunFn;
 }) {
-  const [confirmation, setConfirmation] =
-    useState<GraphRunConfirmationSnapshot | null>(null);
+  const [confirmation, setConfirmation] = useState<GraphRunConfirmationSnapshot | null>(null);
 
   const startRun = (
     draft: GraphDefinition,
@@ -50,24 +44,18 @@ export function useGraphRunActions({
       .then((runId) => {
         if (runId) {
           setConfirmation(null);
-          select(workspaceKey, {
-            mode: "runs",
-            runId,
-            attemptId: undefined,
-            regionId: undefined,
-          });
+          selectRun(workspaceKey, runId);
         }
       });
 
-  const handleRun = () => {
+  /** `definition` defaults to the current design draft; Review and run passes the saved instance. */
+  const handleRun = (definition: GraphDefinition = displayed) => {
     if (!defaults) return;
-    if (displayed.version === 5)
-      void graph
-        .prepareRunConfirmation(displayed, defaults)
-        .then((snapshot) => {
-          if (snapshot) setConfirmation(snapshot);
-        });
-    else startRun(displayed, defaults);
+    if (definition.version === 5)
+      void graph.prepareRunConfirmation(definition, defaults).then((snapshot) => {
+        if (snapshot) setConfirmation(snapshot);
+      });
+    else startRun(definition, defaults);
   };
 
   return { confirmation, setConfirmation, startRun, handleRun };

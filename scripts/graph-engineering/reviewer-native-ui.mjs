@@ -62,13 +62,12 @@ export async function captureReviewerSizes(isolation, window, summary, name, tes
 
 export async function instantiateReviewer(isolation, window, summary, uiAudit) {
   await window.getByTestId("graph-engineering-open").click();
-  await window.getByTestId("graph-view-workflows").click();
+  await window.getByTestId("graph-view-runs").click();
+  await window.getByTestId("graph-new-run").click();
   await selectValue(window, "graph-library-entry", "generic");
   await window.getByTestId("graph-template-parameter-request").fill(REQUEST);
   await window.getByTestId("graph-template-load-recipes").click();
   await window.locator('[data-testid="graph-recipe-read-state"][data-state="ready"]').waitFor();
-  const refs = window.getByTestId("graph-reference-bindings");
-  if ((await refs.getAttribute("open")) === null) await refs.locator(":scope > summary").click();
   for (const details of await window
     .getByTestId("graph-template-reference-instructions")
     .locator("xpath=ancestor::details")
@@ -78,8 +77,13 @@ export async function instantiateReviewer(isolation, window, summary, uiAudit) {
   await window.getByTestId("graph-template-reference-instructions").fill("Context.md");
   await selectValue(window, "graph-template-recipe-build", "reviewer-build");
   await selectValue(window, "graph-template-recipe-test", "reviewer-test");
-  await window.getByTestId("graph-library-instantiate").click();
-  await window.getByTestId("graph-name").waitFor();
+  if (uiAudit) {
+    assert.equal(await window.getByTestId("graph-review-run").innerText(), "Review and run");
+    await captureReviewerSizes(isolation, window, summary, "normal-new-run", "graph-review-run");
+  }
+  // 单一入口：Review and run 使用现有 instantiate + preflight；此时不得有任何原生输入或模型请求。
+  await window.getByTestId("graph-review-run").click();
+  await window.getByTestId("graph-run-confirmation").waitFor({ timeout: 30000 });
   const record = await readGraphRecord(isolation);
   assert.equal(record.definition.template.id, "generic");
   assert.equal(record.definition.template.version, 2);
@@ -105,21 +109,20 @@ export async function instantiateReviewer(isolation, window, summary, uiAudit) {
   assert.deepEqual(await ledger(isolation), []);
   assert.equal(modelCount(isolation), 0);
   if (uiAudit) {
-    await window.getByTestId("graph-view-workflows").click();
-    assert.equal(await window.getByTestId("graph-workflow-run").innerText(), "Save and run");
     assert.equal(await window.getByTestId("graph-workflow-request").innerText(), REQUEST);
     assert.equal(await window.getByTestId("graph-workflow-context").innerText(), "Context.md");
     assert.match(
       await window.getByTestId("graph-workflow-saved-checks").innerText(),
       /Saved checks only/,
     );
-    await captureReviewerSizes(
-      isolation,
-      window,
-      summary,
-      "normal-workflows",
-      "graph-workflow-summary",
+    assert.equal(
+      await window.getByTestId("graph-preflight-ack").getAttribute("aria-checked"),
+      "false",
     );
+    // 确认/Start 区必须在 1280x720 的可见视口内（无需滚动）。
+    await captureReviewerSizes(isolation, window, summary, "normal-review", "graph-review-commit");
+    await window.evaluate(() => window.scrollTo(0, 0));
+    // 离开 Runs 会关闭内联审阅（不创建任何输入）；随后回到 Design 再走 Review。
     await window.getByTestId("graph-view-setup").click();
     await window.getByTestId("graph-recipe-list").waitFor();
     await window.getByTestId("graph-recipe-edit-1").click();

@@ -3,11 +3,28 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphEditorText } from "./GraphEditorMode.js";
 
 /** Captured metadata only: showing references never opens, installs or enables them. */
-export function GraphWorkflowProvenance({ provenance }: { provenance: GraphRunProvenance }) {
+export function GraphWorkflowProvenance({
+  provenance,
+  unknownsFirst = false,
+}: {
+  provenance: GraphRunProvenance;
+  /** Review puts the statements the user must accept before the long technical details. */
+  unknownsFirst?: boolean;
+}) {
   const { intl } = useZCodeIntl(),
     t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
   const environment = provenance.environment;
   const u = useGraphEditorText();
+  const unknowns = provenance.unknowns.length ? (
+    <div className="space-y-1 text-warning" data-testid="graph-preflight-unknowns">
+      <p className="font-medium">{t("unknowns")}</p>
+      <ul>
+        {provenance.unknowns.map((value, index) => (
+          <li key={index}>{value}</li>
+        ))}
+      </ul>
+    </div>
+  ) : null;
   return (
     <section className="space-y-3 break-words text-ui-sm" data-testid="graph-workflow-provenance">
       <h3 className="font-medium text-ui-base">{t("provenance")}</h3>
@@ -17,6 +34,7 @@ export function GraphWorkflowProvenance({ provenance }: { provenance: GraphRunPr
       <p className="break-all font-mono text-ui-xs">
         {provenance.template.id} · {provenance.template.digest}
       </p>
+      {unknownsFirst ? unknowns : null}
       {provenance.operationalDecision ? (
         <p data-testid="graph-operational-decision">
           {t("acceptedDecision")}:{" "}
@@ -104,16 +122,7 @@ export function GraphWorkflowProvenance({ provenance }: { provenance: GraphRunPr
         <summary>{t("recipesPermissions")}</summary>
         <Json value={{ recipes: provenance.recipes, permissions: provenance.permissions }} />
       </details>
-      {provenance.unknowns.length ? (
-        <div className="space-y-1 text-warning" data-testid="graph-preflight-unknowns">
-          <p className="font-medium">{t("unknowns")}</p>
-          <ul>
-            {provenance.unknowns.map((value, index) => (
-              <li key={index}>{value}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
+      {unknownsFirst ? null : unknowns}
       <p className="text-foreground-subtle">{t("nativeAccess")}</p>
       <p className="break-all font-mono text-ui-xs">
         {t("preflightDigest")}: {provenance.digest}

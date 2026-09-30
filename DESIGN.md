@@ -535,3 +535,21 @@ Rules:
 - use semantic error or success colors for non-semantic decoration
 - create components that only look correct in one theme
 - trade clarity for visual novelty in tool-heavy screens
+
+## Graph Engineering workbench (approved, being implemented)
+
+Status: **approved 2026-09-30; implemented in stages.** Rationale, spec and evidence are in `docs/graph-engineering/ux-audit/` (`IMPLEMENTATION_SPEC.md`). Everything above still applies; this section only adds rules for the Graph Engineering surface (mode: Operate, an engineering workbench, not a marketing surface). It introduces no new colour, radius, type or shadow token.
+
+- **Destinations.** Runs (compose, supervise, review, reuse), Workflows (graph editing, library, versions, transfer), Checks (saved project checks). A persistent context bar shows workspace, model, permission mode and saved-check status. Full paths appear in a title or copy action, not repeated in body text.
+- **Master-detail for Runs.** A list of runs on the leading side, the selected run or the new-run form on the trailing side. Below 1000px it collapses to one pane with a back action.
+- **Vocabulary.** Task is the request. Context is documents, instructions and skills, shown apart from the request. Check is saved configuration. Run is one execution. Permission (native tool authorisation) and Approval (Graph gate decision) are different words for different things and never share a label. "Task" in the app sidebar means a Chat session, so a Graph destination is never called Tasks.
+- **Configuration is not a result.** Saved checks show a dashed-circle icon and "Saved · not run". A pass, fail or wait icon appears only for a captured result.
+- **Status is icon plus text.** Attention (waiting on you) uses `--color-warning`; a real failure uses `--color-destructive`; success uses `--color-success`; not-applicable states ("Not requested", "Not reached") use neutral. Never use destructive for a state that is merely absent. Keep the label in `--color-foreground`; tint only the icon and a low-alpha surface, because `--color-warning` in Zai Light does not reach 4.5:1 as text.
+- **Verdict trio.** A run always shows three separate facts: Execution, Checks, Your decision. A run that stopped before a gate was requested reads "Not requested", not "Pending".
+- **Stops and failures use one block:** what happened and why, what is still true, what you can do. Actions name their object ("Inspect reviewer output", "Start a new request from this one"). Do not show the same message twice on one screen.
+- **Commit bars.** A step that needs an explicit, per-run acknowledgment or decision keeps its controls in a sticky footer that is visible at 1280×720 without scrolling. One primary action per bar. Prefer an inline step to a modal for run review.
+- **Interruptions.** A "Needs you" strip is available on every Graph destination while any run waits on a permission, a question or an approval. It links to the exact place to act and never grants anything itself.
+- **Disclosure.** No nested disclosures on the primary path. One level is acceptable for rare diagnostics. Raw identities and digests are secondary details; a blocking warning is never only there.
+- **Controls.** Interactive controls are at least `h-7` (28px). Navigation uses `aria-current="page"`; tabbed detail uses the roving-tabindex tab pattern.
+- **Focus.** The app resets `outline` and `box-shadow` on `:focus`/`:focus-visible` globally (`packages/ui/src/styles.css`), so focus in Graph is shown by a border-colour and fill change (at least 3:1 against the resting state) until that reset is revisited as a separate, app-wide decision.
+- **Localisation.** Display names and descriptions of built-in workflows are localised by UI-owned message ids keyed by template id and version; identities and digests are not translated.

@@ -24,7 +24,7 @@ export const graphPreZ8En: Record<string, string> = {
   "graph.preZ8.retryRead": "Retry read",
   "graph.preZ8.refreshChecks": "Refresh project checks",
   "graph.preZ8.setupChecks": "Set up build/test checks",
-  "graph.preZ8.returnToWorkflow": "Return to workflow setup",
+  "graph.preZ8.returnToWorkflow": "Back to new run",
   "graph.preZ8.incompatible":
     "No compatible check is available for this step. Configure the required check in Project setup.",
   "graph.preZ8.staleSelection":
@@ -75,6 +75,11 @@ export const graphPreZ8En: Record<string, string> = {
   "graph.preZ8.buildChecks": "Build checks",
   "graph.preZ8.testChecks": "Test checks",
   "graph.preZ8.toolSteps": "Tool steps",
+  "graph.preZ8.checksHeading": "Checks",
+  "graph.preZ8.checksToRun": "Checks that will run",
+  "graph.preZ8.reviewAndRun": "Review and run",
+  "graph.preZ8.saveAsWorkflow": "Save as workflow only",
+  "graph.preZ8.selectRun": "Select a run from the list, or start a new one.",
 };
 
 export const graphPreZ8Zh: Record<string, string> = {
@@ -97,7 +102,7 @@ export const graphPreZ8Zh: Record<string, string> = {
   "graph.preZ8.retryRead": "重试读取",
   "graph.preZ8.refreshChecks": "刷新项目检查",
   "graph.preZ8.setupChecks": "设置构建与测试检查",
-  "graph.preZ8.returnToWorkflow": "返回工作流设置",
+  "graph.preZ8.returnToWorkflow": "返回新建运行",
   "graph.preZ8.incompatible": "此步骤没有兼容的检查。请在项目设置中配置所需检查。",
   "graph.preZ8.staleSelection": "所选检查已不存在或不兼容。请刷新并重新选择兼容检查。",
   "graph.preZ8.selectCheck": "选择兼容检查",
@@ -142,4 +147,9 @@ export const graphPreZ8Zh: Record<string, string> = {
   "graph.preZ8.buildChecks": "构建检查",
   "graph.preZ8.testChecks": "测试检查",
   "graph.preZ8.toolSteps": "工具步骤",
+  "graph.preZ8.checksHeading": "检查",
+  "graph.preZ8.checksToRun": "将运行的检查",
+  "graph.preZ8.reviewAndRun": "审阅并运行",
+  "graph.preZ8.saveAsWorkflow": "仅保存为工作流",
+  "graph.preZ8.selectRun": "从列表选择一次运行，或新建一次。",
 };

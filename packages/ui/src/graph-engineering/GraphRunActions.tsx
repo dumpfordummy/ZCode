@@ -6,7 +6,7 @@ import type { GraphRunSummary } from "./graphRunSummaryTypes.js";
 import type { GraphPanelProps } from "./graphEngineeringView.js";
 import { useGraphRunText } from "./GraphRunText.js";
 import { graphEvidenceActionLabels } from "./graphRunPresentation.js";
-import { graphRunOutputs } from "./graphRunOutputs.js";
+import type { GraphRunResult } from "./graphRunResult.js";
 
 export type GraphRunInspection =
   | { kind: "node"; nodeId: string; attemptId?: string }
@@ -15,14 +15,18 @@ export type GraphRunInspection =
 export function GraphRunActions({
   run,
   summary,
+  result,
   disabled,
   onInspect,
   onCancel,
   onOpenConversation,
+  onRunAgain,
 }: {
   run: GraphRun;
   summary: GraphRunSummary;
+  result: GraphRunResult;
   disabled: boolean;
+  onRunAgain?(run: GraphRun): void;
   onInspect(value: GraphRunInspection): void;
   onCancel(runId: string): void;
   onOpenConversation: GraphPanelProps["onOpenConversation"];
@@ -50,13 +54,19 @@ export function GraphRunActions({
   const failedChecks = summary.evidence.checks.filter((check) => check.state === "failed");
   const invalidChecks = summary.evidence.checks.filter((check) => check.state === "invalid");
   const step = summary.execution.currentStep;
-  const invalidOutputs = graphRunOutputs(run).filter((output) => output.state === "invalid");
+  const invalidOutputs = result.invalidOutputs;
+  const sessionOf = (attemptId: string) =>
+    run.version === undefined
+      ? undefined
+      : run.nodeAttempts.find((attempt) => attempt.attemptId === attemptId)?.sessionId;
   const evidenceActionLabels = graphEvidenceActionLabels(summary.evidence);
   const stepButton =
     step &&
     !gates.length &&
     ![...failedChecks, ...invalidChecks].some((check) => check.nodeId === step.nodeId);
+  const canRunAgain = Boolean(onRunAgain) && run.version === 5 && run.definition.template;
   const hasActions =
+    canRunAgain ||
     summary.actionableSessions.length > 0 ||
     uncertain ||
     invalidChecks.length > 0 ||
@@ -109,15 +119,6 @@ export function GraphRunActions({
         </div>
       ) : null}
       {uncertain ? <p className="text-ui-sm text-warning">{u("inspectUnknown")}</p> : null}
-      {invalidOutputs.length ? (
-        <p
-          role="alert"
-          data-testid="graph-run-output-validation-failed"
-          className="text-ui-sm text-warning"
-        >
-          {u("outputValidationFailed")}
-        </p>
-      ) : null}
       {evidenceActionLabels.map((key) => (
         <p key={key} className="text-ui-sm text-foreground-subtle">
           {u(key)}
@@ -134,9 +135,32 @@ export function GraphRunActions({
               onInspect({ kind: "node", nodeId: output.nodeId, attemptId: output.attemptId })
             }
           >
-            {output.name} · {u("inspectInvalidEvidence")}
+            {output.name} · {u("inspectReviewerOutput")}
           </Button>
         ))}
+        {invalidOutputs.flatMap((output) => {
+          const sessionId = sessionOf(output.attemptId);
+          return sessionId
+            ? [
+                <Button
+                  key={`conversation:${output.attemptId}`}
+                  size="sm"
+                  variant="outline"
+                  data-testid="graph-run-open-reviewer-conversation"
+                  data-session-id={sessionId}
+                  onClick={() =>
+                    onOpenConversation(
+                      summary.target.workspacePath,
+                      sessionId,
+                      summary.target.workspaceIdentity,
+                    )
+                  }
+                >
+                  {output.name} · {u("openReviewerConversation")}
+                </Button>,
+              ]
+            : [];
+        })}
         {gates.map((gate) => (
           <Button
             key={gate.nodeId}
@@ -229,6 +253,16 @@ export function GraphRunActions({
             }
           >
             {step.name} · {u("showStep")}
+          </Button>
+        ) : null}
+        {canRunAgain ? (
+          <Button
+            size="sm"
+            variant="outline"
+            data-testid="graph-run-again"
+            onClick={() => onRunAgain?.(run)}
+          >
+            {u("runAgain")}
           </Button>
         ) : null}
         {cancellable ? (

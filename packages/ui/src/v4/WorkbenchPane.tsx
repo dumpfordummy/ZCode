@@ -280,6 +280,7 @@ export interface WorkbenchShellBinding {
   onOpenGitReview?: (sourceId?: GitChangeSourceId) => void;
   onOpenBrowserUrl?: (url: string) => void;
   onOpenAutomationsMain?: OpenAutomationsMain;
+  onReturnToGraphRun?: () => void;
   onOpenCodeViewer?: (source: CodeViewerSource) => void;
   onAutoOpenAssistantPptx?: (request: AssistantPreviewCardsAutoOpenRequest) => void;
   onOpenFileLink?: (target: MessageFileLinkTarget) => void;
@@ -592,6 +593,7 @@ export function WorkbenchLeafPane({
           onOpenGitReview={shouldUseShellStatusPanel ? shell.onOpenGitReview : undefined}
           onOpenBrowserUrl={shell.onOpenBrowserUrl}
           onOpenAutomationsMain={shell.onOpenAutomationsMain}
+          onReturnToGraphRun={shell.onReturnToGraphRun}
           onOpenCodeViewer={shell.onOpenCodeViewer}
           onAutoOpenAssistantPptx={shell.onAutoOpenAssistantPptx}
           onOpenFileLink={shell.onOpenFileLink}

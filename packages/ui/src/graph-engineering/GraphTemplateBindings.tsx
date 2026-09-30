@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { Play } from "lucide-react";
 import type {
   GraphParameterValue,
   GraphTemplateBindings as TemplateBindings,
@@ -15,6 +16,12 @@ import { GraphRecipeReadStatus } from "./GraphRecipeReadStatus.js";
 import type { GraphRecipeReadState } from "./graphRecipeRead.js";
 import { initialTemplateParameters, templateBindingErrors } from "./graphWorkflowView.js";
 import { GraphReferenceBindings } from "./GraphReferenceBindings.js";
+import { useGraphTemplateText } from "./graphTemplateText.js";
+
+const normalizedBindings = (bindings: TemplateBindings): TemplateBindings => ({
+  ...bindings,
+  sourcePaths: bindings.sourcePaths.map((path) => path.trim()).filter(Boolean),
+});
 
 export function GraphTemplateBindings({
   version,
@@ -27,6 +34,7 @@ export function GraphTemplateBindings({
   disabledReason,
   onLoadRecipes,
   onOpenSetup,
+  allowReview = false,
   onInstantiate,
 }: {
   version: GraphTemplateVersion;
@@ -39,12 +47,19 @@ export function GraphTemplateBindings({
   disabledReason?: string;
   onLoadRecipes(): void;
   onOpenSetup(): void;
-  onInstantiate(parameters: Record<string, GraphParameterValue>, bindings: TemplateBindings): void;
+  /** "review" = Review and run; "save" = create the workflow only (explicit, no preflight). */
+  allowReview?: boolean;
+  onInstantiate(
+    parameters: Record<string, GraphParameterValue>,
+    bindings: TemplateBindings,
+    continuation: "review" | "save",
+  ): void;
 }) {
   const { intl } = useZCodeIntl();
   const t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
   const u = (key: string) => intl.formatMessage({ id: `graph.preZ8.${key}` });
   const template = version.template;
+  const display = useGraphTemplateText();
   const initial = useMemo<GraphTemplateFormDraft>(
     () => ({
       parameters: initialTemplateParameters(template),
@@ -97,7 +112,7 @@ export function GraphTemplateBindings({
           id={`graph-template-field-parameter-${parameter.id}`}
         >
           <span>
-            {parameter.label}
+            {display.parameter(parameter.id, parameter.label)}
             {parameter.required ? " *" : ""}
           </span>
           {parameter.type === "boolean" ? (
@@ -166,6 +181,12 @@ export function GraphTemplateBindings({
         onChange={(bindings) => change((current) => ({ ...current, bindings }))}
       />
       {hasTools ? (
+        <div className="space-y-1" data-testid="graph-template-checks-heading">
+          <h4 className="text-ui-base font-medium">{u("checksHeading")}</h4>
+          <p className="text-ui-sm text-foreground-subtle">{u("savedChecksNotRun")}</p>
+        </div>
+      ) : null}
+      {hasTools ? (
         <GraphRecipeReadStatus
           state={recipeReadState}
           onRead={onLoadRecipes}
@@ -203,7 +224,7 @@ export function GraphTemplateBindings({
         <p className="text-foreground-subtle">
           {template.graph.nodes
             .filter((node) => "name" in node)
-            .map((node) => ("name" in node ? node.name : ""))
+            .map((node) => ("name" in node ? display.node(node.id, node.name) : ""))
             .join(" → ")}
         </p>
       </div>
@@ -233,20 +254,33 @@ export function GraphTemplateBindings({
           {disabled ? disabledReason || u("creationLocked") : u("readChecksFirst")}
         </p>
       ) : null}
-      <Button
-        size="sm"
-        disabled={disabled || readBlocked || errors.length > 0}
-        aria-describedby="graph-template-create-reason"
-        data-testid="graph-library-instantiate"
-        onClick={() =>
-          onInstantiate(parameters, {
-            ...bindings,
-            sourcePaths: bindings.sourcePaths.map((path) => path.trim()).filter(Boolean),
-          })
-        }
+      <div
+        className={`${allowReview ? "sticky bottom-0 z-10 -mx-3 border-t border-border bg-background px-3 py-2 " : ""}flex flex-wrap items-center gap-2`}
+        data-testid="graph-new-run-actions"
       >
-        {u("createWorkflow")}
-      </Button>
+        {allowReview ? (
+          <Button
+            size="lg"
+            disabled={disabled || readBlocked || errors.length > 0}
+            aria-describedby="graph-template-create-reason"
+            data-testid="graph-review-run"
+            onClick={() => onInstantiate(parameters, normalizedBindings(bindings), "review")}
+          >
+            <Play className="size-4" />
+            {u("reviewAndRun")}
+          </Button>
+        ) : null}
+        <Button
+          size={allowReview ? "sm" : "default"}
+          variant={allowReview ? "outline" : "default"}
+          disabled={disabled || readBlocked || errors.length > 0}
+          aria-describedby="graph-template-create-reason"
+          data-testid="graph-library-instantiate"
+          onClick={() => onInstantiate(parameters, normalizedBindings(bindings), "save")}
+        >
+          {u(allowReview ? "saveAsWorkflow" : "createWorkflow")}
+        </Button>
+      </div>
     </section>
   );
 }

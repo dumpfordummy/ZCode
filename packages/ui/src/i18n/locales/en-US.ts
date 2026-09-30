@@ -107,7 +107,7 @@ const enUS: Record<string, string> = {
     "Before running, disable “Automatically continue questions” in Settings → General. Graph Engineering does not change this setting for you.",
   "graph.generalSettings": "General settings",
   "graph.save": "Save graph",
-  "graph.run": "Save and run",
+  "graph.run": "Review and run",
   "graph.saving": "Saving or sending request…",
   "graph.unsaved": "Unsaved changes",
   "graph.saved": "Saved",
@@ -115,6 +115,7 @@ const enUS: Record<string, string> = {
     "The saved graph changed in another editor. Your unsaved text is preserved here. Copy it before reloading the saved graph.",
   "graph.reloadSaved": "Discard local edits and reload saved graph",
   "graph.runs": "Runs",
+  "graph.backToRun": "Back to run",
   "graph.noRuns": "No runs yet. Saving or opening a graph does not start an agent task.",
   "graph.openConversation": "Open conversation",
   "graph.cancel": "Cancel attempt",
@@ -7202,7 +7203,8 @@ const enUS: Record<string, string> = {
   "graph.z6.importFile": "Import file",
   "graph.z6.exportFile": "Export to file",
   "graph.z6.fileSaved": "File saved.",
-  "graph.z6.fileUnavailable": "File transfer is unavailable in this environment. Use the JSON path.",
+  "graph.z6.fileUnavailable":
+    "File transfer is unavailable in this environment. Use the JSON path.",
   "graph.z6.repeatRequest": "New request",
   "graph.z6.repeatRequestHelp":
     "Apply a new request to the current design. This does not start a run or change prior runs.",

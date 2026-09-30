@@ -1,0 +1,50 @@
+{
+  "scenario": "pass",
+  "assertions": [
+    "first entry lands on Runs / New run with no design draft",
+    "new-run draft survives navigation to Workflows and back",
+    "Review and run saved the workflow and opened the review; no native input or model request",
+    "commit bar visible without scrolling; acknowledgment unchecked; Start disabled",
+    "repeating Review and run with an unchanged form creates no new definition revision and no run",
+    "Back to run restored the workspace, run and step and did not answer the permission",
+    "Run again pre-fills the new-run form and starts nothing",
+    "Approve is disabled without the required comment",
+    "Approve recorded the exact request id/version/digest with the comment; the run Completed"
+  ],
+  "steps": [
+    {
+      "node": "implement",
+      "permissionText": "Implement is waiting for a native permission.\n\nAnswer the permission in this exact native conversation. Graph does not grant it separately.\n\nThe exact request is shown in that step's conversation."
+    },
+    {
+      "node": "build",
+      "permissionText": "Build is waiting for a native permission.\n\nAnswer the permission in this exact native conversation. Graph does not grant it separately.\n\nConfigured command (Graph's configuration, not the exact permission request)\n\nnode build.mjs {operationId} {sourceDigest}"
+    },
+    {
+      "node": "test",
+      "permissionText": "Test configured criteria is waiting for a native permission.\n\nAnswer the permission in this exact native conversation. Graph does not grant it separately.\n\nConfigured command (Graph's configuration, not the exact permission request)\n\nnode test.mjs {operationId} {sourceDigest} {buildDigest} {reportPath}"
+    }
+  ],
+  "commitGeometry": {
+    "top": 979,
+    "bottom": 1028,
+    "vh": 1080
+  },
+  "finalStatus": "WaitingForApproval",
+  "resultText": "Sequential engineering · Selected run\n\nExecution workspace: <checkout>\\.tmp\\z1-native-1790743366975-9a46cf\\workspace\n\nExecution\nWaiting for human decision\nTest evidence\nCaptured Test evidence passed\nHuman decision\nPending\n\nCurrent step: Final human review\n\nCaptured request\nModify zz-demo.txt file content to after\nCaptured result\nNo captured final result\n\nReview current verification: Valid reviewer decision: pass\n\nThese facts describe this captured run. Opening history does not verify the current workspace or rerun source-freshness checks.\n\nNext action for this run\nFinal human review · Review captured approval request\nStart a new request from this one\nCancel attempt\n\nStopping affects only this run's owned native work. Already-written files remain; unrelated conversations continue.\n\nIndividual checks · 2\nCaptured file changes · 8\nTechnical identities and captured facts\nSteps\nView run graph\nAnalyze\nCompleted\nImplement\nCompleted\nBuild\nCompleted\nTest configured criteria\nCompleted\nReview current verification\nCompleted\nFinal human review\nCurrent · Waiting for approval\n\nNot visited in this run (other branches or steps not reached)\n\nStart\nEnd\n\nReview the frozen evidence and explicitly approve or reject.\n\nRouting inspection\nNative admissions used / maximum\n5 / 24\nFrozen deadline\n9/30/2026, 1:12:55 PM\nMaximum repair iterations after iteration 0\n0\nModel usage and cost\nUnavailable; no estimate is recorded\nIterations, attempts and feedback\nPersisted route checkpoints\nFrozen workflow provenance\nTest configured criteria\n\nThis inspector shows the saved run snapshot. Later graph edits and Chat follow-ups cannot rewrite it.\n\nIteration and attempt\nIteration 0 · Execution completed\n\nExecution completed\n\nAccepted passing evidence\n\nProcess completion, successful exit, fresh parsed evidence and acceptance are separate facts. Agent claims and graph approval do not replace these checks.\n\nOpen conversation\nProcess actually started\nYes\nProcess outcome known\nYes\nCommand exit successful\nYes\nTest report is fresh\nYes\nTest report parsed\nYes\nConfigured acceptance passed\nYes\nVerifier classification\nTest\nDiscovered / passed / failed / skipped tests\n1 / 1 / 0 / 0\nFrozen recipe and native operation\nCaptured artifacts\ncommand · eb260195-92eb-4e47-9147-888946ed104c · valid\nfile · results/report.json · valid\ntest · 44536295-e904-47b1-b860-3857c40fcf88 · valid\njson · 18e3df9c-3b60-41a2-ad46-0a8dc7885782 · valid\nExport metadata manifest",
+  "humanState": "pending",
+  "hasResultBlock": 0,
+  "outputValidationAlerts": 0,
+  "gateCommentPolicy": "required",
+  "approvalBinding": {
+    "requestId": "efb98811-7271-4473-bf59-2fcb00002d2b",
+    "version": 1,
+    "digest": "eea5aaa7de8c5bc9892a06ef3d450043f420fe51ed8b677a3429783b2d87a501"
+  },
+  "runIds": [
+    {
+      "id": "64c5cf3e-1f46-4c4f-af4b-ee0ba485433e",
+      "status": "Completed"
+    }
+  ]
+}

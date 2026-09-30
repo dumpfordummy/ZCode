@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input.js";
 import { useGraphReferencePicker } from "@/hooks/useGraphReferencePicker.js";
 import { GraphSelect } from "./GraphSelect.js";
 import { useGraphEditorText } from "./GraphEditorMode.js";
+import { useGraphTemplateText } from "./graphTemplateText.js";
 
 export interface GraphReferenceRole {
   id: string;
@@ -35,6 +36,7 @@ export function GraphReferenceField({
   onChange(value: GraphTemplateBindings): void;
 }) {
   const t = useGraphEditorText(),
+    display = useGraphTemplateText(),
     [query, setQuery] = useState(""),
     [error, setError] = useState("");
   const picker = useGraphReferencePicker(
@@ -68,8 +70,8 @@ export function GraphReferenceField({
       data-testid={`graph-reference-${id}`}
     >
       <p className="font-medium">
-        {role.label ?? id}
-        {role.required ? " *" : ""} · {role.kind}
+        {role.label ? display.reference(id, role.label) : id}
+        {role.required ? " *" : ""} · {display.kind(role.kind)}
       </p>
       <p className="break-all">
         {t("selected")}: {selected || "—"}

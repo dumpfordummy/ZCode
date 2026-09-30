@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button.js";
 import { Checkbox } from "@/components/ui/checkbox.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphSelect } from "./GraphSelect.js";
+import { useGraphTemplateText } from "./graphTemplateText.js";
 import { useGraphSetupText } from "./GraphSetupFields.js";
 import {
   compatibleTemplateRecipes,
@@ -31,6 +32,7 @@ export function GraphTemplateRecipeBindings({
   const { intl } = useZCodeIntl();
   const u = (key: string) => intl.formatMessage({ id: `graph.preZ8.${key}` });
   const t = useGraphSetupText();
+  const display = useGraphTemplateText();
   const tools = template.graph.nodes.filter((node) => node.type === "tool");
   const buildSlots = tools.filter((node) =>
     snapshot?.recipes.some(
@@ -60,7 +62,7 @@ export function GraphTemplateRecipeBindings({
         return (
           <div key={node.id} className="space-y-2" id={`graph-template-field-recipe-${node.id}`}>
             <GraphSelect
-              label={node.name}
+              label={display.node(node.id, node.name)}
               testId={`graph-template-recipe-${node.id}`}
               disabled={disabled}
               value={stale ? "unbound" : primary || "unbound"}

@@ -52,7 +52,13 @@ export interface GraphRunGate {
   name: string;
   attemptId?: string;
   status?: string;
-  state: "pending" | "approved" | "rejected";
+  /**
+   * Derived from gate facts and the run outcome, never from one status label.
+   * not-reached: no request yet and the run is still active.
+   * not-requested: the run settled without dispatching this gate.
+   * unknown: request/decision issues, or the run outcome itself is unresolved.
+   */
+  state: "pending" | "not-reached" | "not-requested" | "approved" | "rejected" | "unknown";
   requestId?: string;
   requestVersion?: number;
   requestDigest?: string;
@@ -81,7 +87,14 @@ export interface GraphRunSummary {
   execution: { status: GraphRunStatus; currentStep?: GraphRunStep; stopRequested: boolean };
   evidence: GraphRunEvidence;
   human: {
-    state: "not-required" | "pending" | "approved" | "rejected";
+    state:
+      | "not-required"
+      | "pending"
+      | "not-reached"
+      | "not-requested"
+      | "approved"
+      | "rejected"
+      | "unknown";
     gates: GraphRunGate[];
     issues: string[];
   };

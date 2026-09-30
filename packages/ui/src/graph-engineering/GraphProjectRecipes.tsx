@@ -43,9 +43,7 @@ export function GraphProjectRecipes({
     [workspacePath, workspaceIdentity],
   );
   const setup = useGraphProjectSetup(target);
-  const form = useGraphDraftStore(
-    (state) => state.workspaces[workspaceKey]?.recipes,
-  );
+  const form = useGraphDraftStore((state) => state.workspaces[workspaceKey]?.recipes);
   const observeRecipes = useGraphDraftStore((state) => state.observeRecipes);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
@@ -62,31 +60,23 @@ export function GraphProjectRecipes({
       ? validation.result
       : undefined;
   const change = (text: string) => {
-    if (form)
-      useGraphDraftStore
-        .getState()
-        .setRecipeDraft(workspaceKey, { ...form, text });
+    if (form) useGraphDraftStore.getState().setRecipeDraft(workspaceKey, { ...form, text });
     setSaved(false);
   };
   const validate = () =>
     setup.invoke(
       { action: "validate", json: text },
       text,
-      () =>
-        currentForm.current?.text === text &&
-        currentForm.current.digest === form?.digest,
+      () => currentForm.current?.text === text && currentForm.current.digest === form?.digest,
     );
   useEffect(() => {
     if (readState.status === "not-loaded") void graph.readRecipes();
   }, [readState.status, graph.readRecipes]);
   useEffect(() => {
-    if (readState.status === "ready")
-      observeRecipes(workspaceKey, readState.snapshot);
+    if (readState.status === "ready") observeRecipes(workspaceKey, readState.snapshot);
   }, [readState, observeRecipes, workspaceKey]);
   const dirty = Boolean(form && form.text !== form.baseText);
-  const conflict = Boolean(
-    form && readState.snapshot && form.digest !== readState.snapshot.digest,
-  );
+  const conflict = Boolean(form && readState.snapshot && form.digest !== readState.snapshot.digest);
   const saveBlocked =
     disabled ||
     !form ||
@@ -97,10 +87,7 @@ export function GraphProjectRecipes({
   return (
     <section className="space-y-4" data-testid="graph-project-recipes">
       <p className="text-ui-sm text-foreground-subtle">{u("setupHelp")}</p>
-      <GraphRecipeReadStatus
-        state={readState}
-        onRead={() => void graph.readRecipes()}
-      />
+      <GraphRecipeReadStatus state={readState} onRead={() => void graph.readRecipes()} />
       {/* 主视图：已保存检查的紧凑列表，显示名称/类型/配置状态与编辑操作 */}
       {parsed.kind === "ready" && parsed.recipes.length ? (
         <div
@@ -110,15 +97,9 @@ export function GraphProjectRecipes({
           <table className="w-full border-collapse text-ui-sm">
             <thead className="bg-surface-hover text-ui-xs text-foreground-subtle">
               <tr>
-                <th className="px-3 py-2 text-left font-medium">
-                  {s("checkName")}
-                </th>
-                <th className="px-3 py-2 text-left font-medium">
-                  {s("checkType")}
-                </th>
-                <th className="px-3 py-2 text-left font-medium">
-                  {s("checkStatus")}
-                </th>
+                <th className="px-3 py-2 text-left font-medium">{s("checkName")}</th>
+                <th className="px-3 py-2 text-left font-medium">{s("checkType")}</th>
+                <th className="px-3 py-2 text-left font-medium">{s("checkStatus")}</th>
                 <th className="px-3 py-2 text-left font-medium" />
               </tr>
             </thead>
@@ -135,13 +116,9 @@ export function GraphProjectRecipes({
                     </td>
                     <td className="px-3 py-2">
                       {issue ? (
-                        <span className="text-warning">
-                          {s("checkNeedsAttention")}
-                        </span>
+                        <span className="text-warning">{s("checkNeedsAttention")}</span>
                       ) : (
-                        <span className="text-foreground-subtle">
-                          {s("checkConfigured")}
-                        </span>
+                        <span className="text-foreground-subtle">{s("checkConfigured")}</span>
                       )}
                     </td>
                     <td className="px-3 py-2">
@@ -169,13 +146,6 @@ export function GraphProjectRecipes({
       ) : (
         <p className="text-ui-sm text-foreground-subtle">{s("noChecks")}</p>
       )}
-      <GraphDotnetPreset
-        workspaceKey={workspaceKey}
-        setup={setup}
-        text={text}
-        disabled={disabled || !form}
-        onChange={change}
-      />
       <div ref={formRef}>
         <GraphRecipeForm
           text={text}
@@ -231,9 +201,7 @@ export function GraphProjectRecipes({
         data-state={validation.status}
         className="space-y-1 text-ui-sm"
       >
-        {validation.status === "loading" ? (
-          <p role="status">{s("validating")}</p>
-        ) : null}
+        {validation.status === "loading" ? <p role="status">{s("validating")}</p> : null}
         {validated?.recipes && !validated.diagnostics.length ? (
           <p role="status">{s("valid")}</p>
         ) : null}
@@ -260,36 +228,21 @@ export function GraphProjectRecipes({
           const submittedText = form.text;
           void validate()
             .then(async (result) => {
-              if (
-                result?.kind !== "validation" ||
-                !result.recipes ||
-                result.diagnostics.length
-              )
+              if (result?.kind !== "validation" || !result.recipes || result.diagnostics.length)
                 return;
-              const snapshot = await graph.saveRecipes(
-                result.recipes,
-                form.digest,
-              );
+              const snapshot = await graph.saveRecipes(result.recipes, form.digest);
               if (snapshot) {
-                useGraphDraftStore
-                  .getState()
-                  .acceptRecipes(workspaceKey, snapshot, submittedText);
+                useGraphDraftStore.getState().acceptRecipes(workspaceKey, snapshot, submittedText);
                 setSaved(true);
               }
             })
-            .catch((cause) =>
-              setError(cause instanceof Error ? cause.message : String(cause)),
-            );
+            .catch((cause) => setError(cause instanceof Error ? cause.message : String(cause)));
         }}
       >
         {t("saveRecipes")}
       </Button>
       {saveBlocked ? (
-        <p
-          id="graph-recipe-save-reason"
-          role="status"
-          className="text-foreground-subtle"
-        >
+        <p id="graph-recipe-save-reason" role="status" className="text-foreground-subtle">
           {u(disabled ? "creationLocked" : "recipeSaveBlocked")}
         </p>
       ) : null}
@@ -303,6 +256,14 @@ export function GraphProjectRecipes({
           {error || graph.error}
         </p>
       ) : null}
+      {/* 添加检查：项目元数据扫描与 .NET 预设只用于新增，不占据已保存检查的主视图 */}
+      <GraphDotnetPreset
+        workspaceKey={workspaceKey}
+        setup={setup}
+        text={text}
+        disabled={disabled || !form}
+        onChange={change}
+      />
       {/* 高级：原始配方 JSON，默认收起，不暴露在主路径 */}
       <details className="space-y-3 text-ui-sm">
         <summary className="cursor-pointer">{u("rawChecks")}</summary>
@@ -354,9 +315,7 @@ export function GraphProjectRecipes({
         setup={setup}
         snapshot={readState.snapshot}
         text={text}
-        clean={Boolean(
-          form && !dirty && !conflict && readState.status === "ready",
-        )}
+        clean={Boolean(form && !dirty && !conflict && readState.status === "ready")}
         disabled={disabled}
         onRun={onRun}
       />

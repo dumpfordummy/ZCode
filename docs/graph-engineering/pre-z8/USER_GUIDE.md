@@ -1,5 +1,7 @@
 # Pre-Z8 Graph Engineering guide
 
+> **Navigation has changed.** The destinations below named _Workflows_, _Design_, _Runs_ and _Project setup_ are now **Runs** (new run, supervision, results), **Workflows** (the former Design) and **Checks** (the former Project setup). See [`../ux-audit/USER_GUIDE.md`](../ux-audit/USER_GUIDE.md) for the current flow. The behaviour described in the remaining sections (drafts, references, conditions, bounded repair, recovery, evidence) is unchanged.
+
 This guide describes implemented pre-Z8 controls in this working tree. See `EXECUTION_PLAN.md` and retained test receipts for actual verification status. The supported target is supervised local Windows sequential workflows; the separate parallel editor is experimental. Existing native provider, session, permission and question controls remain in use.
 
 U1–U5 have passed their recorded automated native checkpoints on the current build (HEAD `6f41ad53`, build `3.14.0`). U4 run/approval/cancellation/stale-evidence and U5 file transfer/repeat-request/run-identity are verified through the real built desktop app with controlled providers. The U2 .NET matrix (8 scenarios) and dotnet-fixture are BLOCKED on missing SDK 8.0.425 — not skipped or relaxed. Pure tests do not establish human-pilot or live-provider acceptance. User-operated and live human-pilot checks remain NOT RUN; see `HUMAN_PILOT_CHECKLIST.md` for prepared journeys.

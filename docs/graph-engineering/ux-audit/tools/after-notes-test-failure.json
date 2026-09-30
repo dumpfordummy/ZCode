@@ -1,0 +1,42 @@
+{
+  "scenario": "test-failure",
+  "assertions": [
+    "first entry lands on Runs / New run with no design draft",
+    "new-run draft survives navigation to Workflows and back",
+    "Review and run saved the workflow and opened the review; no native input or model request",
+    "commit bar visible without scrolling; acknowledgment unchecked; Start disabled",
+    "repeating Review and run with an unchanged form creates no new definition revision and no run",
+    "Back to run restored the workspace, run and step and did not answer the permission",
+    "Run again pre-fills the new-run form and starts nothing"
+  ],
+  "steps": [
+    {
+      "node": "implement",
+      "permissionText": "Implement is waiting for a native permission.\n\nAnswer the permission in this exact native conversation. Graph does not grant it separately.\n\nThe exact request is shown in that step's conversation."
+    },
+    {
+      "node": "build",
+      "permissionText": "Build is waiting for a native permission.\n\nAnswer the permission in this exact native conversation. Graph does not grant it separately.\n\nConfigured command (Graph's configuration, not the exact permission request)\n\nnode build.mjs {operationId} {sourceDigest}"
+    },
+    {
+      "node": "test",
+      "permissionText": "Test configured criteria is waiting for a native permission.\n\nAnswer the permission in this exact native conversation. Graph does not grant it separately.\n\nConfigured command (Graph's configuration, not the exact permission request)\n\nnode test.mjs {operationId} {sourceDigest} {buildDigest} {reportPath}"
+    }
+  ],
+  "commitGeometry": {
+    "top": 979,
+    "bottom": 1028,
+    "vh": 1080
+  },
+  "finalStatus": "NeedsHuman",
+  "resultText": "Sequential engineering · Selected run\n\nExecution workspace: <checkout>\\.tmp\\z1-native-1790743467525-637e31\\workspace\n\nExecution\nStopped for human review\nTest evidence\nCaptured Test evidence failed\nHuman decision\nNot requested — the run stopped before approval was asked for\n\nCurrent step: Test configured criteria\n\nCaptured request\nModify zz-demo.txt file content to after\nCaptured result\nNo captured final result\n\nTest failed: Test configured criteria. The run stopped and no reviewer was started.\n\nStill true from captured facts\n\nNo approval was requested, so there is nothing to approve or reject.\nFiles already written by the agents remain; nothing was undone.\n\nThese facts describe this captured run. Opening history does not verify the current workspace or rerun source-freshness checks.\n\nNext action for this run\n\nA Test captured failing assertions. Inspect the failure and this run's recorded repair or stop state before starting another request.\n\nTest configured criteria · Test failed — inspect\nStart a new request from this one\nIndividual checks · 2\nCaptured file changes · 0\nTechnical identities and captured facts\nSteps\nView run graph\nAnalyze\nCompleted\nImplement\nCompleted\nBuild\nCompleted\nTest configured criteria\nFailed\n\nNot visited in this run (other branches or steps not reached)\n\nStart\nReview current verification\nFinal human review\nEnd\n\nNode test did not produce a definitive usable result. No repair is authorized.\n\nRouting inspection\nNative admissions used / maximum\n4 / 24\nFrozen deadline\n9/30/2026, 1:14:35 PM\nMaximum repair iterations after iteration 0\n0\nModel usage and cost\nUnavailable; no estimate is recorded\n\nNeedsHuman: Node test did not produce a definitive usable result. No repair is authorized.\n\nIterations, attempts and feedback\nPersisted route checkpoints\nFrozen workflow provenance\nTest configured criteria\n\nThis inspector shows the saved run snapshot. Later graph edits and Chat follow-ups cannot rewrite it.\n\nIteration and attempt\nIteration 0 · Execution failed\n\nExecution failed\n\nAccepted failing evidence\n\nProcess completion, successful exit, fresh parsed evidence and acceptance are separate facts. Agent claims and graph approval do not replace these checks.\n\nThe native command did not exit successfully.\n\nThe native command did not exit successfully.\n\nThe native test report contains failures.\n\nNo executed test passed; all-skipped reports cannot pass.\n\nRequired test zz-demo contains after is missing, failed or skipped.\n\nOpen conversation\n\nThe native command did not exit successfully. The native command did not exit successfully. The native test report contains failures. No executed test passed; all-skipped reports cannot pass. Required test zz-demo contains after is missing, failed or skipped.\n\nProcess actually started\nYes\nProcess outcome known\nYes\nCommand exit successful\nNo\nTest report is fresh\nYes\nTest report parsed\nYes\nConfigured acceptance passed\nNo\nVerifier classification\nTest\nDiscovered / passed / failed / skipped tests\n1 / 0 / 1 / 0\nFrozen recipe and native operation\nCaptured artifacts\ncommand · f2e51ebf-fead-4e7a-a5a6-518df62276ae · invalid\nfile · results/report.json · valid\ntest · cef397f9-1181-4059-a272-a960b27be7fe · invalid\njson · 0308a5ff-b3c6-4a29-8396-4dd4a8e39eaa · valid\nExport metadata manifest",
+  "humanState": "not-requested",
+  "hasResultBlock": 1,
+  "outputValidationAlerts": 0,
+  "runIds": [
+    {
+      "id": "21ff2603-b60f-46b4-b11c-2210ab73def0",
+      "status": "NeedsHuman"
+    }
+  ]
+}

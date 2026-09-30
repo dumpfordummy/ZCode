@@ -1888,6 +1888,9 @@ export const WorkspaceShellLayout = memo(function WorkspaceShellLayoutComponent(
                               onPaneActiveSessionChange={handlePaneActiveSessionChange}
                               onOpenBrowserUrl={handleOpenBrowserUrl}
                               onOpenAutomationsMain={handleOpenAutomations}
+                              onReturnToGraphRun={() =>
+                                onWorkspaceMainViewChange("graph-engineering")
+                              }
                               onOpenCodeViewer={handleOpenCodeViewer}
                               onAutoOpenAssistantPptx={
                                 isDesktop ? handleAutoOpenAssistantPptx : undefined

@@ -39,7 +39,7 @@ const summary = {
 };
 const evidence = path.join(
   root,
-  "docs/graph-engineering/next-iteration/evidence",
+  "docs/graph-engineering/ux-audit/evidence",
   `${scenario}-${path.basename(isolation.home)}`,
 );
 await mkdir(evidence, { recursive: true });

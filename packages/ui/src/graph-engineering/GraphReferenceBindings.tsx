@@ -5,6 +5,7 @@ import type {
 } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import { useGraphProjectSetup } from "@/hooks/useGraphProjectSetup.js";
+import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphEditorText } from "./GraphEditorMode.js";
 import { GraphReferenceField, type GraphReferenceRole } from "./GraphReferenceField.js";
 
@@ -25,6 +26,7 @@ export function GraphReferenceBindings({
 }) {
   const setup = useGraphProjectSetup(target),
     t = useGraphEditorText(),
+    { intl } = useZCodeIntl(),
     key = "references";
   const state = setup.state("reference-catalog", key);
   const catalog: GraphReferenceCatalog | undefined =
@@ -33,12 +35,10 @@ export function GraphReferenceBindings({
       : undefined;
   if (!roles.length) return null;
   return (
-    <details
-      className="space-y-3 text-ui-sm"
-      data-testid="graph-reference-bindings"
-      open={roles.some((role) => role.required)}
-    >
-      <summary>{t("references")}</summary>
+    <section className="space-y-3 text-ui-sm" data-testid="graph-reference-bindings">
+      <h4 className="text-ui-base font-medium">
+        {intl.formatMessage({ id: "graph.preZ8.contextLabel" })}
+      </h4>
       <p>{t("referenceHelp")}</p>
       <p>{t("catalogHelp")}</p>
       <Button
@@ -69,6 +69,6 @@ export function GraphReferenceBindings({
           {...{ role, target, bindings, disabled, catalog, onChange, contextKey }}
         />
       ))}
-    </details>
+    </section>
   );
 }

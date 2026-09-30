@@ -1,0 +1,42 @@
+{
+  "scenario": "prose-fence",
+  "assertions": [
+    "first entry lands on Runs / New run with no design draft",
+    "new-run draft survives navigation to Workflows and back",
+    "Review and run saved the workflow and opened the review; no native input or model request",
+    "commit bar visible without scrolling; acknowledgment unchecked; Start disabled",
+    "repeating Review and run with an unchanged form creates no new definition revision and no run",
+    "Back to run restored the workspace, run and step and did not answer the permission",
+    "Run again pre-fills the new-run form and starts nothing"
+  ],
+  "steps": [
+    {
+      "node": "implement",
+      "permissionText": "Implement is waiting for a native permission.\n\nAnswer the permission in this exact native conversation. Graph does not grant it separately.\n\nThe exact request is shown in that step's conversation."
+    },
+    {
+      "node": "build",
+      "permissionText": "Build is waiting for a native permission.\n\nAnswer the permission in this exact native conversation. Graph does not grant it separately.\n\nConfigured command (Graph's configuration, not the exact permission request)\n\nnode build.mjs {operationId} {sourceDigest}"
+    },
+    {
+      "node": "test",
+      "permissionText": "Test configured criteria is waiting for a native permission.\n\nAnswer the permission in this exact native conversation. Graph does not grant it separately.\n\nConfigured command (Graph's configuration, not the exact permission request)\n\nnode test.mjs {operationId} {sourceDigest} {buildDigest} {reportPath}"
+    }
+  ],
+  "commitGeometry": {
+    "top": 979,
+    "bottom": 1028,
+    "vh": 1080
+  },
+  "finalStatus": "NeedsHuman",
+  "resultText": "Sequential engineering · Selected run\n\nExecution workspace: <checkout>\\.tmp\\z1-native-1790743486501-a560ad\\workspace\n\nExecution\nStopped for human review\nTest evidence\nCaptured Test evidence passed\nHuman decision\nNot requested — the run stopped before approval was asked for\n\nCurrent step: Review current verification\n\nCaptured request\nModify zz-demo.txt file content to after\nCaptured result\nNo captured final result\n\nReview current verification: reviewer output was rejected. No approval was requested.\n\nStructured output validation failed for this step. The reviewer did not produce a valid decision; this is not a needs_changes verdict.\n\nDiagnostic: Invalid strict JSON value.\n\nStill true from captured facts\n\nChecks with accepted passing results: Test configured criteria.\nNo approval was requested, so there is nothing to approve or reject.\nFiles already written by the agents remain; nothing was undone.\n\nThese facts describe this captured run. Opening history does not verify the current workspace or rerun source-freshness checks.\n\nNext action for this run\nReview current verification · Inspect reviewer output\nReview current verification · Open reviewer conversation\nReview current verification · Inspect step\nStart a new request from this one\nIndividual checks · 2\nCaptured file changes · 0\nTechnical identities and captured facts\nSteps\nView run graph\nAnalyze\nCompleted\nImplement\nCompleted\nBuild\nCompleted\nTest configured criteria\nCompleted\nReview current verification\nFailed\n\nNot visited in this run (other branches or steps not reached)\n\nStart\nFinal human review\nEnd\n\nNode reviewer did not produce a definitive usable result. No repair is authorized.\n\nRouting inspection\nNative admissions used / maximum\n5 / 24\nFrozen deadline\n9/30/2026, 1:14:55 PM\nMaximum repair iterations after iteration 0\n0\nModel usage and cost\nUnavailable; no estimate is recorded\n\nNeedsHuman: Node reviewer did not produce a definitive usable result. No repair is authorized.\n\nIterations, attempts and feedback\nPersisted route checkpoints\nFrozen workflow provenance\nTest configured criteria\n\nThis inspector shows the saved run snapshot. Later graph edits and Chat follow-ups cannot rewrite it.\n\nIteration and attempt\nIteration 0 · Execution completed\n\nExecution completed\n\nAccepted passing evidence\n\nProcess completion, successful exit, fresh parsed evidence and acceptance are separate facts. Agent claims and graph approval do not replace these checks.\n\nOpen conversation\nProcess actually started\nYes\nProcess outcome known\nYes\nCommand exit successful\nYes\nTest report is fresh\nYes\nTest report parsed\nYes\nConfigured acceptance passed\nYes\nVerifier classification\nTest\nDiscovered / passed / failed / skipped tests\n1 / 1 / 0 / 0\nFrozen recipe and native operation\nCaptured artifacts\ncommand · 1ab3dda1-14ea-4365-ac8c-ab20bab856c6 · valid\nfile · results/report.json · valid\ntest · 998e6630-5ab0-47d1-877f-d4d372d62cc2 · valid\njson · 08450ada-f96f-4e70-ba5a-e64f6f8e445d · valid\nExport metadata manifest",
+  "humanState": "not-requested",
+  "hasResultBlock": 1,
+  "outputValidationAlerts": 1,
+  "runIds": [
+    {
+      "id": "80120d7b-cf69-4491-9d44-5e38d9c3162a",
+      "status": "NeedsHuman"
+    }
+  ]
+}

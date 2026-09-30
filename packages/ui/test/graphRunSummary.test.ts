@@ -56,7 +56,8 @@ test("missing or stale approval request and mismatched decision never become cur
   ]) {
     const run = summaryRun();
     mutate(run);
-    assert.equal(graphRunSummary(run).human.state, "pending");
+    // 请求/决定不完整、不匹配或过期时，事实无法确认：unknown，并保留问题码，不能冒充 pending 或 approved。
+    assert.equal(graphRunSummary(run).human.state, "unknown");
     assert.ok(graphRunSummary(run).human.issues.length);
   }
 });
@@ -77,8 +78,10 @@ test("current final gate excludes unvisited repaired entry gates and never borro
     request: undefined,
     decision: undefined,
   });
+  // 当前迭代的最终闸门尚无尝试：运行仍在进行时是 not-reached，且不借用上一轮批准。
+  run.status = "Running";
   const result = graphRunSummary(run);
-  assert.equal(result.human.state, "pending");
+  assert.equal(result.human.state, "not-reached");
   assert.deepEqual(
     result.human.gates.map((gate) => gate.nodeId),
     ["gate"],
@@ -121,7 +124,8 @@ test("older sequential gates use frozen planned path and missing gates cannot di
   delete run.definition.routing;
   assert.equal(graphRunSummary(run).human.state, "approved");
   run.approvalAttempts = [];
-  assert.equal(graphRunSummary(run).human.state, "pending");
+  // 已完成的旧顺序运行却没有闸门记录：事实不一致，保守地显示 unknown，而不是“未请求”。
+  assert.equal(graphRunSummary(run).human.state, "unknown");
   run.plannedPath = ["task"];
   assert.equal(graphRunSummary(run).human.state, "not-required");
 });
@@ -285,4 +289,53 @@ test("an uncertain cancellation retains Stop requested until authoritative inact
   };
   assert.equal(graphRunSummary(run).execution.stopRequested, false);
   assert.equal(graphRunSummary(run).execution.status, "CancelRequested");
+});
+
+test("gate state is derived from gate facts and run outcome, not from one status label", () => {
+  const waiting = summaryRun();
+  waiting.approvalAttempts![0]!.status = "WaitingForApproval";
+  delete waiting.approvalAttempts![0]!.decision;
+  waiting.status = "WaitingForApproval";
+  waiting.routing!.cursorNodeId = "gate";
+  assert.equal(graphRunSummary(waiting).human.state, "pending");
+  assert.deepEqual(graphRunSummary(waiting).human.issues, []);
+
+  // 从未派发闸门：运行仍活动 -> not-reached；已因失败/需人工/取消/预算/无进展结束 -> not-requested。
+  for (const [status, expected] of [
+    ["Running", "not-reached"],
+    ["WaitingForPermission", "not-reached"],
+    ["Failed", "not-requested"],
+    ["NeedsHuman", "not-requested"],
+    ["Cancelled", "not-requested"],
+    ["BudgetExhausted", "not-requested"],
+    ["NoProgress", "not-requested"],
+    ["Unknown", "unknown"],
+    ["Interrupted", "unknown"],
+    ["Completed", "unknown"],
+  ] as const) {
+    const run = summaryRun();
+    run.approvalAttempts = [];
+    run.status = status;
+    const summary = graphRunSummary(run);
+    assert.equal(summary.human.state, expected, status);
+    // not-reached / not-requested 不是缺陷，不得制造 missing-* 问题码。
+    if (expected !== "unknown") assert.deepEqual(summary.human.issues, [], status);
+  }
+
+  // 已 Skipped 的闸门（例如需人工后路由停止）同样是 not-requested，而不是 pending。
+  const skipped = summaryRun();
+  skipped.approvalAttempts![0] = {
+    ...skipped.approvalAttempts![0]!,
+    status: "Skipped",
+    request: undefined,
+    decision: undefined,
+  };
+  skipped.status = "NeedsHuman";
+  assert.equal(graphRunSummary(skipped).human.state, "not-requested");
+
+  // 聚合优先级：rejected > approved(全部) > pending > unknown > not-requested > not-reached。
+  const rejected = summaryRun();
+  rejected.approvalAttempts![0]!.status = "Rejected";
+  rejected.approvalAttempts![0]!.decision!.value = "reject";
+  assert.equal(graphRunSummary(rejected).human.state, "rejected");
 });

@@ -1,0 +1,43 @@
+{
+  "scenario": "test-failure",
+  "locale": "zh-CN",
+  "assertions": [
+    "first entry lands on Runs / New run with no design draft",
+    "new-run draft survives navigation to Workflows and back",
+    "Review and run saved the workflow and opened the review; no native input or model request",
+    "commit bar visible without scrolling; acknowledgment unchecked; Start disabled",
+    "repeating Review and run with an unchanged form creates no new definition revision and no run",
+    "Back to run restored the workspace, run and step and did not answer the permission",
+    "Run again pre-fills the new-run form and starts nothing"
+  ],
+  "steps": [
+    {
+      "node": "implement",
+      "permissionText": "Implement正在等待原生权限。\n\n请在此确切原生对话中答复权限请求。Graph 不会另外授予权限。\n\n确切的请求显示在该步骤的会话中。"
+    },
+    {
+      "node": "build",
+      "permissionText": "Build正在等待原生权限。\n\n请在此确切原生对话中答复权限请求。Graph 不会另外授予权限。\n\n已配置的命令（Graph 的配置，不是确切的权限请求）\n\nnode build.mjs {operationId} {sourceDigest}"
+    },
+    {
+      "node": "test",
+      "permissionText": "Test configured criteria正在等待原生权限。\n\n请在此确切原生对话中答复权限请求。Graph 不会另外授予权限。\n\n已配置的命令（Graph 的配置，不是确切的权限请求）\n\nnode test.mjs {operationId} {sourceDigest} {buildDigest} {reportPath}"
+    }
+  ],
+  "commitGeometry": {
+    "top": 979,
+    "bottom": 1028,
+    "vh": 1080
+  },
+  "finalStatus": "NeedsHuman",
+  "resultText": "Sequential engineering · 所选运行\n\n执行工作区: <checkout>\\.tmp\\z1-native-1790743527472-80d8a1\\workspace\n\n执行\n停止并等待人工审阅\n测试证据\n捕获的测试证据失败\n人工决定\n未请求——运行在请求批准之前已停止\n\n当前步骤: Test configured criteria\n\n捕获的请求\nModify zz-demo.txt file content to after\n捕获的结果\n没有捕获的最终结果\n\n测试失败：Test configured criteria。运行已停止，未启动审阅者。\n\n根据已捕获事实仍然成立\n\n由于没有请求批准，没有可批准或拒绝的内容。\n智能体已写入的文件会保留；没有任何内容被撤销。\n\n这些事实描述本次捕获的运行。打开历史记录不会验证当前工作区或重新检查源文件新鲜度。\n\n本次运行的下一步操作\n\n测试捕获了失败断言。开始另一请求前，请检查失败和本次运行记录的修复或停止状态。\n\nTest configured criteria · 测试失败——检查\n以此为基础新建请求\n各项检查 · 2\n捕获的文件改动 · 0\n技术标识与捕获的事实\n步骤\n查看运行图\nAnalyze\n已完成\nImplement\n已完成\nBuild\n已完成\nTest configured criteria\n失败\n\n本次运行未访问（其他分支或尚未到达的步骤）\n\n开始\nReview current verification\nFinal human review\n结束\n\nNode test did not produce a definitive usable result. No repair is authorized.\n\n路由检查\n已用原生执行次数 / 上限\n4 / 24\n固定截止时间\n2026/9/30 13:15:35\n迭代 0 之后的最大修复次数\n0\n模型用量与费用\n不可用；未记录估算值\n\nNeedsHuman: Node test did not produce a definitive usable result. No repair is authorized.\n\n迭代、尝试与反馈\n已持久化的路由检查点\n冻结的工作流来源\nTest configured criteria\n\n此检查器显示已保存的运行快照。之后的图编辑及对话追问不能改写它。\n\n迭代与尝试\n迭代 0 · 执行失败\n\n执行失败\n\n已接受的失败证据\n\n进程完成、退出成功、报告新鲜且可解析、验收通过是不同事实。模型声明与人工批准不能替代这些检查。\n\nThe native command did not exit successfully.\n\nThe native command did not exit successfully.\n\nThe native test report contains failures.\n\nNo executed test passed; all-skipped reports cannot pass.\n\nRequired test zz-demo contains after is missing, failed or skipped.\n\n打开对话\n\nThe native command did not exit successfully. The native command did not exit successfully. The native test report contains failures. No executed test passed; all-skipped reports cannot pass. Required test zz-demo contains after is missing, failed or skipped.\n\n进程确已启动\n是\n进程结果已知\n是\n命令退出成功\n否\n测试报告属于本次调用\n是\n测试报告已解析\n是\n配置验收规则通过\n否\n验证器类别\n测试\n发现 / 通过 / 失败 / 跳过的测试\n1 / 0 / 1 / 0\n冻结配方与原生操作\n已捕获产物\ncommand · f03ff86b-042c-441f-bd91-4f00939ee2e8 · invalid\nfile · results/report.json · valid\ntest · efb57c6e-1f0c-4074-ac62-e234df7053d6 · invalid\njson · 47e19fc2-9663-45a3-b637-c59a3d9154e3 · valid\n导出元数据清单",
+  "humanState": "not-requested",
+  "hasResultBlock": 1,
+  "outputValidationAlerts": 0,
+  "runIds": [
+    {
+      "id": "27034f1b-f10a-49ea-bc09-6fe04e652578",
+      "status": "NeedsHuman"
+    }
+  ]
+}

@@ -28,8 +28,11 @@ async function captureDialog(isolation, window, summary, name) {
   await window.evaluate(
     () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
   );
+  const host = (await window.locator('[role="dialog"]:visible').count())
+    ? window.locator('[role="dialog"]:visible')
+    : window.getByTestId("graph-run-confirmation");
   (summary.dialogPresentation ??= []).push(
-    await window.locator('[role="dialog"]:visible').evaluate((element) => {
+    await host.evaluate((element) => {
       const style = getComputedStyle(element);
       const box = element.getBoundingClientRect();
       return {
@@ -189,11 +192,18 @@ export async function instantiateNativeTemplate(isolation, window, summary, scen
 export async function startNativeTemplate(isolation, window, summary) {
   const before = await ledger(isolation),
     models = modelCount(isolation);
-  await window.getByTestId("graph-run-button").click();
+  // 审阅现在是 Runs 中的内联步骤：若已在审阅（Review and run）则不重复触发；否则从 Design 进入。
+  if (!(await window.getByTestId("graph-run-confirmation").isVisible())) {
+    if (!(await window.getByTestId("graph-run-button").isVisible()))
+      await window.getByTestId("graph-view-design").click();
+    await window.getByTestId("graph-run-button").click();
+  }
   await window.getByTestId("graph-run-confirmation").waitFor({ timeout: 30000 });
-  const snapshot = JSON.parse(
-    await window.getByTestId("graph-confirmation-definition").locator("pre").textContent(),
-  );
+  // <details> 内的快照 JSON 只在展开后可读。
+  const definitionDetails = window.getByTestId("graph-confirmation-definition");
+  if ((await definitionDetails.getAttribute("open")) === null)
+    await definitionDetails.locator(":scope > summary").click();
+  const snapshot = JSON.parse(await definitionDetails.locator("pre").textContent());
   assert.ok(snapshot.provenance?.digest);
   assert.equal(snapshot.provenance.template.digest, snapshot.definition.template.digest);
   assert.equal(await window.getByTestId("graph-confirm-run").isDisabled(), true);

@@ -17,12 +17,18 @@ import { useGraphWorkflow } from "@/hooks/useGraphWorkflow.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphDraftStore } from "@/store/graphDraftStore.js";
 import { GraphSelect } from "./GraphSelect.js";
+import { useGraphTemplateText } from "./graphTemplateText.js";
 import { GraphTemplateBindings } from "./GraphTemplateBindings.js";
 import { GraphLibraryManagement } from "./GraphLibraryManagement.js";
 import { graphDefinitionContent } from "./graphEngineeringView.js";
 import { latestCompatibleTemplateVersion } from "./graphWorkflowView.js";
 import { replaceGraphFromTemplate } from "./graphTemplateReplacement.js";
 import type { GraphRecipeReadState } from "./graphRecipeRead.js";
+import {
+  graphInstantiationFingerprint,
+  isRememberedGraphInstantiation,
+  rememberGraphInstantiation,
+} from "./graphInstantiationMemo.js";
 
 interface ReplacementIntent {
   parameters: Record<string, GraphParameterValue>;
@@ -32,6 +38,9 @@ interface ReplacementIntent {
   version: number;
   digest: string;
   formFingerprint: string;
+  /** "review" continues into the inline Review after the workflow is saved. */
+  continuation: "review" | "save";
+  instantiation: string;
 }
 
 export function GraphLibrary({
@@ -49,6 +58,7 @@ export function GraphLibrary({
   onOpenSetup,
   onSaveDesign,
   onInstantiated,
+  onReview,
 }: {
   workspacePath: string;
   workspaceIdentity?: string;
@@ -63,7 +73,9 @@ export function GraphLibrary({
   onLoadRecipes(): void;
   onOpenSetup(): void;
   onSaveDesign(definition: GraphDefinition): Promise<GraphDefinition | undefined>;
-  onInstantiated(definition: GraphSequentialDefinition): void;
+  onInstantiated(definition: GraphSequentialDefinition, continuation: "review" | "save"): void;
+  /** Called with the unchanged saved design when Review and run needs no new instantiation. */
+  onReview?(definition: GraphDefinition): void;
 }) {
   const { intl } = useZCodeIntl();
   const t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
@@ -74,6 +86,7 @@ export function GraphLibrary({
     [workspacePath, workspaceIdentity],
   );
   const workspaceKey = workspaceIdentity?.trim() || workspacePath;
+  const display = useGraphTemplateText();
   const workflow = useGraphWorkflow(target);
   const selection = useGraphDraftStore((state) => state.workspaces[workspaceKey]?.librarySelection);
   const choose = useGraphDraftStore((state) => state.selectLibrary);
@@ -145,19 +158,22 @@ export function GraphLibrary({
         }),
     });
     if (saved && alive.current) {
-      onInstantiated(saved);
+      rememberGraphInstantiation(workspaceKey, intent.instantiation, graphDefinitionContent(saved));
+      onInstantiated(saved, intent.continuation);
       setReplacement(null);
       setOpen(false);
     } else if (!stillCurrent() && alive.current) setReplacementError(u("changedConsent"));
   };
   const content = (
     <div className="space-y-4">
-      <p
-        className="break-all font-mono text-ui-sm text-foreground-subtle"
-        data-testid="graph-library-workspace"
-      >
-        {workspacePath}
-      </p>
+      {inline ? null : (
+        <p
+          className="break-all font-mono text-ui-sm text-foreground-subtle"
+          data-testid="graph-library-workspace"
+        >
+          {workspacePath}
+        </p>
+      )}
       {workflow.error ? (
         <p role="alert" className="break-words text-ui-sm text-destructive">
           {workflow.error}
@@ -172,7 +188,7 @@ export function GraphLibrary({
           ...(!entry ? [{ value: "none", label: t("chooseWorkflow") }] : []),
           ...entries.map((item) => ({
             value: item.id,
-            label: `${item.name}${item.archived ? ` · ${t("archived")}` : ""}`,
+            label: `${display.entry(item.id, item.name)}${item.archived ? ` · ${t("archived")}` : ""}`,
           })),
         ]}
         onChange={(id) => {
@@ -187,7 +203,7 @@ export function GraphLibrary({
       {version && entry ? (
         <>
           <p className="whitespace-pre-wrap text-ui-sm text-foreground-subtle">
-            {version.template.description}
+            {display.description(entry.id, version.template.description)}
           </p>
           <GraphTemplateBindings
             key={`${entry.id}:${version.version}`}
@@ -204,8 +220,32 @@ export function GraphLibrary({
               setOpen(false);
               onOpenSetup();
             }}
-            onInstantiate={(parameters, bindings) => {
+            allowReview={inline && Boolean(onReview)}
+            onInstantiate={(parameters, bindings, continuation) => {
+              const instantiation = graphInstantiationFingerprint({
+                id: entry.id,
+                version: version.version,
+                digest: version.digest,
+                parameters,
+                bindings,
+              });
+              // 表单与已保存设计没有变化：直接进入审阅，不再次创建定义，也不因重复点击产生新修订。
+              if (
+                continuation === "review" &&
+                !dirty &&
+                definition.version === 5 &&
+                isRememberedGraphInstantiation(
+                  workspaceKey,
+                  instantiation,
+                  graphDefinitionContent(definition),
+                )
+              ) {
+                onReview?.(definition);
+                return;
+              }
               const intent: ReplacementIntent = {
+                continuation,
+                instantiation,
                 parameters: structuredClone(parameters),
                 bindings: structuredClone(bindings),
                 definition: structuredClone(definition),
@@ -230,19 +270,21 @@ export function GraphLibrary({
           {intl.formatMessage({ id: "graph.loading" })}
         </p>
       )}
-      <GraphLibraryManagement
-        key={entry?.id ?? "new"}
-        workflow={workflow}
-        definition={definition}
-        entry={entry}
-        version={version}
-        disabled={locked}
-        target={target}
-        onVersion={(nextVersion) => {
-          if (entry) choose(workspaceKey, { id: entry.id, version: nextVersion });
-          setReplacement(null);
-        }}
-      />
+      {inline ? null : (
+        <GraphLibraryManagement
+          key={entry?.id ?? "new"}
+          workflow={workflow}
+          definition={definition}
+          entry={entry}
+          version={version}
+          disabled={locked}
+          target={target}
+          onVersion={(nextVersion) => {
+            if (entry) choose(workspaceKey, { id: entry.id, version: nextVersion });
+            setReplacement(null);
+          }}
+        />
+      )}
     </div>
   );
   return (

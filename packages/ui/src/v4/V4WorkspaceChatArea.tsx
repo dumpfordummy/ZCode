@@ -104,6 +104,7 @@ interface V4WorkspaceChatAreaProps {
   onPaneActiveSessionChange?: (scope: PaneWorkspaceScope, sessionId: string) => void;
   onOpenBrowserUrl?: (url: string) => void;
   onOpenAutomationsMain?: OpenAutomationsMain;
+  onReturnToGraphRun?: () => void;
   onOpenCodeViewer?: (source: CodeViewerSource) => void;
   onAutoOpenAssistantPptx?: (request: AssistantPreviewCardsAutoOpenRequest) => void;
   onOpenFileLink?: (target: MessageFileLinkTarget) => void;
@@ -165,6 +166,7 @@ export function V4WorkspaceChatArea({
   onPaneActiveSessionChange,
   onOpenBrowserUrl,
   onOpenAutomationsMain,
+  onReturnToGraphRun,
   onOpenCodeViewer,
   onAutoOpenAssistantPptx,
   onOpenFileLink,
@@ -290,6 +292,7 @@ export function V4WorkspaceChatArea({
       onOpenGitReview,
       onOpenBrowserUrl,
       onOpenAutomationsMain,
+      onReturnToGraphRun,
       onOpenCodeViewer,
       onAutoOpenAssistantPptx,
       onOpenFileLink,
@@ -335,6 +338,7 @@ export function V4WorkspaceChatArea({
       onOpenGitReview,
       onOpenBrowserUrl,
       onOpenAutomationsMain,
+      onReturnToGraphRun,
       onOpenCodeViewer,
       onAutoOpenAssistantPptx,
       onOpenFileLink,

@@ -1,0 +1,3228 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Graph Tasks Prototype</title>
+    <meta
+      name="description"
+      content="Isolated clickable prototype of the proposed Graph Engineering task flow. Synthetic data only."
+    />
+    <style>
+      /* Tokens mirror packages/ui/src/styles.css (.theme-zai-dark / .theme-zai-light). No new colours are introduced. */
+      :root {
+        --ui-font-size: 14px;
+        --text-xl: calc(var(--ui-font-size) + 4px);
+        --text-lg: calc(var(--ui-font-size) + 2px);
+        --text-base: var(--ui-font-size);
+        --text-caption: calc(var(--ui-font-size) - 1px);
+        --text-sm: calc(var(--ui-font-size) - 2px);
+        --text-xs: calc(var(--ui-font-size) - 4px);
+        --font-sans:
+          ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei UI",
+          "Noto Sans CJK SC", sans-serif;
+        --font-mono:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+          "Microsoft YaHei UI", "PingFang SC", monospace;
+        --background: #161616;
+        --sidebar: #161616;
+        --panel: #202020;
+        --card: #2b2b2b;
+        --input: #2b2b2b;
+        --menu-hover: #363636;
+        --secondary: #363636;
+        --tag: #363636;
+        --border: rgba(255, 255, 255, 0.1);
+        --border-hover: rgba(255, 255, 255, 0.15);
+        --hover: rgba(255, 255, 255, 0.05);
+        --selected: rgba(255, 255, 255, 0.1);
+        --surface: rgba(255, 255, 255, 0.05);
+        --fg: #d4d4d4;
+        --fg-subtle: color-mix(in oklab, #d4d4d4 60%, transparent);
+        --fg-inverse: #000;
+        --primary: #fff;
+        --primary-fg: #000;
+        --success: #46bf72;
+        --warning: #ff8a30;
+        --destructive: #ff5c5c;
+        --confirm-surface: rgba(70, 191, 114, 0.16);
+        --confirm-fg: #87d9a4;
+        --focus: #fff;
+        color-scheme: dark;
+      }
+      :root[data-theme="light"] {
+        --background: #f8f8f8;
+        --sidebar: #f0f0f0;
+        --panel: #fff;
+        --card: #fff;
+        --input: #fff;
+        --menu-hover: #f0f0f0;
+        --secondary: #e6e6e6;
+        --tag: #e6e6e6;
+        --border: rgba(13, 13, 13, 0.1);
+        --border-hover: rgba(13, 13, 13, 0.15);
+        --hover: rgba(13, 13, 13, 0.05);
+        --selected: rgba(13, 13, 13, 0.07);
+        --surface: rgba(13, 13, 13, 0.03);
+        --fg: #262626;
+        --fg-subtle: color-mix(in oklab, #262626 62%, transparent);
+        --fg-inverse: #fff;
+        --primary: #000;
+        --primary-fg: #fff;
+        --success: #1e8a3e;
+        --warning: #e07b00;
+        --destructive: #e03131;
+        --confirm-surface: #eaf7ee;
+        --confirm-fg: #166b32;
+        --focus: #000;
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        background: var(--background);
+        color: var(--fg);
+        font: 400 var(--text-base)/1.45 var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+      }
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+        color: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      p {
+        margin: 0;
+      }
+      h2 {
+        font-size: var(--text-lg);
+        font-weight: 600;
+      }
+      h3 {
+        font-size: var(--text-base);
+        font-weight: 600;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+      .muted {
+        color: var(--fg-subtle);
+      }
+      .mono {
+        font-family: var(--font-mono);
+      }
+      .sm {
+        font-size: var(--text-sm);
+      }
+      .caption {
+        font-size: var(--text-caption);
+      }
+      svg.i {
+        width: 14px;
+        height: 14px;
+        flex: none;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.75;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      svg.i.lg {
+        width: 16px;
+        height: 16px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .spin {
+        animation: spin 1s linear infinite;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .spin {
+          animation: none;
+        }
+        * {
+          transition: none !important;
+        }
+      }
+
+      /* Focus: the product resets outline/box-shadow globally (styles.css:124), so focus is drawn with border + fill only. */
+      :focus {
+        outline: none;
+      }
+      :focus-visible {
+        border-color: var(--focus) !important;
+        background-color: var(--selected) !important;
+      }
+      textarea:focus-visible,
+      input:focus-visible,
+      select:focus-visible {
+        border-color: var(--focus) !important;
+      }
+
+      /* Frame */
+      .frame {
+        display: grid;
+        grid-template-columns: 248px 1fr;
+        height: 100dvh;
+      }
+      .app-sidebar {
+        background: var(--sidebar);
+        padding: 14px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        border-right: 1px solid var(--border);
+        overflow: hidden;
+      }
+      .app-sidebar .brand {
+        font-weight: 700;
+        padding: 4px 8px 12px;
+      }
+      .side-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 8px;
+        border-radius: 8px;
+        color: var(--fg);
+        background: none;
+        border: 1px solid transparent;
+        text-align: left;
+      }
+      .side-item[aria-current="page"] {
+        background: var(--selected);
+      }
+      .side-label {
+        padding: 14px 8px 4px;
+        color: var(--fg-subtle);
+        font-size: var(--text-sm);
+      }
+      .side-note {
+        margin-top: auto;
+        padding: 8px;
+        color: var(--fg-subtle);
+        font-size: var(--text-sm);
+      }
+      .pane {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 0;
+        background: var(--panel);
+        margin: 4px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+      }
+      .proto-banner {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 4px 12px;
+        background: var(--surface);
+        border-bottom: 1px dashed var(--border-hover);
+        font-size: var(--text-sm);
+        color: var(--fg-subtle);
+      }
+      .proto-banner strong {
+        color: var(--fg);
+        font-weight: 600;
+      }
+      .proto-banner .spacer {
+        flex: 1;
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: transparent;
+        white-space: nowrap;
+      }
+      .btn:hover:not(:disabled) {
+        background: var(--hover);
+        border-color: var(--border-hover);
+      }
+      .btn.primary {
+        background: var(--primary);
+        color: var(--primary-fg);
+        border-color: transparent;
+      }
+      .btn.primary:hover:not(:disabled) {
+        background: color-mix(in oklab, var(--primary) 85%, transparent);
+      }
+      .btn.ghost {
+        border-color: transparent;
+      }
+      .btn.danger {
+        border-color: color-mix(in oklab, var(--destructive) 45%, transparent);
+      }
+      .btn.lg {
+        min-height: 32px;
+        padding: 0 14px;
+      }
+      .btn.sm {
+        min-height: 28px;
+        font-size: var(--text-sm);
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn.w-full {
+        width: 100%;
+      }
+      .btn.primary:focus-visible {
+        background-color: var(--primary) !important;
+        box-shadow: none;
+        border-color: var(--fg-inverse) !important;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      /* Graph header / nav */
+      .g-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px 0;
+        flex-wrap: wrap;
+      }
+      .g-header h1 {
+        font-size: var(--text-base);
+        font-weight: 600;
+        margin-right: 4px;
+      }
+      .ctx {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        padding: 6px 12px 8px;
+        font-size: var(--text-sm);
+      }
+      .ctx-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 24px;
+        padding: 0 8px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--fg);
+        max-width: 100%;
+      }
+      .ctx-chip .k {
+        color: var(--fg-subtle);
+      }
+      .ctx-chip.btn-like:hover {
+        background: var(--hover);
+        border-color: var(--border-hover);
+      }
+      .g-nav {
+        display: flex;
+        gap: 2px;
+        padding: 0 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .nav-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 32px;
+        padding: 0 12px;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        background: none;
+        border-radius: 6px 6px 0 0;
+        color: var(--fg-subtle);
+      }
+      .nav-btn:hover {
+        color: var(--fg);
+        background: var(--hover);
+      }
+      .nav-btn[aria-current="page"] {
+        color: var(--fg);
+        border-bottom-color: var(--fg);
+        font-weight: 600;
+      }
+      .nav-btn .count {
+        font-size: var(--text-sm);
+        background: var(--tag);
+        border-radius: 999px;
+        min-width: 18px;
+        text-align: center;
+        padding: 0 5px;
+      }
+
+      /* Needs you strip */
+      .needs {
+        display: none;
+      }
+      .needs.on {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        background: color-mix(in oklab, var(--warning) 12%, transparent);
+        border-bottom: 1px solid color-mix(in oklab, var(--warning) 35%, transparent);
+        flex-wrap: wrap;
+      }
+      .needs .ico {
+        color: var(--warning);
+        display: inline-flex;
+      }
+      .needs .txt {
+        flex: 1;
+        min-width: 200px;
+      }
+      .needs .txt b {
+        font-weight: 600;
+      }
+
+      /* Layout */
+      main {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+      }
+      .tasks {
+        display: grid;
+        grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+        flex: 1;
+        min-height: 0;
+      }
+      .activity {
+        border-right: 1px solid var(--border);
+        padding: 12px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        min-height: 0;
+      }
+      .group-title {
+        font-size: var(--text-sm);
+        color: var(--fg-subtle);
+        font-weight: 600;
+        padding: 0 4px 4px;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        width: 100%;
+        text-align: left;
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        background: none;
+      }
+      .row:hover {
+        background: var(--hover);
+      }
+      .row[aria-current="true"] {
+        background: var(--selected);
+      }
+      .row .ri {
+        margin-top: 2px;
+      }
+      .row-main {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        gap: 2px;
+      }
+      .row-title {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        overflow-wrap: anywhere;
+      }
+      .row-sub {
+        font-size: var(--text-sm);
+        color: var(--fg-subtle);
+      }
+      .detail {
+        overflow-y: auto;
+        min-width: 0;
+        min-height: 0;
+        padding: 16px 20px 0;
+        position: relative;
+      }
+      .detail-inner {
+        max-width: 820px;
+        padding-bottom: 24px;
+      }
+      .detail h2:focus {
+        outline: none;
+      }
+      .sec {
+        padding: 12px 0;
+        border-top: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .sec:first-of-type {
+        border-top: 0;
+      }
+      .sec-head {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .field-label {
+        font-size: var(--text-sm);
+        color: var(--fg-subtle);
+      }
+      textarea,
+      input[type="text"],
+      input[type="search"],
+      select {
+        width: 100%;
+        background: var(--input);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 6px 10px;
+        min-height: 28px;
+      }
+      textarea {
+        resize: vertical;
+        min-height: 64px;
+        line-height: 1.5;
+      }
+      textarea:hover,
+      input:hover,
+      select:hover {
+        border-color: var(--border-hover);
+      }
+      ::placeholder {
+        color: var(--fg-subtle);
+        opacity: 1;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 24px;
+        padding: 0 8px;
+        border-radius: 6px;
+        background: var(--tag);
+        border: 1px solid transparent;
+        font-size: var(--text-sm);
+      }
+      .chip.btn-like {
+        cursor: pointer;
+      }
+      .x {
+        background: none;
+        border: 1px solid transparent;
+        padding: 2px;
+        display: inline-flex;
+        border-radius: 4px;
+        color: inherit;
+      }
+      .x:hover {
+        background: var(--hover);
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 22px;
+        padding: 0 8px;
+        border-radius: 999px;
+        font-size: var(--text-sm);
+        border: 1px solid var(--border);
+        background: var(--surface);
+        white-space: nowrap;
+      }
+      .pill.warn {
+        background: color-mix(in oklab, var(--warning) 14%, transparent);
+        border-color: color-mix(in oklab, var(--warning) 40%, transparent);
+      }
+      .pill.warn svg {
+        color: var(--warning);
+      }
+      .pill.ok svg {
+        color: var(--success);
+      }
+      .pill.bad {
+        background: color-mix(in oklab, var(--destructive) 12%, transparent);
+        border-color: color-mix(in oklab, var(--destructive) 40%, transparent);
+      }
+      .pill.bad svg {
+        color: var(--destructive);
+      }
+      .pill.run svg {
+        color: var(--fg);
+      }
+      .ic-ok {
+        color: var(--success);
+      }
+      .ic-bad {
+        color: var(--destructive);
+      }
+      .ic-warn {
+        color: var(--warning);
+      }
+      .kv {
+        display: grid;
+        grid-template-columns: 132px minmax(0, 1fr);
+        gap: 6px 14px;
+        margin: 0;
+      }
+      .kv dt {
+        color: var(--fg-subtle);
+        font-size: var(--text-sm);
+        padding-top: 1px;
+      }
+      .kv dd {
+        margin: 0;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .code {
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 4px 8px;
+        display: block;
+        overflow-x: auto;
+        white-space: pre;
+      }
+      .checkrow {
+        display: grid;
+        grid-template-columns: 56px minmax(0, 1fr) auto;
+        gap: 8px 12px;
+        align-items: center;
+      }
+      .checkrow .lbl {
+        color: var(--fg-subtle);
+        font-size: var(--text-sm);
+      }
+      .picker {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--menu, var(--card));
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .opt {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        width: 100%;
+        text-align: left;
+        padding: 5px 8px;
+        border-radius: 6px;
+        border: 1px solid transparent;
+        background: none;
+      }
+      .opt:hover {
+        background: var(--menu-hover);
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .footer-bar {
+        position: sticky;
+        bottom: 0;
+        margin: 0 -20px;
+        padding: 10px 20px;
+        background: var(--panel);
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+        z-index: 2;
+      }
+      .footer-bar .grow {
+        flex: 1;
+        min-width: 240px;
+      }
+      .check-label {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+      }
+      .check-label input {
+        margin-top: 3px;
+        width: 16px;
+        height: 16px;
+        accent-color: var(--fg);
+      }
+
+      /* Stepper */
+      .stepper {
+        display: flex;
+        gap: 0;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        flex-wrap: wrap;
+      }
+      .stepper li {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px 4px 0;
+        font-size: var(--text-sm);
+        color: var(--fg-subtle);
+      }
+      .stepper li .sep {
+        color: var(--fg-subtle);
+      }
+      .stepper li:last-child .sep {
+        display: none;
+      }
+      .stepper li.now {
+        color: var(--fg);
+        font-weight: 600;
+      }
+      .stepper li.done {
+        color: var(--fg);
+      }
+      .stepper li.bad {
+        color: var(--fg);
+        font-weight: 600;
+      }
+      .verdicts {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .verdict {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+      .verdict .k {
+        font-size: var(--text-sm);
+        color: var(--fg-subtle);
+      }
+      .verdict .v {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        font-weight: 600;
+      }
+      .verdict .sub {
+        font-size: var(--text-sm);
+        color: var(--fg-subtle);
+      }
+      .alert {
+        border: 1px solid var(--border-hover);
+        border-radius: 8px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: var(--surface);
+      }
+      .alert.warn {
+        border-color: color-mix(in oklab, var(--warning) 45%, transparent);
+        background: color-mix(in oklab, var(--warning) 9%, transparent);
+      }
+      .alert.bad {
+        border-color: color-mix(in oklab, var(--destructive) 45%, transparent);
+        background: color-mix(in oklab, var(--destructive) 8%, transparent);
+      }
+      .alert .head {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+      }
+      .alert .head h3 {
+        font-size: var(--text-base);
+      }
+      .tabs {
+        display: flex;
+        gap: 2px;
+        border-bottom: 1px solid var(--border);
+      }
+      .tab {
+        min-height: 30px;
+        padding: 0 12px;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        background: none;
+        color: var(--fg-subtle);
+        border-radius: 6px 6px 0 0;
+      }
+      .tab[aria-selected="true"] {
+        color: var(--fg);
+        border-bottom-color: var(--fg);
+        font-weight: 600;
+      }
+      .tab:hover {
+        color: var(--fg);
+        background: var(--hover);
+      }
+      .tabpanel {
+        padding-top: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .timeline {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .timeline li {
+        display: grid;
+        grid-template-columns: 20px minmax(0, 1fr) auto;
+        gap: 10px;
+        padding: 8px 4px;
+        border-top: 1px solid var(--border);
+        align-items: start;
+      }
+      .timeline li:first-child {
+        border-top: 0;
+      }
+      .diff {
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .diff div {
+        padding: 2px 10px;
+        white-space: pre;
+      }
+      .diff .add {
+        background: color-mix(in oklab, var(--success) 16%, transparent);
+      }
+      .diff .del {
+        background: color-mix(in oklab, var(--destructive) 14%, transparent);
+      }
+      .rawout {
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px 10px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        background: var(--surface);
+      }
+      .rawout mark {
+        background: color-mix(in oklab, var(--destructive) 28%, transparent);
+        color: var(--fg);
+        border-radius: 3px;
+        padding: 0 2px;
+      }
+      table.tbl {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: var(--text-sm);
+      }
+      table.tbl th {
+        text-align: left;
+        color: var(--fg-subtle);
+        font-weight: 500;
+        padding: 4px 8px 4px 0;
+      }
+      table.tbl td {
+        padding: 6px 8px 6px 0;
+        border-top: 1px solid var(--border);
+        vertical-align: top;
+      }
+
+      /* Native conversation mock */
+      .conv {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+        min-height: 0;
+      }
+      .conv-top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+      }
+      .conv-body {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        justify-content: center;
+        padding: 20px 16px;
+      }
+      .conv-col {
+        width: min(640px, 100%);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .bubble {
+        background: var(--surface);
+        border-radius: 10px;
+        padding: 8px 12px;
+      }
+      .perm {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .perm .opts {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .perm .o {
+        display: flex;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        background: none;
+        text-align: left;
+      }
+      .perm .o[aria-checked="true"] {
+        background: var(--selected);
+      }
+      .simtag {
+        font-size: var(--text-sm);
+        color: var(--fg-subtle);
+        border: 1px dashed var(--border-hover);
+        border-radius: 6px;
+        padding: 1px 6px;
+      }
+      .owner-note {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: var(--text-sm);
+        color: var(--fg-subtle);
+      }
+
+      /* Checks view */
+      .split {
+        display: grid;
+        grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+        flex: 1;
+        min-height: 0;
+      }
+      .split > .l {
+        border-right: 1px solid var(--border);
+        padding: 12px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .split > .r {
+        padding: 16px 20px;
+        overflow-y: auto;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px 14px;
+      }
+      .form-grid .full {
+        grid-column: 1 / -1;
+      }
+      .arglist {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .arglist li {
+        display: grid;
+        grid-template-columns: 24px 1fr;
+        gap: 8px;
+        align-items: center;
+      }
+      .arglist .n {
+        color: var(--fg-subtle);
+        font-size: var(--text-sm);
+        text-align: right;
+      }
+
+      /* Prototype panel */
+      .proto-panel {
+        position: fixed;
+        right: 12px;
+        bottom: 12px;
+        width: min(340px, calc(100vw - 24px));
+        background: var(--card);
+        border: 1px solid var(--border-hover);
+        border-radius: 12px;
+        padding: 12px;
+        z-index: 30;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        display: none;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .proto-panel.on {
+        display: flex;
+      }
+      .seg {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+      }
+      .seg button[aria-pressed="true"] {
+        background: var(--selected);
+        border-color: var(--border-hover);
+      }
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 20px;
+        transform: translateX(-50%);
+        background: var(--card);
+        border: 1px solid var(--border-hover);
+        border-radius: 12px;
+        padding: 8px 14px;
+        z-index: 40;
+        display: none;
+        gap: 10px;
+        align-items: center;
+      }
+      .toast.on {
+        display: flex;
+      }
+
+      @media (max-width: 1000px) {
+        .frame {
+          grid-template-columns: 1fr;
+        }
+        .app-sidebar {
+          display: none;
+        }
+        .tasks,
+        .split {
+          grid-template-columns: 1fr;
+        }
+        .tasks[data-mobile="detail"] .activity,
+        .split[data-mobile="detail"] > .l {
+          display: none;
+        }
+        .tasks[data-mobile="list"] .detail,
+        .split[data-mobile="list"] > .r {
+          display: none;
+        }
+        .verdicts {
+          grid-template-columns: 1fr;
+        }
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+        .kv {
+          grid-template-columns: 1fr;
+        }
+        .back-list {
+          display: inline-flex !important;
+        }
+      }
+      .back-list {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame" id="frame">
+      <aside class="app-sidebar" aria-label="ZCode application frame (static in this prototype)">
+        <div class="brand">ZCode</div>
+        <button class="side-item" tabindex="-1">
+          <svg class="i lg" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14" /></svg
+          ><span data-i="sbNew"></span>
+        </button>
+        <button class="side-item" tabindex="-1">
+          <svg class="i lg" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" /></svg
+          ><span data-i="sbSearch"></span>
+        </button>
+        <button class="side-item" aria-current="page" tabindex="-1">
+          <svg class="i lg" viewBox="0 0 24 24">
+            <circle cx="6" cy="6" r="3" />
+            <circle cx="6" cy="18" r="3" />
+            <path d="M6 9v6M9 6h3a3 3 0 0 1 3 3v3" />
+            <circle cx="18" cy="15" r="3" /></svg
+          ><span data-i="sbGraph"></span>
+        </button>
+        <button class="side-item" tabindex="-1">
+          <svg class="i lg" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l3 2" /></svg
+          ><span data-i="sbAuto"></span>
+        </button>
+        <div class="side-label" data-i="sbProjects"></div>
+        <button class="side-item" tabindex="-1">
+          <svg class="i lg" viewBox="0 0 24 24">
+            <path
+              d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"
+            /></svg
+          >workspace
+        </button>
+        <div class="side-note" data-i="sbNote"></div>
+      </aside>
+      <div class="pane">
+        <div class="proto-banner" role="note">
+          <strong data-i="protoLabel"></strong><span data-i="protoText"></span>
+          <span class="spacer"></span>
+          <button
+            class="btn sm"
+            id="proto-toggle"
+            aria-expanded="false"
+            aria-controls="proto-panel"
+            data-i="protoControls"
+          ></button>
+        </div>
+        <div class="g-header">
+          <button class="btn ghost sm" id="back-chat">
+            <svg class="i" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7M19 12H5" /></svg
+            ><span data-i="backChat"></span>
+          </button>
+          <h1 data-i="graphTitle"></h1>
+        </div>
+        <div class="ctx" id="ctx" role="group"></div>
+        <nav class="g-nav" id="nav" aria-label="Graph Engineering"></nav>
+        <div class="needs" id="needs" role="region" aria-label="Needs you"></div>
+        <main id="main"></main>
+      </div>
+    </div>
+
+    <div class="proto-panel" id="proto-panel" role="dialog" aria-label="Prototype controls">
+      <div>
+        <div class="field-label" data-i="pcScenario"></div>
+        <div class="seg" id="pc-scenario"></div>
+      </div>
+      <div>
+        <div class="field-label" data-i="pcJump"></div>
+        <div class="seg" id="pc-jump"></div>
+      </div>
+      <div class="actions">
+        <div>
+          <div class="field-label" data-i="pcTheme"></div>
+          <div class="seg" id="pc-theme"></div>
+        </div>
+        <div>
+          <div class="field-label" data-i="pcLang"></div>
+          <div class="seg" id="pc-lang"></div>
+        </div>
+        <div>
+          <div class="field-label" data-i="pcSpeed"></div>
+          <div class="seg" id="pc-speed"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn sm" id="pc-reset" data-i="pcReset"></button
+        ><button class="btn sm ghost" id="pc-close" data-i="close"></button>
+      </div>
+      <p class="sm muted" data-i="pcNote"></p>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+    <div class="sr-only" id="live" aria-live="polite"></div>
+
+    <script>
+      "use strict";
+      /* ============================ i18n ============================ */
+      const T = {
+        en: {
+          sbNew: "New task",
+          sbSearch: "Search",
+          sbGraph: "Graph Engineering",
+          sbAuto: "Automations",
+          sbProjects: "Projects",
+          sbNote: "Static app frame. Only the Graph pane is prototyped.",
+          protoLabel: "PROTOTYPE",
+          protoText: " Synthetic data. Nothing here runs a model, a command or a native session.",
+          protoControls: "Prototype controls",
+          backChat: "Back to chat",
+          graphTitle: "Graph Engineering",
+          ctxWorkspace: "Workspace",
+          ctxModel: "Model",
+          ctxPerm: "Permissions",
+          ctxChecks: "Checks",
+          ctxModelV: "workspace default",
+          ctxPermV: "Ask before changes",
+          ctxChecksV: (n) => `${n} saved · not run`,
+          copyPath: "Copy path",
+          copied: "Path copied",
+          navTasks: "Runs",
+          navWorkflows: "Workflows",
+          navChecks: "Checks",
+          needsPerm: (step, what) => `Permission needed: ${step} wants ${what}`,
+          needsApproval: "Your decision is needed on a finished run",
+          needsGo: "Go to run",
+          needsConv: "Review in conversation",
+          newTask: "New run",
+          groupNeeds: "Needs you",
+          groupRunning: "Running",
+          groupRecent: "Recent",
+          stNeedsPerm: "Needs permission",
+          stNeedsApproval: "Waiting for your decision",
+          stRunning: (s) => `Running · ${s}`,
+          stStoppedTest: "Stopped · Test failed",
+          stStoppedReview: "Stopped · Reviewer output rejected",
+          stApproved: "Approved",
+          stRejected: "Rejected",
+          stCancelled: "Cancelled",
+          ago: (m) =>
+            m < 60
+              ? `${m} min ago`
+              : m < 1440
+                ? `${Math.round(m / 60)} h ago`
+                : `${Math.round(m / 1440)} d ago`,
+          composerTitle: "New run",
+          requestLabel: "What should be done?",
+          requestPlaceholder:
+            "Describe the change in your own words, e.g. “Modify zz-demo.txt file content to after”",
+          requestHint:
+            "This is the request. Documents and skills go under Context below, not here.",
+          recent: "Recent requests",
+          prefilled: (t) => `Prefilled from “${t}”. Nothing has started.`,
+          workflow: "Workflow",
+          wfSeq: "Sequential engineering · v2",
+          wfAgent: "Agent-assisted task · v1",
+          wfSeqDesc:
+            "Analyze → Implement → Build → Test → Review → Your approval. Needs a saved Build and Test.",
+          wfAgentDesc:
+            "Analyze → Implement → Review → Your approval. No project checks; configured test evidence is not included.",
+          context: "Context",
+          contextHelp:
+            "Extra documents, instructions and skills the agents read in addition to your request.",
+          inherited: "Inherited automatically",
+          contextEmpty: "No extra context selected.",
+          addContext: "Add file or skill",
+          find: "Find a file or skill",
+          kindFile: "File",
+          kindSkill: "Skill",
+          kindInstr: "Instructions",
+          remove: (n) => `Remove ${n}`,
+          pickerEmpty: "Nothing matches.",
+          close: "Close",
+          checks: "Checks",
+          checksHelp: "Saved configuration. None of these has run; results appear on the run.",
+          build: "Build",
+          test: "Test",
+          needsBuild: (b) => `Runs after ${b}`,
+          expects: (n, name) => `Expects ${n} named test: ${name}`,
+          savedNotRun: "Saved · not run",
+          editChecks: "Edit in Checks",
+          noChecksAgent:
+            "This workflow has no project checks. The reviewer sees agent output only.",
+          review: "Review and run",
+          reviewHintEmpty: "Describe the task to continue.",
+          reviewHint: "Nothing starts until you confirm on the next step.",
+          reviewKey: "Ctrl+Enter",
+          reviewTitle: "Review before you run",
+          reviewLead:
+            "This is the exact snapshot that will run. Later edits do not change an accepted run.",
+          rvTask: "Task",
+          rvWorkspace: "Workspace",
+          rvWorkflow: "Workflow",
+          rvModels: "Models",
+          rvContext: "Context",
+          rvChecks: "Checks",
+          rvLimits: "Limits",
+          rvChanged: "Since your last run",
+          rvModelsV: "Analyze, Implement, Review use the workspace default model",
+          rvLimitsV: "24 step admissions · 30 minutes · 0 automatic repairs",
+          rvChangedV: "Same workflow, checks and context. Only the request text differs.",
+          rvNone: "None",
+          rvPermTitle: "What will ask for you",
+          rvPermLead:
+            "Each prompt is answered in that step's own conversation. Reviewing here grants nothing.",
+          permEdit: "Implement edits zz-demo.txt",
+          permBuild: "Build runs a saved command",
+          permTest: "Test runs a saved command",
+          permApproval: "Final approval is a separate decision at the end",
+          unknownsTitle: "Unknowns you accept for this run",
+          unknownsLead:
+            "Local metadata cannot verify these. They are the same for every run of this workflow.",
+          ukNet: "Network and providers",
+          ukNative: "Native integrations",
+          ukTool: "Tooling",
+          uk1: "Provider-side routing and web destinations are not verified.",
+          uk2: "Model traffic to a local endpoint is not a guarantee that all traffic stays local.",
+          uk3: "Native web, memory and delegated tools may contact other destinations.",
+          uk4: "Hook trust and MCP live connections are unknown.",
+          uk5: "Native skills, plugins and subagent overrides are not inventoried.",
+          uk6: "Bundled assets and disabled-plugin contents are unknown.",
+          uk7: "Executable availability does not verify SDK version, script contents or network behaviour.",
+          uk8: "Provider redirects and external tools cannot be established from local configuration.",
+          ukCondensed:
+            "Wording condensed for the prototype. Production keeps the exact statements.",
+          shared:
+            "All tasks share this workspace. Other chats and editors can still change its files. A new run can repeat earlier side effects.",
+          rvDetails: "Details",
+          ack: "I have read the 8 unknowns and accept them for this run",
+          ackNeeded: "Tick the acknowledgment to start.",
+          back: "Back to edit",
+          start: "Start run",
+          digest: "Preflight digest",
+          runAgain: "Run again",
+          cancelRun: "Cancel run",
+          cancelConfirm: "Stop this run? Already written files remain.",
+          cancelYes: "Stop run",
+          cancelNo: "Keep running",
+          stepOf: (a, b, n) => `Step ${a} of ${b} · ${n}`,
+          vExec: "Execution",
+          vChecks: "Checks",
+          vDecision: "Your decision",
+          exRunning: "Running",
+          exPerm: "Waiting for permission",
+          exApproval: "Waiting for your decision",
+          exStopped: "Stopped",
+          exDone: "Finished",
+          exCancelled: "Cancelled",
+          chNotYet: "Not run yet",
+          chPassed: (a, b) => `${a}/${b} passed`,
+          chFailed: "Failed",
+          chPassedBuild: "Build passed",
+          deNotYet: "Not reached",
+          dePending: "Pending",
+          deNotReq: "Not requested",
+          deApproved: "Approved",
+          deRejected: "Rejected",
+          subNoGate: "The run stopped before approval was asked for.",
+          subGate: "Approval is a separate decision from tool permission.",
+          stAnalyze: "Analyze",
+          stImplement: "Implement",
+          stBuild: "Build",
+          stTest: "Test",
+          stReview: "Review",
+          stApproval: "Your approval",
+          tabSteps: "Steps",
+          tabChecks: "Checks",
+          tabChanges: "Changes",
+          tabEvidence: "Evidence",
+          permAlertTitle: (s) => `${s} is waiting for your permission`,
+          permAlertBody:
+            "Graph cannot grant this. You answer it in the step's own conversation, exactly as in Chat.",
+          permWhat: "Asking for",
+          permTool: "Tool",
+          permTarget: "Target",
+          permCmd: "Command",
+          permCheck: "Saved check",
+          openConv: "Review in conversation",
+          cancelAttempt: "Cancel run",
+          waitTitle: "Waiting for your decision",
+          waitBody:
+            "Build and Test passed and the reviewer returned a valid decision. Nothing is committed or published by approving.",
+          waitBodyAgent:
+            "The reviewer returned a valid decision. No project checks are part of this workflow, so configured test evidence is not included. Nothing is committed or published by approving.",
+          notInProto: "(not available in this prototype)",
+          comment: "Decision comment (required)",
+          commentPh: "Why are you approving or rejecting?",
+          approve: "Approve",
+          reject: "Reject",
+          approvedNote:
+            "Approved. This records your decision only. Nothing was committed, merged or published.",
+          rejectedNote: "Rejected. The run is closed; files already written remain.",
+          revPass: "Reviewer: pass (valid)",
+          failReviewTitle:
+            "Reviewer output was rejected. The run stopped and no approval was requested.",
+          failReviewWhy:
+            "The reviewer replied with text around its JSON. Only a single JSON object is accepted, so the output cannot be used as a decision. This is not a needs_changes verdict.",
+          failStill: "Still true",
+          failStill1: "Build passed and Test passed (1 of 1) on the current source.",
+          failStill2: "zz-demo.txt keeps its edited content on disk.",
+          failStill3: "No approval was requested, so there is nothing to approve or reject.",
+          failNext: "What you can do",
+          failInspect: "Inspect reviewer output",
+          failConv: "Open reviewer conversation",
+          failNew: "Start a new request from this one",
+          failRetryNote:
+            "An automatic format-only retry is not available. It would need its own design and safety review.",
+          failTestTitle: "Test failed. The run stopped before the reviewer.",
+          failTestWhy:
+            "The saved Test reported a failing assertion, so no reviewer was started and no approval was requested.",
+          failTestStill1: "Build passed.",
+          failTestStill2:
+            "zz-demo.txt was edited by the Implement step and keeps that content on disk.",
+          failTestInspect: "Inspect failed assertion",
+          rawOut: "Reviewer output as received",
+          rawWhy: "Rejected because text and a code fence surround the JSON object.",
+          artifactRef: "Only this artifact may be cited",
+          chBuildDemo: "Build demo",
+          chTestDemo: "Test demo content",
+          cmd: "Command",
+          exit: "Exit code",
+          assertions: "Assertions",
+          asPass: "passed",
+          asFail: "failed",
+          chNotRunTab: "No check has run yet. These are saved settings.",
+          expected: "Expected",
+          got: "Got",
+          changesTitle: "Captured file changes",
+          changesNone: "No file has been changed yet.",
+          changesNote: "Captured from the run, not a live diff.",
+          evTitle: "Evidence and identities",
+          evNote:
+            "Secondary details. Warnings that block a decision are shown above, never only here.",
+          evRun: "Run",
+          evWorkflow: "Workflow",
+          evVerif: "Verification artifact",
+          evConv: "Conversations",
+          tlPending: "Not started",
+          tlRunning: "Running",
+          tlDone: "Done",
+          tlFailed: "Failed",
+          tlWaiting: "Waiting for you",
+          tlSkipped: "Skipped",
+          conv1: "Native conversation",
+          simulated: "simulated",
+          backRun: "Back to run",
+          convOwner:
+            "Graph Engineering owns this attempt. Additional prompts and edits are blocked while it is active. Permission and question responses remain available here.",
+          assistantEdit: "I will change zz-demo.txt from “before” to “after”.",
+          assistantBuild: "Graph is asking to run the saved Build check.",
+          assistantTest: "Graph is asking to run the saved Test check.",
+          permTitle: "Permission required",
+          permAlways: "Tool always requires explicit approval",
+          optAllow: "Allow",
+          optAllowD: "Allow only this time",
+          optDeny: "Deny",
+          optDenyD: "Reject it for now",
+          optTell: "Tell the model what to do instead…",
+          confirm: "Confirm",
+          keysHint: "Use arrow keys to choose, then Enter to confirm",
+          allowedNote: "Allowed once. The run continues.",
+          deniedNote: "Denied. The run stops here.",
+          checksTitle: "Project checks",
+          checksLead: "Saved commands the workflows can run. Saving never executes anything.",
+          addCheck: "Add check",
+          checksList: "Saved checks",
+          kind: "Kind",
+          name: "Name",
+          exe: "Executable",
+          args: "Arguments (ordered)",
+          cwd: "Working directory",
+          timeout: "Timeout (ms)",
+          sources: "Source paths",
+          outputs: "Expected outputs",
+          reportPath: "Report path",
+          minTests: "Minimum tests",
+          requiredTests: "Required test names",
+          buildFor: "Runs after Build",
+          save: "Save check",
+          revert: "Revert",
+          unsaved: "Unsaved changes",
+          savedOk: "Saved. Other checks are unchanged.",
+          notResult: "Configuration only. It is not a result.",
+          tryCheck: "Run this check now",
+          tryNote: "Uses the same native permission path. Not simulated in this prototype.",
+          wfTitle: "Workflows",
+          wfLead:
+            "Editing graphs, versions, the library and transfer. All current capabilities stay: Guided and Advanced editing, canvas, conditions, repair policy, bindings.",
+          wfNotProto:
+            "Not prototyped. See DESIGN_DIRECTION.md, section Workflows, for the wireframe and what moves here from Design.",
+          pcScenario: "Outcome of the next run",
+          pcJump: "Jump to a state",
+          pcTheme: "Theme",
+          pcLang: "Language",
+          pcSpeed: "Speed",
+          pcReset: "Reset prototype",
+          pcNote: "Jumping seeds synthetic state. It is a shortcut, not an execution.",
+          scPass: "Passes",
+          scReviewer: "Reviewer output rejected",
+          scTest: "Test fails",
+          jCompose: "Task entry",
+          jReview: "Review step",
+          jPerm: "Permission wait",
+          jApproval: "Approval gate",
+          jFailReviewer: "Reviewer failure",
+          jFailTest: "Test failure",
+          dark: "Dark",
+          light: "Light",
+          fast: "Fast",
+          normal: "Normal",
+          seedTitle: "Prototype data",
+        },
+        zh: {
+          sbNew: "新建任务",
+          sbSearch: "搜索",
+          sbGraph: "图工程",
+          sbAuto: "自动化",
+          sbProjects: "项目",
+          sbNote: "静态应用外框，仅原型化 Graph 面板。",
+          protoLabel: "原型",
+          protoText: " 合成数据。这里不会运行模型、命令或原生会话。",
+          protoControls: "原型控制",
+          backChat: "返回对话",
+          graphTitle: "图工程",
+          ctxWorkspace: "工作区",
+          ctxModel: "模型",
+          ctxPerm: "权限",
+          ctxChecks: "检查",
+          ctxModelV: "工作区默认",
+          ctxPermV: "修改前询问",
+          ctxChecksV: (n) => `已保存 ${n} 项 · 未运行`,
+          copyPath: "复制路径",
+          copied: "路径已复制",
+          navTasks: "运行",
+          navWorkflows: "工作流",
+          navChecks: "检查",
+          needsPerm: (step, what) => `需要权限：${step}要${what}`,
+          needsApproval: "有一次已完成的运行等待你的决定",
+          needsGo: "前往运行",
+          needsConv: "在会话中查看",
+          newTask: "新建运行",
+          groupNeeds: "需要你处理",
+          groupRunning: "运行中",
+          groupRecent: "最近",
+          stNeedsPerm: "需要权限",
+          stNeedsApproval: "等待你的决定",
+          stRunning: (s) => `运行中 · ${s}`,
+          stStoppedTest: "已停止 · 测试失败",
+          stStoppedReview: "已停止 · 审阅输出被拒绝",
+          stApproved: "已批准",
+          stRejected: "已拒绝",
+          stCancelled: "已取消",
+          ago: (m) =>
+            m < 60
+              ? `${m} 分钟前`
+              : m < 1440
+                ? `${Math.round(m / 60)} 小时前`
+                : `${Math.round(m / 1440)} 天前`,
+          composerTitle: "新建运行",
+          requestLabel: "要完成什么？",
+          requestPlaceholder: "用你自己的话描述改动，例如“把 zz-demo.txt 的内容改为 after”",
+          requestHint: "这里只写任务请求。文档和技能请放在下方“上下文”。",
+          recent: "最近的请求",
+          prefilled: (t) => `已从“${t}”预填。尚未开始。`,
+          workflow: "工作流",
+          wfSeq: "顺序工程 · v2",
+          wfAgent: "智能体辅助任务 · v1",
+          wfSeqDesc: "分析 → 实现 → 构建 → 测试 → 审阅 → 你的批准。需要已保存的构建与测试。",
+          wfAgentDesc: "分析 → 实现 → 审阅 → 你的批准。不含项目检查，不包含已配置的测试证据。",
+          context: "上下文",
+          contextHelp: "除任务请求外，智能体还会读取的文档、指引和技能。",
+          inherited: "自动继承",
+          contextEmpty: "未选择额外上下文。",
+          addContext: "添加文件或技能",
+          find: "查找文件或技能",
+          kindFile: "文件",
+          kindSkill: "技能",
+          kindInstr: "指引",
+          remove: (n) => `移除 ${n}`,
+          pickerEmpty: "没有匹配项。",
+          close: "关闭",
+          checks: "检查",
+          checksHelp: "已保存的配置。它们都还没有运行，结果会显示在运行记录中。",
+          build: "构建",
+          test: "测试",
+          needsBuild: (b) => `在 ${b} 之后运行`,
+          expects: (n, name) => `预期 ${n} 个命名测试：${name}`,
+          savedNotRun: "已保存 · 未运行",
+          editChecks: "到“检查”中编辑",
+          noChecksAgent: "该工作流没有项目检查，审阅者只会看到智能体输出。",
+          review: "审阅并运行",
+          reviewHintEmpty: "请先描述任务。",
+          reviewHint: "在下一步确认之前不会开始任何运行。",
+          reviewKey: "Ctrl+Enter",
+          reviewTitle: "运行前审阅",
+          reviewLead: "这是即将运行的确切快照。之后的编辑不会改变已接受的运行。",
+          rvTask: "任务",
+          rvWorkspace: "工作区",
+          rvWorkflow: "工作流",
+          rvModels: "模型",
+          rvContext: "上下文",
+          rvChecks: "检查",
+          rvLimits: "限制",
+          rvChanged: "相比上次运行",
+          rvModelsV: "分析、实现、审阅使用工作区默认模型",
+          rvLimitsV: "24 次步骤准入 · 30 分钟 · 0 次自动修复",
+          rvChangedV: "工作流、检查与上下文均相同，仅请求文本不同。",
+          rvNone: "无",
+          rvPermTitle: "接下来会向你询问什么",
+          rvPermLead: "每项提示都在对应步骤自己的会话中回答。在这里审阅不会授予任何权限。",
+          permEdit: "实现步骤将编辑 zz-demo.txt",
+          permBuild: "构建将运行已保存的命令",
+          permTest: "测试将运行已保存的命令",
+          permApproval: "最终批准是结尾处单独的决定",
+          unknownsTitle: "你为本次运行接受的未知项",
+          unknownsLead: "本地元数据无法验证这些内容，同一工作流的每次运行都相同。",
+          ukNet: "网络与提供方",
+          ukNative: "原生集成",
+          ukTool: "工具链",
+          uk1: "提供方侧路由与网络目的地未经验证。",
+          uk2: "模型流量指向本地端点，并不保证所有流量都留在本地。",
+          uk3: "原生联网、记忆与委派工具可能访问其他目的地。",
+          uk4: "钩子信任与 MCP 实时连接未知。",
+          uk5: "原生技能、插件与子智能体覆盖项未盘点。",
+          uk6: "内置资源与已禁用插件的内容未知。",
+          uk7: "可执行文件可用并不能验证 SDK 版本、脚本内容或网络行为。",
+          uk8: "提供方重定向与外部工具无法由本地配置确定。",
+          ukCondensed: "此处文案为原型精简版，正式实现保留原有完整表述。",
+          shared:
+            "所有任务共用此工作区。其他对话和编辑器仍可修改其中文件。新的运行可能重复之前的副作用。",
+          rvDetails: "详情",
+          ack: "我已阅读这 8 项未知项，并为本次运行接受它们",
+          ackNeeded: "勾选确认后才能开始。",
+          back: "返回编辑",
+          start: "开始运行",
+          digest: "预检摘要",
+          runAgain: "再次运行",
+          cancelRun: "取消运行",
+          cancelConfirm: "要停止本次运行吗？已写入的文件会保留。",
+          cancelYes: "停止运行",
+          cancelNo: "继续运行",
+          stepOf: (a, b, n) => `第 ${a}/${b} 步 · ${n}`,
+          vExec: "执行",
+          vChecks: "检查",
+          vDecision: "你的决定",
+          exRunning: "运行中",
+          exPerm: "等待权限",
+          exApproval: "等待你的决定",
+          exStopped: "已停止",
+          exDone: "已结束",
+          exCancelled: "已取消",
+          chNotYet: "尚未运行",
+          chPassed: (a, b) => `${a}/${b} 通过`,
+          chFailed: "失败",
+          chPassedBuild: "构建通过",
+          deNotYet: "尚未到达",
+          dePending: "待处理",
+          deNotReq: "未请求",
+          deApproved: "已批准",
+          deRejected: "已拒绝",
+          subNoGate: "运行在请求批准之前已停止。",
+          subGate: "批准与工具权限是两件独立的事。",
+          stAnalyze: "分析",
+          stImplement: "实现",
+          stBuild: "构建",
+          stTest: "测试",
+          stReview: "审阅",
+          stApproval: "你的批准",
+          tabSteps: "步骤",
+          tabChecks: "检查",
+          tabChanges: "改动",
+          tabEvidence: "证据",
+          permAlertTitle: (s) => `${s}正在等待你的权限`,
+          permAlertBody: "Graph 无法代为授权。请在该步骤自己的会话中回答，与在对话中完全一致。",
+          permWhat: "请求内容",
+          permTool: "工具",
+          permTarget: "目标",
+          permCmd: "命令",
+          permCheck: "已保存的检查",
+          openConv: "在会话中查看",
+          cancelAttempt: "取消运行",
+          waitTitle: "等待你的决定",
+          waitBody: "构建与测试已通过，审阅者返回了有效结论。批准不会提交或发布任何内容。",
+          waitBodyAgent:
+            "审阅者返回了有效结论。该工作流不含项目检查，因此不包含已配置的测试证据。批准不会提交或发布任何内容。",
+          notInProto: "（本原型未提供）",
+          comment: "决定说明（必填）",
+          commentPh: "为什么批准或拒绝？",
+          approve: "批准",
+          reject: "拒绝",
+          approvedNote: "已批准。这只记录你的决定，没有提交、合并或发布任何内容。",
+          rejectedNote: "已拒绝。运行已关闭；已写入的文件会保留。",
+          revPass: "审阅者：通过（有效）",
+          failReviewTitle: "审阅者输出被拒绝。运行已停止，且未请求批准。",
+          failReviewWhy:
+            "审阅者在 JSON 外包了文字。只接受单个 JSON 对象，因此该输出不能作为结论使用。这不是 needs_changes 结论。",
+          failStill: "仍然成立",
+          failStill1: "构建通过，测试通过（1/1），基于当前源码。",
+          failStill2: "zz-demo.txt 已编辑的内容仍保留在磁盘上。",
+          failStill3: "由于没有请求批准，所以没有可批准或拒绝的内容。",
+          failNext: "你可以做什么",
+          failInspect: "查看审阅者输出",
+          failConv: "打开审阅者会话",
+          failNew: "以此为基础新建请求",
+          failRetryNote: "暂不提供自动的仅格式重试；它需要单独的设计与安全评审。",
+          failTestTitle: "测试失败。运行在审阅者之前停止。",
+          failTestWhy: "已保存的测试报告了失败的断言，因此没有启动审阅者，也没有请求批准。",
+          failTestStill1: "构建通过。",
+          failTestStill2: "实现步骤编辑过 zz-demo.txt，其内容仍保留在磁盘上。",
+          failTestInspect: "查看失败的断言",
+          rawOut: "收到的审阅者原始输出",
+          rawWhy: "被拒绝的原因：JSON 对象外面有文字和代码围栏。",
+          artifactRef: "只允许引用这个产物",
+          chBuildDemo: "构建演示",
+          chTestDemo: "测试演示内容",
+          cmd: "命令",
+          exit: "退出码",
+          assertions: "断言",
+          asPass: "通过",
+          asFail: "失败",
+          chNotRunTab: "还没有任何检查运行。这些只是已保存的设置。",
+          expected: "预期",
+          got: "实际",
+          changesTitle: "已捕获的文件改动",
+          changesNone: "尚未改动任何文件。",
+          changesNote: "来自运行时的捕获，并非实时 diff。",
+          evTitle: "证据与标识",
+          evNote: "次要细节。会阻碍决定的警告会显示在上方，绝不只放在这里。",
+          evRun: "运行",
+          evWorkflow: "工作流",
+          evVerif: "验证产物",
+          evConv: "会话",
+          tlPending: "未开始",
+          tlRunning: "运行中",
+          tlDone: "完成",
+          tlFailed: "失败",
+          tlWaiting: "等待你",
+          tlSkipped: "已跳过",
+          conv1: "原生会话",
+          simulated: "模拟",
+          backRun: "返回运行",
+          convOwner:
+            "Graph Engineering 拥有此次尝试。运行期间会阻止额外提示和编辑。权限和问题的回答仍可在此进行。",
+          assistantEdit: "我会把 zz-demo.txt 从“before”改为“after”。",
+          assistantBuild: "Graph 请求运行已保存的构建检查。",
+          assistantTest: "Graph 请求运行已保存的测试检查。",
+          permTitle: "需要权限",
+          permAlways: "该工具始终需要明确批准",
+          optAllow: "允许",
+          optAllowD: "仅本次允许",
+          optDeny: "拒绝",
+          optDenyD: "暂时拒绝",
+          optTell: "告诉模型改做别的…",
+          confirm: "确认",
+          keysHint: "用方向键选择，按 Enter 确认",
+          allowedNote: "已允许一次。运行继续。",
+          deniedNote: "已拒绝。运行在此停止。",
+          checksTitle: "项目检查",
+          checksLead: "工作流可运行的已保存命令。保存从不执行任何东西。",
+          addCheck: "添加检查",
+          checksList: "已保存的检查",
+          kind: "类型",
+          name: "名称",
+          exe: "可执行文件",
+          args: "参数（有序）",
+          cwd: "工作目录",
+          timeout: "超时（毫秒）",
+          sources: "源路径",
+          outputs: "预期输出",
+          reportPath: "报告路径",
+          minTests: "最少测试数",
+          requiredTests: "必需的测试名",
+          buildFor: "在此构建之后运行",
+          save: "保存检查",
+          revert: "还原",
+          unsaved: "有未保存的更改",
+          savedOk: "已保存，其他检查未受影响。",
+          notResult: "仅为配置，不是结果。",
+          tryCheck: "立即运行此检查",
+          tryNote: "使用同一条原生权限路径。本原型不模拟。",
+          wfTitle: "工作流",
+          wfLead:
+            "编辑图、版本、库与传输。现有能力全部保留：引导式与高级编辑、画布、条件、修复策略、绑定。",
+          wfNotProto:
+            "未做原型。线框以及从“设计”迁入此处的内容见 DESIGN_DIRECTION.md 的“工作流”一节。",
+          pcScenario: "下一次运行的结果",
+          pcJump: "跳转到某个状态",
+          pcTheme: "主题",
+          pcLang: "语言",
+          pcSpeed: "速度",
+          pcReset: "重置原型",
+          pcNote: "跳转会填入合成状态，只是捷径，并非执行。",
+          scPass: "通过",
+          scReviewer: "审阅输出被拒绝",
+          scTest: "测试失败",
+          jCompose: "任务输入",
+          jReview: "审阅步骤",
+          jPerm: "权限等待",
+          jApproval: "批准环节",
+          jFailReviewer: "审阅者失败",
+          jFailTest: "测试失败",
+          dark: "深色",
+          light: "浅色",
+          fast: "快",
+          normal: "常规",
+          seedTitle: "原型数据",
+        },
+      };
+      const ICON = {
+        check: '<path d="M20 6 9 17l-5-5"/>',
+        x: '<path d="M18 6 6 18M6 6l12 12"/>',
+        warn: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/>',
+        shield:
+          '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+        user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+        load: '<path d="M21 12a9 9 0 1 1-6.219-8.56"/>',
+        dash: '<circle cx="12" cy="12" r="9" stroke-dasharray="3 3.5"/>',
+        play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+        redo: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+        plus: '<path d="M5 12h14M12 5v14"/>',
+        file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
+        arrow: '<path d="m12 19-7-7 7-7M19 12H5"/>',
+        chev: '<path d="m9 18 6-6-6-6"/>',
+        copy: '<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+        layers: '<path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/>',
+        list: '<path d="M10 6h11M10 12h11M10 18h11M3 6l1 1 2-2M3 12l1 1 2-2M3 18l1 1 2-2"/>',
+        tasks: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/>',
+        ban: '<circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/>',
+      };
+      const ic = (n, cls = "") =>
+        `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICON[n]}</svg>`;
+      const esc = (s) =>
+        String(s).replace(
+          /[&<>"']/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
+        );
+
+      /* ============================ state ============================ */
+      const WORKSPACE_PATH = "C:\\Users\\dev\\projects\\sample-engine\\workspace";
+      const CHECKS0 = [
+        {
+          id: "build",
+          kind: "Build",
+          name: "Build demo",
+          exe: "node",
+          args: ["build.mjs", "{operationId}", "{sourceDigest}"],
+          cwd: ".",
+          timeout: 30000,
+          sources: "zz-demo.txt\nbuild.mjs\ntest.mjs",
+          outputs: "build.out",
+        },
+        {
+          id: "test",
+          kind: "Test",
+          name: "Test demo content",
+          exe: "node",
+          args: ["test.mjs", "{operationId}", "{sourceDigest}", "{buildDigest}", "{reportPath}"],
+          cwd: ".",
+          timeout: 30000,
+          sources: "zz-demo.txt\nbuild.mjs\ntest.mjs",
+          outputs: "",
+          reportPath: "results/report.json",
+          minTests: 1,
+          required: "zz-demo contains after",
+          after: "build",
+        },
+      ];
+      const SEED_RUNS = () => [
+        {
+          id: "r-101",
+          request: "Bump the request timeout constant to 30 s and update its unit test",
+          wf: "seq",
+          mins: 34,
+          status: "needs-approval",
+          seeded: true,
+          steps: doneSteps(),
+          scenario: "pass",
+          context: [{ id: "ctx", name: "Context.md", kind: "instr" }],
+          sim: false,
+        },
+        {
+          id: "r-100",
+          request: "Add a null check to the manifest parser and cover it with a test",
+          wf: "seq",
+          mins: 190,
+          status: "approved",
+          seeded: true,
+          steps: { ...doneSteps(), approval: { state: "done" } },
+          scenario: "pass",
+          context: [],
+          sim: false,
+        },
+        {
+          id: "r-099",
+          request: "Rename the retry helper and update all call sites",
+          wf: "seq",
+          mins: 1500,
+          status: "stopped-test",
+          seeded: true,
+          steps: doneSteps("test"),
+          scenario: "test",
+          context: [],
+          sim: false,
+        },
+      ];
+      function doneSteps(failAt) {
+        const ids = ["analyze", "implement", "build", "test", "review", "approval"];
+        const s = {};
+        let failed = false;
+        ids.forEach((id) => {
+          if (failed) s[id] = { state: "skipped" };
+          else if (id === failAt) {
+            s[id] = { state: "failed" };
+            failed = true;
+          } else if (id === "approval") s[id] = { state: failAt ? "skipped" : "waiting" };
+          else s[id] = { state: "done" };
+        });
+        return s;
+      }
+      const S = {
+        lang: "en",
+        theme: "dark",
+        speed: 1,
+        view: "tasks",
+        pane: "compose",
+        selected: null,
+        mobile: "list",
+        checks: JSON.parse(JSON.stringify(CHECKS0)),
+        checksSaved: JSON.parse(JSON.stringify(CHECKS0)),
+        checkSel: "test",
+        checkDirty: false,
+        checkNote: false,
+        draft: {
+          request: "",
+          wf: "seq",
+          context: [{ id: "ctx", name: "Context.md", kind: "instr", path: "Context.md" }],
+          build: "build",
+          test: "test",
+        },
+        prefilledFrom: null,
+        pickerOpen: false,
+        pickerQ: "",
+        ack: false,
+        runs: SEED_RUNS(),
+        scenario: "pass",
+        conv: null,
+        convChoice: 0,
+        convDone: null,
+        tab: "steps",
+        cancelAsk: false,
+        comment: "",
+        nextId: 200,
+        timer: null,
+        protoOpen: false,
+      };
+      const CATALOG = [
+        { id: "agents", name: "AGENTS.md", kind: "instr", path: "AGENTS.md", inherited: true },
+        { id: "ctx", name: "Context.md", kind: "instr", path: "Context.md" },
+        { id: "readme", name: "README.md", kind: "file", path: "README.md" },
+        { id: "notes", name: "docs/DESIGN_NOTES.md", kind: "file", path: "docs/DESIGN_NOTES.md" },
+        { id: "skill1", name: "fixture-guidance", kind: "skill", path: "workspace skill" },
+        { id: "skill2", name: "commit-conventions", kind: "skill", path: "workspace skill" },
+      ];
+      const STEP_IDS = ["analyze", "implement", "build", "test", "review", "approval"];
+      // 合成的“散文 + 代码围栏”评审输出；<mark> 标出被拒绝的部分。
+      const RAW_REVIEW =
+        "<mark>Review follows.\n```json</mark>\n" +
+        '{"outcome":"pass","findings":[],"evidenceReferences":["aae5f8ed-506b-…"]}' +
+        "\n<mark>```</mark>";
+      const stepsFor = (wf) =>
+        wf === "seq" ? STEP_IDS : ["analyze", "implement", "review", "approval"];
+      const tt = (k, ...a) => {
+        const v = T[S.lang][k] ?? T.en[k];
+        return typeof v === "function" ? v(...a) : v;
+      };
+      const $ = (s, r = document) => r.querySelector(s);
+      const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+      const runById = (id) => S.runs.find((r) => r.id === id);
+      const isDirty = (id) =>
+        JSON.stringify(S.checks.find((c) => c.id === id)) !==
+        JSON.stringify(S.checksSaved.find((c) => c.id === id));
+      const live = (m) => {
+        const l = $("#live");
+        l.textContent = "";
+        setTimeout(() => (l.textContent = m), 30);
+      };
+      const toast = (m) => {
+        const e = $("#toast");
+        e.textContent = m;
+        e.classList.add("on");
+        setTimeout(() => e.classList.remove("on"), 2200);
+      };
+
+      /* ============================ derived ============================ */
+      const stepName = (id) =>
+        tt(
+          {
+            analyze: "stAnalyze",
+            implement: "stImplement",
+            build: "stBuild",
+            test: "stTest",
+            review: "stReview",
+            approval: "stApproval",
+          }[id],
+        );
+      function statusOf(r) {
+        switch (r.status) {
+          case "needs-permission":
+            return { tone: "warn", icon: "shield", label: tt("stNeedsPerm") };
+          case "needs-approval":
+            return { tone: "warn", icon: "user", label: tt("stNeedsApproval") };
+          case "running":
+            return {
+              tone: "run",
+              icon: "load",
+              spin: true,
+              label: tt("stRunning", stepName(currentStep(r))),
+            };
+          case "stopped-test":
+            return { tone: "bad", icon: "x", label: tt("stStoppedTest") };
+          case "stopped-review":
+            return { tone: "bad", icon: "x", label: tt("stStoppedReview") };
+          case "approved":
+            return { tone: "ok", icon: "check", label: tt("stApproved") };
+          case "rejected":
+            return { tone: "bad", icon: "x", label: tt("stRejected") };
+          case "cancelled":
+            return { tone: "", icon: "ban", label: tt("stCancelled") };
+        }
+      }
+      function currentStep(r) {
+        const ids = stepsFor(r.wf);
+        return (
+          ids.find((id) => ["running", "waiting"].includes(r.steps[id]?.state)) ??
+          ids.find((id) => r.steps[id]?.state === "pending") ??
+          ids[ids.length - 1]
+        );
+      }
+      const needsYou = () =>
+        S.runs.filter((r) => ["needs-permission", "needs-approval"].includes(r.status));
+
+      /* ============================ rendering: chrome ============================ */
+      function applyStatic() {
+        document.documentElement.lang = S.lang === "zh" ? "zh-CN" : "en";
+        document.documentElement.dataset.theme = S.theme;
+        $$("[data-i]").forEach((e) => (e.textContent = tt(e.dataset.i)));
+      }
+      function renderChrome() {
+        applyStatic();
+        const base = WORKSPACE_PATH.split("\\").slice(-2)[0];
+        $("#ctx").innerHTML = `
+    <span class="ctx-chip" title="${esc(WORKSPACE_PATH)}"><span class="k">${tt("ctxWorkspace")}</span><span class="mono">${esc(base)}</span>
+      <button class="x" data-act="copy-path" aria-label="${tt("copyPath")}" title="${tt("copyPath")}">${ic("copy")}</button></span>
+    <span class="ctx-chip"><span class="k">${tt("ctxModel")}</span>${tt("ctxModelV")}</span>
+    <span class="ctx-chip"><span class="k">${tt("ctxPerm")}</span>${tt("ctxPermV")}</span>
+    <button class="ctx-chip btn-like" data-act="nav" data-v="checks"><span class="k">${tt("ctxChecks")}</span>${tt("ctxChecksV", S.checksSaved.length)}</button>`;
+        const n = needsYou().length;
+        $("#nav").innerHTML = [
+          ["tasks", "navTasks", "tasks"],
+          ["workflows", "navWorkflows", "layers"],
+          ["checks", "navChecks", "list"],
+        ]
+          .map(
+            ([v, k, i]) =>
+              `<button class="nav-btn" data-act="nav" data-v="${v}" ${S.view === v ? 'aria-current="page"' : ""}>${ic(i)}${tt(k)}${v === "tasks" && n ? `<span class="count" aria-label="${n}">${n}</span>` : ""}</button>`,
+          )
+          .join("");
+        const y = needsYou();
+        const strip = $("#needs");
+        if (!y.length || (S.conv && y.length === 1 && y[0].id === S.conv.runId)) {
+          strip.className = "needs";
+          strip.innerHTML = "";
+        } else {
+          const r = y[0];
+          const perm = r.status === "needs-permission" ? permFor(r) : null;
+          strip.className = "needs on";
+          strip.innerHTML = `<span class="ico">${ic(perm ? "shield" : "user", "lg")}</span>
+      <span class="txt">${perm ? `<b>${esc(tt("needsPerm", stepName(perm.step), perm.what()))}</b>` : `<b>${tt("needsApproval")}</b>`}<span class="muted"> · ${esc(short(r.request, 60))}</span></span>
+      <button class="btn sm" data-act="open-run" data-id="${r.id}">${tt("needsGo")}</button>${perm ? `<button class="btn sm primary" data-act="open-conv" data-id="${r.id}">${tt("needsConv")}</button>` : ""}`;
+        }
+      }
+      const short = (s, n) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
+
+      /* ============================ rendering: tasks ============================ */
+      function renderMain() {
+        const m = $("#main");
+        if (S.conv) {
+          m.innerHTML = convView();
+          // 会话视图也需要绑定键盘处理，否则方向键无法改变权限选项。
+          bindMain();
+          return;
+        }
+        if (S.view === "tasks") m.innerHTML = tasksView();
+        else if (S.view === "checks") m.innerHTML = checksView();
+        else m.innerHTML = workflowsView();
+        bindMain();
+      }
+      function focusKey() {
+        const a = document.activeElement;
+        if (!a || a === document.body) return null;
+        if (a.id) return "#" + a.id;
+        const d = a.dataset || {};
+        if (!d.act) return null;
+        return (
+          `[data-act="${d.act}"]` +
+          (d.id ? `[data-id="${d.id}"]` : "") +
+          (d.t ? `[data-t="${d.t}"]` : "")
+        );
+      }
+      function render(focus) {
+        // 后台状态推进会重绘；保留键盘焦点，避免焦点丢到 body。
+        const key = focus ? null : focusKey();
+        renderChrome();
+        renderMain();
+        if (key) document.querySelector(key)?.focus({ preventScroll: true });
+        if (focus) {
+          const h = $("#pane-h");
+          if (h) {
+            h.setAttribute("tabindex", "-1");
+            h.focus({ preventScroll: true });
+          }
+        }
+      }
+      function activityList() {
+        const row = (r) => {
+          const st = statusOf(r);
+          return `<button class="row" data-act="open-run" data-id="${r.id}" ${S.pane === "run" && S.selected === r.id ? 'aria-current="true"' : ""}>
+      <span class="ri ${st.tone === "warn" ? "ic-warn" : st.tone === "bad" ? "ic-bad" : st.tone === "ok" ? "ic-ok" : ""}">${ic(st.icon, st.spin ? "spin" : "")}</span>
+      <span class="row-main"><span class="row-title">${esc(r.request)}</span><span class="row-sub">${esc(st.label)} · ${tt("ago", r.mins)}</span></span></button>`;
+        };
+        const y = S.runs.filter((r) => ["needs-permission", "needs-approval"].includes(r.status));
+        const run = S.runs.filter((r) => r.status === "running");
+        const rest = S.runs.filter((r) => !y.includes(r) && !run.includes(r));
+        const g = (k, list) =>
+          list.length
+            ? `<div><div class="group-title">${tt(k)}</div>${list.map(row).join("")}</div>`
+            : "";
+        return `<button class="btn primary w-full" data-act="new">${ic("plus")}${tt("newTask")}</button>${g("groupNeeds", y)}${g("groupRunning", run)}${g("groupRecent", rest)}
+    <p class="sm muted">${tt("seedTitle")}</p>`;
+      }
+      function tasksView() {
+        const detail =
+          S.pane === "compose"
+            ? composer()
+            : S.pane === "review"
+              ? reviewView()
+              : runView(runById(S.selected));
+        return `<div class="tasks" data-mobile="${S.mobile}"><section class="activity" aria-label="${tt("navTasks")}">${activityList()}</section><section class="detail" id="detail" aria-label="${tt("composerTitle")}"><div class="detail-inner">${detail}</div></section></div>`;
+      }
+      function wfLabel(wf) {
+        return wf === "seq" ? tt("wfSeq") : tt("wfAgent");
+      }
+      function chip(c, removable) {
+        return `<span class="chip">${ic(c.kind === "skill" ? "layers" : "file")}<span>${esc(c.name)}</span><span class="muted">${tt(c.kind === "skill" ? "kindSkill" : c.kind === "instr" ? "kindInstr" : "kindFile")}</span>${removable ? `<button class="x" data-act="ctx-remove" data-id="${c.id}" aria-label="${esc(tt("remove", c.name))}">${ic("x")}</button>` : ""}</span>`;
+      }
+      function composer() {
+        const d = S.draft;
+        const chosen = new Set(d.context.map((c) => c.id));
+        const opts = CATALOG.filter(
+          (c) =>
+            !c.inherited &&
+            !chosen.has(c.id) &&
+            (c.name + c.path).toLowerCase().includes(S.pickerQ.toLowerCase()),
+        );
+        const seq = d.wf === "seq";
+        const b = S.checksSaved.find((c) => c.id === d.build),
+          t = S.checksSaved.find((c) => c.id === d.test);
+        const recents = [...new Set(S.runs.map((r) => r.request))].slice(0, 3);
+        return `<h2 id="pane-h">${tt("composerTitle")}</h2>
+  ${S.prefilledFrom ? `<p class="sm muted" role="status" style="margin-top:6px">${esc(tt("prefilled", short(S.prefilledFrom, 48)))}</p>` : ""}
+  <div class="sec">
+    <label class="field-label" for="req">${tt("requestLabel")}</label>
+    <textarea id="req" placeholder="${esc(tt("requestPlaceholder"))}" aria-describedby="req-hint">${esc(d.request)}</textarea>
+    <p class="sm muted" id="req-hint">${tt("requestHint")}</p>
+    <div class="chips"><span class="sm muted">${tt("recent")}</span>${recents.map((r, i) => `<button class="chip btn-like" data-act="recent" data-n="${i}" title="${esc(r)}">${esc(short(r, 40))}</button>`).join("")}</div>
+  </div>
+  <div class="sec">
+    <label class="field-label" for="wf">${tt("workflow")}</label>
+    <select id="wf"><option value="seq" ${seq ? "selected" : ""}>${tt("wfSeq")}</option><option value="agent" ${!seq ? "selected" : ""}>${tt("wfAgent")}</option></select>
+    <p class="sm muted">${seq ? tt("wfSeqDesc") : tt("wfAgentDesc")}</p>
+  </div>
+  <div class="sec">
+    <div class="sec-head"><h3>${tt("context")}</h3><span class="sm muted">${tt("contextHelp")}</span></div>
+    <div class="chips"><span class="chip" style="background:none;border:1px dashed var(--border-hover)" title="${tt("inherited")}">${ic("file")}AGENTS.md<span class="muted">${tt("inherited")}</span></span>${d.context.map((c) => chip(c, true)).join("")}
+      ${d.context.length ? "" : `<span class="sm muted">${tt("contextEmpty")}</span>`}
+      <button class="btn sm" data-act="picker" aria-expanded="${S.pickerOpen}" aria-controls="picker">${ic("plus")}${tt("addContext")}</button></div>
+    ${
+      S.pickerOpen
+        ? `<div class="picker" id="picker" role="group" aria-label="${tt("addContext")}"><input type="search" id="pq" placeholder="${esc(tt("find"))}" aria-label="${esc(tt("find"))}" value="${esc(S.pickerQ)}" />
+      ${opts.length ? opts.map((o) => `<button class="opt" data-act="ctx-add" data-id="${o.id}">${ic(o.kind === "skill" ? "layers" : "file")}<span>${esc(o.name)}</span><span class="muted sm">${tt(o.kind === "skill" ? "kindSkill" : o.kind === "instr" ? "kindInstr" : "kindFile")} · ${esc(o.path)}</span></button>`).join("") : `<span class="sm muted">${tt("pickerEmpty")}</span>`}</div>`
+        : ""
+    }
+  </div>
+  <div class="sec">
+    <div class="sec-head"><h3>${tt("checks")}</h3><span class="sm muted">${seq ? tt("checksHelp") : ""}</span></div>
+    ${
+      seq
+        ? `
+    <div class="checkrow"><span class="lbl">${tt("build")}</span>
+      <div><select aria-label="${tt("build")}" id="sel-build">${S.checksSaved
+        .filter((c) => c.kind === "Build")
+        .map(
+          (c) =>
+            `<option value="${c.id}" ${c.id === d.build ? "selected" : ""}>${esc(c.name)}</option>`,
+        )
+        .join("")}</select>
+      <div class="code" style="margin-top:4px">${esc(b.exe + " " + b.args.slice(0, 1).join(" "))} …</div></div>
+      <span class="pill">${ic("dash")}${tt("savedNotRun")}</span></div>
+    <div class="checkrow"><span class="lbl">${tt("test")}</span>
+      <div><select aria-label="${tt("test")}" id="sel-test">${S.checksSaved
+        .filter((c) => c.kind === "Test")
+        .map(
+          (c) =>
+            `<option value="${c.id}" ${c.id === d.test ? "selected" : ""}>${esc(c.name)}</option>`,
+        )
+        .join("")}</select>
+      <div class="sm muted" style="margin-top:4px">${esc(tt("needsBuild", b.name))} · ${esc(tt("expects", t.minTests ?? 1, t.required ?? "—"))}</div></div>
+      <span class="pill">${ic("dash")}${tt("savedNotRun")}</span></div>
+    <div><button class="btn sm ghost" data-act="nav" data-v="checks">${tt("editChecks")}${ic("chev")}</button></div>`
+        : `<p class="sm muted">${tt("noChecksAgent")}</p>`
+    }
+  </div>
+  <div class="footer-bar"><div class="grow"><p class="sm muted" id="review-hint">${d.request.trim() ? tt("reviewHint") : tt("reviewHintEmpty")}</p></div>
+    <button class="btn primary lg" id="go-review" data-act="review" ${d.request.trim() ? "" : "disabled"} aria-describedby="review-hint">${ic("play")}${tt("review")} <span class="sm" style="opacity:.7">${tt("reviewKey")}</span></button></div>`;
+      }
+      function reviewView() {
+        const d = S.draft,
+          seq = d.wf === "seq";
+        const b = S.checksSaved.find((c) => c.id === d.build),
+          t = S.checksSaved.find((c) => c.id === d.test);
+        const ids = stepsFor(d.wf);
+        const cmd = (c) => `${c.exe} ${c.args.join(" ")}`;
+        const uk = (title, items) =>
+          `<div><h4 class="sm" style="font-weight:600;margin-bottom:2px">${title}</h4><ul style="margin:0;padding-left:18px">${items.map((i) => `<li>${tt(i)}</li>`).join("")}</ul></div>`;
+        return `<button class="btn ghost sm" data-act="back-edit">${ic("arrow")}${tt("back")}</button>
+  <h2 id="pane-h" style="margin-top:6px">${tt("reviewTitle")}</h2><p class="muted sm" style="margin-top:4px">${tt("reviewLead")}</p>
+  <div class="sec"><dl class="kv">
+    <dt>${tt("rvTask")}</dt><dd>${esc(d.request)}</dd>
+    <dt>${tt("rvWorkflow")}</dt><dd>${wfLabel(d.wf)}<div class="sm muted">${ids.map(stepName).join(" → ")}</div></dd>
+    <dt>${tt("rvContext")}</dt><dd><div class="chips">${d.context.length ? d.context.map((c) => chip(c, false)).join("") : `<span class="muted">${tt("rvNone")}</span>`}<span class="sm muted">+ AGENTS.md (${tt("inherited")})</span></div></dd>
+    <dt>${tt("rvChecks")}</dt><dd>${seq ? `<div class="code">${esc(b.name)}: ${esc(cmd(b))}</div><div class="code" style="margin-top:4px">${esc(t.name)}: ${esc(cmd(t))}</div>` : `<span class="muted">${tt("rvNone")}</span>`}</dd>
+    <dt>${tt("rvChanged")}</dt><dd>${tt("rvChangedV")}</dd></dl></div>
+  <div class="sec" id="unknowns"><h3>${tt("unknownsTitle")}</h3><p class="sm muted">${tt("unknownsLead")}</p>
+    ${uk(tt("ukNet"), ["uk1", "uk2", "uk3"])}${uk(tt("ukNative"), ["uk4", "uk5", "uk6"])}${uk(tt("ukTool"), ["uk7", "uk8"])}
+    <p class="sm muted">${tt("ukCondensed")}</p></div>
+  <div class="sec"><h3>${tt("rvPermTitle")}</h3><p class="sm muted">${tt("rvPermLead")}</p>
+    <ol style="margin:0;padding-left:18px"><li>${tt("permEdit")}</li>${seq ? `<li>${tt("permBuild")}</li><li>${tt("permTest")}</li>` : ""}<li class="muted">${tt("permApproval")}</li></ol></div>
+  <div class="sec"><h3>${tt("rvDetails")}</h3><dl class="kv">
+    <dt>${tt("rvWorkspace")}</dt><dd class="mono sm">${esc(WORKSPACE_PATH)}</dd>
+    <dt>${tt("rvModels")}</dt><dd>${tt("rvModelsV")}</dd>
+    <dt>${tt("rvLimits")}</dt><dd>${tt("rvLimitsV")}</dd>
+    <dt>${tt("digest")}</dt><dd class="mono sm">7307e6439e16…a619b853a4</dd></dl>
+    <p class="sm">${tt("shared")}</p></div>
+  <div class="footer-bar"><label class="check-label grow"><input type="checkbox" id="ack" ${S.ack ? "checked" : ""} aria-describedby="ack-hint" /><span>${tt("ack")}</span></label>
+    <span class="sm muted" id="ack-hint" ${S.ack ? "hidden" : ""}>${tt("ackNeeded")}</span>
+    <button class="btn" data-act="back-edit">${tt("back")}</button>
+    <button class="btn primary lg" id="go-start" data-act="start" ${S.ack ? "" : "disabled"}>${ic("play")}${tt("start")}</button></div>`;
+      }
+      function permFor(r) {
+        const id = currentStep(r);
+        if (id === "implement")
+          return {
+            step: id,
+            tool: "Edit",
+            target: "zz-demo.txt",
+            diff: true,
+            what: () => (S.lang === "zh" ? "编辑 zz-demo.txt" : "to edit zz-demo.txt"),
+            line: () => tt("assistantEdit"),
+          };
+        const c = (r.checks ?? S.checksSaved).find(
+          (x) => x.id === (id === "build" ? r.draft.build : r.draft.test),
+        );
+        return {
+          step: id,
+          tool: "GraphRecipe",
+          check: c.name,
+          cmd: `${c.exe} ${c.args.join(" ")}`,
+          what: () => (S.lang === "zh" ? "运行已保存的检查" : "to run a saved check"),
+          line: () => tt(id === "build" ? "assistantBuild" : "assistantTest"),
+        };
+      }
+      function pill(tone, icon, text, spin) {
+        return `<span class="pill ${tone}">${ic(icon, spin ? "spin" : "")}${esc(text)}</span>`;
+      }
+      function runView(r) {
+        if (!r) return "";
+        const ids = stepsFor(r.wf),
+          st = statusOf(r),
+          cur = currentStep(r);
+        const testDone = r.steps.test?.state === "done",
+          testFail = r.steps.test?.state === "failed";
+        const exec = {
+          running: tt("exRunning"),
+          "needs-permission": tt("exPerm"),
+          "needs-approval": tt("exApproval"),
+          "stopped-test": tt("exStopped"),
+          "stopped-review": tt("exStopped"),
+          approved: tt("exDone"),
+          rejected: tt("exDone"),
+          cancelled: tt("exCancelled"),
+        }[r.status];
+        const execIcon = {
+          running: ["load", "run", true],
+          "needs-permission": ["shield", "warn"],
+          "needs-approval": ["user", "warn"],
+          "stopped-test": ["x", "bad"],
+          "stopped-review": ["x", "bad"],
+          approved: ["check", "ok"],
+          rejected: ["x", "bad"],
+          cancelled: ["ban", ""],
+        }[r.status];
+        const chk =
+          r.wf !== "seq"
+            ? [tt("rvNone"), "dash", ""]
+            : testFail
+              ? [tt("chFailed"), "x", "bad"]
+              : testDone
+                ? [tt("chPassed", 1, 1), "check", "ok"]
+                : r.steps.build?.state === "done"
+                  ? [tt("chPassedBuild"), "check", "ok"]
+                  : [tt("chNotYet"), "dash", ""];
+        const hasGate = ["needs-approval", "approved", "rejected"].includes(r.status);
+        const dec =
+          r.status === "approved"
+            ? [tt("deApproved"), "check", "ok", tt("subGate")]
+            : r.status === "rejected"
+              ? [tt("deRejected"), "x", "bad", tt("subGate")]
+              : r.status === "needs-approval"
+                ? [tt("dePending"), "user", "warn", tt("subGate")]
+                : ["stopped-test", "stopped-review"].includes(r.status)
+                  ? [tt("deNotReq"), "ban", "", tt("subNoGate")]
+                  : [tt("deNotYet"), "dash", "", ""];
+        const stepper = ids
+          .map((id) => {
+            const s = r.steps[id]?.state ?? "pending";
+            const cls =
+              s === "done"
+                ? "done"
+                : s === "failed"
+                  ? "bad"
+                  : ["running", "waiting"].includes(s)
+                    ? "now"
+                    : "";
+            const icn =
+              s === "done"
+                ? ["check", "ic-ok"]
+                : s === "failed"
+                  ? ["x", "ic-bad"]
+                  : s === "running"
+                    ? ["load", "", true]
+                    : s === "waiting"
+                      ? [id === "approval" ? "user" : "shield", "ic-warn"]
+                      : s === "skipped"
+                        ? ["ban", ""]
+                        : ["dash", ""];
+            return `<li class="${cls}" ${cls === "now" ? 'aria-current="step"' : ""}><span class="${icn[1]}">${ic(icn[0], icn[2] ? "spin" : "")}</span>${stepName(id)}<span class="sep" aria-hidden="true">›</span></li>`;
+          })
+          .join("");
+        let attention = "";
+        if (r.status === "needs-permission") {
+          const p = permFor(r);
+          attention = `<div class="alert warn" role="alert"><div class="head"><span class="ic-warn">${ic("shield", "lg")}</span><div><h3>${tt("permAlertTitle", stepName(p.step))}</h3><p class="sm muted">${tt("permAlertBody")}</p></div></div>
+      <dl class="kv"><dt>${tt("permTool")}</dt><dd>${p.tool}</dd>${p.target ? `<dt>${tt("permTarget")}</dt><dd class="mono">${p.target}</dd>` : `<dt>${tt("permCheck")}</dt><dd>${esc(p.check)}</dd><dt>${tt("permCmd")}</dt><dd class="mono sm">${esc(p.cmd)}</dd>`}</dl>
+      ${p.diff ? `<div class="diff" aria-label="preview"><div class="del">- before</div><div class="add">+ after</div></div>` : ""}
+      <div class="actions"><button class="btn primary" data-act="open-conv" data-id="${r.id}">${tt("openConv")}</button></div></div>`;
+        } else if (r.status === "needs-approval") {
+          attention = `<div class="alert warn"><div class="head"><span class="ic-warn">${ic("user", "lg")}</span><div><h3>${tt("waitTitle")}</h3><p class="sm muted">${tt(r.wf === "seq" ? "waitBody" : "waitBodyAgent")}</p></div></div>
+      <div class="pill ok" style="align-self:flex-start">${ic("check")}${tt("revPass")}</div>
+      <div><label class="field-label" for="cmt">${tt("comment")}</label><textarea id="cmt" style="min-height:56px" placeholder="${esc(tt("commentPh"))}">${esc(S.comment)}</textarea></div>
+      <div class="actions"><button class="btn primary" id="btn-approve" data-act="approve" ${S.comment.trim() ? "" : "disabled"}>${ic("check")}${tt("approve")}</button><button class="btn danger" id="btn-reject" data-act="reject" ${S.comment.trim() ? "" : "disabled"}>${tt("reject")}</button></div></div>`;
+        } else if (r.status === "stopped-review") {
+          attention = `<div class="alert bad" role="alert"><div class="head"><span class="ic-bad">${ic("x", "lg")}</span><div><h3>${tt("failReviewTitle")}</h3><p class="sm" style="margin-top:4px">${tt("failReviewWhy")}</p></div></div>
+      <div><div class="field-label">${tt("failStill")}</div><ul style="margin:2px 0 0;padding-left:18px"><li>${tt("failStill1")}</li><li>${tt("failStill2")}</li><li>${tt("failStill3")}</li></ul></div>
+      <div><div class="field-label">${tt("failNext")}</div><div class="actions" style="margin-top:4px"><button class="btn primary" data-act="tab" data-t="evidence">${tt("failInspect")}</button><button class="btn" data-act="open-conv-view" data-id="${r.id}">${tt("failConv")}</button><button class="btn" data-act="again" data-id="${r.id}">${ic("redo")}${tt("failNew")}</button></div>
+      <p class="sm muted" style="margin-top:6px">${tt("failRetryNote")}</p></div></div>`;
+        } else if (r.status === "stopped-test") {
+          attention = `<div class="alert bad" role="alert"><div class="head"><span class="ic-bad">${ic("x", "lg")}</span><div><h3>${tt("failTestTitle")}</h3><p class="sm" style="margin-top:4px">${tt("failTestWhy")}</p></div></div>
+      <div><div class="field-label">${tt("failStill")}</div><ul style="margin:2px 0 0;padding-left:18px"><li>${tt("failTestStill1")}</li><li>${tt("failTestStill2")}</li><li>${tt("failStill3")}</li></ul></div>
+      <div><div class="field-label">${tt("failNext")}</div><div class="actions" style="margin-top:4px"><button class="btn primary" data-act="tab" data-t="checks">${tt("failTestInspect")}</button><button class="btn" data-act="again" data-id="${r.id}">${ic("redo")}${tt("failNew")}</button></div></div></div>`;
+        } else if (r.status === "approved" || r.status === "rejected") {
+          attention = `<div class="alert"><p>${tt(r.status === "approved" ? "approvedNote" : "rejectedNote")}</p><div class="actions"><button class="btn primary" data-act="again" data-id="${r.id}">${ic("redo")}${tt("runAgain")}</button><button class="btn" data-act="new">${tt("newTask")}</button></div></div>`;
+        }
+        const cancellable = ["running", "needs-permission"].includes(r.status);
+        const tabs = ["steps", "checks", "changes", "evidence"];
+        return `<div class="actions" style="justify-content:space-between"><button class="btn ghost sm back-list" data-act="back-list">${ic("arrow")}${tt("navTasks")}</button>
+      <div class="actions" style="margin-left:auto">${["needs-approval", "approved", "rejected", "cancelled"].includes(r.status) ? `<button class="btn sm" data-act="again" data-id="${r.id}">${ic("redo")}${tt("runAgain")}</button>` : ""}
+      ${cancellable ? (S.cancelAsk ? `<span class="sm">${tt("cancelConfirm")}</span><button class="btn sm danger" data-act="cancel-yes" data-id="${r.id}">${tt("cancelYes")}</button><button class="btn sm" data-act="cancel-no">${tt("cancelNo")}</button>` : `<button class="btn sm" data-act="cancel-ask">${tt("cancelRun")}</button>`) : ""}</div></div>
+    <h2 id="pane-h" style="margin-top:8px">${esc(r.request)}</h2>
+    <div class="actions" style="margin-top:6px">${pill(st.tone, st.icon, st.label, st.spin)}<span class="sm muted">${wfLabel(r.wf)} · ${r.sim && ["running", "needs-permission", "needs-approval"].includes(r.status) ? tt("stepOf", stepsFor(r.wf).indexOf(cur) + 1, stepsFor(r.wf).length, stepName(cur)) : tt("ago", r.mins)}</span></div>
+    <div class="sec" style="border-top:0"><ol class="stepper" aria-label="${tt("tabSteps")}">${stepper}</ol></div>
+    <div class="verdicts" role="group" aria-label="status">
+      <div class="verdict"><span class="k">${tt("vExec")}</span><span class="v"><span class="${execIcon[1] === "warn" ? "ic-warn" : execIcon[1] === "bad" ? "ic-bad" : execIcon[1] === "ok" ? "ic-ok" : ""}">${ic(execIcon[0], execIcon[2] ? "spin" : "")}</span>${exec}</span></div>
+      <div class="verdict"><span class="k">${tt("vChecks")}</span><span class="v"><span class="${chk[2] === "bad" ? "ic-bad" : chk[2] === "ok" ? "ic-ok" : ""}">${ic(chk[1])}</span>${chk[0]}</span></div>
+      <div class="verdict"><span class="k">${tt("vDecision")}</span><span class="v"><span class="${dec[2] === "bad" ? "ic-bad" : dec[2] === "ok" ? "ic-ok" : dec[2] === "warn" ? "ic-warn" : ""}">${ic(dec[1])}</span>${dec[0]}</span>${dec[3] ? `<span class="sub">${dec[3]}</span>` : ""}</div></div>
+    <div class="sec">${attention}</div>
+    <div class="tabs" role="tablist" aria-label="${tt("navTasks")}">${tabs.map((k) => `<button class="tab" role="tab" id="tab-${k}" aria-selected="${S.tab === k}" tabindex="${S.tab === k ? 0 : -1}" aria-controls="panel" data-act="tab" data-t="${k}">${tt("tab" + k[0].toUpperCase() + k.slice(1))}</button>`).join("")}</div>
+    <div class="tabpanel" id="panel" role="tabpanel" aria-labelledby="tab-${S.tab}">${tabPanel(r)}</div>`;
+      }
+      function tabPanel(r) {
+        const ids = stepsFor(r.wf);
+        if (S.tab === "steps") {
+          return `<ul class="timeline">${ids
+            .map((id) => {
+              const s = r.steps[id]?.state ?? "pending";
+              const l = {
+                pending: "tlPending",
+                running: "tlRunning",
+                done: "tlDone",
+                failed: "tlFailed",
+                waiting: "tlWaiting",
+                skipped: "tlSkipped",
+              }[s];
+              const icn =
+                s === "done"
+                  ? ["check", "ic-ok"]
+                  : s === "failed"
+                    ? ["x", "ic-bad"]
+                    : s === "running"
+                      ? ["load", "", 1]
+                      : s === "waiting"
+                        ? ["shield", "ic-warn"]
+                        : s === "skipped"
+                          ? ["ban", ""]
+                          : ["dash", ""];
+              const rcv =
+                id === "analyze"
+                  ? `<div class="sm muted">${tt("rvTask")}:${esc(short(r.request, 50))}${r.context.length ? " · " + tt("context") + ": " + r.context.map((c) => esc(c.name)).join(", ") : ""}</div>`
+                  : "";
+              return `<li><span class="${icn[1]}">${ic(icn[0], icn[2] ? "spin" : "")}</span><div>${stepName(id)}${rcv}</div><span class="sm muted">${tt(l)}</span></li>`;
+            })
+            .join("")}</ul>`;
+        }
+        if (S.tab === "checks") {
+          if (r.wf !== "seq") return `<p class="muted">${tt("noChecksAgent")}</p>`;
+          const done = r.steps.build?.state === "done",
+            tdone = r.steps.test?.state === "done",
+            tfail = r.steps.test?.state === "failed";
+          if (!done && !tdone && !tfail) return `<p class="muted">${tt("chNotRunTab")}</p>`;
+          const dr = r.draft ?? { build: "build", test: "test" };
+          const cs = r.checks ?? S.checksSaved;
+          const b = cs.find((c) => c.id === dr.build),
+            t = cs.find((c) => c.id === dr.test);
+          return `<table class="tbl"><thead><tr><th>${tt("build")} / ${tt("test")}</th><th>${tt("cmd")}</th><th>${tt("exit")}</th><th>${tt("assertions")}</th></tr></thead><tbody>
+      <tr><td>${esc(b.name)}</td><td class="mono">${esc(b.exe + " " + b.args[0])} …</td><td>${done ? "0" : "—"}</td><td>—</td></tr>
+      <tr><td>${esc(t.name)}</td><td class="mono">${esc(t.exe + " " + t.args[0])} …</td><td>${tdone ? "0" : tfail ? "1" : "—"}</td><td>${tdone ? `1 ${tt("asPass")}` : tfail ? `1 ${tt("asFail")}` : "—"}</td></tr></tbody></table>
+      ${tfail ? `<div class="alert bad"><strong>zz-demo contains after</strong><div class="diff"><div class="del">${tt("expected")}: after</div><div class="add">${tt("got")}: still-before</div></div></div>` : ""}`;
+        }
+        if (S.tab === "changes") {
+          const edited =
+            ["done", "failed", "skipped"].includes(r.steps.implement?.state) &&
+            r.steps.implement?.state !== "skipped";
+          return edited
+            ? `<h3>${tt("changesTitle")}</h3><div class="code">zz-demo.txt</div><div class="diff"><div class="del">- before</div><div class="add">+ after</div></div><p class="sm muted">${tt("changesNote")}</p>`
+            : `<p class="muted">${tt("changesNone")}</p>`;
+        }
+        const raw =
+          r.status === "stopped-review"
+            ? `<h3>${tt("rawOut")}</h3><div class="rawout">${RAW_REVIEW}</div><p class="sm">${tt("rawWhy")}</p>`
+            : "";
+        return `${raw}<h3>${tt("evTitle")}</h3><p class="sm muted">${tt("evNote")}</p><dl class="kv"><dt>${tt("evRun")}</dt><dd class="mono sm">${r.id}-2535e508</dd><dt>${tt("evWorkflow")}</dt><dd class="mono sm">generic v2 · 7307e6439e16…</dd><dt>${tt("evVerif")}</dt><dd class="mono sm">aae5f8ed-506b-4dda-80ba-d633dcd38161 <span class="muted">(${tt("artifactRef")})</span></dd><dt>${tt("evConv")}</dt><dd>${ids.slice(0, 5).map(stepName).join(" · ")}</dd></dl>`;
+      }
+      /* ============================ conversation mock ============================ */
+      function convView() {
+        const r = runById(S.conv.runId);
+        const p = r.status === "needs-permission" ? permFor(r) : null;
+        const back = `<button class="btn sm" data-act="conv-back">${ic("arrow")}${tt("backRun")}</button>`;
+        const opts = [
+          ["optAllow", "optAllowD"],
+          ["optDeny", "optDenyD"],
+          ["optTell", ""],
+        ];
+        if (S.convDone)
+          return `<div class="conv"><div class="conv-top">${back}<strong>${esc(short(r.request, 60))}</strong><span class="simtag">${tt("simulated")}</span></div><div class="conv-body"><div class="conv-col"><div class="bubble" role="status">${tt(S.convDone === "allow" ? "allowedNote" : "deniedNote")}</div><div><button class="btn primary" id="conv-return" data-act="conv-back">${tt("backRun")}</button></div></div></div></div>`;
+        return `<div class="conv"><div class="conv-top">${back}<strong>${tt("conv1")} · ${p ? stepName(p.step) : ""}</strong><span class="simtag">${tt("simulated")}</span><span class="sm muted" style="margin-left:auto">${esc(short(r.request, 60))}</span></div>
+    <div class="conv-body"><div class="conv-col">
+      ${
+        p
+          ? `<div class="bubble">${p.line()}</div>
+      <div class="perm" role="group" aria-label="${tt("permTitle")}"><h3>${tt("permTitle")}</h3><p class="muted sm">${p.tool} — ${tt("permAlways")}</p>
+        <div class="code">${p.target ? `Edit ${p.target}\n- before\n+ after` : esc(p.cmd)}</div>
+        <div class="opts" role="radiogroup" aria-label="${tt("permTitle")}">${opts.map((o, i) => (i === 2 ? `<button class="o" role="radio" aria-checked="false" aria-disabled="true" disabled tabindex="-1" data-i="${i}"><span>${i + 1}.</span><span><b>${tt(o[0])}</b> <span class="muted">${tt("notInProto")}</span></span></button>` : `<button class="o" role="radio" aria-checked="${S.convChoice === i}" tabindex="${S.convChoice === i ? 0 : -1}" data-act="conv-opt" data-i="${i}"><span>${i + 1}.</span><span><b>${tt(o[0])}</b> <span class="muted">${o[1] ? tt(o[1]) : ""}</span></span></button>`)).join("")}</div>
+        <div class="actions" style="justify-content:space-between"><span class="sm muted">${tt("keysHint")}</span><button class="btn primary" id="conv-confirm" data-act="conv-confirm">${tt("confirm")}</button></div></div>`
+          : ""
+      }
+      ${!p && r.status === "stopped-review" ? `<div class="bubble"><div class="field-label">${tt("rawOut")}</div><div class="rawout" style="margin-top:4px">${RAW_REVIEW}</div></div>` : ""}
+      <p class="owner-note">${tt("convOwner")}</p></div></div></div>`;
+      }
+      /* ============================ checks & workflows ============================ */
+      function checksView() {
+        const sel = S.checks.find((c) => c.id === S.checkSel);
+        const isTest = sel.kind === "Test";
+        const f = (id, label, val, full) =>
+          `<div class="${full ? "full" : ""}"><label class="field-label" for="${id}">${label}</label><input type="text" id="${id}" data-field="${id.replace("f-", "")}" value="${esc(val ?? "")}" /></div>`;
+        return `<div class="split" data-mobile="${S.mobile === "detail" ? "detail" : "list"}"><section class="l" aria-label="${tt("checksList")}"><h2 id="pane-h" style="padding:0 4px">${tt("checksTitle")}</h2><p class="sm muted" style="padding:0 4px">${tt("checksLead")}</p>
+    ${S.checks.map((c) => `<button class="row" data-act="check-sel" data-id="${c.id}" ${c.id === S.checkSel ? 'aria-current="true"' : ""}><span class="ri">${ic("list")}</span><span class="row-main"><span class="row-title">${esc(c.name)}</span><span class="row-sub">${c.kind} · ${isDirty(c.id) ? tt("unsaved") : tt("savedNotRun")}</span></span></button>`).join("")}
+    <button class="btn sm" disabled>${ic("plus")}${tt("addCheck")}</button></section>
+    <section class="r" aria-label="${esc(sel.name)}"><div class="detail-inner">
+      <div class="actions"><button class="btn ghost sm back-list" data-act="back-list">${ic("arrow")}${tt("checksList")}</button></div>
+      <h2>${esc(sel.name)}</h2><p class="sm muted">${tt("notResult")}</p>
+      <div class="form-grid" style="margin-top:12px">
+        ${f("f-name", tt("name"), sel.name)}<div><span class="field-label">${tt("kind")}</span><div style="padding:6px 0">${sel.kind}</div></div>
+        ${f("f-exe", tt("exe"), sel.exe)}${f("f-cwd", tt("cwd"), sel.cwd)}
+        <div class="full"><span class="field-label">${tt("args")}</span><ol class="arglist">${sel.args.map((a, i) => `<li><span class="n">${i + 1}</span><input type="text" class="mono" aria-label="${tt("args")} ${i + 1}" data-arg="${i}" value="${esc(a)}"/></li>`).join("")}</ol></div>
+        ${f("f-timeout", tt("timeout"), sel.timeout)}${f("f-sources", tt("sources"), sel.sources.replace(/\n/g, ", "))}
+        ${isTest ? f("f-report", tt("reportPath"), sel.reportPath) + f("f-min", tt("minTests"), sel.minTests) + f("f-req", tt("requiredTests"), sel.required, true) + `<div class="full"><span class="field-label">${tt("buildFor")}</span><div style="padding:6px 0">${esc(S.checks.find((c) => c.id === sel.after)?.name ?? "")}</div></div>` : f("f-out", tt("outputs"), sel.outputs)}
+      </div>
+      <div class="footer-bar"><div class="grow"><span class="sm" role="status">${S.checkNote ? tt("savedOk") : isDirty(S.checkSel) ? tt("unsaved") : ""}</span></div>
+        <button class="btn" data-act="check-revert" ${isDirty(S.checkSel) ? "" : "disabled"}>${tt("revert")}</button><button class="btn primary" data-act="check-save" ${isDirty(S.checkSel) ? "" : "disabled"}>${tt("save")}</button></div>
+      <div class="sec"><button class="btn sm" disabled>${ic("play")}${tt("tryCheck")}</button><p class="sm muted">${tt("tryNote")}</p></div>
+    </div></section></div>`;
+      }
+      function workflowsView() {
+        return `<div class="detail" style="flex:1"><div class="detail-inner"><h2 id="pane-h">${tt("wfTitle")}</h2><p class="muted" style="margin-top:6px;max-width:64ch">${tt("wfLead")}</p><p class="alert" style="margin-top:14px;max-width:64ch">${tt("wfNotProto")}</p></div></div>`;
+      }
+
+      /* ============================ events ============================ */
+      function bindMain() {
+        const req = $("#req");
+        if (req) {
+          req.addEventListener("input", () => {
+            S.draft.request = req.value;
+            const ok = req.value.trim();
+            $("#go-review").disabled = !ok;
+            $("#review-hint").textContent = ok ? tt("reviewHint") : tt("reviewHintEmpty");
+          });
+          req.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && S.draft.request.trim()) {
+              e.preventDefault();
+              goReview();
+            }
+          });
+        }
+        const wf = $("#wf");
+        if (wf)
+          wf.addEventListener("change", () => {
+            S.draft.wf = wf.value;
+            render();
+            $("#wf")?.focus();
+          });
+        ["build", "test"].forEach((k) => {
+          const e = $("#sel-" + k);
+          if (e)
+            e.addEventListener("change", () => {
+              S.draft[k] = e.value;
+              render();
+            });
+        });
+        const pq = $("#pq");
+        if (pq) {
+          pq.focus();
+          pq.setSelectionRange(pq.value.length, pq.value.length);
+          pq.addEventListener("input", () => {
+            S.pickerQ = pq.value;
+            render();
+          });
+          pq.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+              S.pickerOpen = false;
+              S.pickerQ = "";
+              render();
+              $('[data-act="picker"]')?.focus();
+            }
+          });
+        }
+        const ack = $("#ack");
+        if (ack)
+          ack.addEventListener("change", () => {
+            S.ack = ack.checked;
+            $("#go-start").disabled = !S.ack;
+            $("#ack-hint").hidden = S.ack;
+          });
+        const cmt = $("#cmt");
+        if (cmt)
+          cmt.addEventListener("input", () => {
+            S.comment = cmt.value;
+            const ok = cmt.value.trim() ? false : true;
+            $("#btn-approve").disabled = ok;
+            $("#btn-reject").disabled = ok;
+          });
+        $$("[data-field]").forEach((i) =>
+          i.addEventListener("input", () => {
+            const sel = S.checks.find((c) => c.id === S.checkSel);
+            const k = i.dataset.field;
+            if (k === "name") sel.name = i.value;
+            else if (k === "exe") sel.exe = i.value;
+            else if (k === "cwd") sel.cwd = i.value;
+            else if (k === "timeout") sel.timeout = i.value;
+            else if (k === "sources") sel.sources = i.value;
+            else if (k === "report") sel.reportPath = i.value;
+            else if (k === "min") sel.minTests = i.value;
+            else if (k === "req") sel.required = i.value;
+            else if (k === "out") sel.outputs = i.value;
+            S.checkNote = false;
+            $("[data-act='check-save']").disabled = !isDirty(S.checkSel);
+            $("[data-act='check-revert']").disabled = !isDirty(S.checkSel);
+            $("[role=status]", $(".footer-bar")).textContent = isDirty(S.checkSel)
+              ? tt("unsaved")
+              : "";
+          }),
+        );
+        $$("[data-arg]").forEach((i) =>
+          i.addEventListener("input", () => {
+            const sel = S.checks.find((c) => c.id === S.checkSel);
+            sel.args[+i.dataset.arg] = i.value;
+            S.checkNote = false;
+            $("[data-act='check-save']").disabled = !isDirty(S.checkSel);
+            $("[data-act='check-revert']").disabled = !isDirty(S.checkSel);
+          }),
+        );
+        const tabs = $$('[role="tab"]');
+        tabs.forEach((t, i) =>
+          t.addEventListener("keydown", (e) => {
+            const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+            if (d) {
+              e.preventDefault();
+              const n = tabs[(i + d + tabs.length) % tabs.length];
+              S.tab = n.dataset.t;
+              render();
+              $("#tab-" + S.tab).focus();
+            } else if (e.key === "Home") {
+              e.preventDefault();
+              S.tab = tabs[0].dataset.t;
+              render();
+              $("#tab-" + S.tab).focus();
+            } else if (e.key === "End") {
+              e.preventDefault();
+              S.tab = tabs.at(-1).dataset.t;
+              render();
+              $("#tab-" + S.tab).focus();
+            }
+          }),
+        );
+        const radios = $$('[role="radio"]');
+        radios.forEach((o, i) =>
+          o.addEventListener("keydown", (e) => {
+            const d = { ArrowDown: 1, ArrowUp: -1, ArrowRight: 1, ArrowLeft: -1 }[e.key];
+            if (d) {
+              e.preventDefault();
+              // 只有 Allow / Deny 可选；第三项在原型中未实现，保持 disabled。
+              S.convChoice = (i + d + 2) % 2;
+              render();
+              $$('[role="radio"]')[S.convChoice].focus();
+            } else if (e.key === "Enter") {
+              e.preventDefault();
+              act("conv-confirm");
+            }
+          }),
+        );
+        const rows = $$(".activity .row");
+        rows.forEach((r, i) =>
+          r.addEventListener("keydown", (e) => {
+            const d = { ArrowDown: 1, ArrowUp: -1 }[e.key];
+            if (d && rows[i + d]) {
+              e.preventDefault();
+              rows[i + d].focus();
+            }
+          }),
+        );
+      }
+      document.addEventListener("click", (e) => {
+        const b = e.target.closest("[data-act]");
+        if (!b) return;
+        act(b.dataset.act, b);
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          if (S.cancelAsk) {
+            S.cancelAsk = false;
+            render();
+          } else if (S.protoOpen) setProto(false);
+        }
+      });
+      function act(a, el) {
+        const id = el?.dataset?.id;
+        switch (a) {
+          case "nav":
+            S.view = el.dataset.v;
+            S.conv = null;
+            S.mobile = "detail";
+            render(true);
+            break;
+          case "new":
+            S.view = "tasks";
+            S.conv = null;
+            S.pane = "compose";
+            S.selected = null;
+            S.mobile = "detail";
+            render(true);
+            $("#req")?.focus();
+            break;
+          case "open-run":
+            S.view = "tasks";
+            S.conv = null;
+            S.pane = "run";
+            S.selected = id;
+            S.mobile = "detail";
+            S.tab = defaultTab(runById(id));
+            S.cancelAsk = false;
+            S.comment = "";
+            render(true);
+            break;
+          case "back-list":
+            S.mobile = "list";
+            render();
+            break;
+          case "copy-path":
+            navigator.clipboard?.writeText(WORKSPACE_PATH).catch(() => {});
+            toast(tt("copied"));
+            break;
+          case "recent": {
+            const r = [...new Set(S.runs.map((x) => x.request))][+el.dataset.n];
+            S.draft.request = r;
+            S.prefilledFrom = null;
+            render();
+            $("#req").focus();
+            break;
+          }
+          case "picker":
+            S.pickerOpen = !S.pickerOpen;
+            S.pickerQ = "";
+            render();
+            break;
+          case "ctx-add": {
+            const c = CATALOG.find((x) => x.id === id);
+            S.draft.context.push({ id: c.id, name: c.name, kind: c.kind, path: c.path });
+            S.pickerOpen = false;
+            S.pickerQ = "";
+            render();
+            live(tt("context") + ": " + c.name);
+            $('[data-act="picker"]')?.focus();
+            break;
+          }
+          case "ctx-remove": {
+            S.draft.context = S.draft.context.filter((c) => c.id !== id);
+            render();
+            $('[data-act="picker"]')?.focus();
+            break;
+          }
+          case "review":
+            goReview();
+            break;
+          case "back-edit":
+            S.pane = "compose";
+            S.ack = false;
+            render(true);
+            break;
+          case "start":
+            startRun();
+            break;
+          case "tab":
+            S.tab = el.dataset.t;
+            render();
+            $("#tab-" + S.tab)?.focus();
+            break;
+          case "cancel-ask":
+            S.cancelAsk = true;
+            render();
+            break;
+          case "cancel-no":
+            S.cancelAsk = false;
+            render();
+            break;
+          case "cancel-yes": {
+            const r = runById(id);
+            stopTimer();
+            r.status = "cancelled";
+            S.cancelAsk = false;
+            Object.values(r.steps).forEach((s) => {
+              if (["running", "waiting", "pending"].includes(s.state)) s.state = "skipped";
+            });
+            live(tt("stCancelled"));
+            render();
+            break;
+          }
+          case "open-conv":
+          case "open-conv-view":
+            S.conv = { runId: id };
+            S.convChoice = 0;
+            S.convDone = null;
+            S.view = "tasks";
+            render();
+            $(".conv .o[aria-checked=true]")?.focus();
+            break;
+          case "conv-opt":
+            S.convChoice = +el.dataset.i;
+            render();
+            $$('[role="radio"]')[S.convChoice].focus();
+            break;
+          case "conv-confirm": {
+            const r = runById(S.conv.runId);
+            if (S.convChoice === 0) {
+              S.convDone = "allow";
+              grant(r);
+            } else if (S.convChoice === 1) {
+              S.convDone = "deny";
+              denyRun(r);
+            } else break; // 未实现的选项不得被当作另一种动作执行
+            render();
+            $("#conv-return")?.focus();
+            live(tt(S.convDone === "allow" ? "allowedNote" : "deniedNote"));
+            break;
+          }
+          case "conv-back": {
+            const rid = S.conv?.runId;
+            S.conv = null;
+            S.pane = "run";
+            S.selected = rid;
+            S.mobile = "detail";
+            render(true);
+            break;
+          }
+          case "approve":
+          case "reject": {
+            const r = runById(S.selected);
+            r.status = a === "approve" ? "approved" : "rejected";
+            r.steps.approval = { state: "done" };
+            S.comment = "";
+            live(tt(a === "approve" ? "stApproved" : "stRejected"));
+            render();
+            break;
+          }
+          case "again": {
+            const r = runById(id);
+            S.draft = {
+              request: r.request,
+              wf: r.wf,
+              context: (r.context || []).map((c) => ({ ...c })),
+              build: r.draft?.build ?? "build",
+              test: r.draft?.test ?? "test",
+            };
+            S.prefilledFrom = r.request;
+            S.pane = "compose";
+            S.selected = null;
+            S.mobile = "detail";
+            S.ack = false;
+            render(true);
+            break;
+          }
+          case "check-sel":
+            // 切换检查时保留其他检查未保存的编辑。
+            S.checkNote = false;
+            S.checkSel = id;
+            S.mobile = "detail";
+            render();
+            break;
+          case "check-save":
+            S.checksSaved = S.checksSaved.map((c) =>
+              c.id === S.checkSel
+                ? JSON.parse(JSON.stringify(S.checks.find((x) => x.id === c.id)))
+                : c,
+            );
+            S.checkNote = true;
+            render();
+            live(tt("savedOk"));
+            break;
+          case "check-revert":
+            S.checks = S.checks.map((c) =>
+              c.id === S.checkSel
+                ? JSON.parse(JSON.stringify(S.checksSaved.find((x) => x.id === c.id)))
+                : c,
+            );
+            render();
+            break;
+        }
+      }
+      function defaultTab(r) {
+        return ["stopped-test"].includes(r.status)
+          ? "checks"
+          : ["stopped-review"].includes(r.status)
+            ? "evidence"
+            : r.status === "needs-approval"
+              ? "changes"
+              : "steps";
+      }
+      function goReview() {
+        if (!S.draft.request.trim()) return;
+        S.pane = "review";
+        S.ack = false;
+        render(true);
+        $("#detail")?.scrollTo(0, 0);
+      }
+
+      /* ============================ simulation ============================ */
+      function newRun() {
+        const d = JSON.parse(JSON.stringify(S.draft));
+        const ids = stepsFor(d.wf);
+        const steps = {};
+        ids.forEach((i) => (steps[i] = { state: "pending" }));
+        const r = {
+          id: "r-" + S.nextId++,
+          request: d.request.trim(),
+          wf: d.wf,
+          mins: 0,
+          status: "running",
+          steps,
+          scenario: S.scenario,
+          context: d.context,
+          draft: d,
+          checks: JSON.parse(JSON.stringify(S.checksSaved)),
+          sim: true,
+          granted: {},
+        };
+        S.runs.unshift(r);
+        return r;
+      }
+      function startRun() {
+        const r = newRun();
+        S.pane = "run";
+        S.selected = r.id;
+        S.tab = "steps";
+        S.mobile = "detail";
+        S.ack = false;
+        render(true);
+        live(tt("stRunning", stepName("analyze")));
+        tick(r);
+      }
+      const wait = (ms) => ms * S.speed;
+      function stopTimer() {
+        clearTimeout(S.timer);
+        S.timer = null;
+      }
+      function tick(r) {
+        stopTimer();
+        const ids = stepsFor(r.wf);
+        const id = ids.find(
+          (x) => r.steps[x].state === "pending" || r.steps[x].state === "running",
+        );
+        if (!id) return;
+        if (id === "approval") {
+          r.steps.approval.state = "waiting";
+          r.status = "needs-approval";
+          live(tt("waitTitle"));
+          render();
+          return;
+        }
+        r.steps[id].state = "running";
+        r.status = "running";
+        render();
+        const needsPerm = ["implement", "build", "test"].includes(id) && !r.granted[id];
+        S.timer = setTimeout(
+          () => {
+            if (needsPerm) {
+              r.steps[id].state = "waiting";
+              r.status = "needs-permission";
+              live(tt("permAlertTitle", stepName(id)));
+              render();
+              return;
+            }
+            if (id === "test" && r.scenario === "test") {
+              r.steps.test.state = "failed";
+              r.status = "stopped-test";
+              ["review", "approval"].forEach((k) => r.steps[k] && (r.steps[k].state = "skipped"));
+              S.tab = "checks";
+              live(tt("failTestTitle"));
+              render();
+              return;
+            }
+            if (id === "review" && r.scenario === "reviewer") {
+              r.steps.review.state = "failed";
+              r.status = "stopped-review";
+              r.steps.approval && (r.steps.approval.state = "skipped");
+              S.tab = "evidence";
+              live(tt("failReviewTitle"));
+              render();
+              return;
+            }
+            r.steps[id].state = "done";
+            tick(r);
+          },
+          wait(id === "analyze" ? 1400 : id === "review" ? 1600 : 1000),
+        );
+      }
+      function grant(r) {
+        const id = currentStep(r);
+        r.granted[id] = true;
+        r.steps[id].state = "pending";
+        r.status = "running";
+        tick(r);
+      }
+      function denyRun(r) {
+        stopTimer();
+        const id = currentStep(r);
+        r.steps[id].state = "failed";
+        r.status = "cancelled";
+        Object.values(r.steps).forEach((s) => {
+          if (["pending", "running", "waiting"].includes(s.state)) s.state = "skipped";
+        });
+      }
+
+      /* ============================ jumps & panel ============================ */
+      function jump(k, opts = {}) {
+        stopTimer();
+        S.conv = null;
+        S.view = "tasks";
+        S.cancelAsk = false;
+        if (k === "compose") {
+          S.pane = "compose";
+          S.selected = null;
+          S.mobile = "detail";
+          if (!S.draft.request.trim()) S.draft.request = "Modify zz-demo.txt file content to after";
+          render(true);
+          return;
+        }
+        if (k === "review") {
+          if (!S.draft.request.trim()) S.draft.request = "Modify zz-demo.txt file content to after";
+          S.pane = "review";
+          S.ack = false;
+          S.mobile = "detail";
+          render(true);
+          return;
+        }
+        const base = {
+          request: "Modify zz-demo.txt file content to after",
+          wf: "seq",
+          mins: 0,
+          context: [{ id: "ctx", name: "Context.md", kind: "instr" }],
+          draft: {
+            request: "Modify zz-demo.txt file content to after",
+            wf: "seq",
+            context: [],
+            build: "build",
+            test: "test",
+          },
+          checks: JSON.parse(JSON.stringify(S.checksSaved)),
+          sim: true,
+          granted: {},
+          ...opts,
+        };
+        const mk = (status, steps, scenario) => {
+          const r = {
+            ...base,
+            id: "r-" + S.nextId++,
+            status,
+            steps: {
+              ...Object.fromEntries(STEP_IDS.map((i) => [i, { state: "pending" }])),
+              ...steps,
+            },
+            scenario,
+          };
+          S.runs.unshift(r);
+          S.pane = "run";
+          S.selected = r.id;
+          S.mobile = "detail";
+          return r;
+        };
+        if (k === "perm") {
+          const r = mk(
+            "needs-permission",
+            {
+              analyze: { state: "done" },
+              implement: { state: "done" },
+              build: { state: "waiting" },
+            },
+            S.scenario,
+          );
+          r.granted = { implement: true };
+          S.tab = "steps";
+        }
+        if (k === "approval") {
+          mk(
+            "needs-approval",
+            {
+              analyze: { state: "done" },
+              implement: { state: "done" },
+              build: { state: "done" },
+              test: { state: "done" },
+              review: { state: "done" },
+              approval: { state: "waiting" },
+            },
+            "pass",
+          );
+          S.tab = "changes";
+        }
+        if (k === "fail-reviewer") {
+          mk(
+            "stopped-review",
+            {
+              analyze: { state: "done" },
+              implement: { state: "done" },
+              build: { state: "done" },
+              test: { state: "done" },
+              review: { state: "failed" },
+              approval: { state: "skipped" },
+            },
+            "reviewer",
+          );
+          S.tab = "evidence";
+        }
+        if (k === "fail-test") {
+          mk(
+            "stopped-test",
+            {
+              analyze: { state: "done" },
+              implement: { state: "done" },
+              build: { state: "done" },
+              test: { state: "failed" },
+              review: { state: "skipped" },
+              approval: { state: "skipped" },
+            },
+            "test",
+          );
+          S.tab = "checks";
+        }
+        render(true);
+      }
+      function seg(id, items, cur, on) {
+        $(id).innerHTML = items
+          .map(
+            ([v, l]) =>
+              `<button class="btn sm" data-v="${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`,
+          )
+          .join("");
+        $$("button", $(id)).forEach((b) => b.addEventListener("click", () => on(b.dataset.v)));
+      }
+      function renderPanel() {
+        applyStatic();
+        seg(
+          "#pc-scenario",
+          [
+            ["pass", tt("scPass")],
+            ["reviewer", tt("scReviewer")],
+            ["test", tt("scTest")],
+          ],
+          S.scenario,
+          (v) => {
+            S.scenario = v;
+            renderPanel();
+          },
+        );
+        seg(
+          "#pc-jump",
+          [
+            ["compose", tt("jCompose")],
+            ["review", tt("jReview")],
+            ["perm", tt("jPerm")],
+            ["approval", tt("jApproval")],
+            ["fail-reviewer", tt("jFailReviewer")],
+            ["fail-test", tt("jFailTest")],
+          ],
+          "",
+          (v) => {
+            jump(v);
+          },
+        );
+        seg(
+          "#pc-theme",
+          [
+            ["dark", tt("dark")],
+            ["light", tt("light")],
+          ],
+          S.theme,
+          (v) => {
+            S.theme = v;
+            document.documentElement.dataset.theme = v;
+            renderPanel();
+          },
+        );
+        seg(
+          "#pc-lang",
+          [
+            ["en", "EN"],
+            ["zh", "中文"],
+          ],
+          S.lang,
+          (v) => {
+            S.lang = v;
+            render();
+            renderPanel();
+          },
+        );
+        seg(
+          "#pc-speed",
+          [
+            ["1", tt("normal")],
+            ["0.2", tt("fast")],
+          ],
+          String(S.speed),
+          (v) => {
+            S.speed = +v;
+            renderPanel();
+          },
+        );
+      }
+      function setProto(on) {
+        S.protoOpen = on;
+        $("#proto-panel").classList.toggle("on", on);
+        $("#proto-toggle").setAttribute("aria-expanded", on);
+        if (on) renderPanel();
+      }
+      $("#proto-toggle").addEventListener("click", () => setProto(!S.protoOpen));
+      $("#pc-close").addEventListener("click", () => {
+        setProto(false);
+        $("#proto-toggle").focus();
+      });
+      $("#pc-reset").addEventListener("click", () => {
+        stopTimer();
+        const keep = { lang: S.lang, theme: S.theme, speed: S.speed, scenario: S.scenario };
+        Object.assign(
+          S,
+          {
+            view: "tasks",
+            pane: "compose",
+            selected: null,
+            conv: null,
+            runs: SEED_RUNS(),
+            checks: JSON.parse(JSON.stringify(CHECKS0)),
+            checksSaved: JSON.parse(JSON.stringify(CHECKS0)),
+            draft: {
+              request: "",
+              wf: "seq",
+              context: [{ id: "ctx", name: "Context.md", kind: "instr", path: "Context.md" }],
+              build: "build",
+              test: "test",
+            },
+            prefilledFrom: null,
+            ack: false,
+            comment: "",
+            nextId: 200,
+          },
+          keep,
+        );
+        render(true);
+      });
+      $("#back-chat").addEventListener("click", () =>
+        toast(S.lang === "zh" ? "原型：不会离开此页面" : "Prototype: does not leave this page"),
+      );
+      window.__proto = { jump, act, S, setProto, start: startRun };
+      renderChrome();
+      renderMain();
+      renderPanel();
+    </script>
+  </body>
+</html>

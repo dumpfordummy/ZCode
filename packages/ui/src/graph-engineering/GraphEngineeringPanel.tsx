@@ -6,6 +6,7 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphEditor } from "./GraphEditor.js";
 import type { GraphPanelProps } from "./graphEngineeringView.js";
 import { GraphParallelPanel } from "./GraphParallelPanel.js";
+import { graphFocusClass } from "./graphFocus.js";
 
 export default function GraphEngineeringPanel(props: GraphPanelProps) {
   const [parallel, setParallel] = useState(false);
@@ -14,7 +15,7 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
   return (
     <main
-      className="flex h-full min-h-0 flex-col bg-background text-foreground"
+      className={`${graphFocusClass} flex h-full min-h-0 flex-col bg-background text-foreground`}
       data-testid="graph-engineering-panel"
     >
       <header className="flex flex-wrap items-center gap-2 border-b border-border p-3 [app-region:no-drag]">
@@ -23,21 +24,6 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
           {t("backToChat")}
         </Button>
         <h2 className="text-ui-base font-medium">{t("title")}</h2>
-        {graph.local ? (
-          <details className="text-ui-sm" data-testid="graph-advanced">
-            <summary className="cursor-pointer">
-              {intl.formatMessage({ id: "graph.preZ8.experimental" })}
-            </summary>
-            <Button
-              variant={parallel ? "secondary" : "outline"}
-              size="sm"
-              onClick={() => setParallel((value) => !value)}
-              data-testid="graph-parallel-toggle"
-            >
-              {t(parallel ? "z7.sequential" : "z7.title")}
-            </Button>
-          </details>
-        ) : null}
         <p
           className="min-w-0 flex-1 break-all font-mono text-ui-sm text-foreground-subtle"
           data-testid="graph-workspace"
@@ -84,6 +70,23 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
           </Button>
         </div>
       )}
+      {graph.local ? (
+        <footer className="shrink-0 border-t border-border px-3 py-2">
+          <details className="text-ui-sm" data-testid="graph-advanced">
+            <summary className="cursor-pointer">
+              {intl.formatMessage({ id: "graph.preZ8.experimental" })}
+            </summary>
+            <Button
+              variant={parallel ? "secondary" : "outline"}
+              size="sm"
+              onClick={() => setParallel((value) => !value)}
+              data-testid="graph-parallel-toggle"
+            >
+              {t(parallel ? "z7.sequential" : "z7.title")}
+            </Button>
+          </details>
+        </footer>
+      ) : null}
     </main>
   );
 }
