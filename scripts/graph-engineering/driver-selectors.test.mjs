@@ -22,7 +22,6 @@ export const DRIVERS = [
   "pre-z8-u1-native.mjs",
   "pre-z8-u1-ui.mjs",
   "pre-z8-u5-native.mjs",
-  "pre-z8-u5-library.mjs",
   "ux-m3-native-library.mjs",
 ];
 
@@ -40,6 +39,9 @@ async function walk(dir) {
 async function uiIds() {
   const literals = new Set();
   const prefixes = new Set();
+  // 组件用 `${prefix}-json` 这类形式组合 id（prefix 由调用方传入）：收集后缀和调用方给出的前缀，再做笛卡尔组合。
+  const suffixes = new Set();
+  const prefixValues = new Set();
   for (const file of (await Promise.all(uiSources.map(walk))).flat()) {
     const source = await readFile(file, "utf8");
     for (const match of source.matchAll(
@@ -51,6 +53,11 @@ async function uiIds() {
         if (prefix.length >= 6) prefixes.add(prefix); // 空前缀（`${prefix}-json`）不能让所有 id 都算存在
       } else literals.add(id);
     }
+    for (const match of source.matchAll(/\$\{prefix\}(-[a-z0-9-]+)/g)) suffixes.add(match[1]);
+    for (const line of source.split("\n"))
+      if (/\bprefix\b\s*[=:]/.test(line))
+        for (const match of line.matchAll(/["'`](graph-[a-z0-9-]+)["'`]/g))
+          prefixValues.add(match[1]);
     if (/test-ids[^/]*\.ts$/.test(file))
       for (const match of source.matchAll(/["']([a-z][a-z0-9]*(?:-[a-z0-9]+)+)["']/g))
         literals.add(match[1]);
@@ -58,6 +65,8 @@ async function uiIds() {
     for (const match of source.matchAll(/testid[^\n]{0,20}?["'`]([a-z][a-z0-9-]+)["'`]/gi))
       literals.add(match[1]);
   }
+  for (const prefix of prefixValues)
+    for (const suffix of suffixes) literals.add(`${prefix}${suffix}`);
   return { literals, prefixes };
 }
 

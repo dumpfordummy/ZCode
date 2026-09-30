@@ -290,6 +290,11 @@ export async function instantiateU1(isolation, window, summary) {
   );
   await captureU1(isolation, window, summary, "pre-z8-u1-retained-task-and-draft");
   await verifyFailedSaveReplacement(isolation, window, summary, boundaryOptions);
+  // UX-M3：新运行页直接写出本次将实例化的工作流版本；内置版本读取 Host 实际提供的，不写死。
+  const offeredLine = await window.getByTestId("graph-new-run-version-line").innerText();
+  const offered = Number(/(?:Version|版本)\s+(\d+)/.exec(offeredLine)?.[1]);
+  assert.ok(Number.isInteger(offered) && offered >= 1, `no offered version in: ${offeredLine}`);
+  assert.match(offeredLine, /Built-in|内置/);
   await window.getByTestId("graph-library-instantiate").click();
   await window.getByTestId("graph-replace-dialog").waitFor();
   await window.getByTestId("graph-replace-discard").click();
@@ -297,7 +302,11 @@ export async function instantiateU1(isolation, window, summary) {
     isolation,
     (value) => value.definition.template?.id === "agent-assisted",
   );
-  assert.equal(record.definition.template.version, 1);
+  assert.equal(
+    record.definition.template.version,
+    offered,
+    "the instance pins the version the page said it would use",
+  );
   assert.deepEqual(
     record.definition.nodes.map((node) => node.id),
     ["start", "analyze", "implement", "review", "final-gate", "end"],
@@ -316,7 +325,7 @@ export async function instantiateU1(isolation, window, summary) {
   await assertNoNativeWork(isolation, "agent-assisted template instantiation");
   summary.instantiatedDefinition = record.definition;
   summary.assertions.push(
-    "Agent-assisted v1 pins the existing v5 semantics without recipes/JSON; task and dirty draft survive navigation/cancel, and only explicit discard replaces the draft.",
+    "Agent-assisted (the offered built-in version) pins the existing v5 semantics without recipes/JSON; task and dirty draft survive navigation/cancel, and only explicit discard replaces the draft.",
   );
   await window.getByTestId("graph-view-design").click();
 }
