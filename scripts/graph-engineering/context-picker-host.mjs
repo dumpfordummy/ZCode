@@ -254,6 +254,13 @@ export async function createContextPickerHost() {
       async pickFile() {
         log("selectFile", "start");
         await gate("selectFile");
+        // UX-M2.3：与其他操作一样可注入失败（原生选择器本身抛错）。
+        try {
+          maybeFail("selectFile");
+        } catch (error) {
+          log("selectFile", "error", { message: String(error?.message ?? error) });
+          throw error;
+        }
         log("selectFile", "done");
         return pickedFile;
       },
