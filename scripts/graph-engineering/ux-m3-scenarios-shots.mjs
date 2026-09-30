@@ -3,6 +3,8 @@
 // an in-memory store; Linux Chromium, not Electron and not Windows.
 import { SIZES, flush, setState, shot } from "./ux-m1-helpers.mjs";
 import { permissionWaitRun } from "./ux-m1-runs.mjs";
+import { ALL_CHECKS } from "./ux-m1-checks.mjs";
+import { pinnedRun } from "./ux-m3-pins.mjs";
 import { T, boot, openAdvanced, openLibrary, openShare, selectValue } from "./ux-m3-helpers.mjs";
 
 const THEMES = ["zai-dark", "zai-light"];
@@ -114,7 +116,51 @@ function shareJourney(locale, variants) {
   };
 }
 
+function pinJourney(locale, variants) {
+  return {
+    name: `screenshots (${locale}): a historical pin that is no longer offered, and what Continue carried over`,
+    async run({ page, host, url, shotsDir }) {
+      if (!shotsDir) return;
+      await host.seedRecipes("A", ALL_CHECKS);
+      host.setRuns("A", [
+        pinnedRun("run-historical", {
+          templateId: "generic",
+          name: "Sequential engineering",
+          parameters: { request: "Fix the request parser", oldFlag: true },
+          bindings: {
+            references: { instructions: "docs/Context.md", notes: "docs/Notes.md" },
+            recipes: { build: "build-main", test: "test-unit", lint: "lint-main" },
+            sourcePaths: [],
+          },
+          references: [
+            { id: "instructions", kind: "instruction", nodeIds: [] },
+            { id: "notes", kind: "document", nodeIds: [] },
+          ],
+        }),
+      ]);
+      await boot(page, host, url);
+      if (locale !== "en-US") {
+        await setState(page, { locale });
+        await T(page, "graph-new-run-pane").waitFor();
+      }
+      await page.locator('[data-testid="graph-run"][data-run-id="run-historical"]').click();
+      await T(page, "graph-run-again").click();
+      await T(page, "graph-historical-pin").waitFor();
+      await variants(page, shotsDir, "m3-pin-notice", locale, async () => {
+        await T(page, "graph-historical-pin").scrollIntoViewIfNeeded();
+      });
+      await T(page, "graph-historical-pin-continue").click();
+      await T(page, "graph-carry-report").waitFor();
+      await variants(page, shotsDir, "m3-pin-carried", locale, async () => {
+        await T(page, "graph-carry-report").scrollIntoViewIfNeeded();
+      });
+    },
+  };
+}
+
 export const m3ShotScenarios = [
+  pinJourney("en-US", everyVariant),
+  pinJourney("zh-CN", oneVariant),
   libraryJourney("en-US", everyVariant),
   libraryJourney("zh-CN", oneVariant),
   shareJourney("en-US", everyVariant),

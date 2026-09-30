@@ -16,7 +16,6 @@ export function pinnedRun(
     parameters = { request: "Historical request from the captured run" },
     bindings = { references: {}, recipes: {}, sourcePaths: [] },
     references = [],
-    regionId,
   } = {},
 ) {
   const run = completedRun(id);
@@ -30,7 +29,6 @@ export function pinnedRun(
     references: structuredClone(references),
     excluded: [],
   };
-  if (regionId) run.definition.routing = { region: { id: regionId } };
   run.createdAt = Date.UTC(2026, 8, 1, 8, 0, 0);
   return run;
 }

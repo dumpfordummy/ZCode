@@ -19,6 +19,9 @@ import { GraphLibraryManage } from "./GraphLibraryManage.js";
 import { GraphLibraryPicker } from "./GraphLibraryPicker.js";
 import { GraphLibraryReplace } from "./GraphLibraryReplace.js";
 import { useGraphLibraryReplacement } from "./useGraphLibraryReplacement.js";
+import { useGraphLibrarySelection } from "./useGraphLibrarySelection.js";
+import { GraphCarryReport } from "./GraphCarryReport.js";
+import { GraphPinNotice } from "./GraphPinNotice.js";
 import { GraphRunWorkflowVersion } from "./GraphRunWorkflowVersion.js";
 import { GraphLibrarySection } from "./GraphLibrarySections.js";
 import { GraphLibraryVersions } from "./GraphLibraryVersions.js";
@@ -26,12 +29,7 @@ import { GraphShare } from "./GraphShare.js";
 import { GraphShareImport } from "./GraphShareImport.js";
 import type { GraphMutationResult } from "./graphLibrarySave.js";
 import { useGraphM3Text } from "./GraphM3Text.js";
-import {
-  designPin,
-  libraryGates,
-  resolveLibrarySelection,
-  versionRows,
-} from "./graphLibraryView.js";
+import { designPin, libraryGates, versionRows } from "./graphLibraryView.js";
 import { latestCompatibleTemplateVersion } from "./graphWorkflowView.js";
 import type { GraphRecipeReadState } from "./graphRecipeRead.js";
 
@@ -45,6 +43,7 @@ export function GraphLibrary({
   admissionReason,
   hostReadOnlyReason,
   onViewCurrentRun,
+  onOpenInRuns,
   pending = false,
   error,
   errorKind,
@@ -69,6 +68,8 @@ export function GraphLibrary({
   /** UX-M3.1: another Host owns the workspace; browsing is fine, library mutations are refused. */
   hostReadOnlyReason?: string;
   onViewCurrentRun?(): void;
+  /** UX-M3.3: open Runs -> New run with the selected workflow and version. Never reviews or starts. */
+  onOpenInRuns?(): void;
   pending?: boolean;
   error?: string | null;
   /** UX-M2.3: how the New-run bar frames `error` (inline only). An instantiate failure is a review failure. */
@@ -96,18 +97,13 @@ export function GraphLibrary({
   const workspaceKey = workspaceIdentity?.trim() || workspacePath;
   const display = useGraphTemplateText();
   const workflow = useGraphWorkflow(target);
-  const selection = useGraphDraftStore((state) => state.workspaces[workspaceKey]?.librarySelection);
   const choose = useGraphDraftStore((state) => state.selectLibrary);
   const [open, setOpen] = useState(false);
   // UX-M3.2：最近一次创建/新版本/复制的结果，来自服务返回的列表；用户改选后清除。
   const [saved, setSaved] = useState<GraphMutationResult | "unknown" | null>(null);
   const entries = workflow.view?.entries ?? [];
-  const { entry, version, defaultId, defaultVersion } = resolveLibrarySelection(entries, selection);
-  useEffect(() => {
-    // 默认选择只在新建意图首次读取后固定；刷新库不能让正在填写的表单自动漂移到新版本。
-    if (!selection && defaultId && defaultVersion !== undefined)
-      choose(workspaceKey, { id: defaultId, version: defaultVersion });
-  }, [selection, defaultId, defaultVersion, choose, workspaceKey]);
+  const { entry, version, status, carryReport, continueWithOffered, dismissCarryReport } =
+    useGraphLibrarySelection(entries, Boolean(workflow.view), workspaceKey);
   useEffect(() => {
     if (inline) void workflow.read();
   }, [inline, workflow.read]);
@@ -160,30 +156,44 @@ export function GraphLibrary({
         onViewCurrentRun();
       }
     : undefined;
-  const bindings =
-    version && entry ? (
-      <GraphTemplateBindings
-        key={`${entry.id}:${version.version}`}
-        version={version}
-        workspaceKey={workspaceKey}
-        workspacePath={workspacePath}
-        workspaceIdentity={workspaceIdentity}
-        templateKey={`${entry.id}:${version.version}`}
-        recipeReadState={recipeReadState}
-        disabled={locked || entry.archived}
-        disabledReason={entry.archived ? u("noCompatibleVersion") : disabledReason}
-        admissionReason={admissionReason}
-        onViewCurrentRun={viewCurrentRun}
-        error={inline ? workflow.error || error || undefined : undefined}
-        errorKind={workflow.error ? "review" : errorKind}
-        onLoadRecipes={onLoadRecipes}
-        onOpenSetup={(checkId) => {
-          setOpen(false);
-          onOpenSetup(checkId);
-        }}
-        allowReview={inline && Boolean(onReview)}
-        onInstantiate={requestInstantiate}
+  // UX-M3.3：选择指向库里不再提供的版本时，只显示说明，不在它的位置显示别的版本的表单。
+  const pin =
+    status.kind === "offered" ? null : (
+      <GraphPinNotice
+        status={status}
+        onContinue={status.kind === "workflow-missing" ? undefined : continueWithOffered}
       />
+    );
+  const bindings =
+    pin ??
+    (version && entry ? (
+      <>
+        {carryReport ? (
+          <GraphCarryReport report={carryReport} onDismiss={dismissCarryReport} />
+        ) : null}
+        <GraphTemplateBindings
+          key={`${entry.id}:${version.version}`}
+          version={version}
+          workspaceKey={workspaceKey}
+          workspacePath={workspacePath}
+          workspaceIdentity={workspaceIdentity}
+          templateKey={`${entry.id}:${version.version}`}
+          recipeReadState={recipeReadState}
+          disabled={locked || entry.archived}
+          disabledReason={entry.archived ? u("noCompatibleVersion") : disabledReason}
+          admissionReason={admissionReason}
+          onViewCurrentRun={viewCurrentRun}
+          error={inline ? workflow.error || error || undefined : undefined}
+          errorKind={workflow.error ? "review" : errorKind}
+          onLoadRecipes={onLoadRecipes}
+          onOpenSetup={(checkId) => {
+            setOpen(false);
+            onOpenSetup(checkId);
+          }}
+          allowReview={inline && Boolean(onReview)}
+          onInstantiate={requestInstantiate}
+        />
+      </>
     ) : workflow.view ? (
       <p role="status" className="text-ui-sm text-warning">
         {u("noCompatibleVersion")}
@@ -192,7 +202,7 @@ export function GraphLibrary({
       <p role="status" className="text-ui-sm">
         {intl.formatMessage({ id: "graph.loading" })}
       </p>
-    );
+    ));
   const description =
     version && entry ? (
       <p className="whitespace-pre-wrap text-ui-sm text-foreground-subtle">
@@ -290,6 +300,26 @@ export function GraphLibrary({
       ) : null}
       <GraphLibrarySection id="use" title={m3("sectionUse")}>
         {bindings}
+        {onOpenInRuns ? (
+          <div
+            className="flex flex-wrap items-center gap-2"
+            data-testid="graph-library-open-runs-row"
+          >
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={!entry || !version || entry.archived}
+              data-testid="graph-library-open-runs"
+              onClick={() => {
+                setOpen(false);
+                onOpenInRuns();
+              }}
+            >
+              {m3("openInRuns")}
+            </Button>
+            <p className="text-ui-xs text-foreground-subtle">{m3("openInRunsHelp")}</p>
+          </div>
+        ) : null}
       </GraphLibrarySection>
       <details className="space-y-3" data-testid="graph-library-share">
         <summary className="cursor-pointer text-ui-sm font-medium">{m3("sectionShare")}</summary>

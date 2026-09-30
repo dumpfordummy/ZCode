@@ -60,6 +60,50 @@ const messages: Record<string, [string, string]> = {
     "所选版本与资料库的技术标识。大多数任务不需要它们。",
   ],
   versionDigest: ["Version digest", "版本摘要"],
+  // UX-M3.3：在 Runs 中打开，以及历史固定版本。
+  openInRuns: ["Open in Runs", "在 Runs 中打开"],
+  openInRunsHelp: [
+    "Opens New run with this workflow and version. Nothing is reviewed or started.",
+    "打开“新建运行”并带上此工作流与版本。不会审阅或启动任何内容。",
+  ],
+  pinNotOffered: [
+    "Version {requested} used by this run is no longer offered. Version {offered} is available.",
+    "该运行使用的版本 {requested} 已不再提供。可用的是版本 {offered}。",
+  ],
+  pinNoneOffered: [
+    "Version {requested} used by this run is no longer offered, and no other version of this workflow can be used.",
+    "该运行使用的版本 {requested} 已不再提供，此工作流也没有其他可用版本。",
+  ],
+  pinChanged: [
+    "Version {requested} used by this run has changed since it ran. The version offered now has a different definition.",
+    "该运行使用的版本 {requested} 自运行以来已发生变化。现在提供的版本定义不同。",
+  ],
+  pinWorkflowMissing: [
+    "The workflow used by this run is no longer in the library.",
+    "该运行使用的工作流已不在资料库中。",
+  ],
+  pinExplain: [
+    "Your request and choices from that run are kept. Nothing starts: continue explicitly, or choose another workflow above.",
+    "该运行的请求和选择已保留。不会启动任何内容：请明确选择继续，或在上方选择其他工作流。",
+  ],
+  pinContinue: ["Continue with version {offered}", "继续使用版本 {offered}"],
+  carryTitle: ["Carried over from version {from}", "从版本 {from} 带过来的内容"],
+  carryCarried: ["Carried over: {items}", "已带过来：{items}"],
+  carryNone: ["Nothing could be carried over.", "没有内容可以带过来。"],
+  carryNotCarried: ["Not carried over", "未带过来"],
+  carryStillRequired: [
+    "Required values that were not carried over are still missing; Review and run stays unavailable until you fill them.",
+    "未带过来的必填项仍然缺失；填好之前“审阅并运行”保持不可用。",
+  ],
+  carryDismiss: ["Dismiss", "关闭"],
+  kindParameter: ["parameter", "参数"],
+  kindReference: ["context", "上下文"],
+  kindCheck: ["check", "检查"],
+  kindSourcePaths: ["repair source paths", "修复源路径"],
+  reasonAbsent: ["not declared in this version", "此版本未声明"],
+  reasonType: ["a different type in this version", "此版本中类型不同"],
+  reasonKind: ["a different kind in this version", "此版本中种类不同"],
+  reasonNode: ["its step or region is not in this version", "此版本没有对应的步骤或区域"],
   // UX-M3.2：Share 里的三个独立任务，以及 Advanced 里的手动 JSON。
   shareSaveTitle: ["Save current design", "保存当前设计"],
   shareExportTitle: ["Export a version", "导出某个版本"],

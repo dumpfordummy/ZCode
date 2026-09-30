@@ -12,9 +12,30 @@ import {
   type GraphDraftState,
 } from "../graph-engineering/graphEngineeringView.js";
 
+/** Where a seeded form came from (Run again): the captured pin and the facts needed to match values by stable identity. */
+export interface GraphFormOrigin {
+  version: number;
+  digest: string;
+  /** Reference roles the run had bound, with the kind each accepted. */
+  references: Array<{ id: string; kind: "document" | "instruction" | "skill" }>;
+  /** The repair region the run's definition declared, if any. */
+  regionId?: string;
+}
+/** What Continue with the offered version did with a historical form. Cleared by Dismiss. */
+export interface GraphCarryReport {
+  fromVersion: number;
+  carried: Array<{ kind: "parameter" | "reference" | "check" | "sourcePaths"; id: string }>;
+  notCarried: Array<{
+    kind: "parameter" | "reference" | "check" | "sourcePaths";
+    id: string;
+    reason: "absent" | "type" | "kind" | "node";
+  }>;
+}
 export interface GraphTemplateFormDraft {
   parameters: Record<string, GraphParameterValue>;
   bindings: GraphTemplateBindings;
+  origin?: GraphFormOrigin;
+  carryReport?: GraphCarryReport;
 }
 export interface GraphRecipeFormDraft {
   text: string;

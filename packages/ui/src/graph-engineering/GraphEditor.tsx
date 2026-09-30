@@ -284,6 +284,7 @@ export function GraphEditor({
             admissionReason={occupiedReason}
             hostReadOnlyReason={readOnlyReason ?? (view.readOnly ? t("readOnlyHost") : undefined)}
             onViewCurrentRun={activeRun ? () => go.viewRun(activeRun.id) : undefined}
+            onOpenInRuns={go.newRun}
             pending={graph.pending}
             error={graph.error}
             recipeReadState={graph.recipeReadState}
