@@ -2,7 +2,13 @@
 
 Date: **2026-10-01**. Plan: [UX_M3_MILESTONE.md](UX_M3_MILESTONE.md). Contract: [UX_M3_SPEC.md](UX_M3_SPEC.md). Cloud results: [UX_M3_REPORT.md](UX_M3_REPORT.md) (Linux, Chromium, fixture Host over the real workflow service: historical evidence, not Windows acceptance). Procedure: [UX_M2_WINDOWS_REPORT.md](UX_M2_WINDOWS_REPORT.md). Evidence: [evidence/ux-m3-windows/](evidence/ux-m3-windows/).
 
-**Status: AUTOMATED WINDOWS ACCEPTANCE COMPLETE — HUMAN ACCEPTANCE PENDING.** Everything below ran on this Windows machine (Windows 11 Education 10.0.26200, primary display 1920x1080 at 100% scaling, Windows display language English (United States)) in the real Electron app, with the real library file store, the real Graph Host and real native sessions. **No human acceptance is claimed.** No product source was changed by this acceptance: the product passed as merged. What this acceptance changed is test harness code (section 6). Two usability findings and three items that could not be shown natively are listed in sections 7 and 8.
+**Status: AUTOMATED WINDOWS ACCEPTANCE COMPLETE — USER MANUAL ACCEPTANCE PASSED.**
+
+## Manual acceptance note (2026-10-01)
+
+**The user reports that the UX-M3 manual test passed.** It was run with the prepared launcher (section 10). This is the user's statement; I did not observe it and have no per-row record, so rows are not individually marked. It is not live-model, packaged-installer or real 125%/150% DPI acceptance unless the user says they tested those. Nothing NOT RUN or BLOCKED in section 8 became passed, and findings 7.1 and 7.2 stay open. The same user also reports that the interface still feels overloaded and visually flat; that is UX-M4's input, not a UX-M3 failure.
+
+Everything below ran on this Windows machine (Windows 11 Education 10.0.26200, primary display 1920x1080 at 100% scaling, Windows display language English (United States)) in the real Electron app, with the real library file store, the real Graph Host and real native sessions. **No human acceptance is claimed.** No product source was changed by this acceptance: the product passed as merged. What this acceptance changed is test harness code (section 6). Two usability findings and three items that could not be shown natively are listed in sections 7 and 8.
 
 ## 1. Result at a glance
 
