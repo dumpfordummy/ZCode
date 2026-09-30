@@ -5,7 +5,7 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphM1Text } from "./GraphM1Text.js";
 import { GraphProjectRecipes } from "./GraphProjectRecipes.js";
 import { useGraphM2Text } from "./GraphM2Text.js";
-import { useGraphRecipeChanges } from "./GraphRecipeChanges.js";
+import { useGraphRecipeChanges } from "./GraphRecipeChangeSummary.js";
 
 type GraphHook = ReturnType<typeof useGraphEngineering>;
 
