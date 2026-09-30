@@ -126,7 +126,10 @@ try {
     const begin = performance.now();
     await next.focus();
     await next.press("Enter");
-    await page.locator(`[data-testid="graph-run"][data-run-id="ui-only-${index * 25}"]`).waitFor();
+    // UX-M2.1：由新到旧，第 index+1 页的第一行是 ui-only-(499 - index*25)。
+    await page
+      .locator(`[data-testid="graph-run"][data-run-id="ui-only-${499 - index * 25}"]`)
+      .waitFor();
     assert.equal(await page.getByTestId("graph-run").count(), 25);
     evidence.interactions.push({
       action: "keyboard-next-page",
@@ -135,10 +138,10 @@ try {
     });
   }
   assert.equal(await next.isDisabled(), true);
-  assert.equal(await page.getByTestId("fixture-selection").textContent(), "Selected: ui-only-0");
+  assert.equal(await page.getByTestId("fixture-selection").textContent(), "Selected: ui-only-499");
   await page.getByTestId("graph-history-selected").focus();
   await page.keyboard.press("Enter");
-  const first = page.locator('[data-testid="graph-run"][data-run-id="ui-only-0"]');
+  const first = page.locator('[data-testid="graph-run"][data-run-id="ui-only-499"]');
   await first.waitFor();
   await first.focus();
   await page.keyboard.press("Tab");
@@ -146,10 +149,10 @@ try {
   await page.waitForFunction(
     () =>
       document.querySelector('[data-testid="fixture-selection"]')?.textContent ===
-      "Selected: ui-only-1",
+      "Selected: ui-only-498",
   );
   assert.equal(
-    await page.locator('[data-run-id="ui-only-1"]').getAttribute("aria-current"),
+    await page.locator('[data-run-id="ui-only-498"]').getAttribute("aria-current"),
     "true",
   );
   for (const viewport of [
@@ -168,14 +171,14 @@ try {
         theme,
       );
       await page.getByTestId("fixture-theme").focus();
-      const focusTarget = page.locator('[data-run-id="ui-only-1"]');
+      const focusTarget = page.locator('[data-run-id="ui-only-498"]');
       const unfocusedBorder = await focusTarget.evaluate(
         (element) => getComputedStyle(element).borderColor,
       );
       await first.focus();
       await page.keyboard.press("Tab");
       await page.waitForFunction((before) => {
-        const target = document.querySelector('[data-run-id="ui-only-1"]');
+        const target = document.querySelector('[data-run-id="ui-only-498"]');
         return (
           target === document.activeElement &&
           target?.matches(":focus-visible") &&

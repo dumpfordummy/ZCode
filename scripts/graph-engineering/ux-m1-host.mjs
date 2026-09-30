@@ -163,7 +163,8 @@ export async function createUxM1Host() {
             throw new Error("Another run still owns this workspace.");
           const run = runningRun(`run-new-${++runCounter}`, params.requestId);
           run.createdAt = Date.now();
-          graph[id].runs.unshift(run);
+          // 与真实 Host（app/service.ts）一致：新运行追加到记录末尾（创建顺序）。UX-M2.1 之前夹具误用了 unshift。
+          graph[id].runs.push(run);
           notify(id);
           return structuredClone(run);
         },

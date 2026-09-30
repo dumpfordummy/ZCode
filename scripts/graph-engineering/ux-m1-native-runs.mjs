@@ -287,6 +287,9 @@ export async function runsJourney() {
         await T(window, "graph-new-run").click();
         await T(window, "graph-needs-you").waitFor();
         assert.equal(await T(window, "graph-needs-you").getAttribute("data-run-id"), pending.id);
+        // UX-M2.1：历史由新到旧，待处理运行（唯一未结束的，因而最新）在第 1 页。保留原语义：
+        // 用户翻到较早的一页，所示页不含待处理运行，Needs-you 仍能到达它。
+        await T(window, "graph-history-next").click();
         const range = await T(window, "graph-history-range").innerText();
         observe(receipt, "history page shown (26 real runs, 25 per page)", range);
         assert.equal(
@@ -304,6 +307,10 @@ export async function runsJourney() {
         await T(window, "graph-run-summary").waitFor();
         assert.equal(await T(window, "graph-run-summary").getAttribute("data-run-id"), pending.id);
         await waitFocused(window, "graph-run-summary", "after Go to run");
+        // UX-M2.1：Go to run 是显式导航，历史翻回待处理运行所在的页。
+        await window
+          .locator(`[data-testid="graph-run"][data-run-id="${pending.id}"][aria-current="true"]`)
+          .waitFor();
         await shot(isolation, window, receipt, "e-needs-you-go-to-run", [1280, 720]);
         // Open conversation now → Back to run，不回答权限。
         const before = await snapshot(isolation);

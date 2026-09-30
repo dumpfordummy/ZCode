@@ -47,7 +47,8 @@ Object.defineProperty(window, "preZ8HistoryFixture", {
 });
 
 function Fixture() {
-  const [selected, setSelected] = useState("ui-only-0");
+  // UX-M2.1：历史由新到旧；选中最新的一行，使初始页仍是第 1 页（与原驱动的旅程一致）。
+  const [selected, setSelected] = useState("ui-only-499");
   const [dark, setDark] = useState(false);
   useEffect(() => {
     // 真实主题还设置 theme-zai-*；仅切换 dark 会生成与产品不同的按钮颜色。
