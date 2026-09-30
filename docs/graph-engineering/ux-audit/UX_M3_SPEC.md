@@ -4,13 +4,13 @@ Contracts for [UX_M3_MILESTONE.md](UX_M3_MILESTONE.md). Each checkpoint's sectio
 
 ## 0. Shared ownership and vocabulary
 
-| Fact                                   | Owner                                                                                          | Renderer may                                       |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| Library entries, versions, digests     | `IGraphWorkflowService` + the profile file `workflow-library.json` (atomic, locked, revisioned) | read a projection (`useGraphWorkflow`); never edit |
-| Built-in versions                      | Repository (`builtinTemplates`), published by the service as `BUILTIN_TEMPLATE_VERSION`        | show only what `list()` returns                    |
-| Which version the next instance uses   | `graphDraftStore.librarySelection` (renderer, per workspace, unchanged)                        | write on explicit user selection                   |
-| Origin of the current design           | `definition.template` (`id`, `name`, `version`, `digest`), a fact of the saved design          | read only                                          |
-| Occupied workspace                     | `graphAdmission(view.runs)` (renderer view of the Host's one-unresolved-run rule)              | read only                                          |
+| Fact                                 | Owner                                                                                           | Renderer may                                       |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Library entries, versions, digests   | `IGraphWorkflowService` + the profile file `workflow-library.json` (atomic, locked, revisioned) | read a projection (`useGraphWorkflow`); never edit |
+| Built-in versions                    | Repository (`builtinTemplates`), published by the service as `BUILTIN_TEMPLATE_VERSION`         | show only what `list()` returns                    |
+| Which version the next instance uses | `graphDraftStore.librarySelection` (renderer, per workspace, unchanged)                         | write on explicit user selection                   |
+| Origin of the current design         | `definition.template` (`id`, `name`, `version`, `digest`), a fact of the saved design           | read only                                          |
+| Occupied workspace                   | `graphAdmission(view.runs)` (renderer view of the Host's one-unresolved-run rule)               | read only                                          |
 
 Terms used in the UI. **Version N**: the library version number of one workflow (integer, immutable). **Latest**: the highest compatible non-archived version the Host currently offers, shown only when the workflow offers more than one. **Used by current design**: the design's `template` matches the row's workflow id, version **and** digest. There is no generic "Current version". The digest, library revision and raw JSON are technical identities and live under **Advanced**; the definition revision and the portable-format/graph-schema versions are not user vocabulary.
 
@@ -46,14 +46,14 @@ One dialog, opened from **Workflow library** on Workflows (`graph-library-open`)
 
 ### 1.4 Read-only during an active run
 
-| Action                                                                         | Occupied workspace                                                             |
-| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| Browse workflows, select versions, read metadata and Advanced facts, Refresh   | **allowed** (`list()` is pure)                                                 |
-| Capture / export / import **preview** (`preview()` is pure), choose an import file to read | **allowed**                                                        |
-| Edit the Use form (as on New run)                                              | allowed; nothing is admitted                                                   |
-| Load into design (instantiate/replace), Review and run, Save as workflow only  | **blocked**, reason + **View current run** (UX-M1, unchanged)                  |
-| Create workflow, save new version, duplicate, archive, import-and-save         | **blocked**, reason                                                            |
-| Export to disk                                                                 | **blocked**: the OS save dialog cannot be constrained away from the workspace |
+| Action                                                                                     | Occupied workspace                                                            |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| Browse workflows, select versions, read metadata and Advanced facts, Refresh               | **allowed** (`list()` is pure)                                                |
+| Capture / export / import **preview** (`preview()` is pure), choose an import file to read | **allowed**                                                                   |
+| Edit the Use form (as on New run)                                                          | allowed; nothing is admitted                                                  |
+| Load into design (instantiate/replace), Review and run, Save as workflow only              | **blocked**, reason + **View current run** (UX-M1, unchanged)                 |
+| Create workflow, save new version, duplicate, archive, import-and-save                     | **blocked**, reason                                                           |
+| Export to disk                                                                             | **blocked**: the OS save dialog cannot be constrained away from the workspace |
 
 The reason is one sentence beside the blocked group, with **View current run**, and is linked by `aria-describedby` from every disabled button. Blocked paths are refused in the handler, not only by `disabled`. Host read-only mode blocks library mutations too. A design revision conflict blocks Load into design and saving the design as a workflow, not browsing.
 
@@ -112,3 +112,41 @@ The existing paste route moves under **Advanced**: an editable JSON field, **Val
 ### 2.6 Acceptance (Cloud)
 
 Pure functions for targets, rename disclosure and result derivation are unit tested. Browser scenarios with the real service: default target from origin; the dropdown is not the target; dirty disclosure text for both targets; rename disclosure; description kept; new version selected from the returned list; duplicate result selected; built-in origin; export identifies workflow and version and ignores the canvas; export blocked while a run is active; import choose/preview/save as separate steps with no mutation before save; manual JSON under Advanced; reviewed gate resets on edit; library conflict then Refresh then explicit retry succeeds.
+
+## 3. UX-M3.3 — Open in Runs and honest historical pins
+
+### 3.1 Open in Runs
+
+The Use section of the library dialog gets **Open in Runs**. It closes the dialog and opens Runs -> New run. The workflow and version are already the stored `librarySelection` (written by the user's selection), so the New-run pane shows exactly that `Using <workflow> · Version N`. The action never instantiates, saves, reviews, acknowledges or starts, is not a library mutation (so it stays available while a run owns the workspace), and is disabled only when the selected workflow is archived or offers no usable version. Review and Start remain the New-run pane's own explicit steps.
+
+### 3.2 Reproduction before any fix
+
+Source finding to confirm (not assumed): `graphRunAgainDraft(run)` seeds `librarySelection = {id, version: N}` and the form under `"<id>:N"` from the run's captured `template`. `GraphLibrary` resolves a selection with `versions.find(N) ?? latestCompatible`, and keys the visible form by the version it actually shows. For a built-in pinned at a version the Host no longer offers (built-in v1 before `ed3bd3a`), the UI would therefore show the latest version's (empty) form under the latest version's key and never display the seeded values; nothing would say so. M3.3 first adds a **characterization scenario** to the browser suite (real `GraphWorkflowService`, a fixture run record whose captured `template` pins `agent-assisted` version 1 — a run record, not a library version) that asserts what the UI does today, runs it, and is committed with its output; the fix then changes those assertions. No fix is written before this scenario exists and has been run.
+
+### 3.3 Behavior after the fix
+
+State owner: the unsubmitted draft (`graphDraftStore`). The seeded form now also records where it came from (`origin`): the pinned version and digest, the captured reference roles with their kinds, and the repair region id. A run's captured definition is never read again or modified.
+
+A selection is **unavailable** when its workflow is missing from the library, or the workflow does not offer the selected version number, or it offers that number with a different digest than the one recorded in `origin`. In every such case:
+
+- The Use form for any other version is **not** shown in its place, and the selection is **not** changed. The pane shows a notice instead: "Version N used by this run is no longer offered. Version M is available." (M = the highest compatible offered version; for a changed digest: "Version N used by this run has changed since it ran. The version offered now has a different definition.") If the workflow is gone: "The workflow used by this run is no longer in the library."
+- Two explicit ways forward: **Continue with version M**, or choose another workflow/version in the pickers. Nothing else happens by itself; Review and Start stay unavailable until a form is shown.
+
+**Continue with version M** selects `{id, M}` and seeds that version's form with the structurally compatible values of the historical form, then shows a report of what was and was not carried. Matching is by stable identity only, never by label or position:
+
+| Historical value                       | Carried when the target template has…                                                                                            |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| parameter `id` (including `request`)   | a parameter with the same `id` whose declared type equals the value's type                                                       |
+| reference role `id` (path or skill id) | a role with the same `id` and the same accepted `kind` (kind from the captured template's roles)                                 |
+| recipe binding for tool node `id`      | a tool node with the same `id` (and its `recipeGroups` entry); a `buildMappings` entry only if the mapped Build node also exists |
+| `sourcePaths`                          | a repair region with the same region `id`                                                                                        |
+
+Everything else is listed as not carried with its reason (not declared, type changed, kind changed, node missing). Internal node configuration is never copied. Values that are required by the target and not carried stay missing: the existing field checks keep **Review and run** disabled and name the field. Carried values are not validated as correct (saved checks and references are still checked at review). The report stays until dismissed; dismissing it changes nothing else.
+
+### 3.4 Not done
+
+No built-in version 1 is synthesized, no fake library entry is created, no historical pin is upgraded automatically, and the historical run and its captured evidence are untouched.
+
+### 3.5 Acceptance (Cloud)
+
+Open in Runs carries the selection and does nothing else (Host call log); characterization scenario before the change; after it: the notice for a missing version, for a changed digest and for a missing workflow; the selection is not changed by the notice; no form for another version; Continue carries only structurally compatible values (parameter, reference, check, source paths), lists the rest, keeps required-missing blocking Review, leaves the run record deep-equal; exact-version offers (user workflows, current built-in) behave as before; English/Chinese. Pure tests for the status and the carry-forward rules, including label-lookalikes and positional traps.
