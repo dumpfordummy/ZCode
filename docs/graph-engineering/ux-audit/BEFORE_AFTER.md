@@ -19,3 +19,15 @@ All "after" files exist at 1280×720 and 1920×1080 unless marked. Themes: Zai D
 | Checks                        | `audit/ex-02-setup-list`                                                                          | `after/pass-10-checks`                                                                                                                   |
 | Simplified Chinese            | `audit/zh-01-workflows` (mixed English)                                                           | `after/zh-CN-pass-02-new-run-filled`, `after/zh-CN-test-failure-06-result`                                                               |
 | Zai Light                     | not captured for the old app                                                                      | `after/light-prose-fence-06-result`                                                                                                      |
+
+## Context picker (added 2026-09-30)
+
+These are **not** native screenshots. They come from the real components in headless Chromium on Linux with fixture services (see [CONTEXT_PICKER_SPEC.md](CONTEXT_PICKER_SPEC.md) section 12); Windows native acceptance is PENDING. Before = the per-role form described in [UX_AUDIT.md](UX_AUDIT.md) B2. Files are in `screenshots/context-picker/` at 1280×720 and 1920×1080, Zai Dark, English, unless stated.
+
+| State                                                                              | File                                    |
+| ---------------------------------------------------------------------------------- | --------------------------------------- |
+| Selected context (two chips with status and receiving steps)                       | `selected-context-*`                    |
+| Search results with the active option highlighted, slot chooser and replace notice | `search-results-*`                      |
+| Validation error beside the slot; previous selection kept                          | `validation-error-*`                    |
+| Required reference removed (placeholder, Review disabled, field named)             | `required-removed-*`                    |
+| Same, Simplified Chinese and Zai Light (1280×720 only)                             | `required-removed-zh-CN-light-1280x720` |
