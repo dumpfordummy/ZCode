@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button.js";
+import { GraphWarningNote } from "./GraphWarningNote.js";
 import type { useGraphEngineering } from "@/hooks/useGraphEngineering.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphM1Text } from "./GraphM1Text.js";
@@ -65,9 +66,9 @@ export function GraphSetupPanel({
           >
             {m1("returnKept")}
             {unsaved ? (
-              <span className="block text-warning" data-testid="graph-return-unsaved">
+              <GraphWarningNote as="span" className="flex" data-testid="graph-return-unsaved">
                 {m2("returnUnsaved")}
-              </span>
+              </GraphWarningNote>
             ) : null}
           </p>
         </div>

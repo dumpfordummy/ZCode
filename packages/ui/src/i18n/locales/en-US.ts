@@ -7056,7 +7056,7 @@ const enUS: Record<string, string> = {
   "graph.z4.recipesHelp":
     "Edit this workspace's .zcode/config.json graphRecipes array. Fixed executable/argument arrays, relative cwd, timeout, sourcePaths, expectedOutputs and verifier are required. Only '{operationId}', '{sourceDigest}', '{buildDigest}', '{reportPath}' placeholders are supported. Shell recipes are unsupported. Native permission remains separate; loading or saving does not execute work.",
   "graph.z4.loadRecipes": "Load recipes",
-  "graph.z4.saveRecipes": "Save recipes",
+  "graph.z4.saveRecipes": "Save checks",
   "graph.z4.recipesArray": "Enter a JSON array of recipes.",
   "graph.z4.recipesSaved": "Recipes saved. No command was executed.",
   "graph.z4.recipeExample": "Build recipe example",

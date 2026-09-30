@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { GraphWarningNote } from "./GraphWarningNote.js";
 import { Button } from "@/components/ui/button.js";
 import { useGraphDraftStore } from "@/store/graphDraftStore.js";
 import { useGraphM2Text } from "./GraphM2Text.js";
@@ -21,9 +22,9 @@ function ChangeList({ changes }: { changes: GraphRecipeChanges }) {
   const m2 = useGraphM2Text();
   if (changes.kind === "unsummarizable")
     return (
-      <p className="text-warning" data-testid="graph-recipe-changes-unlisted">
+      <GraphWarningNote data-testid="graph-recipe-changes-unlisted">
         {m2(`unsummarizable.${changes.reason}`)}
-      </p>
+      </GraphWarningNote>
     );
   if (changes.kind !== "changes") return null;
   if (changes.formattingOnly) return <p>{m2("changeFormattingOnly")}</p>;

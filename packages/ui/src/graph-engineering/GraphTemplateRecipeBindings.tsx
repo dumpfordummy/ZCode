@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphSelect } from "./GraphSelect.js";
 import { GraphSelectedChecks } from "./GraphSelectedChecks.js";
+import { GraphWarningNote } from "./GraphWarningNote.js";
 import { useGraphM2Text } from "./GraphM2Text.js";
 import type { GraphRecipeChanges } from "./graphRecipeChanges.js";
 import { graphCheckSelection } from "./graphCheckSelection.js";
@@ -54,14 +55,14 @@ export function GraphTemplateRecipeBindings({
   return (
     <>
       {tools.length && changes.kind !== "clean" ? (
-        <p
+        <GraphWarningNote
           role="status"
-          className="text-ui-sm text-warning"
+          className="text-ui-sm"
           data-testid="graph-new-run-unsaved-checks"
           data-kind={changes.kind}
         >
           {m2(changes.kind === "changes" ? "newRunUnsaved" : "newRunUnsavedUnlisted")}
-        </p>
+        </GraphWarningNote>
       ) : null}
       {tools.map((node) => {
         const choices = compatibleTemplateRecipes(template, node.id, snapshot, bindings);

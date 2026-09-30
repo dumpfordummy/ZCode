@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button.js";
+import { GraphWarningNote } from "./GraphWarningNote.js";
 import type { GraphStepChecks } from "./graphCheckSelection.js";
 import { useGraphM1Text } from "./GraphM1Text.js";
 import { useGraphSetupText } from "./GraphSetupFields.js";
@@ -55,13 +56,13 @@ export function GraphSelectedChecks({
                     {kind(check.recipe.verifier.kind)} · {m1("checkSavedNotRun")}
                   </span>
                   {unsaved ? (
-                    <span
-                      className="text-warning"
+                    <GraphWarningNote
+                      as="span"
                       data-testid="graph-selected-check-unsaved"
                       data-change={unsaved}
                     >
                       {m2(unsaved === "modified" ? "selectedModified" : "selectedRemoved")}
-                    </span>
+                    </GraphWarningNote>
                   ) : null}
                   <Button
                     variant="ghost"

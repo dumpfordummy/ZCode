@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button.js";
 import { useGraphSetupText } from "./GraphSetupFields.js";
 import { useGraphM2Text } from "./GraphM2Text.js";
+import { GraphWarningNote } from "./GraphWarningNote.js";
 import type { GraphRecipeChanges } from "./graphRecipeChanges.js";
 import {
   graphRecipeGuidedIssue,
@@ -57,12 +58,13 @@ export function GraphRecipeList({
                 <td className="px-3 py-2 font-medium">
                   {String(recipe.name ?? recipe.id ?? index + 1)}
                   {unsaved ? (
-                    <span
-                      className="ml-2 font-normal text-ui-xs text-warning"
+                    <GraphWarningNote
+                      as="span"
+                      className="ml-2 font-normal text-ui-xs"
                       data-testid="graph-recipe-row-unsaved"
                     >
                       {m2(unsaved === "added" ? "rowNew" : "rowUnsaved")}
-                    </span>
+                    </GraphWarningNote>
                   ) : null}
                 </td>
                 <td className="px-3 py-2 text-foreground-subtle">
