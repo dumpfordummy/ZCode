@@ -183,6 +183,8 @@ try {
   assert.deepEqual(await readGraphRecord(isolation), pinned);
   await screenshot("z6-dirty-draft-explicit-replacement");
   await window.getByTestId("graph-replace-cancel").click();
+  // 取消替换后等第二层对话框真正卸载，Escape 才会落到资料库对话框上（否则被退出动画中的上层吞掉）。
+  await window.getByTestId("graph-replace-dialog").waitFor({ state: "hidden" });
   await closeLibrary();
   assert.equal(await window.getByTestId("graph-name").inputValue(), "UNSAVED_DRAFT_SENTINEL");
   assert.deepEqual(await readGraphRecord(isolation), pinned);

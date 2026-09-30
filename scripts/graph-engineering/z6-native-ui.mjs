@@ -154,12 +154,19 @@ export async function instantiateNativeTemplate(isolation, window, summary, scen
   if (scenario === "bugfix")
     await window.getByTestId("graph-template-source-paths").fill(SOURCE_PATHS.join("\n"));
   await captureDialog(isolation, window, summary, "z6-explicit-template-bindings");
-  const savedBeforeReplacement = await readGraphRecord(isolation);
+  // 默认设计在首次保存前没有持久化记录（界面显示 “Unsaved changes”）；“取消替换不改动已保存记录”
+  // 的断言对“尚无记录”同样成立：记录仍然不存在。这里只是容忍 ENOENT，断言本身不变。
+  const savedRecord = () =>
+    readGraphRecord(isolation).catch((error) => {
+      if (error.code === "ENOENT") return null;
+      throw error;
+    });
+  const savedBeforeReplacement = await savedRecord();
   const draftName = await window.getByTestId("graph-name").inputValue();
   const typedRequest = await window.getByTestId("graph-template-parameter-request").inputValue();
   await window.getByTestId("graph-library-instantiate").click();
   await window.getByTestId("graph-replace-dialog").waitFor();
-  assert.deepEqual(await readGraphRecord(isolation), savedBeforeReplacement);
+  assert.deepEqual(await savedRecord(), savedBeforeReplacement);
   await window.getByTestId("graph-replace-cancel").click();
   assert.equal(await window.getByTestId("graph-name").inputValue(), draftName);
   assert.equal(

@@ -66,8 +66,12 @@ if (historical) {
     },
     to: { version: 1, digest: HISTORICAL_DIGEST },
   };
-  target.definition.template.version = 1;
-  target.definition.template.digest = HISTORICAL_DIGEST;
+  // 宿主要求运行的冻结出处与定义里的模板逐字节相同（"Template run must preserve its exact frozen
+  // provenance."）；只改定义会被产品校验拒绝（UX-M3 Windows 验收实测），所以两份副本一起改。
+  for (const copy of [target.definition.template, target.provenance.template]) {
+    copy.version = 1;
+    copy.digest = HISTORICAL_DIGEST;
+  }
   await writeFile(file, JSON.stringify(record, null, 2));
   window = await isolation.launch(launchOptions);
 }

@@ -34,16 +34,55 @@ try {
     } while ($added)
     $set
   }
+  Add-Type -Namespace ZM2 -Name Enum -MemberDefinition @"
+public delegate bool EnumCb(System.IntPtr h, System.IntPtr l);
+[System.Runtime.InteropServices.DllImport("user32.dll")] static extern bool EnumWindows(EnumCb cb, System.IntPtr l);
+[System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)] static extern int GetClassName(System.IntPtr h, System.Text.StringBuilder s, int n);
+[System.Runtime.InteropServices.DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(System.IntPtr h, out uint pid);
+[System.Runtime.InteropServices.DllImport("user32.dll")] static extern bool IsWindowVisible(System.IntPtr h);
+public static System.Collections.Generic.List<string> Dialogs() {
+  var result = new System.Collections.Generic.List<string>();
+  EnumWindows((h, l) => {
+    var c = new System.Text.StringBuilder(64); GetClassName(h, c, 64);
+    if (c.ToString() == "#32770" && IsWindowVisible(h)) { uint pid; GetWindowThreadProcessId(h, out pid); result.Add(h.ToInt64() + "|" + pid); }
+    return true;
+  }, System.IntPtr.Zero);
+  return result;
+}
+"@
   $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
   $dialog = $null
   while (-not $dialog -and (Get-Date) -lt $deadline) {
     $tree = Get-Tree $ProcessId
-    foreach ($candidate in $root.FindAll([System.Windows.Automation.TreeScope]::Children, $classCondition)) {
-      if ($tree.Contains([int]$candidate.Current.ProcessId) -and $candidate.Current.Name -eq "Open") { $dialog = $candidate; break }
+    # The Open dialog is a child of the UI Automation root, but a Save As dialog owned by the app window is
+    # not listed there; Win32 enumeration finds both, then UI Automation wraps the window handle.
+    $candidates = New-Object System.Collections.Generic.List[object]
+    foreach ($item in $root.FindAll([System.Windows.Automation.TreeScope]::Children, $classCondition)) { $candidates.Add($item) }
+    foreach ($entry in [ZM2.Enum]::Dialogs()) {
+      $handle, $owner = $entry.Split("|")
+      if (-not $tree.Contains([int]$owner)) { continue }
+      try { $candidates.Add([System.Windows.Automation.AutomationElement]::FromHandle([System.IntPtr][int64]$handle)) } catch { }
+    }
+    foreach ($candidate in $candidates) {
+      if (-not $tree.Contains([int]$candidate.Current.ProcessId)) { continue }
+      # An Open dialog (File name edit id 1148) or a Save As dialog (id 1001) has the File name edit box; a message box does not.
+      $nameBox = $null
+      foreach ($nameId in "1148", "1001") {
+        if (-not $nameBox) {
+          $nameBox = $candidate.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
+            (New-Object System.Windows.Automation.AndCondition(
+              (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::AutomationIdProperty, $nameId)),
+              (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::ClassNameProperty, "Edit")))))
+        }
+      }
+      if ($nameBox) { $dialog = $candidate; break }
     }
     if (-not $dialog) { Start-Sleep -Milliseconds 200 }
   }
-  if (-not $dialog) { throw "No Windows Open dialog (#32770) in the process tree of $ProcessId appeared within $TimeoutSeconds s." }
+  if (-not $dialog) {
+    $seen = @($root.FindAll([System.Windows.Automation.TreeScope]::Children, $classCondition) | Where-Object { $tree.Contains([int]$_.Current.ProcessId) } | ForEach-Object { "'" + $_.Current.Name + "'" }) -join ", "
+    throw "No Windows Open or Save dialog (#32770) in the process tree of $ProcessId appeared within $TimeoutSeconds s. Dialogs seen: [$seen]"
+  }
   $result.title = $dialog.Current.Name
   $result.className = $dialog.Current.ClassName
 
@@ -76,7 +115,8 @@ public static extern System.IntPtr GetText(System.IntPtr hWnd, uint msg, System.
     $result.ok = $true
   } else {
     $edit = Find-Control $dialog "1148" "Edit"
-    if (-not $edit) { throw "File name edit (id 1148) not found in '$($dialog.Current.Name)'." }
+    if (-not $edit) { $edit = Find-Control $dialog "1001" "Edit" }
+    if (-not $edit) { throw "File name edit (id 1148 or 1001) not found in '$($dialog.Current.Name)'." }
     $handle = [System.IntPtr]$edit.Current.NativeWindowHandle
     # GetWindowText does not read another process's edit box; WM_GETTEXT does.
     $before = New-Object System.Text.StringBuilder 2048
