@@ -202,3 +202,15 @@ Where the implementation differs from, or adds to, the sections written before i
 6. **Harness fidelity.** The harness panel is now viewport-height so the editor scrolls internally as in the app (this exposed the sticky-bar offset in item 2). Colour transitions are disabled while capturing screenshots and when probing focus styles.
 7. **Not done, recorded.** Focus is not moved when a history row is selected (the row keeps focus). The Needs-you strip is not paged. No keyboard shortcut was added. Localization of the unresolved-fields list covers built-in template labels through the existing display map; a custom template's labels stay as authored. `Test configured criteria` and similar built-in step names are display-only translations, as before.
 8. **Pre-existing, unchanged.** `pnpm fmt:check` at the repository root reports files unrelated to this work (413 at the time); only changed files were checked. `pnpm lint` reports 75 warnings, none in changed files.
+
+## 9. UX-M1.4 (Windows acceptance): defect found and fixed (2026-09-30)
+
+Found by the native journey "checks" (`scripts/graph-engineering/ux-m1-native-checks.mjs`, step C4; screenshot `c-after-failed-save-back`), then reproduced in the browser suite before any code changed.
+
+**Defect.** `useGraphEngineering` keeps one action error for every operation. After a failed **Save checks** (for example the real digest conflict "Project recipe configuration changed; reload before saving."), **Back to new run** rendered that message in the New-run action bar, directly beside **Review and run**, as if Review had failed. Section 8 item 1 says the bar shows a failed instantiate, preflight or Start; a check-save failure belongs to the Checks editor, where it happened and where it is shown again if the user returns.
+
+**Rule.** The action bar of the New-run pane and the inline review show only errors of the admission path (instantiate, preflight, Start). An error raised by saving checks is tagged with its source and is not shown there. It is still shown by the Checks editor. Nothing else about errors changes (no new store, the single action error remains, and the next operation still clears it).
+
+**Owner and change.** `useGraphEngineering` tags the action error `source: "checks"` for `saveRecipes` and exposes it as `errorSource`; `GraphRunsDestination` passes `graph.error` to the New-run bar and to the inline review only when `errorSource` is not `"checks"`. The generic alert below the editor is unchanged (it is already suppressed while the New-run pane or a review is shown).
+
+**Verification.** The browser scenario "cancel, a failed save and a digest conflict leave the request, workflow, references and check choices untouched" asserts that no `graph-new-run-error` is shown after Back. It failed before the fix and passes after it. The native journey is re-run on the rebuilt Desktop.

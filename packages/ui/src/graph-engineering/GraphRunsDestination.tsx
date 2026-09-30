@@ -56,6 +56,8 @@ export function GraphRunsDestination(props: {
   onRunAgain(run: Run): void;
 }) {
   const { view, graph, confirmation, selectedRun } = props;
+  // UX-M1.4：检查保存失败属于 Checks 编辑器；返回新运行后不能显示在 Review and run 旁边。
+  const admissionError = graph.errorSource === "checks" ? undefined : (graph.error ?? undefined);
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
   const u = (id: string) => intl.formatMessage({ id: `graph.preZ8.${id}` });
@@ -82,7 +84,7 @@ export function GraphRunsDestination(props: {
             canConfirm={props.canConfirm}
             onClose={props.onCloseConfirmation}
             onConfirm={props.onStart}
-            error={graph.error ?? undefined}
+            error={admissionError}
           />
         ) : props.newRunPane ? (
           <section className="space-y-3" data-testid="graph-new-run-pane">
@@ -104,7 +106,7 @@ export function GraphRunsDestination(props: {
                 props.activeRunId ? () => props.onViewRun(props.activeRunId!) : undefined
               }
               pending={graph.pending}
-              error={graph.error}
+              error={admissionError}
               recipeReadState={graph.recipeReadState}
               onLoadRecipes={graph.readRecipes}
               onOpenSetup={props.onOpenSetup}
