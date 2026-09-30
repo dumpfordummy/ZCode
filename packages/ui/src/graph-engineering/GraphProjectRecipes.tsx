@@ -18,7 +18,7 @@ import {
   GraphRecipeChangeSummary,
   GraphRecipeDiscard,
   useGraphRecipeChanges,
-} from "./GraphRecipeChanges.js";
+} from "./GraphRecipeChangeSummary.js";
 import { graphRecipeDraft } from "./graphRecipeDraftForm.js";
 
 export function GraphProjectRecipes({

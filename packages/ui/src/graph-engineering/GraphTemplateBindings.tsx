@@ -12,7 +12,7 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphDraftStore, type GraphTemplateFormDraft } from "@/store/graphDraftStore.js";
 import { useGraphEngineeringViewStore } from "@/store/graphEngineeringViewStore.js";
 import { GraphTemplateRecipeBindings } from "./GraphTemplateRecipeBindings.js";
-import { useGraphRecipeChanges } from "./GraphRecipeChanges.js";
+import { useGraphRecipeChanges } from "./GraphRecipeChangeSummary.js";
 import { GraphRecipeReadStatus } from "./GraphRecipeReadStatus.js";
 import type { GraphRecipeReadState } from "./graphRecipeRead.js";
 import { initialTemplateParameters, templateBindingErrors } from "./graphWorkflowView.js";
