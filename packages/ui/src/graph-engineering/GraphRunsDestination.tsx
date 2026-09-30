@@ -41,6 +41,8 @@ export function GraphRunsDestination(props: {
   confirmation: GraphRunConfirmationSnapshot | null;
   onNewRun(): void;
   onSelectRun(runId: string): void;
+  /** UX-M1.3: open a run because the user asked to view it (focus follows), unlike a history row. */
+  onViewRun(runId: string): void;
   onCloseConfirmation(): void;
   onStart(preflight?: GraphSubmission["preflight"]): void;
   onOpenSetup(checkId?: string): void;
@@ -80,6 +82,7 @@ export function GraphRunsDestination(props: {
             canConfirm={props.canConfirm}
             onClose={props.onCloseConfirmation}
             onConfirm={props.onStart}
+            error={graph.error ?? undefined}
           />
         ) : props.newRunPane ? (
           <section className="space-y-3" data-testid="graph-new-run-pane">
@@ -98,7 +101,7 @@ export function GraphRunsDestination(props: {
               disabledReason={props.draftLockReason}
               admissionReason={props.occupiedReason}
               onViewCurrentRun={
-                props.activeRunId ? () => props.onSelectRun(props.activeRunId!) : undefined
+                props.activeRunId ? () => props.onViewRun(props.activeRunId!) : undefined
               }
               pending={graph.pending}
               error={graph.error}

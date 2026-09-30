@@ -6,11 +6,19 @@ import { create } from "zustand";
  */
 export type GraphViewMode = "runs" | "design" | "setup";
 
+/**
+ * UX-M1.3: where keyboard focus should land after a navigation the user asked for. Renderer-local,
+ * consumed once by the element's owner when it mounts, and cleared by any navigation that does not
+ * set it again, so it can never move focus later, on a refresh or on a Host event.
+ */
+export type GraphFocusRequest = "run" | "draft" | { checkId: string };
+
 interface GraphViewSelection {
   mode: GraphViewMode;
   /** Runs destination: "new" shows the new-run form; undefined shows the selected run. */
   pane?: "new";
   returnToWorkflow?: boolean;
+  focus?: GraphFocusRequest;
   /** Checks destination: the saved check (by stable id) the editor should open. Navigation only. */
   checkId?: string;
   runId?: string;
@@ -45,6 +53,8 @@ export const useGraphEngineeringViewStore = create<{
           pane: "new",
           ...state.selections[workspaceKey],
           ...selection,
+          // 焦点请求只属于发起它的那一次导航。
+          focus: "focus" in selection ? selection.focus : undefined,
         },
       },
     })),
@@ -60,6 +70,7 @@ export const useGraphEngineeringViewStore = create<{
           nodeId: step?.nodeId,
           attemptId: step?.attemptId,
           regionId: undefined,
+          focus: undefined,
         },
       },
     })),

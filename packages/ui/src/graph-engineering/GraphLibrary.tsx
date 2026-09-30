@@ -183,7 +183,7 @@ export function GraphLibrary({
           {workspacePath}
         </p>
       )}
-      {workflow.error ? (
+      {workflow.error && !inline ? (
         <p role="alert" className="break-words text-ui-sm text-destructive">
           {workflow.error}
         </p>
@@ -226,6 +226,7 @@ export function GraphLibrary({
             disabledReason={entry.archived ? u("noCompatibleVersion") : disabledReason}
             admissionReason={admissionReason}
             onViewCurrentRun={onViewCurrentRun}
+            error={inline ? workflow.error || error || undefined : undefined}
             onLoadRecipes={onLoadRecipes}
             onOpenSetup={(checkId) => {
               setOpen(false);

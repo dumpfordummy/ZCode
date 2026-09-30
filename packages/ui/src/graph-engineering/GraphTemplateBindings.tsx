@@ -1,5 +1,4 @@
-import { useEffect, useMemo } from "react";
-import { Play } from "lucide-react";
+import { useEffect, useMemo, useRef } from "react";
 import type {
   GraphParameterValue,
   GraphTemplateBindings as TemplateBindings,
@@ -11,11 +10,13 @@ import { Textarea } from "@/components/ui/textarea.js";
 import { Checkbox } from "@/components/ui/checkbox.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphDraftStore, type GraphTemplateFormDraft } from "@/store/graphDraftStore.js";
+import { useGraphEngineeringViewStore } from "@/store/graphEngineeringViewStore.js";
 import { GraphTemplateRecipeBindings } from "./GraphTemplateRecipeBindings.js";
 import { GraphRecipeReadStatus } from "./GraphRecipeReadStatus.js";
 import type { GraphRecipeReadState } from "./graphRecipeRead.js";
 import { initialTemplateParameters, templateBindingErrors } from "./graphWorkflowView.js";
 import { GraphContextSection } from "./GraphContextSection.js";
+import { GraphNewRunActions } from "./GraphNewRunActions.js";
 import { useGraphTemplateText } from "./graphTemplateText.js";
 import { useGraphM1Text } from "./GraphM1Text.js";
 
@@ -35,6 +36,7 @@ export function GraphTemplateBindings({
   disabledReason,
   admissionReason,
   onViewCurrentRun,
+  error,
   onLoadRecipes,
   onOpenSetup,
   allowReview = false,
@@ -52,6 +54,8 @@ export function GraphTemplateBindings({
   /** UX-M1: a run occupies the workspace. The form stays editable; every admission action is refused. */
   admissionReason?: string;
   onViewCurrentRun?(): void;
+  /** Failure of the last instantiate/preflight, shown beside the primary action. */
+  error?: string;
   onLoadRecipes(): void;
   onOpenSetup(checkId?: string): void;
   /** "review" = Review and run; "save" = create the workflow only (explicit, no preflight). */
@@ -108,16 +112,63 @@ export function GraphTemplateBindings({
       ? admissionReason
       : readBlocked
         ? u("readChecksFirst")
-        : undefined;
+        : errors.length
+          ? m1("fieldsNeedAttention", { count: errors.length })
+          : undefined;
+  const blockedBy = disabled
+    ? "draft-lock"
+    : occupied
+      ? "run-active"
+      : readBlocked
+        ? "checks"
+        : errors.length
+          ? "fields"
+          : undefined;
   useEffect(() => {
     if (hasTools && recipeReadState.status === "not-loaded") onLoadRecipes();
   }, [hasTools, recipeReadState.status, onLoadRecipes]);
-  const fields = [
-    ...template.parameters.map((item) => [item.label, `parameter-${item.id}`]),
-    ...template.references.map((item) => [item.label, `reference-${item.id}`]),
-    ...tools.map((node) => [node.name, `recipe-${node.id}`]),
-    ["sourcePaths", "source-paths"],
+  // UX-M1.3：从运行或检查编辑器返回草稿时，一次性把焦点交回发起的控件（没有则回到请求输入框）。
+  // 表单在库加载后才挂载，所以由这里的挂载副作用消费请求，而不是在导航处用定时器猜时机。
+  const root = useRef<HTMLElement>(null);
+  const focusRequest = useGraphEngineeringViewStore(
+    (state) => state.selections[workspaceKey]?.focus,
+  );
+  useEffect(() => {
+    if (!focusRequest || focusRequest === "run") return;
+    const origin =
+      typeof focusRequest === "object"
+        ? root.current?.querySelector<HTMLElement>(
+            `[data-check-id="${CSS.escape(focusRequest.checkId)}"] button`,
+          )
+        : null;
+    (
+      origin ??
+      root.current?.querySelector<HTMLElement>(
+        "#graph-template-field-parameter-request textarea, input",
+      )
+    )?.focus();
+    useGraphEngineeringViewStore.getState().select(workspaceKey, { focus: undefined });
+  }, [focusRequest, workspaceKey]);
+  // [模板原文标签, 字段 id, 界面显示名]：定位仍按原文标签，显示走已有的模板显示映射（zh-CN 才翻译）。
+  const fields: Array<[string, string, string]> = [
+    ...template.parameters.map<[string, string, string]>((item) => [
+      item.label,
+      `parameter-${item.id}`,
+      display.parameter(item.id, item.label),
+    ]),
+    ...template.references.map<[string, string, string]>((item) => [
+      item.label,
+      `reference-${item.id}`,
+      display.reference(item.id, item.label),
+    ]),
+    ...tools.map<[string, string, string]>((node) => [
+      node.name,
+      `recipe-${node.id}`,
+      display.node(node.id, node.name),
+    ]),
+    ["sourcePaths", "source-paths", t("sourcePaths")],
   ];
+  const issueLabel = (label: string) => fields.find(([name]) => name === label)?.[2] ?? label;
   const focusIssue = (label: string) => {
     const id = fields.find(([name]) => name === label)?.[1];
     const field = id ? document.getElementById(`graph-template-field-${id}`) : null;
@@ -126,7 +177,7 @@ export function GraphTemplateBindings({
     field?.querySelector<HTMLElement>("input,textarea,button")?.focus();
   };
   return (
-    <section className="space-y-3" data-testid="graph-template-bindings">
+    <section ref={root} className="space-y-3" data-testid="graph-template-bindings">
       <p className="rounded-lg bg-surface p-3 text-ui-sm" data-testid="graph-template-verification">
         {u(hasTools ? "configuredChecks" : "agentLed")}
       </p>
@@ -273,65 +324,23 @@ export function GraphTemplateBindings({
                 size="sm"
                 onClick={() => focusIssue(error)}
               >
-                {error === "sourcePaths" ? t("sourcePaths") : error}
+                {issueLabel(error)}
               </Button>
             ))}
           </div>
         </div>
       ) : null}
-      <div
-        className={`${allowReview ? "sticky -bottom-3 z-10 -mx-3 -mb-3 border-t border-border bg-background px-3 pb-5 pt-2 " : ""}flex flex-wrap items-center gap-2`}
-        data-testid="graph-new-run-actions"
-      >
-        {allowReview ? (
-          <Button
-            size="lg"
-            disabled={actionsBlocked}
-            aria-describedby="graph-template-create-reason"
-            data-testid="graph-review-run"
-            onClick={() => {
-              if (actionsBlocked) return;
-              onInstantiate(parameters, normalizedBindings(bindings), "review");
-            }}
-          >
-            <Play className="size-4" />
-            {u("reviewAndRun")}
-          </Button>
-        ) : null}
-        <Button
-          size={allowReview ? "sm" : "default"}
-          variant={allowReview ? "outline" : "default"}
-          disabled={actionsBlocked}
-          aria-describedby="graph-template-create-reason"
-          data-testid="graph-library-instantiate"
-          onClick={() => {
-            if (actionsBlocked) return;
-            onInstantiate(parameters, normalizedBindings(bindings), "save");
-          }}
-        >
-          {u(allowReview ? "saveAsWorkflow" : "createWorkflow")}
-        </Button>
-        {blockedReason ? (
-          <div
-            className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
-            data-testid="graph-new-run-blocked"
-            data-blocked-by={disabled ? "draft-lock" : occupied ? "run-active" : "checks"}
-          >
-            <p id="graph-template-create-reason" role="status" className="text-ui-sm text-warning">
-              {blockedReason}
-            </p>
-            {occupied && !disabled && onViewCurrentRun ? (
-              <Button
-                variant="outline"
-                data-testid="graph-view-current-run"
-                onClick={onViewCurrentRun}
-              >
-                {m1("viewCurrentRun")}
-              </Button>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
+      <GraphNewRunActions
+        allowReview={allowReview}
+        blocked={actionsBlocked}
+        reason={blockedReason}
+        blockedBy={blockedBy}
+        onReview={() => onInstantiate(parameters, normalizedBindings(bindings), "review")}
+        onSave={() => onInstantiate(parameters, normalizedBindings(bindings), "save")}
+        onViewCurrentRun={onViewCurrentRun}
+        error={error}
+        onGoToFirstField={errors[0] ? () => focusIssue(errors[0]!) : undefined}
+      />
     </section>
   );
 }

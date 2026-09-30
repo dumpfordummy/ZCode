@@ -27,9 +27,11 @@ import { GraphNeedsYou } from "./GraphNeedsYou.js";
 import { GraphRunsDestination } from "./GraphRunsDestination.js";
 import { GraphSetupPanel } from "./GraphSetupPanel.js";
 import { graphFocusClass } from "./graphFocus.js";
-import { graphNeedsYou, type GraphNeedsYouItem } from "./graphNeedsYouQueue.js";
+import { graphNeedsYou } from "./graphNeedsYouQueue.js";
 import { graphRunAgainDraft } from "./graphRunAgain.js";
 import { useGraphRunActions } from "./useGraphRunActions.js";
+import { useGraphRunFocus } from "./useGraphFocusRequest.js";
+import { useGraphEditorNavigation } from "./useGraphEditorNavigation.js";
 
 export function GraphEditor({
   workspacePath,
@@ -164,7 +166,7 @@ export function GraphEditor({
   };
   const selectNode = (nodeId: string) =>
     select(workspaceKey, { nodeId, attemptId: undefined, regionId: undefined });
-  const { confirmation, setConfirmation, startRun, handleRun } = useGraphRunActions({
+  const { confirmation, dismissConfirmation, startRun, handleRun } = useGraphRunActions({
     graph,
     displayed,
     defaults,
@@ -172,20 +174,16 @@ export function GraphEditor({
     selectRun,
     admission,
   });
-  // UX-M1.2：只有从「新建运行」进入 Checks 才提供返回草稿的入口，并清掉上一次遗留的 checkId。
-  const openChecks = () => {
-    setConfirmation(null);
-    select(workspaceKey, { mode: "setup", returnToWorkflow: newRunPane, checkId: undefined });
-  };
-  const openCheckSetup = (checkId?: string) =>
-    select(workspaceKey, { mode: "setup", returnToWorkflow: true, checkId });
+  const focusRoot = useGraphRunFocus(workspaceKey, Boolean(selectedRun));
+  const go = useGraphEditorNavigation({
+    workspaceKey,
+    newRunPane,
+    checkId: navigation?.checkId,
+    dismissConfirmation,
+  });
   // Pending human actions come from the complete run list, never from the visible history page.
   const needsYou = useMemo(() => graphNeedsYou(view.runs), [view.runs]);
   const needsYouRunIds = useMemo(() => new Set(needsYou.map((item) => item.runId)), [needsYou]);
-  const goToRun = (item: GraphNeedsYouItem) => {
-    setConfirmation(null);
-    selectRun(workspaceKey, item.runId, { nodeId: item.nodeId, attemptId: item.attemptId });
-  };
   /** Review always happens inline in Runs, whichever destination asked for it. */
   const reviewAndRun = (target: GraphDefinition) => {
     select(workspaceKey, { mode: "runs", pane: "new", returnToWorkflow: false });
@@ -197,11 +195,12 @@ export function GraphEditor({
     const drafts = useGraphDraftStore.getState();
     drafts.selectLibrary(workspaceKey, seed.selection);
     drafts.setTemplateDraft(workspaceKey, seed.templateKey, seed.form);
-    setConfirmation(null);
+    dismissConfirmation();
     select(workspaceKey, { mode: "runs", pane: "new", returnToWorkflow: false });
   };
   return (
     <div
+      ref={focusRoot}
       className={`${graphFocusClass} flex min-h-0 flex-1 flex-col gap-3 overflow-auto p-3`}
       data-view={selectedRun ? "run" : destination}
     >
@@ -211,22 +210,17 @@ export function GraphEditor({
         dirty={dirty}
         conflicted={conflicted}
         runSelected={Boolean(selectedRun)}
-        onSelect={(mode) => {
-          // 内联审阅只属于当前意图；离开目的地即关闭快照，草稿与已保存设计不受影响。
-          if (mode === "setup") return openChecks();
-          setConfirmation(null);
-          select(workspaceKey, { mode });
-        }}
+        onSelect={go.destination}
       />
       <GraphContextBar
         modelSelection={selection}
         mode={config.draftConfig.mode}
         recipeReadState={graph.recipeReadState}
-        onOpenChecks={openChecks}
+        onOpenChecks={() => go.destination("setup")}
       />
       <GraphNeedsYou
         items={needsYou}
-        onGoToRun={goToRun}
+        onGoToRun={go.goToRun}
         onOpenConversation={(item) => {
           if (item.sessionId) onOpenConversation(workspacePath, item.sessionId, workspaceIdentity);
         }}
@@ -253,25 +247,20 @@ export function GraphEditor({
           attemptId={navigation?.attemptId}
           defaults={defaults}
           confirmation={confirmation}
-          onNewRun={() => {
-            setConfirmation(null);
-            select(workspaceKey, { mode: "runs", pane: "new" });
-          }}
-          onSelectRun={(runId) => {
-            setConfirmation(null);
-            selectRun(workspaceKey, runId);
-          }}
-          onCloseConfirmation={() => setConfirmation(null)}
+          onNewRun={go.newRun}
+          onSelectRun={go.selectRun}
+          onViewRun={go.viewRun}
+          onCloseConfirmation={() => dismissConfirmation()}
           onStart={(preflight) =>
             confirmation &&
             !admission.blocked &&
             startRun(confirmation.definition, confirmation.settings, true, preflight)
           }
-          onOpenSetup={openCheckSetup}
+          onOpenSetup={go.openCheckSetup}
           onReview={reviewAndRun}
           onInstantiated={(saved, continuation) => {
             acceptDefinition(workspaceKey, saved);
-            setConfirmation(null);
+            dismissConfirmation();
             void graph.reload();
             if (continuation === "review") reviewAndRun(saved);
             else select(workspaceKey, { mode: "design", returnToWorkflow: false });
@@ -297,11 +286,11 @@ export function GraphEditor({
             error={graph.error}
             recipeReadState={graph.recipeReadState}
             onLoadRecipes={graph.readRecipes}
-            onOpenSetup={openCheckSetup}
+            onOpenSetup={go.openCheckSetup}
             onSaveDesign={graph.save}
             onInstantiated={(saved) => {
               acceptDefinition(workspaceKey, saved);
-              setConfirmation(null);
+              dismissConfirmation();
               select(workspaceKey, { mode: "design", returnToWorkflow: false });
               void graph.reload();
             }}
@@ -333,7 +322,8 @@ export function GraphEditor({
           />
         </>
       ) : null}
-      {graph.error ? (
+      {/* 新建运行/审阅中的失败显示在主操作旁；其余位置仍用这里的通用提示，避免同一条错误出现两次。 */}
+      {graph.error && !(showingRuns && (newRunPane || confirmation)) ? (
         <p role="alert" className="break-words text-ui-sm text-destructive">
           {graph.error}
         </p>
@@ -369,13 +359,7 @@ export function GraphEditor({
           disabled={disabled}
           returnToWorkflow={navigation?.returnToWorkflow}
           checkId={navigation?.checkId}
-          onReturn={() =>
-            select(workspaceKey, {
-              mode: "runs",
-              pane: "new",
-              returnToWorkflow: false,
-            })
-          }
+          onReturn={go.returnToDraft}
           onRun={(runId) => selectRun(workspaceKey, runId)}
         />
       ) : null}

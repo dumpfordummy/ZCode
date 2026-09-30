@@ -31,6 +31,16 @@ const messages: Record<string, [string, string]> = {
     "Your request, context and check choices are kept. A check choice stays selected only if that saved check still exists and fits its step.",
     "请求、上下文和检查选择都会保留。只有该已保存检查仍然存在且适用于对应步骤时，选择才会保持。",
   ],
+  // UX-M1.3：主操作旁的原因与去处、Needs-you 的范围说明。
+  fieldsNeedAttention: [
+    "Not ready to review: {count} to complete or correct.",
+    "尚不能审阅：还有 {count} 项需补全或修正。",
+  ],
+  goToFirstField: ["Go to first field", "前往第一个字段"],
+  needsYouScope: [
+    "Lists waiting steps from this workspace's runs as reported by this Host. It is not a queue across workspaces or other Hosts.",
+    "仅列出此主机报告的、本工作区运行中的等待步骤，不是跨工作区或其他主机的队列。",
+  ],
   recipeSaveBlockedByRun: [
     "Saving checks is blocked while a run is unresolved. You can keep editing; your changes stay as a draft.",
     "运行尚未结束时不能保存检查。可以继续编辑，更改会作为草稿保留。",
