@@ -54,6 +54,11 @@ const readyScenario = (locale) => ({
     }
     await frames(page, shotsDir, "m4-new-run", locale);
     await frames(page, shotsDir, "m4-new-run-lower", locale, undefined, 640);
+    // 预检与确认：冻结快照、确认事项与唯一的粘性提交栏
+    await T(page, "graph-review-run").click();
+    await T(page, "graph-run-confirmation").waitFor();
+    await frames(page, shotsDir, "m4-preflight", locale);
+    await frames(page, shotsDir, "m4-preflight-lower", locale, undefined, 100000);
   },
 });
 
@@ -80,6 +85,10 @@ const scenario = (locale) => ({
     await frames(page, shotsDir, "m4-run-failed", locale);
     await pick(page, "run-approval");
     await frames(page, shotsDir, "m4-run-approval", locale);
+    // 最终人工批准：从横幅里的主操作进入，证据在下方全宽显示
+    await T(page, "graph-run-review-gate").click();
+    await T(page, "graph-approval-request").waitFor();
+    await frames(page, shotsDir, "m4-approval-inspect", locale, undefined, 100000);
     await openLibrary(page);
     await frames(page, shotsDir, "m4-library", locale);
   },

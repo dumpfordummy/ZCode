@@ -93,3 +93,15 @@
   --color-tag: #e3e4ea;
   --color-tooltip: #26282d;
 }
+
+/*
+ * 共享 Textarea 用 border-input / bg-input/20，在 Graph 的表面上边框与填充同色、几乎看不见。
+ * 只在 Graph 范围内让它使用与 Input 相同的边框与填充令牌，不改共享组件。
+ */
+.graph-ui textarea {
+  border-color: var(--color-input-border);
+  background-color: var(--color-input);
+}
+.graph-ui textarea:hover:not(:disabled) {
+  border-color: var(--color-input-border-hover);
+}
