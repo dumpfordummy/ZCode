@@ -86,7 +86,7 @@ export function GraphRunConfirmation({
         </pre>
       </details>
       <div
-        className="sticky -bottom-3 z-10 -mx-3 -mb-3 mt-auto flex flex-wrap items-center gap-3 border-t border-border bg-background px-3 pb-5 pt-2"
+        className="sticky -bottom-4 z-10 -mx-4 -mb-4 mt-auto flex flex-wrap items-center gap-3 border-t border-border bg-background px-4 pb-5 pt-3"
         data-testid="graph-review-commit"
       >
         {error ? (

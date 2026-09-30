@@ -65,6 +65,20 @@ export function GraphRunActions({
     !gates.length &&
     ![...failedChecks, ...invalidChecks].some((check) => check.nodeId === step.nodeId);
   const canRunAgain = Boolean(onRunAgain) && run.version === 5 && run.definition.template;
+  // UX-M4：一次只有一个主操作（强调色）：先是原生会话，再是人工闸门，其次失败的 Test、无效输出与无效证据。
+  const primary = summary.actionableSessions.length
+    ? "native"
+    : gates.length
+      ? "gate"
+      : failedChecks.length
+        ? "failure"
+        : invalidOutputs.length
+          ? "output"
+          : invalidChecks.length
+            ? "invalid"
+            : undefined;
+  const variantOf = (kind: string, index: number) =>
+    primary === kind && index === 0 ? ("default" as const) : ("outline" as const);
   const hasActions =
     canRunAgain ||
     summary.actionableSessions.length > 0 ||
@@ -79,10 +93,11 @@ export function GraphRunActions({
     cancellable;
   return (
     <section
-      className="space-y-2 border-t border-border pt-2"
+      className="space-y-2 border-t border-border/60 pt-3"
       data-testid="graph-run-required-actions"
     >
-      <h4 className="text-ui-sm font-medium">{u("actions")}</h4>
+      {/* 横幅已经说明状态；这个标题只服务辅助技术，避免重复一句“下一步”。 */}
+      <h4 className="sr-only">{u("actions")}</h4>
       {!hasActions ? (
         <p className="text-ui-sm text-foreground-subtle" data-testid="graph-run-no-action">
           {u("noActionRequired")}
@@ -90,11 +105,10 @@ export function GraphRunActions({
       ) : null}
       {summary.actionableSessions.length ? (
         <div className="flex flex-wrap gap-2">
-          {summary.actionableSessions.map((session) => (
+          {summary.actionableSessions.map((session, index) => (
             <div key={session.attemptId} className="min-w-0 space-y-1">
               <Button
-                size="sm"
-                variant="outline"
+                variant={variantOf("native", index)}
                 data-testid="graph-run-open-native"
                 data-session-id={session.sessionId}
                 data-node-id={session.nodeId}
@@ -109,10 +123,9 @@ export function GraphRunActions({
               >
                 {session.name} · {u("openNative")}
               </Button>
-              {session.status === "WaitingForPermission" || session.status === "WaitingForUser" ? (
-                <p className="max-w-lg text-ui-xs text-foreground-subtle">
-                  {u(session.status === "WaitingForPermission" ? "permissionHelp" : "questionHelp")}
-                </p>
+              {/* 权限等待的说明只在横幅里出现一次；问题等待没有横幅正文，仍在这里说明。 */}
+              {session.status === "WaitingForUser" ? (
+                <p className="max-w-lg text-ui-sm text-foreground-subtle">{u("questionHelp")}</p>
               ) : null}
             </div>
           ))}
@@ -125,11 +138,10 @@ export function GraphRunActions({
         </p>
       ))}
       <div className="flex flex-wrap gap-2">
-        {invalidOutputs.map((output) => (
+        {invalidOutputs.map((output, index) => (
           <Button
             key={output.attemptId}
-            size="sm"
-            variant="outline"
+            variant={variantOf("output", index)}
             data-testid="graph-run-inspect-output"
             onClick={() =>
               onInspect({ kind: "node", nodeId: output.nodeId, attemptId: output.attemptId })
@@ -144,7 +156,6 @@ export function GraphRunActions({
             ? [
                 <Button
                   key={`conversation:${output.attemptId}`}
-                  size="sm"
                   variant="outline"
                   data-testid="graph-run-open-reviewer-conversation"
                   data-session-id={sessionId}
@@ -161,11 +172,10 @@ export function GraphRunActions({
               ]
             : [];
         })}
-        {gates.map((gate) => (
+        {gates.map((gate, index) => (
           <Button
             key={gate.nodeId}
-            size="sm"
-            variant="outline"
+            variant={variantOf("gate", index)}
             data-testid="graph-run-review-gate"
             data-node-id={gate.nodeId}
             data-attempt-id={gate.attemptId ?? ""}
@@ -181,11 +191,10 @@ export function GraphRunActions({
             {gate.name} · {u("reviewGate")}
           </Button>
         ))}
-        {failedChecks.map((check) => (
+        {failedChecks.map((check, index) => (
           <Button
             key={check.nodeId}
-            size="sm"
-            variant="outline"
+            variant={variantOf("failure", index)}
             data-testid="graph-run-inspect-failure"
             data-node-id={check.nodeId}
             onClick={() =>
@@ -199,11 +208,10 @@ export function GraphRunActions({
             {check.name} · {u("inspectFailedTest")}
           </Button>
         ))}
-        {invalidChecks.map((check) => (
+        {invalidChecks.map((check, index) => (
           <Button
             key={check.nodeId}
-            size="sm"
-            variant="outline"
+            variant={variantOf("invalid", index)}
             data-testid="graph-run-inspect-invalid"
             data-node-id={check.nodeId}
             onClick={() =>
@@ -219,7 +227,6 @@ export function GraphRunActions({
         ))}
         {summary.checkpoint ? (
           <Button
-            size="sm"
             variant="outline"
             data-testid="graph-run-show-checkpoint"
             data-checkpoint-id={summary.checkpoint.id}
@@ -231,7 +238,6 @@ export function GraphRunActions({
         ) : null}
         {uncertain ? (
           <Button
-            size="sm"
             variant="outline"
             data-testid="graph-run-show-recovery"
             onClick={() => onInspect({ kind: "recovery" })}
@@ -241,7 +247,6 @@ export function GraphRunActions({
         ) : null}
         {stepButton ? (
           <Button
-            size="sm"
             variant="outline"
             data-testid="graph-run-show-step"
             onClick={() =>
@@ -257,7 +262,6 @@ export function GraphRunActions({
         ) : null}
         {canRunAgain ? (
           <Button
-            size="sm"
             variant="outline"
             data-testid="graph-run-again"
             onClick={() => onRunAgain?.(run)}
@@ -267,7 +271,6 @@ export function GraphRunActions({
         ) : null}
         {cancellable ? (
           <Button
-            size="sm"
             variant="outline"
             data-testid="graph-cancel"
             disabled={disabled}
@@ -278,7 +281,7 @@ export function GraphRunActions({
         ) : null}
       </div>
       {cancellable || summary.execution.stopRequested || run.status === "Cancelled" ? (
-        <p className="text-ui-xs text-foreground-subtle">{u("stopMeaning")}</p>
+        <p className="text-ui-sm text-foreground-subtle">{u("stopMeaning")}</p>
       ) : null}
     </section>
   );

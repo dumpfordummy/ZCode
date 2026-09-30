@@ -55,7 +55,7 @@ export function GraphNeedsYou({
       ) : null}
       {/* 范围说明：这是本主机对本工作区运行的投影，不是全局队列。 */}
       <p
-        className="basis-full text-ui-xs font-normal text-foreground-subtle"
+        className="basis-full text-ui-sm font-normal text-foreground-subtle"
         data-testid="graph-needs-you-scope"
       >
         {m1("needsYouScope")}

@@ -41,7 +41,7 @@ export function GraphNewRunActions({
   const m3 = useGraphM3Text();
   return (
     <div
-      className={`${allowReview ? "sticky -bottom-3 z-10 -mx-3 -mb-3 border-t border-border bg-background px-3 pb-5 pt-2 " : ""}flex flex-wrap items-center gap-2`}
+      className={`${allowReview ? "sticky -bottom-4 z-10 -mx-4 -mb-4 border-t border-border bg-background px-4 pb-5 pt-3 " : ""}flex flex-wrap items-center gap-2`}
       data-testid="graph-new-run-actions"
     >
       {allowReview ? (

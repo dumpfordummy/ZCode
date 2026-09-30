@@ -16,16 +16,18 @@ const runs = (extra = []) => [
   }),
 ];
 
-async function frames(page, dir, name, locale, prepare) {
+async function frames(page, dir, name, locale, prepare, scroll = 0) {
   for (const theme of THEMES) {
     await setState(page, { theme });
     for (const size of SIZE_LIST) {
       await page.setViewportSize(size);
       if (prepare) await prepare();
-      await page.evaluate(() => {
-        for (const node of document.querySelectorAll("[data-view], [data-testid=graph-library-dialog]"))
+      await page.evaluate((top) => {
+        for (const node of document.querySelectorAll("[data-view], [data-testid=graph-library-dialog], [data-testid=graph-run-history]"))
           node.scrollTop = 0;
-      });
+        const view = document.querySelector("[data-view]");
+        if (view) view.scrollTop = top;
+      }, scroll);
       await page.mouse.move(0, 0);
       await flush(page);
       await shot(page, dir, `${name}-${locale}-${theme.replace("zai-", "")}`, size);
@@ -55,6 +57,7 @@ const scenario = (locale) => ({
     await frames(page, shotsDir, "m4-new-run-occupied", locale);
     await pick(page, "run-waiting");
     await frames(page, shotsDir, "m4-run-permission", locale);
+    await frames(page, shotsDir, "m4-run-permission-lower", locale, undefined, 560);
     await pick(page, "run-failed");
     await frames(page, shotsDir, "m4-run-failed", locale);
     await pick(page, "run-approval");

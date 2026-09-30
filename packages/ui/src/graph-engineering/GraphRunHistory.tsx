@@ -90,12 +90,14 @@ export function GraphRunHistory({
     if (page.selectedPage !== page.page) setPage(page.selectedPage);
   }
   return (
-    <nav className={`${graphFocusClass} min-w-0 space-y-2`} aria-label={t("runs")}>
+    <nav
+      className={`${graphFocusClass} min-w-0 space-y-2 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] lg:self-start lg:overflow-auto`}
+      aria-label={t("runs")}
+    >
       {onNewRun ? (
         <Button
-          className="w-full"
-          size="lg"
-          variant={newRunSelected ? "secondary" : "default"}
+          className="w-full justify-start"
+          variant={newRunSelected ? "secondary" : "ghost"}
           aria-current={newRunSelected ? "page" : undefined}
           data-testid="graph-new-run"
           onClick={onNewRun}
@@ -105,7 +107,7 @@ export function GraphRunHistory({
         </Button>
       ) : null}
       {runs.length ? (
-        <ul className="space-y-1" data-testid="graph-run-history">
+        <ul className="space-y-0.5" data-testid="graph-run-history">
           {page.items.map((run) => {
             const selected = !newRunSelected && run.id === selectedRunId;
             const evidence = graphRunEvidence(run);
@@ -114,9 +116,9 @@ export function GraphRunHistory({
             return (
               <li
                 key={run.id}
-                className={`flex cursor-pointer gap-2 rounded-lg border p-2 transition-colors ${
+                className={`flex cursor-pointer gap-2 rounded-md border-l-2 px-2 py-2 transition-colors ${
                   selected
-                    ? "border-border bg-selected"
+                    ? "border-brand bg-selected"
                     : "border-transparent hover:bg-surface-hover"
                 }`}
                 data-testid="graph-run"
@@ -147,18 +149,21 @@ export function GraphRunHistory({
                       {preview}
                     </div>
                   ) : null}
-                  <div className="break-words text-ui-xs text-foreground-subtle">
-                    {run.definition.name}
-                    {run.release ? ` · ${t("released")}` : ""} · {u(`execution.${run.status}`)}
+                  <div className="break-words text-ui-sm text-foreground-subtle">
+                    {u(`execution.${run.status}`)}
                   </div>
-                  <div className="text-ui-xs text-foreground-subtle">
-                    {time(run.createdAt)} ·{" "}
+                  <div
+                    className="truncate text-ui-sm text-foreground-subtle"
+                    title={`${run.definition.name}${run.release ? ` · ${t("released")}` : ""} · ${time(run.createdAt)}`}
+                  >
+                    {time(run.createdAt)} · {run.definition.name}
+                    {run.release ? ` · ${t("released")}` : ""} ·{" "}
                     {evidence.configuredTestCount
                       ? u(`evidence.${evidence.state}`)
                       : u("evidence.no-tests")}
                   </div>
                   {needsYou ? (
-                    <div className="text-ui-xs font-medium text-warning">{u("needsYou")}</div>
+                    <div className="text-ui-sm font-medium text-warning">{u("needsYou")}</div>
                   ) : null}
                 </div>
               </li>
@@ -169,7 +174,7 @@ export function GraphRunHistory({
         <p className="text-ui-sm text-foreground-subtle">{u("noRunsYet")}</p>
       )}
       {runs.length ? (
-        <div className="flex flex-wrap items-center gap-2 text-ui-xs">
+        <div className="flex flex-wrap items-center gap-2 text-ui-sm">
           <Button
             size="sm"
             variant="outline"

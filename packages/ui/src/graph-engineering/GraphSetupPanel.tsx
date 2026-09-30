@@ -47,7 +47,7 @@ export function GraphSetupPanel({
         // 粘性返回栏：编辑靠下的字段时，回到新建运行的入口始终在视口内。草稿从未离开 store。
         // -top-3/-mt-3/pt-3 抵消滚动容器的 p-3：粘性偏移不含内边距，否则滚动内容会从栏上方露出一条缝。
         <div
-          className="sticky -top-3 z-10 -mx-3 -mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-border bg-background px-3 pb-2 pt-3"
+          className="sticky -top-4 z-10 -mx-4 -mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-border bg-background px-4 pb-2 pt-4"
           data-testid="graph-return-bar"
         >
           <Button

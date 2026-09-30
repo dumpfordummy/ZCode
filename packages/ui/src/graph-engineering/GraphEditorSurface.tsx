@@ -1,5 +1,5 @@
 import type { GraphDefinition, GraphNativeSettings, GraphWorkspaceView } from "@zcode/services";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { useGraphEngineering } from "@/hooks/useGraphEngineering.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import type { GraphPanelProps } from "./graphEngineeringView.js";
@@ -14,6 +14,14 @@ import { GraphEditorMode } from "./GraphEditorMode.js";
 import { GraphEdgeActions } from "./GraphEdgeActions.js";
 import { GraphRunTrail } from "./GraphRunTrail.js";
 import { useGraphRunText } from "./GraphRunText.js";
+import { GraphTab, GraphTabList, GraphTabPanel, GraphTabs } from "./GraphTabs.js";
+import {
+  GraphRunEvidencePanel,
+  GraphRunRequestPanel,
+  GraphRunTechnicalPanel,
+} from "./GraphRunCapturedDetails.js";
+import { graphRunSummary } from "./graphRunSummary.js";
+import { useGraphM4Text } from "./GraphM4Text.js";
 import { Button } from "@/components/ui/button.js";
 import { useGraphEngineeringViewStore } from "@/store/graphEngineeringViewStore.js";
 
@@ -63,6 +71,14 @@ export function GraphEditorSurface({
     (state) => state.selections[workspaceKey]?.runGraph === true,
   );
   const u = useGraphRunText();
+  const m4 = useGraphM4Text();
+  // UX-M4：运行详情的次要信息放在单层标签里；当前标签是 UI 局部状态，换运行就回到“步骤”。
+  const [runTabState, setRunTabState] = useState<{ runId: string; tab: string }>();
+  const runTab = runTabState && runTabState.runId === selectedRun?.id ? runTabState.tab : "steps";
+  const runSummary = useMemo(
+    () => (showingRuns && selectedRun ? graphRunSummary(selectedRun) : undefined),
+    [showingRuns, selectedRun],
+  );
   const onSelectEdge = (value: string) =>
     useGraphEngineeringViewStore.getState().select(workspaceKey, { edgeKey: value });
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
@@ -80,6 +96,8 @@ export function GraphEditorSurface({
       if (request.attemptId) onSelectAttempt(request.attemptId);
     }
     setInspection({ runId: selectedRun.id, request });
+    // 检查器在“步骤”标签里；从横幅、步骤条或证据发起的检查必须先让它出现，再由下面的效果聚焦。
+    setRunTabState({ runId: selectedRun.id, tab: "steps" });
   };
   useEffect(() => {
     if (!inspection || inspection.runId !== selectedRun?.id) return;
@@ -187,44 +205,72 @@ export function GraphEditorSurface({
         />
       ) : null}
       {showingRuns && selectedRun ? (
-        // 步骤轨迹是 Runs 的主视图；冻结运行定义的只读图可按需切换，且不改变任何选择。
-        <div
-          className="grid min-w-0 gap-3 min-[1600px]:grid-cols-[minmax(14rem,20rem)_minmax(0,1fr)]"
-          data-testid="graph-run-steps"
+        <GraphTabs
+          value={runTab}
+          onValueChange={(tab) => setRunTabState({ runId: selectedRun.id, tab })}
         >
-          <div className="flex min-w-0 flex-col gap-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h4 className="text-ui-base font-medium">{u("steps")}</h4>
-              <Button
-                size="sm"
-                variant={runGraph ? "secondary" : "outline"}
-                aria-pressed={runGraph}
-                data-testid="graph-run-graph-toggle"
-                onClick={() =>
-                  useGraphEngineeringViewStore
-                    .getState()
-                    .select(workspaceKey, { runGraph: !runGraph })
-                }
-              >
-                {u(runGraph ? "hideRunGraph" : "viewRunGraph")}
-              </Button>
+          <GraphTabList aria-label={m4("runTabs")}>
+            <GraphTab value="steps" data-testid="graph-run-tab-steps">
+              {m4("tabSteps")}
+            </GraphTab>
+            <GraphTab value="request" data-testid="graph-run-tab-request">
+              {m4("tabRequest")}
+            </GraphTab>
+            <GraphTab value="evidence" data-testid="graph-run-tab-evidence">
+              {m4("tabEvidence")}
+            </GraphTab>
+            <GraphTab value="technical" data-testid="graph-run-tab-technical">
+              {m4("tabTechnical")}
+            </GraphTab>
+          </GraphTabList>
+          {/* 步骤轨迹是 Runs 的主视图；冻结运行定义的只读图可按需切换，且不改变任何选择。 */}
+          <GraphTabPanel value="steps">
+            <div
+              className="grid min-w-0 gap-4 min-[1600px]:grid-cols-[minmax(14rem,22rem)_minmax(0,1fr)]"
+              data-testid="graph-run-steps"
+            >
+              <div className="flex min-w-0 flex-col gap-3">
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                  <Button
+                    variant={runGraph ? "secondary" : "outline"}
+                    aria-pressed={runGraph}
+                    data-testid="graph-run-graph-toggle"
+                    onClick={() =>
+                      useGraphEngineeringViewStore
+                        .getState()
+                        .select(workspaceKey, { runGraph: !runGraph })
+                    }
+                  >
+                    {u(runGraph ? "hideRunGraph" : "viewRunGraph")}
+                  </Button>
+                </div>
+                {run && !runGraph ? (
+                  <GraphRunTrail
+                    run={run}
+                    selectedNodeId={selectedNodeId}
+                    selectedAttemptId={attemptId}
+                    onSelect={(nodeId, nextAttemptId) => {
+                      onSelectNode(nodeId);
+                      if (nextAttemptId) onSelectAttempt(nextAttemptId);
+                    }}
+                  />
+                ) : (
+                  canvas
+                )}
+              </div>
+              {inspector}
             </div>
-            {run && !runGraph ? (
-              <GraphRunTrail
-                run={run}
-                selectedNodeId={selectedNodeId}
-                selectedAttemptId={attemptId}
-                onSelect={(nodeId, nextAttemptId) => {
-                  onSelectNode(nodeId);
-                  if (nextAttemptId) onSelectAttempt(nextAttemptId);
-                }}
-              />
-            ) : (
-              canvas
-            )}
-          </div>
-          {inspector}
-        </div>
+          </GraphTabPanel>
+          <GraphTabPanel value="request">
+            {runSummary ? <GraphRunRequestPanel run={selectedRun} summary={runSummary} /> : null}
+          </GraphTabPanel>
+          <GraphTabPanel value="evidence">
+            {runSummary ? <GraphRunEvidencePanel summary={runSummary} onInspect={onInspect} /> : null}
+          </GraphTabPanel>
+          <GraphTabPanel value="technical">
+            {runSummary ? <GraphRunTechnicalPanel summary={runSummary} /> : null}
+          </GraphTabPanel>
+        </GraphTabs>
       ) : (
         // 窄屏纵向堆叠时保留画布、节点控制和检查器的自然高度，避免 flex 压缩后内容重叠。
         <div className="flex shrink-0 flex-col gap-3 lg:min-h-0 lg:flex-1 lg:shrink lg:flex-row">
