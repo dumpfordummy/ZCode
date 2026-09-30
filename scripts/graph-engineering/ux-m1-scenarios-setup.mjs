@@ -168,7 +168,17 @@ const occupied = {
       /blocked while a run is unresolved/,
     );
     await T(page, "graph-recipe-field-2-name").fill("Unit tests (edited)"); // 编辑仍被允许
-    assert.match(await T(page, "graph-project-recipes").innerText(), /Unsaved project-check edits/);
+    // UX-M2.2：未保存编辑的披露改为 Save 旁的变更摘要（按稳定 id 列出）。
+    assert.match(
+      await T(page, "graph-recipe-changes").innerText(),
+      /Unsaved changes to saved checks/,
+    );
+    assert.equal(
+      await page
+        .locator('[data-testid="graph-recipe-change"][data-change="modified"]')
+        .getAttribute("data-check-id"),
+      "test-unit",
+    );
     await invokeHandler(page, "graph-save-recipes"); // 备用控件：处理函数自身拒绝
     await flush(page);
     await until(() => page.evaluate(() => Boolean(window.__probe?.view)), "probe view loaded");
