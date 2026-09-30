@@ -64,3 +64,51 @@ Service, store, digests, portable schema and limits, the replace dialog, the UX-
 ### 1.6 Acceptance (Cloud)
 
 Real `GraphWorkflowService` with an in-memory store behind the fixture Host. Browsing and previewing with a run waiting; every mutation refused (Host call log shows no `wf.mutate`, `wf.instantiate`, `graph.saveDefinition`); Built-in/Yours; version rows and labels including no date for built-ins; Used-by from actual facts; New-run version line; Workflows origin line; Advanced holds digest and revision; English/Chinese; light/dark; 1280x720 and 1920x1080; keyboard focus.
+
+## 2. UX-M3.2 — separate versioning and share tasks
+
+"Transfer" stops being one operation. **Share** holds three tasks and **Advanced** holds the manual JSON route. All of them reuse the existing service operations unchanged: `preview` (capture, export, import; pure), `mutate` (create, version, duplicate; library only), the portable schema, the 256 KB limit, the secret and private-path scan and the reviewed-preview gate.
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant UI as Share task
+  participant S as IGraphWorkflowService
+  U->>UI: choose source (design / version / file / JSON)
+  UI->>S: preview(...) — pure, no mutation
+  S-->>UI: template + json + errors + diagnostics
+  U->>UI: read the JSON, tick "I reviewed it"
+  U->>UI: pick the target, read the disclosures, press the save button
+  UI->>S: mutate(create | version, expectedRevision)
+  S-->>UI: authoritative list()
+  UI->>UI: diff previous vs returned list -> select the result
+```
+
+### 2.1 Save current design (as a new workflow or as a new version)
+
+- **Source** is the design shown on Workflows, including unsaved edits. If it has unsaved edits the task says so **before** any mutation, next to the target: for a new version "This version includes your current unsaved design edits.", for a new workflow "This workflow includes your current unsaved design edits." It never silently includes or omits them. The preview is built from the same design.
+- **Target** is an explicit choice: "A new workflow", or "New version of X" for each of your own, non-archived workflows. The dropdown of the Workflow section is never an implicit target. Default: the workflow the design originated from (`definition.template.id`) when that workflow is yours, not archived and still offered; otherwise "A new workflow". When the design came from a built-in, the task says built-ins cannot get new versions and that saving creates your own workflow.
+- **Name and description** default to what the target already has (the target's name and its latest version's description for a new version; the design's name and an empty description for a new workflow), so an untouched form neither renames the workflow nor drops its description. The service derives the workflow's name from the saved template (`entry.name = template.name`, unchanged). If the name differs from the target's current name the task states "The workflow will be renamed from X to Y." before the confirm button. No service contract change is needed; if one ever were, the milestone stops and reports.
+- **Gate** is the existing one: preview, read the JSON, tick the reviewed checkbox. The confirm button (`graph-library-create` for a new workflow, `graph-library-save-version` for a version) is disabled with a reason until the gate is met, and with the occupied-workspace reason while a run owns the workspace.
+- A design that is not a version-5 graph cannot be captured; the task says so instead of a bare disabled button.
+
+### 2.2 Export selected version
+
+Shows `Workflow X · Version N` for the version selected in Versions and exports exactly that stored version (`preview({action:"export"})`). It states that the unsaved Workflows canvas is not part of the export. Preview, JSON, reviewed checkbox, then **Export to file** (blocked while a run owns the workspace, spec 1.4). After saving it names the workflow and version that were exported. Cancelling the save dialog is neither success nor failure.
+
+### 2.3 Import a workflow file
+
+Three separate steps: **choose file** (bounded read, fatal UTF-8 decode, unchanged), **preview and review** (`preview({action:"import"})`, no mutation, allowed while a run is active), **save into the library** with the same explicit target choice and rename disclosure as 2.1. Nothing is saved by choosing or previewing. Where the platform cannot select a file, the task says so and points to Advanced.
+
+### 2.4 Advanced / manual JSON
+
+The existing paste route moves under **Advanced**: an editable JSON field, **Validate preview**, then the same review and save step as 2.3. Editing the JSON invalidates any preview and reviewed state. Library-revision conflicts show their error with Refresh beside it (1.4 of the M3.1 surface); after Refresh the reviewed preview is kept and the save is retried explicitly against the new revision.
+
+### 2.5 Results, duplicate and built-ins
+
+- After create / new version / duplicate the dialog selects the resulting workflow **and** version and shows "Saved: X · Version N is now selected." (`role=status`). The result is derived from the list the service returned, by comparing it with the list before the call: exactly one new workflow, or exactly one new version of one workflow; otherwise nothing is selected and the message says the library was updated. The version number is never guessed.
+- For a built-in, Archive and "new version" stay unavailable with an explanation, and the duplicate action reads **Duplicate to edit** (the supported path).
+
+### 2.6 Acceptance (Cloud)
+
+Pure functions for targets, rename disclosure and result derivation are unit tested. Browser scenarios with the real service: default target from origin; the dropdown is not the target; dirty disclosure text for both targets; rename disclosure; description kept; new version selected from the returned list; duplicate result selected; built-in origin; export identifies workflow and version and ignores the canvas; export blocked while a run is active; import choose/preview/save as separate steps with no mutation before save; manual JSON under Advanced; reviewed gate resets on edit; library conflict then Refresh then explicit retry succeeds.
