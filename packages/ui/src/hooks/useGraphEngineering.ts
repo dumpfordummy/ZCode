@@ -29,6 +29,7 @@ import {
 } from "@/graph-engineering/graphApprovalView.js";
 
 import { captureGraphContinuation } from "@/graph-engineering/graphRoutingView.js";
+import { assertGraphAdmission } from "@/graph-engineering/graphAdmission.js";
 import {
   graphWorkspaceReadState,
   readGraphWorkspaceProjection,
@@ -200,6 +201,11 @@ export function useGraphEngineering(scope: GraphScope) {
     ) =>
       act(async () => {
         if (!service) return;
+        // UX-M1：任何调用方（按钮、备用控件、脚本）到达准入前，都在最低的 Renderer 路径上拒绝。
+        // 丢失 ACK 后重发的保留请求已创建的那个运行不算第二次准入。Host 的准入检查仍是权威。
+        assertGraphAdmission(latestView.current?.runs ?? [], {
+          reconcilingRequestId: submission.current?.requestId,
+        });
         const owner = generation.current;
         const confirmedDefinition = structuredClone(definition);
         const request = await captureGraphSubmission({
@@ -256,6 +262,10 @@ export function useGraphEngineering(scope: GraphScope) {
       (definition: GraphSequentialDefinition, settings: GraphNativeSettings) =>
         act(async () => {
           if (!service) return;
+          // 预检准备会保存/复用设计并请求 Host 预检：占用期间同样不得到达。
+          assertGraphAdmission(latestView.current?.runs ?? [], {
+            reconcilingRequestId: submission.current?.requestId,
+          });
           const owner = generation.current;
           const captured = await prepareGraphRunConfirmation({
             definition,
