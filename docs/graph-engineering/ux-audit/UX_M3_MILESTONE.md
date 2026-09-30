@@ -32,13 +32,13 @@ Graph stays an agent engineering workspace, not a workflow-database UI. Advanced
 
 Each checkpoint's contract is written in [UX_M3_SPEC.md](UX_M3_SPEC.md) and committed before its behavior.
 
-| Checkpoint | Deliverable                                                     | Size / risk    |
-| ---------- | --------------------------------------------------------------- | -------------- |
-| UX-M3.1    | One library surface, clear version semantics, read-only browse  | M / low-medium |
-| UX-M3.2    | Separate save-version and share tasks with explicit targets     | M-L / medium   |
-| UX-M3.3    | Open in Runs; honest historical pins                            | S / low-medium |
-| UX-M3.4    | Restore the four historical drivers on the final UI             | S / low        |
-| Windows    | One combined acceptance, afterwards                             | after Cloud    |
+| Checkpoint | Deliverable                                                    | Size / risk    |
+| ---------- | -------------------------------------------------------------- | -------------- |
+| UX-M3.1    | One library surface, clear version semantics, read-only browse | M / low-medium |
+| UX-M3.2    | Separate save-version and share tasks with explicit targets    | M-L / medium   |
+| UX-M3.3    | Open in Runs; honest historical pins                           | S / low-medium |
+| UX-M3.4    | Restore the four historical drivers on the final UI            | S / low        |
+| Windows    | One combined acceptance, afterwards                            | after Cloud    |
 
 ### UX-M3.1 — one library surface, clear version semantics
 

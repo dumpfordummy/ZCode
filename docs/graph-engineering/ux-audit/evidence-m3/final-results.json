@@ -1,0 +1,17 @@
+{
+  "note": "Actual exits of the combined Cloud pass (Linux, Node 24.14.0, pnpm 10.33.2, Chromium 141). Not Windows, not Electron.",
+  "commands": [
+    { "command": "node scripts/check-workspace-freshness.mjs", "exit": 0, "result": "fresh; ahead 43 / behind 1 of origin/main (threshold 50)" },
+    { "command": "pnpm typecheck", "exit": 0 },
+    { "command": "pnpm lint", "exit": 0, "result": "0 errors, 75 warnings (the pre-existing baseline; none in a changed file)" },
+    { "command": "pnpm architecture:check", "exit": 0, "result": "violations 0, baseline 0, new 0" },
+    { "command": "oxfmt --check on the changed source, test, script and doc files", "exit": 0 },
+    { "command": "node --import tsx --test test/*.test.ts (cwd packages/ui)", "exit": 0, "result": "223 pass, 0 fail, 0 skipped" },
+    { "command": "node --import tsx --test packages/services/src/graph-engineering/**/*.test.ts (60 files)", "exit": 0, "result": "363 tests: 361 pass, 0 fail, 2 skipped (genuine-TRX replay needs PRE_Z8_TRX_FIXTURE_MANIFEST)" },
+    { "command": "node --import tsx --test scripts/graph-engineering/*.test.mjs", "exit": 1, "result": "122 tests: 111 pass, 11 fail. All 11 are environment limits in files this branch did not touch: 7 need the .NET SDK, 4 launch Microsoft Edge (same 11 as the UX-M2 Cloud pass). driver-selectors.test.mjs and context-picker-roundtrip.test.mjs pass." },
+    { "command": "ux-m3-browser.mjs", "exit": 0, "result": "31 pass (29 behaviour, 6 screenshot scenarios return immediately without --shots)" },
+    { "command": "ux-m2-browser.mjs", "exit": 0, "result": "18 pass" },
+    { "command": "ux-m1-browser.mjs", "exit": 0, "result": "30 pass" },
+    { "command": "context-picker-browser.mjs", "exit": 0, "result": "14 pass" }
+  ]
+}
