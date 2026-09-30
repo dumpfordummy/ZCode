@@ -4,6 +4,7 @@ import { graphEditorGuidanceZh } from "./graphEditorGuidance.js";
 import { graphRunClarityZh } from "./graphRunClarity.js";
 import { graphContextPickerZh } from "./graphContextPicker.js";
 import { graphM1Zh } from "./graphM1.js";
+import { graphM2Zh } from "./graphM2.js";
 /** 中文翻译 */
 const zhCN: Record<string, string> = {
   ...graphPreZ8Zh,
@@ -12,6 +13,7 @@ const zhCN: Record<string, string> = {
   ...graphRunClarityZh,
   ...graphContextPickerZh,
   ...graphM1Zh,
+  ...graphM2Zh,
   "graph.node.approval": "人工审批",
   "graph.status.WaitingForApproval": "等待审批",
   "graph.status.AwaitingContinuation": "等待明确继续",
@@ -6715,7 +6717,7 @@ const zhCN: Record<string, string> = {
   "graph.z4.recipesHelp":
     "编辑当前工作区 .zcode/config.json 的 graphRecipes 数组。声明固定可执行文件、参数数组、相对 cwd、超时、sourcePaths、expectedOutputs 和 verifier。仅支持 '{operationId}'、'{sourceDigest}'、'{buildDigest}'、'{reportPath}' 占位符。不支持 Shell 配方。原生权限仍需单独审阅；读取或保存不会执行命令。",
   "graph.z4.loadRecipes": "读取配方",
-  "graph.z4.saveRecipes": "保存配方",
+  "graph.z4.saveRecipes": "保存检查",
   "graph.z4.recipesArray": "请输入配方 JSON 数组。",
   "graph.z4.recipesSaved": "配方已保存，未执行命令。",
   "graph.z4.recipeExample": "构建配方示例",

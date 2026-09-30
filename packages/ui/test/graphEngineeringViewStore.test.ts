@@ -48,3 +48,22 @@ test("focus requests are per workspace", () => {
   assert.equal(store().selections["workspace-a"]?.focus, "draft");
   assert.equal(store().selections["workspace-b"]?.focus, undefined);
 });
+
+test("UX-M2.1: every explicit run navigation increments reveal; other navigation keeps it", () => {
+  reset();
+  store().selectRun(KEY, "run-1");
+  const first = store().selections[KEY]?.reveal ?? 0;
+  assert.ok(first > 0);
+  // 同一个已选中的运行再次被显式打开（例如翻页后按 Go to run）也必须能再次翻到它所在的页。
+  store().selectRun(KEY, "run-1");
+  assert.equal(store().selections[KEY]?.reveal, first + 1);
+  store().select(KEY, { focus: "run" });
+  store().select(KEY, { mode: "design" });
+  store().select(KEY, { mode: "runs" });
+  assert.equal(store().selections[KEY]?.reveal, first + 1, "select() never reveals");
+  assert.equal(
+    useGraphEngineeringViewStore.getState().selections["workspace-b"]?.reveal,
+    undefined,
+    "another workspace is untouched",
+  );
+});

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphApprovalEvidence } from "./GraphApprovalEvidence.js";
 import { useGraphRunText } from "./GraphRunText.js";
+import { useGraphTime } from "./GraphM2Text.js";
 import {
   graphApprovalActionState,
   graphApprovalCommand,
@@ -42,6 +43,7 @@ export function GraphApprovalInspector({
   ) => void;
 }) {
   const { intl } = useZCodeIntl();
+  const time = useGraphTime();
   const t = (id: string) => intl.formatMessage({ id: `graph.approval.${id}` });
   const u = useGraphRunText();
   const [comment, setComment] = useState("");
@@ -227,7 +229,7 @@ export function GraphApprovalInspector({
         >
           <h4 className="font-medium">{t("decisionHistory")}</h4>
           <p>
-            {t(decision.value)} · {new Date(decision.decidedAt).toLocaleString()}
+            {t(decision.value)} · {time(decision.decidedAt)}
           </p>
           <p className="whitespace-pre-wrap break-words">{decision.comment}</p>
           <dl className="break-all font-mono text-ui-xs">

@@ -4,6 +4,7 @@ import { graphEditorGuidanceEn } from "./graphEditorGuidance.js";
 import { graphRunClarityEn } from "./graphRunClarity.js";
 import { graphContextPickerEn } from "./graphContextPicker.js";
 import { graphM1En } from "./graphM1.js";
+import { graphM2En } from "./graphM2.js";
 /** English translations */
 const enUS: Record<string, string> = {
   ...graphPreZ8En,
@@ -12,6 +13,7 @@ const enUS: Record<string, string> = {
   ...graphRunClarityEn,
   ...graphContextPickerEn,
   ...graphM1En,
+  ...graphM2En,
   "graph.node.approval": "Human Approval",
   "graph.status.WaitingForApproval": "Waiting for approval",
   "graph.status.AwaitingContinuation": "Waiting for explicit Continue",
@@ -7054,7 +7056,7 @@ const enUS: Record<string, string> = {
   "graph.z4.recipesHelp":
     "Edit this workspace's .zcode/config.json graphRecipes array. Fixed executable/argument arrays, relative cwd, timeout, sourcePaths, expectedOutputs and verifier are required. Only '{operationId}', '{sourceDigest}', '{buildDigest}', '{reportPath}' placeholders are supported. Shell recipes are unsupported. Native permission remains separate; loading or saving does not execute work.",
   "graph.z4.loadRecipes": "Load recipes",
-  "graph.z4.saveRecipes": "Save recipes",
+  "graph.z4.saveRecipes": "Save checks",
   "graph.z4.recipesArray": "Enter a JSON array of recipes.",
   "graph.z4.recipesSaved": "Recipes saved. No command was executed.",
   "graph.z4.recipeExample": "Build recipe example",

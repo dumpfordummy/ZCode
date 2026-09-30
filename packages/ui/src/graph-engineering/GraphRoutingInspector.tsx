@@ -2,6 +2,7 @@ import type { GraphConditionAttempt, GraphSequentialRun } from "@zcode/services"
 import { Button } from "@/components/ui/button.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { graphRoutingCanContinue } from "./graphRoutingView.js";
+import { useGraphTime } from "./GraphM2Text.js";
 
 export function GraphRoutingInspector({
   run,
@@ -12,8 +13,9 @@ export function GraphRoutingInspector({
   disabled: boolean;
   onContinue(runId: string, checkpointId: string, checkpointDigest: string): void;
 }) {
-  const { intl, locale } = useZCodeIntl(),
+  const { intl } = useZCodeIntl(),
     t = (key: string) => intl.formatMessage({ id: `graph.z5.${key}` });
+  const time = useGraphTime();
   const routing = run.routing,
     config = run.definition.routing;
   if (!routing || !config) return null;
@@ -34,7 +36,7 @@ export function GraphRoutingInspector({
           {routing.admissions} / {config.limits.maxNodeAdmissions}
         </dd>
         <dt className="text-foreground-subtle">{t("deadline")}</dt>
-        <dd>{new Date(routing.deadlineAt).toLocaleString(locale)}</dd>
+        <dd>{time(routing.deadlineAt)}</dd>
         <dt className="text-foreground-subtle">{t("maxRepairIterations")}</dt>
         <dd>{config.region?.maxRepairIterations ?? 0}</dd>
         <dt className="text-foreground-subtle">{t("usage")}</dt>

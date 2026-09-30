@@ -240,6 +240,7 @@ export function GraphEditor({
           occupiedReason={occupiedReason}
           activeRunId={activeRun?.id}
           needsYouRunIds={needsYouRunIds}
+          reveal={navigation?.reveal}
           newRunPane={newRunPane}
           selectedRun={selectedRun}
           selectedNodeId={selectedNode?.id}
@@ -323,7 +324,10 @@ export function GraphEditor({
         </>
       ) : null}
       {/* 新建运行/审阅中的失败显示在主操作旁；其余位置仍用这里的通用提示，避免同一条错误出现两次。 */}
-      {graph.error && !(showingRuns && (newRunPane || confirmation)) ? (
+      {graph.error &&
+      !(showingRuns && (newRunPane || confirmation)) &&
+      // UX-M2.3：检查保存失败已由 Checks 编辑器在“保存检查”旁说明，这里不再重复同一条消息。
+      !(showingSetup && graph.errorSource === "checks") ? (
         <p role="alert" className="break-words text-ui-sm text-destructive">
           {graph.error}
         </p>

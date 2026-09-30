@@ -91,9 +91,10 @@ export async function occupiedSteps({ isolation, window, receipt }) {
       await window.waitForFunction(
         () => !document.querySelector('[data-testid="graph-save-recipes"]')?.disabled,
       );
+      // UX-M2.2：保留的编辑由 Save 旁的变更摘要披露（“已保存的检查有未保存的更改”及按 id 的清单）。
       assert.match(
-        await T(window, "graph-project-recipes").innerText(),
-        /Unsaved project-check edits/,
+        await T(window, "graph-recipe-changes").innerText(),
+        /Unsaved changes to saved checks/,
         "retained edits are disclosed",
       );
       await name.fill("Alternate test (renamed)");

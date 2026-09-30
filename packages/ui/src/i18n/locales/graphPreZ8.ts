@@ -57,7 +57,6 @@ export const graphPreZ8En: Record<string, string> = {
   "graph.preZ8.recipeConflict":
     "Project checks changed outside this form. Your draft is retained. Review the current saved configuration before discarding or merging your edits.",
   "graph.preZ8.useSavedChecks": "Discard edits and use loaded checks",
-  "graph.preZ8.unsavedChecks": "Unsaved project-check edits are retained for this workspace.",
   "graph.preZ8.recipeSaveBlocked":
     "Load project checks before saving; a failed read or an external conflict must be resolved first.",
   "graph.preZ8.showSavedChecks": "Show current saved checks",
@@ -130,7 +129,6 @@ export const graphPreZ8Zh: Record<string, string> = {
   "graph.preZ8.recipeConflict":
     "项目检查已在此表单之外改变。草稿已保留；丢弃或合并编辑前，请审阅当前已保存配置。",
   "graph.preZ8.useSavedChecks": "丢弃编辑并使用已加载检查",
-  "graph.preZ8.unsavedChecks": "此工作区的未保存项目检查编辑已保留。",
   "graph.preZ8.recipeSaveBlocked": "请先加载项目检查；读取失败或外部冲突需先解决。",
   "graph.preZ8.showSavedChecks": "查看当前已保存检查",
   "graph.preZ8.experimental": "高级：实验性并行工作流",

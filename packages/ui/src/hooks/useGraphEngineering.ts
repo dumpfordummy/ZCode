@@ -48,7 +48,12 @@ interface GraphScope {
 
 /** The Host schedules work. This hook only reads projections and handles explicit user actions. */
 /** Where an action error came from; only errors of the admission path belong beside Review and run. */
-export type GraphErrorSource = "checks";
+/**
+ * Which operation raised the single action error. UX-M1.4 added `checks`; UX-M2.3 adds the
+ * admission path (`review` = preflight, `start` = Start) and `design` (a design save), so each
+ * surface shows only its own failures. Untagged operations (cancel, decisions, recovery) have none.
+ */
+export type GraphErrorSource = "checks" | "review" | "start" | "design";
 
 export function useGraphEngineering(scope: GraphScope) {
   const resolution = useWorkspaceServicesResolution(
@@ -196,7 +201,7 @@ export function useGraphEngineering(scope: GraphScope) {
           definition,
           expectedRevision: definition.revision,
         });
-      }),
+      }, "design"),
     [act, service, target],
   );
 
@@ -245,7 +250,7 @@ export function useGraphEngineering(scope: GraphScope) {
           confirmationProvenance.current = null;
         }
         return owns(owner) ? run.id : undefined;
-      }),
+      }, "start"),
     [act, service, target, owns],
   );
 
@@ -313,7 +318,7 @@ export function useGraphEngineering(scope: GraphScope) {
           if (owns(owner) && captured?.provenance)
             confirmationProvenance.current = captured.provenance;
           return owns(owner) ? captured : undefined;
-        }),
+        }, "review"),
       [act, service, workflowService, target, owns],
     ),
     run,

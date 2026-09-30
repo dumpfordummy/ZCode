@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input.js";
 import { useGraphReferencePicker } from "@/hooks/useGraphReferencePicker.js";
 import { useGraphEditorText } from "./GraphEditorMode.js";
 import { useGraphContextText } from "./GraphContextText.js";
+import { GraphContextFailure, graphFileName } from "./GraphContextFailure.js";
 import {
   graphContextOptions,
   type GraphContextKind,
@@ -120,8 +121,23 @@ export function GraphContextPicker({
       document.getElementById(`${listId}-${active}`)?.scrollIntoView?.({ block: "nearest" });
   }, [active, listId]);
 
-  const [attempt, setAttempt] = useState<{ roleId: string; value: string } | null>(null);
-  const validation = attempt && attempt.roleId === role.id ? picker.validation : undefined;
+  // UX-M2.3：一次尝试 = 用户选中的值（搜索结果，或原生选择器返回路径的文件名；完整路径放在 title）。
+  // 修复原因：原先原生选择器的尝试值为空，失败时不说明是哪个文件、原选择是否保留；取消会让旧的失败继续显示；
+  // 选择器本身抛错时是未处理的拒绝，界面什么也不显示。依据：只有属于本次尝试路径的校验才显示为失败。
+  const [attempt, setAttempt] = useState<{ roleId: string; value: string; path?: string } | null>(
+    null,
+  );
+  const [chooserError, setChooserError] = useState<{ roleId: string; message: string } | null>(
+    null,
+  );
+  const validation =
+    attempt &&
+    attempt.roleId === role.id &&
+    attempt.value &&
+    picker.validationPath === (attempt.path ?? attempt.value)
+      ? picker.validation
+      : undefined;
+  const chooserFailure = chooserError?.roleId === role.id ? chooserError.message : undefined;
   const busy = validation?.status === "loading";
   const finish = (outcome: Awaited<ReturnType<typeof picker.select>>) => {
     // 只有仍是当前意图的回执才写入；否则（换槽位/换工作区/已关闭）静默丢弃。
@@ -134,12 +150,26 @@ export function GraphContextPicker({
       onApply({ roleId: role.id, value: option.value });
       return;
     }
+    setChooserError(null);
     setAttempt({ roleId: role.id, value: option.value });
     finish(await picker.select(async () => option.value));
   };
   const chooseNative = async () => {
+    setChooserError(null);
     setAttempt({ roleId: role.id, value: "" });
-    finish(await picker.selectNative());
+    try {
+      const outcome = await picker.selectNative((path) =>
+        // 取消不是失败：清除本槽位的尝试（连同旧的失败说明）。选中则记下文件名与完整路径。
+        setAttempt(path ? { roleId: role.id, value: graphFileName(path), path } : null),
+      );
+      finish(outcome);
+    } catch (cause) {
+      setAttempt(null);
+      setChooserError({
+        roleId: role.id,
+        message: cause instanceof Error ? cause.message : String(cause),
+      });
+    }
   };
 
   const groups = options.reduce<
@@ -228,6 +258,7 @@ export function GraphContextPicker({
                 onChange={() => {
                   setSlotId(item.id);
                   setAttempt(null);
+                  setChooserError(null);
                 }}
               />
               <span className="min-w-0 break-all">
@@ -272,6 +303,7 @@ export function GraphContextPicker({
         onChange={(event) => {
           setQuery(event.target.value);
           setAttempt(null);
+          setChooserError(null);
         }}
         onKeyDown={(event) => {
           if (event.key === "ArrowDown" || event.key === "ArrowUp") {
@@ -353,20 +385,12 @@ export function GraphContextPicker({
           {checking}
         </p>
       ) : null}
-      {validation?.status === "error" ? (
-        <div
-          role="alert"
-          className="space-y-0.5 rounded-md bg-destructive/10 px-2 py-1"
-          data-testid="graph-context-validation-error"
-        >
-          {attempt?.value ? (
-            <p className="break-all font-medium">
-              {t("selectionFailed", { value: attempt.value })}
-            </p>
-          ) : null}
-          <p className="break-all text-destructive">{validation.error}</p>
-        </div>
-      ) : null}
+      <GraphContextFailure
+        attempt={validation?.status === "error" ? attempt : null}
+        diagnostic={validation?.status === "error" ? validation.error : undefined}
+        chooserFailure={chooserFailure}
+        previous={current}
+      />
       {files && picker.canSelectFile ? (
         <Button
           variant="outline"

@@ -84,6 +84,8 @@ const needsYou = {
     host.setRuns("A", [...many, permissionWaitRun("run-far")]);
     await boot(page, host, url);
     await T(page, "graph-needs-you").waitFor();
+    // UX-M2.1：由新到旧，等待中的运行在第 1 页；翻到较早的一页再截图，与原场景语义一致。
+    await T(page, "graph-history-next").click();
     await shot(page, shotsDir, "m1-needs-you-scope", SIZES[0]);
     await setState(page, { locale: "zh-CN" });
     await T(page, "graph-needs-you-scope").waitFor();

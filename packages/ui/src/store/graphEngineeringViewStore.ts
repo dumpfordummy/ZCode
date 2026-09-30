@@ -29,13 +29,18 @@ interface GraphViewSelection {
   edgeKey?: string;
   /** Runs destination: show the read-only graph of the frozen run definition. */
   runGraph?: boolean;
+  /**
+   * UX-M2.1: incremented by every explicit navigation to a run (`selectRun`), so the history shows
+   * that run's page even when it was already selected. Refreshes never change it. Navigation only.
+   */
+  reveal?: number;
 }
 
 /** Renderer-local navigation only. Accepted graphs, attempts and settings remain Host facts. */
 export const useGraphEngineeringViewStore = create<{
   selections: Record<string, GraphViewSelection>;
   select: (workspaceKey: string, selection: Partial<GraphViewSelection>) => void;
-  /** Open one run (and optionally one step); leaves the new-run pane. */
+  /** Open one run (and optionally one step); leaves the new-run pane and reveals its history page. */
   selectRun: (
     workspaceKey: string,
     runId: string,
@@ -71,6 +76,7 @@ export const useGraphEngineeringViewStore = create<{
           attemptId: step?.attemptId,
           regionId: undefined,
           focus: undefined,
+          reveal: (state.selections[workspaceKey]?.reveal ?? 0) + 1,
         },
       },
     })),

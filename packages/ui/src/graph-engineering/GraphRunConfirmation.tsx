@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Play } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox.js";
 import { GraphWorkflowProvenance } from "./GraphWorkflowProvenance.js";
+import { GraphFailureText } from "./GraphFailureText.js";
 import type { GraphRunConfirmationSnapshot, GraphSubmission } from "./graphSubmission.js";
 import { Button } from "@/components/ui/button.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
@@ -20,6 +21,7 @@ export function GraphRunConfirmation({
   onConfirm,
   onClose,
   error,
+  errorKind = "start",
 }: {
   snapshot: GraphRunConfirmationSnapshot;
   workspacePath: string;
@@ -29,6 +31,8 @@ export function GraphRunConfirmation({
   onClose(): void;
   /** A failed Start, shown in the commit bar next to Start. */
   error?: string;
+  /** UX-M2.3: which admission step failed, for the UI-owned framing above the verbatim message. */
+  errorKind?: "review" | "start";
 }) {
   const { intl } = useZCodeIntl(),
     t = (key: string) => intl.formatMessage({ id: `graph.z5.${key}` });
@@ -86,13 +90,11 @@ export function GraphRunConfirmation({
         data-testid="graph-review-commit"
       >
         {error ? (
-          <p
-            role="alert"
-            className="basis-full break-words text-ui-sm text-destructive"
-            data-testid="graph-run-confirmation-error"
-          >
-            {error}
-          </p>
+          <GraphFailureText
+            testId="graph-run-confirmation-error"
+            framing={errorKind === "review" ? "reviewFailed" : "startFailed"}
+            message={error}
+          />
         ) : null}
         {snapshot.provenance ? (
           <label className="flex min-w-60 flex-1 items-start gap-2 text-ui-sm">

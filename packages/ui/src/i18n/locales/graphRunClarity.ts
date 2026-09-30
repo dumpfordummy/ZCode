@@ -119,8 +119,6 @@ const messages: Record<string, [string, string]> = {
     "This request leads to End. Approval records human consent to the captured evidence; it does not certify testing or publish changes.",
     "此请求通向结束。批准记录对捕获证据的人工同意，不证明测试通过，也不会发布改动。",
   ],
-  historyPrevious: ["Previous runs", "上一页运行"],
-  historyNext: ["Next runs", "下一页运行"],
   historySelected: ["Show selected run in history", "在历史中显示所选运行"],
   historyRange: [
     "{start}–{end} of {total} runs · Page {page} of {pages}",

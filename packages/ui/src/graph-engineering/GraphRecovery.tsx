@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button.js";
 import { Textarea } from "@/components/ui/textarea.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { graphRunCanRelease } from "./graphEditing.js";
+import { useGraphTime } from "./GraphM2Text.js";
 
 export function GraphRecovery({
   run,
@@ -17,6 +18,7 @@ export function GraphRecovery({
   onRelease: (runId: string, reason: string) => void;
 }) {
   const { intl } = useZCodeIntl();
+  const time = useGraphTime();
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
   const [reason, setReason] = useState("");
   const [confirmed, setConfirmed] = useState(false);
@@ -25,7 +27,7 @@ export function GraphRecovery({
       <div className="space-y-2 text-ui-sm" data-testid="graph-release-audit">
         <p className="font-medium">{t("released")}</p>
         <p>{run.release.reason}</p>
-        <p>{new Date(run.release.releasedAt).toLocaleString()}</p>
+        <p>{time(run.release.releasedAt)}</p>
         <p className="text-foreground-subtle">{t("releaseMeaning")}</p>
       </div>
     );

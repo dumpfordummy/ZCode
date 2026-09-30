@@ -290,7 +290,11 @@ export const coreScenarios = [
       await T(page, "graph-context-option-0").click();
       await T(page, "graph-context-validation-error").waitFor();
       const message = await T(page, "graph-context-validation-error").innerText();
-      assert.match(message, /Could not use empty\.md\. The previous selection was kept\./);
+      // UX-M2.3：说明点名被保留的原选择（此处槽位原本持有 docs/Context.md）。
+      assert.match(
+        message,
+        /Could not use empty\.md\. The previous selection docs\/Context\.md was kept\./,
+      );
       assert.match(message, /Reference must be a nonempty UTF-8 text file\./);
       assert.deepEqual((await draft(page)).bindings, stored, "validation failure changes nothing");
       await T(page, "graph-context-popover").waitFor();
