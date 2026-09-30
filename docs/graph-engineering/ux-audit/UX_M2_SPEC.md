@@ -147,3 +147,48 @@ sequenceDiagram
 6. Save refused while a run is unresolved; Discard and editing still work. **Browser**.
 7. Localization of every new message in English and Chinese; check names and ids stay verbatim. **Unit** (keys) and **Browser** (zh).
 8. Mutation checks: summary drops removed checks; New-run marker missing; Discard without confirmation; Discard enabled without a ready snapshot.
+
+## 4. UX-M2.3: error framing on this journey
+
+Finalized **2026-09-30**, before UX-M2.3 was implemented. Scope: Context selection, Checks read/save, and the New-run action bar (with the inline review's commit bar, which is the same admission path). Nothing else.
+
+### 4.1 Inventory (from the source, before any change)
+
+| Surface                                    | Today                                                                                                                                                | Gap                                                                                                                                                                      |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Picker, search result fails the Host check | "Could not use {value}. The previous selection was kept." + Host diagnostic                                                                          | the sentence claims a previous selection even when the slot was empty                                                                                                    |
+| Picker, native chooser path fails          | only the Host diagnostic (for example "Unsafe workspace-relative path segment."): the attempted value is set to `""`, so the framing line is skipped | no UI explanation, no file named (Windows observation 4)                                                                                                                 |
+| Picker, native chooser cancelled           | nothing new; but an earlier failure for the slot stays on screen, now without its framing line                                                       | a cancel reads like a failure                                                                                                                                            |
+| Picker, native chooser throws              | `void chooseNative()` rejects unhandled; nothing is shown                                                                                            | a failure with no message                                                                                                                                                |
+| Checks read fails                          | `GraphRecipeReadStatus`: "Project checks could not be read. Retry the read to use current configuration." + diagnostic + Retry                       | already framed; unchanged                                                                                                                                                |
+| Checks save fails                          | the raw message near Save, **and** the same message again in the editor's generic alert                                                              | no explanation of what is still true; shown twice on one screen                                                                                                          |
+| New-run action bar / review commit bar     | the raw message of any action error except a checks save (M1 section 9)                                                                              | no explanation; errors of unrelated operations (cancel, a decision, a design save) can still appear there, although M1 section 9 limits these bars to the admission path |
+
+### 4.2 Ownership
+
+| State or rule                                  | Single owner                                                                                                                                                     |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The action error and which operation raised it | `useGraphEngineering` (unchanged single action error). Its `errorSource` gains `review` (preflight), `start` (Start) and `design` (design save) besides `checks` |
+| Instantiate errors                             | `useGraphWorkflow` (unchanged)                                                                                                                                   |
+| A picker attempt and its outcome               | `GraphContextPicker` component state; the chosen path is reported by `useGraphReferencePicker.selectNative(onPicked)`                                            |
+| Framing text                                   | UI locale tables (`graph.m2.*`). Host diagnostics are shown verbatim beneath it, never rewritten or translated                                                   |
+
+### 4.3 Rules
+
+1. **Framing above, diagnostic verbatim below.** Every error on these surfaces shows one UI-owned sentence (what did not happen and what is still true) and, beneath it, the authoritative message byte for byte.
+2. **Picker.**
+   - A failed check of a chosen file: "Could not use {file}." followed by "The previous selection {previous} was kept." only when the slot held a value, otherwise "Nothing is selected for this slot." `{file}` is the value the user chose: the search result, or the file name of the path the native chooser returned (the full returned path is in the element's title). It is never empty and never invented.
+   - A cancelled chooser shows nothing and clears an earlier failure message for that slot; it is not a failure.
+   - A chooser that throws: "The file chooser did not return a file." with the same previous/nothing sentence and the diagnostic.
+3. **Checks save.** Near **Save checks**: "The saved checks were not changed. Your unsaved edits are kept." + the Host or validation message. The editor's generic alert does not repeat a `checks` error on the Checks destination.
+4. **New-run action bar and review commit bar show only admission-path errors**: instantiate (`useGraphWorkflow`), `review` and `start`. Framing: for instantiate and `review`, "Review could not be prepared. Nothing was started; your request, context and check choices are kept."; for `start`, "Start did not complete. Check the run list to see whether a run was admitted before you start again." (a lost response can have admitted a run, so nothing here claims it did not). The UX-M1 Windows fix stays: a `checks` error never appears beside **Review and run**.
+5. **Elsewhere unchanged.** The generic alert keeps showing other operations' errors on their own destinations, and stays suppressed in the New-run pane and the inline review (UX-M1). The check-run calibration review (`GraphChecksSetup`) is outside this journey and unchanged.
+6. **Localization.** New framing exists in English and Simplified Chinese. File names, paths, check names, ids and diagnostics are not translated.
+
+### 4.4 Acceptance and how each is verified
+
+1. Picker: failed search selection with and without a previous value; chooser path failure names the file and frames it; chooser cancel shows nothing and clears an earlier failure; chooser throw is framed; the binding never changes; the diagnostic is byte-identical. **Browser** (Context-picker harness and the UX-M2 suite).
+2. Checks save failure (injected, and a real digest conflict): framed once near Save, not repeated by the generic alert, diagnostic verbatim. **Browser**.
+3. New-run bar: a preflight failure is framed; a checks-save error and an unrelated operation's error are not shown beside Review (M1 regression kept). The review bar frames a Start failure without claiming nothing started. **Browser**.
+4. English and Chinese framing. **Unit** (keys) and **Browser**.
+5. Mutation checks: "previous selection" shown without one; cancel treated as failure; chooser path unnamed; checks error shown beside Review; duplicate checks alert.
