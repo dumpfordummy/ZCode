@@ -12,6 +12,7 @@ import {
   graphChecksRequestAfterProjection,
   type GraphChecksRequest,
 } from "@/graph-engineering/graphChecksView.js";
+import { assertGraphAdmission } from "@/graph-engineering/graphAdmission.js";
 
 /** Calibration uses the existing Graph admission directly and never saves the current design. */
 export function useGraphChecks(
@@ -47,6 +48,10 @@ export function useGraphChecks(
       let command: GraphRunChecksCommand | undefined;
       const run = await act(async () => {
         const previous = retained.current?.scope === scope ? retained.current.command : undefined;
+        // UX-M1：检查运行同样是准入路径；丢失回执后同一 request 的重发不算第二次准入。
+        assertGraphAdmission(latestView.current?.runs ?? [], {
+          reconcilingRequestId: previous?.requestId,
+        });
         command = captureGraphChecksCommand(
           target,
           preview,

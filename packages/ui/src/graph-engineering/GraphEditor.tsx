@@ -18,16 +18,20 @@ import {
   reconcileGraphDraft,
   type GraphPanelProps,
 } from "./graphEngineeringView.js";
-import { graphRunIsUnresolved, graphToolOnlySettings } from "./graphEditing.js";
+import { graphToolOnlySettings } from "./graphEditing.js";
+import { graphAdmission } from "./graphAdmission.js";
+import { useGraphM1Text } from "./GraphM1Text.js";
 import { GraphLibrary } from "./GraphLibrary.js";
 import { GraphContextBar } from "./GraphContextBar.js";
 import { GraphNeedsYou } from "./GraphNeedsYou.js";
 import { GraphRunsDestination } from "./GraphRunsDestination.js";
 import { GraphSetupPanel } from "./GraphSetupPanel.js";
 import { graphFocusClass } from "./graphFocus.js";
-import { graphNeedsYou, type GraphNeedsYouItem } from "./graphNeedsYouQueue.js";
+import { graphNeedsYou } from "./graphNeedsYouQueue.js";
 import { graphRunAgainDraft } from "./graphRunAgain.js";
 import { useGraphRunActions } from "./useGraphRunActions.js";
+import { useGraphRunFocus } from "./useGraphFocusRequest.js";
+import { useGraphEditorNavigation } from "./useGraphEditorNavigation.js";
 
 export function GraphEditor({
   workspacePath,
@@ -43,6 +47,7 @@ export function GraphEditor({
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
   const u = (id: string) => intl.formatMessage({ id: `graph.preZ8.${id}` });
+  const m1 = useGraphM1Text();
   const config = useGraphConfiguration(workspacePath, workspaceIdentity);
   const { settings } = useSettings();
   const openSettingsTab = useTabStore((state) => state.openSettingsTab);
@@ -77,7 +82,11 @@ export function GraphEditor({
   const setDefinition = (draft: GraphDefinition) =>
     useGraphDraftStore.getState().editDefinition(workspaceKey, draft, reconciled.base);
   const dirty = graphDefinitionContent(displayed) !== graphDefinitionContent(view.definition);
-  const activeRun = view.runs.find(graphRunIsUnresolved);
+  // UX-M1：占用工作区的未解决运行只锁「准入」，不再锁定新建运行表单的编辑。
+  const admission = graphAdmission(view.runs);
+  const activeRun = admission.blocked
+    ? view.runs.find((run) => run.id === admission.runId)
+    : undefined;
   const selectedRun =
     showingRuns && !newRunPane ? view.runs.find((run) => run.id === navigation?.runId) : undefined;
   const definition = selectedRun ? selectedRun.definition : displayed;
@@ -134,14 +143,21 @@ export function GraphEditor({
           : readiness.errors.length
             ? u("designIssues")
             : undefined);
-  // 新建运行只依赖：可用性、模型和现有的准入限制；设计草稿的就绪问题属于 Workflows。
-  const newRunReason =
-    creationReason ??
-    (!view.availability.available
-      ? view.availability.reason || t("prerequisite")
-      : !modelReady || !defaults
-        ? t("noModel")
-        : undefined);
+  // 编辑锁（表单不可编辑）：操作进行中、其他 Host 拥有、修订冲突、不可用、没有模型。
+  // 有未解决的运行不在其中：那只锁准入（occupiedReason），草稿仍可编辑。
+  const draftLockReason = graph.pending
+    ? u("busy")
+    : (readOnlyReason ??
+      (view.readOnly
+        ? t("readOnlyHost")
+        : conflicted
+          ? t("conflict")
+          : !view.availability.available
+            ? view.availability.reason || t("prerequisite")
+            : !modelReady || !defaults
+              ? t("noModel")
+              : undefined));
+  const occupiedReason = admission.blocked ? m1("admissionBlocked") : undefined;
   const showGeneralSettingsButton =
     settings != null && settings.askUserQuestionAutoResolutionEnabled !== false;
   const openSettings = (section: "general" | "modelProvider") => {
@@ -150,20 +166,24 @@ export function GraphEditor({
   };
   const selectNode = (nodeId: string) =>
     select(workspaceKey, { nodeId, attemptId: undefined, regionId: undefined });
-  const { confirmation, setConfirmation, startRun, handleRun } = useGraphRunActions({
+  const { confirmation, dismissConfirmation, startRun, handleRun } = useGraphRunActions({
     graph,
     displayed,
     defaults,
     workspaceKey,
     selectRun,
+    admission,
+  });
+  const focusRoot = useGraphRunFocus(workspaceKey, Boolean(selectedRun));
+  const go = useGraphEditorNavigation({
+    workspaceKey,
+    newRunPane,
+    checkId: navigation?.checkId,
+    dismissConfirmation,
   });
   // Pending human actions come from the complete run list, never from the visible history page.
   const needsYou = useMemo(() => graphNeedsYou(view.runs), [view.runs]);
   const needsYouRunIds = useMemo(() => new Set(needsYou.map((item) => item.runId)), [needsYou]);
-  const goToRun = (item: GraphNeedsYouItem) => {
-    setConfirmation(null);
-    selectRun(workspaceKey, item.runId, { nodeId: item.nodeId, attemptId: item.attemptId });
-  };
   /** Review always happens inline in Runs, whichever destination asked for it. */
   const reviewAndRun = (target: GraphDefinition) => {
     select(workspaceKey, { mode: "runs", pane: "new", returnToWorkflow: false });
@@ -175,11 +195,12 @@ export function GraphEditor({
     const drafts = useGraphDraftStore.getState();
     drafts.selectLibrary(workspaceKey, seed.selection);
     drafts.setTemplateDraft(workspaceKey, seed.templateKey, seed.form);
-    setConfirmation(null);
+    dismissConfirmation();
     select(workspaceKey, { mode: "runs", pane: "new", returnToWorkflow: false });
   };
   return (
     <div
+      ref={focusRoot}
       className={`${graphFocusClass} flex min-h-0 flex-1 flex-col gap-3 overflow-auto p-3`}
       data-view={selectedRun ? "run" : destination}
     >
@@ -189,24 +210,17 @@ export function GraphEditor({
         dirty={dirty}
         conflicted={conflicted}
         runSelected={Boolean(selectedRun)}
-        onSelect={(mode) => {
-          // 内联审阅只属于当前意图；离开目的地即关闭快照，草稿与已保存设计不受影响。
-          setConfirmation(null);
-          select(workspaceKey, { mode });
-        }}
+        onSelect={go.destination}
       />
       <GraphContextBar
         modelSelection={selection}
         mode={config.draftConfig.mode}
         recipeReadState={graph.recipeReadState}
-        onOpenChecks={() => {
-          setConfirmation(null);
-          select(workspaceKey, { mode: "setup" });
-        }}
+        onOpenChecks={() => go.destination("setup")}
       />
       <GraphNeedsYou
         items={needsYou}
-        onGoToRun={goToRun}
+        onGoToRun={go.goToRun}
         onOpenConversation={(item) => {
           if (item.sessionId) onOpenConversation(workspacePath, item.sessionId, workspaceIdentity);
         }}
@@ -222,7 +236,8 @@ export function GraphEditor({
           dirty={dirty}
           disabled={disabled}
           canConfirm={!disabled && !activeRun && !conflicted}
-          newRunReason={newRunReason}
+          draftLockReason={draftLockReason}
+          occupiedReason={occupiedReason}
           activeRunId={activeRun?.id}
           needsYouRunIds={needsYouRunIds}
           newRunPane={newRunPane}
@@ -232,24 +247,20 @@ export function GraphEditor({
           attemptId={navigation?.attemptId}
           defaults={defaults}
           confirmation={confirmation}
-          onNewRun={() => {
-            setConfirmation(null);
-            select(workspaceKey, { mode: "runs", pane: "new" });
-          }}
-          onSelectRun={(runId) => {
-            setConfirmation(null);
-            selectRun(workspaceKey, runId);
-          }}
-          onCloseConfirmation={() => setConfirmation(null)}
+          onNewRun={go.newRun}
+          onSelectRun={go.selectRun}
+          onViewRun={go.viewRun}
+          onCloseConfirmation={() => dismissConfirmation()}
           onStart={(preflight) =>
             confirmation &&
+            !admission.blocked &&
             startRun(confirmation.definition, confirmation.settings, true, preflight)
           }
-          onOpenSetup={() => select(workspaceKey, { mode: "setup", returnToWorkflow: true })}
+          onOpenSetup={go.openCheckSetup}
           onReview={reviewAndRun}
           onInstantiated={(saved, continuation) => {
             acceptDefinition(workspaceKey, saved);
-            setConfirmation(null);
+            dismissConfirmation();
             void graph.reload();
             if (continuation === "review") reviewAndRun(saved);
             else select(workspaceKey, { mode: "design", returnToWorkflow: false });
@@ -275,11 +286,11 @@ export function GraphEditor({
             error={graph.error}
             recipeReadState={graph.recipeReadState}
             onLoadRecipes={graph.readRecipes}
-            onOpenSetup={() => select(workspaceKey, { mode: "setup", returnToWorkflow: true })}
+            onOpenSetup={go.openCheckSetup}
             onSaveDesign={graph.save}
             onInstantiated={(saved) => {
               acceptDefinition(workspaceKey, saved);
-              setConfirmation(null);
+              dismissConfirmation();
               select(workspaceKey, { mode: "design", returnToWorkflow: false });
               void graph.reload();
             }}
@@ -311,7 +322,8 @@ export function GraphEditor({
           />
         </>
       ) : null}
-      {graph.error ? (
+      {/* 新建运行/审阅中的失败显示在主操作旁；其余位置仍用这里的通用提示，避免同一条错误出现两次。 */}
+      {graph.error && !(showingRuns && (newRunPane || confirmation)) ? (
         <p role="alert" className="break-words text-ui-sm text-destructive">
           {graph.error}
         </p>
@@ -346,13 +358,8 @@ export function GraphEditor({
           workspaceIdentity={workspaceIdentity}
           disabled={disabled}
           returnToWorkflow={navigation?.returnToWorkflow}
-          onReturn={() =>
-            select(workspaceKey, {
-              mode: "runs",
-              pane: "new",
-              returnToWorkflow: false,
-            })
-          }
+          checkId={navigation?.checkId}
+          onReturn={go.returnToDraft}
           onRun={(runId) => selectRun(workspaceKey, runId)}
         />
       ) : null}

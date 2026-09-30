@@ -19,6 +19,7 @@ export function GraphRunConfirmation({
   canConfirm,
   onConfirm,
   onClose,
+  error,
 }: {
   snapshot: GraphRunConfirmationSnapshot;
   workspacePath: string;
@@ -26,6 +27,8 @@ export function GraphRunConfirmation({
   canConfirm: boolean;
   onConfirm(preflight?: GraphSubmission["preflight"]): void;
   onClose(): void;
+  /** A failed Start, shown in the commit bar next to Start. */
+  error?: string;
 }) {
   const { intl } = useZCodeIntl(),
     t = (key: string) => intl.formatMessage({ id: `graph.z5.${key}` });
@@ -79,9 +82,18 @@ export function GraphRunConfirmation({
         </pre>
       </details>
       <div
-        className="sticky bottom-0 z-10 -mx-3 mt-auto flex flex-wrap items-center gap-3 border-t border-border bg-background px-3 py-2"
+        className="sticky -bottom-3 z-10 -mx-3 -mb-3 mt-auto flex flex-wrap items-center gap-3 border-t border-border bg-background px-3 pb-5 pt-2"
         data-testid="graph-review-commit"
       >
+        {error ? (
+          <p
+            role="alert"
+            className="basis-full break-words text-ui-sm text-destructive"
+            data-testid="graph-run-confirmation-error"
+          >
+            {error}
+          </p>
+        ) : null}
         {snapshot.provenance ? (
           <label className="flex min-w-60 flex-1 items-start gap-2 text-ui-sm">
             <Checkbox

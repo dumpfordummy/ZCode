@@ -17,6 +17,9 @@ Assignment: product UX for everyday engineering work in Graph Engineering (open 
 | [IMPLEMENTATION_REPORT.md](IMPLEMENTATION_REPORT.md)                                 | What changed, built vs reused, results, limits, manual checklist                                                    |
 | [USER_GUIDE.md](USER_GUIDE.md)                                                       | The current user flow                                                                                               |
 | [CONTEXT_PICKER_SPEC.md](CONTEXT_PICKER_SPEC.md)                                     | Context chips and the Add context picker: contract, payload semantics, event order, verification, Windows checklist |
+| [UX_M1_MILESTONE.md](UX_M1_MILESTONE.md)                                             | Approved plan for UX-M1: draft while running, one setup journey, keyboard and state clarity                         |
+| [UX_M1_SPEC.md](UX_M1_SPEC.md)                                                       | UX-M1 contract written before implementation, with as-built notes                                                   |
+| [UX_M1_REPORT.md](UX_M1_REPORT.md)                                                   | UX-M1 result: commits, screenshots, test outcomes, mutation results, limits, Windows checklist                      |
 | [CLOUD_HANDOFF.md](CLOUD_HANDOFF.md)                                                 | Start here in a new environment: identity, file map, constraints, what to reproduce                                 |
 | [BEFORE_AFTER.md](BEFORE_AFTER.md)                                                   | Before and after screenshots from the real app                                                                      |
 | [../../../PRODUCT.md](../../../PRODUCT.md), [../../../DESIGN.md](../../../DESIGN.md) | Product context (new file) and a scoped, clearly-marked proposed section appended to the existing design system     |

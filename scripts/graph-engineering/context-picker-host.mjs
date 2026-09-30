@@ -162,6 +162,10 @@ export async function createContextPickerHost() {
     workspaces,
     outside,
     calls,
+    /** Shared with other harness hosts so their operations can be held, failed and logged the same way. */
+    log,
+    gate,
+    maybeFail,
     /** 让某个操作的回执停在 Host，直到 release()；用于制造迟到回执。 */
     hold(op) {
       gates.set(op, { held: true, waiting: [] });

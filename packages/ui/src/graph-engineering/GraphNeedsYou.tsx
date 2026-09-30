@@ -1,6 +1,7 @@
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button.js";
 import type { GraphNeedsYouItem } from "./graphNeedsYouQueue.js";
+import { useGraphM1Text } from "./GraphM1Text.js";
 import { useGraphRunText } from "./GraphRunText.js";
 
 /**
@@ -17,6 +18,7 @@ export function GraphNeedsYou({
   onOpenConversation(item: GraphNeedsYouItem): void;
 }) {
   const u = useGraphRunText();
+  const m1 = useGraphM1Text();
   const first = items[0];
   if (!first) return null;
   const label = u(`needs.${first.kind}`, { step: first.stepName, run: first.runName });
@@ -51,6 +53,13 @@ export function GraphNeedsYou({
           {u("openConversationNow")}
         </Button>
       ) : null}
+      {/* 范围说明：这是本主机对本工作区运行的投影，不是全局队列。 */}
+      <p
+        className="basis-full text-ui-xs font-normal text-foreground-subtle"
+        data-testid="graph-needs-you-scope"
+      >
+        {m1("needsYouScope")}
+      </p>
     </section>
   );
 }

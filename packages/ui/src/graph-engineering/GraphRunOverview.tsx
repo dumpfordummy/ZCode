@@ -35,7 +35,9 @@ export function GraphRunOverview({
   const result = useMemo(() => graphRunResult(run, summary), [run, summary]);
   return (
     <section
-      className="shrink-0 space-y-3 rounded-xl border border-border bg-surface p-3"
+      // 「查看运行」的落点：可被程序聚焦，并使用 Graph 的边框式焦点标记。
+      tabIndex={-1}
+      className="shrink-0 space-y-3 rounded-xl border border-border bg-surface p-3 focus-visible:border-brand"
       data-testid="graph-run-summary"
       data-run-id={run.id}
     >

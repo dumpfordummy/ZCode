@@ -26,7 +26,10 @@ export function GraphRunsDestination(props: {
   dirty: boolean;
   disabled: boolean;
   canConfirm: boolean;
-  newRunReason?: string;
+  /** The form cannot be edited (operation in flight, other Host, conflict, unavailable, no model). */
+  draftLockReason?: string;
+  /** A run occupies the workspace: the draft stays editable, admission is refused. */
+  occupiedReason?: string;
   activeRunId?: string;
   needsYouRunIds: ReadonlySet<string>;
   newRunPane: boolean;
@@ -38,9 +41,11 @@ export function GraphRunsDestination(props: {
   confirmation: GraphRunConfirmationSnapshot | null;
   onNewRun(): void;
   onSelectRun(runId: string): void;
+  /** UX-M1.3: open a run because the user asked to view it (focus follows), unlike a history row. */
+  onViewRun(runId: string): void;
   onCloseConfirmation(): void;
   onStart(preflight?: GraphSubmission["preflight"]): void;
-  onOpenSetup(): void;
+  onOpenSetup(checkId?: string): void;
   onReview(definition: GraphDefinition): void;
   onInstantiated(saved: GraphDefinition, continuation: "review" | "save"): void;
   onSelectNode(nodeId: string): void;
@@ -77,13 +82,13 @@ export function GraphRunsDestination(props: {
             canConfirm={props.canConfirm}
             onClose={props.onCloseConfirmation}
             onConfirm={props.onStart}
+            error={graph.error ?? undefined}
           />
         ) : props.newRunPane ? (
           <section className="space-y-3" data-testid="graph-new-run-pane">
             <GraphDesignReadiness
-              reason={props.newRunReason}
+              reason={props.draftLockReason}
               errors={[]}
-              activeRunId={props.activeRunId}
               onOpenRun={props.onSelectRun}
             />
             <GraphLibrary
@@ -91,9 +96,13 @@ export function GraphRunsDestination(props: {
               workspaceIdentity={props.workspaceIdentity}
               definition={props.displayed}
               dirty={props.dirty}
-              disabled={props.newRunReason !== undefined}
+              disabled={props.draftLockReason !== undefined}
               inline
-              disabledReason={props.newRunReason}
+              disabledReason={props.draftLockReason}
+              admissionReason={props.occupiedReason}
+              onViewCurrentRun={
+                props.activeRunId ? () => props.onViewRun(props.activeRunId!) : undefined
+              }
               pending={graph.pending}
               error={graph.error}
               recipeReadState={graph.recipeReadState}

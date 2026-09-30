@@ -45,6 +45,7 @@ const zh = {
     implement: "实现",
     build: "构建",
     test: "按配置的标准测试",
+    review: "审阅",
     reviewer: "审阅当前验证",
     "final-gate": "最终人工审阅",
     repair: "根据当前证据修复",
