@@ -12,6 +12,7 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphDraftStore, type GraphTemplateFormDraft } from "@/store/graphDraftStore.js";
 import { useGraphEngineeringViewStore } from "@/store/graphEngineeringViewStore.js";
 import { GraphTemplateRecipeBindings } from "./GraphTemplateRecipeBindings.js";
+import { useGraphRecipeChanges } from "./GraphRecipeChanges.js";
 import { GraphRecipeReadStatus } from "./GraphRecipeReadStatus.js";
 import type { GraphRecipeReadState } from "./graphRecipeRead.js";
 import { initialTemplateParameters, templateBindingErrors } from "./graphWorkflowView.js";
@@ -102,6 +103,7 @@ export function GraphTemplateBindings({
   const recipes = recipeReadState.status === "ready" ? recipeReadState.snapshot : null;
   const errors = templateBindingErrors(template, parameters, bindings, recipes);
   const readBlocked = hasTools && recipeReadState.status !== "ready";
+  const recipeChanges = useGraphRecipeChanges(workspaceKey);
   // 准入类动作（Review and run、Save as workflow only）：编辑锁、占用、检查未读、字段未补全时一律拒绝。
   // 处理函数自身也检查，不依赖按钮的禁用样式。
   const occupied = Boolean(admissionReason);
@@ -277,6 +279,7 @@ export function GraphTemplateBindings({
         template={template}
         bindings={bindings}
         snapshot={recipes}
+        changes={recipeChanges}
         disabled={disabled || readBlocked}
         onOpenChecks={onOpenSetup}
         onChange={(update) =>

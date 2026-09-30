@@ -9,6 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphSelect } from "./GraphSelect.js";
 import { GraphSelectedChecks } from "./GraphSelectedChecks.js";
+import { useGraphM2Text } from "./GraphM2Text.js";
+import type { GraphRecipeChanges } from "./graphRecipeChanges.js";
 import { graphCheckSelection } from "./graphCheckSelection.js";
 import { useGraphTemplateText } from "./graphTemplateText.js";
 import { useGraphSetupText } from "./GraphSetupFields.js";
@@ -23,6 +25,7 @@ export function GraphTemplateRecipeBindings({
   bindings,
   snapshot,
   disabled,
+  changes = { kind: "clean" },
   onChange,
   onOpenChecks,
 }: {
@@ -30,6 +33,8 @@ export function GraphTemplateRecipeBindings({
   bindings: GraphTemplateBindings;
   snapshot: GraphRecipeSnapshot | null;
   disabled: boolean;
+  /** UX-M2.2: unsaved edits in Checks. Disclosed only; the saved snapshot stays what is shown and used. */
+  changes?: GraphRecipeChanges;
   onChange(update: (current: GraphTemplateBindings) => GraphTemplateBindings): void;
   /** Open the existing Checks editor (optionally on one saved check) without leaving the draft. */
   onOpenChecks(checkId?: string): void;
@@ -38,6 +43,7 @@ export function GraphTemplateRecipeBindings({
   const u = (key: string) => intl.formatMessage({ id: `graph.preZ8.${key}` });
   const t = useGraphSetupText();
   const display = useGraphTemplateText();
+  const m2 = useGraphM2Text();
   const tools = template.graph.nodes.filter((node) => node.type === "tool");
   const steps = graphCheckSelection(template, bindings, snapshot);
   const buildSlots = tools.filter((node) =>
@@ -47,6 +53,16 @@ export function GraphTemplateRecipeBindings({
   );
   return (
     <>
+      {tools.length && changes.kind !== "clean" ? (
+        <p
+          role="status"
+          className="text-ui-sm text-warning"
+          data-testid="graph-new-run-unsaved-checks"
+          data-kind={changes.kind}
+        >
+          {m2(changes.kind === "changes" ? "newRunUnsaved" : "newRunUnsavedUnlisted")}
+        </p>
+      ) : null}
       {tools.map((node) => {
         const choices = compatibleTemplateRecipes(template, node.id, snapshot, bindings);
         const primary = bindings.recipes[node.id];
@@ -86,6 +102,7 @@ export function GraphTemplateRecipeBindings({
             <GraphSelectedChecks
               step={steps.find((item) => item.nodeId === node.id)!}
               label={display.node(node.id, node.name)}
+              changes={changes}
               onOpenChecks={onOpenChecks}
             />
             {snapshot?.recipes.length && !choices.length ? (

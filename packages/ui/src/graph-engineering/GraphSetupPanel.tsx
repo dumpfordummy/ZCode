@@ -3,6 +3,8 @@ import type { useGraphEngineering } from "@/hooks/useGraphEngineering.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphM1Text } from "./GraphM1Text.js";
 import { GraphProjectRecipes } from "./GraphProjectRecipes.js";
+import { useGraphM2Text } from "./GraphM2Text.js";
+import { useGraphRecipeChanges } from "./GraphRecipeChanges.js";
 
 type GraphHook = ReturnType<typeof useGraphEngineering>;
 
@@ -35,6 +37,9 @@ export function GraphSetupPanel({
   const { intl } = useZCodeIntl();
   const u = (id: string) => intl.formatMessage({ id: `graph.preZ8.${id}` });
   const m1 = useGraphM1Text();
+  const m2 = useGraphM2Text();
+  // UX-M2.2：返回始终立即生效；有未保存的检查编辑时，在返回按钮旁说明它们保留且下一次运行不使用。
+  const unsaved = useGraphRecipeChanges(workspaceKey).kind !== "clean";
   return (
     <>
       {returnToWorkflow ? (
@@ -59,6 +64,11 @@ export function GraphSetupPanel({
             data-testid="graph-return-note"
           >
             {m1("returnKept")}
+            {unsaved ? (
+              <span className="block text-warning" data-testid="graph-return-unsaved">
+                {m2("returnUnsaved")}
+              </span>
+            ) : null}
           </p>
         </div>
       ) : null}

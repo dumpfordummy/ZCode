@@ -6,6 +6,7 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphDraftStore } from "@/store/graphDraftStore.js";
 import { GraphRecipeReadStatus } from "./GraphRecipeReadStatus.js";
 import { GraphRecipeForm } from "./GraphRecipeForm.js";
+import { GraphRecipeList } from "./GraphRecipeList.js";
 import { GraphDotnetPreset } from "./GraphDotnetPreset.js";
 import { GraphChecksSetup } from "./GraphChecksSetup.js";
 import { useGraphSetupText } from "./GraphSetupFields.js";
@@ -13,10 +14,11 @@ import { useGraphProjectSetup } from "@/hooks/useGraphProjectSetup.js";
 import { graphAdmission } from "./graphAdmission.js";
 import { useGraphM1Text } from "./GraphM1Text.js";
 import {
-  graphRecipeDraft,
-  graphRecipeGuidedIssue,
-  recipeVerifierKind,
-} from "./graphRecipeDraftForm.js";
+  GraphRecipeChangeSummary,
+  GraphRecipeDiscard,
+  useGraphRecipeChanges,
+} from "./GraphRecipeChanges.js";
+import { graphRecipeDraft } from "./graphRecipeDraftForm.js";
 
 export function GraphProjectRecipes({
   graph,
@@ -41,6 +43,7 @@ export function GraphProjectRecipes({
   const u = (id: string) => intl.formatMessage({ id: `graph.preZ8.${id}` });
   const s = useGraphSetupText();
   const m1 = useGraphM1Text();
+  const changes = useGraphRecipeChanges(workspaceKey);
   const target = useMemo(
     () => ({
       workspacePath,
@@ -119,63 +122,14 @@ export function GraphProjectRecipes({
       <p className="text-ui-sm text-foreground-subtle">{u("setupHelp")}</p>
       <GraphRecipeReadStatus state={readState} onRead={() => void graph.readRecipes()} />
       {/* 主视图：已保存检查的紧凑列表，显示名称/类型/配置状态与编辑操作 */}
-      {parsed.kind === "ready" && parsed.recipes.length ? (
-        <div
-          className="overflow-auto rounded-lg border border-border"
-          data-testid="graph-recipe-list"
-        >
-          <table className="w-full border-collapse text-ui-sm">
-            <thead className="bg-surface-hover text-ui-xs text-foreground-subtle">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium">{s("checkName")}</th>
-                <th className="px-3 py-2 text-left font-medium">{s("checkType")}</th>
-                <th className="px-3 py-2 text-left font-medium">{s("checkStatus")}</th>
-                <th className="px-3 py-2 text-left font-medium" />
-              </tr>
-            </thead>
-            <tbody>
-              {parsed.recipes.map((recipe, index) => {
-                const issue = graphRecipeGuidedIssue(recipe);
-                return (
-                  <tr key={index} className="border-t border-border">
-                    <td className="px-3 py-2 font-medium">
-                      {String(recipe.name ?? recipe.id ?? index + 1)}
-                    </td>
-                    <td className="px-3 py-2 text-foreground-subtle">
-                      {s(recipeVerifierKind(recipe))}
-                    </td>
-                    <td className="px-3 py-2">
-                      {issue ? (
-                        <span className="text-warning">{s("checkNeedsAttention")}</span>
-                      ) : (
-                        <span className="text-foreground-subtle">{s("checkConfigured")}</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        data-testid={`graph-recipe-edit-${index}`}
-                        onClick={() => {
-                          setOpenIndex(index);
-                          formRef.current?.scrollIntoView({
-                            behavior: "smooth",
-                            block: "start",
-                          });
-                        }}
-                      >
-                        {s("edit")}
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p className="text-ui-sm text-foreground-subtle">{s("noChecks")}</p>
-      )}
+      <GraphRecipeList
+        recipes={parsed.kind === "ready" ? parsed.recipes : []}
+        changes={changes}
+        onEdit={(index) => {
+          setOpenIndex(index);
+          formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }}
+      />
       <div ref={formRef} tabIndex={-1} className="outline-none">
         <GraphRecipeForm
           text={text}
@@ -185,11 +139,6 @@ export function GraphProjectRecipes({
         />
       </div>
       {/* 主路径：未保存、冲突、校验与保存操作始终可见，避免阻塞信息仅藏在 Advanced 下 */}
-      {dirty ? (
-        <p role="status" className="text-foreground-subtle">
-          {u("unsavedChecks")}
-        </p>
-      ) : null}
       {conflict ? (
         <div className="space-y-2">
           <p role="alert" className="text-warning">
@@ -246,11 +195,22 @@ export function GraphProjectRecipes({
           </p>
         ) : null}
       </div>
+      {/* UX-M2.2：保存前说明它的完整范围（整个清单，含之前保留的编辑）以及下一次运行不使用未保存的编辑 */}
+      <GraphRecipeChangeSummary
+        id="graph-recipe-changes"
+        changes={changes}
+        loaded={readState.status === "ready"}
+        conflict={conflict}
+      />
       <Button
         size="sm"
         variant="outline"
         disabled={saveBlocked}
-        aria-describedby={saveBlocked ? "graph-recipe-save-reason" : undefined}
+        aria-describedby={
+          [dirty ? "graph-recipe-changes" : "", saveBlocked ? "graph-recipe-save-reason" : ""]
+            .filter(Boolean)
+            .join(" ") || undefined
+        }
         data-testid="graph-save-recipes"
         onClick={() => {
           // 处理函数自身也拒绝：不依赖按钮的禁用样式（备用控件、脚本同样到不了 Host）。
@@ -281,6 +241,22 @@ export function GraphProjectRecipes({
               : u("recipeSaveBlocked")}
         </p>
       ) : null}
+      {/* 冲突时沿用原有的冲突处理（“放弃编辑并使用已加载检查”），这里不再提供第二个放弃入口 */}
+      {conflict ? null : (
+        <GraphRecipeDiscard
+          changes={changes}
+          loaded={readState.status === "ready"}
+          disabled={disabled || !form}
+          onDiscard={() => {
+            if (readState.status !== "ready" || !form || conflict) return;
+            useGraphDraftStore
+              .getState()
+              .acceptRecipes(workspaceKey, readState.snapshot, form.text);
+            if (openIndex >= readState.snapshot.recipes.length) setOpenIndex(0);
+            setSaved(false);
+          }}
+        />
+      )}
       {saved ? (
         <p role="status" data-testid="graph-recipes-saved">
           {t("recipesSaved")}

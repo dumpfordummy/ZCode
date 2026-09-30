@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button.js";
 import type { GraphStepChecks } from "./graphCheckSelection.js";
 import { useGraphM1Text } from "./GraphM1Text.js";
 import { useGraphSetupText } from "./GraphSetupFields.js";
+import { useGraphM2Text } from "./GraphM2Text.js";
+import { graphRecipeChangeOf, type GraphRecipeChanges } from "./graphRecipeChanges.js";
 
 /**
  * UX-M1.2：新建运行里，某个 Build/Test 步骤当前所选的检查（名称、类型、已保存·未运行）。
@@ -11,13 +13,17 @@ import { useGraphSetupText } from "./GraphSetupFields.js";
 export function GraphSelectedChecks({
   step,
   label,
+  changes = { kind: "clean" },
   onOpenChecks,
 }: {
   step: GraphStepChecks;
   label: string;
+  /** UX-M2.2: unsaved check edits, only to mark a row; the row keeps showing the saved check. */
+  changes?: GraphRecipeChanges;
   onOpenChecks(checkId?: string): void;
 }) {
   const m1 = useGraphM1Text();
+  const m2 = useGraphM2Text();
   const kind = useGraphSetupText();
   return (
     <ul
@@ -32,6 +38,8 @@ export function GraphSelectedChecks({
       ) : (
         step.checks.map((check) => {
           const unresolved = check.state === "missing" || check.state === "incompatible";
+          const unsaved =
+            check.state === "resolved" ? graphRecipeChangeOf(changes, check.id) : undefined;
           return (
             <li
               key={check.id}
@@ -46,6 +54,15 @@ export function GraphSelectedChecks({
                   <span className="text-foreground-subtle">
                     {kind(check.recipe.verifier.kind)} · {m1("checkSavedNotRun")}
                   </span>
+                  {unsaved ? (
+                    <span
+                      className="text-warning"
+                      data-testid="graph-selected-check-unsaved"
+                      data-change={unsaved}
+                    >
+                      {m2(unsaved === "modified" ? "selectedModified" : "selectedRemoved")}
+                    </span>
+                  ) : null}
                   <Button
                     variant="ghost"
                     size="sm"

@@ -26,6 +26,22 @@ test("the graph-engineering components only read UX-M2 message ids that are defi
     for (const match of source.matchAll(/\bm2\(\s*"([A-Za-z]+)"/g)) used.add(match[1]!);
     for (const match of source.matchAll(/"graph\.m2\.([A-Za-z]+)"/g)) used.add(match[1]!);
   }
+  // 由条件或模板字符串选出的键，扫描不到字面量，单独校验。
+  for (const key of [
+    "rowNew",
+    "rowUnsaved",
+    "selectedModified",
+    "selectedRemoved",
+    "newRunUnsaved",
+    "newRunUnsavedUnlisted",
+    "changeAdded",
+    "changeModified",
+    "changeRemoved",
+    "unsummarizable.invalid-json",
+    "unsummarizable.missing-id",
+    "unsummarizable.duplicate-id",
+  ])
+    used.add(key);
   assert.ok(used.size >= 3, "the scan found UX-M2 keys in the components");
   for (const key of used)
     assert.ok(GRAPH_M2_MESSAGE_KEYS.includes(key), `graph.m2.${key} is used but not defined`);

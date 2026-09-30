@@ -8,6 +8,78 @@ const messages: Record<string, [string, string]> = {
   historyNewer: ["Newer runs", "较新的运行"],
   historyOlder: ["Older runs", "较早的运行"],
   timeNotRecorded: ["Time not recorded", "未记录时间"],
+  // UX-M2.2：未保存的检查编辑。检查名称与 id 原样显示，不翻译。
+  unsavedTitle: ["Unsaved changes to saved checks", "已保存的检查有未保存的更改"],
+  unsavedNotUsed: [
+    "They are not used by the next run. Review and runs use the saved checks until you save.",
+    "下一次运行不会使用这些更改。保存之前，审阅和运行都使用已保存的检查。",
+  ],
+  saveScope: [
+    "Save checks writes the whole check list, including every change listed here, also those made earlier in this workspace.",
+    "“保存检查”会写入整个检查清单，包括这里列出的每一项更改，也包括之前在此工作区所做的更改。",
+  ],
+  changeAdded: ["Added", "新增"],
+  changeModified: ["Changed", "已更改"],
+  changeRemoved: ["Removed", "已删除"],
+  changeReordered: ["The order of the checks changed.", "检查的顺序已改变。"],
+  changeFormattingOnly: [
+    "Only the formatting differs; saving writes the same checks.",
+    "仅格式不同；保存会写入相同的检查。",
+  ],
+  "unsummarizable.invalid-json": [
+    "The changes cannot be listed: the check list is not valid JSON. Save validates the list first and refuses an invalid one.",
+    "无法列出更改：检查清单不是有效的 JSON。保存前会先校验清单，并拒绝无效的清单。",
+  ],
+  "unsummarizable.missing-id": [
+    "The changes cannot be listed: a check has no id. Save validates the list first and refuses an invalid one.",
+    "无法列出更改：有检查缺少 id。保存前会先校验清单，并拒绝无效的清单。",
+  ],
+  "unsummarizable.duplicate-id": [
+    "The changes cannot be listed: two checks have the same id. Save validates the list first and refuses an invalid one.",
+    "无法列出更改：有两个检查使用相同的 id。保存前会先校验清单，并拒绝无效的清单。",
+  ],
+  comparedEarlier: [
+    "Compared with the saved checks loaded earlier; they are not loaded right now.",
+    "对比对象是之前加载的已保存检查；它们当前未加载。",
+  ],
+  comparedStarted: [
+    "Compared with the saved checks these edits started from; the saved checks have changed since (see below).",
+    "对比对象是这些编辑开始时的已保存检查；此后已保存的检查已发生变化（见下文）。",
+  ],
+  discardOpen: ["Discard all unsaved check edits…", "放弃所有未保存的检查编辑…"],
+  discardQuestion: [
+    "Discard all unsaved edits to the check list? Every check returns to the saved checks, not only the one that is open.",
+    "要放弃检查清单的全部未保存编辑吗？所有检查都会恢复为已保存的检查，而不只是当前打开的那一项。",
+  ],
+  discardConfirm: ["Discard all edits", "放弃全部编辑"],
+  keepEditing: ["Keep editing", "继续编辑"],
+  discardNeedsSaved: [
+    "Load the saved checks before discarding, so the edits are replaced by the current saved checks.",
+    "请先加载已保存的检查再放弃，这样编辑会被当前已保存的检查替换。",
+  ],
+  discarded: [
+    "Unsaved check edits were discarded; the saved checks are shown.",
+    "已放弃未保存的检查编辑；现在显示的是已保存的检查。",
+  ],
+  rowUnsaved: ["Unsaved changes", "有未保存的更改"],
+  rowNew: ["New · not saved", "新增 · 未保存"],
+  returnUnsaved: [
+    "Unsaved check edits stay in Checks and are not used by the next run.",
+    "未保存的检查编辑保留在“检查”中，下一次运行不会使用它们。",
+  ],
+  newRunUnsaved: [
+    "Checks has unsaved edits. Review and the next run use the saved checks shown here.",
+    "“检查”中有未保存的编辑。审阅和下一次运行使用这里显示的已保存检查。",
+  ],
+  newRunUnsavedUnlisted: [
+    "Checks has unsaved edits that cannot be listed. Review and the next run use the saved checks shown here.",
+    "“检查”中有无法列出的未保存编辑。审阅和下一次运行使用这里显示的已保存检查。",
+  ],
+  selectedModified: ["Unsaved edits in Checks are not used", "“检查”中的未保存编辑不会被使用"],
+  selectedRemoved: [
+    "Removed in unsaved edits; the saved check is still used",
+    "已在未保存的编辑中删除；仍使用已保存的检查",
+  ],
 };
 export const graphM2En = Object.fromEntries(
   Object.entries(messages).map(([key, value]) => [`graph.m2.${key}`, value[0]]),
