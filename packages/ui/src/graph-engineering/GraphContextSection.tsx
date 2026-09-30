@@ -150,9 +150,12 @@ export function GraphContextSection({
           .join(" · ");
 
   return (
-    <section className="space-y-3 text-ui-sm" data-testid="graph-reference-bindings">
+    <section
+      className="space-y-3 border-t border-border pt-5 text-ui-base"
+      data-testid="graph-reference-bindings"
+    >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h4 className="text-ui-base font-medium">
+        <h4 className="text-ui-base font-semibold">
           {intl.formatMessage({ id: "graph.preZ8.contextLabel" })}
         </h4>
         <p className="text-foreground-subtle" data-testid="graph-context-summary">

@@ -23,7 +23,10 @@ async function frames(page, dir, name, locale, prepare, scroll = 0) {
       await page.setViewportSize(size);
       if (prepare) await prepare();
       await page.evaluate((top) => {
-        for (const node of document.querySelectorAll("[data-view], [data-testid=graph-library-dialog], [data-testid=graph-run-history]"))
+        window.scrollTo(0, 0);
+        for (const node of document.querySelectorAll(
+          "[data-view], [data-testid=graph-library-dialog], [data-testid=graph-run-history]",
+        ))
           node.scrollTop = 0;
         const view = document.querySelector("[data-view]");
         if (view) view.scrollTop = top;
@@ -39,8 +42,23 @@ const pick = async (page, id) => {
   await T(page, "graph-run-summary").waitFor();
 };
 
+const readyScenario = (locale) => ({
+  name: `captures (${locale}): new run ready to review`,
+  async run({ page, host, url, shotsDir }) {
+    if (!shotsDir) return;
+    host.setRuns("A", runs([failedTestRun("run-failed")]));
+    await preparedDraft(page, host, url);
+    if (locale !== "en-US") {
+      await setState(page, { locale });
+      await T(page, "graph-new-run-pane").waitFor();
+    }
+    await frames(page, shotsDir, "m4-new-run", locale);
+    await frames(page, shotsDir, "m4-new-run-lower", locale, undefined, 640);
+  },
+});
+
 const scenario = (locale) => ({
-  name: `captures (${locale}): new run, permission wait, failed Test, final approval, library`,
+  name: `captures (${locale}): new run occupied, permission wait, failed Test, final approval, library`,
   async run({ page, host, url, shotsDir }) {
     if (!shotsDir) return;
     const waiting = permissionWaitRun("run-waiting");
@@ -67,4 +85,8 @@ const scenario = (locale) => ({
   },
 });
 
-export const uxM4Scenarios = [scenario("en-US"), ...(QUICK ? [] : [scenario("zh-CN")])];
+export const uxM4Scenarios = [
+  readyScenario("en-US"),
+  scenario("en-US"),
+  ...(QUICK ? [] : [readyScenario("zh-CN"), scenario("zh-CN")]),
+];

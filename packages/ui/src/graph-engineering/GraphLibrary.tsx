@@ -1,13 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { GraphDefinition, GraphSequentialDefinition } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog.js";
+import { Dialog, DialogContent } from "@/components/ui/dialog.js";
 import { useGraphWorkflow } from "@/hooks/useGraphWorkflow.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphDraftStore } from "@/store/graphDraftStore.js";
@@ -16,14 +10,15 @@ import { GraphTemplateBindings } from "./GraphTemplateBindings.js";
 import { GraphLibraryAdvanced } from "./GraphLibraryAdvanced.js";
 import { GraphLibraryBlocked } from "./GraphLibraryBlocked.js";
 import { GraphLibraryManage } from "./GraphLibraryManage.js";
-import { GraphLibraryPicker } from "./GraphLibraryPicker.js";
+import { GraphLibraryPicker, useGraphWorkflowLabel } from "./GraphLibraryPicker.js";
+import { GraphLibraryDialogBody } from "./GraphLibraryDialogBody.js";
+import { GraphLibraryList } from "./GraphLibraryList.js";
 import { GraphLibraryReplace } from "./GraphLibraryReplace.js";
 import { useGraphLibraryReplacement } from "./useGraphLibraryReplacement.js";
 import { useGraphLibrarySelection } from "./useGraphLibrarySelection.js";
 import { GraphCarryReport } from "./GraphCarryReport.js";
 import { GraphPinNotice } from "./GraphPinNotice.js";
 import { GraphRunWorkflowVersion } from "./GraphRunWorkflowVersion.js";
-import { GraphLibrarySection } from "./GraphLibrarySections.js";
 import { GraphLibraryVersions } from "./GraphLibraryVersions.js";
 import { GraphShare } from "./GraphShare.js";
 import { GraphShareImport } from "./GraphShareImport.js";
@@ -99,6 +94,9 @@ export function GraphLibrary({
   const workflow = useGraphWorkflow(target);
   const choose = useGraphDraftStore((state) => state.selectLibrary);
   const [open, setOpen] = useState(false);
+  // UX-M4：对话框固定页脚的承载节点；使用标签里的操作栏通过 portal 渲染到这里。
+  const [actionsHost, setActionsHost] = useState<HTMLElement | null>(null);
+  const label = useGraphWorkflowLabel();
   // UX-M3.2：最近一次创建/新版本/复制的结果，来自服务返回的列表；用户改选后清除。
   const [saved, setSaved] = useState<GraphMutationResult | "unknown" | null>(null);
   const entries = workflow.view?.entries ?? [];
@@ -107,6 +105,10 @@ export function GraphLibrary({
   useEffect(() => {
     if (inline) void workflow.read();
   }, [inline, workflow.read]);
+  // UX-M4：新的库操作一开始就清除上一次的成功提示，失败与成功不会同时竞争注意力。
+  useEffect(() => {
+    if (workflow.pending) setSaved(null);
+  }, [workflow.pending]);
   const locked = disabled || workflow.pending;
   // 表单编辑只受 locked 限制；创建/替换/审阅这类准入动作还受占用限制。
   const actionsLocked = locked || Boolean(admissionReason);
@@ -182,7 +184,7 @@ export function GraphLibrary({
           disabled={locked || entry.archived}
           disabledReason={entry.archived ? u("noCompatibleVersion") : disabledReason}
           admissionReason={admissionReason}
-          onViewCurrentRun={viewCurrentRun}
+          onViewCurrentRun={inline ? viewCurrentRun : undefined}
           error={inline ? workflow.error || error || undefined : undefined}
           errorKind={workflow.error ? "review" : errorKind}
           onLoadRecipes={onLoadRecipes}
@@ -191,6 +193,7 @@ export function GraphLibrary({
             onOpenSetup(checkId);
           }}
           allowReview={inline && Boolean(onReview)}
+          actionsHost={inline ? null : actionsHost}
           onInstantiate={requestInstantiate}
         />
       </>
@@ -217,10 +220,12 @@ export function GraphLibrary({
       onSelect={(id) => select(id)}
     />
   );
-  const content = inline ? (
-    <div className="space-y-4">
-      {picker}
-      {description}
+  const inlineContent = (
+    <div className="space-y-5">
+      <div className="space-y-2">
+        {picker}
+        {description}
+      </div>
       {entry && version ? (
         <GraphRunWorkflowVersion
           entry={entry}
@@ -232,98 +237,114 @@ export function GraphLibrary({
       ) : null}
       {bindings}
     </div>
-  ) : (
-    <div className="space-y-5">
-      <p
-        className="break-all font-mono text-ui-sm text-foreground-subtle"
-        data-testid="graph-library-workspace"
-      >
-        {workspacePath}
-      </p>
-      {workflow.error ? (
-        <div
-          role="alert"
-          className="flex flex-wrap items-center gap-2"
-          data-testid="graph-library-error"
-        >
-          <p className="min-w-0 flex-1 break-words text-ui-sm text-destructive">{workflow.error}</p>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={workflow.pending}
-            data-testid="graph-library-error-refresh"
-            onClick={() => void workflow.read()}
-          >
-            {t("refresh")}
-          </Button>
-        </div>
-      ) : null}
-      {saved ? (
-        <p role="status" className="text-ui-sm font-medium" data-testid="graph-library-result">
-          {saved === "unknown"
-            ? m3("savedUnknown")
-            : m3("saved", { name: saved.name, version: saved.version })}
-        </p>
-      ) : null}
-      {admissionReason ? (
-        <GraphLibraryBlocked
-          id={blockedId}
-          reason={m3("blockedBrowse")}
-          onViewCurrentRun={viewCurrentRun}
+  );
+  // UX-M4：一个较新的失败不能和旧的成功提示并排；新操作开始时旧结果也已清除（见上面的 effect）。
+  const shownSaved = saved && !workflow.error ? saved : null;
+  const dialogBody = (
+    <GraphLibraryDialogBody
+      title={t("library")}
+      help={u("workflowHelp")}
+      workspacePath={workspacePath}
+      list={
+        <GraphLibraryList
+          entries={entries}
+          selected={entry?.id}
+          disabled={workflow.pending}
+          onSelect={(id) => select(id)}
         />
-      ) : gates.mutation ? (
-        <GraphLibraryBlocked id={blockedId} reason={gates.mutation} />
-      ) : null}
-      <GraphLibrarySection id="workflow" title={m3("sectionWorkflow")}>
-        {picker}
-        {description}
-      </GraphLibrarySection>
-      {entry ? (
-        <GraphLibrarySection id="versions" title={m3("sectionVersions")}>
-          <GraphLibraryVersions
-            entry={entry}
-            rows={rows}
-            selected={version?.version}
-            disabled={workflow.pending}
-            onSelect={(next) => select(entry.id, next)}
-          />
-          <GraphLibraryManage
-            key={entry.id}
-            workflow={workflow}
-            entry={entry}
-            version={version?.version}
-            mutationBlocked={gates.mutation}
-            blockedId={blockedId}
-            onSaved={onSaved}
-          />
-        </GraphLibrarySection>
-      ) : null}
-      <GraphLibrarySection id="use" title={m3("sectionUse")}>
-        {bindings}
-        {onOpenInRuns ? (
-          <div
-            className="flex flex-wrap items-center gap-2"
-            data-testid="graph-library-open-runs-row"
-          >
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={!entry || !version || entry.archived}
-              data-testid="graph-library-open-runs"
-              onClick={() => {
-                setOpen(false);
-                onOpenInRuns();
-              }}
+      }
+      detail={
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-baseline gap-x-3">
+            <h3
+              className="min-w-0 break-words text-ui-xl font-semibold"
+              data-testid="graph-library-entry"
             >
-              {m3("openInRuns")}
-            </Button>
-            <p className="text-ui-xs text-foreground-subtle">{m3("openInRunsHelp")}</p>
+              {entry ? label.name(entry) : t("chooseWorkflow")}
+              {entry ? (
+                <span className="text-ui-base font-normal text-foreground-subtle">
+                  {` · ${label.kind(entry)}`}
+                  {entry.archived ? ` · ${m3("archivedTag")}` : ""}
+                </span>
+              ) : null}
+            </h3>
           </div>
-        ) : null}
-      </GraphLibrarySection>
-      <details className="space-y-3" data-testid="graph-library-share">
-        <summary className="cursor-pointer text-ui-sm font-medium">{m3("sectionShare")}</summary>
-        {workflow.view ? (
+          {entry?.archived ? (
+            <p role="status" className="text-ui-sm text-warning">
+              {m3("archivedNote")}
+            </p>
+          ) : null}
+          {description}
+        </div>
+      }
+      notices={
+        <>
+          {admissionReason ? (
+            <GraphLibraryBlocked
+              id={blockedId}
+              reason={m3("blockedBrowse")}
+              onViewCurrentRun={viewCurrentRun}
+            />
+          ) : gates.mutation ? (
+            <GraphLibraryBlocked id={blockedId} reason={gates.mutation} />
+          ) : null}
+          {workflow.error ? (
+            <div
+              role="alert"
+              className="flex flex-wrap items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2"
+              data-testid="graph-library-error"
+            >
+              <p className="min-w-0 flex-1 break-words text-ui-base">{workflow.error}</p>
+              <Button
+                variant="outline"
+                disabled={workflow.pending}
+                data-testid="graph-library-error-refresh"
+                onClick={() => void workflow.read()}
+              >
+                {t("refresh")}
+              </Button>
+            </div>
+          ) : null}
+          {shownSaved ? (
+            <p
+              role="status"
+              className="rounded-lg border border-success/40 bg-success/10 px-3 py-2 text-ui-base font-medium"
+              data-testid="graph-library-result"
+            >
+              {shownSaved === "unknown"
+                ? m3("savedUnknown")
+                : m3("saved", { name: shownSaved.name, version: shownSaved.version })}
+            </p>
+          ) : null}
+        </>
+      }
+      panels={{
+        versions: entry ? (
+          <div className="space-y-4">
+            <GraphLibraryVersions
+              entry={entry}
+              rows={rows}
+              selected={version?.version}
+              disabled={workflow.pending}
+              onSelect={(next) => select(entry.id, next)}
+            />
+            <GraphLibraryManage
+              key={entry.id}
+              workflow={workflow}
+              entry={entry}
+              version={version?.version}
+              mutationBlocked={gates.mutation}
+              blockedId={blockedId}
+              onSaved={onSaved}
+            />
+          </div>
+        ) : (
+          <p role="status" className="text-ui-base text-foreground-subtle">
+            {t("chooseWorkflow")}
+          </p>
+        ),
+        use: bindings,
+        share: workflow.view ? (
           <GraphShare
             workflow={workflow}
             view={workflow.view}
@@ -337,30 +358,60 @@ export function GraphLibrary({
             target={target}
             onSaved={onSaved}
           />
-        ) : null}
-      </details>
-      <GraphLibraryAdvanced workflow={workflow} digest={version?.digest} entry={entry}>
-        {workflow.view ? (
-          <GraphShareImport
-            manual
-            workflow={workflow}
-            view={workflow.view}
-            mutationBlocked={gates.mutation}
-            blockedId={blockedId}
-            target={target}
-            onSaved={onSaved}
-          />
-        ) : null}
-      </GraphLibraryAdvanced>
-    </div>
+        ) : null,
+        advanced: (
+          <GraphLibraryAdvanced workflow={workflow} digest={version?.digest} entry={entry}>
+            {workflow.view ? (
+              <GraphShareImport
+                manual
+                workflow={workflow}
+                view={workflow.view}
+                mutationBlocked={gates.mutation}
+                blockedId={blockedId}
+                target={target}
+                onSaved={onSaved}
+              />
+            ) : null}
+          </GraphLibraryAdvanced>
+        ),
+      }}
+      footer={
+        <>
+          {onOpenInRuns ? (
+            <div
+              className="flex flex-wrap items-center gap-2"
+              data-testid="graph-library-open-runs-row"
+            >
+              <Button
+                disabled={!entry || !version || entry.archived}
+                data-testid="graph-library-open-runs"
+                onClick={() => {
+                  setOpen(false);
+                  onOpenInRuns();
+                }}
+              >
+                {m3("openInRuns")}
+              </Button>
+            </div>
+          ) : null}
+          {/* 「载入设计」的操作栏由使用标签里的表单渲染到这里；占用、未填写等原因与失败就在它旁边。 */}
+          <div ref={setActionsHost} className="contents" data-testid="graph-library-actions-host" />
+          {onOpenInRuns ? (
+            <p className="basis-full text-ui-sm text-foreground-subtle">{m3("openInRunsHelp")}</p>
+          ) : null}
+        </>
+      }
+    />
   );
   return (
     <>
       {inline ? (
-        <section className="space-y-4" data-testid="graph-library-dialog">
-          <h3 className="text-ui-base font-medium">{u("useWorkflow")}</h3>
-          <p className="text-ui-sm text-foreground-subtle">{u("workflowHelp")}</p>
-          {content}
+        <section className="space-y-5" data-testid="graph-library-dialog">
+          <header className="space-y-1">
+            <h3 className="text-ui-xl font-semibold">{u("useWorkflow")}</h3>
+            <p className="text-ui-base text-foreground-subtle">{u("workflowHelp")}</p>
+          </header>
+          {inlineContent}
         </section>
       ) : (
         <>
@@ -383,14 +434,10 @@ export function GraphLibrary({
             }}
           >
             <DialogContent
-              className="graph-ui max-h-[90vh] overflow-auto sm:max-w-3xl"
+              className="graph-ui h-[min(88vh,46rem)] max-h-[88vh] gap-0 overflow-hidden p-0 sm:max-w-5xl"
               data-testid="graph-library-dialog"
             >
-              <DialogHeader>
-                <DialogTitle>{t("library")}</DialogTitle>
-                <DialogDescription>{u("workflowHelp")}</DialogDescription>
-              </DialogHeader>
-              {content}
+              {dialogBody}
             </DialogContent>
           </Dialog>
         </>

@@ -12,6 +12,7 @@ import {
   openAdvanced,
   openLibrary,
   openShare,
+  openVersions,
   optionLabels,
   selectValue,
   versionRowsOf,
@@ -181,6 +182,7 @@ const builtinOrigin = {
     assert.equal(await T(page, "graph-library-duplicate").innerText(), "Duplicate to edit");
     assert.equal(await T(page, "graph-library-archive").isDisabled(), true);
     assert.equal(await T(page, "graph-library-builtin-note").count(), 1);
+    await openVersions(page);
     await T(page, "graph-library-duplicate-name").fill("My copy");
     await T(page, "graph-library-duplicate").click();
     await T(page, "graph-library-result").waitFor();

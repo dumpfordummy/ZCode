@@ -218,12 +218,9 @@ export function GraphEditor({
         }
       />
       <GraphNeedsYou
-        // UX-M4：正在查看的运行，其横幅已经说明并承载这个操作；条带只提示其他等待你的运行。
-        items={
-          showingRuns && selectedRun
-            ? needsYou.filter((item) => item.runId !== selectedRun.id)
-            : needsYou
-        }
+        items={needsYou}
+        // UX-M4：正在查看的就是等待的那个运行时，横幅承载操作，条带退为安静的定位提示。
+        currentRunId={showingRuns ? selectedRun?.id : undefined}
         onGoToRun={go.goToRun}
         onOpenConversation={(item) => {
           if (item.sessionId) onOpenConversation(workspacePath, item.sessionId, workspaceIdentity);

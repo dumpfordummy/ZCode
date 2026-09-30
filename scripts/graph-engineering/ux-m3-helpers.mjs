@@ -24,10 +24,11 @@ export async function openLibrary(page) {
   await T(page, "graph-library-versions").waitFor();
   await flush(page);
 }
-export const openShare = (page) =>
-  page.locator('[data-testid="graph-library-share"] > summary').click();
-export const openAdvanced = (page) =>
-  page.locator('[data-testid="graph-library-advanced"] > summary').click();
+// UX-M4：Share 与 Advanced 现在是单层标签，不再是披露块。
+export const openVersions = (page) => T(page, "graph-library-tab-versions").click();
+export const openUse = (page) => T(page, "graph-library-tab-use").click();
+export const openShare = (page) => T(page, "graph-library-tab-share").click();
+export const openAdvanced = (page) => T(page, "graph-library-tab-advanced").click();
 
 /** The version rows as the user reads them: number, labels and the facts behind them. */
 export const versionRowsOf = (page) =>
@@ -42,6 +43,15 @@ export const versionRowsOf = (page) =>
   );
 /** Visible labels of the options of a select (opened, read, closed with Escape). */
 export async function optionLabels(page, testId) {
+  if (testId === "graph-library-entry" && (await page.getByTestId("graph-library-list").count()))
+    return page
+      .locator('[data-testid="graph-library-entry-option"]')
+      .evaluateAll((items) =>
+        items.map(
+          (item) =>
+            `${item.innerText.replace(/\s+/g, " ").trim()} · ${item.parentElement.querySelector("p").innerText.trim()}`,
+        ),
+      );
   await T(page, testId).click();
   const labels = await page
     .locator("[role=option][data-value]")

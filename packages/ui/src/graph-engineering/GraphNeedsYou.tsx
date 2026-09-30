@@ -10,10 +10,13 @@ import { useGraphRunText } from "./GraphRunText.js";
  */
 export function GraphNeedsYou({
   items,
+  currentRunId,
   onGoToRun,
   onOpenConversation,
 }: {
   items: GraphNeedsYouItem[];
+  /** The run whose page is open. Its banner already carries the action, so the strip only locates it. */
+  currentRunId?: string;
   onGoToRun(item: GraphNeedsYouItem): void;
   onOpenConversation(item: GraphNeedsYouItem): void;
 }) {
@@ -22,9 +25,12 @@ export function GraphNeedsYou({
   const first = items[0];
   if (!first) return null;
   const label = u(`needs.${first.kind}`, { step: first.stepName, run: first.runName });
+  const quiet = first.runId === currentRunId;
   return (
     <section
-      className="flex flex-wrap items-center gap-2 rounded-lg border border-warning/50 bg-warning/10 px-3 py-2 text-ui-sm"
+      className={`flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2 text-ui-sm ${
+        quiet ? "border-border bg-surface" : "border-warning/40 bg-warning/10"
+      }`}
       aria-label={u("needsYou")}
       data-testid="graph-needs-you"
       data-run-id={first.runId}
@@ -44,7 +50,7 @@ export function GraphNeedsYou({
       >
         {u("goToRun")}
       </Button>
-      {first.sessionId ? (
+      {first.sessionId && !quiet ? (
         <Button
           size="sm"
           data-testid="graph-needs-you-conversation"

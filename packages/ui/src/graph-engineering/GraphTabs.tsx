@@ -27,5 +27,5 @@ export function GraphTab({ className = "", ...props }: ComponentProps<typeof Tab
 }
 
 export function GraphTabPanel({ className = "", ...props }: ComponentProps<typeof TabsPrimitive.Content>) {
-  return <TabsPrimitive.Content className={`pt-4 outline-none ${className}`} {...props} />;
+  return <TabsPrimitive.Content className={`pt-4 outline-none data-[state=inactive]:hidden ${className}`} {...props} />;
 }

@@ -10,6 +10,11 @@ const messages: Record<string, [string, string]> = {
   tabRequest: ["Request and result", "请求与结果"],
   tabEvidence: ["Evidence", "证据"],
   tabTechnical: ["Technical details", "技术详情"],
+  // 新建运行：就绪只表示可以进入审阅，不表示检查通过。
+  readyToReview: [
+    "Ready to review. Nothing starts until you confirm.",
+    "可以审阅。你确认之前不会开始任何执行。",
+  ],
 };
 export const graphM4En = Object.fromEntries(
   Object.entries(messages).map(([key, value]) => [`graph.m4.${key}`, value[0]]),
