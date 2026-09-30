@@ -88,6 +88,8 @@ const graphEngineeringService = guard("graphEngineeringService", {
 });
 const graphWorkflowService = guard("graphWorkflowService", {
   list: ux("list"),
+  mutate: ux("mutate"),
+  preview: ux("preview"),
   instantiate: ux("instantiate"),
   prepare: ux("prepare"),
   projectSetup: ux("projectSetup"),

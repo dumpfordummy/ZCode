@@ -7,19 +7,19 @@
 // FIXTURE (labelled in the report): the workspace view (`getWorkspace`, the run list and the
 // definition's revision counter), `run` (admits a fixture run record), the workflow preflight
 // (`prepare`, built from the REAL reference validation and the REAL recipe store, but with a fixture
-// native environment), the library view (built from the real built-in templates), change events, and
-// the transport (a Playwright bridge instead of RPC).
+// native environment), change events, and the transport (a Playwright bridge instead of RPC).
+// UX-M3: the workflow library is the REAL `GraphWorkflowService` over an in-memory store
+// (ux-m3-library-host.mjs).
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { builtinTemplates } from "../../packages/services/src/graph-engineering/domain/workflow-samples.ts";
-import { instantiateTemplate } from "../../packages/services/src/graph-engineering/domain/workflow.ts";
 import {
   defaultDefinition,
   validateReadiness,
 } from "../../packages/services/src/graph-engineering/domain/definition.ts";
 import { createGraphRecipeStore } from "../../packages/services/src/graph-engineering/adapters/recipes.ts";
 import { createContextPickerHost } from "./context-picker-host.mjs";
+import { createLibraryFixture } from "./ux-m3-library-host.mjs";
 import { resolved, runningRun } from "./ux-m1-runs.mjs";
 
 // 与 Host 的 isConfirmedTerminal 相同的判定（domain/definition.ts）：未结束的运行占用工作区。
@@ -51,18 +51,6 @@ export async function createUxM1Host() {
     runCounter = 0;
   };
   resetState();
-  const library = {
-    revision: 1,
-    entries: builtinTemplates.map(({ id, template }) => ({
-      id,
-      name: template.name,
-      archived: false,
-      builtin: true,
-      versions: [
-        { version: 1, digest: sha(id), createdAt: 0, template: structuredClone(template) },
-      ],
-    })),
-  };
   const notify = (id) => {
     void page
       ?.evaluate((key) => window.__emitGraphChange?.(key), picker.workspaces[id])
@@ -95,6 +83,26 @@ export async function createUxM1Host() {
     unknowns: [],
   };
 
+  const saveDefinitionNow = (id, definition, expectedRevision) => {
+    if (graph[id].definition.revision !== expectedRevision)
+      throw new Error("Graph revision changed; reload before saving.");
+    const saved = { ...structuredClone(definition), revision: expectedRevision + 1 };
+    graph[id].definition = saved;
+    notify(id);
+    return structuredClone(saved);
+  };
+  // UX-M3：真实的 GraphWorkflowService（内存库存储）。instantiate 读取的两个成员由这里的工作区状态提供，
+  // 不经过 graph.saveDefinition 的日志包装，所以一次实例化在调用日志里仍是一次 wf.instantiate。
+  const libraryFixture = createLibraryFixture({
+    op,
+    graph: {
+      recipes: ({ target }) => store.read(target),
+      saveDefinition: async ({ target, definition, expectedRevision }) =>
+        saveDefinitionNow(idOf(target), definition, expectedRevision),
+    },
+  });
+
+  await libraryFixture.warm();
   const bridge = {
     ...picker.bridge,
     async getWorkspace(target) {
@@ -107,14 +115,9 @@ export async function createUxM1Host() {
     },
     async saveDefinition({ target, definition, expectedRevision }) {
       const id = idOf(target);
-      return op("graph.saveDefinition", { workspace: id, expectedRevision }, async () => {
-        if (graph[id].definition.revision !== expectedRevision)
-          throw new Error("Graph revision changed; reload before saving.");
-        const saved = { ...structuredClone(definition), revision: expectedRevision + 1 };
-        graph[id].definition = saved;
-        notify(id);
-        return structuredClone(saved);
-      });
+      return op("graph.saveDefinition", { workspace: id, expectedRevision }, async () =>
+        saveDefinitionNow(id, definition, expectedRevision),
+      );
     },
     async validateDefinition({ definition }) {
       return op("graph.validateDefinition", {}, async () => validateReadiness(definition));
@@ -170,9 +173,7 @@ export async function createUxM1Host() {
         },
       );
     },
-    async list() {
-      return op("wf.list", {}, async () => structuredClone(library));
-    },
+    ...libraryFixture.bridge,
     async instantiate({ target, id: templateId, version, expectedRevision, parameters, bindings }) {
       const id = idOf(target);
       return op(
@@ -185,19 +186,15 @@ export async function createUxM1Host() {
           parameters: structuredClone(parameters),
           bindings: structuredClone(bindings),
         },
-        async () => {
-          const entry = library.entries.find((item) => item.id === templateId);
-          const selected = entry?.versions.find((item) => item.version === version);
-          if (!selected) throw new Error("Unknown workflow version.");
-          if (graph[id].definition.revision !== expectedRevision)
-            throw new Error("Graph revision changed; reload before instantiating.");
-          // 真实的 Host 实例化：必填/未声明的引用与参数由这里的领域函数拒绝。
-          const built = instantiateTemplate(templateId, selected, parameters, bindings);
-          const saved = { ...built, revision: expectedRevision + 1 };
-          graph[id].definition = saved;
-          notify(id);
-          return structuredClone(saved);
-        },
+        () =>
+          libraryFixture.service.instantiate({
+            target,
+            id: templateId,
+            version,
+            expectedRevision,
+            parameters,
+            bindings,
+          }),
       );
     },
     async prepare({ target, revision, settings }) {
@@ -274,7 +271,7 @@ export async function createUxM1Host() {
     ...picker,
     bridge,
     graph,
-    library,
+    library: libraryFixture,
     attachPage(target) {
       page = target;
     },
@@ -302,6 +299,7 @@ export async function createUxM1Host() {
     async reset() {
       picker.reset();
       resetState();
+      libraryFixture.reset();
       // 真实的检查存储把配置写在工作区的 .zcode/config.json：每个场景从干净状态开始。
       await Promise.all(
         ids.map((id) =>
