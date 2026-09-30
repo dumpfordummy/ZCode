@@ -26,7 +26,15 @@ A bar under the tabs always shows the effective model, mode and the saved-check 
 
 One run at a time can own the workspace. While one is unresolved you can still **prepare the next task**: the request, context and check choices stay editable and are kept (see _Prepare the next task while a run is active_). Only starting is blocked.
 
-When **Review and run** is unavailable, the reason is shown beside it (in the bar that stays at the bottom of the form), with the way to fix it: **Go to first field** for a missing required field, context or check, **View current run** when a run owns the workspace. A failed review (for example a preflight error) is shown in the same bar. The longer list of fields to complete stays above it.
+When **Review and run** is unavailable, the reason is shown beside it (in the bar that stays at the bottom of the form), with the way to fix it: **Go to first field** for a missing required field, context or check, **View current run** when a run owns the workspace. A failed review (for example a preflight error) is shown in the same bar: first what that means ("Review could not be prepared. Nothing was started; your request, context and check choices are kept."), then the Host's own message, unchanged. A failed **Start** in the review says "Start did not complete" and asks you to check the run list before starting again. It does not claim that nothing started, because a lost reply can hide an admitted run. Only failures of reviewing and starting appear in these bars. A failed check save, a cancel or a decision stays where it happened. The longer list of fields to complete stays above it.
+
+## Find recent work
+
+The run list shows the **newest run first**, by the order in which runs were created (a run's later progress never moves it). It pages 25 runs at a time with **Newer runs** and **Older runs**.
+
+- Opening a run on purpose shows its page, even if you had paged away from it: **Start**, **Go to run** (Needs you), **View current run** and **Back to run** all do this.
+- A refresh or an update from the Host never changes the page you are on, the selected run or where the keyboard focus is. If a new run arrives while you are on an older page, the rows on that page shift by one.
+- Times are shown in the app's language, in your time zone. A run without a recorded time says "Time not recorded".
 
 ## Prepare the next task while a run is active
 
@@ -48,6 +56,15 @@ Under each Build/Test step of the workflow you chose, the New run form lists the
 - Cancelling, a failed save and a conflicting save leave your request, workflow, context and check choices as they were.
 - While a run is unresolved, **Save checks** is disabled with its reason (the Host refuses it too). You can still edit; the edits stay as a draft.
 
+### Unsaved check edits
+
+Edits in the Checks editor are a draft for this workspace until you press **Save checks**. **They are never used by Review or by a run**: those always use the saved checks.
+
+- **Back to new run** returns at once and keeps the draft. The bar says that unsaved edits stay in Checks and are not used by the next run. Nothing asks you to save or discard when you leave, and nothing stops you from going to a waiting run.
+- In New run, a line says that Checks has unsaved edits and that Review uses the saved checks shown. A selected check that you changed (or removed) in the draft is marked; the row still shows the saved check.
+- In the Checks editor, changed and new checks are marked in the list, and a summary above **Save checks** lists every added, changed and removed check by name and id, including edits made on earlier visits. **Save checks** writes that whole list. If the list cannot be summarized (for example the raw JSON is invalid), the summary says so; Save still validates first and refuses an invalid list.
+- **Discard all unsaved check edits…** asks for confirmation and names its scope: every check returns to the saved checks, not only the one that is open. **Keep editing** changes nothing. Discard needs the saved checks to be loaded; while they could not be read it is disabled with the reason. When the saved checks were changed elsewhere (a conflict), use the conflict's own **Discard edits and use loaded checks**.
+
 ## Add context
 
 Under **Context**, each kind of reference the workflow accepts (for example _Additional project instructions_ or _Existing native skill_) is a **slot** that holds **one** item. A slot that holds something is shown as a chip: what it is, which steps use it ("Used by Analyze, Implement"), and its status. The line above the chips says how many slots are set and how many required slots are still empty.
@@ -55,7 +72,7 @@ Under **Context**, each kind of reference the workflow accepts (for example _Add
 1. Press **Add context**. To change a chip use its **Replace**; for an empty required slot use **Choose…**.
 2. Under **Add to**, pick the slot. If it already holds something the picker says that selecting a result **replaces** it. Only the slot you chose changes.
 3. Type to search the workspace. For instructions, the native instruction files are listed first; for skills, the loaded skill list is shown and can be filtered. Move with ↑ ↓ and press **Enter** to select. **Nothing is selected until you move to a result and press Enter**, and Enter never starts the run. **Esc** closes the picker and puts the focus back where you opened it.
-4. A file is checked by the Host when you select it. If the check fails (empty file, over 100 KB, outside the workspace) the reason is shown beside the slot and your previous selection is kept. Cancelling or closing the picker changes nothing.
+4. A file is checked by the Host when you select it. If the check fails (empty file, over 100 KB, outside the workspace), the picker says which file could not be used and whether the previous selection was kept (or that nothing is selected in this slot), followed by the Host's reason, unchanged. A file from **Choose file…** is named by its file name; the full path is in its tooltip. Cancelling the file chooser, or closing the picker, changes nothing and is not shown as a failure. If the file chooser itself fails, the picker says so and keeps the previous selection.
 
 A chip's status is only what the Host has established:
 
@@ -100,4 +117,4 @@ Every Graph control is reachable by keyboard and shows a border and fill when fo
 
 ## Known limits
 
-See [IMPLEMENTATION_REPORT.md](IMPLEMENTATION_REPORT.md). For the UX-M1 additions (draft while running, checks for this workflow, keyboard/state clarity) see [UX_M1_REPORT.md](UX_M1_REPORT.md): they were verified on Linux Chromium with a fixture Graph Host; **Windows native acceptance is pending**.
+See [IMPLEMENTATION_REPORT.md](IMPLEMENTATION_REPORT.md). For the UX-M1 additions (draft while running, checks for this workflow, keyboard/state clarity) see [UX_M1_REPORT.md](UX_M1_REPORT.md) and their Windows acceptance in [UX_M1_WINDOWS_REPORT.md](UX_M1_WINDOWS_REPORT.md), including the items it records as blocked or not run. For the UX-M2 additions (newest-first history, unsaved check edits, failure explanations) see [UX_M2_REPORT.md](UX_M2_REPORT.md): they were verified on Linux Chromium with a fixture Graph Host; **Windows acceptance of UX-M2 is pending**.

@@ -20,6 +20,10 @@ Assignment: product UX for everyday engineering work in Graph Engineering (open 
 | [UX_M1_MILESTONE.md](UX_M1_MILESTONE.md)                                             | Approved plan for UX-M1: draft while running, one setup journey, keyboard and state clarity                         |
 | [UX_M1_SPEC.md](UX_M1_SPEC.md)                                                       | UX-M1 contract written before implementation, with as-built notes                                                   |
 | [UX_M1_REPORT.md](UX_M1_REPORT.md)                                                   | UX-M1 result: commits, screenshots, test outcomes, mutation results, limits, Windows checklist                      |
+| [UX_M1_WINDOWS_REPORT.md](UX_M1_WINDOWS_REPORT.md)                                   | UX-M1 Windows acceptance: results, the fixed defect, blocked and not-run items                                      |
+| [UX_M2_MILESTONE.md](UX_M2_MILESTONE.md)                                             | Approved plan for UX-M2: newest-first history, unsaved-check semantics, failure framing                             |
+| [UX_M2_SPEC.md](UX_M2_SPEC.md)                                                       | UX-M2 contract written before implementation, with as-built notes                                                   |
+| [UX_M2_REPORT.md](UX_M2_REPORT.md)                                                   | UX-M2 result: commits, screenshots, test outcomes, mutation results, limits, Windows checklist                      |
 | [CLOUD_HANDOFF.md](CLOUD_HANDOFF.md)                                                 | Start here in a new environment: identity, file map, constraints, what to reproduce                                 |
 | [BEFORE_AFTER.md](BEFORE_AFTER.md)                                                   | Before and after screenshots from the real app                                                                      |
 | [../../../PRODUCT.md](../../../PRODUCT.md), [../../../DESIGN.md](../../../DESIGN.md) | Product context (new file) and a scoped, clearly-marked proposed section appended to the existing design system     |

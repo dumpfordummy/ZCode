@@ -192,3 +192,17 @@ Finalized **2026-09-30**, before UX-M2.3 was implemented. Scope: Context selecti
 3. New-run bar: a preflight failure is framed; a checks-save error and an unrelated operation's error are not shown beside Review (M1 regression kept). The review bar frames a Start failure without claiming nothing started. **Browser**.
 4. English and Chinese framing. **Unit** (keys) and **Browser**.
 5. Mutation checks: "previous selection" shown without one; cancel treated as failure; chooser path unnamed; checks error shown beside Review; duplicate checks alert.
+
+## 5. As built: deviations and open items (2026-09-30)
+
+Where the implementation differs from, or adds to, sections 2 to 4. Nothing above was rewritten.
+
+1. **Notice styling (adds to 3.3 rule 3).** Screenshot inspection showed the first build rendering the new notices (unsaved-edit line, row markers, Back-bar note, unsummarizable message) as warning-orange text, which DESIGN.md rules out because the warning colour does not reach 4.5:1 as text in Zai Light. They now use `GraphWarningNote`: foreground text with a warning-tinted icon.
+2. **"Save checks" label.** The summary names **Save checks**, the user guide already called it that, and PRODUCT.md's vocabulary is _Check_, but the button read "Save recipes" (zh "保存配方"). The UI-owned label is now "Save checks" / "保存检查". Test ids are unchanged. The historical manual launchers (`z4/z5/z6-launch-manual.mjs`) still say "Save recipes"; they describe older UI throughout and were not edited.
+3. **Discard focus.** The confirmation puts focus on **Keep editing** (the safe choice); **Keep editing** returns focus to the Discard button.
+4. **Replace dialog (4.3 rule 4).** Because the New-run bar now receives only admission-path errors, a failed design save from the replace dialog ("Save and replace") would no longer have reached that dialog. The dialog receives the `design` error separately (`designError`). This path has **no browser interaction test**: the harness stubs the Workflows design panel, so a dirty design cannot be produced there. It is covered by review only.
+5. **Fixture fidelity.** The UX-M1 browser fixture Host prepended admitted runs; it now appends like `app/service.ts`. The fixture native chooser can now be made to throw (`host.fail("selectFile", …)`), like the other fixture operations.
+6. **Runner.** The UX-M1 runner was split so UX-M2 uses the same harness (`ux-browser-runner.mjs`); the UX-M1 command line is unchanged.
+7. **Pre-existing, confirmed, fixed here.** Before the change, a failed **Save checks** was rendered twice on the Checks destination (near Save and in the generic alert), and a native-chooser error was an unhandled rejection with nothing shown. Both were reproduced with a throwaway probe before any product change.
+8. **Not done, recorded.** A picker option chosen with the mouse can leave focus outside the search field, so Escape does not close the picker until the field is focused again; observed in the test harness only and not investigated (the keyboard path is unaffected). The run inspector's fixture `deadlineAt` (30 minutes in milliseconds) renders as a 1970 time, as before: it is a valid stored value, not an invented date. The check-run calibration review (`GraphChecksSetup`) still shows `graph.error` of any source; it is outside this journey.
+9. **Unchanged, pre-existing.** `pnpm lint` reports 75 warnings, none in changed files. Repo-wide `pnpm fmt:check` was not run (known unrelated findings); changed files were checked.
