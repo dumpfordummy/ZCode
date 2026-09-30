@@ -8,12 +8,7 @@ import type {
 import { Button } from "@/components/ui/button.js";
 import { Input } from "@/components/ui/input.js";
 import { Textarea } from "@/components/ui/textarea.js";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/tabs.js";
+import { GraphTab, GraphTabList, GraphTabPanel, GraphTabs } from "./GraphTabs.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphNodeBindings } from "./GraphNodeBindings.js";
 import { GraphNodeConfiguration } from "./GraphNodeConfiguration.js";
@@ -100,37 +95,37 @@ export function GraphNodeInspector({
         ) : null}
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full justify-start">
-          <TabsTrigger value="task" data-testid="graph-inspector-tab-task">
+      <GraphTabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <GraphTabList>
+          <GraphTab value="task" data-testid="graph-inspector-tab-task">
             {et("tab.task")}
-          </TabsTrigger>
+          </GraphTab>
           {showInputsTab ? (
-            <TabsTrigger
+            <GraphTab
               value="inputs"
               data-testid="graph-inspector-tab-inputs"
             >
               {et("tab.inputs")}
-            </TabsTrigger>
+            </GraphTab>
           ) : null}
           {showOutputTab ? (
-            <TabsTrigger
+            <GraphTab
               value="output"
               data-testid="graph-inspector-tab-output"
             >
               {et("tab.output")}
-            </TabsTrigger>
+            </GraphTab>
           ) : null}
-          <TabsTrigger
+          <GraphTab
             value="advanced"
             data-testid="graph-inspector-tab-advanced"
           >
             {et("tab.advanced")}
-          </TabsTrigger>
-        </TabsList>
+          </GraphTab>
+        </GraphTabList>
 
         {/* Task 标签：主要编辑内容 */}
-        <TabsContent value="task" className="space-y-3">
+        <GraphTabPanel value="task" className="space-y-3">
           {definition.template ? (
             <GraphReferenceBindings
               key={`references:${node.id}`}
@@ -356,33 +351,33 @@ export function GraphNodeInspector({
               {...{ definition, node, disabled, onChange }}
             />
           ) : null}
-        </TabsContent>
+        </GraphTabPanel>
 
         {/* Inputs 标签：绑定（仅高级模式 bound 指令） */}
         {showInputsTab && isTask ? (
-          <TabsContent value="inputs" className="space-y-3">
+          <GraphTabPanel value="inputs" className="space-y-3">
             <GraphNodeBindings
               node={node}
               definition={definition}
               disabled={disabled}
               onChange={update}
             />
-          </TabsContent>
+          </GraphTabPanel>
         ) : null}
 
         {/* Output 标签：结构化输出（仅高级模式 task） */}
         {showOutputTab ? (
-          <TabsContent value="output" className="space-y-3">
+          <GraphTabPanel value="output" className="space-y-3">
             <GraphStructuredOutput
               key={`output:${node.id}`}
               {...{ node, disabled, workspaceKey }}
               onChange={update}
             />
-          </TabsContent>
+          </GraphTabPanel>
         ) : null}
 
         {/* Advanced 标签：模型/运行配置、技术标识、删除 */}
-        <TabsContent value="advanced" className="space-y-3">
+        <GraphTabPanel value="advanced" className="space-y-3">
           {isTask && defaults ? (
             <GraphNodeConfiguration
               key={`settings:${node.id}`}
@@ -399,8 +394,8 @@ export function GraphNodeInspector({
               {t("literalHelp")}
             </p>
           ) : null}
-        </TabsContent>
-      </Tabs>
+        </GraphTabPanel>
+      </GraphTabs>
     </section>
   );
 }

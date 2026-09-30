@@ -52,7 +52,6 @@ export function GraphSetupPanel({
         >
           <Button
             variant="outline"
-            size="sm"
             aria-describedby="graph-return-note"
             data-testid="graph-return-to-workflow"
             onClick={onReturn}
@@ -61,10 +60,10 @@ export function GraphSetupPanel({
           </Button>
           <p
             id="graph-return-note"
-            className="min-w-0 flex-1 text-ui-sm text-foreground-subtle"
+            className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-1 text-ui-sm text-foreground-subtle"
             data-testid="graph-return-note"
           >
-            {m1("returnKept")}
+            <span>{m1("returnKept")}</span>
             {unsaved ? (
               <GraphWarningNote as="span" className="flex" data-testid="graph-return-unsaved">
                 {m2("returnUnsaved")}

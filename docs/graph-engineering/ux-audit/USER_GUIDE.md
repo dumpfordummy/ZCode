@@ -12,7 +12,7 @@ Graph is for structured, repeatable, supervised work. Chat is for interactive wo
 | **Workflows** | Edit the graph: Guided/Advanced, canvas, bindings, conditions, bounded repair, the **Workflow library** (choose a workflow, inspect versions, save, export, import) and **New request** for the current design. It shows which workflow and version the current design started from. Node positions are not rewritten. |
 | **Checks**    | The saved project checks: a list plus **one** selected editor. Project scan and the .NET preset are under it, as ways to add checks.                                                                                                                                                                                   |
 
-A bar under the tabs always shows the effective model, mode and the saved-check status for the next run. Changing them is still done where it always was (Workflows → Workspace defaults).
+**UX-M4 layout.** The three destinations are one row of tabs under the workflow name. At the end of that row, on every destination, a short line states what the next run will use: **For the next run · Model … · Mode … · Checks N saved**. The model and mode are read-only here (change them where you always did: Workflows → Workspace defaults); **Checks** opens the Checks destination. When a run is open, the model and mode of that run are in its own facts, not in this line. The page is one working area with a slim list of runs on the left; there is no permanent right-hand panel. Wide content (the graph canvas, checks, evidence, file changes) uses the full width; the task, summaries and the run banner use a comfortable reading width.
 
 ## Run something
 
@@ -24,13 +24,15 @@ A bar under the tabs always shows the effective model, mode and the saved-check 
 
 **Save as workflow only** creates the workflow without reviewing or running it.
 
+The bar at the bottom of the form is the only place with actions. When the form can be reviewed it says "Ready to review. Nothing starts until you confirm." "Ready" means you may go on to the review; it does not mean any check has run or passed. On a short form the bar sits right under the form; on a long one it stays at the bottom of the window.
+
 One run at a time can own the workspace. While one is unresolved you can still **prepare the next task**: the request, context and check choices stay editable and are kept (see _Prepare the next task while a run is active_). Only starting is blocked.
 
 When **Review and run** is unavailable, the reason is shown beside it (in the bar that stays at the bottom of the form), with the way to fix it: **Go to first field** for a missing required field, context or check, **View current run** when a run owns the workspace. A failed review (for example a preflight error) is shown in the same bar: first what that means ("Review could not be prepared. Nothing was started; your request, context and check choices are kept."), then the Host's own message, unchanged. A failed **Start** in the review says "Start did not complete" and asks you to check the run list before starting again. It does not claim that nothing started, because a lost reply can hide an admitted run. Only failures of reviewing and starting appear in these bars. A failed check save, a cancel or a decision stays where it happened. The longer list of fields to complete stays above it.
 
 ## Find recent work
 
-The run list shows the **newest run first**, by the order in which runs were created (a run's later progress never moves it). It pages 25 runs at a time with **Newer runs** and **Older runs**.
+The run list shows the **newest run first**, by the order in which runs were created (a run's later progress never moves it). It pages 25 runs at a time with **Newer runs** and **Older runs**. Each row has a status icon and words (for example _Waiting for native permission_), the time, the workflow and the test evidence; the selected row has an accent bar.
 
 - Opening a run on purpose shows its page, even if you had paged away from it: **Start**, **Go to run** (Needs you), **View current run** and **Back to run** all do this.
 - A refresh or an update from the Host never changes the page you are on, the selected run or where the keyboard focus is. If a new run arrives while you are on an older page, the rows on that page shift by one.
@@ -93,7 +95,7 @@ Open a run and choose **Start a new request from this one**. The form is pre-fil
 
 ## Reusable workflows
 
-**Workflows → Workflow library** is one dialog with five sections: **Workflow**, **Versions**, **Use**, **Share** and **Advanced**. Each workflow says **Built-in** or **Yours**.
+**Workflows → Workflow library** is one dialog. On the left is the list of workflows, grouped **Yours** and **Built-in**. On the right is the selected workflow with four tabs: **Versions**, **Use**, **Share** and **Advanced**. The footer is always visible: **Open in Runs** (the main way forward) and **Load into design**, with the reason beside them when one is unavailable. A failure (for example a revision conflict) appears directly above the tabs, with **Refresh library**, and a success message from an earlier action disappears as soon as the next action starts or fails. Changing tabs keeps what you typed and any preview you reviewed.
 
 - **Versions.** One row per version the app offers: **Version N**, **Latest** (only when a workflow has several), **Used by current design** (only when the design's own record names that workflow, version and definition) and a creation date for your own versions. There is no generic "current version". Your own versions are immutable and each one can be chosen. A built-in lists only what the app offers today; a version it no longer offers is not recreated.
 - **New run** says which workflow and version the next run will instantiate ("This run will use … · Version N · Built-in"). When a workflow has several versions, a **Version** choice appears there too.
@@ -110,7 +112,7 @@ While a run owns the workspace you can browse workflows, inspect versions and pr
 
 ## When a run needs you
 
-A **Needs you** strip appears on every destination while a run waits for a permission, a question or an approval. It is built from the complete run list this Host returned for this workspace, not from the visible page of history, so it still finds a waiting run that is on another page. It says so: it is not a queue across workspaces or other Hosts.
+A **Needs you** strip appears on every destination while a run waits for a permission, a question or an approval. When you are already looking at that run, the strip is a quiet pointer and its banner carries the action. It is built from the complete run list this Host returned for this workspace, not from the visible page of history, so it still finds a waiting run that is on another page. It says so: it is not a queue across workspaces or other Hosts.
 
 - **Permission.** Graph cannot answer it. **Open conversation** takes you to that step's own conversation, where you use the ordinary Allow / Deny. The run shows the step's _configured_ command, labelled as configuration and not as the exact request; the exact request is in the conversation.
 - **Back to run.** In a Graph-owned conversation, **Back to run** returns to the same workspace, run and step. It does not answer anything.
@@ -118,9 +120,11 @@ A **Needs you** strip appears on every destination while a run waits for a permi
 
 ## Read a result
 
-Each run shows three separate facts: **Execution**, **Test evidence** and **Human decision**. The decision can be _Pending_, _Not reached yet_, _Not requested_, _Approved_, _Rejected_ or _Unknown_, derived from the gate's own record.
+A selected run opens on its **banner**: one block that says what is happening or what stopped, and the one thing to do next (for example **Open conversation**, **Review captured approval request** or **Inspect the failing Test**, in the accent colour; the other actions are plain). Amber means it needs you or the outcome is uncertain; red is a real failure (a failed Test); green is a completed run. Each state is explained once, in the banner. Under it is a strip of the steps the run actually visited, then three facts kept apart: **Execution**, **Test evidence** and **Human decision**. A fact that does not apply (for example no configured Tests, or an approval never requested) is a quiet line, not an emphasised value. The decision can be _Pending_, _Not reached yet_, _Not requested_, _Approved_, _Rejected_ or _Unknown_, derived from the gate's own record; a run that stopped before a gate says _Not requested_, never _Pending_.
 
-When a run stops, one block says what was rejected, the recorded diagnostic and what is still true from captured facts:
+The rest is in four tabs under the facts: **Steps** (the default), **Request and result**, **Evidence** (checks and captured file changes) and **Technical details**. Anything you need to decide is in the banner or the action bar, never only in a tab.
+
+When a run stops, the banner says what was rejected, the recorded diagnostic and what is still true from captured facts:
 
 - **Reviewer output rejected** (for example prose or a code fence around the JSON, or an unbound evidence reference). This is not a `needs_changes` verdict. No approval was requested.
 - **Test failed.** The reviewer is not started.

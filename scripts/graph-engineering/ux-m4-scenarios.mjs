@@ -1,7 +1,16 @@
 // UX-M4 scenarios: populated states of the Focus-page visual system. Fixture data, real components.
-import { SIZES, flush, preparedDraft, setState, shot } from "./ux-m1-helpers.mjs";
+import {
+  SIZES,
+  editCheckByKeyboard,
+  flush,
+  preparedDraft,
+  setState,
+  shot,
+} from "./ux-m1-helpers.mjs";
 import { approvalWaitRun, completedRun, failedTestRun, permissionWaitRun } from "./ux-m1-runs.mjs";
 import { T, openLibrary } from "./ux-m3-helpers.mjs";
+import { checkScenarios } from "./ux-m4-scenarios-checks.mjs";
+import { contrastScenario } from "./ux-m4-scenarios-contrast.mjs";
 
 const QUICK = process.env.M4_QUICK === "1";
 const THEMES = QUICK ? ["zai-dark"] : ["zai-dark", "zai-light"];
@@ -54,6 +63,13 @@ const readyScenario = (locale) => ({
     }
     await frames(page, shotsDir, "m4-new-run", locale);
     await frames(page, shotsDir, "m4-new-run-lower", locale, undefined, 640);
+    // Checks：从所选检查进入编辑器，未保存的修改出现变更摘要，返回栏保持可见
+    await editCheckByKeyboard(page, "test");
+    await T(page, "graph-recipe-field-2-name").fill("Unit tests (edited)");
+    await frames(page, shotsDir, "m4-checks-editor", locale);
+    await frames(page, shotsDir, "m4-checks-editor-lower", locale, undefined, 100000);
+    await T(page, "graph-return-to-workflow").click();
+    await T(page, "graph-new-run-pane").waitFor();
     // 预检与确认：冻结快照、确认事项与唯一的粘性提交栏
     await T(page, "graph-review-run").click();
     await T(page, "graph-run-confirmation").waitFor();
@@ -95,6 +111,8 @@ const scenario = (locale) => ({
 });
 
 export const uxM4Scenarios = [
+  ...checkScenarios,
+  contrastScenario,
   readyScenario("en-US"),
   scenario("en-US"),
   ...(QUICK ? [] : [readyScenario("zh-CN"), scenario("zh-CN")]),
