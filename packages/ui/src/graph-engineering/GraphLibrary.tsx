@@ -76,7 +76,7 @@ export function GraphLibrary({
   recipeReadState: GraphRecipeReadState;
   inline?: boolean;
   onLoadRecipes(): void;
-  onOpenSetup(): void;
+  onOpenSetup(checkId?: string): void;
   onSaveDesign(definition: GraphDefinition): Promise<GraphDefinition | undefined>;
   onInstantiated(definition: GraphSequentialDefinition, continuation: "review" | "save"): void;
   /** Called with the unchanged saved design when Review and run needs no new instantiation. */
@@ -227,9 +227,9 @@ export function GraphLibrary({
             admissionReason={admissionReason}
             onViewCurrentRun={onViewCurrentRun}
             onLoadRecipes={onLoadRecipes}
-            onOpenSetup={() => {
+            onOpenSetup={(checkId) => {
               setOpen(false);
-              onOpenSetup();
+              onOpenSetup(checkId);
             }}
             allowReview={inline && Boolean(onReview)}
             onInstantiate={(parameters, bindings, continuation) => {

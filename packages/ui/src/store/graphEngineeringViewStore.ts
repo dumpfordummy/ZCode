@@ -11,6 +11,8 @@ interface GraphViewSelection {
   /** Runs destination: "new" shows the new-run form; undefined shows the selected run. */
   pane?: "new";
   returnToWorkflow?: boolean;
+  /** Checks destination: the saved check (by stable id) the editor should open. Navigation only. */
+  checkId?: string;
   runId?: string;
   nodeId?: string;
   attemptId?: string;

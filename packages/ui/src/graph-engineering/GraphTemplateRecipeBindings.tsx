@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button.js";
 import { Checkbox } from "@/components/ui/checkbox.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphSelect } from "./GraphSelect.js";
+import { GraphSelectedChecks } from "./GraphSelectedChecks.js";
+import { graphCheckSelection } from "./graphCheckSelection.js";
 import { useGraphTemplateText } from "./graphTemplateText.js";
 import { useGraphSetupText } from "./GraphSetupFields.js";
 import {
@@ -22,18 +24,22 @@ export function GraphTemplateRecipeBindings({
   snapshot,
   disabled,
   onChange,
+  onOpenChecks,
 }: {
   template: GraphPortableTemplate;
   bindings: GraphTemplateBindings;
   snapshot: GraphRecipeSnapshot | null;
   disabled: boolean;
   onChange(update: (current: GraphTemplateBindings) => GraphTemplateBindings): void;
+  /** Open the existing Checks editor (optionally on one saved check) without leaving the draft. */
+  onOpenChecks(checkId?: string): void;
 }) {
   const { intl } = useZCodeIntl();
   const u = (key: string) => intl.formatMessage({ id: `graph.preZ8.${key}` });
   const t = useGraphSetupText();
   const display = useGraphTemplateText();
   const tools = template.graph.nodes.filter((node) => node.type === "tool");
+  const steps = graphCheckSelection(template, bindings, snapshot);
   const buildSlots = tools.filter((node) =>
     snapshot?.recipes.some(
       (recipe) => recipe.id === bindings.recipes[node.id] && recipe.verifier.kind === "build",
@@ -76,11 +82,12 @@ export function GraphTemplateRecipeBindings({
                 )
               }
             />
-            {stale ? (
-              <p role="status" className="text-ui-sm text-warning">
-                {u("staleSelection")}
-              </p>
-            ) : null}
+            {/* 已选检查的名称/类型/状态；缺失或不兼容时显示存储的 id 与原因，不替用户改选 */}
+            <GraphSelectedChecks
+              step={steps.find((item) => item.nodeId === node.id)!}
+              label={display.node(node.id, node.name)}
+              onOpenChecks={onOpenChecks}
+            />
             {snapshot?.recipes.length && !choices.length ? (
               <p role="status" className="text-ui-sm text-warning">
                 {u("incompatible")}

@@ -43,7 +43,7 @@ export function GraphRunsDestination(props: {
   onSelectRun(runId: string): void;
   onCloseConfirmation(): void;
   onStart(preflight?: GraphSubmission["preflight"]): void;
-  onOpenSetup(): void;
+  onOpenSetup(checkId?: string): void;
   onReview(definition: GraphDefinition): void;
   onInstantiated(saved: GraphDefinition, continuation: "review" | "save"): void;
   onSelectNode(nodeId: string): void;

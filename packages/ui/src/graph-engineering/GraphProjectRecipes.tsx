@@ -10,6 +10,8 @@ import { GraphDotnetPreset } from "./GraphDotnetPreset.js";
 import { GraphChecksSetup } from "./GraphChecksSetup.js";
 import { useGraphSetupText } from "./GraphSetupFields.js";
 import { useGraphProjectSetup } from "@/hooks/useGraphProjectSetup.js";
+import { graphAdmission } from "./graphAdmission.js";
+import { useGraphM1Text } from "./GraphM1Text.js";
 import {
   graphRecipeDraft,
   graphRecipeGuidedIssue,
@@ -22,6 +24,7 @@ export function GraphProjectRecipes({
   disabled,
   workspacePath,
   workspaceIdentity,
+  checkId,
   onRun,
 }: {
   graph: ReturnType<typeof useGraphEngineering>;
@@ -29,12 +32,15 @@ export function GraphProjectRecipes({
   disabled: boolean;
   workspacePath: string;
   workspaceIdentity?: string;
+  /** UX-M1.2: the saved check to open on arrival (stable id); navigation only. */
+  checkId?: string;
   onRun(runId: string): void;
 }) {
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.z4.${id}` });
   const u = (id: string) => intl.formatMessage({ id: `graph.preZ8.${id}` });
   const s = useGraphSetupText();
+  const m1 = useGraphM1Text();
   const target = useMemo(
     () => ({
       workspacePath,
@@ -48,6 +54,8 @@ export function GraphProjectRecipes({
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const [openIndex, setOpenIndex] = useState(0);
+  const [focusOpened, setFocusOpened] = useState(false);
+  const arrivedFor = useRef<string | undefined>(undefined);
   const formRef = useRef<HTMLDivElement>(null);
   const readState = graph.recipeReadState;
   const text = form?.text ?? "[]";
@@ -75,10 +83,32 @@ export function GraphProjectRecipes({
   useEffect(() => {
     if (readState.status === "ready") observeRecipes(workspaceKey, readState.snapshot);
   }, [readState, observeRecipes, workspaceKey]);
+  // 从新建运行的“编辑检查”进入：按稳定 id 打开那一项检查（找不到则保持默认，不猜测别的检查）。
+  useEffect(() => {
+    if (!checkId || arrivedFor.current === checkId) return;
+    if (readState.status !== "ready" || !form) return;
+    arrivedFor.current = checkId;
+    const draft = graphRecipeDraft(form.text);
+    const index = draft.kind === "ready" ? draft.recipes.findIndex((r) => r.id === checkId) : -1;
+    if (index < 0) return;
+    setOpenIndex(index);
+    setFocusOpened(true);
+  }, [checkId, readState.status, form]);
+  // 目标检查渲染出来后再把焦点移到它的第一个字段（键盘用户从“编辑检查”落到可编辑处）。
+  useEffect(() => {
+    if (!focusOpened) return;
+    const target = formRef.current;
+    (target?.querySelector<HTMLElement>("input, textarea, [role='combobox']") ?? target)?.focus();
+    target?.scrollIntoView({ block: "start" });
+    setFocusOpened(false);
+  }, [focusOpened, openIndex]);
   const dirty = Boolean(form && form.text !== form.baseText);
   const conflict = Boolean(form && readState.snapshot && form.digest !== readState.snapshot.digest);
+  // 图运行未结束时 Host 拒绝保存检查；这里同样禁用并说明原因（编辑仍可继续，草稿保留）。
+  const occupied = graphAdmission(graph.view?.runs ?? []).blocked;
   const saveBlocked =
     disabled ||
+    occupied ||
     !form ||
     readState.status !== "ready" ||
     conflict ||
@@ -146,7 +176,7 @@ export function GraphProjectRecipes({
       ) : (
         <p className="text-ui-sm text-foreground-subtle">{s("noChecks")}</p>
       )}
-      <div ref={formRef}>
+      <div ref={formRef} tabIndex={-1} className="outline-none">
         <GraphRecipeForm
           text={text}
           disabled={disabled || !form}
@@ -223,7 +253,8 @@ export function GraphProjectRecipes({
         aria-describedby={saveBlocked ? "graph-recipe-save-reason" : undefined}
         data-testid="graph-save-recipes"
         onClick={() => {
-          if (!form) return;
+          // 处理函数自身也拒绝：不依赖按钮的禁用样式（备用控件、脚本同样到不了 Host）。
+          if (saveBlocked || !form) return;
           setError("");
           const submittedText = form.text;
           void validate()
@@ -243,7 +274,11 @@ export function GraphProjectRecipes({
       </Button>
       {saveBlocked ? (
         <p id="graph-recipe-save-reason" role="status" className="text-foreground-subtle">
-          {u(disabled ? "creationLocked" : "recipeSaveBlocked")}
+          {disabled
+            ? u("creationLocked")
+            : occupied
+              ? m1("recipeSaveBlockedByRun")
+              : u("recipeSaveBlocked")}
         </p>
       ) : null}
       {saved ? (

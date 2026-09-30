@@ -312,6 +312,9 @@ export function useGraphEngineering(scope: GraphScope) {
       (values: GraphRecipe[], expectedDigest: string) =>
         act(async () => {
           if (!service) return;
+          // UX-M1.2：Host 在图运行未结束时拒绝保存检查（“Project recipe edits are blocked …”）。
+          // Renderer 在到达 Host 之前就拒绝，界面不再留下一个必然失败的保存；Host 仍是权威。
+          assertGraphAdmission(latestView.current?.runs ?? []);
           const owner = generation.current;
           const value = await service.recipes({
             target,

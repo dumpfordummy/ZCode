@@ -53,7 +53,7 @@ export function GraphTemplateBindings({
   admissionReason?: string;
   onViewCurrentRun?(): void;
   onLoadRecipes(): void;
-  onOpenSetup(): void;
+  onOpenSetup(checkId?: string): void;
   /** "review" = Review and run; "save" = create the workflow only (explicit, no preflight). */
   allowReview?: boolean;
   onInstantiate(
@@ -219,7 +219,7 @@ export function GraphTemplateBindings({
         <GraphRecipeReadStatus
           state={recipeReadState}
           onRead={onLoadRecipes}
-          onSetup={onOpenSetup}
+          onSetup={() => onOpenSetup()}
         />
       ) : null}
       <GraphTemplateRecipeBindings
@@ -227,6 +227,7 @@ export function GraphTemplateBindings({
         bindings={bindings}
         snapshot={recipes}
         disabled={disabled || readBlocked}
+        onOpenChecks={onOpenSetup}
         onChange={(update) =>
           change((current) => ({ ...current, bindings: update(current.bindings) }))
         }
@@ -279,7 +280,7 @@ export function GraphTemplateBindings({
         </div>
       ) : null}
       <div
-        className={`${allowReview ? "sticky bottom-0 z-10 -mx-3 border-t border-border bg-background px-3 py-2 " : ""}flex flex-wrap items-center gap-2`}
+        className={`${allowReview ? "sticky -bottom-3 z-10 -mx-3 -mb-3 border-t border-border bg-background px-3 pb-5 pt-2 " : ""}flex flex-wrap items-center gap-2`}
         data-testid="graph-new-run-actions"
       >
         {allowReview ? (

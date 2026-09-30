@@ -172,6 +172,13 @@ export function GraphEditor({
     selectRun,
     admission,
   });
+  // UX-M1.2：只有从「新建运行」进入 Checks 才提供返回草稿的入口，并清掉上一次遗留的 checkId。
+  const openChecks = () => {
+    setConfirmation(null);
+    select(workspaceKey, { mode: "setup", returnToWorkflow: newRunPane, checkId: undefined });
+  };
+  const openCheckSetup = (checkId?: string) =>
+    select(workspaceKey, { mode: "setup", returnToWorkflow: true, checkId });
   // Pending human actions come from the complete run list, never from the visible history page.
   const needsYou = useMemo(() => graphNeedsYou(view.runs), [view.runs]);
   const needsYouRunIds = useMemo(() => new Set(needsYou.map((item) => item.runId)), [needsYou]);
@@ -206,6 +213,7 @@ export function GraphEditor({
         runSelected={Boolean(selectedRun)}
         onSelect={(mode) => {
           // 内联审阅只属于当前意图；离开目的地即关闭快照，草稿与已保存设计不受影响。
+          if (mode === "setup") return openChecks();
           setConfirmation(null);
           select(workspaceKey, { mode });
         }}
@@ -214,10 +222,7 @@ export function GraphEditor({
         modelSelection={selection}
         mode={config.draftConfig.mode}
         recipeReadState={graph.recipeReadState}
-        onOpenChecks={() => {
-          setConfirmation(null);
-          select(workspaceKey, { mode: "setup" });
-        }}
+        onOpenChecks={openChecks}
       />
       <GraphNeedsYou
         items={needsYou}
@@ -262,7 +267,7 @@ export function GraphEditor({
             !admission.blocked &&
             startRun(confirmation.definition, confirmation.settings, true, preflight)
           }
-          onOpenSetup={() => select(workspaceKey, { mode: "setup", returnToWorkflow: true })}
+          onOpenSetup={openCheckSetup}
           onReview={reviewAndRun}
           onInstantiated={(saved, continuation) => {
             acceptDefinition(workspaceKey, saved);
@@ -292,7 +297,7 @@ export function GraphEditor({
             error={graph.error}
             recipeReadState={graph.recipeReadState}
             onLoadRecipes={graph.readRecipes}
-            onOpenSetup={() => select(workspaceKey, { mode: "setup", returnToWorkflow: true })}
+            onOpenSetup={openCheckSetup}
             onSaveDesign={graph.save}
             onInstantiated={(saved) => {
               acceptDefinition(workspaceKey, saved);
@@ -363,6 +368,7 @@ export function GraphEditor({
           workspaceIdentity={workspaceIdentity}
           disabled={disabled}
           returnToWorkflow={navigation?.returnToWorkflow}
+          checkId={navigation?.checkId}
           onReturn={() =>
             select(workspaceKey, {
               mode: "runs",

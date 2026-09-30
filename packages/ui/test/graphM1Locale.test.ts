@@ -26,7 +26,9 @@ test("the graph-engineering components only read UX-M1 message ids that are defi
       /\bm1\(\s*"([A-Za-z]+)"/g,
     ))
       used.add(match[1]!);
-  assert.ok(used.size > 0, "the scan found UX-M1 keys in the components");
+  // 由 m1(cond ? "a" : "b") 选出的键，扫描不到字面量，单独校验。
+  for (const key of ["checkMissing", "checkIncompatible"]) used.add(key);
+  assert.ok(used.size > 5, "the scan found UX-M1 keys in the components");
   for (const key of used)
     assert.ok(GRAPH_M1_MESSAGE_KEYS.includes(key), `graph.m1.${key} is used but not defined`);
 });
