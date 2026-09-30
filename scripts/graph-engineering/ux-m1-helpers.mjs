@@ -19,12 +19,17 @@ const ALLOWED_OPS = new Set([
   "validate",
   "graph.run",
   "wf.list",
+  "wf.mutate",
+  "wf.preview",
   "wf.instantiate",
   "wf.prepare",
   "reference-catalog",
   "validate-reference",
   "searchWorkspaceFiles",
   "selectFile",
+  "stat",
+  "readFileRange",
+  "saveFile",
   "openConversation",
 ]);
 
@@ -112,10 +117,13 @@ export async function optionValues(page, testId) {
   return values;
 }
 
-export const GENERIC_KEY = "generic:1";
 /** The retained draft of one template in one workspace (draft-store fact, not page text). */
-export const templateDraft = async (page, host, workspace = "A", key = GENERIC_KEY) =>
-  (await drafts(page))[host.workspaces[workspace]]?.templates[key];
+export const templateDraft = async (
+  page,
+  host,
+  workspace = "A",
+  key = host.library.key("generic"),
+) => (await drafts(page))[host.workspaces[workspace]]?.templates[key];
 export const recipesReady = (page) =>
   until(
     async () => (await T(page, "graph-recipe-read-state").getAttribute("data-state")) === "ready",

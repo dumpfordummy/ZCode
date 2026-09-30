@@ -29,6 +29,8 @@ declare global {
       set(patch: Partial<HarnessState>): void;
       drafts(): unknown;
       navigation(): unknown;
+      /** An unsaved edit of the design's name, as the Workflows editor would make (renderer draft only). */
+      editDesignName(workspace: string, name: string): void;
     };
   }
 }
@@ -88,6 +90,8 @@ const graphEngineeringService = guard("graphEngineeringService", {
 });
 const graphWorkflowService = guard("graphWorkflowService", {
   list: ux("list"),
+  mutate: ux("mutate"),
+  preview: ux("preview"),
   instantiate: ux("instantiate"),
   prepare: ux("prepare"),
   projectSetup: ux("projectSetup"),
@@ -95,9 +99,22 @@ const graphWorkflowService = guard("graphWorkflowService", {
 const services = guard("services", {
   graphEngineeringService,
   graphWorkflowService,
-  fileService: guard("fileService", { searchWorkspaceFiles: ux("searchFiles") }),
+  fileService: guard("fileService", {
+    searchWorkspaceFiles: ux("searchFiles"),
+    stat: ux("stat"),
+    readFileRange: async (params: unknown) =>
+      new Uint8Array((await window.__ux.readFileRange!(params)) as number[]),
+  }),
 });
-const platform = guard("platform", { canSelectFilePath: true, selectFile: ux("pickFile") });
+const platform = guard("platform", {
+  canSelectFilePath: true,
+  selectFile: ux("pickFile"),
+  saveFile: (request: { data: ArrayBuffer; suggestedName?: string }) =>
+    window.__ux.saveFile!({
+      suggestedName: request.suggestedName,
+      bytes: Array.from(new Uint8Array(request.data)),
+    }),
+});
 
 function Probe({ path }: { path: string }) {
   // 第二个真实的 useGraphEngineering 实例：让测试不经过任何按钮直接调用 run / prepareRunConfirmation。
@@ -128,6 +145,12 @@ function Harness() {
       drafts: () => JSON.parse(JSON.stringify(useGraphDraftStore.getState().workspaces)),
       navigation: () =>
         JSON.parse(JSON.stringify(useGraphEngineeringViewStore.getState().selections)),
+      editDesignName: (workspace, name) => {
+        const key = window.__WORKSPACES__[workspace]!;
+        const editor = useGraphDraftStore.getState().workspaces[key]?.definition;
+        if (editor)
+          useGraphDraftStore.getState().editDefinition(key, { ...editor.draft, name }, editor.base);
+      },
     };
   }, []);
   useEffect(() => {

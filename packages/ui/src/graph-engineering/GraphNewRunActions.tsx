@@ -2,6 +2,7 @@ import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphM1Text } from "./GraphM1Text.js";
+import { useGraphM3Text } from "./GraphM3Text.js";
 import { GraphFailureText } from "./GraphFailureText.js";
 
 /**
@@ -37,6 +38,7 @@ export function GraphNewRunActions({
   const { intl } = useZCodeIntl();
   const u = (key: string) => intl.formatMessage({ id: `graph.preZ8.${key}` });
   const m1 = useGraphM1Text();
+  const m3 = useGraphM3Text();
   return (
     <div
       className={`${allowReview ? "sticky -bottom-3 z-10 -mx-3 -mb-3 border-t border-border bg-background px-3 pb-5 pt-2 " : ""}flex flex-wrap items-center gap-2`}
@@ -68,7 +70,7 @@ export function GraphNewRunActions({
           onSave();
         }}
       >
-        {u(allowReview ? "saveAsWorkflow" : "createWorkflow")}
+        {allowReview ? u("saveAsWorkflow") : m3("loadIntoDesign")}
       </Button>
       {error ? (
         <GraphFailureText

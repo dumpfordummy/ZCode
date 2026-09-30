@@ -7,8 +7,8 @@ import { setTimeout as delay } from "node:timers/promises";
 import { createIsolation, root } from "./isolation.mjs";
 import { prepareU3Fixture, U3_REQUEST, u3Sha256 } from "./pre-z8-u3-fixture.mjs";
 import { startU3Fixture } from "./pre-z8-u3-provider.mjs";
-import { selectU3NativeInstructions } from "./pre-z8-u3-references.mjs";
-import { verifyU3Context } from "./pre-z8-u3-context.mjs";
+import { chooseEntry, chooseVersion, openAdvanced, openShare } from "./ux-m3-native-library.mjs";
+import { chipStatus, pickByValue, popoverClosed } from "./ux-m1-native-context-helpers.mjs";
 import { prepareSourceFixture } from "./z3-fixture.mjs";
 import {
   captureU3,
@@ -92,20 +92,20 @@ async function closeLibrary() {
   await window.keyboard.press("Escape");
   await window.getByTestId("graph-library-dialog").waitFor({ state: "hidden" });
 }
-async function management() {
-  const panel = window.getByTestId("graph-library-management");
-  if ((await panel.getAttribute("open")) === null) await panel.locator(":scope > summary").click();
-}
+// UX-M3：资料库是带分区的单一对话框；旧的“管理”面板和统一的 Transfer 已拆成 Share 下的独立任务
+// （保存当前设计、导出版本、导入文件）与 Advanced 下的手动 JSON。
 async function transfer() {
-  await management();
-  const panel = window.getByTestId("graph-template-transfer");
-  if ((await panel.getAttribute("open")) === null) await panel.locator(":scope > summary").click();
+  await openShare(window);
 }
 async function choose(id, version) {
-  await selectValue(window, "graph-library-entry", id);
-  await management();
-  if (version !== undefined) await selectValue(window, "graph-library-version", String(version));
+  await chooseEntry(window, id);
+  if (version !== undefined) await chooseVersion(window, version);
 }
+// 预览 JSON 只在有预览时才显示；没有就是空字符串（旧界面里是一个始终存在的文本框）。
+const jsonNow = async (testId) =>
+  (await window.getByTestId(testId).count()) ? window.getByTestId(testId).inputValue() : "";
+const importJsonNow = () => jsonNow("graph-import-json");
+const exportJsonNow = () => jsonNow("graph-export-json");
 async function screenshot(name) {
   await captureU3(isolation, window, summary, name);
 }
@@ -119,68 +119,37 @@ async function assertIdle(label) {
   assert.deepEqual(isolation.fixture.toolCalls, [], `${label}: tool command executed.`);
   assert.deepEqual(isolation.fixture.toolResults, [], `${label}: tool result produced.`);
 }
-// Import a file and wait for the preview-result alert. The workflow invoke flight
-// guard may block the import's preview call when a concurrent invoke is still
-// settling. If the alert hasn't appeared after the import, check whether the JSON
-// was populated (import succeeded) and retry via the dry-preview button.
+// Import a file and wait for the preview-result alert. A preview call can be refused while another
+// library call is still in flight (single flight); choosing the file again re-runs the same read and
+// preview. The import JSON is read-only now: a corrected file is chosen again, never edited in place.
 async function importFileAndAwaitPreviewAlert(openPath) {
-  const jsonBefore = await window.getByTestId("graph-template-json").inputValue();
   await writeControl({ open: { path: openPath } });
-  await window.getByTestId("graph-template-import-file").click();
-  // Poll for up to 10 s: the import may set the JSON, show a preview alert, or
-  // show a file error. The workflow invoke flight guard may block the import's
-  // preview call; if so, we retry via the dry-preview button.
-  let jsonChanged = false;
-  for (let i = 0; i < 20; i++) {
-    await delay(500);
-    const jsonNow = await window.getByTestId("graph-template-json").inputValue();
-    if (jsonNow !== jsonBefore) {
-      jsonChanged = true;
-      break;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await window.getByTestId("graph-template-import-file").click();
+    const outcome = await Promise.race([
+      window
+        .getByTestId("graph-import-preview-result")
+        .getByRole("alert")
+        .first()
+        .waitFor({ timeout: 8000 })
+        .then(() => "alert")
+        .catch(() => "none"),
+      window
+        .getByTestId("graph-import-file-error")
+        .waitFor({ timeout: 8000 })
+        .then(() => "file-error")
+        .catch(() => "none"),
+    ]);
+    if (outcome === "alert") break;
+    if (outcome === "file-error") {
+      await writeControl({});
+      const errorText = await window.getByTestId("graph-import-file-error").innerText();
+      throw new Error(`Import file error (expected preview alert): ${errorText}`);
     }
-    const alertVisible = await window
-      .getByTestId("graph-template-preview-result")
-      .getByRole("alert")
-      .first()
-      .isVisible()
-      .catch(() => false);
-    if (alertVisible) break;
-    const fileErrorVisible = await window
-      .getByTestId("graph-template-file-error")
-      .isVisible()
-      .catch(() => false);
-    if (fileErrorVisible) break;
   }
   await writeControl({});
-  // If a preview alert is already visible, we're done.
-  if (
-    await window
-      .getByTestId("graph-template-preview-result")
-      .getByRole("alert")
-      .first()
-      .isVisible()
-      .catch(() => false)
-  )
-    return;
-  // If a file error appeared, the import itself failed — surface it.
-  const fileErrorVisible = await window
-    .getByTestId("graph-template-file-error")
-    .isVisible()
-    .catch(() => false);
-  if (fileErrorVisible) {
-    const errorText = await window.getByTestId("graph-template-file-error").innerText();
-    throw new Error(`Import file error (expected preview alert): ${errorText}`);
-  }
-  // Import set the JSON but the preview was blocked (flight guard) — retry via
-  // dry-preview. If the JSON didn't change, importFile returned undefined.
-  const jsonValue = await window.getByTestId("graph-template-json").inputValue();
-  if (!jsonChanged)
-    throw new Error(
-      `Import did not populate the JSON (importFile returned undefined) for ${openPath}`,
-    );
-  if (jsonValue.trim()) await window.getByTestId("graph-template-preview").click();
   await window
-    .getByTestId("graph-template-preview-result")
+    .getByTestId("graph-import-preview-result")
     .getByRole("alert")
     .first()
     .waitFor({ timeout: 15000 });
@@ -278,12 +247,16 @@ try {
   // ═══════════════════════════════════════════════════════════════════
   // Phase: Instantiate agent-assisted (pinned v5 definition).
   // ═══════════════════════════════════════════════════════════════════
-  await window.getByTestId("graph-view-workflows").click();
+  // 新运行页：选工作流、填请求、用 Context 选择器选原生指令（取代旧的逐角色目录表单），再显式创建。
+  await window.getByTestId("graph-view-runs").click();
+  await window.getByTestId("graph-new-run").click();
   await selectValue(window, "graph-library-entry", "agent-assisted");
   await window.getByTestId("graph-template-parameter-request").fill(U3_REQUEST);
-  await selectU3NativeInstructions(isolation, window, summary);
+  await pickByValue(window, { slot: "instructions", query: "AGENTS", includes: "AGENTS.md" });
+  await popoverClosed(window);
+  assert.match(await chipStatus(window, "instructions"), /native-instructions/);
+  await assertIdle("explicit native instructions selection");
   await instantiateU3Draft(isolation, window, "agent-assisted");
-  await verifyU3Context(isolation, window, summary);
   const pinnedRecord = await readGraphRecord(isolation);
   assert.equal(pinnedRecord.definition.template?.id, "agent-assisted");
   assert.equal(pinnedRecord.definition.version, 5);
@@ -299,10 +272,11 @@ try {
     .getByTestId("graph-library-description")
     .fill("Reviewed synthetic portable source for U5 round trip.");
   await window.getByTestId("graph-library-capture").click();
-  await window.getByTestId("graph-template-reviewed").waitFor();
-  await window.getByTestId("graph-template-reviewed").setChecked(true);
-  await window.getByTestId("graph-library-create").click();
-  await window.getByTestId("graph-template-saved").waitFor();
+  await window.getByTestId("graph-save-reviewed").waitFor();
+  await window.getByTestId("graph-save-reviewed").setChecked(true);
+  assert.equal(await window.getByTestId("graph-save-target").innerText(), "A new workflow");
+  await window.getByTestId("graph-save-confirm").click();
+  await window.getByTestId("graph-library-result").waitFor();
   const sourceEntry = (await readLibrary()).entries.find((e) => e.name === "U5 Portable Source");
   assert.ok(sourceEntry, "Custom template was not created.");
   assert.equal(sourceEntry.versions.length, 1);
@@ -319,8 +293,8 @@ try {
     await transfer();
     // Export preview.
     await window.getByTestId("graph-library-export").click();
-    await window.getByTestId("graph-template-reviewed").waitFor();
-    const previewJson = await window.getByTestId("graph-template-json").inputValue();
+    await window.getByTestId("graph-export-reviewed").waitFor();
+    const previewJson = await window.getByTestId("graph-export-json").inputValue();
     // Verify portable format and no local data in the preview JSON.
     const previewObj = JSON.parse(previewJson);
     assert.equal(previewObj.format, "zcode-workflow");
@@ -331,7 +305,7 @@ try {
     assert.ok(!previewJson.includes("password"), "No credential pattern in export.");
     assert.ok(!previewObj.runs, "No run records in exported template.");
     assert.ok(!previewObj.conversations, "No conversations in exported template.");
-    await window.getByTestId("graph-template-reviewed").setChecked(true);
+    await window.getByTestId("graph-export-reviewed").setChecked(true);
     await screenshot("u5-export-preview-reviewed");
 
     // Export to file: controlled save dialog → real disk write.
@@ -382,60 +356,18 @@ try {
       edgeCount: diskObj.graph.edges.length,
     };
 
-    // Fill the library name BEFORE importing — the name input's onChange clears
-    // the preview (capture/export previews embed the name), so it must be set first.
-    await window.getByTestId("graph-library-name").fill("U5 Imported");
-    await delay(300);
-    // Import: controlled open dialog → real disk read → preview.
+    // Import: controlled open dialog → real disk read → preview. Choosing and previewing save nothing.
     await writeControl({ open: { path: exportPath } });
     await window.getByTestId("graph-template-import-file").click();
-    // The import's workflow.preview() invoke may be blocked by a concurrent
-    // flight guard. Wait briefly; if no preview appears, click dry-preview to
-    // re-trigger workflow.preview() with the JSON the import already set.
-    await delay(2000);
+    await window.getByTestId("graph-import-reviewed").waitFor({ timeout: 15000 });
     await writeControl({});
-    let reviewedVisible = await window
-      .getByTestId("graph-template-reviewed")
-      .isVisible()
-      .catch(() => false);
-    if (!reviewedVisible) {
-      // Check for file error or preview error first.
-      const fileErrorVisible = await window
-        .getByTestId("graph-template-file-error")
-        .isVisible()
-        .catch(() => false);
-      const previewAlertVisible = await window
-        .getByTestId("graph-template-preview-result")
-        .getByRole("alert")
-        .first()
-        .isVisible()
-        .catch(() => false);
-      if (fileErrorVisible) {
-        const fileErrorText = await window.getByTestId("graph-template-file-error").innerText();
-        throw new Error(`Import produced a file error: ${fileErrorText}`);
-      }
-      if (previewAlertVisible) {
-        const alertText = await window
-          .getByTestId("graph-template-preview-result")
-          .getByRole("alert")
-          .first()
-          .innerText()
-          .catch(() => "<no alert>");
-        throw new Error(`Import preview has errors. First alert: ${alertText}`);
-      }
-      // No error and no preview — the invoke was likely blocked. Retry via dry-preview.
-      const jsonLen = (await window.getByTestId("graph-template-json").inputValue()).length;
-      if (jsonLen > 0) {
-        await window.getByTestId("graph-template-preview").click();
-        await window.getByTestId("graph-template-reviewed").waitFor({ timeout: 15000 });
-        reviewedVisible = true;
-      }
-    }
-    if (!reviewedVisible) {
-      throw new Error("Import did not produce a preview after retry.");
-    }
+    assert.equal(
+      (await readLibrary()).entries.some((e) => e.name === "U5 Imported"),
+      false,
+      "Choosing and previewing a file must not save anything.",
+    );
     // Verify preview shows the template with no errors.
-    const importPreviewResult = window.getByTestId("graph-template-preview-result");
+    const importPreviewResult = window.getByTestId("graph-import-preview-result");
     const importErrors = importPreviewResult.getByRole("alert");
     assert.equal(await importErrors.count(), 0, "Import preview should have no errors.");
     // Verify unresolved references are surfaced (not silently inherited).
@@ -455,18 +387,18 @@ try {
       );
     }
     await screenshot("u5-import-preview");
-    // The imported template keeps its original name from the JSON. To create a
-    // distinct entry, modify the JSON name, re-validate via dry-preview, then create.
-    const importJson = await window.getByTestId("graph-template-json").inputValue();
-    const importObj = JSON.parse(importJson);
+    // The imported template keeps its original name from the JSON. To create a distinct entry,
+    // correct the JSON name in the manual route (Advanced), validate it, review it, then save.
+    const importObj = JSON.parse(await window.getByTestId("graph-import-json").inputValue());
     importObj.name = "U5 Imported";
     importObj.graph.name = "U5 Imported";
-    await window.getByTestId("graph-template-json").fill(JSON.stringify(importObj));
-    await window.getByTestId("graph-template-preview").click();
-    await window.getByTestId("graph-template-reviewed").waitFor();
-    await window.getByTestId("graph-template-reviewed").setChecked(true);
-    await window.getByTestId("graph-library-create").click();
-    await window.getByTestId("graph-template-saved").waitFor();
+    await openAdvanced(window);
+    await window.getByTestId("graph-manual-json").fill(JSON.stringify(importObj));
+    await window.getByTestId("graph-manual-preview").click();
+    await window.getByTestId("graph-manual-reviewed").waitFor();
+    await window.getByTestId("graph-manual-reviewed").setChecked(true);
+    await window.getByTestId("graph-manual-confirm").click();
+    await window.getByTestId("graph-library-result").waitFor();
     const importedEntry = (await readLibrary()).entries.find((e) => e.name === "U5 Imported");
     assert.ok(importedEntry, "Imported template was not created.");
     const importedTemplate = importedEntry.versions[0].template;
@@ -514,7 +446,7 @@ try {
     await writeControl({});
     assert.equal(
       await window
-        .getByTestId("graph-template-file-error")
+        .getByTestId("graph-import-file-error")
         .isVisible()
         .catch(() => false),
       false,
@@ -566,9 +498,9 @@ try {
     );
     await writeControl({ open: { path: oversizePath } });
     await window.getByTestId("graph-template-import-file").click();
-    await window.getByTestId("graph-template-file-error").waitFor();
+    await window.getByTestId("graph-import-file-error").waitFor();
     await writeControl({});
-    const oversizeError = await window.getByTestId("graph-template-file-error").innerText();
+    const oversizeError = await window.getByTestId("graph-import-file-error").innerText();
     assert.ok(
       oversizeError.includes("256 KB") || oversizeError.includes("exceeds"),
       "Oversize file must be rejected with transfer-limit error.",
@@ -580,9 +512,9 @@ try {
     await writeFile(invalidUtf8Path, Buffer.from([0xff, 0xfe, 0xfd, 0xfc]));
     await writeControl({ open: { path: invalidUtf8Path } });
     await window.getByTestId("graph-template-import-file").click();
-    await window.getByTestId("graph-template-file-error").waitFor();
+    await window.getByTestId("graph-import-file-error").waitFor();
     await writeControl({});
-    const utf8Error = await window.getByTestId("graph-template-file-error").innerText();
+    const utf8Error = await window.getByTestId("graph-import-file-error").innerText();
     assert.ok(
       utf8Error.includes("UTF-8") || utf8Error.includes("encoding"),
       "Invalid UTF-8 must be rejected with encoding error.",
@@ -593,7 +525,7 @@ try {
     const ghostPath = path.join(isolation.home, "ghost-file-does-not-exist.json");
     await writeControl({ open: { path: ghostPath } });
     await window.getByTestId("graph-template-import-file").click();
-    await window.getByTestId("graph-template-file-error").waitFor();
+    await window.getByTestId("graph-import-file-error").waitFor();
     await writeControl({});
     assert.deepEqual(
       (await readGraphRecord(isolation)).definition,
@@ -606,9 +538,9 @@ try {
 
     // 2b. Export save cancel: preview → review → controlled save dialog → cancel.
     await window.getByTestId("graph-library-export").click();
-    await window.getByTestId("graph-template-reviewed").waitFor();
-    await window.getByTestId("graph-template-reviewed").setChecked(true);
-    const jsonBeforeCancel = await window.getByTestId("graph-template-json").inputValue();
+    await window.getByTestId("graph-export-reviewed").waitFor();
+    await window.getByTestId("graph-export-reviewed").setChecked(true);
+    const jsonBeforeCancel = await window.getByTestId("graph-export-json").inputValue();
     await writeControl({ save: { cancel: true } });
     await window.getByTestId("graph-template-export-file").click();
     await delay(500);
@@ -623,7 +555,7 @@ try {
     );
     // Preview JSON preserved after save cancel.
     assert.equal(
-      await window.getByTestId("graph-template-json").inputValue(),
+      await window.getByTestId("graph-export-json").inputValue(),
       jsonBeforeCancel,
       "Save cancel must preserve the preview JSON.",
     );
@@ -633,9 +565,9 @@ try {
     // set the save dialog to fail and click export-file again.
     await writeControl({ save: { fail: "synthetic save failure" } });
     await window.getByTestId("graph-template-export-file").click();
-    await window.getByTestId("graph-template-file-error").waitFor();
+    await window.getByTestId("graph-export-file-error").waitFor();
     await writeControl({});
-    const saveError = await window.getByTestId("graph-template-file-error").innerText();
+    const saveError = await window.getByTestId("graph-export-file-error").innerText();
     assert.ok(
       saveError.includes("synthetic save failure"),
       "Save failure must propagate the error.",
@@ -681,13 +613,13 @@ try {
     await choose(sourceEntry.id, 1);
     await transfer();
     assert.equal(
-      await window.getByTestId("graph-template-json").inputValue(),
+      await importJsonNow(),
       "",
       "Late import result must not refill the draft after unmount.",
     );
     assert.equal(
       await window
-        .getByTestId("graph-template-file-error")
+        .getByTestId("graph-import-file-error")
         .isVisible()
         .catch(() => false),
       false,
@@ -712,7 +644,7 @@ try {
     await delay(1000);
     await writeControl({});
     // Verify at most one preview was applied (no duplicate import).
-    const jsonAfter = await window.getByTestId("graph-template-json").inputValue();
+    const jsonAfter = await importJsonNow();
     assert.ok(jsonAfter.trim().length > 0, "Import should produce a preview.");
     // The JSON should be valid (not duplicated/corrupted).
     JSON.parse(jsonAfter);
@@ -722,34 +654,31 @@ try {
     await screenshot("u5-async-lifecycle");
 
     // 3c. Version switch after export preview: old preview must not survive.
-    // Create a second version of the source template.
-    await window
-      .getByTestId("graph-template-reviewed")
-      .setChecked(false)
-      .catch(() => {});
-    // We need two versions to test version switch. Save a modified version first.
-    const currentJson = await window.getByTestId("graph-template-json").inputValue();
-    if (currentJson.trim()) {
-      const modified = JSON.parse(currentJson);
+    // We need two versions to test version switch. Save a modified version first, through the
+    // manual route (Advanced): validate, review, pick the explicit target, confirm.
+    if (jsonAfter.trim()) {
+      const modified = JSON.parse(jsonAfter);
       modified.name = "U5 Portable Source v2";
       modified.graph.name = modified.name;
-      await window.getByTestId("graph-template-json").fill(JSON.stringify(modified));
-      await window.getByTestId("graph-template-preview").click();
-      await window.getByTestId("graph-template-reviewed").waitFor();
-      await window.getByTestId("graph-template-reviewed").setChecked(true);
-      await window.getByTestId("graph-library-save-version").click();
-      await window.getByTestId("graph-template-saved").waitFor();
+      await openAdvanced(window);
+      await window.getByTestId("graph-manual-json").fill(JSON.stringify(modified));
+      await window.getByTestId("graph-manual-preview").click();
+      await window.getByTestId("graph-manual-reviewed").waitFor();
+      await window.getByTestId("graph-manual-reviewed").setChecked(true);
+      await selectValue(window, "graph-manual-target", `version:${sourceEntry.id}`);
+      await window.getByTestId("graph-manual-confirm").click();
+      await window.getByTestId("graph-library-result").waitFor();
     }
     // Export preview version 1.
     await choose(sourceEntry.id, 1);
     await window.getByTestId("graph-library-export").click();
-    await window.getByTestId("graph-template-reviewed").waitFor();
-    const v1Json = await window.getByTestId("graph-template-json").inputValue();
+    await window.getByTestId("graph-export-reviewed").waitFor();
+    const v1Json = await window.getByTestId("graph-export-json").inputValue();
     // Switch to version 2.
     await choose(sourceEntry.id, 2);
     await delay(500);
     // Per spec, review state must not survive changing version. Check if old preview persists.
-    const jsonAfterSwitch = await window.getByTestId("graph-template-json").inputValue();
+    const jsonAfterSwitch = await exportJsonNow();
     if (jsonAfterSwitch === v1Json) {
       // Old preview survived version switch — record as a potential defect.
       scenario3Assertions.push(
@@ -757,7 +686,7 @@ try {
       );
       summary.versionSwitchDefect = {
         description:
-          "GraphTemplateTransfer does not clear preview/reviewed/json state when the version prop changes.",
+          "The export task does not clear preview/reviewed/json state when the selected version changes.",
         spec: "U5_REUSE_SPEC.md: Review state belongs to an exact preview operation, entry/version; it must not survive changing those inputs.",
         severity: "medium",
       };
@@ -782,7 +711,8 @@ try {
   const scenario4aAssertions = [];
   try {
     // Re-instantiate agent-assisted to get a clean pinned definition.
-    await window.getByTestId("graph-view-workflows").click();
+    await window.getByTestId("graph-view-runs").click();
+    await window.getByTestId("graph-new-run").click();
     await selectValue(window, "graph-library-entry", "agent-assisted");
     await window.getByTestId("graph-template-parameter-request").fill(U3_REQUEST);
     await instantiateU3Draft(isolation, window, "agent-assisted");
@@ -957,7 +887,8 @@ try {
   // Worker/Plugin/MCP 活动；fixture 未单独跟踪这三类活动。
   const delta = {
     nativeInputs: transferSideEffectSnapshot.nativeInputs - (summary.baseline?.nativeInputs ?? 0),
-    modelRequests: transferSideEffectSnapshot.modelRequests - (summary.baseline?.modelRequests ?? 0),
+    modelRequests:
+      transferSideEffectSnapshot.modelRequests - (summary.baseline?.modelRequests ?? 0),
     toolCalls: transferSideEffectSnapshot.toolCalls - (summary.baseline?.toolCalls ?? 0),
   };
   summary.zeroSideEffectProof = {

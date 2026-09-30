@@ -18,9 +18,8 @@ import {
 } from "./ux-m1-helpers.mjs";
 import { approvalWaitRun, permissionWaitRun, questionWaitRun, runningRun } from "./ux-m1-runs.mjs";
 
-const TEMPLATE_KEY = "agent-assisted:1";
 const draftOf = async (page, host, workspace = "A") =>
-  (await drafts(page))[host.workspaces[workspace]]?.templates[TEMPLATE_KEY];
+  (await drafts(page))[host.workspaces[workspace]]?.templates[host.library.key("agent-assisted")];
 
 const waits = [
   ["a native permission", permissionWaitRun],

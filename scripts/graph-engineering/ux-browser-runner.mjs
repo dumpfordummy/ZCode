@@ -21,10 +21,15 @@ export async function runUxBrowserSuite({ suite, scenarios }) {
     "recipes",
     "run",
     "list",
+    "mutate",
+    "preview",
     "instantiate",
     "prepare",
     "projectSetup",
     "searchFiles",
+    "stat",
+    "readFileRange",
+    "saveFile",
     "pickFile",
     "record",
   ];
@@ -79,9 +84,9 @@ export async function runUxBrowserSuite({ suite, scenarios }) {
       ],
       fixtures: [
         "Graph engineering service: workspace view, run list, definition revision counter, run admission, change events",
-        "Graph workflow service: library view (from the real built-in templates), preflight (built from the real reference validation and recipe store, fixture native environment)",
+        "Graph workflow service: only the preflight (`prepare`, built from the real reference validation and recipe store, fixture native environment). The library operations list/mutate/preview/instantiate are the REAL GraphWorkflowService over an in-memory GraphLibraryStore (same revision rule and schema validation as the file store)",
         "run records: the UI tests' summaryRun() (unit-only captured records), not native runs",
-        "file search, platform.selectFile, transport (Playwright bridge instead of RPC)",
+        "file search, platform.selectFile/saveFile and fileService.stat/readFileRange (real temp files; no OS dialogs), transport (Playwright bridge instead of RPC)",
       ],
       stubs: [
         "GraphConfiguration (composer model/mode configuration hook)",

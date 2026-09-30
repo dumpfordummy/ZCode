@@ -6,11 +6,11 @@ Graph is for structured, repeatable, supervised work. Chat is for interactive wo
 
 ## Where things are
 
-| Destination   | What it is for                                                                                                                                                                                                     |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Runs**      | Start a run (**New run**), see what needs you, supervise, read results, repeat a request.                                                                                                                          |
-| **Workflows** | Edit the graph: Guided/Advanced, canvas, bindings, conditions, bounded repair, the **Workflow library** (choose, versions, transfer) and **New request** for the current design. Node positions are not rewritten. |
-| **Checks**    | The saved project checks: a list plus **one** selected editor. Project scan and the .NET preset are under it, as ways to add checks.                                                                               |
+| Destination   | What it is for                                                                                                                                                                                                                                                                                                         |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Runs**      | Start a run (**New run**), see what needs you, supervise, read results, repeat a request.                                                                                                                                                                                                                              |
+| **Workflows** | Edit the graph: Guided/Advanced, canvas, bindings, conditions, bounded repair, the **Workflow library** (choose a workflow, inspect versions, save, export, import) and **New request** for the current design. It shows which workflow and version the current design started from. Node positions are not rewritten. |
+| **Checks**    | The saved project checks: a list plus **one** selected editor. Project scan and the .NET preset are under it, as ways to add checks.                                                                                                                                                                                   |
 
 A bar under the tabs always shows the effective model, mode and the saved-check status for the next run. Changing them is still done where it always was (Workflows → Workspace defaults).
 
@@ -91,6 +91,23 @@ Limits: chip statuses from a check last only for the current session; the Contex
 
 Open a run and choose **Start a new request from this one**. The form is pre-filled from that run's captured parameters and bindings. The bindings are checked against today's saved checks and references, so they may need correction. **Nothing starts** until you review and press Start.
 
+## Reusable workflows
+
+**Workflows → Workflow library** is one dialog with five sections: **Workflow**, **Versions**, **Use**, **Share** and **Advanced**. Each workflow says **Built-in** or **Yours**.
+
+- **Versions.** One row per version the app offers: **Version N**, **Latest** (only when a workflow has several), **Used by current design** (only when the design's own record names that workflow, version and definition) and a creation date for your own versions. There is no generic "current version". Your own versions are immutable and each one can be chosen. A built-in lists only what the app offers today; a version it no longer offers is not recreated.
+- **New run** says which workflow and version the next run will instantiate ("This run will use … · Version N · Built-in"). When a workflow has several versions, a **Version** choice appears there too.
+- **Use.** **Load into design** puts the chosen version into the Workflows design (it asks before replacing unsaved edits). **Open in Runs** opens New run with the chosen workflow and version; it never reviews or starts anything.
+- **Share** holds three separate tasks. **Save current design** saves the design shown in Workflows as a new workflow or as a new version of one of yours; the target is chosen there (by default the workflow the design started from), and before you confirm it says if the save includes your unsaved design edits and if it would rename the workflow. **Export a version** names the exact `Workflow · Version N` and never includes the unsaved canvas. **Import a file** is three steps: choose, preview and review, then save with an explicit target. Everything is previewed and reviewed (tick the review box) before anything is saved, and the previews do not change the library.
+- After a save, a new version or a duplicate, the result is selected and named ("Saved: X · Version N is now selected"). For a built-in use **Duplicate to edit**; built-ins cannot be archived or given versions.
+- **Advanced** holds the technical identities (version digest, library revision), **Refresh library** and **Manual JSON** for environments that cannot select a file. A library conflict ("revision changed") shows **Refresh library** next to the error; your reviewed preview is kept.
+
+While a run owns the workspace you can browse workflows, inspect versions and preview. Loading a design, creating, versioning, duplicating, archiving, importing-and-saving and **exporting to a file** are refused, each with its reason and **View current run**. **Open in Runs** is allowed (it only navigates).
+
+### A run that used a version that is no longer offered
+
+**Start a new request from this one** on a run whose workflow version the library does not offer now (a built-in corrected since, or changed content) shows "Version N used by this run is no longer offered. Version M is available." instead of quietly showing another version. The run is untouched. **Continue with version M** copies only what matches by stable identity (parameter id and type, context role id and kind, step id of a check, repair region id), lists what was not carried, and keeps Review disabled while a required value is missing.
+
 ## When a run needs you
 
 A **Needs you** strip appears on every destination while a run waits for a permission, a question or an approval. It is built from the complete run list this Host returned for this workspace, not from the visible page of history, so it still finds a waiting run that is on another page. It says so: it is not a queue across workspaces or other Hosts.
@@ -117,4 +134,4 @@ Every Graph control is reachable by keyboard and shows a border and fill when fo
 
 ## Known limits
 
-See [IMPLEMENTATION_REPORT.md](IMPLEMENTATION_REPORT.md). For the UX-M1 additions (draft while running, checks for this workflow, keyboard/state clarity) see [UX_M1_REPORT.md](UX_M1_REPORT.md) and their Windows acceptance in [UX_M1_WINDOWS_REPORT.md](UX_M1_WINDOWS_REPORT.md), including the items it records as blocked or not run. For the UX-M2 additions (newest-first history, unsaved check edits, failure explanations) see [UX_M2_REPORT.md](UX_M2_REPORT.md): they were verified on Linux Chromium with a fixture Graph Host; **Windows acceptance of UX-M2 is pending**.
+See [IMPLEMENTATION_REPORT.md](IMPLEMENTATION_REPORT.md). For the UX-M1 additions (draft while running, checks for this workflow, keyboard/state clarity) see [UX_M1_REPORT.md](UX_M1_REPORT.md) and their Windows acceptance in [UX_M1_WINDOWS_REPORT.md](UX_M1_WINDOWS_REPORT.md), including the items it records as blocked or not run. For the UX-M2 additions (newest-first history, unsaved check edits, failure explanations) see [UX_M2_REPORT.md](UX_M2_REPORT.md): they were verified on Linux Chromium with a fixture Graph Host; UX-M2 Windows acceptance is recorded in [UX_M2_WINDOWS_REPORT.md](UX_M2_WINDOWS_REPORT.md). For the UX-M3 additions (one library surface, version semantics, separate save/export/import, Open in Runs, historical pins) see [UX_M3_REPORT.md](UX_M3_REPORT.md): they were verified on Linux Chromium with a fixture Graph Host and the real workflow service; **Windows acceptance of UX-M3 is pending**.
