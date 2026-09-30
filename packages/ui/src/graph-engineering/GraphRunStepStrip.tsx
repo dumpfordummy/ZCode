@@ -14,9 +14,12 @@ function StripIcon({ status }: { status?: string }) {
     return <XCircle className={`${className} text-destructive`} aria-hidden="true" />;
   if (
     status &&
-    ["WaitingForPermission", "WaitingForUser", "WaitingForApproval", "AwaitingContinuation"].includes(
-      status,
-    )
+    [
+      "WaitingForPermission",
+      "WaitingForUser",
+      "WaitingForApproval",
+      "AwaitingContinuation",
+    ].includes(status)
   )
     return <AlertTriangle className={`${className} text-warning`} aria-hidden="true" />;
   if (status && ["Starting", "Running", "CancelRequested"].includes(status))

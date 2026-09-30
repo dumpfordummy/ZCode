@@ -37,7 +37,9 @@ export function GraphLibraryDialogBody({
     <div className="flex h-full min-h-0 flex-col">
       <DialogHeader className="shrink-0 border-b border-border px-6 pb-3 pr-14 pt-5">
         <DialogTitle className="text-ui-lg font-semibold">{title}</DialogTitle>
-        <DialogDescription className="text-ui-base text-foreground-subtle">{help}</DialogDescription>
+        <DialogDescription className="text-ui-base text-foreground-subtle">
+          {help}
+        </DialogDescription>
         <p
           className="break-all font-mono text-ui-sm text-foreground-subtle"
           data-testid="graph-library-workspace"

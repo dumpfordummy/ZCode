@@ -75,7 +75,11 @@ export function GraphNewRunActions({
       </Button>
       {/* 就绪指“可以进入下一步（审阅）”，不代表检查通过；确认之前不会开始任何执行。 */}
       {allowReview && !blocked && !error ? (
-        <p role="status" className="text-ui-sm text-foreground-subtle" data-testid="graph-new-run-ready">
+        <p
+          role="status"
+          className="text-ui-sm text-foreground-subtle"
+          data-testid="graph-new-run-ready"
+        >
           {m4("readyToReview")}
         </p>
       ) : null}

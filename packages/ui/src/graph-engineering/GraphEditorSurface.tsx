@@ -265,7 +265,9 @@ export function GraphEditorSurface({
             {runSummary ? <GraphRunRequestPanel run={selectedRun} summary={runSummary} /> : null}
           </GraphTabPanel>
           <GraphTabPanel value="evidence">
-            {runSummary ? <GraphRunEvidencePanel summary={runSummary} onInspect={onInspect} /> : null}
+            {runSummary ? (
+              <GraphRunEvidencePanel summary={runSummary} onInspect={onInspect} />
+            ) : null}
           </GraphTabPanel>
           <GraphTabPanel value="technical">
             {runSummary ? <GraphRunTechnicalPanel summary={runSummary} /> : null}

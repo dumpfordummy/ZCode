@@ -74,7 +74,10 @@ export function GraphRunOverview({
     >
       <header className="space-y-1">
         <h3 className="break-words text-ui-xl font-semibold">{title || run.definition.name}</h3>
-        <p className="break-all text-ui-sm text-foreground-subtle" data-testid="graph-run-workspace">
+        <p
+          className="break-all text-ui-sm text-foreground-subtle"
+          data-testid="graph-run-workspace"
+        >
           {run.definition.name} · {u("workspace")}: {summary.target.workspacePath}
         </p>
       </header>
@@ -125,7 +128,9 @@ export function GraphRunOverview({
           state={summary.evidence.state}
           value={u(evidenceLabels.primary)}
           note={evidenceLabels.note ? u(evidenceLabels.note) : undefined}
-          quiet={quietEvidence.has(summary.evidence.state) && summary.evidence.configuredTestCount === 0}
+          quiet={
+            quietEvidence.has(summary.evidence.state) && summary.evidence.configuredTestCount === 0
+          }
         />
         {/* 有效的审阅结论只是一行事实；无效输出、失败检查与其他停止统一在横幅中说明一次。 */}
         {outputs.map((output) => (
@@ -208,7 +213,9 @@ function Fact({
       <dt className="w-40 shrink-0 text-foreground-subtle">{label}</dt>
       <dd className={`min-w-0 flex-1 ${quiet ? "text-foreground-subtle" : "font-medium"}`}>
         {value}
-        {note ? <span className="block text-ui-sm font-normal text-foreground-subtle">{note}</span> : null}
+        {note ? (
+          <span className="block text-ui-sm font-normal text-foreground-subtle">{note}</span>
+        ) : null}
       </dd>
     </div>
   );

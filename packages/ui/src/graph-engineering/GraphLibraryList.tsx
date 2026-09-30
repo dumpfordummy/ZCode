@@ -25,11 +25,7 @@ export function GraphLibraryList({
     { kind: "builtin", title: m3("kindBuiltin"), items: entries.filter((item) => item.builtin) },
   ].filter((group) => group.items.length);
   return (
-    <fieldset
-      className="min-w-0 space-y-4"
-      disabled={disabled}
-      data-testid="graph-library-list"
-    >
+    <fieldset className="min-w-0 space-y-4" disabled={disabled} data-testid="graph-library-list">
       <legend className="sr-only">{m3("sectionWorkflow")}</legend>
       {groups.map((group) => (
         <div key={group.kind} className="space-y-1" data-kind={group.kind}>

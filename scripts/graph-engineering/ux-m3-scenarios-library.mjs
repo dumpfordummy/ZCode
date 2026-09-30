@@ -31,9 +31,7 @@ const sections = {
     await boot(page, host, url);
     await openLibrary(page);
     const order = await page
-      .locator(
-        '[data-testid="graph-library-dialog"] [role="tabpanel"]',
-      )
+      .locator('[data-testid="graph-library-dialog"] [role="tabpanel"]')
       .evaluateAll((items) => items.map((item) => item.getAttribute("data-testid")));
     // UX-M4：一个对话框，左侧是工作流列表，右侧是单层标签 Versions / Use / Share / Advanced。
     assert.deepEqual(order, [

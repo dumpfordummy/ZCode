@@ -12,7 +12,13 @@ import type { GraphRun } from "@zcode/services";
  * on lives here: the banner and its actions own the decision.
  */
 
-export function GraphRunRequestPanel({ run, summary }: { run: GraphRun; summary: GraphRunSummary }) {
+export function GraphRunRequestPanel({
+  run,
+  summary,
+}: {
+  run: GraphRun;
+  summary: GraphRunSummary;
+}) {
   const u = useGraphRunText();
   const result =
     summary.result.kind === "text"

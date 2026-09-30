@@ -261,11 +261,7 @@ export function GraphRunActions({
           </Button>
         ) : null}
         {canRunAgain ? (
-          <Button
-            variant="outline"
-            data-testid="graph-run-again"
-            onClick={() => onRunAgain?.(run)}
-          >
+          <Button variant="outline" data-testid="graph-run-again" onClick={() => onRunAgain?.(run)}>
             {u("runAgain")}
           </Button>
         ) : null}

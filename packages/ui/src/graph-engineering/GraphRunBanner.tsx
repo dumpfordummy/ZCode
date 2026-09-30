@@ -22,7 +22,8 @@ function BannerIcon({ icon, className }: { icon: GraphBannerIcon; className: str
   if (icon === "alert") return <AlertTriangle className={shared} aria-hidden="true" />;
   if (icon === "failure") return <XCircle className={shared} aria-hidden="true" />;
   if (icon === "done") return <CheckCircle2 className={shared} aria-hidden="true" />;
-  if (icon === "progress") return <Loader2 className={`${shared} animate-spin`} aria-hidden="true" />;
+  if (icon === "progress")
+    return <Loader2 className={`${shared} animate-spin`} aria-hidden="true" />;
   return null;
 }
 
