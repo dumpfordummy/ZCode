@@ -2,7 +2,16 @@
 
 Date: **2026-09-30**. Plan: [UX_M2_MILESTONE.md](UX_M2_MILESTONE.md). Contract: [UX_M2_SPEC.md](UX_M2_SPEC.md) (section 6 is new). Cloud results: [UX_M2_REPORT.md](UX_M2_REPORT.md) (Linux, Chromium, fixture Host: historical evidence, not Windows acceptance). Procedure: [UX_M1_WINDOWS_REPORT.md](UX_M1_WINDOWS_REPORT.md). Evidence: [evidence/ux-m2-windows/](evidence/ux-m2-windows/).
 
-**Status: AUTOMATED WINDOWS ACCEPTANCE COMPLETE — HUMAN ACCEPTANCE PENDING.** One integration defect was found and fixed (section 5); the items that could not be run natively are listed in section 8. Everything below ran on this Windows machine (Windows 11 Education 10.0.26200, primary display 1920x1080 at 100% scaling, Windows display language English (United States), regional format English (Malaysia)) in the real Electron app, except where a row says otherwise. Synthetic permission answers were given by the test driver only in scenarios that verify decision handling. **No human acceptance is claimed.** The user's earlier statement that the UX-M1 manual runs passed says nothing about UX-M2.
+**Status: AUTOMATED WINDOWS ACCEPTANCE COMPLETE — USER MANUAL ACCEPTANCE PASSED.** One integration defect was found and fixed (section 5); the items that could not be run natively are listed in section 8. Everything below ran on this Windows machine (Windows 11 Education 10.0.26200, primary display 1920x1080 at 100% scaling, Windows display language English (United States), regional format English (Malaysia)) in the real Electron app, except where a row says otherwise. Synthetic permission answers were given by the test driver only in scenarios that verify decision handling. The automated results below are unchanged by the manual acceptance note that follows. The user's earlier statement about the UX-M1 manual runs says nothing about UX-M2.
+
+## Manual acceptance note (2026-10-01)
+
+**The user reports that the prepared UX-M2 manual run passed.**
+
+- What was run: the manual launcher of section 10 on the Desktop built from this source (fresh isolated profile, disposable workspace, controlled loopback provider, real Windows file chooser).
+- What this is **not**: not live-model acceptance, not packaged-installer acceptance, not a clean-machine test.
+- This is the user's statement. I did not observe the run and have no per-row record of which checklist rows were exercised, so the rows are not individually marked. In particular real Windows 125% / 150% scaling is not claimed as tested.
+- **Nothing that is NOT RUN or BLOCKED in section 8 became passed because of this note.** Section 8 is unchanged.
 
 ## 1. Result at a glance
 
@@ -177,7 +186,7 @@ No other product defect was found. **Stopped-before list:** nothing touched Grap
 
 ## 8. Not run / blocked / limits
 
-- **Human acceptance: NOT RUN** (yours, section 10).
+- **Human acceptance:** see the dated manual acceptance note at the top (the user's statement; per-row results not recorded).
 - **Real Windows scaling 125% / 150%: NOT RUN.** Emulated only; the display setting was not changed.
 - **A preflight-specific failure (the `prepare` call failing): NOT RUN.** What ran natively is a real instantiate failure (F5) and a real Host-refused Start (F6). No supported way to make the preflight call itself fail was found, and no production path was added for it.
 - **An unrelated action error never appearing beside Review: NOT RUN natively.** Only the checks-save case ran natively (K6). The unrelated cases (a cancel or decision error) are Cloud-only.
