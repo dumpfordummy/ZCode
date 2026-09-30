@@ -150,3 +150,20 @@ No built-in version 1 is synthesized, no fake library entry is created, no histo
 ### 3.5 Acceptance (Cloud)
 
 Open in Runs carries the selection and does nothing else (Host call log); characterization scenario before the change; after it: the notice for a missing version, for a changed digest and for a missing workflow; the selection is not changed by the notice; no form for another version; Continue carries only structurally compatible values (parameter, reference, check, source paths), lists the rest, keeps required-missing blocking Review, leaves the run record deep-equal; exact-version offers (user workflows, current built-in) behave as before; English/Chinese. Pure tests for the status and the carry-forward rules, including label-lookalikes and positional traps.
+
+## 4. UX-M3.4 — driver restoration
+
+Targets: `z6-native-smoke --scenario=generic`, `z6-native-library`, `pre-z8-u1-native`, `pre-z8-u5-native`. `pre-z8-u3-native` stays out of scope (its catalogue-form helpers are only touched where `pre-z8-u5-native` needs a Context-picker equivalent).
+
+**What is migrated, and what is never changed**
+
+| Kind of change                                                                                      | Rule                                                                                                                                                                               |
+| --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Navigation and control ids (`<details>` management panel, unified Transfer, `graph-view-workflows`) | Migrated mechanically to the final UI through `ux-m3-native-library.mjs`; the operation each step performs is the same.                                                            |
+| Built-in version in a driver that selects a NEW built-in instance                                   | Read from what the Host offers (the checked version row and the digest in Advanced) and asserted against the pinned instance. Never `1`, never `2`.                                |
+| User-created workflow versions (`saved.versions[0]`, version `1`/`2`)                               | Unchanged and exact.                                                                                                                                                               |
+| Assertions                                                                                          | Not weakened. Where the UI now makes a forbidden step impossible instead of disabled (for example a Save button that does not exist before a preview), the driver asserts absence. |
+
+**Dedicated policy assertion (service level, Cloud-runnable):** every built-in offers exactly the versions `list()` returns (today one); selecting a version that is not offered (the historical built-in v1) is rejected, never served by another version; user-created versions are individually selectable and exact. It extends `reviewer-version.test.ts` to all built-ins and to user versions.
+
+**Cloud check for the drivers themselves:** a static guard (`driver-selectors.test.mjs`) fails when a driver reaches for a test id that no longer exists in the UI. It proves the drivers no longer use removed controls; only a native run proves they pass, and that stays NOT RUN until Windows.

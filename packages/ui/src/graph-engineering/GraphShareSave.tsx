@@ -122,6 +122,7 @@ export function GraphShareSave({
         onTarget={(next) => {
           setTarget(next);
           setEdit({});
+          flow.invalidate(); // 名称与描述默认值随目标变化，先前的预览不再对应当前表单
         }}
         mutationBlocked={mutationBlocked}
         blockedId={blockedId}

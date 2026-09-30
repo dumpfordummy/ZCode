@@ -280,10 +280,13 @@ const importTask = {
     host.setPickedFile(good);
     await T(page, "graph-template-import-file").click();
     await T(page, "graph-import-preview-result").waitFor();
-    await selectValue(page, "graph-import-target", `version:${team.id}`);
-    await T(page, "graph-template-import-file").click();
-    await T(page, "graph-import-reviewed").waitFor();
     await T(page, "graph-import-reviewed").click();
+    await selectValue(page, "graph-import-target", `version:${team.id}`);
+    assert.equal(
+      await T(page, "graph-import-reviewed").isChecked(),
+      true,
+      "choosing the target does not undo the review of the same JSON",
+    );
     assert.match(
       await T(page, "graph-import-rename").innerText(),
       /renamed from “Team release” to “Imported flow”/,

@@ -89,8 +89,8 @@ export function GraphPortableSave({
           })),
         ]}
         onChange={(value) => {
+          // 目标只决定保存到哪里，不改变已预览并已审阅的模板；需要重新预览的是 Save current design（见调用方）。
           onTarget(parseTargetValue(value));
-          flow.invalidate();
         }}
       />
       {extra ? (
