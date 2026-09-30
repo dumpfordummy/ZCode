@@ -44,7 +44,7 @@ export function GraphDeleteNode({
           if (!open) setReviewed(null);
         }}
       >
-        <DialogContent className="max-h-[85vh] overflow-auto" data-testid="graph-delete-impact">
+        <DialogContent className="graph-ui max-h-[85vh] overflow-auto" data-testid="graph-delete-impact">
           <DialogHeader>
             <DialogTitle>
               {t("deleteTitle")}: {"name" in node ? node.name : node.id}

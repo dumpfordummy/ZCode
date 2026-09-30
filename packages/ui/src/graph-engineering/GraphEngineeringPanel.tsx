@@ -15,7 +15,7 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
   return (
     <main
-      className={`${graphFocusClass} flex h-full min-h-0 flex-col bg-background text-foreground`}
+      className={`${graphFocusClass} graph-ui flex h-full min-h-0 flex-col bg-background text-foreground`}
       data-testid="graph-engineering-panel"
     >
       <header className="flex flex-wrap items-center gap-2 border-b border-border p-3 [app-region:no-drag]">

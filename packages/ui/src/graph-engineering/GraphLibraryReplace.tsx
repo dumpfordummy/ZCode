@@ -35,7 +35,7 @@ export function GraphLibraryReplace({
         if (!value && !operationPending) onCancel();
       }}
     >
-      <DialogContent data-testid="graph-replace-dialog" showCloseButton={!operationPending}>
+      <DialogContent className="graph-ui" data-testid="graph-replace-dialog" showCloseButton={!operationPending}>
         <DialogHeader>
           <DialogTitle>{u("replaceTitle")}</DialogTitle>
           <DialogDescription>{u("replaceHelp")}</DialogDescription>

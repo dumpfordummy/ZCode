@@ -230,7 +230,7 @@ export function GraphContextSection({
           ref={contentRef}
           align="start"
           aria-label={t("pickerTitle")}
-          className={`${graphFocusClass} w-[min(34rem,calc(100vw-2rem))] gap-2`}
+          className={`${graphFocusClass} graph-ui w-[min(34rem,calc(100vw-2rem))] gap-2`}
           data-testid="graph-context-popover"
           onOpenAutoFocus={(event) => {
             // 焦点进入搜索框，而不是弹层里第一个可聚焦元素。
