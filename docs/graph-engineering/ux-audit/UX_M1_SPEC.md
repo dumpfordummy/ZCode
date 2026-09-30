@@ -80,7 +80,55 @@ sequenceDiagram
 
 ## 4. UX-M1.2: one draft-preserving setup journey
 
-To be finalized before implementation (see the plan, section 5).
+Finalized **2026-09-30**, before UX-M1.2 was implemented. Source read: `GraphTemplateBindings`, `GraphTemplateRecipeBindings`, `GraphRecipeReadStatus`, `GraphContextBar`, `GraphSetupPanel`, `GraphProjectRecipes`, `GraphRecipeForm`, `graphWorkflowView`, `useGraphRecipes`/`readGraphRecipeSnapshot`, `graphDraftStore`, `graphEngineeringViewStore`, and the Host `recipes` handler (`app/service.ts`).
+
+### 4.1 What exists today, and the gaps
+
+Already correct and **kept unchanged**: check choices are stored in the draft (`bindings.recipes`, `recipeGroups`, `buildMappings`) by stable recipe id, not by list position; the checks editor draft (`workspaces[key].recipes`) and its digest conflict handling; single-flight, sequence-guarded recipe reads (`readGraphRecipeSnapshot`, a late read cannot overwrite a newer snapshot or another workspace); `templateBindingErrors` blocks Review when a selected check is missing or incompatible; "Set up checks" and "Back to new run" already exist; the Host refuses `recipes save` while any graph is unresolved (`"Project recipe edits are blocked while a graph is unresolved."`, `app/service.ts`) and re-verifies recipe digests during a run.
+
+Gaps this milestone closes:
+
+1. The New-run pane shows a `<select>` per Build/Test step but not what the chosen check _is_ (name, kind, saved/not run) nor a way to open **that** check. The context bar shows only the project-wide count.
+2. Every unresolved selection shows one sentence and the select silently displays "Choose a compatible check", so the stored id is not visible and "missing" and "incompatible" are not distinguished.
+3. The route to the editor opens the first check and the return control scrolls away with the page. Entering the Checks tab from the New-run pane offers no return, and a stale `returnToWorkflow` value can survive navigation.
+4. While a run is unresolved the editor's **Save checks** button looks usable; the Host then refuses it with a raw error. (Checks _editing_ stays allowed; only the save is blocked.)
+5. The context bar does not say that model, mode and saved checks are the settings of the **next** run, not the current one.
+
+### 4.2 Ownership (no new store, no second editor)
+
+| State or rule                                      | Single owner                                                                                          |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Which check a step uses                            | draft store `bindings.recipes`/`recipeGroups`/`buildMappings` (unchanged)                             |
+| What saved checks exist                            | Host recipe store, read through the existing `recipes` interface (unchanged)                          |
+| Unsaved edits to saved checks                      | draft store `recipes` (unchanged)                                                                     |
+| Which check the editor opens and where "Back" goes | view store selection: `mode`, `returnToWorkflow` and a new renderer-local `checkId` (navigation only) |
+| Whether a step's selection is valid                | new pure `graphCheckSelection` over (template, bindings, snapshot); never writes anything             |
+| May checks be saved                                | Host (authoritative). The renderer refuses earlier using the same projection (`graphAdmission`)       |
+
+### 4.3 Rules
+
+1. **Selected checks are visible per step.** Under each Build/Test step the New-run pane shows, for every selected check id in group order: name, kind, and `Saved · not run` (or the existing "needs attention" state), and an **Edit check** action. A step without a selection shows "No check selected". A workflow without Build/Test steps keeps its existing statement that configured test evidence is not included; nothing says or implies that tests passed.
+2. **Unresolved selections are explicit and block Review.** Each stored id is classified `resolved`, `missing` (not in the saved checks) or `incompatible` (saved but not usable for this step). Unresolved ones show the stored id, the reason, and an **Open Checks** action. They are never replaced, dropped or auto-selected, even when exactly one compatible check exists. The existing `templateBindingErrors` remains the blocker; the row is the explanation.
+3. **One editor, one route.** **Edit check**, **Set up checks** and the context bar's Checks chip all open the existing Checks destination. Entering it from the New-run pane sets `returnToWorkflow`; entering it from anywhere else clears it. **Edit check** also sets `checkId`, and the editor opens that check (matching `id`) and moves focus to its first field. No modal, no second editor.
+4. **Back is always reachable.** While `returnToWorkflow` is set the editor shows a sticky bar with **Back to new run** and a note that the request, context and check choices are kept. Back leaves the pane exactly as it was (the draft never left the store).
+5. **Draft-preserving failure and cancel.** Cancelling, navigating away, a failed or conflicting save, a failed re-read and a workspace switch never change the request, workflow, references or check selections. Only an explicit, successful save changes saved checks.
+6. **Save authority is unchanged and visible.** While a run is unresolved, **Save checks** is disabled with a reason, and `saveRecipes` refuses at the hook (defence in depth; the Host still enforces the same rule and re-verifies digests during a run). Editing the checks text stays allowed. Nothing about the running definition, its recipes or evidence is touched.
+7. **After an explicit save** the recipe snapshot is refreshed through the existing interface and each step re-resolves by **stable id**: a selection survives only if that id still exists and is compatible. Renaming a check keeps the selection (the label updates); removing or making an id incompatible turns it into an unresolved row.
+8. **Next-run wording.** The context bar is labelled as the configuration of the next run, and its Checks chip is the project-wide count; the per-step rows above are what this workflow will use.
+9. **Preflight uses what is shown.** Review instantiates from the draft's normalized bindings; the preflight is built from the instantiated definition, so the checks in the review are exactly the selected, resolved ones. A stale, unresolved or missing selection prevents Review before any Host call.
+10. **Late replies.** A recipe read that resolves after a save, a refresh or a workspace switch is discarded (existing sequence guard); it never writes another workspace's or template's draft.
+
+### 4.4 Acceptance and how each is verified
+
+1. Selected checks per step (name, kind, Saved · not run) match the draft. **Browser** (generic workflow, real recipe store) and **unit** (`graphCheckSelection`).
+2. Edit check opens the right check; Back returns to the identical draft. **Browser**: view-store selection, focus, draft-store equality before and after.
+3. Missing, incompatible and unselected steps are explicit and Review stays blocked with no `wf.instantiate`/`wf.prepare`. **Browser** (Host call log) and **unit**.
+4. A rename keeps the selection; a removal does not auto-replace it, even when another compatible check exists. **Browser** with a real save through the real recipe store.
+5. Cancel, failed save (injected failure) and revision/digest conflict leave the draft untouched. **Browser**.
+6. Saving is refused while a run is unresolved (no `graph.recipes.save` reaches the Host), then allowed once resolved. **Browser**; hook guard by **mutation test**.
+7. Instantiate and prepare payloads equal the visible choices; the review lists the same checks. **Browser** (payloads and review text).
+8. Late reads (after switch or after save) do not overwrite. **Browser** with held Host operations.
+9. Copy is localized in English and Simplified Chinese; check names, ids, commands and paths are not translated. **Unit** (message keys) and **Browser** (zh-CN pass).
 
 ## 5. UX-M1.3: keyboard, localization and state clarity
 
