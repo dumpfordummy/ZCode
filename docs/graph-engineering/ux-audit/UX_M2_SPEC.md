@@ -74,3 +74,76 @@ sequenceDiagram
 8. Mutation checks: reversing order removed; reveal not applied; reveal applied on refresh.
 
 The historical driver `pre-z8-u4-history.mjs` (500 synthetic rows, keyboard paging) is updated to the new order with the same assertions (bounded rendering, keyboard paging to the end, "Show selected run", Tab+Enter selects the neighbouring row). The native `ux-m1-native-runs.mjs` step E3 is updated the same way as the browser scenario; it runs only on Windows and stays pending until executed there.
+
+## 3. UX-M2.2: explicit unsaved-check semantics
+
+Finalized **2026-09-30**, before UX-M2.2 was implemented. Approved approach: disclosure, Discard and a Save summary; **no** blocking Save/Discard/Keep dialog on Back or on navigation to a pending run.
+
+### 3.1 Facts from the source
+
+- The unsaved check draft is `useGraphDraftStore().workspaces[key].recipes = { text, baseText, digest }`: `baseText` is the saved list (JSON of the snapshot at `digest`) the draft started from; `text` is the whole edited list. Dirty means `text !== baseText`. It survives navigation and is per workspace.
+- **Save checks** validates `text` through the Host and then saves the **whole list** with `expectedDigest = digest`. So a save writes every retained edit, including ones made on earlier visits (Windows C9).
+- A conflict is `digest !== snapshot.digest` (the saved checks changed elsewhere). The conflict block offers **Discard edits and use loaded checks** (`acceptRecipes(snapshot, text)`), and Save is blocked.
+- New run reads only the Host snapshot (`recipeReadState.snapshot` when `ready`); preflight is built by the Host from the saved recipe store. Unsaved edits are never part of a review or a run. Nothing says so today.
+- The dirty status is one line below the form ("Unsaved project-check edits are retained for this workspace."). No discard exists outside the conflict case. The sticky Back bar says only that choices are kept.
+
+### 3.2 Ownership (no new store, no new write path)
+
+| State or rule                     | Single owner                                                                                          |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Unsaved check edits               | draft store `recipes` (unchanged)                                                                     |
+| Saved checks                      | Host recipe store via `recipes read/save` (unchanged authority, validation, digest check)             |
+| What changed, by stable id        | pure `graphRecipeChanges(recipes)` over (`baseText`, `text`); derived, never stored                   |
+| Discard                           | the existing `acceptRecipes(snapshot, text)` with a **ready, non-conflicting** snapshot; nothing else |
+| Discard confirmation, open/closed | component state in the Checks editor (renderer-local)                                                 |
+
+### 3.3 Rules
+
+1. **Back is immediate.** **Back to new run** keeps the check draft and returns at once. No dialog, no prompt, on Back, on the tabs, on Needs-you, on **Go to run**, **View current run** or **Back to run**.
+2. **Changes by stable id.** `graphRecipeChanges` compares `baseText` and `text` by recipe `id`: **added** (id only in the draft), **modified** (both, content differs; key order ignored), **removed** (id only in the saved base), and **order changed** (the same ids in a different order). Names come from the draft (added, modified) or the base (removed) when they are strings; otherwise only the id is shown. A draft that is not a JSON array of objects, or has a recipe without a string id, or has duplicate ids, is **unsummarizable**: the UI says the changes cannot be listed and never presents a partial list as complete. Text that differs only in formatting is reported as "only formatting".
+3. **Visible near the actions.**
+   - Checks editor, list: a modified row is marked "Unsaved changes", an added row "New · not saved". Removed checks, which have no row, are in the summary.
+   - Checks editor, above **Save checks**: one summary block (replacing the old one-line status): the lists above; "They are not used by the next run. Review and runs use the saved checks until you save."; and the save scope: "**Save checks** writes the whole check list, including every change listed here, also those made earlier in this workspace." **Save checks** is described by this block (`aria-describedby`).
+   - Sticky Back bar: when the draft is dirty, "Unsaved check edits stay in Checks and are not used by the next run."
+   - New run, Checks section: when the draft is dirty, one line: "Checks has unsaved edits. Review and the next run use the saved checks shown here." A selected check whose id is modified or removed in the draft carries a marker ("Unsaved edits in Checks are not used" / "Removed in unsaved edits; the saved check is still used"). The row keeps the **saved** name, kind and "Saved · not run"; draft values are never shown there or substituted. When the draft is unsummarizable, the line says the edits cannot be listed and no per-row marker is claimed.
+4. **Save is unchanged.** Enabled state, validation, digest conflict, the admission refusal while a run is unresolved, and the post-save refresh are unchanged. An unsummarizable draft does not change whether Save is enabled; Save still validates first and refuses an invalid list.
+5. **Discard names its scope and is confirmed.** **Discard all unsaved check edits…** appears beside Save when the draft is dirty and there is no conflict. It opens an inline confirmation (no modal): "Discard all unsaved edits to the check list? Every check returns to the saved checks, not only the one that is open." with the same change summary, **Discard all edits** and **Keep editing**. Only **Discard all edits** changes anything: `acceptRecipes(snapshot, text)` with the current, ready snapshot. **Keep editing** changes nothing. Discard is available while a run is unresolved (it only touches the renderer draft).
+6. **Stale or missing saved checks.** Discard is disabled, with its reason, unless the saved checks are loaded (`ready`); it never resets to an older `baseText` as if it were current. When the saved checks are not currently loaded, the summary says it compares with the saved checks loaded earlier. In a conflict the existing conflict block and its **Discard edits and use loaded checks** stay the only discard path (unchanged), and the summary says it compares with the version the draft started from.
+7. **Open check after discard.** If the open check's index no longer exists after a discard, the editor opens the first check.
+
+### 3.4 Event order
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant C as Checks editor
+  participant D as Draft store (recipes)
+  participant H as Host recipe store
+  participant N as New run
+  U->>C: edit a check (Edit check from New run)
+  C->>D: setRecipeDraft(text) (dirty)
+  U->>C: Back to new run (immediate, no prompt)
+  N->>D: read recipes, graphRecipeChanges
+  N-->>U: saved check shown, marked "unsaved edits not used"
+  U->>N: Review and run
+  N->>H: instantiate/prepare (Host reads SAVED checks)
+  alt Discard
+    U->>C: Discard all unsaved check edits... then Discard all edits
+    C->>D: acceptRecipes(ready snapshot, text) (clean)
+  else Save
+    U->>C: Save checks (summary lists every change)
+    C->>H: validate, save(whole list, expectedDigest)
+    H-->>D: acceptRecipes(new snapshot) (clean)
+  end
+```
+
+### 3.5 Acceptance and how each is verified
+
+1. `graphRecipeChanges`: added/modified/removed/order, key order ignored, names, formatting only, invalid JSON, missing and duplicate ids. **Unit**.
+2. Edit check -> change -> Back: Back is immediate; the New-run row keeps the saved name and is marked; the pane line is shown; Review's preflight lists the saved check (Host payload and review text), not the edit. **Browser** with the real recipe store.
+3. Save summary: after edits on two separate visits (one check changed, one added, one removed), the summary lists all of them by id and name; Save writes exactly that list (real `.zcode/config.json`). **Browser**.
+4. Discard: cancel changes nothing; confirm restores the saved list; the label and confirmation name the whole list. Disabled while the saved checks are not loaded. Conflict keeps its own flow. **Browser**.
+5. Unsummarizable raw JSON: the summary says so, Save is not newly enabled and still refuses. **Browser** and **unit**.
+6. Save refused while a run is unresolved; Discard and editing still work. **Browser**.
+7. Localization of every new message in English and Chinese; check names and ids stay verbatim. **Unit** (keys) and **Browser** (zh).
+8. Mutation checks: summary drops removed checks; New-run marker missing; Discard without confirmation; Discard enabled without a ready snapshot.
