@@ -237,7 +237,9 @@ export function GraphLibrary({
       {inline ? (
         <section className="space-y-5" data-testid="graph-library-dialog">
           <header className="space-y-1">
-            <h3 className="text-ui-xl font-semibold">{u("useWorkflow")}</h3>
+            <h3 className="text-ui-xl font-semibold">
+              {intl.formatMessage({ id: "graph.run.newRun" })}
+            </h3>
             <p className="text-ui-base text-foreground-subtle">{u("workflowHelp")}</p>
           </header>
           {inlineContent}

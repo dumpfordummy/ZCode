@@ -77,7 +77,10 @@ const newRunActions = {
     await T(page, "graph-new-run-blocked").waitFor();
     assert.equal(await T(page, "graph-review-run").isDisabled(), true, "Review is blocked");
     assert.equal(await T(page, "graph-new-run-ready").count(), 0, "no ready text beside a block");
-    assert.equal(await T(page, "graph-new-run-blocked").getAttribute("data-blocked-by"), "run-active");
+    assert.equal(
+      await T(page, "graph-new-run-blocked").getAttribute("data-blocked-by"),
+      "run-active",
+    );
     await T(page, "graph-view-current-run").waitFor();
     assert.match(
       await T(page, "graph-template-parameter-request").inputValue(),
@@ -112,8 +115,14 @@ const permission = {
     assert.equal(await T(page, "graph-run-open-native").getAttribute("data-variant"), "default");
     for (const id of ["graph-run-execution", "graph-run-evidence", "graph-run-human"])
       assert.equal(await T(page, id).count(), 1, id);
-    assert.equal(await T(page, "graph-run-execution").getAttribute("data-state"), "WaitingForPermission");
-    assert.equal(await T(page, "graph-run-summary").locator('[data-testid="graph-run-request"]').count(), 0);
+    assert.equal(
+      await T(page, "graph-run-execution").getAttribute("data-state"),
+      "WaitingForPermission",
+    );
+    assert.equal(
+      await T(page, "graph-run-summary").locator('[data-testid="graph-run-request"]').count(),
+      0,
+    );
     assertClean(host);
   },
 };
@@ -128,7 +137,10 @@ const failure = {
     const bannerText = await text(banner(page));
     assert.match(bannerText, /Test failed/);
     assert.match(bannerText, /No approval was requested/);
-    assert.equal(await T(page, "graph-run-inspect-failure").getAttribute("data-variant"), "default");
+    assert.equal(
+      await T(page, "graph-run-inspect-failure").getAttribute("data-variant"),
+      "default",
+    );
     const human = await text(T(page, "graph-run-human"));
     assert.match(human, /Not requested/);
     assert.doesNotMatch(human, /Pending/);
@@ -157,7 +169,8 @@ const approval = {
     assert.equal(await T(page, "graph-approval-approve").count(), 1, "one Approve in the page");
     // 被阻止的原因在同一栏里（此处证据未完整或无请求时）
     const blocked = T(page, "graph-approval-blocked");
-    if (await blocked.count()) assert.equal(await commit.locator('[data-testid="graph-approval-blocked"]').count(), 1);
+    if (await blocked.count())
+      assert.equal(await commit.locator('[data-testid="graph-approval-blocked"]').count(), 1);
     assertClean(host);
   },
 };
@@ -200,7 +213,9 @@ const strip = {
     await pick(page, "run-approval");
     const steps = await page
       .locator('[data-testid="graph-strip-step"]')
-      .evaluateAll((items) => items.map((item) => [item.getAttribute("data-node-id"), item.getAttribute("data-current")]));
+      .evaluateAll((items) =>
+        items.map((item) => [item.getAttribute("data-node-id"), item.getAttribute("data-current")]),
+      );
     const trail = await page
       .locator('[data-testid="graph-run-trail"] [data-testid^="graph-select-node-"]')
       .count();
@@ -237,7 +252,9 @@ const libraryFailure = {
     assert.equal(await T(page, "graph-library-result").count(), 0, "the old success is gone");
     const related = await page.evaluate(() => {
       const error = document.querySelector('[data-testid="graph-library-error"]');
-      const tabs = document.querySelector('[data-testid="graph-library-tab-versions"]').closest('[role="tablist"]');
+      const tabs = document
+        .querySelector('[data-testid="graph-library-tab-versions"]')
+        .closest('[role="tablist"]');
       return error.compareDocumentPosition(tabs) & Node.DOCUMENT_POSITION_FOLLOWING;
     });
     assert.ok(related, "the error sits directly above the tabs");
@@ -256,8 +273,13 @@ const layout = {
       await flush(page);
       const metrics = await page.evaluate(() => {
         const view = document.querySelector("[data-view]");
-        const pane = document.querySelector('[data-testid="graph-new-run-pane"]').getBoundingClientRect();
-        const rail = document.querySelector('[data-testid="graph-run-history"], [data-testid="graph-new-run"]')?.closest("nav")?.getBoundingClientRect();
+        const pane = document
+          .querySelector('[data-testid="graph-new-run-pane"]')
+          .getBoundingClientRect();
+        const rail = document
+          .querySelector('[data-testid="graph-run-history"], [data-testid="graph-new-run"]')
+          ?.closest("nav")
+          ?.getBoundingClientRect();
         return {
           overflow: view.scrollWidth - view.clientWidth,
           pane: pane.width,
@@ -285,7 +307,11 @@ const layout = {
         return { outside, inside };
       });
       assert.notEqual(read.outside, read.inside, `${theme}: scoped`);
-      assert.equal(read.outside, theme === "zai-dark" ? "#161616" : "#f8f8f8", `${theme}: shared token intact`);
+      assert.equal(
+        read.outside,
+        theme === "zai-dark" ? "#161616" : "#f8f8f8",
+        `${theme}: shared token intact`,
+      );
     }
     assertClean(host);
   },
@@ -301,7 +327,7 @@ const questionBanner = {
     assert.equal(await T(page, "graph-run-permission").count(), 0);
     await pick(page, "run-done");
     assert.equal(await banner(page).getAttribute("data-tone"), "success");
-    assert.equal(await focused(page) !== undefined, true);
+    assert.equal((await focused(page)) !== undefined, true);
     assertClean(host);
   },
 };

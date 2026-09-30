@@ -42,8 +42,7 @@ const measure = () => {
     const a = top[3];
     return [0, 1, 2].map((i) => top[i] * a + bottom[i] * (1 - a)).concat(1);
   };
-  const lum = (c) =>
-    0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+  const lum = (c) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
   const lin = (v) => {
     const s = v / 255;
     return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
@@ -59,7 +58,11 @@ const measure = () => {
     el.textContent = "Ag";
     parent.append(el);
     const style = getComputedStyle(el);
-    const out = { color: parse(style.color), background: parse(style.backgroundColor), border: parse(style.borderTopColor) };
+    const out = {
+      color: parse(style.color),
+      background: parse(style.backgroundColor),
+      border: parse(style.borderTopColor),
+    };
     el.remove();
     return out;
   };
@@ -98,9 +101,17 @@ const measure = () => {
   }
   // 控件边界（非文字对比）：输入框边框对它旁边的表面，以及焦点标记（品牌色边框）对卡片
   const input = probe("border bg-input border-input-border");
-  rows.push({ pair: "input border vs canvas", ratio: ratio(over(input.border, input.background), base), floor: 3 });
+  rows.push({
+    pair: "input border vs canvas",
+    ratio: ratio(over(input.border, input.background), base),
+    floor: 3,
+  });
   const focus = probe("border bg-card border-brand");
-  rows.push({ pair: "focus border vs raised", ratio: ratio(focus.border, focus.background), floor: 3 });
+  rows.push({
+    pair: "focus border vs raised",
+    ratio: ratio(focus.border, focus.background),
+    floor: 3,
+  });
   return rows;
 };
 

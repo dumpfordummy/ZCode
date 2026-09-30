@@ -52,9 +52,7 @@ export function GraphNodeInspector({
   const update = (next: GraphNode) => {
     if (!disabled) onChange(updateGraphNode(definition, next));
   };
-  const outputs = definition.nodes.filter(
-    (item) => item.type === "task" || item.type === "tool",
-  );
+  const outputs = definition.nodes.filter((item) => item.type === "task" || item.type === "tool");
   const label = (item: GraphNode) =>
     item.type === "task" ||
     item.type === "approval" ||
@@ -75,11 +73,7 @@ export function GraphNodeInspector({
   }, [activeTab, showInputsTab, showOutputTab]);
 
   return (
-    <section
-      className="space-y-3"
-      data-testid="graph-node-inspector"
-      data-node-id={node.id}
-    >
+    <section className="space-y-3" data-testid="graph-node-inspector" data-node-id={node.id}>
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-ui-base font-medium">{label(node)}</h3>
         {/* 有效设置的简明摘要与编辑入口，始终可见 */}
@@ -101,25 +95,16 @@ export function GraphNodeInspector({
             {et("tab.task")}
           </GraphTab>
           {showInputsTab ? (
-            <GraphTab
-              value="inputs"
-              data-testid="graph-inspector-tab-inputs"
-            >
+            <GraphTab value="inputs" data-testid="graph-inspector-tab-inputs">
               {et("tab.inputs")}
             </GraphTab>
           ) : null}
           {showOutputTab ? (
-            <GraphTab
-              value="output"
-              data-testid="graph-inspector-tab-output"
-            >
+            <GraphTab value="output" data-testid="graph-inspector-tab-output">
               {et("tab.output")}
             </GraphTab>
           ) : null}
-          <GraphTab
-            value="advanced"
-            data-testid="graph-inspector-tab-advanced"
-          >
+          <GraphTab value="advanced" data-testid="graph-inspector-tab-advanced">
             {et("tab.advanced")}
           </GraphTab>
         </GraphTabList>
@@ -159,16 +144,10 @@ export function GraphNodeInspector({
             )
           ) : null}
           {node.type === "approval" ? (
-            <GraphApprovalEditor
-              {...{ node, definition, disabled }}
-              onChange={update}
-            />
+            <GraphApprovalEditor {...{ node, definition, disabled }} onChange={update} />
           ) : null}
           {node.type === "tool" ? (
-            <GraphToolEditor
-              {...{ node, disabled, recipes }}
-              onChange={update}
-            />
+            <GraphToolEditor {...{ node, disabled, recipes }} onChange={update} />
           ) : null}
           {node.type === "start" ? (
             <label className="block space-y-1 text-ui-sm text-foreground-subtle">
@@ -179,9 +158,7 @@ export function GraphNodeInspector({
                 rows={8}
                 value={node.request}
                 disabled={disabled}
-                onChange={(event) =>
-                  update({ ...node, request: event.target.value })
-                }
+                onChange={(event) => update({ ...node, request: event.target.value })}
               />
               <span>{t("startHelp")}</span>
             </label>
@@ -198,8 +175,7 @@ export function GraphNodeInspector({
                   value: task.id,
                   label: task.name,
                 })),
-                ...(node.outputNodeId &&
-                !outputs.some((task) => task.id === node.outputNodeId)
+                ...(node.outputNodeId && !outputs.some((task) => task.id === node.outputNodeId)
                   ? [
                       {
                         value: node.outputNodeId,
@@ -238,9 +214,7 @@ export function GraphNodeInspector({
                   aria-label={t("taskName")}
                   value={node.name}
                   disabled={disabled}
-                  onChange={(event) =>
-                    update({ ...node, name: event.target.value })
-                  }
+                  onChange={(event) => update({ ...node, name: event.target.value })}
                 />
               </label>
               <GraphSelect
@@ -267,77 +241,58 @@ export function GraphNodeInspector({
                   rows={8}
                   value={node.instructions}
                   disabled={disabled}
-                  onChange={(event) =>
-                    update({ ...node, instructions: event.target.value })
-                  }
+                  onChange={(event) => update({ ...node, instructions: event.target.value })}
                 />
               </label>
             </>
           ) : null}
           {node.type === "condition"
-            ? [
-                ...new Set([
-                  ...node.branches.map((branch) => branch.exit),
-                  node.defaultExit,
-                ]),
-              ].map((exit) => (
-                <GraphSelect
-                  key={exit}
-                  label={`${t("z5.exit")}: ${exit}`}
-                  testId={`graph-next-node-${node.id}-${exit}`}
-                  disabled={disabled}
-                  value={
-                    definition.edges.find(
-                      (edge) =>
-                        edge.source === node.id && edge.sourcePort === exit,
-                    )?.target ?? "none"
-                  }
-                  options={[
-                    { value: "none", label: t("disconnected") },
-                    ...definition.nodes
-                      .filter(
-                        (item) => item.id !== node.id && item.type !== "start",
+            ? [...new Set([...node.branches.map((branch) => branch.exit), node.defaultExit])].map(
+                (exit) => (
+                  <GraphSelect
+                    key={exit}
+                    label={`${t("z5.exit")}: ${exit}`}
+                    testId={`graph-next-node-${node.id}-${exit}`}
+                    disabled={disabled}
+                    value={
+                      definition.edges.find(
+                        (edge) => edge.source === node.id && edge.sourcePort === exit,
+                      )?.target ?? "none"
+                    }
+                    options={[
+                      { value: "none", label: t("disconnected") },
+                      ...definition.nodes
+                        .filter((item) => item.id !== node.id && item.type !== "start")
+                        .map((item) => ({ value: item.id, label: label(item) })),
+                    ]}
+                    onChange={(value) =>
+                      onChange(
+                        connectGraphNodes(
+                          definition,
+                          node.id,
+                          value === "none" ? null : value,
+                          exit,
+                        ),
                       )
-                      .map((item) => ({ value: item.id, label: label(item) })),
-                  ]}
-                  onChange={(value) =>
-                    onChange(
-                      connectGraphNodes(
-                        definition,
-                        node.id,
-                        value === "none" ? null : value,
-                        exit,
-                      ),
-                    )
-                  }
-                />
-              ))
+                    }
+                  />
+                ),
+              )
             : null}
           {node.type !== "end" && node.type !== "condition" ? (
             <GraphSelect
               label={t("nextNode")}
               testId={`graph-next-node-${node.id}`}
               disabled={disabled}
-              value={
-                definition.edges.find((edge) => edge.source === node.id)
-                  ?.target ?? "none"
-              }
+              value={definition.edges.find((edge) => edge.source === node.id)?.target ?? "none"}
               options={[
                 { value: "none", label: t("disconnected") },
                 ...definition.nodes
-                  .filter(
-                    (item) => item.id !== node.id && item.type !== "start",
-                  )
+                  .filter((item) => item.id !== node.id && item.type !== "start")
                   .map((item) => ({ value: item.id, label: label(item) })),
               ]}
               onChange={(value) =>
-                onChange(
-                  connectGraphNodes(
-                    definition,
-                    node.id,
-                    value === "none" ? null : value,
-                  ),
-                )
+                onChange(connectGraphNodes(definition, node.id, value === "none" ? null : value))
               }
             />
           ) : null}
@@ -390,9 +345,7 @@ export function GraphNodeInspector({
             <p className="break-all font-mono">{node.id}</p>
           </div>
           {isTask && node.instructionMode === "literal" ? (
-            <p className="text-ui-sm text-foreground-subtle">
-              {t("literalHelp")}
-            </p>
+            <p className="text-ui-sm text-foreground-subtle">{t("literalHelp")}</p>
           ) : null}
         </GraphTabPanel>
       </GraphTabs>
