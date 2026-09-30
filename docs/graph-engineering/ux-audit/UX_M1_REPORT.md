@@ -2,6 +2,8 @@
 
 Date: **2026-09-30**. Plan: [UX_M1_MILESTONE.md](UX_M1_MILESTONE.md). Contract and as-built notes: [UX_M1_SPEC.md](UX_M1_SPEC.md). Current user flow: [USER_GUIDE.md](USER_GUIDE.md).
 
+**Update, 2026-09-30:** the automated Windows run (UX-M1.4) has been executed and is recorded in [UX_M1_WINDOWS_REPORT.md](UX_M1_WINDOWS_REPORT.md); it found and fixed one defect, and the user reports that their manual test runs (controlled provider only) passed; see its dated note for what remains open. The text below is the Cloud-time record and is left as written.
+
 **Status: CLOUD DEVELOPMENT COMPLETE — WINDOWS ACCEPTANCE PENDING.** UX-M1.1, UX-M1.2 and UX-M1.3 are implemented and verified in the Cloud. **UX-M1.4 (Windows acceptance) has not been run and is not claimed.** Everything below ran on Linux in Chromium with a fixture Graph Host. It is not Electron, not the native session owner, not real permissions and not Windows.
 
 ## 1. Identity

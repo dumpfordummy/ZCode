@@ -47,6 +47,9 @@ interface GraphScope {
 }
 
 /** The Host schedules work. This hook only reads projections and handles explicit user actions. */
+/** Where an action error came from; only errors of the admission path belong beside Review and run. */
+export type GraphErrorSource = "checks";
+
 export function useGraphEngineering(scope: GraphScope) {
   const resolution = useWorkspaceServicesResolution(
     scope.workspacePath,
@@ -78,8 +81,14 @@ export function useGraphEngineering(scope: GraphScope) {
   // 预检准备读取最新的 Host 投影，避免闭包里的旧修订。
   const latestView = useRef(view);
   latestView.current = view;
-  const [actionError, setActionError] = useState<{ scope: typeof readScope; error: string }>();
+  // UX-M1.4：错误带上来源。检查保存失败属于 Checks 编辑器，不能在返回新运行后显示成 Review 失败。
+  const [actionError, setActionError] = useState<{
+    scope: typeof readScope;
+    error: string;
+    source?: GraphErrorSource;
+  }>();
   const error = actionError?.scope === readScope ? actionError.error : readError;
+  const errorSource = actionError?.scope === readScope ? actionError.source : undefined;
   const publishRead = useCallback(
     (patch: Partial<GraphWorkspaceReadProjection["state"]>) => {
       if (currentReadScope.current !== readScope) return;
@@ -148,7 +157,7 @@ export function useGraphEngineering(scope: GraphScope) {
   }, [service, target, targetKey, reload, publishRead]);
 
   const act = useCallback(
-    async <T>(operation: () => Promise<T>): Promise<T | undefined> => {
+    async <T>(operation: () => Promise<T>, source?: GraphErrorSource): Promise<T | undefined> => {
       const owner = generation.current;
       if (!owns(owner) || flight.current === owner) return;
       flight.current = owner;
@@ -162,6 +171,7 @@ export function useGraphEngineering(scope: GraphScope) {
           setActionError({
             scope: readScope,
             error: cause instanceof Error ? cause.message : String(cause),
+            ...(source ? { source } : {}),
           });
       } finally {
         if (owns(owner)) {
@@ -255,6 +265,7 @@ export function useGraphEngineering(scope: GraphScope) {
     loading,
     pending,
     error,
+    errorSource,
     local,
     supported: Boolean(service),
     save,
@@ -325,7 +336,7 @@ export function useGraphEngineering(scope: GraphScope) {
           if (!owns(owner)) return;
           recipeProjection.acceptRecipes(value);
           return value;
-        }),
+        }, "checks"),
       [act, service, target, recipeProjection.acceptRecipes, owns],
     ),
     ...evidence,

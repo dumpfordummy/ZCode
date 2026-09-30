@@ -1,0 +1,258 @@
+[
+  {
+    "id": "ui-tests",
+    "command": "node --import tsx --test packages/ui/test/*.test.ts (cwd packages/ui)",
+    "exit": 0,
+    "seconds": 2.2,
+    "log": ".tmp\\ux-m1-4\\final\\ui-tests.log",
+    "group": "checks"
+  },
+  {
+    "id": "services-graph-tests",
+    "command": "node --import tsx --test packages/services/src/graph-engineering/**/*.test.ts",
+    "exit": 0,
+    "seconds": 7.3,
+    "log": ".tmp\\ux-m1-4\\final\\services-graph-tests.log",
+    "group": "checks"
+  },
+  {
+    "id": "context-picker-roundtrip",
+    "command": "node --import tsx --test scripts/graph-engineering/context-picker-roundtrip.test.mjs",
+    "exit": 0,
+    "seconds": 0.8,
+    "log": ".tmp\\ux-m1-4\\final\\context-picker-roundtrip.log",
+    "group": "checks"
+  },
+  {
+    "id": "script-tests-plain",
+    "command": "node --test scripts/graph-engineering/*.test.mjs (files that do not import TypeScript)",
+    "exit": 0,
+    "seconds": 15,
+    "log": ".tmp\\ux-m1-4\\final\\script-tests-plain.log",
+    "group": "checks"
+  },
+  {
+    "id": "script-tests-tsx",
+    "command": "node --import tsx --test pre-z8-dotnet-fixture.test.mjs",
+    "exit": 0,
+    "seconds": 14.9,
+    "log": ".tmp\\ux-m1-4\\final\\script-tests-tsx.log",
+    "group": "checks"
+  },
+  {
+    "id": "browser-context-picker",
+    "command": "node --import tsx scripts/graph-engineering/context-picker-browser.mjs --chromium=<Chrome 154>",
+    "exit": 0,
+    "seconds": 17.1,
+    "log": ".tmp\\ux-m1-4\\final\\browser-context-picker.log",
+    "group": "checks"
+  },
+  {
+    "id": "browser-ux-m1",
+    "command": "node --import tsx scripts/graph-engineering/ux-m1-browser.mjs --chromium=<Chrome 154> --shots --summary",
+    "exit": 1,
+    "seconds": 30.9,
+    "log": ".tmp\\ux-m1-4\\final\\browser-ux-m1.log",
+    "group": "checks"
+  },
+  {
+    "id": "reviewer-pass",
+    "command": "node scripts/graph-engineering/reviewer-native.mjs --scenario=pass",
+    "exit": 0,
+    "seconds": 14.9,
+    "log": ".tmp\\ux-m1-4\\final\\reviewer-pass.log",
+    "group": "reviewer"
+  },
+  {
+    "id": "reviewer-prose-fence",
+    "command": "node scripts/graph-engineering/reviewer-native.mjs --scenario=prose-fence",
+    "exit": 0,
+    "seconds": 12.6,
+    "log": ".tmp\\ux-m1-4\\final\\reviewer-prose-fence.log",
+    "group": "reviewer"
+  },
+  {
+    "id": "reviewer-unbound-report",
+    "command": "node scripts/graph-engineering/reviewer-native.mjs --scenario=unbound-report",
+    "exit": 0,
+    "seconds": 12.7,
+    "log": ".tmp\\ux-m1-4\\final\\reviewer-unbound-report.log",
+    "group": "reviewer"
+  },
+  {
+    "id": "reviewer-needs_changes",
+    "command": "node scripts/graph-engineering/reviewer-native.mjs --scenario=needs_changes",
+    "exit": 0,
+    "seconds": 13,
+    "log": ".tmp\\ux-m1-4\\final\\reviewer-needs_changes.log",
+    "group": "reviewer"
+  },
+  {
+    "id": "reviewer-needs_human",
+    "command": "node scripts/graph-engineering/reviewer-native.mjs --scenario=needs_human",
+    "exit": 0,
+    "seconds": 12.7,
+    "log": ".tmp\\ux-m1-4\\final\\reviewer-needs_human.log",
+    "group": "reviewer"
+  },
+  {
+    "id": "reviewer-test-failure",
+    "command": "node scripts/graph-engineering/reviewer-native.mjs --scenario=test-failure",
+    "exit": 0,
+    "seconds": 11.6,
+    "log": ".tmp\\ux-m1-4\\final\\reviewer-test-failure.log",
+    "group": "reviewer"
+  },
+  {
+    "id": "ux-draft",
+    "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=draft",
+    "exit": 0,
+    "seconds": 16.7,
+    "log": ".tmp\\ux-m1-4\\final\\ux-draft.log",
+    "group": "journeys"
+  },
+  {
+    "id": "ux-context",
+    "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=context",
+    "exit": 0,
+    "seconds": 14.5,
+    "log": ".tmp\\ux-m1-4\\final\\ux-context.log",
+    "group": "journeys"
+  },
+  {
+    "id": "ux-checks",
+    "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=checks",
+    "exit": 0,
+    "seconds": 15.9,
+    "log": ".tmp\\ux-m1-4\\final\\ux-checks.log",
+    "group": "journeys"
+  },
+  {
+    "id": "ux-runs",
+    "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=runs",
+    "exit": 0,
+    "seconds": 35.8,
+    "log": ".tmp\\ux-m1-4\\final\\ux-runs.log",
+    "group": "journeys"
+  },
+  {
+    "id": "ux-presentation-en",
+    "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=presentation-en",
+    "exit": 0,
+    "seconds": 19.2,
+    "log": ".tmp\\ux-m1-4\\final\\ux-presentation-en.log",
+    "group": "journeys"
+  },
+  {
+    "id": "ux-presentation-zh",
+    "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=presentation-zh",
+    "exit": 1,
+    "seconds": 50.6,
+    "log": ".tmp\\ux-m1-4\\final\\ux-presentation-zh.log",
+    "group": "journeys"
+  },
+  {
+    "id": "ux-scale-1.25",
+    "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=scale-1.25",
+    "exit": 0,
+    "seconds": 12.4,
+    "log": ".tmp\\ux-m1-4\\final\\ux-scale-1.25.log",
+    "group": "journeys"
+  },
+  {
+    "id": "ux-scale-1.5",
+    "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=scale-1.5",
+    "exit": 0,
+    "seconds": 12.6,
+    "log": ".tmp\\ux-m1-4\\final\\ux-scale-1.5.log",
+    "group": "journeys"
+  },
+  {
+    "id": "hist-pre-z8-u1-recipe-independence.mjs",
+    "command": "node scripts/graph-engineering/pre-z8-u1-recipe-independence.mjs",
+    "exit": 0,
+    "seconds": 6,
+    "log": ".tmp\\ux-m1-4\\final\\hist-pre-z8-u1-recipe-independence.mjs.log",
+    "group": "historical"
+  },
+  {
+    "id": "hist-pre-z8-u2-native.mjs",
+    "command": "node scripts/graph-engineering/pre-z8-u2-native.mjs",
+    "exit": 0,
+    "seconds": 27.6,
+    "log": ".tmp\\ux-m1-4\\final\\hist-pre-z8-u2-native.mjs.log",
+    "group": "historical"
+  },
+  {
+    "id": "hist-z4-native-smoke.mjs",
+    "command": "node scripts/graph-engineering/z4-native-smoke.mjs",
+    "exit": 0,
+    "seconds": 10.9,
+    "log": ".tmp\\ux-m1-4\\final\\hist-z4-native-smoke.mjs.log",
+    "group": "historical"
+  },
+  {
+    "id": "hist-pre-z8-u1-native.mjs",
+    "command": "node scripts/graph-engineering/pre-z8-u1-native.mjs",
+    "exit": 1,
+    "seconds": 15.8,
+    "log": ".tmp\\ux-m1-4\\final\\hist-pre-z8-u1-native.mjs.log",
+    "group": "historical"
+  },
+  {
+    "id": "hist-pre-z8-u3-native.mjs",
+    "command": "node scripts/graph-engineering/pre-z8-u3-native.mjs",
+    "exit": 1,
+    "seconds": 40.5,
+    "log": ".tmp\\ux-m1-4\\final\\hist-pre-z8-u3-native.mjs.log",
+    "group": "historical"
+  },
+  {
+    "id": "hist-z6-native-smoke-generic",
+    "command": "node scripts/graph-engineering/z6-native-smoke.mjs --scenario=generic",
+    "exit": 1,
+    "seconds": 36.6,
+    "log": ".tmp\\ux-m1-4\\final\\hist-z6-native-smoke-generic.log",
+    "group": "historical"
+  },
+  {
+    "id": "hist-z5-native-smoke",
+    "command": "node scripts/graph-engineering/z5-native-smoke.mjs",
+    "exit": 0,
+    "seconds": 38.4,
+    "log": ".tmp\\ux-m1-4\\final\\hist-z5-native-smoke.log",
+    "group": "z5"
+  },
+  {
+    "id": "browser-ux-m1 (retry after transient ERR_NO_BUFFER_SPACE)",
+    "command": "node --import tsx scripts/graph-engineering/ux-m1-browser.mjs --chromium=<Chrome 154> --shots --summary",
+    "exit": 0,
+    "seconds": 31.3,
+    "group": "checks",
+    "log": "browser-ux-m1.log"
+  },
+  {
+    "id": "ux-presentation-zh (retry 3 of 3 passing after one launch timeout)",
+    "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=presentation-zh",
+    "exit": 0,
+    "seconds": 18.3,
+    "group": "journeys",
+    "log": "ux-presentation-zh.retry3.log"
+  },
+  {
+    "id": "ux-states-en",
+    "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=states-en",
+    "exit": 0,
+    "seconds": 70.9,
+    "group": "journeys",
+    "log": "ux-states-en.log"
+  },
+  {
+    "id": "ux-states-zh",
+    "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=states-zh",
+    "exit": 0,
+    "seconds": 103.5,
+    "group": "journeys",
+    "log": "ux-states-zh.log"
+  }
+]

@@ -74,7 +74,9 @@ export async function verifyWorkspaceDraftRetention(
   await window.getByTestId("graph-view-design").click();
   assert.notEqual(await window.getByTestId("graph-name").inputValue(), name);
   await window.getByTestId("graph-name").fill(SECOND_DESIGN);
-  await window.getByTestId("graph-view-workflows").click();
+  // UX 审计后 Workflows 标签只剩设计画布；旧的“Workflows”页签内容现在是 Runs → New run。
+  await window.getByTestId("graph-view-runs").click();
+  await window.getByTestId("graph-new-run").click();
   await selectValue(window, "graph-library-entry", "agent-assisted");
   assert.equal(await window.getByTestId("graph-template-parameter-request").inputValue(), "");
   await window.getByTestId("graph-template-parameter-request").fill(SECOND_REQUEST);
@@ -83,11 +85,15 @@ export async function verifyWorkspaceDraftRetention(
   await selectWorkspace(window, isolation.workspace);
   await window.getByTestId("graph-view-design").click();
   assert.equal(await window.getByTestId("graph-name").inputValue(), name);
-  await window.getByTestId("graph-view-workflows").click();
+  // UX 审计后 Workflows 标签只剩设计画布；旧的“Workflows”页签内容现在是 Runs → New run。
+  await window.getByTestId("graph-view-runs").click();
+  await window.getByTestId("graph-new-run").click();
   assert.equal(await window.getByTestId("graph-template-parameter-request").inputValue(), request);
   assert.deepEqual(await readGraphRecord(isolation), savedBefore);
   await selectWorkspace(window, secondary);
-  await window.getByTestId("graph-view-workflows").click();
+  // UX 审计后 Workflows 标签只剩设计画布；旧的“Workflows”页签内容现在是 Runs → New run。
+  await window.getByTestId("graph-view-runs").click();
+  await window.getByTestId("graph-new-run").click();
   assert.equal(
     await window.getByTestId("graph-template-parameter-request").inputValue(),
     SECOND_REQUEST,
@@ -142,7 +148,9 @@ export async function verifyFailedSaveReplacement(
   await window.getByTestId("graph-replace-cancel").click();
   await window.getByTestId("graph-view-design").click();
   assert.equal(await window.getByTestId("graph-name").inputValue(), name);
-  await window.getByTestId("graph-view-workflows").click();
+  // UX 审计后 Workflows 标签只剩设计画布；旧的“Workflows”页签内容现在是 Runs → New run。
+  await window.getByTestId("graph-view-runs").click();
+  await window.getByTestId("graph-new-run").click();
   assert.equal(await window.getByTestId("graph-template-parameter-request").inputValue(), request);
   await idle("restored Save-and-replace failure");
   summary.assertions.push(

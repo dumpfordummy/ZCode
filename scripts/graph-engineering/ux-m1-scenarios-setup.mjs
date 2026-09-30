@@ -143,6 +143,13 @@ const failuresKeepDraft = {
       "request, references and choices are unchanged",
     );
     assert.equal(await T(page, "graph-template-parameter-request").inputValue(), REQUEST);
+    // UX-M1.4（Windows 原生验收发现）：检查保存失败的原因属于 Checks 编辑器，
+    // 返回新运行后不能显示在「Review and run」旁边，好像是 Review 失败了。
+    assert.equal(
+      await T(page, "graph-new-run-error").count(),
+      0,
+      "a failed check save is not shown beside Review and run after Back to new run",
+    );
     assert.deepEqual(admissionCalls(host), []);
     assertClean(host);
   },
