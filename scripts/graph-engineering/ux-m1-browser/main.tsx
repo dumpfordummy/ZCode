@@ -29,6 +29,8 @@ declare global {
       set(patch: Partial<HarnessState>): void;
       drafts(): unknown;
       navigation(): unknown;
+      /** An unsaved edit of the design's name, as the Workflows editor would make (renderer draft only). */
+      editDesignName(workspace: string, name: string): void;
     };
   }
 }
@@ -143,6 +145,12 @@ function Harness() {
       drafts: () => JSON.parse(JSON.stringify(useGraphDraftStore.getState().workspaces)),
       navigation: () =>
         JSON.parse(JSON.stringify(useGraphEngineeringViewStore.getState().selections)),
+      editDesignName: (workspace, name) => {
+        const key = window.__WORKSPACES__[workspace]!;
+        const editor = useGraphDraftStore.getState().workspaces[key]?.definition;
+        if (editor)
+          useGraphDraftStore.getState().editDefinition(key, { ...editor.draft, name }, editor.base);
+      },
     };
   }, []);
   useEffect(() => {

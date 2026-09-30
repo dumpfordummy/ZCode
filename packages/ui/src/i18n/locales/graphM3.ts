@@ -60,6 +60,84 @@ const messages: Record<string, [string, string]> = {
     "所选版本与资料库的技术标识。大多数任务不需要它们。",
   ],
   versionDigest: ["Version digest", "版本摘要"],
+  // UX-M3.2：Share 里的三个独立任务，以及 Advanced 里的手动 JSON。
+  shareSaveTitle: ["Save current design", "保存当前设计"],
+  shareExportTitle: ["Export a version", "导出某个版本"],
+  shareImportTitle: ["Import a file", "导入文件"],
+  manualTitle: ["Manual JSON", "手动 JSON"],
+  manualHelp: [
+    "Paste a portable workflow when this environment cannot select a file. It is checked and reviewed exactly like an imported file.",
+    "当此环境无法选择文件时，可在此粘贴可移植工作流。它会像导入的文件一样被检查和审阅。",
+  ],
+  saveHelp: [
+    "Turn the design shown in Workflows into a reusable workflow, or add it as a new version of one of yours.",
+    "把 Workflows 中显示的设计变成可复用的工作流，或作为你自己某个工作流的新版本。",
+  ],
+  saveNeedsV5: [
+    "This design is not a version-5 graph, so it cannot be saved as a workflow yet.",
+    "此设计不是第 5 版图，暂时不能保存为工作流。",
+  ],
+  saveTarget: ["Save as", "保存为"],
+  targetNew: ["A new workflow", "一个新工作流"],
+  targetVersion: ["New version of {name}", "{name} 的新版本"],
+  unsavedVersion: [
+    "This version includes your current unsaved design edits.",
+    "此版本包含你当前尚未保存的设计修改。",
+  ],
+  unsavedWorkflow: [
+    "This workflow includes your current unsaved design edits.",
+    "此工作流包含你当前尚未保存的设计修改。",
+  ],
+  builtinOrigin: [
+    "This design came from a built-in workflow. Built-ins cannot get new versions, so saving creates your own workflow.",
+    "此设计来自内置工作流。内置工作流不能新增版本，因此保存会创建你自己的工作流。",
+  ],
+  renameNotice: [
+    "The workflow will be renamed from “{from}” to “{to}”.",
+    "工作流将从“{from}”重命名为“{to}”。",
+  ],
+  willCreate: [
+    "Confirming creates a new workflow named “{name}”. Nothing is saved until you confirm.",
+    "确认后将创建名为“{name}”的新工作流。确认之前不会保存任何内容。",
+  ],
+  willAddVersion: [
+    "Confirming adds a new version to “{name}”. Existing versions, designs and runs are not changed.",
+    "确认后将为“{name}”添加一个新版本。已有版本、设计和运行不会改变。",
+  ],
+  confirmNew: ["Save as new workflow", "保存为新工作流"],
+  confirmVersion: ["Save as new version of “{name}”", "保存为“{name}”的新版本"],
+  reviewFirst: ["Preview and tick the review box first.", "请先预览并勾选审阅确认框。"],
+  saved: [
+    "Saved: {name} · Version {version} is now selected.",
+    "已保存：{name} · 版本 {version} 已被选中。",
+  ],
+  savedUnknown: [
+    "The library was updated. Choose the workflow in Workflow to see it.",
+    "资料库已更新。请在“工作流”中选择它查看。",
+  ],
+  exportSubject: ["{name} · Version {version}", "{name} · 版本 {version}"],
+  exportNone: [
+    "Choose a workflow and a version in Versions to export it.",
+    "请先在“版本”中选择要导出的工作流和版本。",
+  ],
+  exportScope: [
+    "Exports this stored version exactly. The unsaved design in Workflows is not part of it.",
+    "按存储的原样导出此版本。Workflows 中尚未保存的设计不包含在内。",
+  ],
+  exportedAs: [
+    "Saved {name} · Version {version} to a file.",
+    "已把 {name} · 版本 {version} 保存到文件。",
+  ],
+  importHelp: [
+    "Choose a portable workflow file. Choosing and previewing change nothing; saving is a separate step.",
+    "选择一个可移植工作流文件。选择和预览不会改变任何内容；保存是单独的一步。",
+  ],
+  importChoose: ["Choose file…", "选择文件…"],
+  importNoFile: [
+    "Choosing a file is not available in this environment. Paste the JSON under Advanced instead.",
+    "此环境无法选择文件。请改在“高级”中粘贴 JSON。",
+  ],
+  jsonReadOnly: ["Portable workflow JSON (read-only)", "可移植工作流 JSON（只读）"],
   shareIntro: [
     "Save the current design as a workflow, export a version, or import a file.",
     "把当前设计保存为工作流、导出某个版本，或导入文件。",

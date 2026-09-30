@@ -71,7 +71,52 @@ function libraryJourney(locale, variants) {
   };
 }
 
+function shareJourney(locale, variants) {
+  return {
+    name: `screenshots (${locale}): save current design with unsaved edits and a rename, export and import, and the saved result`,
+    async run({ page, host, url, shotsDir }) {
+      if (!shotsDir) return;
+      const team = await host.library.seedUser("Team release", {
+        base: "agent-assisted",
+        versions: 2,
+      });
+      await boot(page, host, url);
+      if (locale !== "en-US") {
+        await setState(page, { locale });
+        await T(page, "graph-new-run-pane").waitFor();
+      }
+      await selectValue(page, "graph-library-entry", team.id);
+      await T(page, "graph-template-parameter-request").fill("Tidy the release notes");
+      await T(page, "graph-library-instantiate").click();
+      await T(page, "graph-design-origin").waitFor();
+      await page.evaluate(() => window.__harness.editDesignName("A", "Release notes (edited)"));
+      await openLibrary(page);
+      await openShare(page);
+      await T(page, "graph-library-name").fill("Release notes (edited)");
+      await T(page, "graph-library-capture").click();
+      await T(page, "graph-save-reviewed").click();
+      await T(page, "graph-share-save-design").scrollIntoViewIfNeeded();
+      await variants(page, shotsDir, "m3-share-save", locale, async () => {
+        await T(page, "graph-share-save-design").scrollIntoViewIfNeeded();
+      });
+      await T(page, "graph-save-confirm").click();
+      await T(page, "graph-library-result").waitFor();
+      await variants(page, shotsDir, "m3-share-result", locale, async () => {
+        await scrollDialogTop(page);
+      });
+      await T(page, "graph-library-export").click();
+      await T(page, "graph-export-reviewed").click();
+      await variants(page, shotsDir, "m3-share-export", locale, async () => {
+        await T(page, "graph-share-export").scrollIntoViewIfNeeded();
+      });
+      await page.keyboard.press("Escape");
+    },
+  };
+}
+
 export const m3ShotScenarios = [
   libraryJourney("en-US", everyVariant),
   libraryJourney("zh-CN", oneVariant),
+  shareJourney("en-US", everyVariant),
+  shareJourney("zh-CN", oneVariant),
 ];

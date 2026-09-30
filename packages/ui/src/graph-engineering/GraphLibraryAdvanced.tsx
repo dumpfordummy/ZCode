@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { GraphLibraryEntry } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import type { useGraphWorkflow } from "@/hooks/useGraphWorkflow.js";
@@ -9,10 +10,13 @@ export function GraphLibraryAdvanced({
   workflow,
   digest,
   entry,
+  children,
 }: {
   workflow: ReturnType<typeof useGraphWorkflow>;
   digest?: string;
   entry?: GraphLibraryEntry;
+  /** The manual JSON route (UX-M3.2). */
+  children?: ReactNode;
 }) {
   const { intl } = useZCodeIntl();
   const t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
@@ -46,6 +50,7 @@ export function GraphLibraryAdvanced({
       >
         {t("refresh")}
       </Button>
+      {children}
     </details>
   );
 }

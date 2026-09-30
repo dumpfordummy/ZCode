@@ -1,10 +1,11 @@
 import { useState } from "react";
-import type { GraphLibraryEntry } from "@zcode/services";
+import type { GraphLibraryEntry, GraphLibraryView } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import { Input } from "@/components/ui/input.js";
 import type { useGraphWorkflow } from "@/hooks/useGraphWorkflow.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphM3Text } from "./GraphM3Text.js";
+import { type GraphMutationResult, mutationResult } from "./graphLibrarySave.js";
 
 /**
  * Duplicate the selected version into a new workflow of your own, and archive or restore one.
@@ -17,6 +18,7 @@ export function GraphLibraryManage({
   version,
   mutationBlocked,
   blockedId,
+  onSaved,
 }: {
   workflow: ReturnType<typeof useGraphWorkflow>;
   entry: GraphLibraryEntry;
@@ -24,6 +26,8 @@ export function GraphLibraryManage({
   mutationBlocked?: string;
   /** The id of the paragraph that states `mutationBlocked`, for aria-describedby. */
   blockedId: string;
+  /** The duplicate that was created, read from the list the service returned. */
+  onSaved(result: GraphMutationResult | undefined): void;
 }) {
   const { intl } = useZCodeIntl();
   const t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
@@ -33,7 +37,14 @@ export function GraphLibraryManage({
   const blockedBy = mutationBlocked ? blockedId : undefined;
   const duplicate = () => {
     if (mutationBlocked || version === undefined || revision === undefined || !name.trim()) return;
-    void workflow.mutate({ action: "duplicate", id: entry.id, version, name }, revision);
+    const before: GraphLibraryView | undefined = workflow.view;
+    void workflow
+      .mutate({ action: "duplicate", id: entry.id, version, name }, revision)
+      .then((after) => {
+        if (!after || !before) return;
+        setName("");
+        onSaved(mutationResult(before, after));
+      });
   };
   const archive = () => {
     if (mutationBlocked || entry.builtin || revision === undefined) return;

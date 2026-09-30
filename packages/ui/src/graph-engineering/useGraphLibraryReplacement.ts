@@ -12,7 +12,11 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphDraftStore } from "@/store/graphDraftStore.js";
 import { graphDefinitionContent } from "./graphEngineeringView.js";
 import { replaceGraphFromTemplate } from "./graphTemplateReplacement.js";
-import { rememberGraphInstantiation } from "./graphInstantiationMemo.js";
+import {
+  graphInstantiationFingerprint,
+  isRememberedGraphInstantiation,
+  rememberGraphInstantiation,
+} from "./graphInstantiationMemo.js";
 
 export interface ReplacementIntent {
   parameters: Record<string, GraphParameterValue>;
@@ -35,22 +39,27 @@ export interface ReplacementIntent {
 export function useGraphLibraryReplacement({
   workspaceKey,
   definition,
+  dirty,
   entry,
   version,
   actionsLocked,
   workflow,
   onSaveDesign,
   onInstantiated,
+  onReview,
   onDone,
 }: {
   workspaceKey: string;
   definition: GraphDefinition;
+  dirty: boolean;
   entry?: GraphLibraryEntry;
   version?: GraphTemplateVersion;
   actionsLocked: boolean;
   workflow: ReturnType<typeof useGraphWorkflow>;
   onSaveDesign(definition: GraphDefinition): Promise<GraphDefinition | undefined>;
   onInstantiated(definition: GraphSequentialDefinition, continuation: "review" | "save"): void;
+  /** Called with the unchanged saved design when Review and run needs no new instantiation. */
+  onReview?(definition: GraphDefinition): void;
   onDone(): void;
 }) {
   const { intl } = useZCodeIntl();
@@ -107,12 +116,48 @@ export function useGraphLibraryReplacement({
       onDone();
     } else if (!stillCurrent() && alive.current) setReplacementError(u("changedConsent"));
   };
-  return {
-    replacement,
-    setReplacement,
-    replacementError,
-    setReplacementError,
-    apply,
-    formFingerprint,
+  const requestInstantiate = (
+    parameters: Record<string, GraphParameterValue>,
+    bindingValues: TemplateBindings,
+    continuation: "review" | "save",
+  ) => {
+    if (actionsLocked || !entry || !version) return;
+    const instantiation = graphInstantiationFingerprint({
+      id: entry.id,
+      version: version.version,
+      digest: version.digest,
+      parameters,
+      bindings: bindingValues,
+    });
+    // 表单与已保存设计没有变化：直接进入审阅，不再次创建定义，也不因重复点击产生新修订。
+    if (
+      continuation === "review" &&
+      !dirty &&
+      definition.version === 5 &&
+      isRememberedGraphInstantiation(
+        workspaceKey,
+        instantiation,
+        graphDefinitionContent(definition),
+      )
+    ) {
+      onReview?.(definition);
+      return;
+    }
+    const intent: ReplacementIntent = {
+      continuation,
+      instantiation,
+      parameters: structuredClone(parameters),
+      bindings: structuredClone(bindingValues),
+      definition: structuredClone(definition),
+      entryId: entry.id,
+      version: version.version,
+      digest: version.digest,
+      formFingerprint: formFingerprint(entry.id, version.version),
+    };
+    if (dirty) {
+      setReplacementError("");
+      setReplacement(intent);
+    } else void apply(intent, "discard");
   };
+  return { replacement, setReplacement, replacementError, apply, requestInstantiate };
 }

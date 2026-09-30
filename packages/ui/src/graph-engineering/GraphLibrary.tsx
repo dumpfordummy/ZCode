@@ -1,8 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type {
-  GraphDefinition,
-  GraphSequentialDefinition,
-} from "@zcode/services";
+import type { GraphDefinition, GraphSequentialDefinition } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import {
   Dialog,
@@ -21,16 +18,14 @@ import { GraphLibraryBlocked } from "./GraphLibraryBlocked.js";
 import { GraphLibraryManage } from "./GraphLibraryManage.js";
 import { GraphLibraryPicker } from "./GraphLibraryPicker.js";
 import { GraphLibraryReplace } from "./GraphLibraryReplace.js";
-import {
-  useGraphLibraryReplacement,
-  type ReplacementIntent,
-} from "./useGraphLibraryReplacement.js";
+import { useGraphLibraryReplacement } from "./useGraphLibraryReplacement.js";
 import { GraphRunWorkflowVersion } from "./GraphRunWorkflowVersion.js";
 import { GraphLibrarySection } from "./GraphLibrarySections.js";
 import { GraphLibraryVersions } from "./GraphLibraryVersions.js";
-import { GraphTemplateTransfer } from "./GraphTemplateTransfer.js";
+import { GraphShare } from "./GraphShare.js";
+import { GraphShareImport } from "./GraphShareImport.js";
+import type { GraphMutationResult } from "./graphLibrarySave.js";
 import { useGraphM3Text } from "./GraphM3Text.js";
-import { graphDefinitionContent } from "./graphEngineeringView.js";
 import {
   designPin,
   libraryGates,
@@ -39,10 +34,6 @@ import {
 } from "./graphLibraryView.js";
 import { latestCompatibleTemplateVersion } from "./graphWorkflowView.js";
 import type { GraphRecipeReadState } from "./graphRecipeRead.js";
-import {
-  graphInstantiationFingerprint,
-  isRememberedGraphInstantiation,
-} from "./graphInstantiationMemo.js";
 
 export function GraphLibrary({
   workspacePath,
@@ -108,6 +99,8 @@ export function GraphLibrary({
   const selection = useGraphDraftStore((state) => state.workspaces[workspaceKey]?.librarySelection);
   const choose = useGraphDraftStore((state) => state.selectLibrary);
   const [open, setOpen] = useState(false);
+  // UX-M3.2：最近一次创建/新版本/复制的结果，来自服务返回的列表；用户改选后清除。
+  const [saved, setSaved] = useState<GraphMutationResult | "unknown" | null>(null);
   const entries = workflow.view?.entries ?? [];
   const { entry, version, defaultId, defaultVersion } = resolveLibrarySelection(entries, selection);
   useEffect(() => {
@@ -129,24 +122,20 @@ export function GraphLibrary({
     exportOccupiedReason: m3("blockedExport"),
   });
   const blockedId = "graph-library-blocked-reason";
-  const {
-    replacement,
-    setReplacement,
-    replacementError,
-    setReplacementError,
-    apply,
-    formFingerprint,
-  } = useGraphLibraryReplacement({
-    workspaceKey,
-    definition,
-    entry,
-    version,
-    actionsLocked,
-    workflow,
-    onSaveDesign,
-    onInstantiated,
-    onDone: () => setOpen(false),
-  });
+  const { replacement, setReplacement, replacementError, apply, requestInstantiate } =
+    useGraphLibraryReplacement({
+      workspaceKey,
+      definition,
+      dirty,
+      entry,
+      version,
+      actionsLocked,
+      workflow,
+      onSaveDesign,
+      onInstantiated,
+      onReview,
+      onDone: () => setOpen(false),
+    });
   const operationPending = pending || workflow.pending;
   const select = (id: string, versionNumber?: number) => {
     const next = entries.find((item) => item.id === id);
@@ -155,6 +144,13 @@ export function GraphLibrary({
       (next ? (latestCompatibleTemplateVersion(next) ?? next.versions.at(-1)) : undefined);
     if (next && chosen) choose(workspaceKey, { id: next.id, version: chosen.version });
     setReplacement(null);
+    setSaved(null);
+  };
+  // 保存/复制成功后选中服务返回列表里的结果；无法唯一确定时不猜，只说明资料库已更新。
+  const onSaved = (result: GraphMutationResult | undefined) => {
+    if (result) choose(workspaceKey, { id: result.entryId, version: result.version });
+    setReplacement(null);
+    setSaved(result ?? "unknown");
   };
   const rows = entry ? versionRows(entry, designPin(definition)) : [];
   // 对话框里点“查看当前运行”要先关掉对话框，否则被查看的页面被遮住。
@@ -186,45 +182,7 @@ export function GraphLibrary({
           onOpenSetup(checkId);
         }}
         allowReview={inline && Boolean(onReview)}
-        onInstantiate={(parameters, bindingValues, continuation) => {
-          if (actionsLocked) return;
-          const instantiation = graphInstantiationFingerprint({
-            id: entry.id,
-            version: version.version,
-            digest: version.digest,
-            parameters,
-            bindings: bindingValues,
-          });
-          // 表单与已保存设计没有变化：直接进入审阅，不再次创建定义，也不因重复点击产生新修订。
-          if (
-            continuation === "review" &&
-            !dirty &&
-            definition.version === 5 &&
-            isRememberedGraphInstantiation(
-              workspaceKey,
-              instantiation,
-              graphDefinitionContent(definition),
-            )
-          ) {
-            onReview?.(definition);
-            return;
-          }
-          const intent: ReplacementIntent = {
-            continuation,
-            instantiation,
-            parameters: structuredClone(parameters),
-            bindings: structuredClone(bindingValues),
-            definition: structuredClone(definition),
-            entryId: entry.id,
-            version: version.version,
-            digest: version.digest,
-            formFingerprint: formFingerprint(entry.id, version.version),
-          };
-          if (dirty) {
-            setReplacementError("");
-            setReplacement(intent);
-          } else void apply(intent, "discard");
-        }}
+        onInstantiate={requestInstantiate}
       />
     ) : workflow.view ? (
       <p role="status" className="text-ui-sm text-warning">
@@ -290,6 +248,13 @@ export function GraphLibrary({
           </Button>
         </div>
       ) : null}
+      {saved ? (
+        <p role="status" className="text-ui-sm font-medium" data-testid="graph-library-result">
+          {saved === "unknown"
+            ? m3("savedUnknown")
+            : m3("saved", { name: saved.name, version: saved.version })}
+        </p>
+      ) : null}
       {admissionReason ? (
         <GraphLibraryBlocked
           id={blockedId}
@@ -319,6 +284,7 @@ export function GraphLibrary({
             version={version?.version}
             mutationBlocked={gates.mutation}
             blockedId={blockedId}
+            onSaved={onSaved}
           />
         </GraphLibrarySection>
       ) : null}
@@ -327,24 +293,35 @@ export function GraphLibrary({
       </GraphLibrarySection>
       <details className="space-y-3" data-testid="graph-library-share">
         <summary className="cursor-pointer text-ui-sm font-medium">{m3("sectionShare")}</summary>
-        <p className="text-ui-sm text-foreground-subtle">{m3("shareIntro")}</p>
         {workflow.view ? (
-          <GraphTemplateTransfer
-            key={`${entry?.id ?? "new"}:${version?.version ?? "none"}`}
+          <GraphShare
             workflow={workflow}
+            view={workflow.view}
             definition={definition}
+            dirty={dirty}
             entry={entry}
             version={version?.version}
-            revision={workflow.view.revision}
-            disabled={workflow.pending}
             mutationBlocked={gates.mutation}
             exportBlocked={gates.exportToDisk}
             blockedId={blockedId}
             target={target}
+            onSaved={onSaved}
           />
         ) : null}
       </details>
-      <GraphLibraryAdvanced workflow={workflow} digest={version?.digest} entry={entry} />
+      <GraphLibraryAdvanced workflow={workflow} digest={version?.digest} entry={entry}>
+        {workflow.view ? (
+          <GraphShareImport
+            manual
+            workflow={workflow}
+            view={workflow.view}
+            mutationBlocked={gates.mutation}
+            blockedId={blockedId}
+            target={target}
+            onSaved={onSaved}
+          />
+        ) : null}
+      </GraphLibraryAdvanced>
     </div>
   );
   return (

@@ -272,9 +272,9 @@ const readOnly = {
     // 预览是只读的：导出预览与手动 JSON 的干预览都可用
     await openShare(page);
     await T(page, "graph-library-export").click();
-    await T(page, "graph-template-preview-result").waitFor();
+    await T(page, "graph-export-preview-result").waitFor();
     assert.equal(callsOf(host, "wf.preview").filter((call) => call.action === "export").length, 1);
-    await T(page, "graph-template-reviewed").click();
+    await T(page, "graph-export-reviewed").click();
     const exportFile = T(page, "graph-template-export-file");
     assert.equal(await exportFile.isDisabled(), true, "export to disk is blocked");
     assert.match(
@@ -288,16 +288,17 @@ const readOnly = {
     await invokeHandler(page, "graph-template-export-file");
     assert.equal(host.saves.length, 0, "the save dialog was never reached");
     const json = JSON.stringify(host.library.template("agent-assisted", "Preview only"));
-    await T(page, "graph-template-json").fill(json);
-    await T(page, "graph-template-preview").click();
+    await openAdvanced(page);
+    await T(page, "graph-manual-json").fill(json);
+    await T(page, "graph-manual-preview").click();
     await until(
       () => callsOf(host, "wf.preview").some((call) => call.action === "import"),
       "import preview",
     );
-    await T(page, "graph-template-reviewed").click();
+    await T(page, "graph-manual-reviewed").click();
     // 每个修改都被拒绝（按钮禁用、原因可读、处理函数本身也拒绝）
     const reasonId = "graph-library-blocked-reason";
-    for (const id of ["graph-library-create", "graph-library-save-version"]) {
+    for (const id of ["graph-manual-confirm", "graph-save-confirm"]) {
       assert.equal(await T(page, id).isDisabled(), true, id);
       assert.equal(await T(page, id).getAttribute("aria-describedby"), reasonId);
       await invokeHandler(page, id);
@@ -321,7 +322,7 @@ const readOnly = {
       async () => (await T(page, "graph-library-blocked").count()) === 0,
       "the notice goes",
     );
-    assert.equal(await T(page, "graph-library-create").isDisabled(), false);
+    assert.equal(await T(page, "graph-manual-confirm").isDisabled(), false);
     await T(page, "graph-library-duplicate-name").fill("Copy");
     assert.equal(await T(page, "graph-library-duplicate").isDisabled(), false);
     assert.deepEqual(mutationCalls(host), [], "nothing happened by itself");
