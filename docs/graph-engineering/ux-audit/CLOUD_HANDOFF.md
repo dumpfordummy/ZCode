@@ -120,3 +120,11 @@ Should not:
 | Implementation payload commit (`feat: improve Graph Engineering run UX`) | `df50abbdb6bdfa364e1ba9686b2751688fb4ab63` |
 
 The branch tip is this payload commit plus one documentation-only commit that adds this table (no product, test or harness change). Verify with `git log --oneline 558347d..HEAD` and `git diff --stat df50abb HEAD` (only this file).
+
+## Status update, 2026-09-30 (Cloud session)
+
+Recorded as a dated addition; the sections above are unchanged.
+
+- **Base.** Work continued from `bd9302224bbc2f41c486bb605b15ed8b1ab0b93c` on a separate branch, `claude/graph-context-picker`. Nothing was pushed to `main` or `claude/zcde-graph-ux-audit-be80d8`.
+- **Done.** The context chip picker (recommended next task 5, first half): [CONTEXT_PICKER_SPEC.md](CONTEXT_PICKER_SPEC.md), with its verification in section 12 and the Windows acceptance checklist in section 13. Windows native acceptance is **PENDING**. The localisation of the remaining Host-authored template text (second half of task 5) is not done.
+- **Environment.** Node 24.14.0 (nvm, checksum-verified) and pnpm 10.33.2; `pnpm install --frozen-lockfile --ignore-scripts` (the Electron postinstall needs `www.electronjs.org`, which the Cloud network policy denies). Lockfiles, package versions, engine requirements and `architecture-policy.yaml` unchanged.

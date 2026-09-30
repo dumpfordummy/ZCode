@@ -4,6 +4,8 @@ Date: 2026-09-30. Branch `claude/zcde-graph-ux-audit-be80d8` on `558347d`. **Not
 
 Contract, state derivations, layouts and recorded deviations: [IMPLEMENTATION_SPEC.md](IMPLEMENTATION_SPEC.md) (section 8 is authoritative where it differs). User flow: [USER_GUIDE.md](USER_GUIDE.md). Screenshots: [BEFORE_AFTER.md](BEFORE_AFTER.md).
 
+> **Status note, added 2026-09-30 (after the handoff).** This report records the state when it was written. Its statements that nothing was committed and that the changes are "uncommitted in the working tree" were true then. The work was afterwards committed as `df50abb` (implementation) and `bd93022` (handoff SHAs); see [CLOUD_HANDOFF.md](CLOUD_HANDOFF.md). Its limitation "Context chips / inline picker … are not implemented" is superseded on branch `claude/graph-context-picker` by [CONTEXT_PICKER_SPEC.md](CONTEXT_PICKER_SPEC.md) (Windows native acceptance of that change is PENDING). Nothing below was rewritten.
+
 ## What now exists
 
 | Approved item                                | Implementation                                                                                                                                                                                                                                                                                                         |

@@ -15,7 +15,7 @@ import { GraphTemplateRecipeBindings } from "./GraphTemplateRecipeBindings.js";
 import { GraphRecipeReadStatus } from "./GraphRecipeReadStatus.js";
 import type { GraphRecipeReadState } from "./graphRecipeRead.js";
 import { initialTemplateParameters, templateBindingErrors } from "./graphWorkflowView.js";
-import { GraphReferenceBindings } from "./GraphReferenceBindings.js";
+import { GraphContextSection } from "./GraphContextSection.js";
 import { useGraphTemplateText } from "./graphTemplateText.js";
 
 const normalizedBindings = (bindings: TemplateBindings): TemplateBindings => ({
@@ -79,6 +79,12 @@ export function GraphTemplateBindings({
       update(store.workspaces[workspaceKey]?.templates[templateKey] ?? initial),
     );
   };
+  // “供哪些节点使用”显示节点名称（UI 自有标签映射），不改写 role.nodeIds。
+  const nodeNames = Object.fromEntries(
+    template.graph.nodes.flatMap((node) =>
+      "name" in node ? [[node.id, display.node(node.id, node.name)] as const] : [],
+    ),
+  );
   const tools = template.graph.nodes.filter((node) => node.type === "tool");
   const hasTools = tools.length > 0;
   const recipes = recipeReadState.status === "ready" ? recipeReadState.snapshot : null;
@@ -173,12 +179,16 @@ export function GraphTemplateBindings({
           )}
         </label>
       ))}
-      <GraphReferenceBindings
+      <GraphContextSection
         target={{ workspacePath, workspaceIdentity }}
+        contextKey={`${workspaceKey}\u0000${templateKey}`}
         roles={template.references}
         bindings={bindings}
         disabled={disabled}
-        onChange={(bindings) => change((current) => ({ ...current, bindings }))}
+        nodeNames={nodeNames}
+        onChange={(update) =>
+          change((current) => ({ ...current, bindings: update(current.bindings) }))
+        }
       />
       {hasTools ? (
         <div className="space-y-1" data-testid="graph-template-checks-heading">

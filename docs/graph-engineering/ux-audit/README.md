@@ -16,6 +16,7 @@ Assignment: product UX for everyday engineering work in Graph Engineering (open 
 | [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)                                     | Batches and dependency order                                                                                        |
 | [IMPLEMENTATION_REPORT.md](IMPLEMENTATION_REPORT.md)                                 | What changed, built vs reused, results, limits, manual checklist                                                    |
 | [USER_GUIDE.md](USER_GUIDE.md)                                                       | The current user flow                                                                                               |
+| [CONTEXT_PICKER_SPEC.md](CONTEXT_PICKER_SPEC.md)                                     | Context chips and the Add context picker: contract, payload semantics, event order, verification, Windows checklist |
 | [CLOUD_HANDOFF.md](CLOUD_HANDOFF.md)                                                 | Start here in a new environment: identity, file map, constraints, what to reproduce                                 |
 | [BEFORE_AFTER.md](BEFORE_AFTER.md)                                                   | Before and after screenshots from the real app                                                                      |
 | [../../../PRODUCT.md](../../../PRODUCT.md), [../../../DESIGN.md](../../../DESIGN.md) | Product context (new file) and a scoped, clearly-marked proposed section appended to the existing design system     |
