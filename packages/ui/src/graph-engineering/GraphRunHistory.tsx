@@ -1,9 +1,10 @@
 import type { GraphRun } from "@zcode/services";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AlertTriangle, CheckCircle2, CircleDashed, Loader2, Plus, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
-import { graphHistoryPage } from "./graphRunHistoryView.js";
+import { graphHistoryPage, graphRunsNewestFirst } from "./graphRunHistoryView.js";
+import { useGraphM2Text, useGraphTime } from "./GraphM2Text.js";
 import { useGraphRunText } from "./GraphRunText.js";
 import { graphRunEvidence } from "./graphRunEvidence.js";
 import { graphFocusClass } from "./graphFocus.js";
@@ -47,32 +48,47 @@ function StatusIcon({ status }: { status: string }) {
 const noRuns: ReadonlySet<string> = new Set();
 
 /**
- * Run activity list. Pagination is a display concern over the complete run list; the Needs-you
- * badge comes from the complete projection (`needsYouRunIds`), so a pending run on another page
- * is still discoverable through the strip and is badged when its page is shown.
+ * Run activity list, newest first by creation order (UX-M2.1). Pagination is a display concern over
+ * the complete run list; the Needs-you badge comes from the complete projection (`needsYouRunIds`),
+ * so a pending run on another page is still discoverable through the strip and is badged when its
+ * page is shown.
  */
 export function GraphRunHistory({
   runs,
   selectedRunId,
   newRunSelected = false,
   needsYouRunIds = noRuns,
+  reveal = 0,
   onSelect,
   onNewRun,
 }: {
-  runs: GraphRun[];
+  runs: readonly GraphRun[];
   selectedRunId?: string;
   newRunSelected?: boolean;
   needsYouRunIds?: ReadonlySet<string>;
+  /** UX-M2.1: changes on every explicit navigation to a run (`selectRun`); refreshes never change it. */
+  reveal?: number;
   onSelect: (runId: string) => void;
   onNewRun?: () => void;
 }) {
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
   const u = useGraphRunText();
+  const m2 = useGraphM2Text();
+  const time = useGraphTime();
+  const ordered = useMemo(() => graphRunsNewestFirst(runs), [runs]);
   const [requestedPage, setPage] = useState(
-    () => graphHistoryPage(runs, 0, selectedRunId).selectedPage ?? 0,
+    () => graphHistoryPage(ordered, 0, selectedRunId).selectedPage ?? 0,
   );
-  const page = graphHistoryPage(runs, requestedPage, selectedRunId);
+  const [revealed, setRevealed] = useState(reveal);
+  const page = graphHistoryPage(ordered, requestedPage, selectedRunId);
+  // UX-M2.1：显式导航到某个运行（selectRun 递增 reveal）时翻到它所在的页，即使它早已被选中而用户又翻走了。
+  // 运行还没出现在投影里（Start 的回执可能先于刷新）时保持待定，出现后只应用一次。
+  // 刷新与 Host 事件不改变 reveal，所以不会改页、改选择或移动焦点。
+  if (reveal !== revealed && page.selectedPage !== undefined) {
+    setRevealed(reveal);
+    if (page.selectedPage !== page.page) setPage(page.selectedPage);
+  }
   return (
     <nav className={`${graphFocusClass} min-w-0 space-y-2`} aria-label={t("runs")}>
       {onNewRun ? (
@@ -136,7 +152,7 @@ export function GraphRunHistory({
                     {run.release ? ` · ${t("released")}` : ""} · {u(`execution.${run.status}`)}
                   </div>
                   <div className="text-ui-xs text-foreground-subtle">
-                    {new Date(run.createdAt).toLocaleString()} ·{" "}
+                    {time(run.createdAt)} ·{" "}
                     {evidence.configuredTestCount
                       ? u(`evidence.${evidence.state}`)
                       : u("evidence.no-tests")}
@@ -161,7 +177,7 @@ export function GraphRunHistory({
             disabled={page.page === 0}
             onClick={() => setPage(page.page - 1)}
           >
-            {u("historyPrevious")}
+            {m2("historyNewer")}
           </Button>
           <p role="status" data-testid="graph-history-range">
             {u("historyRange", {
@@ -179,7 +195,7 @@ export function GraphRunHistory({
             disabled={page.page + 1 >= page.pages}
             onClick={() => setPage(page.page + 1)}
           >
-            {u("historyNext")}
+            {m2("historyOlder")}
           </Button>
           {page.selectedPage !== undefined && page.selectedPage !== page.page ? (
             <Button

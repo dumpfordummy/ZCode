@@ -1,6 +1,7 @@
 import type { GraphRunProvenance } from "@zcode/services";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphEditorText } from "./GraphEditorMode.js";
+import { graphIsoTimestamp } from "./graphTimestamp.js";
 
 /** Captured metadata only: showing references never opens, installs or enables them. */
 export function GraphWorkflowProvenance({
@@ -41,7 +42,9 @@ export function GraphWorkflowProvenance({
           {provenance.operationalDecision.acknowledgedUnknowns
             ? t("acknowledged")
             : t("notAcknowledged")}{" "}
-          · {new Date(provenance.operationalDecision.acceptedAt).toISOString()}
+          ·{" "}
+          {graphIsoTimestamp(provenance.operationalDecision.acceptedAt) ??
+            intl.formatMessage({ id: "graph.m2.timeNotRecorded" })}
         </p>
       ) : null}
       <details>

@@ -240,6 +240,7 @@ export function GraphEditor({
           occupiedReason={occupiedReason}
           activeRunId={activeRun?.id}
           needsYouRunIds={needsYouRunIds}
+          reveal={navigation?.reveal}
           newRunPane={newRunPane}
           selectedRun={selectedRun}
           selectedNodeId={selectedNode?.id}

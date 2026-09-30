@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button.js";
 import type { GraphRunSummary } from "./graphRunSummaryTypes.js";
 import type { GraphRunInspection } from "./GraphRunActions.js";
 import { useGraphRunText } from "./GraphRunText.js";
+import { useGraphTime } from "./GraphM2Text.js";
 
 export function GraphRunCapturedDetails({
   summary,
@@ -12,6 +13,7 @@ export function GraphRunCapturedDetails({
   onInspect(value: GraphRunInspection): void;
 }) {
   const u = useGraphRunText();
+  const time = useGraphTime();
   const [technicalOpen, setTechnicalOpen] = useState(false);
   return (
     <div className="space-y-2 text-ui-sm">
@@ -78,7 +80,7 @@ export function GraphRunCapturedDetails({
                 data-complete={entry.snapshot.complete}
               >
                 <p>
-                  {new Date(entry.capturedAt).toLocaleString()} ·{" "}
+                  {time(entry.capturedAt)} ·{" "}
                   {u(entry.snapshot.complete ? "snapshotComplete" : "snapshotIncomplete")}
                 </p>
                 <p className="break-words font-mono text-ui-xs">{entry.snapshot.scope}</p>

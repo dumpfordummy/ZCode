@@ -32,6 +32,8 @@ export function GraphRunsDestination(props: {
   occupiedReason?: string;
   activeRunId?: string;
   needsYouRunIds: ReadonlySet<string>;
+  /** UX-M2.1: the view store's reveal counter (explicit navigation to a run). */
+  reveal?: number;
   newRunPane: boolean;
   selectedRun?: Run;
   selectedNodeId?: string;
@@ -71,6 +73,7 @@ export function GraphRunsDestination(props: {
         selectedRunId={selectedRun?.id}
         newRunSelected={props.newRunPane}
         needsYouRunIds={props.needsYouRunIds}
+        reveal={props.reveal}
         onNewRun={props.onNewRun}
         onSelect={props.onSelectRun}
       />
