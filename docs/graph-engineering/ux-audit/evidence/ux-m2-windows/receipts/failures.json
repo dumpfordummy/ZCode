@@ -1,0 +1,105 @@
+{
+  "journey": "failures",
+  "status": "PASS",
+  "startedAt": "2026-09-30T14:07:12.624Z",
+  "finishedAt": "2026-09-30T14:07:25.493Z",
+  "options": {
+    "scenario": "pass",
+    "locale": "en-US",
+    "dialog": true
+  },
+  "providerRequests": 7,
+  "providerErrors": [],
+  "steps": [
+    {
+      "id": "F0",
+      "title": "Real Windows dialog: choose a valid workspace file first",
+      "status": "PASS",
+      "seconds": 1.8
+    },
+    {
+      "id": "F1",
+      "title": "Real dialog, file OUTSIDE the workspace: named, previous kept, Host text unchanged",
+      "status": "PASS",
+      "seconds": 1.2
+    },
+    {
+      "id": "F2",
+      "title": "Real dialog, EMPTY slot: says nothing is selected and never claims a previous selection",
+      "status": "PASS",
+      "seconds": 1.2
+    },
+    {
+      "id": "F3",
+      "title": "Cancel the real Windows dialog: no new failure, the earlier failure does not linger",
+      "status": "PASS",
+      "seconds": 3.2
+    },
+    {
+      "id": "F4",
+      "title": "A chooser error through the existing test seam is framed with the previous selection named",
+      "status": "PASS",
+      "seconds": 0.5
+    },
+    {
+      "id": "F5",
+      "title": "A real instantiate failure is framed beside Review; nothing started; the draft is kept",
+      "status": "PASS",
+      "seconds": 0.2
+    },
+    {
+      "id": "F6",
+      "title": "A Start the Host refuses after Review is framed without claiming nothing started",
+      "status": "PASS",
+      "seconds": 0.4
+    }
+  ],
+  "observations": [
+    {
+      "text": "the real OS dialog",
+      "data": {
+        "ok": true,
+        "action": "select",
+        "title": "Open",
+        "className": "#32770",
+        "error": null,
+        "fileNameBefore": "",
+        "acceptedPath": "<profile>\\workspace\\docs\\Notes.md"
+      }
+    },
+    {
+      "text": "picker failure text",
+      "data": "Could not use outside-secret.md. The previous selection docs/Notes.md was kept.\n\nUnsafe workspace-relative path segment."
+    },
+    {
+      "text": "empty-slot failure text",
+      "data": "Could not use outside-secret.md. Nothing is selected for this slot.\n\nUnsafe workspace-relative path segment."
+    },
+    {
+      "text": "chooser error text",
+      "data": "The file chooser did not return a file. The previous selection docs/Notes.md was kept.\n\nError invoking remote method 'zcode:select-file': Error: Dialog service unavailable (acceptance seam)"
+    },
+    {
+      "text": "Review failure text",
+      "data": "Review could not be prepared. Nothing was started; your request, context and check choices are kept.\n\nENOENT: no such file or directory, lstat '<profile>\\workspace\\docs\\Notes.md'"
+    },
+    {
+      "text": "Start after an external check change",
+      "data": "error"
+    },
+    {
+      "text": "Start failure text",
+      "data": "Start did not complete. Check the run list to see whether a run was admitted before you start again.\n\nWorkflow references or configuration changed; prepare and review a new run."
+    }
+  ],
+  "notRun": [],
+  "screenshots": [
+    "f-context-failure-kept-1280x720.png",
+    "f-context-failure-kept-1920x1080.png",
+    "f-context-failure-empty-1280x720.png",
+    "f-chooser-error-1280x720.png",
+    "f-review-failure-1280x720.png",
+    "f-review-failure-1920x1080.png",
+    "f-start-failure-1280x720.png"
+  ]
+}
