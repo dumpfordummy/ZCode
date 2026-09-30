@@ -61,12 +61,12 @@ export async function closeLibrary(window) {
   await window.keyboard.press("Escape");
   await T(window, "graph-library-dialog").waitFor({ state: "hidden" });
 }
-export const openDisclosure = async (window, id) => {
-  const panel = T(window, id);
-  if ((await panel.getAttribute("open")) === null) await panel.locator(":scope > summary").click();
-};
-export const openShare = (window) => openDisclosure(window, "graph-library-share");
-export const openAdvanced = (window) => openDisclosure(window, "graph-library-advanced");
+/** UX-M4: Versions / Use / Share / Advanced are single-level tabs (panels stay mounted, hidden when inactive). */
+export const openTab = (window, name) => T(window, `graph-library-tab-${name}`).click();
+export const openVersions = (window) => openTab(window, "versions");
+export const openUse = (window) => openTab(window, "use");
+export const openShare = (window) => openTab(window, "share");
+export const openAdvanced = (window) => openTab(window, "advanced");
 
 export const versionRows = (window) =>
   window.locator('[data-testid="graph-library-version-row"]').evaluateAll((rows) =>
@@ -104,6 +104,7 @@ export function assertFactsUnchanged(before, after, what) {
 /** Duplicate a workflow (built-in: "Duplicate to edit") from the open dialog; returns the new entry id. */
 export async function duplicateWorkflow(window, isolation, sourceId, name) {
   await chooseEntry(window, sourceId);
+  await openVersions(window);
   const before = new Set((await readLibrary(isolation)).entries.map((entry) => entry.id));
   await T(window, "graph-library-duplicate-name").fill(name);
   await T(window, "graph-library-duplicate").click();

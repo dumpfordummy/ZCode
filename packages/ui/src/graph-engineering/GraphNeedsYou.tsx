@@ -42,17 +42,13 @@ export function GraphNeedsYou({
         {label}
         {items.length > 1 ? ` · ${u("needsMore", { count: items.length - 1 })}` : ""}
       </span>
-      <Button
-        size="sm"
-        variant="outline"
-        data-testid="graph-needs-you-go"
-        onClick={() => onGoToRun(first)}
-      >
+      <Button variant="outline" data-testid="graph-needs-you-go" onClick={() => onGoToRun(first)}>
         {u("goToRun")}
       </Button>
-      {first.sessionId && !quiet ? (
+      {first.sessionId ? (
+        // 横幅里已有主操作时，条带里的同一操作退为普通样式，页面上仍只有一个强调色的“打开会话”。
         <Button
-          size="sm"
+          variant={quiet ? "outline" : "default"}
           data-testid="graph-needs-you-conversation"
           onClick={() => onOpenConversation(first)}
         >

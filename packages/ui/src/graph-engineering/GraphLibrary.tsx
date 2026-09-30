@@ -247,8 +247,8 @@ export function GraphLibrary({
       ) : (
         <>
           <Button
-            size="sm"
             variant="outline"
+            className="self-start"
             disabled={!workflow.supported}
             data-testid="graph-library-open"
             onClick={() => {

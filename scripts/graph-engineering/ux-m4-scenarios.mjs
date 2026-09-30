@@ -8,7 +8,7 @@ import {
   shot,
 } from "./ux-m1-helpers.mjs";
 import { approvalWaitRun, completedRun, failedTestRun, permissionWaitRun } from "./ux-m1-runs.mjs";
-import { T, openLibrary } from "./ux-m3-helpers.mjs";
+import { T, boot, openLibrary, selectValue } from "./ux-m3-helpers.mjs";
 import { checkScenarios } from "./ux-m4-scenarios-checks.mjs";
 import { contrastScenario } from "./ux-m4-scenarios-contrast.mjs";
 
@@ -110,10 +110,42 @@ const scenario = (locale) => ({
   },
 });
 
+const LONG_NAME =
+  "Quarterly payment reconciliation and refund audit workflow for the regional finance engineering group";
+const LONG_REQUEST =
+  "Investigate why the nightly payment reconciliation job double counts partially refunded orders when the refund arrives after the settlement window closes, then add a regression test that reproduces it with the anonymised fixture data and explain which ledger entry is written twice. Keep the public API unchanged and do not touch the billing exports.\n\nAcceptance: the reconciliation totals match the ledger for every fixture order, the new test fails before the fix and passes after it, and the change is limited to the reconciliation module.";
+
+// 压力状态：超长名称与请求、多个上下文槽位与检查、缺少必填值、准备就绪。
+const stressScenario = (locale) => ({
+  name: `captures (${locale}): long names and request, several context slots and checks, missing required values`,
+  async run({ page, host, url, shotsDir }) {
+    if (!shotsDir) return;
+    const user = await host.library.seedUser(LONG_NAME, { base: "slot", versions: 3 });
+    const history = runs([]).map((run, index) => {
+      run.startInput = `${LONG_REQUEST.slice(0, 90 + index * 25)}`;
+      return run;
+    });
+    host.setRuns("A", history);
+    await boot(page, host, url);
+    if (locale !== "en-US") {
+      await setState(page, { locale });
+      await T(page, "graph-new-run-pane").waitFor();
+    }
+    await selectValue(page, "graph-library-entry", user.id);
+    await T(page, "graph-template-parameter-request").fill(LONG_REQUEST);
+    await frames(page, shotsDir, "m4-stress-missing", locale);
+    await frames(page, shotsDir, "m4-stress-missing-lower", locale, undefined, 900);
+    await openLibrary(page);
+    await selectValue(page, "graph-library-entry", user.id);
+    await frames(page, shotsDir, "m4-stress-library", locale);
+  },
+});
+
 export const uxM4Scenarios = [
   ...checkScenarios,
   contrastScenario,
   readyScenario("en-US"),
   scenario("en-US"),
-  ...(QUICK ? [] : [readyScenario("zh-CN"), scenario("zh-CN")]),
+  stressScenario("en-US"),
+  ...(QUICK ? [] : [readyScenario("zh-CN"), scenario("zh-CN"), stressScenario("zh-CN")]),
 ];

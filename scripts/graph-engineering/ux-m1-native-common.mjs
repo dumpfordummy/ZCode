@@ -153,9 +153,18 @@ export async function launchUx(journey, options = {}) {
   });
   if (theme) {
     await window.evaluate((value) => localStorage.setItem("zcode-theme", value), theme);
-    await window.reload();
-    await window.waitForLoadState("domcontentloaded");
-    await T(window, "graph-engineering-open").waitFor({ timeout: 45000 });
+    // 重新加载后应用有时先落在欢迎（连接账户）页，再次重新加载即可回到工作区（UX-M4 最终构建的观察，
+    // 与 Graph 界面无关）。最多重试三次；始终回不来才算真正的失败。
+    for (let attempt = 1; ; attempt += 1) {
+      await window.reload();
+      await window.waitForLoadState("domcontentloaded");
+      try {
+        await T(window, "graph-engineering-open").waitFor({ timeout: 20000 });
+        break;
+      } catch (error) {
+        if (attempt >= 3) throw error;
+      }
+    }
   }
   const dialogControl = controlFile
     ? {

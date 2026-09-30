@@ -160,6 +160,16 @@ export async function selectNode(window, id) {
 }
 
 export async function selectValue(window, testId, value) {
+  // UX-M4：资料库对话框里的工作流是列表（单选组），New run 里仍是下拉框。
+  if (testId === "graph-library-entry") {
+    const option = window.locator(
+      `[data-testid="graph-library-entry-option"][data-value="${value}"]`,
+    );
+    if (await option.count()) {
+      await option.click();
+      return;
+    }
+  }
   await window.getByTestId(testId).click();
   await window.locator(`[role="option"][data-value="${value}"]`).click();
 }

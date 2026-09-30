@@ -29,13 +29,22 @@ import {
 const THEMES = ["zai-dark", "zai-light"];
 async function setTheme(window, theme) {
   await window.evaluate((value) => localStorage.setItem("zcode-theme", value), theme);
-  await window.reload();
-  await window.waitForLoadState("domcontentloaded");
-  // After a reload the app may restore the Graph panel, which has no open button: wait for either.
-  await T(window, "graph-engineering-open")
-    .or(T(window, "graph-engineering-panel"))
-    .first()
-    .waitFor({ timeout: 45000 });
+  // After a reload the app may restore the Graph panel (no open button), and with a run already
+  // waiting the welcome screen can appear first (observed on the UX-M4 final build; a second reload
+  // returns to the workspace). Try a few times; a page that never comes back is a real failure.
+  for (let attempt = 1; ; attempt += 1) {
+    await window.reload();
+    await window.waitForLoadState("domcontentloaded");
+    try {
+      await T(window, "graph-engineering-open")
+        .or(T(window, "graph-engineering-panel"))
+        .first()
+        .waitFor({ timeout: 20000 });
+      return;
+    } catch (error) {
+      if (attempt >= 3) throw error;
+    }
+  }
 }
 async function eachTheme(window, name, prepare, isolation, receipt) {
   for (const theme of THEMES) {

@@ -17,12 +17,12 @@ export const offeredVersions = (window) =>
     })),
   );
 
-export async function openDisclosure(window, testId) {
-  const panel = T(window, testId);
-  if ((await panel.getAttribute("open")) === null) await panel.locator(":scope > summary").click();
-}
-export const openShare = (window) => openDisclosure(window, "graph-library-share");
-export const openAdvanced = (window) => openDisclosure(window, "graph-library-advanced");
+/** UX-M4: Versions / Use / Share / Advanced are single-level tabs (panels stay mounted, hidden when inactive). */
+export const openTab = (window, name) => T(window, `graph-library-tab-${name}`).click();
+export const openVersions = (window) => openTab(window, "versions");
+export const openUse = (window) => openTab(window, "use");
+export const openShare = (window) => openTab(window, "share");
+export const openAdvanced = (window) => openTab(window, "advanced");
 
 /** Select a workflow in the Workflow section. */
 export const chooseEntry = (window, id) => selectValue(window, "graph-library-entry", id);
