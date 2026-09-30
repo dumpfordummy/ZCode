@@ -17,6 +17,7 @@ import type { GraphRecipeReadState } from "./graphRecipeRead.js";
 import { initialTemplateParameters, templateBindingErrors } from "./graphWorkflowView.js";
 import { GraphContextSection } from "./GraphContextSection.js";
 import { useGraphTemplateText } from "./graphTemplateText.js";
+import { useGraphM1Text } from "./GraphM1Text.js";
 
 const normalizedBindings = (bindings: TemplateBindings): TemplateBindings => ({
   ...bindings,
@@ -32,6 +33,8 @@ export function GraphTemplateBindings({
   recipeReadState,
   disabled,
   disabledReason,
+  admissionReason,
+  onViewCurrentRun,
   onLoadRecipes,
   onOpenSetup,
   allowReview = false,
@@ -43,8 +46,12 @@ export function GraphTemplateBindings({
   workspaceIdentity?: string;
   templateKey: string;
   recipeReadState: GraphRecipeReadState;
+  /** The form cannot be edited. */
   disabled: boolean;
   disabledReason?: string;
+  /** UX-M1: a run occupies the workspace. The form stays editable; every admission action is refused. */
+  admissionReason?: string;
+  onViewCurrentRun?(): void;
   onLoadRecipes(): void;
   onOpenSetup(): void;
   /** "review" = Review and run; "save" = create the workflow only (explicit, no preflight). */
@@ -58,6 +65,7 @@ export function GraphTemplateBindings({
   const { intl } = useZCodeIntl();
   const t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
   const u = (key: string) => intl.formatMessage({ id: `graph.preZ8.${key}` });
+  const m1 = useGraphM1Text();
   const template = version.template;
   const display = useGraphTemplateText();
   const initial = useMemo<GraphTemplateFormDraft>(
@@ -90,6 +98,17 @@ export function GraphTemplateBindings({
   const recipes = recipeReadState.status === "ready" ? recipeReadState.snapshot : null;
   const errors = templateBindingErrors(template, parameters, bindings, recipes);
   const readBlocked = hasTools && recipeReadState.status !== "ready";
+  // 准入类动作（Review and run、Save as workflow only）：编辑锁、占用、检查未读、字段未补全时一律拒绝。
+  // 处理函数自身也检查，不依赖按钮的禁用样式。
+  const occupied = Boolean(admissionReason);
+  const actionsBlocked = disabled || occupied || readBlocked || errors.length > 0;
+  const blockedReason = disabled
+    ? disabledReason || u("creationLocked")
+    : occupied
+      ? admissionReason
+      : readBlocked
+        ? u("readChecksFirst")
+        : undefined;
   useEffect(() => {
     if (hasTools && recipeReadState.status === "not-loaded") onLoadRecipes();
   }, [hasTools, recipeReadState.status, onLoadRecipes]);
@@ -259,11 +278,6 @@ export function GraphTemplateBindings({
           </div>
         </div>
       ) : null}
-      {disabled || readBlocked ? (
-        <p id="graph-template-create-reason" role="status" className="text-ui-sm text-warning">
-          {disabled ? disabledReason || u("creationLocked") : u("readChecksFirst")}
-        </p>
-      ) : null}
       <div
         className={`${allowReview ? "sticky bottom-0 z-10 -mx-3 border-t border-border bg-background px-3 py-2 " : ""}flex flex-wrap items-center gap-2`}
         data-testid="graph-new-run-actions"
@@ -271,10 +285,13 @@ export function GraphTemplateBindings({
         {allowReview ? (
           <Button
             size="lg"
-            disabled={disabled || readBlocked || errors.length > 0}
+            disabled={actionsBlocked}
             aria-describedby="graph-template-create-reason"
             data-testid="graph-review-run"
-            onClick={() => onInstantiate(parameters, normalizedBindings(bindings), "review")}
+            onClick={() => {
+              if (actionsBlocked) return;
+              onInstantiate(parameters, normalizedBindings(bindings), "review");
+            }}
           >
             <Play className="size-4" />
             {u("reviewAndRun")}
@@ -283,13 +300,36 @@ export function GraphTemplateBindings({
         <Button
           size={allowReview ? "sm" : "default"}
           variant={allowReview ? "outline" : "default"}
-          disabled={disabled || readBlocked || errors.length > 0}
+          disabled={actionsBlocked}
           aria-describedby="graph-template-create-reason"
           data-testid="graph-library-instantiate"
-          onClick={() => onInstantiate(parameters, normalizedBindings(bindings), "save")}
+          onClick={() => {
+            if (actionsBlocked) return;
+            onInstantiate(parameters, normalizedBindings(bindings), "save");
+          }}
         >
           {u(allowReview ? "saveAsWorkflow" : "createWorkflow")}
         </Button>
+        {blockedReason ? (
+          <div
+            className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+            data-testid="graph-new-run-blocked"
+            data-blocked-by={disabled ? "draft-lock" : occupied ? "run-active" : "checks"}
+          >
+            <p id="graph-template-create-reason" role="status" className="text-ui-sm text-warning">
+              {blockedReason}
+            </p>
+            {occupied && !disabled && onViewCurrentRun ? (
+              <Button
+                variant="outline"
+                data-testid="graph-view-current-run"
+                onClick={onViewCurrentRun}
+              >
+                {m1("viewCurrentRun")}
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </section>
   );

@@ -50,6 +50,8 @@ export function GraphLibrary({
   dirty,
   disabled,
   disabledReason,
+  admissionReason,
+  onViewCurrentRun,
   pending = false,
   error,
   recipeReadState,
@@ -66,6 +68,9 @@ export function GraphLibrary({
   dirty: boolean;
   disabled: boolean;
   disabledReason?: string;
+  /** UX-M1: a run occupies the workspace. The form stays editable; instantiate/save/review are refused. */
+  admissionReason?: string;
+  onViewCurrentRun?(): void;
   pending?: boolean;
   error?: string | null;
   recipeReadState: GraphRecipeReadState;
@@ -121,15 +126,19 @@ export function GraphLibrary({
       alive.current = false;
     };
   }, []);
-  const latest = useRef({ workspaceKey, definition, entry, version });
-  latest.current = { workspaceKey, definition, entry, version };
   const locked = disabled || workflow.pending;
+  // 表单编辑只受 locked 限制；创建/替换/审阅这类准入动作还受占用限制。
+  const actionsLocked = locked || Boolean(admissionReason);
+  const latest = useRef({ workspaceKey, definition, entry, version, actionsLocked });
+  latest.current = { workspaceKey, definition, entry, version, actionsLocked };
   const operationPending = pending || workflow.pending;
   const formFingerprint = (id: string, versionNumber: number) =>
     JSON.stringify(
       useGraphDraftStore.getState().workspaces[workspaceKey]?.templates[`${id}:${versionNumber}`],
     );
   const apply = async (intent: ReplacementIntent, decision: "save" | "discard") => {
+    // 所有到达实例化/保存替换的路径（按钮、替换对话框、异步续接）都经过这里：占用时一律拒绝。
+    if (latest.current.actionsLocked) return;
     setReplacementError("");
     const stillCurrent = () =>
       alive.current &&
@@ -215,6 +224,8 @@ export function GraphLibrary({
             recipeReadState={recipeReadState}
             disabled={locked || entry.archived}
             disabledReason={entry.archived ? u("noCompatibleVersion") : disabledReason}
+            admissionReason={admissionReason}
+            onViewCurrentRun={onViewCurrentRun}
             onLoadRecipes={onLoadRecipes}
             onOpenSetup={() => {
               setOpen(false);
@@ -222,6 +233,7 @@ export function GraphLibrary({
             }}
             allowReview={inline && Boolean(onReview)}
             onInstantiate={(parameters, bindings, continuation) => {
+              if (actionsLocked) return;
               const instantiation = graphInstantiationFingerprint({
                 id: entry.id,
                 version: version.version,
@@ -346,7 +358,7 @@ export function GraphLibrary({
           ) : null}
           <div className="flex flex-wrap gap-2">
             <Button
-              disabled={locked}
+              disabled={actionsLocked}
               data-testid="graph-replace-save"
               onClick={() => {
                 if (replacement) void apply(replacement, "save");
@@ -356,7 +368,7 @@ export function GraphLibrary({
             </Button>
             <Button
               variant="outline"
-              disabled={locked}
+              disabled={actionsLocked}
               data-testid="graph-replace-discard"
               onClick={() => {
                 if (replacement) void apply(replacement, "discard");

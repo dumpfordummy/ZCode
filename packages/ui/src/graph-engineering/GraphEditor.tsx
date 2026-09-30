@@ -18,7 +18,9 @@ import {
   reconcileGraphDraft,
   type GraphPanelProps,
 } from "./graphEngineeringView.js";
-import { graphRunIsUnresolved, graphToolOnlySettings } from "./graphEditing.js";
+import { graphToolOnlySettings } from "./graphEditing.js";
+import { graphAdmission } from "./graphAdmission.js";
+import { useGraphM1Text } from "./GraphM1Text.js";
 import { GraphLibrary } from "./GraphLibrary.js";
 import { GraphContextBar } from "./GraphContextBar.js";
 import { GraphNeedsYou } from "./GraphNeedsYou.js";
@@ -43,6 +45,7 @@ export function GraphEditor({
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
   const u = (id: string) => intl.formatMessage({ id: `graph.preZ8.${id}` });
+  const m1 = useGraphM1Text();
   const config = useGraphConfiguration(workspacePath, workspaceIdentity);
   const { settings } = useSettings();
   const openSettingsTab = useTabStore((state) => state.openSettingsTab);
@@ -77,7 +80,11 @@ export function GraphEditor({
   const setDefinition = (draft: GraphDefinition) =>
     useGraphDraftStore.getState().editDefinition(workspaceKey, draft, reconciled.base);
   const dirty = graphDefinitionContent(displayed) !== graphDefinitionContent(view.definition);
-  const activeRun = view.runs.find(graphRunIsUnresolved);
+  // UX-M1：占用工作区的未解决运行只锁「准入」，不再锁定新建运行表单的编辑。
+  const admission = graphAdmission(view.runs);
+  const activeRun = admission.blocked
+    ? view.runs.find((run) => run.id === admission.runId)
+    : undefined;
   const selectedRun =
     showingRuns && !newRunPane ? view.runs.find((run) => run.id === navigation?.runId) : undefined;
   const definition = selectedRun ? selectedRun.definition : displayed;
@@ -134,14 +141,21 @@ export function GraphEditor({
           : readiness.errors.length
             ? u("designIssues")
             : undefined);
-  // 新建运行只依赖：可用性、模型和现有的准入限制；设计草稿的就绪问题属于 Workflows。
-  const newRunReason =
-    creationReason ??
-    (!view.availability.available
-      ? view.availability.reason || t("prerequisite")
-      : !modelReady || !defaults
-        ? t("noModel")
-        : undefined);
+  // 编辑锁（表单不可编辑）：操作进行中、其他 Host 拥有、修订冲突、不可用、没有模型。
+  // 有未解决的运行不在其中：那只锁准入（occupiedReason），草稿仍可编辑。
+  const draftLockReason = graph.pending
+    ? u("busy")
+    : (readOnlyReason ??
+      (view.readOnly
+        ? t("readOnlyHost")
+        : conflicted
+          ? t("conflict")
+          : !view.availability.available
+            ? view.availability.reason || t("prerequisite")
+            : !modelReady || !defaults
+              ? t("noModel")
+              : undefined));
+  const occupiedReason = admission.blocked ? m1("admissionBlocked") : undefined;
   const showGeneralSettingsButton =
     settings != null && settings.askUserQuestionAutoResolutionEnabled !== false;
   const openSettings = (section: "general" | "modelProvider") => {
@@ -156,6 +170,7 @@ export function GraphEditor({
     defaults,
     workspaceKey,
     selectRun,
+    admission,
   });
   // Pending human actions come from the complete run list, never from the visible history page.
   const needsYou = useMemo(() => graphNeedsYou(view.runs), [view.runs]);
@@ -222,7 +237,8 @@ export function GraphEditor({
           dirty={dirty}
           disabled={disabled}
           canConfirm={!disabled && !activeRun && !conflicted}
-          newRunReason={newRunReason}
+          draftLockReason={draftLockReason}
+          occupiedReason={occupiedReason}
           activeRunId={activeRun?.id}
           needsYouRunIds={needsYouRunIds}
           newRunPane={newRunPane}
@@ -243,6 +259,7 @@ export function GraphEditor({
           onCloseConfirmation={() => setConfirmation(null)}
           onStart={(preflight) =>
             confirmation &&
+            !admission.blocked &&
             startRun(confirmation.definition, confirmation.settings, true, preflight)
           }
           onOpenSetup={() => select(workspaceKey, { mode: "setup", returnToWorkflow: true })}

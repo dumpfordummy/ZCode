@@ -3,6 +3,7 @@ import { graphProjectSetupZh } from "./graphProjectSetup.js";
 import { graphEditorGuidanceZh } from "./graphEditorGuidance.js";
 import { graphRunClarityZh } from "./graphRunClarity.js";
 import { graphContextPickerZh } from "./graphContextPicker.js";
+import { graphM1Zh } from "./graphM1.js";
 /** 中文翻译 */
 const zhCN: Record<string, string> = {
   ...graphPreZ8Zh,
@@ -10,6 +11,7 @@ const zhCN: Record<string, string> = {
   ...graphEditorGuidanceZh,
   ...graphRunClarityZh,
   ...graphContextPickerZh,
+  ...graphM1Zh,
   "graph.node.approval": "人工审批",
   "graph.status.WaitingForApproval": "等待审批",
   "graph.status.AwaitingContinuation": "等待明确继续",

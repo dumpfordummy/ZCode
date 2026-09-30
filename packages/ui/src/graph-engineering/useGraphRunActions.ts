@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { GraphDefinition, GraphNativeSettings } from "@zcode/services";
 import type { useGraphEngineering } from "@/hooks/useGraphEngineering.js";
 import type { useGraphEngineeringViewStore } from "@/store/graphEngineeringViewStore.js";
+import type { GraphAdmission } from "./graphAdmission.js";
 import type { GraphRunConfirmationSnapshot, GraphSubmission } from "./graphSubmission.js";
 
 type GraphHook = ReturnType<typeof useGraphEngineering>;
@@ -17,12 +18,15 @@ export function useGraphRunActions({
   defaults,
   workspaceKey,
   selectRun,
+  admission,
 }: {
   graph: GraphHook;
   displayed: GraphDefinition;
   defaults: GraphNativeSettings | null;
   workspaceKey: string;
   selectRun: SelectRunFn;
+  /** UX-M1：占用期间 handleRun/startRun 一律拒绝（不只是按钮禁用）；graph.run 另有 Hook 级拒绝。 */
+  admission: GraphAdmission;
 }) {
   const [confirmation, setConfirmation] = useState<GraphRunConfirmationSnapshot | null>(null);
 
@@ -31,7 +35,8 @@ export function useGraphRunActions({
     settings: GraphNativeSettings,
     confirmed = false,
     preflight?: GraphSubmission["preflight"],
-  ) =>
+  ) => {
+    if (admission.blocked) return;
     void graph
       .run(
         draft,
@@ -47,10 +52,11 @@ export function useGraphRunActions({
           selectRun(workspaceKey, runId);
         }
       });
+  };
 
   /** `definition` defaults to the current design draft; Review and run passes the saved instance. */
   const handleRun = (definition: GraphDefinition = displayed) => {
-    if (!defaults) return;
+    if (!defaults || admission.blocked) return;
     if (definition.version === 5)
       void graph.prepareRunConfirmation(definition, defaults).then((snapshot) => {
         if (snapshot) setConfirmation(snapshot);
