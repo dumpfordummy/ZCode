@@ -132,7 +132,53 @@ Gaps this milestone closes:
 
 ## 5. UX-M1.3: keyboard, localization and state clarity
 
-To be finalized before implementation (see the plan, section 6).
+Finalized **2026-09-30**, before UX-M1.3 was implemented. Source read: `GraphNeedsYou`, `graphNeedsYouQueue`, `GraphRunHistory`, `GraphRunOverview`, `GraphRunResultBlock`, `graphRunResult`, `graphRunSummary`, `GraphRunActions`, `useGraphRunActions`, `GraphTemplateBindings` (action bar), `graphTemplateText`, `graphFocus`, and the `graphRunClarity` copy tables.
+
+### 5.1 What exists today, and the gaps
+
+Already correct and **kept unchanged**: Needs-you is derived from the complete Host run projection (`view.runs`), not from the visible history page, and distinguishes permission, question, approval and continuation (`data-kind`); the run detail already separates a failed Test, invalid machine evidence, an invalid (malformed) reviewer output and a valid reviewer decision (`graphRunResult`; `data-kind` on the result block, `data-state` on the axes and structured-output lines) and never reports one as the other; run-history rows are focusable and answer Enter/Space; Graph marks keyboard focus with theme borders and fill (`graphFocusClass`) because the global stylesheet removes the default ring; the picker's Enter/Escape semantics and focus return are covered by the Context-picker suite.
+
+Gaps this milestone closes (each was observed in the running UI, not assumed):
+
+1. Activating **View current run**, **Go to run**, **New run** or **Back to new run** unmounts the control that had focus, so keyboard focus is lost and the next Tab starts from an arbitrary place.
+2. When Review is unavailable because a required field, reference or check is unresolved, the reason is only in a list above the sticky action bar. At 1280x720 the disabled primary action is visible while its reason is scrolled out of view. (The "run occupies the workspace" reason already sits beside the action.)
+3. The unresolved-fields list prints the raw English template labels in Simplified Chinese, while the same fields are shown localized elsewhere. The template display map has no entry for the `review` step, so "Review" stays English in the step preview and in the Context "Used by" line.
+4. Needs-you does not state what it covers. Its scope is the run projection this Host returned for this workspace, not a global queue.
+5. **Stale async result.** `handleRun` stores the preflight snapshot when `prepareRunConfirmation` resolves, even if the user has since left that intent. An abandoned review can appear later, in a place the user is no longer looking at. Every navigation already calls `setConfirmation(null)`, but a late reply re-sets it.
+
+### 5.2 Ownership (nothing new is stored)
+
+| State or rule                                            | Single owner                                                                                                                                                    |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Where the user is and which control should receive focus | view store selection: existing `mode`/`pane`/`runId`/`returnToWorkflow`/`checkId` plus one renderer-local `focus` request, consumed once by the element's owner |
+| Whether an inline review is still wanted                 | `useGraphRunActions` intent token (renderer-local); a newer intent or a dismissal invalidates older replies                                                     |
+| Which labels are UI-owned                                | locale tables (`graph.m1.*`, the existing `graph.*` tables) and `graphTemplateText` (display only)                                                              |
+| Original text (requests, instructions, ids, diagnostics) | never translated, never rewritten                                                                                                                               |
+
+### 5.3 Rules
+
+1. **Focus follows navigation, once.** A navigation the user asked for records one `focus` request in the same `select` call: **View current run** and **Go to run** focus the run summary; **New run** focuses the request field; **Back to new run** returns to the control that opened the editor (the check's Edit/Open control) when it still exists, otherwise the request field. The element's owner consumes the request when it mounts (deterministic, no timeout) and clears it. Initial page load, refreshes and Host events never move focus.
+2. **Visible focus on every touched control** (View current run, Go to run, Edit/Open check, Back to new run, the blocked-action reason and its shortcut) using the existing Graph focus treatment. The focus target of a route (the run summary) is focusable programmatically and shows the same treatment.
+3. **The reason sits beside the primary action.** When Review is unavailable for a field, reference or check, the action bar shows one concise reason ("Complete or correct N field(s) before review.") and a **Go to first field** control that moves focus to that field. It is described by the same `aria-describedby` id as the other reasons. The existing detailed list stays.
+4. **No shortcut skips review.** No key binding is added. Enter in a field, in the picker, or on any UX-M1 control never instantiates, prepares or starts; Enter and Escape in the picker keep their meaning, including while a run occupies the workspace. Start needs the explicit control and an acknowledged preflight.
+5. **Distinguishable states are asserted, not assumed.** Waiting for a native permission, waiting for a native question, waiting for the final human approval, a failed machine check, invalid machine evidence, a malformed reviewer output and a valid reviewer decision (pass or needs-changes) each render a different, named state in both languages. A valid reviewer decision is never shown as a failure, and machine-check invalidity is never shown as reviewer output.
+6. **Needs-you states its scope.** A short line, visible with the banner, says it lists waiting steps from this workspace's runs as reported by this Host, and that it is not a queue across workspaces or Hosts. Needs-you keeps working when the selected history page does not contain the waiting run, and Go to run reaches it.
+7. **Localization.** New and directly affected UI-owned labels exist in English and Simplified Chinese: the reason and shortcut, the scope line, the unresolved-fields list (template labels through the existing display map, `review` added), and the touched UX-M1 messages. Requests, instructions, ids, check names, commands, paths, Host diagnostics, evidence and captured definitions stay verbatim.
+8. **A late preflight reply is discarded.** `handleRun` takes an intent token; a newer intent, a navigation that closes the review, or leaving the destination invalidates it. A discarded reply changes nothing (no snapshot, no error, no focus), and the Host is unaffected (preflight is read-only).
+9. **Layout.** At 1280x720 and 1920x1080, dark and light, the primary action, its reason and the way back to the current run are visible or reachable by scrolling without hiding the action. No new tokens, no restyling.
+
+### 5.4 Acceptance and how each is verified
+
+1. Prepare, inspect the current run and return complete with Tab, Enter and Space only; focus lands where rule 1 says and shows the focus treatment. **Browser** (real key presses; focus target, computed focus style).
+2. Every state in rule 5 is distinct in English and Chinese; diagnostics and ids are byte-identical to the source. **Browser** over run fixtures built from the UI unit fixtures (labelled as such), plus the existing `graphRunResult` unit tests.
+3. Active wait, missing required context, invalid check, preflight error and ready-to-review are exercised; each shows its reason beside the action, with the draft intact. **Browser**; preflight failure injected at the Host operation.
+4. Needs-you scope text and reachability when the history page excludes the run. **Browser** with more runs than one history page.
+5. A late preflight reply after leaving the intent does not appear. **Browser** with a held Host operation, proven to fail without the fix (**mutation**).
+6. Picker Enter/Escape do not submit while a run occupies the workspace, and focus returns to the invoking control. **Browser**.
+7. Localization keys complete in both locales and only defined keys are read. **Unit**.
+8. Screenshots at both sizes, dark and light, inspected by eye.
+
+Fixture boundaries are unchanged from section 6; the run records for rule 5 are the UI tests' `summaryRun()` variants, not native runs.
 
 ## 6. Verification approach and fixtures
 
