@@ -114,4 +114,9 @@ Should not:
 
 ## Recorded SHAs
 
-Filled in by a documentation-only follow-up commit after the implementation commit exists.
+| Item | SHA |
+| --- | --- |
+| Base (`origin/main` at branch point) | `558347d94bd5d341a3e12c151db6ba40fa7612b8` |
+| Implementation payload commit (`feat: improve Graph Engineering run UX`) | `df50abbdb6bdfa364e1ba9686b2751688fb4ab63` |
+
+The branch tip is this payload commit plus one documentation-only commit that adds this table (no product, test or harness change). Verify with `git log --oneline 558347d..HEAD` and `git diff --stat df50abb HEAD` (only this file).
