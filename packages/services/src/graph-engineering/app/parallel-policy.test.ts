@@ -6,7 +6,11 @@ import { parallelFixture, plan, settings, target } from "./parallel.fixture.js";
 const disabled: GraphParallelPolicy = resolveGraphParallelPolicy({ flavor: "graph" });
 
 test("the supported Graph package is disabled whatever the environment says; other builds need an explicit opt-in", () => {
-  for (const env of [{}, { ZCODE_GRAPH_EXPERIMENTAL_PARALLEL: "1" }, { ZCODE_GRAPH_EXPERIMENTAL_PARALLEL: "true" }]) {
+  for (const env of [
+    {},
+    { ZCODE_GRAPH_EXPERIMENTAL_PARALLEL: "1" },
+    { ZCODE_GRAPH_EXPERIMENTAL_PARALLEL: "true" },
+  ]) {
     const policy = resolveGraphParallelPolicy({ flavor: "graph", env });
     assert.equal(policy.mode, "disabled");
     assert.equal(policy.source, "supported-package");
@@ -15,7 +19,8 @@ test("the supported Graph package is disabled whatever the environment says; oth
     assert.equal(resolveGraphParallelPolicy({ flavor, env: {} }).mode, "disabled");
     assert.equal(resolveGraphParallelPolicy({ flavor }).source, "default");
     assert.equal(
-      resolveGraphParallelPolicy({ flavor, env: { ZCODE_GRAPH_EXPERIMENTAL_PARALLEL: "true" } }).mode,
+      resolveGraphParallelPolicy({ flavor, env: { ZCODE_GRAPH_EXPERIMENTAL_PARALLEL: "true" } })
+        .mode,
       "disabled",
     );
     const optIn = resolveGraphParallelPolicy({
@@ -98,7 +103,12 @@ test("historical parallel data stays readable, cancellable and inert after the p
   );
   assert.equal(f.sends.length, 2);
   // 已有工作仍可经既有路径停止；这不是新的准入。
-  await f.parallel.control({ target, runId: view.runs[0]!.id, action: "cancel", reason: "operator" });
+  await f.parallel.control({
+    target,
+    runId: view.runs[0]!.id,
+    action: "cancel",
+    reason: "operator",
+  });
   assert.equal(f.cancels.length, 2);
   assert.equal(f.sends.length, 2);
 });

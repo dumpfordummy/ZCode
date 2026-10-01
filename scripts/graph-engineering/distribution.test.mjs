@@ -91,7 +91,14 @@ test("Graph release version is explicit and cannot change ordinary package versi
       ),
     );
   }
-  for (const version of ["3.14.3-z8.1", "3.14.3-z8.0", "3.14.3-z8.12", "3.14.3-z1.2", "3.14.3-z2.2", "3.14.3-z7.5"])
+  for (const version of [
+    "3.14.3-z8.1",
+    "3.14.3-z8.0",
+    "3.14.3-z8.12",
+    "3.14.3-z1.2",
+    "3.14.3-z2.2",
+    "3.14.3-z7.5",
+  ])
     assert.equal(
       resolveGraphDistributionVersion(
         { ZCODE_GRAPH_DISTRIBUTION: "1", ZCODE_GRAPH_VERSION: version },
@@ -120,9 +127,8 @@ test("Graph release version is explicit and cannot change ordinary package versi
 });
 
 test("Graph entry scrubs every inherited automatic-telemetry setting before application import", async () => {
-  const { graphAutomaticTelemetryEnv } = await import(
-    "../../packages/desktop/scripts/graph-profile.mjs"
-  );
+  const { graphAutomaticTelemetryEnv } =
+    await import("../../packages/desktop/scripts/graph-profile.mjs");
   const inherited = {
     ZCODE_ARMS_RUM_ENDPOINT: "https://rum.synthetic.invalid/x",
     ZCODE_TELEMETRY_REPORT_ENDPOINT: "https://report.synthetic.invalid/x",
@@ -143,4 +149,16 @@ test("Graph entry scrubs every inherited automatic-telemetry setting before appl
   ]);
   assert.deepEqual(policy.set, { ZCODE_MODEL_TELEMETRY_ENABLED: "0" });
   assert.deepEqual(graphAutomaticTelemetryEnv({}).remove, []);
+});
+
+test("release workflow keeps historical notes as the fallback and prefers a per-version file", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const workflow = await readFile(
+    new URL("../../.github/workflows/graph-windows-release.yml", import.meta.url),
+    "utf8",
+  );
+  assert.match(workflow, /release-notes\/\$env:RELEASE_VERSION\.md/);
+  assert.match(workflow, /docs\/graph-engineering\/WINDOWS_RELEASE_NOTES\.md/);
+  // 版本校验仍然只经过唯一的版本策略函数。
+  assert.match(workflow, /resolveGraphDistributionVersion/);
 });

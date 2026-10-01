@@ -6,7 +6,7 @@ Run from the repository root after reviewing and committing the intended release
 pnpm graph:release --version 3.14.0-z7.2
 ```
 
-The command pushes one annotated version tag to `dumpfordummy/ZCode`, waits for that exact tag/commit's Windows workflow, checks the published prerelease and required assets, and prints its GitHub Releases URL. The build runs on GitHub; this command does not build or launch the installed application on your PC. A successful run makes the installer visible in the repository's **Releases** section. The chosen version must be unused. `3.14.0-z2.1` is a retained failed build tag and [3.14.0-z2.2 is published](https://github.com/dumpfordummy/ZCode/releases/tag/graph-v3.14.0-z2.2); these examples use the Z7 version, `3.14.0-z7.2`. The current publication explicitly targets the committed Z7 implementation; the resolver accepts Z1, Z2 and Z7 labels only. Z7-A12 Fork/Join portability remains unsupported and must be disclosed in release notes.
+The command pushes one annotated version tag to `dumpfordummy/ZCode`, waits for that exact tag/commit's Windows workflow, checks the published prerelease and required assets, and prints its GitHub Releases URL. The build runs on GitHub; this command does not build or launch the installed application on your PC. A successful run makes the installer visible in the repository's **Releases** section. The chosen version must be unused. `3.14.0-z2.1` is a retained failed build tag and [3.14.0-z2.2 is published](https://github.com/dumpfordummy/ZCode/releases/tag/graph-v3.14.0-z2.2); these examples use the Z7 version, `3.14.0-z7.2`. The current publication explicitly targets the committed Z7 implementation; the resolver accepts Z1, Z2, Z7 and (since Z8.1) Z8 labels only, e.g. `3.14.3-z8.1`. Z7-A12 Fork/Join portability remains unsupported and must be disclosed in release notes.
 
 ## One-time setup
 
@@ -25,7 +25,7 @@ Dry-run checks local cleanliness, repository and commit/tag state, then prints t
 
 ## What happens on publish
 
-1. Preflight validates canonical Z1/Z2/Z7 prerelease naming, the exact destination, clean committed HEAD, GitHub access, active workflow, and existing local/remote tag/release state.
+1. Preflight validates canonical Z1/Z2/Z7/Z8 prerelease naming, the exact destination, clean committed HEAD, GitHub access, active workflow, and existing local/remote tag/release state.
 2. It creates `graph-v<version>` at the captured commit and pushes only that tag, with no force or additional tags. Pushing the tag also transfers its committed source; it does not update `main` or another branch.
 3. GitHub runs release/distribution tests, Graph service/adapter/UI regressions, root typecheck/lint and architecture checks. Supplemental CLI lint and full formatting diagnostics remain visible as known baseline exceptions, with logs in Actions artifacts. They do not masquerade as passing checks.
 4. The existing Windows build creates the installer and SHA256 file. The detached packaged application must pass ordinary Chat, literal Z1, no-provider and Z2 sequential/interactions/recovery cases. These use actual native tools and controlled loopback responses in synthetic profiles. No paid/live provider task is run.

@@ -33,7 +33,8 @@ export function resolveGraphParallelPolicy(input: {
     return {
       mode: "experimental",
       source: "development-opt-in",
-      reason: "Experimental parallel workflows were enabled explicitly for development. Unsupported.",
+      reason:
+        "Experimental parallel workflows were enabled explicitly for development. Unsupported.",
     };
   return {
     mode: "disabled",

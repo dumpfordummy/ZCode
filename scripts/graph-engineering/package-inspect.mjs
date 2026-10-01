@@ -13,10 +13,44 @@ import path from "node:path";
 export const INSPECTION_FILE = "package-inspection.json";
 
 const BINARY_EXTENSIONS = new Set([
-  ".exe", ".dll", ".node", ".png", ".jpg", ".jpeg", ".gif", ".ico", ".icns", ".pak", ".bin",
-  ".dat", ".so", ".dylib", ".woff", ".woff2", ".ttf", ".otf", ".eot", ".zip", ".gz", ".br",
-  ".lib", ".pdb", ".wasm", ".mp3", ".mp4", ".webm", ".webp", ".avif", ".asar", ".snap", ".blockmap",
-  ".7z", ".tar", ".nupkg", ".pyc", ".map",
+  ".exe",
+  ".dll",
+  ".node",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".ico",
+  ".icns",
+  ".pak",
+  ".bin",
+  ".dat",
+  ".so",
+  ".dylib",
+  ".woff",
+  ".woff2",
+  ".ttf",
+  ".otf",
+  ".eot",
+  ".zip",
+  ".gz",
+  ".br",
+  ".lib",
+  ".pdb",
+  ".wasm",
+  ".mp3",
+  ".mp4",
+  ".webm",
+  ".webp",
+  ".avif",
+  ".asar",
+  ".snap",
+  ".blockmap",
+  ".7z",
+  ".tar",
+  ".nupkg",
+  ".pyc",
+  ".map",
 ]);
 const MAX_SCAN_BYTES = 64 * 1024 * 1024;
 
@@ -28,10 +62,11 @@ const SECRET_RULES = [
   ["private-key-block", /-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----/g],
   ["jwt-literal", /\beyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{10,}/g],
 ];
-const FIXTURE_RULE = /z1-local-fixture|Z1_ALLOW_PROVIDER_NETWORK|scripts[\\/]graph-engineering|provider-fixture|Z1_PACKAGED_EXE/g;
+const FIXTURE_RULE =
+  /z1-local-fixture|Z1_ALLOW_PROVIDER_NETWORK|scripts[\\/]graph-engineering|provider-fixture|Z1_PACKAGED_EXE/g;
 const PROFILE_RULE = /\.zcode-graph-engineering/g;
 const PRIVATE_ADDRESS_RULE =
-  /\b(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})\b/g;
+  /(?<![\w.-])(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(?![\w-]|\.\d)/g;
 const WINDOWS_USER_PATH = /[A-Za-z]:\\+Users\\+([^\\/"'`\s<>|:*?]+)\\+/gi;
 
 function escapeRegExp(text) {
@@ -42,11 +77,21 @@ function escapeRegExp(text) {
 export function contextualRules({ checkoutRoot, userName }) {
   const rules = [];
   if (checkoutRoot) {
-    const variants = new Set([checkoutRoot, checkoutRoot.replace(/\\/g, "/"), checkoutRoot.replace(/\\/g, "\\\\")]);
-    rules.push(["build-checkout-path", new RegExp([...variants].map(escapeRegExp).join("|"), "gi")]);
+    const variants = new Set([
+      checkoutRoot,
+      checkoutRoot.replace(/\\/g, "/"),
+      checkoutRoot.replace(/\\/g, "\\\\"),
+    ]);
+    rules.push([
+      "build-checkout-path",
+      new RegExp([...variants].map(escapeRegExp).join("|"), "gi"),
+    ]);
   }
   if (userName)
-    rules.push(["build-user-path", new RegExp(`[\\\\/]+Users[\\\\/]+${escapeRegExp(userName)}(?=[\\\\/"'\\s]|$)`, "gi")]);
+    rules.push([
+      "build-user-path",
+      new RegExp(`[\\\\/]+Users[\\\\/]+${escapeRegExp(userName)}(?=[\\\\/"'\\s]|$)`, "gi"),
+    ]);
   return rules;
 }
 
@@ -58,7 +103,8 @@ const lineOf = (text, index) => {
 /** 上下文片段里出现的任何密钥形字面量一律遮蔽，避免报告本身泄漏它在寻找的东西。 */
 const maskSecrets = (value) =>
   SECRET_RULES.reduce(
-    (masked, [rule, pattern]) => masked.replace(new RegExp(pattern.source, pattern.flags), `[${rule}]`),
+    (masked, [rule, pattern]) =>
+      masked.replace(new RegExp(pattern.source, pattern.flags), `[${rule}]`),
     value,
   );
 const snippetOf = (text, index, length) =>
@@ -83,7 +129,10 @@ export function scanText(relativePath, text, rules) {
         file: relativePath,
         line: lineOf(text, match.index),
         match: redact(rule, match[0]),
-        context: rule.endsWith("-key") || rule.endsWith("-token") ? "[redacted]" : snippetOf(text, match.index, match[0].length),
+        context:
+          rule.endsWith("-key") || rule.endsWith("-token")
+            ? "[redacted]"
+            : snippetOf(text, match.index, match[0].length),
       });
       if (match[0].length === 0) pattern.lastIndex++;
     }
@@ -113,30 +162,42 @@ export function allRules(context) {
  */
 export function validateExceptions(exceptions) {
   for (const e of exceptions) {
-    for (const key of ["rule", "file", "match", "reason"])
-      if (typeof e[key] !== "string" || !e[key].trim()) throw new Error(`Invalid scan exception: missing ${key}.`);
-    if (!Number.isInteger(e.count) || e.count < 1) throw new Error("Invalid scan exception: count.");
+    for (const key of ["rule", "file", "reason"])
+      if (typeof e[key] !== "string" || !e[key].trim())
+        throw new Error(`Invalid scan exception: missing ${key}.`);
+    const entries = Object.entries(e.matches ?? {});
+    if (!entries.length || entries.some(([text, n]) => !text || !Number.isInteger(n) || n < 1))
+      throw new Error(
+        `Scan exception for ${e.file} needs exact matched texts with positive counts.`,
+      );
     if (/[*?]/.test(e.file) || e.reason.trim().length < 20)
       throw new Error(`Scan exception for ${e.file} is not narrow or not explained.`);
   }
   return exceptions;
 }
 
+/**
+ * 例外 = 规则 + 精确文件 + 精确匹配文本及其允许次数。次数用尽后的同类命中仍是 unexplained，
+ * 所以同一文件里新增的命中不会被旧例外悄悄吞掉。
+ */
 export function classifyHits(hits, exceptions) {
   const used = new Map();
   const explained = [];
   const unexplained = [];
   for (const hit of hits) {
     const index = exceptions.findIndex(
-      (e) => e.rule === hit.rule && e.file === hit.file && e.match === hit.match,
+      (e) => e.rule === hit.rule && e.file === hit.file && hit.match in (e.matches ?? {}),
     );
-    const taken = index === -1 ? Infinity : (used.get(index) ?? 0);
-    if (index !== -1 && taken < exceptions[index].count) {
-      used.set(index, taken + 1);
+    const key = `${index}|${hit.match}`;
+    const taken = used.get(key) ?? 0;
+    if (index !== -1 && taken < exceptions[index].matches[hit.match]) {
+      used.set(key, taken + 1);
       explained.push({ ...hit, classification: "benign", reason: exceptions[index].reason });
     } else unexplained.push({ ...hit, classification: "unexplained" });
   }
-  const unused = exceptions.filter((e, i) => (used.get(i) ?? 0) < e.count);
+  const unused = exceptions.filter((e, i) =>
+    Object.entries(e.matches).some(([text, n]) => (used.get(`${i}|${text}`) ?? 0) < n),
+  );
   return { explained, unexplained, unusedExceptions: unused };
 }
 
@@ -179,16 +240,22 @@ async function scanTree(root, label, rules, stats) {
 }
 
 const check = (id, ok, detail) => ({ id, status: ok ? "PASS" : "FAIL", detail });
-const exists = async (file) => stat(file).then(() => true, () => false);
+const exists = async (file) =>
+  stat(file).then(
+    () => true,
+    () => false,
+  );
 
 export async function inspectPackage({ root, distDirectory, version, exceptions, expected }) {
   const unpacked = path.join(distDirectory, "win-unpacked");
   const resources = path.join(unpacked, "resources");
   const checks = [];
-  const need = async (id, relative) => checks.push(check(id, await exists(path.join(unpacked, relative)), relative));
+  const need = async (id, relative) =>
+    checks.push(check(id, await exists(path.join(unpacked, relative)), relative));
   await need("executable", "ZCode Graph.exe");
   await need("asar", "resources/app.asar");
-  for (const relative of expected.resources) await need(`resource:${relative}`, `resources/${relative}`);
+  for (const relative of expected.resources)
+    await need(`resource:${relative}`, `resources/${relative}`);
 
   const requireFromDesktop = createRequire(path.join(root, "packages/desktop/package.json"));
   const asar = requireFromDesktop("@electron/asar");
@@ -196,27 +263,80 @@ export async function inspectPackage({ root, distDirectory, version, exceptions,
   try {
     asar.extractAll(path.join(resources, "app.asar"), extracted);
     const manifest = JSON.parse(await readFile(path.join(extracted, "package.json"), "utf8"));
-    checks.push(check("asar-main-entry", manifest.main === "out/main/graph-entry.mjs", `main=${manifest.main}`));
+    checks.push(
+      check(
+        "asar-main-entry",
+        manifest.main === "out/main/graph-entry.mjs",
+        `main=${manifest.main}`,
+      ),
+    );
     checks.push(check("asar-version", manifest.version === version, `version=${manifest.version}`));
-    checks.push(check("asar-flavor", manifest.zcodeProductFlavor === "graph", `zcodeProductFlavor=${manifest.zcodeProductFlavor}`));
+    checks.push(
+      check(
+        "asar-flavor",
+        manifest.zcodeProductFlavor === "graph",
+        `zcodeProductFlavor=${manifest.zcodeProductFlavor}`,
+      ),
+    );
     for (const relative of ["out/main/graph-entry.mjs", "out/main/graph-profile.mjs"])
-      checks.push(check(`asar:${relative}`, await exists(path.join(extracted, relative)), relative));
+      checks.push(
+        check(`asar:${relative}`, await exists(path.join(extracted, relative)), relative),
+      );
     const identityPath = path.join(resources, "graph-build-identity.json");
     if (await exists(identityPath)) {
       const identity = JSON.parse(await readFile(identityPath, "utf8"));
-      checks.push(check("identity-version", identity.version === version, `version=${identity.version}`));
-      checks.push(check("identity-product", identity.product?.productName === "ZCode Graph" && identity.product?.appId === expected.appId, `${identity.product?.productName} ${identity.product?.appId}`));
-      checks.push(check("identity-parallel-disabled", identity.capabilityPolicy?.parallel?.mode === "disabled", `parallel=${identity.capabilityPolicy?.parallel?.mode}`));
-      checks.push(check("identity-telemetry-disabled", identity.capabilityPolicy?.automaticTelemetry?.enabled === false, "automaticTelemetry.enabled=false"));
+      checks.push(
+        check("identity-version", identity.version === version, `version=${identity.version}`),
+      );
+      checks.push(
+        check(
+          "identity-product",
+          identity.product?.productName === "ZCode Graph" &&
+            identity.product?.appId === expected.appId,
+          `${identity.product?.productName} ${identity.product?.appId}`,
+        ),
+      );
+      checks.push(
+        check(
+          "identity-parallel-disabled",
+          identity.capabilityPolicy?.parallel?.mode === "disabled",
+          `parallel=${identity.capabilityPolicy?.parallel?.mode}`,
+        ),
+      );
+      checks.push(
+        check(
+          "identity-telemetry-disabled",
+          identity.capabilityPolicy?.automaticTelemetry?.enabled === false,
+          "automaticTelemetry.enabled=false",
+        ),
+      );
     }
-    const all = (await listAll(unpacked)).map((f) => path.relative(unpacked, f).split(path.sep).join("/"));
+    const all = (await listAll(unpacked)).map((f) =>
+      path.relative(unpacked, f).split(path.sep).join("/"),
+    );
     const maps = all.filter((f) => f.endsWith(".map"));
-    checks.push(check("no-sourcemaps-outside-asar", maps.length === 0, `${maps.length} .map file(s) beside the asar`));
-    const asarFiles = (await listAll(extracted)).map((f) => path.relative(extracted, f).split(path.sep).join("/"));
+    checks.push(
+      check(
+        "no-sourcemaps-outside-asar",
+        maps.length === 0,
+        `${maps.length} .map file(s) beside the asar`,
+      ),
+    );
+    const asarFiles = (await listAll(extracted)).map((f) =>
+      path.relative(extracted, f).split(path.sep).join("/"),
+    );
     const asarMaps = asarFiles.filter((f) => f.endsWith(".map"));
-    checks.push(check("no-sourcemaps-in-asar", asarMaps.length === 0, `${asarMaps.length} .map file(s) inside the asar`));
+    checks.push(
+      check(
+        "no-sourcemaps-in-asar",
+        asarMaps.length === 0,
+        `${asarMaps.length} .map file(s) inside the asar`,
+      ),
+    );
     const envFiles = [...all, ...asarFiles].filter((f) => /(^|\/)\.env(\.|$)/.test(f));
-    checks.push(check("no-env-files", envFiles.length === 0, envFiles.slice(0, 5).join(", ") || "none"));
+    checks.push(
+      check("no-env-files", envFiles.length === 0, envFiles.slice(0, 5).join(", ") || "none"),
+    );
 
     const rules = allRules({ checkoutRoot: root, userName: userInfo().username });
     const stats = { files: 0, bytes: 0, skippedBinary: 0, skippedLarge: [] };
@@ -225,7 +345,13 @@ export async function inspectPackage({ root, distDirectory, version, exceptions,
       ...(await scanTree(unpacked, "win-unpacked/", rules, stats)),
     ];
     const classified = classifyHits(hits, validateExceptions(exceptions));
-    checks.push(check("content-scan-unexplained", classified.unexplained.length === 0, `${classified.unexplained.length} unexplained hit(s)`));
+    checks.push(
+      check(
+        "content-scan-unexplained",
+        classified.unexplained.length === 0,
+        `${classified.unexplained.length} unexplained hit(s)`,
+      ),
+    );
     const report = {
       schema: "zcode-graph-package-inspection/1",
       version,
@@ -244,7 +370,10 @@ export async function inspectPackage({ root, distDirectory, version, exceptions,
         explainedHits: classified.explained,
       },
     };
-    await writeFile(path.join(distDirectory, INSPECTION_FILE), `${JSON.stringify(report, null, 2)}\n`);
+    await writeFile(
+      path.join(distDirectory, INSPECTION_FILE),
+      `${JSON.stringify(report, null, 2)}\n`,
+    );
     return report;
   } finally {
     await rm(extracted, { recursive: true, force: true });

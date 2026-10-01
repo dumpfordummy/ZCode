@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Graph prerelease version (e.g. 3.14.0-z7.2); manual runs build artifacts only"
+        description: "Graph prerelease version (e.g. 3.14.3-z8.1); manual runs build artifacts only"
         required: true
-        default: "3.14.0-z7.2"
+        default: "3.14.3-z8.1"
 
 concurrency:
   group: graph-windows-${{ github.ref }}
@@ -59,7 +59,7 @@ jobs:
         run: node node_modules/electron/install.js
       - name: Verify source
         run: |
-          node --test scripts/graph-engineering/distribution.test.mjs scripts/graph-engineering/publish.test.mjs scripts/graph-engineering/publish-git.test.mjs scripts/graph-engineering/acceptance-paths.test.mjs scripts/graph-engineering/z2-provider-fixture.test.mjs
+          node --test scripts/graph-engineering/distribution.test.mjs scripts/graph-engineering/publish.test.mjs scripts/graph-engineering/publish-git.test.mjs scripts/graph-engineering/acceptance-paths.test.mjs scripts/graph-engineering/z2-provider-fixture.test.mjs scripts/graph-engineering/release-manifest.test.mjs
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           node --import tsx --test packages/services/src/graph-engineering/app/*.test.ts packages/services/src/graph-engineering/adapters/*.test.ts packages/services/src/zcode-agent/expectedRuntimeClient.test.ts packages/services/src/zcode-agent/runtimeRetirement.test.ts
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
@@ -114,6 +114,10 @@ jobs:
             packages/desktop/dist-graph/SHA256SUMS.txt
             packages/desktop/dist-graph/packaged-smoke.json
             packages/desktop/dist-graph/smoke-evidence/
+            packages/desktop/dist-graph/RELEASE_MANIFEST.json
+            packages/desktop/dist-graph/package-inspection.json
+            packages/desktop/dist-graph/build-record.json
+            packages/desktop/dist-graph/unpacked-file-hashes.json
             .tmp/graph-release-checks/
       - name: Publish verified prerelease
         if: startsWith(github.ref, 'refs/tags/graph-v')
@@ -123,6 +127,9 @@ jobs:
         run: |
           $installer = "packages/desktop/dist-graph/ZCode Graph-$env:RELEASE_VERSION-win-x64.exe"
           if (!(Test-Path -LiteralPath $installer)) { throw "Expected versioned Graph installer is missing" }
-          $notes = Get-Content -LiteralPath docs/graph-engineering/WINDOWS_RELEASE_NOTES.md -Raw
+          # 每个版本优先使用自己的说明；没有时回退到历史文件（z1–z7 的说明仍由它提供）。
+          $versionNotes = "docs/graph-engineering/release-notes/$env:RELEASE_VERSION.md"
+          $notesPath = if (Test-Path -LiteralPath $versionNotes) { $versionNotes } else { "docs/graph-engineering/WINDOWS_RELEASE_NOTES.md" }
+          $notes = Get-Content -LiteralPath $notesPath -Raw
           $notes.Replace('/blob/main/', "/blob/$($env:GITHUB_REF_NAME)/") | Set-Content -LiteralPath packages/desktop/dist-graph/release-notes.md -Encoding utf8
           gh release create $env:GITHUB_REF_NAME $installer packages/desktop/dist-graph/SHA256SUMS.txt --repo $env:GITHUB_REPOSITORY --verify-tag --prerelease --title "ZCode Graph $env:RELEASE_VERSION (Windows x64)" --notes-file packages/desktop/dist-graph/release-notes.md

@@ -29,7 +29,10 @@ export function createGraphProfile(originalHome, env = {}) {
   };
 }
 
-const GRAPH_TELEMETRY_ENDPOINT_KEYS = new Set(["ZCODE_ARMS_RUM_ENDPOINT", "ZCODE_TELEMETRY_REPORT_ENDPOINT"]);
+const GRAPH_TELEMETRY_ENDPOINT_KEYS = new Set([
+  "ZCODE_ARMS_RUM_ENDPOINT",
+  "ZCODE_TELEMETRY_REPORT_ENDPOINT",
+]);
 
 /**
  * Graph 安装包有意关闭自动遥测。继承的端点/OTLP 变量必须在应用模块导入前清除：

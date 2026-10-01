@@ -28,7 +28,15 @@ test("side-by-side output directories are restricted to dist-graph names", () =>
   assert.equal(resolveDistDirName(undefined), "dist-graph");
   assert.equal(resolveDistDirName("dist-graph-b2"), "dist-graph-b2");
   assert.equal(resolveDistDirName("dist-graph-z8.1-a"), "dist-graph-z8.1-a");
-  for (const bad of ["", "dist", "../dist-graph", "dist-graph/x", "dist-graph-", "dist-graph b", "C:\\x"])
+  for (const bad of [
+    "",
+    "dist",
+    "../dist-graph",
+    "dist-graph/x",
+    "dist-graph-",
+    "dist-graph b",
+    "C:\\x",
+  ])
     assert.throws(() => resolveDistDirName(bad), bad);
 });
 
@@ -37,7 +45,9 @@ test("recorded build environment contains only the explicit builder settings", (
   assert.equal(environment.ZCODE_GRAPH_VERSION, "3.14.3-z8.1");
   assert.equal(environment.ZCODE_DESKTOP_DIST_DIR, "dist-graph-b1");
   assert.equal(environment.ZCODE_GRAPH_DISTRIBUTION, "1");
-  assert.ok(!("PATH" in environment) && !("HOME" in environment) && !("USERPROFILE" in environment));
+  assert.ok(
+    !("PATH" in environment) && !("HOME" in environment) && !("USERPROFILE" in environment),
+  );
   assert.ok(!Object.keys(environment).some((key) => /TOKEN|KEY|SECRET|PASSWORD/i.test(key)));
 });
 
@@ -84,7 +94,11 @@ test("the embedded identity carries no installer hash and no build-machine path"
     toolchain: { zcodeCli: "0.16.9", electron: "41.0.3", electronBuilder: "26.8.1" },
     protocol: { zcode: 1, v4Wire: 3 },
     policies,
-    identity: { productName: "ZCode Graph", appId: "dev.dumpfordummy.zcode.graph", flavor: "graph" },
+    identity: {
+      productName: "ZCode Graph",
+      appId: "dev.dumpfordummy.zcode.graph",
+      flavor: "graph",
+    },
   });
   const text = JSON.stringify(identity);
   assert.ok(!text.includes(root) && !text.includes(root.replace(/\\/g, "/")));
@@ -108,7 +122,10 @@ test("content scan finds synthetic canaries, redacts secrets and classifies only
   const hits = scanText("app.asar/out/main/x.js", text, rules);
   const byRule = (rule) => hits.filter((h) => h.rule === rule);
   assert.equal(byRule("openai-style-key").length, 1);
-  assert.ok(!JSON.stringify(hits).includes(canarySecret), "secret literal must be redacted in the report");
+  assert.ok(
+    !JSON.stringify(hits).includes(canarySecret),
+    "secret literal must be redacted in the report",
+  );
   assert.equal(byRule("private-key-block").length, 1);
   assert.equal(byRule("windows-user-directory").length, 1);
   assert.equal(byRule("fixture-identifier").length, 1);
@@ -118,8 +135,7 @@ test("content scan finds synthetic canaries, redacts secrets and classifies only
   const exception = {
     rule: "profile-directory-name",
     file: profile.file,
-    match: profile.match,
-    count: 1,
+    matches: { [profile.match]: 1 },
     reason: "Fixture: the private profile directory constant, an expected literal.",
   };
   const classified = classifyHits(hits, validateExceptions([exception]));
@@ -135,14 +151,21 @@ test("content scan finds synthetic canaries, redacts secrets and classifies only
 });
 
 test("scan exceptions must be narrow and explained", () => {
-  const ok = { rule: "r", file: "a/b.js", match: "m", count: 1, reason: "Long enough written reason." };
+  const ok = {
+    rule: "r",
+    file: "a/b.js",
+    matches: { m: 1 },
+    reason: "Long enough written reason.",
+  };
   assert.doesNotThrow(() => validateExceptions([ok]));
   for (const bad of [
     { ...ok, file: "a/*.js" },
     { ...ok, file: "" },
     { ...ok, reason: "short" },
-    { ...ok, count: 0 },
-    { ...ok, match: "" },
+    { ...ok, matches: { m: 0 } },
+    { ...ok, matches: {} },
+    { ...ok, matches: { "": 1 } },
+    { ...ok, matches: undefined },
   ])
     assert.throws(() => validateExceptions([bad]));
 });
@@ -156,7 +179,12 @@ async function syntheticPackage(directory, { leak }) {
   await mkdir(path.join(resources, "config/provider"), { recursive: true });
   await writeFile(
     path.join(app, "package.json"),
-    JSON.stringify({ name: "zcode", main: "out/main/graph-entry.mjs", version: "3.14.3-z8.1", zcodeProductFlavor: "graph" }),
+    JSON.stringify({
+      name: "zcode",
+      main: "out/main/graph-entry.mjs",
+      version: "3.14.3-z8.1",
+      zcodeProductFlavor: "graph",
+    }),
   );
   await writeFile(path.join(app, "out/main/graph-entry.mjs"), leak ? `// ${leak}\n` : "// entry\n");
   await writeFile(path.join(app, "out/main/graph-profile.mjs"), "// profile\n");
@@ -178,7 +206,14 @@ async function syntheticPackage(directory, { leak }) {
 }
 const expected = {
   appId: "dev.dumpfordummy.zcode.graph",
-  resources: ["graph-build-identity.json", "THIRD-PARTY-NOTICES.md", "config/default.json", "config/provider/zcode-builtin.json", "icon.png", "glm/zcode.cjs"],
+  resources: [
+    "graph-build-identity.json",
+    "THIRD-PARTY-NOTICES.md",
+    "config/default.json",
+    "config/provider/zcode-builtin.json",
+    "icon.png",
+    "glm/zcode.cjs",
+  ],
 };
 
 test("package inspection passes a clean synthetic package and fails on a planted leak", async () => {
@@ -186,13 +221,31 @@ test("package inspection passes a clean synthetic package and fails on a planted
   const dirty = await mkdtemp(path.join(tmpdir(), "graph-inspect-dirty-"));
   try {
     await syntheticPackage(clean, {});
-    const ok = await inspectPackage({ root, distDirectory: clean, version: "3.14.3-z8.1", exceptions: [], expected });
+    const ok = await inspectPackage({
+      root,
+      distDirectory: clean,
+      version: "3.14.3-z8.1",
+      exceptions: [],
+      expected,
+    });
     assert.equal(ok.status, "PASS", JSON.stringify(ok.checks.filter((c) => c.status !== "PASS")));
     await syntheticPackage(dirty, { leak: `${root}\\packages\\desktop` });
-    const bad = await inspectPackage({ root, distDirectory: dirty, version: "3.14.3-z8.1", exceptions: [], expected });
+    const bad = await inspectPackage({
+      root,
+      distDirectory: dirty,
+      version: "3.14.3-z8.1",
+      exceptions: [],
+      expected,
+    });
     assert.equal(bad.status, "FAIL");
     assert.ok(bad.scan.unexplained.some((h) => h.rule === "build-checkout-path"));
-    const wrongVersion = await inspectPackage({ root, distDirectory: clean, version: "3.14.3-z8.2", exceptions: [], expected });
+    const wrongVersion = await inspectPackage({
+      root,
+      distDirectory: clean,
+      version: "3.14.3-z8.2",
+      exceptions: [],
+      expected,
+    });
     assert.equal(wrongVersion.status, "FAIL");
   } finally {
     await rm(clean, { recursive: true, force: true });
@@ -219,16 +272,50 @@ test("the external manifest hashes the installer and components with artifact-re
       policies,
       embedded: { product: { productName: "ZCode Graph" } },
     });
-    assert.equal(manifest.artifact.installer.sha256, createHash("sha256").update(installerBytes).digest("hex"));
+    assert.equal(
+      manifest.artifact.installer.sha256,
+      createHash("sha256").update(installerBytes).digest("hex"),
+    );
     assert.equal(manifest.artifact.installer.path, "ZCode Graph-3.14.3-z8.1-win-x64.exe");
     assert.ok(manifest.artifact.components["resources/app.asar"].sha256);
     assert.ok(manifest.artifact.components["resources/glm/"].treeDigest);
     const text = JSON.stringify(manifest);
     assert.ok(!text.includes(dist) && !text.includes(root), "no absolute build or checkout paths");
     assert.equal(manifest.validation.status, "not-recorded");
-    const recorded = JSON.parse(await readFile(path.join(dist, "unpacked-file-hashes.json"), "utf8"));
+    const recorded = JSON.parse(
+      await readFile(path.join(dist, "unpacked-file-hashes.json"), "utf8"),
+    );
     assert.equal(recorded.digest, manifest.artifact.unpackedTree.digest);
   } finally {
     await rm(dist, { recursive: true, force: true });
   }
+});
+
+test("the private-address rule ignores digit runs inside longer numbers but still finds real addresses", () => {
+  const rules = allRules({});
+  const find = (text) =>
+    scanText("x", text, rules)
+      .filter((h) => h.rule === "private-address")
+      .map((h) => h.match);
+  assert.deepEqual(find("M10.142.22.65.442 10.399 26.997"), []);
+  assert.deepEqual(find("http://10.20.30.40:8080/api"), ["10.20.30.40"]);
+  assert.deepEqual(find("a=192.168.1.5,b=172.16.4.4;"), ["192.168.1.5", "172.16.4.4"]);
+  assert.deepEqual(find("v1.10.0.0.1x 8.8.8.8"), []);
+});
+
+test("the committed scan exceptions are narrow, explained and exact", async () => {
+  const file = JSON.parse(
+    await readFile(
+      path.join(root, "scripts/graph-engineering/package-scan-exceptions.json"),
+      "utf8",
+    ),
+  );
+  assert.doesNotThrow(() => validateExceptions(file.exceptions));
+  assert.ok(
+    file.exceptions.every(
+      (e) => e.file.startsWith("app.asar/") || e.file.startsWith("win-unpacked/"),
+    ),
+  );
+  const keys = file.exceptions.map((e) => `${e.rule}|${e.file}`);
+  assert.equal(new Set(keys).size, keys.length, "one entry per rule and file");
 });

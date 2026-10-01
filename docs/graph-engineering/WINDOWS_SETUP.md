@@ -2,6 +2,8 @@
 
 ZCode Graph is this fork's Windows x64 distribution of native Graph Engineering. Z1 supports Start → Agent Task → End; Z2 adds editable sequential tasks, explicit bindings and a fresh native session per node. It bundles the existing Electron application, ZCode agent runtime and native search tools. The installer does not contain model credentials, test workspaces, development profiles, or a second agent engine.
 
+> **Status (Z8.1, 2026-10-01).** The download steps below name the published **z2.2** release and are accurate for that build. Later published prereleases (z7.2, z7.5) are listed on the [Releases](https://github.com/dumpfordummy/ZCode/releases) page. The Z8.1 candidate `3.14.3-z8.1` is a **local, unpublished** build; its build identity, hashes and package-inspection result are in its `RELEASE_MANIFEST.json` (see [z8/Z8_1_REPORT.md](z8/Z8_1_REPORT.md)). Parallel (Fork/Join) workflows are **disabled** in the supported package from Z8.1 on, and automatic telemetry is disabled for the Graph app.
+
 ## Install and use
 
 1. Open the published [ZCode Graph 3.14.0-z2.2 release](https://github.com/dumpfordummy/ZCode/releases/tag/graph-v3.14.0-z2.2) and download its Windows x64 `.exe` plus `SHA256SUMS.txt`. Use [this fork's Releases](https://github.com/dumpfordummy/ZCode/releases) for later versions. The historical Z1 1.2 prerelease does not include Z2.
@@ -30,13 +32,13 @@ node --test scripts/graph-engineering/distribution.test.mjs
 pnpm typecheck
 pnpm lint
 pnpm architecture:check --changed
-node scripts/graph-engineering/build-windows.mjs 3.14.0-z2.2
-node scripts/graph-engineering/packaged-smoke.mjs 3.14.0-z2.2
+node scripts/graph-engineering/build-windows.mjs 3.14.3-z8.1
+node scripts/graph-engineering/packaged-smoke.mjs 3.14.3-z8.1
 ```
 
-Stop if a command fails. Packaging downloads public native/runtime assets. Output is `packages/desktop/dist-graph/`: the NSIS `.exe`, checksum file, and `win-unpacked/`. To run unpacked, keep the **entire** `win-unpacked` directory together and launch `ZCode Graph.exe`; copying that single executable is insufficient. `git pull --ff-only` updates source, after which dependencies and the build must be refreshed; Git does not install an executable automatically. Do not run typecheck concurrently with packaging because its emitted Host output shares the build directory.
+Stop if a command fails. Packaging downloads public native/runtime assets. Output is `packages/desktop/dist-graph/`: the NSIS `.exe`, checksum file, `RELEASE_MANIFEST.json`, `package-inspection.json` and `win-unpacked/`. Add `--dist-dir dist-graph-<name>` to build into a side-by-side directory (and set `ZCODE_GRAPH_DIST_DIR` for the packaged smoke). To run unpacked, keep the **entire** `win-unpacked` directory together and launch `ZCode Graph.exe`; copying that single executable is insufficient. `git pull --ff-only` updates source, after which dependencies and the build must be refreshed; Git does not install an executable automatically. Do not run typecheck concurrently with packaging because its emitted Host output shares the build directory.
 
-The repeatable CI workflow is `.github/workflows/graph-windows-release.yml`. After reviewing and committing the next intended release, `pnpm graph:release --version 3.14.0-z2.3` pushes its unused version tag, waits for the checked build, and prints the confirmed Release URL. See [PUBLISH.md](PUBLISH.md) for prerequisites, offline dry-run and explicit resume. A manual workflow run produces downloadable Actions artifacts without creating a Release. Release tags are immutable. Binaries, caches and private test profiles are ignored by Git.
+The repeatable CI workflow is `.github/workflows/graph-windows-release.yml`. After reviewing and committing the next intended release, `pnpm graph:release --version <unused version, e.g. 3.14.3-z8.1>` pushes its unused version tag, waits for the checked build, and prints the confirmed Release URL. See [PUBLISH.md](PUBLISH.md) for prerequisites, offline dry-run and explicit resume. A manual workflow run produces downloadable Actions artifacts without creating a Release. Release tags are immutable. Binaries, caches and private test profiles are ignored by Git.
 
 ## No-cost automated acceptance
 

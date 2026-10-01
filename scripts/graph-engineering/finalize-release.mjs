@@ -75,10 +75,16 @@ export async function finalizeRelease({ root, distName, validationPath }) {
   if (embedded.version !== manifest.version) problems.push("embedded identity version differs");
   if (embedded.source.commit !== manifest.source.commit)
     problems.push("embedded identity commit differs");
-  if (manifest.embeddedIdentity.sha256 !== (await sha256File(path.join(distDirectory, "win-unpacked/resources", IDENTITY_FILE))))
+  if (
+    manifest.embeddedIdentity.sha256 !==
+    (await sha256File(path.join(distDirectory, "win-unpacked/resources", IDENTITY_FILE)))
+  )
     problems.push("embedded identity hash differs");
   if (problems.length) throw new Error(`Release manifest inconsistent: ${problems.join("; ")}`);
-  await writeFile(path.join(distDirectory, MANIFEST_FILE), `${JSON.stringify(manifest, null, 2)}\n`);
+  await writeFile(
+    path.join(distDirectory, MANIFEST_FILE),
+    `${JSON.stringify(manifest, null, 2)}\n`,
+  );
   return manifest;
 }
 

@@ -12,7 +12,11 @@ const version = resolveGraphDistributionVersion(
   "",
 );
 // 与构建器相同的并排输出目录规则；默认仍是 dist-graph。
-const output = path.join(root, "packages/desktop", resolveDistDirName(process.env.ZCODE_GRAPH_DIST_DIR));
+const output = path.join(
+  root,
+  "packages/desktop",
+  resolveDistDirName(process.env.ZCODE_GRAPH_DIST_DIR),
+);
 const detached = await mkdtemp(path.join(tmpdir(), "zcode-graph-package-"));
 await cp(path.join(output, "win-unpacked"), detached, { recursive: true });
 const results = [];

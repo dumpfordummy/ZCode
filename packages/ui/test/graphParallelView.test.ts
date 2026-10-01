@@ -17,9 +17,8 @@ test("Z7 starts disabled and every duplicate source path is an explicit visible 
 });
 
 test("Z8.1 the parallel entry and admissions follow only the Host policy", async () => {
-  const { parallelAdmissionsBlocked, parallelAdvancedVisible } = await import(
-    "../src/graph-engineering/graphParallelView.js"
-  );
+  const { parallelAdmissionsBlocked, parallelAdvancedVisible } =
+    await import("../src/graph-engineering/graphParallelView.js");
   const policy = (mode: "disabled" | "experimental") => ({ mode, source: "default", reason: "r" });
   const view = (mode: "disabled" | "experimental", runs: unknown[] = [], plan?: unknown) =>
     ({ policy: policy(mode), runs, plan, children: {} }) as never;

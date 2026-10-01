@@ -128,7 +128,10 @@ export async function protocolVersions(root) {
   };
   return {
     zcode: await read("packages/shared/src/zcode-protocol/index.ts", "ZCODE_PROTOCOL_VERSION"),
-    v4Wire: await read("packages/shared/src/zcode-protocol-v4/index.ts", "V4_WIRE_PROTOCOL_VERSION"),
+    v4Wire: await read(
+      "packages/shared/src/zcode-protocol-v4/index.ts",
+      "V4_WIRE_PROTOCOL_VERSION",
+    ),
   };
 }
 
@@ -172,7 +175,15 @@ export async function resolvePackagePolicies(root) {
 }
 
 /** 嵌入包内的构建身份：确定性、无时间戳、不含自身哈希或构建机路径。 */
-export function buildEmbeddedIdentity({ version, baseVersion, source, toolchain, protocol, policies, identity }) {
+export function buildEmbeddedIdentity({
+  version,
+  baseVersion,
+  source,
+  toolchain,
+  protocol,
+  policies,
+  identity,
+}) {
   return {
     schema: IDENTITY_SCHEMA,
     product: { productName: identity.productName, appId: identity.appId, flavor: identity.flavor },
@@ -209,20 +220,83 @@ export function buildCapabilityTable({ policies, packagedCases }) {
   const passed = (...names) => names.filter((n) => packagedCases[n] === "PASS");
   const doc = (...files) => files.map((f) => `docs/graph-engineering/${f}`);
   return [
-    { id: "ordinary-chat", enabled: true, devVerified: doc("evidence/chat-summary.json", "Z6_SPEC.md"), packageVerified: passed("ordinary-chat") },
-    { id: "no-provider-startup", enabled: true, devVerified: doc("evidence/no-provider-summary.json"), packageVerified: passed("no-provider") },
-    { id: "sequential-graph", enabled: true, devVerified: doc("Z2_REPORT.md", "Z6_SPEC.md"), packageVerified: passed("z1-literal-compatibility", "z2-complete", "z2-question") },
-    { id: "build-test-checks", enabled: true, devVerified: doc("Z4_REPORT.md", "pre-z8/U2_CONTRACT_DRAFT.md"), packageVerified: [] },
-    { id: "reviewer-and-repair", enabled: true, devVerified: doc("Z5_REPORT.md"), packageVerified: [] },
+    {
+      id: "ordinary-chat",
+      enabled: true,
+      devVerified: doc("evidence/chat-summary.json", "Z6_SPEC.md"),
+      packageVerified: passed("ordinary-chat"),
+    },
+    {
+      id: "no-provider-startup",
+      enabled: true,
+      devVerified: doc("evidence/no-provider-summary.json"),
+      packageVerified: passed("no-provider"),
+    },
+    {
+      id: "sequential-graph",
+      enabled: true,
+      devVerified: doc("Z2_REPORT.md", "Z6_SPEC.md"),
+      packageVerified: passed("z1-literal-compatibility", "z2-complete", "z2-question"),
+    },
+    {
+      id: "build-test-checks",
+      enabled: true,
+      devVerified: doc("Z4_REPORT.md", "pre-z8/U2_CONTRACT_DRAFT.md"),
+      packageVerified: [],
+    },
+    {
+      id: "reviewer-and-repair",
+      enabled: true,
+      devVerified: doc("Z5_REPORT.md"),
+      packageVerified: [],
+    },
     { id: "final-approval", enabled: true, devVerified: doc("Z3_REPORT.md"), packageVerified: [] },
-    { id: "workflow-library", enabled: true, devVerified: doc("ux-audit/UX_M3_WINDOWS_REPORT.md", "Z6_SPEC.md"), packageVerified: [] },
-    { id: "sequential-import-export", enabled: true, devVerified: doc("ux-audit/UX_M3_WINDOWS_REPORT.md"), packageVerified: [] },
-    { id: "historical-pins", enabled: true, devVerified: doc("ux-audit/UX_M3_WINDOWS_REPORT.md"), packageVerified: [] },
-    { id: "restart-and-recovery", enabled: true, devVerified: doc("Z2_REPORT.md", "Z3_REPORT.md", "Z5_REPORT.md"), packageVerified: passed("z2-restart-interrupted", "z2-restart-permission", "z2-persistence-recovery") },
-    { id: "parallel-fork-join", enabled: policies.parallel.mode === "experimental", policy: { mode: policies.parallel.mode, source: policies.parallel.source }, devVerified: doc("Z7_SPEC.md"), packageVerified: [], note: "Z7-A12 (export/import) FAIL; not part of the supported set." },
+    {
+      id: "workflow-library",
+      enabled: true,
+      devVerified: doc("ux-audit/UX_M3_WINDOWS_REPORT.md", "Z6_SPEC.md"),
+      packageVerified: [],
+    },
+    {
+      id: "sequential-import-export",
+      enabled: true,
+      devVerified: doc("ux-audit/UX_M3_WINDOWS_REPORT.md"),
+      packageVerified: [],
+    },
+    {
+      id: "historical-pins",
+      enabled: true,
+      devVerified: doc("ux-audit/UX_M3_WINDOWS_REPORT.md"),
+      packageVerified: [],
+    },
+    {
+      id: "restart-and-recovery",
+      enabled: true,
+      devVerified: doc("Z2_REPORT.md", "Z3_REPORT.md", "Z5_REPORT.md"),
+      packageVerified: passed(
+        "z2-restart-interrupted",
+        "z2-restart-permission",
+        "z2-persistence-recovery",
+      ),
+    },
+    {
+      id: "parallel-fork-join",
+      enabled: policies.parallel.mode === "experimental",
+      policy: { mode: policies.parallel.mode, source: policies.parallel.source },
+      devVerified: doc("Z7_SPEC.md"),
+      packageVerified: [],
+      note: "Z7-A12 (export/import) FAIL; not part of the supported set.",
+    },
     { id: "remote-or-mobile-graph", enabled: false, devVerified: [], packageVerified: [] },
     { id: "scheduled-or-background-graph", enabled: false, devVerified: [], packageVerified: [] },
-    { id: "automatic-telemetry", enabled: policies.automaticTelemetry.enabled, devVerified: [], packageVerified: [], note: "Disabled by policy; no claim about all network egress." },
+    {
+      id: "automatic-telemetry",
+      enabled: policies.automaticTelemetry.enabled,
+      devVerified: [],
+      // 金丝雀用例通过 = 继承的遥测设置在打包运行中没有产生任何上报（仅覆盖这三条上报路径）。
+      packageVerified: passed("telemetry-canary"),
+      note: "Disabled by policy. The canary covers inherited ARMS, warehouse and OTLP settings only; no claim about all network egress.",
+    },
   ];
 }
 
@@ -230,7 +304,10 @@ export async function readPackagedCases(distDirectory) {
   try {
     const smoke = await readJson(path.join(distDirectory, "packaged-smoke.json"));
     return Object.fromEntries(
-      (smoke.results ?? []).map((r) => [r.name, r.status === "PASS" && r.exitCode === 0 ? "PASS" : "FAIL"]),
+      (smoke.results ?? []).map((r) => [
+        r.name,
+        r.status === "PASS" && r.exitCode === 0 ? "PASS" : "FAIL",
+      ]),
     );
   } catch {
     return {};
@@ -309,11 +386,19 @@ export async function buildReleaseManifest({
       },
       checksumFile: "SHA256SUMS.txt",
       unpackedHashes: UNPACKED_HASHES_FILE,
-      unpackedTree: { path: "win-unpacked", files: tree.count, bytes: tree.bytes, digest: tree.digest },
+      unpackedTree: {
+        path: "win-unpacked",
+        files: tree.count,
+        bytes: tree.bytes,
+        digest: tree.digest,
+      },
       components,
     },
     source,
-    embeddedIdentity: { resource: `resources/${IDENTITY_FILE}`, sha256: tree.files[`resources/${IDENTITY_FILE}`]?.sha256 },
+    embeddedIdentity: {
+      resource: `resources/${IDENTITY_FILE}`,
+      sha256: tree.files[`resources/${IDENTITY_FILE}`]?.sha256,
+    },
     toolchain,
     protocol,
     lockfiles,
@@ -325,6 +410,9 @@ export async function buildReleaseManifest({
     capabilities: buildCapabilityTable({ policies, packagedCases }),
     inspection: inspection ?? { status: "not-run" },
     validation: validation ?? { status: "not-recorded", results: [], exceptions: [] },
-    reproducibility: { status: "not-assessed", note: "Measured by compare-builds.mjs; never asserted here." },
+    reproducibility: {
+      status: "not-assessed",
+      note: "Measured by compare-builds.mjs; never asserted here.",
+    },
   };
 }
