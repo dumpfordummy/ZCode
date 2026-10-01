@@ -89,7 +89,22 @@ The first corrected-package matrix run ([attempt 1](evidence/z8-2-correction/upg
 
 **Validation (final run).**
 
-FINAL_VALIDATION_PLACEHOLDER
+Run by `run-validation.mjs` in the documented toolchain shell (Node 24.14.0, pnpm 10.33.2, `ZCODE_ENV=test`) on commit `a4bef48917d03053608778ae4721d87d6c5848a0`, source `dirty: false`; all suite exit codes 0. [validation.json](evidence/z8-2-correction/validation.json); the pre-build run on `7df4062` is [validation.pre-build.json](evidence/z8-2-correction/validation.pre-build.json). Between `7df4062` and this commit only the harness driver, the evidence folder and documentation changed.
+
+| Check                                              | Exit | Result                                                                                   |
+| -------------------------------------------------- | ---- | ---------------------------------------------------------------------------------------- |
+| `pnpm typecheck`                                   | 0    | PASS                                                                                     |
+| `pnpm lint`                                        | 0    | PASS, 0 errors, 75 warnings (unchanged)                                                  |
+| `pnpm architecture:check --changed`                | 0    | PASS                                                                                     |
+| Script tests                                       | 0    | 65 passed                                                                                |
+| Graph-service tests                                | 0    | 425 passed, 0 failed, 2 skipped (pre-existing skips)                                     |
+| Services/registry tests                            | 0    | 17 passed                                                                                |
+| UI tests                                           | 0    | 227 passed                                                                               |
+| Scoped format check                                | 0    | PASS, 92 files, 0 nonconforming (historical fixtures and `evidence/` excluded by design) |
+| **Baseline exception** CLI lint (`apps/zcode-cli`) | 1    | 42 warnings, 56 errors this run (counts vary per run); not cleaned up                    |
+| **Baseline exception** `pnpm fmt:check`            | 1    | 4,212 flagged (Windows CRLF noise); not cleaned up                                       |
+
+New or extended focused tests in this correction: `instruction-contract.test.ts` (9), `reconcile-idempotence.test.ts` (7), two restore-at-bound tests, the extended `historical-fixtures.test.ts` (16, no gap exemption), `record-version.test.ts`, and a sequencer assertion that every new attempt is marked.
 
 **`z75-build-test-completed` old-driver failure — re-run** ([evidence](evidence/z8-2-correction/z75-build-test-completed.rerun.json)). Re-running the tagged z7.5 `z4-native-smoke --scenario=complete` against the already-downloaded z7.5 binary reproduced the failure (exit 1, a **separate** capture; the original fixture, capture and FAIL label are untouched). The full output was kept this time: the driver recorded its completion assertions, then its final step (artifact-tamper inspection after a restart) timed out after 30 s waiting for an alert matching `digest/byte length mismatch` (`z4-native-artifact-fault.mjs:32`). Whether the cause is the old product, the harness or this environment is **not diagnosed**; the scenario is not marked PASS and the original log is not recovered. In both captures every artifact's content matches its manifest digest and length, so the probe's edit did not reach the captured Graph bytes. The `z75-library-user-versions` driver failure (late dialog-hidden wait, after the library file was written) keeps its label.
 
