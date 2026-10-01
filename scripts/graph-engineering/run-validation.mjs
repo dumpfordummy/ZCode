@@ -83,7 +83,11 @@ const SUITES = {
 const ACCEPTED_BASE = "51f6ed67f63ff3500abca1bd86023f40bb29543d";
 // 审计记录按原样保留；z8/evidence 下是工具生成的原始证据（清单、报告、摘要），也不为格式化而改写。
 const FORMAT_EXCLUDED = new Set(["docs/graph-engineering/z8/Z8_DELTA_AUDIT.md"]);
-const FORMAT_EXCLUDED_PREFIXES = ["docs/graph-engineering/z8/evidence/"];
+// 旧版本真实写出的 Graph 数据按字节保存；格式化会改变它们，使 PROVENANCE 哈希失效。
+const FORMAT_EXCLUDED_PREFIXES = [
+  "docs/graph-engineering/z8/evidence/",
+  "docs/graph-engineering/z8/fixtures/historical/",
+];
 
 /**
  * oxfmt 在 Windows 检出里偏好 CRLF，几乎所有文件都会被 fmt:check 标记，这个信号没有信息量。

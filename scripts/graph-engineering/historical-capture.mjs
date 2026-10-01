@@ -7,12 +7,12 @@ import { promisify } from "node:util";
 import { execFile } from "node:child_process";
 
 /**
- * Z8.2ï¼šä»Žå·²å‘å¸ƒçš„æ—§ Graph ç‰ˆæœ¬æ•èŽ·ã€Œæ—§äºŒè¿›åˆ¶çœŸæ­£å†™ä¸‹çš„ã€æ•°æ®ã€‚
+ * Z8.2：从已发布的旧 Graph 版本捕获「旧二进制真正写下的」数据。
  *   node scripts/graph-engineering/historical-capture.mjs prepare <z2.2|z7.5>
  *   node scripts/graph-engineering/historical-capture.mjs run <fixtureId>
- * å®‰è£…åŒ…åªåšåªè¯»è§£åŽ‹ï¼ˆä»“åº“è‡ªå¸¦çš„ 7zaï¼‰ï¼Œä»Žä¸æ‰§è¡Œï¼›æ—§ harness å–è‡ªåŒä¸€ä¸ªå‘å¸ƒæ ‡ç­¾ï¼ˆå„ç‰ˆæœ¬ç•Œé¢ä¸åŒï¼‰ï¼Œ
- * æ”¾åœ¨ .tmp çš„ä¸´æ—¶ç›®å½•é‡Œè¿è¡Œã€‚å”¯ä¸€çš„æ”¹åŠ¨æ˜¯ç»™ä¸´æ—¶ç›®å½•é‡Œçš„ isolation.mjs çš„ stopApp åŠ ä¸€ä¸ªã€Œåœæ­¢åŽå¤åˆ¶ Graph é…ç½®ã€
- * é’©å­ï¼ˆçŽ¯å¢ƒå˜é‡ Z8_CAPTURE_DIRï¼‰ï¼Œå…¶ä½™æ—§ harness ä¸Žæ—§äºŒè¿›åˆ¶é€å­—èŠ‚ä¸å˜ã€‚æ•°æ®æ°¸è¿œä¸ç”¨å½“å‰ä»£ç æž„é€ ã€‚
+ * 安装包只做只读解压（仓库自带的 7za），从不执行；旧 harness 取自同一个发布标签（各版本界面不同），
+ * 放在 .tmp 的临时目录里运行。唯一的改动是给临时目录里的 isolation.mjs 的 stopApp 加一个「停止后复制 Graph 配置」
+ * 钩子（环境变量 Z8_CAPTURE_DIR），其余旧 harness 与旧二进制逐字节不变。数据永远不用当前代码构造。
  */
 const root = path.resolve(import.meta.dirname, "../..");
 const scratch = path.join(root, ".tmp/z8-2");
@@ -32,7 +32,7 @@ export const RELEASES = {
   },
 };
 
-/** fixtureId â†’ æ—§ç‰ˆæœ¬è‡ªå·±çš„é©±åŠ¨ä¸Žå‚æ•°ï¼Œä»¥åŠå–å“ªä¸€æ¬¡ã€Œåœæ­¢åŽã€çš„å¤åˆ¶ï¼ˆstop-N æˆ– finalï¼‰ã€‚ */
+/** fixtureId → 旧版本自己的驱动与参数，以及取哪一次「停止后」的复制（stop-N 或 final）。 */
 export const FIXTURES = {
   "z22-completed-sequential": {
     release: "z2.2",
@@ -133,8 +133,8 @@ export const FIXTURES = {
 };
 
 /**
- * æ—§ harness é‡Œä»…æœ‰çš„ã€ä¸Žäº§å“æ— å…³çš„é€‚é…ï¼ˆåªæ”¹æµ‹è¯•è„šæœ¬ï¼Œä¸æ”¹æ—§äºŒè¿›åˆ¶ï¼‰ã€‚æ¯ä¸€é¡¹éƒ½ä¼šè®°å½•åœ¨æ¥æºè¯æ˜Žé‡Œï¼š
- * z6-native-library æ˜¯ä¸ºå¼€å‘æž„å»ºå†™çš„ï¼Œå‡å®šã€Œå·²æœ‰è®°å½•æ–‡ä»¶ã€ä¸”æŠŠåº“æ–‡ä»¶æ”¾åœ¨ data/ ç›®å½•ï¼›æ‰“åŒ…åº”ç”¨çš„ç§æœ‰é…ç½®ä¸åœ¨é‚£é‡Œã€‚
+ * 旧 harness 里仅有的、与产品无关的适配（只改测试脚本，不改旧二进制）。每一项都会记录在来源证明里：
+ * z6-native-library 是为开发构建写的，假定「已有记录文件」且把库文件放在 data/ 目录；打包应用的私有配置不在那里。
  */
 export const HARNESS_PATCHES = {
   "z7.5": [
@@ -147,7 +147,7 @@ export const HARNESS_PATCHES = {
   try {
     return JSON.parse(await readFile(acceptancePaths(isolation).record, "utf8"));
   } catch (error) {
-    // Z8.2 é€‚é…ï¼šå°šæœªä¿å­˜ä»»ä½•è®¾è®¡æ—¶æ²¡æœ‰è®°å½•æ–‡ä»¶ï¼›è¿”å›žç©ºå£³ä»¥ä¾¿é©±åŠ¨ç»§ç»­ï¼ˆæ—§ harness å‡å®šå¼€å‘æž„å»ºé‡Œå·²æœ‰è®°å½•ï¼‰ã€‚
+    // Z8.2 适配：尚未保存任何设计时没有记录文件；返回空壳以便驱动继续（旧 harness 假定开发构建里已有记录）。
     if (error.code === "ENOENT") return { definition: null, runs: [] };
     throw error;
   }
@@ -162,7 +162,7 @@ export const HARNESS_PATCHES = {
       replace: `const libraryPath = path.join(
   path.dirname(acceptancePaths(isolation).record),
   "workflow-library.json",
-); // Z8.2 é€‚é…ï¼šæ‰“åŒ…åº”ç”¨çš„åº“æ–‡ä»¶åœ¨ç§æœ‰é…ç½®é‡Œï¼Œä¸åœ¨å¼€å‘æž„å»ºçš„ data/ ä¸‹`,
+); // Z8.2 适配：打包应用的库文件在私有配置里，不在开发构建的 data/ 下`,
       extraImport: 'import { acceptancePaths } from "./acceptance-paths.mjs";',
     },
   ],
@@ -183,7 +183,7 @@ const HOOKED_STOP_APP = `  let z8Stops = 0; ${HOOK_MARKER}
       await app.close().catch(() => {});
       app = undefined;
       if (process.env.Z8_CAPTURE_DIR) {
-        // åœæ­¢åŽç«‹å³å¤åˆ¶ Graph é…ç½®ä¸Žå·¥ä½œåŒºï¼ˆä¸å« Electron ç¼“å­˜/å‡­æ®ä»¥å¤–çš„ä¼šè¯æ•°æ®ï¼‰ï¼Œå†è¢«ä¸‹ä¸€æ¬¡ launch ä½¿ç”¨ã€‚
+        // 停止后立即复制 Graph 配置与工作区（不含 Electron 缓存/凭据以外的会话数据），再被下一次 launch 使用。
         const { cp: copy, mkdir: makeDir } = await import("node:fs/promises");
         const target = path.join(process.env.Z8_CAPTURE_DIR, \`stop-\${++z8Stops}\`);
         await makeDir(target, { recursive: true });
@@ -208,7 +208,7 @@ export async function prepare(key) {
     throw new Error(`Installer hash mismatch for ${key}: ${actual} != ${expected}`);
   const appDirectory = path.join(directory, "app");
   if (!(await stat(path.join(appDirectory, "ZCode Graph.exe")).catch(() => null))) {
-    // 7z åªè¯»è§£åŽ‹ï¼šå®‰è£…åŒ…å†…å« 7z æ•°æ®ï¼Œä¸ä¼šè¢«æ‰§è¡Œã€‚
+    // 7z 只读解压：安装包内含 7z 数据，不会被执行。
     const code = await new Promise((resolve) =>
       spawn(sevenZip, ["x", "-y", `-o${appDirectory}`, installer], {
         stdio: "ignore",
@@ -224,7 +224,7 @@ export async function prepare(key) {
   const identity = JSON.parse(
     asar.extractFile(path.join(appDirectory, "resources/app.asar"), "package.json"),
   );
-  // æ—§ harnessï¼šå–è‡ªåŒä¸€å‘å¸ƒæ ‡ç­¾ã€‚
+  // 旧 harness：取自同一发布标签。
   const harness = path.join(scratch, "harness", key);
   await mkdir(harness, { recursive: true });
   const run = promisify(execFile);

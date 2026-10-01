@@ -1,0 +1,1475 @@
+{
+  "schema": "zcode-graph-historical-fixtures/1",
+  "note": "Graph data written by the genuine old release binaries (extracted, not installed) in an isolated temporary profile with synthetic workspaces and a loopback provider. Bytes are exported unmodified. Not included: installers, credentials, provider configuration, Electron session data, raw profiles, native logs. Recipe: scripts/graph-engineering/historical-capture.mjs.",
+  "releases": {
+    "graph-v3.14.0-z2.2": {
+      "appVersion": "3.14.0-z2.2",
+      "asset": "ZCode.Graph-3.14.0-z2.2-win-x64.exe",
+      "url": "https://github.com/dumpfordummy/ZCode/releases/download/graph-v3.14.0-z2.2/ZCode.Graph-3.14.0-z2.2-win-x64.exe",
+      "sha256sumsUrl": "https://github.com/dumpfordummy/ZCode/releases/download/graph-v3.14.0-z2.2/SHA256SUMS.txt",
+      "sha256sums": "d9fed73f6820f1f9e4022b2f2628c740f382858347fd79f3a9013ed1ea8e029e  ZCode Graph-3.14.0-z2.2-win-x64.exe",
+      "installerBytes": 149654458,
+      "installerSha256": "d9fed73f6820f1f9e4022b2f2628c740f382858347fd79f3a9013ed1ea8e029e",
+      "installedByThisWork": false,
+      "extraction": "7za x (read-only unpack of the NSIS payload; the installer was never executed)"
+    },
+    "graph-v3.14.0-z7.5": {
+      "appVersion": "3.14.0-z7.5",
+      "asset": "ZCode.Graph-3.14.0-z7.5-win-x64.exe",
+      "url": "https://github.com/dumpfordummy/ZCode/releases/download/graph-v3.14.0-z7.5/ZCode.Graph-3.14.0-z7.5-win-x64.exe",
+      "sha256sumsUrl": "https://github.com/dumpfordummy/ZCode/releases/download/graph-v3.14.0-z7.5/SHA256SUMS.txt",
+      "sha256sums": "0b643b91bf1f98ef9ee82d3dfa13706cb08669bf2918449ada259743127645f6  ZCode Graph-3.14.0-z7.5-win-x64.exe",
+      "installerBytes": 149844888,
+      "installerSha256": "0b643b91bf1f98ef9ee82d3dfa13706cb08669bf2918449ada259743127645f6",
+      "installedByThisWork": false,
+      "extraction": "7za x (read-only unpack of the NSIS payload; the installer was never executed)"
+    }
+  },
+  "fixtures": {
+    "z22-cancelled-terminal": {
+      "release": "graph-v3.14.0-z2.2",
+      "installerSha256": "d9fed73f6820f1f9e4022b2f2628c740f382858347fd79f3a9013ed1ea8e029e",
+      "oldApp": {
+        "name": "@zcode/desktop",
+        "version": "3.14.0-z2.2",
+        "flavor": "graph",
+        "main": "out/main/graph-entry.mjs"
+      },
+      "scenario": {
+        "script": "z2-native-smoke.mjs",
+        "args": [
+          "--scenario=cancel-permission"
+        ],
+        "oldDriverExitCode": 0,
+        "oldDriverStatus": "PASS",
+        "captureTaken": "stop-1",
+        "allCaptures": [
+          "stop-1"
+        ]
+      },
+      "workspaceIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-nqYUHe\\workspace",
+      "graphProfileRelativeRoot": ".zcode/v2/graph-engineering/",
+      "recordVersion": 2,
+      "runStatuses": [
+        {
+          "version": 2,
+          "status": "Cancelled"
+        }
+      ],
+      "capturedFiles": [
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/4228b9d232da2ad2aef0256060b24ffe4ccd605b1d1e6a42180a4edcf400f713.json",
+          "bytes": 15204,
+          "sha256": "cf2170b23ce3d249b0f8188457532ee77c810330c3ce6d41bc895580a568b7fe"
+        }
+      ],
+      "exportedFiles": [
+        {
+          "path": "z22-cancelled-terminal/graph-engineering/4228b9d232da2ad2aef0256060b24ffe4ccd605b1d1e6a42180a4edcf400f713.json",
+          "bytes": 15204,
+          "sha256": "cf2170b23ce3d249b0f8188457532ee77c810330c3ce6d41bc895580a568b7fe"
+        }
+      ],
+      "byteForByteProducedByOldApp": true,
+      "sanitization": "none",
+      "harnessPatch": {
+        "patchedFile": "scripts/graph-engineering/isolation.mjs",
+        "patchedSha256": "833e2428636da61e6bef7963450c65563a6c39d6b44f850d01b492ee94a939fe"
+      }
+    },
+    "z22-completed-sequential": {
+      "release": "graph-v3.14.0-z2.2",
+      "installerSha256": "d9fed73f6820f1f9e4022b2f2628c740f382858347fd79f3a9013ed1ea8e029e",
+      "oldApp": {
+        "name": "@zcode/desktop",
+        "version": "3.14.0-z2.2",
+        "flavor": "graph",
+        "main": "out/main/graph-entry.mjs"
+      },
+      "scenario": {
+        "script": "z2-native-smoke.mjs",
+        "args": [
+          "--scenario=complete"
+        ],
+        "oldDriverExitCode": 0,
+        "oldDriverStatus": "PASS",
+        "captureTaken": "stop-2",
+        "allCaptures": [
+          "stop-1",
+          "stop-2"
+        ]
+      },
+      "workspaceIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-9wUv2C\\workspace",
+      "graphProfileRelativeRoot": ".zcode/v2/graph-engineering/",
+      "recordVersion": 2,
+      "runStatuses": [
+        {
+          "version": 2,
+          "status": "Completed"
+        }
+      ],
+      "capturedFiles": [
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/f2469d48e0792c712d91a0538baa032254c7afe634121e24f33582e0dd917fa4.json",
+          "bytes": 18040,
+          "sha256": "ade2a124dd5bce3e33f630d54636003fce3fc1b819cf303bd114c55ede32d2dc"
+        }
+      ],
+      "exportedFiles": [
+        {
+          "path": "z22-completed-sequential/graph-engineering/f2469d48e0792c712d91a0538baa032254c7afe634121e24f33582e0dd917fa4.json",
+          "bytes": 18040,
+          "sha256": "ade2a124dd5bce3e33f630d54636003fce3fc1b819cf303bd114c55ede32d2dc"
+        }
+      ],
+      "byteForByteProducedByOldApp": true,
+      "sanitization": "none",
+      "harnessPatch": {
+        "patchedFile": "scripts/graph-engineering/isolation.mjs",
+        "patchedSha256": "833e2428636da61e6bef7963450c65563a6c39d6b44f850d01b492ee94a939fe"
+      }
+    },
+    "z22-permission-interrupted-after-old-restart": {
+      "release": "graph-v3.14.0-z2.2",
+      "installerSha256": "d9fed73f6820f1f9e4022b2f2628c740f382858347fd79f3a9013ed1ea8e029e",
+      "oldApp": {
+        "name": "@zcode/desktop",
+        "version": "3.14.0-z2.2",
+        "flavor": "graph",
+        "main": "out/main/graph-entry.mjs"
+      },
+      "scenario": {
+        "script": "z2-native-smoke.mjs",
+        "args": [
+          "--scenario=restart-permission"
+        ],
+        "oldDriverExitCode": 0,
+        "oldDriverStatus": "PASS",
+        "captureTaken": "stop-2",
+        "allCaptures": [
+          "stop-1",
+          "stop-2"
+        ]
+      },
+      "workspaceIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-5NC83G\\workspace",
+      "graphProfileRelativeRoot": ".zcode/v2/graph-engineering/",
+      "recordVersion": 2,
+      "runStatuses": [
+        {
+          "version": 2,
+          "status": "Interrupted"
+        }
+      ],
+      "capturedFiles": [
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/b4bd8d68ecc4b7b2f1fe3dfc1a74de2043f6a01861def46b9a6b3b9240320aa5.json",
+          "bytes": 16962,
+          "sha256": "38ff1ad32d0a2866ed9c55c9a2244db2eebbf8b8f50cdb22051a998fa7963389"
+        }
+      ],
+      "exportedFiles": [
+        {
+          "path": "z22-permission-interrupted-after-old-restart/graph-engineering/b4bd8d68ecc4b7b2f1fe3dfc1a74de2043f6a01861def46b9a6b3b9240320aa5.json",
+          "bytes": 16962,
+          "sha256": "38ff1ad32d0a2866ed9c55c9a2244db2eebbf8b8f50cdb22051a998fa7963389"
+        }
+      ],
+      "byteForByteProducedByOldApp": true,
+      "sanitization": "none",
+      "harnessPatch": {
+        "patchedFile": "scripts/graph-engineering/isolation.mjs",
+        "patchedSha256": "833e2428636da61e6bef7963450c65563a6c39d6b44f850d01b492ee94a939fe"
+      }
+    },
+    "z22-permission-pending-prereconcile": {
+      "release": "graph-v3.14.0-z2.2",
+      "installerSha256": "d9fed73f6820f1f9e4022b2f2628c740f382858347fd79f3a9013ed1ea8e029e",
+      "oldApp": {
+        "name": "@zcode/desktop",
+        "version": "3.14.0-z2.2",
+        "flavor": "graph",
+        "main": "out/main/graph-entry.mjs"
+      },
+      "scenario": {
+        "script": "z2-native-smoke.mjs",
+        "args": [
+          "--scenario=restart-permission"
+        ],
+        "oldDriverExitCode": 0,
+        "oldDriverStatus": "PASS",
+        "captureTaken": "stop-1",
+        "allCaptures": [
+          "stop-1",
+          "stop-2"
+        ]
+      },
+      "workspaceIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-nFLhHZ\\workspace",
+      "graphProfileRelativeRoot": ".zcode/v2/graph-engineering/",
+      "recordVersion": 2,
+      "runStatuses": [
+        {
+          "version": 2,
+          "status": "WaitingForPermission"
+        }
+      ],
+      "capturedFiles": [
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/b35f0267b5338b280c6b6e6b79d92f7d9d205841ffbafe645acc46dfadde9aa8.json",
+          "bytes": 14884,
+          "sha256": "8f407240cc352e200aa30097e94c43bcfb95e7c27e6d0eadf904872e57372921"
+        }
+      ],
+      "exportedFiles": [
+        {
+          "path": "z22-permission-pending-prereconcile/graph-engineering/b35f0267b5338b280c6b6e6b79d92f7d9d205841ffbafe645acc46dfadde9aa8.json",
+          "bytes": 14884,
+          "sha256": "8f407240cc352e200aa30097e94c43bcfb95e7c27e6d0eadf904872e57372921"
+        }
+      ],
+      "byteForByteProducedByOldApp": true,
+      "sanitization": "none",
+      "harnessPatch": {
+        "patchedFile": "scripts/graph-engineering/isolation.mjs",
+        "patchedSha256": "833e2428636da61e6bef7963450c65563a6c39d6b44f850d01b492ee94a939fe"
+      }
+    },
+    "z22-question-pending-prereconcile": {
+      "release": "graph-v3.14.0-z2.2",
+      "installerSha256": "d9fed73f6820f1f9e4022b2f2628c740f382858347fd79f3a9013ed1ea8e029e",
+      "oldApp": {
+        "name": "@zcode/desktop",
+        "version": "3.14.0-z2.2",
+        "flavor": "graph",
+        "main": "out/main/graph-entry.mjs"
+      },
+      "scenario": {
+        "script": "z2-native-smoke.mjs",
+        "args": [
+          "--scenario=restart-interrupted"
+        ],
+        "oldDriverExitCode": 0,
+        "oldDriverStatus": "PASS",
+        "captureTaken": "stop-1",
+        "allCaptures": [
+          "stop-1",
+          "stop-2"
+        ]
+      },
+      "workspaceIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-HyMPM5\\workspace",
+      "graphProfileRelativeRoot": ".zcode/v2/graph-engineering/",
+      "recordVersion": 2,
+      "runStatuses": [
+        {
+          "version": 2,
+          "status": "WaitingForUser"
+        }
+      ],
+      "capturedFiles": [
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/bb09c102f17ec70c4070d977d416fa75fa871004117601b5a7fbcc9892998f84.json",
+          "bytes": 12206,
+          "sha256": "343a9fa768d36030f834d6d2b7673bda26e0fcbeee14f4af7a902afdeb84b58a"
+        }
+      ],
+      "exportedFiles": [
+        {
+          "path": "z22-question-pending-prereconcile/graph-engineering/bb09c102f17ec70c4070d977d416fa75fa871004117601b5a7fbcc9892998f84.json",
+          "bytes": 12206,
+          "sha256": "343a9fa768d36030f834d6d2b7673bda26e0fcbeee14f4af7a902afdeb84b58a"
+        }
+      ],
+      "byteForByteProducedByOldApp": true,
+      "sanitization": "none",
+      "harnessPatch": {
+        "patchedFile": "scripts/graph-engineering/isolation.mjs",
+        "patchedSha256": "833e2428636da61e6bef7963450c65563a6c39d6b44f850d01b492ee94a939fe"
+      }
+    },
+    "z22-z1-literal-completed": {
+      "release": "graph-v3.14.0-z2.2",
+      "installerSha256": "d9fed73f6820f1f9e4022b2f2628c740f382858347fd79f3a9013ed1ea8e029e",
+      "oldApp": {
+        "name": "@zcode/desktop",
+        "version": "3.14.0-z2.2",
+        "flavor": "graph",
+        "main": "out/main/graph-entry.mjs"
+      },
+      "scenario": {
+        "script": "z2-z1-regression.mjs",
+        "args": [],
+        "oldDriverExitCode": 0,
+        "oldDriverStatus": "PASS",
+        "captureTaken": "stop-2",
+        "allCaptures": [
+          "stop-1",
+          "stop-2"
+        ]
+      },
+      "workspaceIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-K4Wiz6\\workspace",
+      "graphProfileRelativeRoot": ".zcode/v2/graph-engineering/",
+      "recordVersion": 1,
+      "runStatuses": [
+        {
+          "version": "z1-unversioned",
+          "status": "Completed"
+        }
+      ],
+      "capturedFiles": [
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/0a1527ae7ffa3bdb69947f8754a89dfa3226666a3f47895f5e39abbc8348a54d.json",
+          "bytes": 3544,
+          "sha256": "3ad4b413d9c3a91497f4178d6c034cf0dee97aa7184df8ac7634f21a5f519751"
+        }
+      ],
+      "exportedFiles": [
+        {
+          "path": "z22-z1-literal-completed/graph-engineering/0a1527ae7ffa3bdb69947f8754a89dfa3226666a3f47895f5e39abbc8348a54d.json",
+          "bytes": 3544,
+          "sha256": "3ad4b413d9c3a91497f4178d6c034cf0dee97aa7184df8ac7634f21a5f519751"
+        }
+      ],
+      "byteForByteProducedByOldApp": true,
+      "sanitization": "none",
+      "harnessPatch": {
+        "patchedFile": "scripts/graph-engineering/isolation.mjs",
+        "patchedSha256": "833e2428636da61e6bef7963450c65563a6c39d6b44f850d01b492ee94a939fe"
+      }
+    },
+    "z75-approval-pending-prereconcile": {
+      "release": "graph-v3.14.0-z7.5",
+      "installerSha256": "0b643b91bf1f98ef9ee82d3dfa13706cb08669bf2918449ada259743127645f6",
+      "oldApp": {
+        "name": "@zcode/desktop",
+        "version": "3.14.0-z7.5",
+        "flavor": "graph",
+        "main": "out/main/graph-entry.mjs"
+      },
+      "scenario": {
+        "script": "z3-native-smoke.mjs",
+        "args": [
+          "--scenario=restart-pending"
+        ],
+        "oldDriverExitCode": 0,
+        "oldDriverStatus": "PASS",
+        "captureTaken": "stop-1",
+        "allCaptures": [
+          "stop-1",
+          "stop-2",
+          "stop-3"
+        ]
+      },
+      "workspaceIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-fO8ERI\\workspace",
+      "graphProfileRelativeRoot": ".zcode/v2/graph-engineering/",
+      "recordVersion": 3,
+      "runStatuses": [
+        {
+          "version": 3,
+          "status": "WaitingForApproval"
+        }
+      ],
+      "capturedFiles": [
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/c669b1b64944f65947757f8a0dc2409a56548721d7c0869cedd495b7ba5ce21a.json",
+          "bytes": 24448,
+          "sha256": "6cccf9a9423fc5588b5c4db3c15f3a848c063e61e1ba0a600b41a0cf90ee1a0c"
+        }
+      ],
+      "exportedFiles": [
+        {
+          "path": "z75-approval-pending-prereconcile/graph-engineering/c669b1b64944f65947757f8a0dc2409a56548721d7c0869cedd495b7ba5ce21a.json",
+          "bytes": 24448,
+          "sha256": "6cccf9a9423fc5588b5c4db3c15f3a848c063e61e1ba0a600b41a0cf90ee1a0c"
+        }
+      ],
+      "byteForByteProducedByOldApp": true,
+      "sanitization": "none",
+      "harnessPatch": {
+        "patchedFile": "scripts/graph-engineering/isolation.mjs",
+        "patchedSha256": "18bd5566b16857b26c105f8016e9291b762934406bdf2937bd634dfbd7704f23"
+      }
+    },
+    "z75-approval-rejected-terminal": {
+      "release": "graph-v3.14.0-z7.5",
+      "installerSha256": "0b643b91bf1f98ef9ee82d3dfa13706cb08669bf2918449ada259743127645f6",
+      "oldApp": {
+        "name": "@zcode/desktop",
+        "version": "3.14.0-z7.5",
+        "flavor": "graph",
+        "main": "out/main/graph-entry.mjs"
+      },
+      "scenario": {
+        "script": "z3-native-smoke.mjs",
+        "args": [
+          "--scenario=reject"
+        ],
+        "oldDriverExitCode": 0,
+        "oldDriverStatus": "PASS",
+        "captureTaken": "stop-1",
+        "allCaptures": [
+          "stop-1"
+        ]
+      },
+      "workspaceIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-4qdrFS\\workspace",
+      "graphProfileRelativeRoot": ".zcode/v2/graph-engineering/",
+      "recordVersion": 3,
+      "runStatuses": [
+        {
+          "version": 3,
+          "status": "Rejected"
+        }
+      ],
+      "capturedFiles": [
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/ea5cd721d2e6ce43a94de71e0411818aa5d904aec22c16d41c0124804f57434c.json",
+          "bytes": 25008,
+          "sha256": "8041d4a26c767511872d255e9191ed2f666a505ebdd447759e1d389e53ae80eb"
+        }
+      ],
+      "exportedFiles": [
+        {
+          "path": "z75-approval-rejected-terminal/graph-engineering/ea5cd721d2e6ce43a94de71e0411818aa5d904aec22c16d41c0124804f57434c.json",
+          "bytes": 25008,
+          "sha256": "8041d4a26c767511872d255e9191ed2f666a505ebdd447759e1d389e53ae80eb"
+        }
+      ],
+      "byteForByteProducedByOldApp": true,
+      "sanitization": "none",
+      "harnessPatch": {
+        "patchedFile": "scripts/graph-engineering/isolation.mjs",
+        "patchedSha256": "18bd5566b16857b26c105f8016e9291b762934406bdf2937bd634dfbd7704f23"
+      }
+    },
+    "z75-build-test-completed": {
+      "release": "graph-v3.14.0-z7.5",
+      "installerSha256": "0b643b91bf1f98ef9ee82d3dfa13706cb08669bf2918449ada259743127645f6",
+      "oldApp": {
+        "name": "@zcode/desktop",
+        "version": "3.14.0-z7.5",
+        "flavor": "graph",
+        "main": "out/main/graph-entry.mjs"
+      },
+      "scenario": {
+        "script": "z4-native-smoke.mjs",
+        "args": [
+          "--scenario=complete"
+        ],
+        "oldDriverExitCode": 1,
+        "oldDriverStatus": "FAIL",
+        "captureTaken": "stop-2",
+        "allCaptures": [
+          "stop-1",
+          "stop-2"
+        ]
+      },
+      "workspaceIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-rVcFi6\\workspace",
+      "graphProfileRelativeRoot": ".zcode/v2/graph-engineering/",
+      "recordVersion": 4,
+      "runStatuses": [
+        {
+          "version": 4,
+          "status": "Completed"
+        }
+      ],
+      "capturedFiles": [
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/163fd7f1250e35727655da3a725d23247866d76a71b618e64d8567212b9e7273.json",
+          "bytes": 1240,
+          "sha256": "315e137e5c542f458e342f9e9820ee4a034b089329ccc3a69f53f0f426ca70df"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/18e2fb59f9c92562f15cbe886cb58ed928db1b23223d5b03d9e2e900524397c1.json",
+          "bytes": 1302,
+          "sha256": "c0cf681099b43420675c4acd5874e8f07de1cbb2db6dd2344a6458119aff167b"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/364bc96784be45a03ff32f7f6733bdce895c142e50c1d604b55ff4fb5304a0ed.json",
+          "bytes": 1136,
+          "sha256": "7dce7318bdca5428b943feffb9dbcb29bd37a679c5f497f8ff5f85804466692e"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/55bcbdd4150e0b8461190660a2316efefe201920a19e537ef8c07ad805902f06.json",
+          "bytes": 1100,
+          "sha256": "8855b2e6e674eed6b06e81a4f2f1987670d3070ff5ab2aefc772d7ae03ff22fc"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/855847d6ee0685185da09cb8e73e0c05a9d1a6576b3fb57d0ded7f61147acb21.json",
+          "bytes": 798,
+          "sha256": "3777dfed63f6402b1b5c26fb79a773ce048bd556293e19d8a8da34c5f69c54b2"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/ca5c33320a7c54ab25172f588b4c46a27ad97adfd5ad42ebd6454ce509067715.json",
+          "bytes": 728,
+          "sha256": "c78a1eaa1275ee5b0ea88d31cf971244636834196225c9040f53a3b4147a80d8"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/cfcb8bfdb85fdf497a90b04894fce2cbc730360a5002315cdc072f98f04e6ec6.json",
+          "bytes": 1814,
+          "sha256": "62588bfcc2d868dfb58a9a447d3f97af9e9514ec2b4b41df37a6a83e6e956ea3"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/d28a60057da5410d2779f96470f062446a9e70bea7e07c8d6d301a79ae8ce233.json",
+          "bytes": 728,
+          "sha256": "1bdb93e21004f62a548aa20d792f9a558fcf551c92ef0c5af0fcb5dcb8b60c15"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/eb7483165cea654942865070ecad047dc55c5cbc45f8b158c9a453612cba33a4.json",
+          "bytes": 1509,
+          "sha256": "368596521d82b8ce864a4fb75f89b6a84efd72600d9db53ba7937b039a98bb28"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4.json",
+          "bytes": 38115,
+          "sha256": "a02bf35ef11d4fb3b4699ac8e0d27f2491008a7d3fdc7a7cb45129f637032b07"
+        }
+      ],
+      "exportedFiles": [
+        {
+          "path": "z75-build-test-completed/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/163fd7f1250e35727655da3a725d23247866d76a71b618e64d8567212b9e7273.json",
+          "bytes": 1240,
+          "sha256": "315e137e5c542f458e342f9e9820ee4a034b089329ccc3a69f53f0f426ca70df"
+        },
+        {
+          "path": "z75-build-test-completed/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/18e2fb59f9c92562f15cbe886cb58ed928db1b23223d5b03d9e2e900524397c1.json",
+          "bytes": 1302,
+          "sha256": "c0cf681099b43420675c4acd5874e8f07de1cbb2db6dd2344a6458119aff167b"
+        },
+        {
+          "path": "z75-build-test-completed/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/364bc96784be45a03ff32f7f6733bdce895c142e50c1d604b55ff4fb5304a0ed.json",
+          "bytes": 1136,
+          "sha256": "7dce7318bdca5428b943feffb9dbcb29bd37a679c5f497f8ff5f85804466692e"
+        },
+        {
+          "path": "z75-build-test-completed/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/55bcbdd4150e0b8461190660a2316efefe201920a19e537ef8c07ad805902f06.json",
+          "bytes": 1100,
+          "sha256": "8855b2e6e674eed6b06e81a4f2f1987670d3070ff5ab2aefc772d7ae03ff22fc"
+        },
+        {
+          "path": "z75-build-test-completed/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/855847d6ee0685185da09cb8e73e0c05a9d1a6576b3fb57d0ded7f61147acb21.json",
+          "bytes": 798,
+          "sha256": "3777dfed63f6402b1b5c26fb79a773ce048bd556293e19d8a8da34c5f69c54b2"
+        },
+        {
+          "path": "z75-build-test-completed/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/ca5c33320a7c54ab25172f588b4c46a27ad97adfd5ad42ebd6454ce509067715.json",
+          "bytes": 728,
+          "sha256": "c78a1eaa1275ee5b0ea88d31cf971244636834196225c9040f53a3b4147a80d8"
+        },
+        {
+          "path": "z75-build-test-completed/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/cfcb8bfdb85fdf497a90b04894fce2cbc730360a5002315cdc072f98f04e6ec6.json",
+          "bytes": 1814,
+          "sha256": "62588bfcc2d868dfb58a9a447d3f97af9e9514ec2b4b41df37a6a83e6e956ea3"
+        },
+        {
+          "path": "z75-build-test-completed/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/d28a60057da5410d2779f96470f062446a9e70bea7e07c8d6d301a79ae8ce233.json",
+          "bytes": 728,
+          "sha256": "1bdb93e21004f62a548aa20d792f9a558fcf551c92ef0c5af0fcb5dcb8b60c15"
+        },
+        {
+          "path": "z75-build-test-completed/graph-engineering/artifacts/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4/6de55e1c4c5381646b0d447031352150f6cbd7a9c87dcd1e3f2c24e1a88153c2/eb7483165cea654942865070ecad047dc55c5cbc45f8b158c9a453612cba33a4.json",
+          "bytes": 1509,
+          "sha256": "368596521d82b8ce864a4fb75f89b6a84efd72600d9db53ba7937b039a98bb28"
+        },
+        {
+          "path": "z75-build-test-completed/graph-engineering/e7999abe018090e5838a94abeaf3284e18a145430a256ae0aee30e51a5ad69e4.json",
+          "bytes": 38115,
+          "sha256": "a02bf35ef11d4fb3b4699ac8e0d27f2491008a7d3fdc7a7cb45129f637032b07"
+        }
+      ],
+      "byteForByteProducedByOldApp": true,
+      "sanitization": "none",
+      "harnessPatch": {
+        "patchedFile": "scripts/graph-engineering/isolation.mjs",
+        "patchedSha256": "18bd5566b16857b26c105f8016e9291b762934406bdf2937bd634dfbd7704f23"
+      }
+    },
+    "z75-library-user-versions": {
+      "release": "graph-v3.14.0-z7.5",
+      "installerSha256": "0b643b91bf1f98ef9ee82d3dfa13706cb08669bf2918449ada259743127645f6",
+      "oldApp": {
+        "name": "@zcode/desktop",
+        "version": "3.14.0-z7.5",
+        "flavor": "graph",
+        "main": "out/main/graph-entry.mjs"
+      },
+      "scenario": {
+        "script": "z6-native-library.mjs",
+        "args": [],
+        "oldDriverExitCode": 1,
+        "oldDriverStatus": "FAIL",
+        "captureTaken": "stop-1",
+        "allCaptures": [
+          "stop-1"
+        ]
+      },
+      "workspaceIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-dxzzm8\\workspace",
+      "graphProfileRelativeRoot": ".zcode/v2/graph-engineering/",
+      "recordVersion": 5,
+      "runStatuses": [],
+      "capturedFiles": [
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/d0eff1f255e1af26ae1c4d56c6f47a60f00cf7555d0e952702e9c55e058a7bbc.json",
+          "bytes": 7856,
+          "sha256": "30852efd12fccced34ebc66c5271734575c3bf4172dd3e17edeace6c4ba06267"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/workflow-library.json",
+          "bytes": 32447,
+          "sha256": "c571ef666c05b835733d770d65d16ac467074f8bd33f620857dc387667b7e6ed"
+        }
+      ],
+      "exportedFiles": [
+        {
+          "path": "z75-library-user-versions/graph-engineering/d0eff1f255e1af26ae1c4d56c6f47a60f00cf7555d0e952702e9c55e058a7bbc.json",
+          "bytes": 7856,
+          "sha256": "30852efd12fccced34ebc66c5271734575c3bf4172dd3e17edeace6c4ba06267"
+        },
+        {
+          "path": "z75-library-user-versions/graph-engineering/workflow-library.json",
+          "bytes": 32447,
+          "sha256": "c571ef666c05b835733d770d65d16ac467074f8bd33f620857dc387667b7e6ed"
+        }
+      ],
+      "byteForByteProducedByOldApp": true,
+      "sanitization": "none",
+      "harnessPatch": {
+        "patchedFile": "scripts/graph-engineering/isolation.mjs",
+        "patchedSha256": "18bd5566b16857b26c105f8016e9291b762934406bdf2937bd634dfbd7704f23",
+        "additionalPatches": [
+          {
+            "file": "scripts/graph-engineering/z2-native-helpers.mjs",
+            "patchedSha256": "1cdbef2e2470a2efcedb09cba52a5ab20669e217edb28ba60be1dbc12f29c8a7"
+          },
+          {
+            "file": "scripts/graph-engineering/z6-native-library.mjs",
+            "patchedSha256": "b2d48df857471531c8f40291014fd9b47af554ceec5f9f00c7a9f1b26de55472"
+          }
+        ]
+      }
+    },
+    "z75-needs-human-condition-missing": {
+      "release": "graph-v3.14.0-z7.5",
+      "installerSha256": "0b643b91bf1f98ef9ee82d3dfa13706cb08669bf2918449ada259743127645f6",
+      "oldApp": {
+        "name": "@zcode/desktop",
+        "version": "3.14.0-z7.5",
+        "flavor": "graph",
+        "main": "out/main/graph-entry.mjs"
+      },
+      "scenario": {
+        "script": "z5-native-smoke.mjs",
+        "args": [
+          "--scenario=condition-missing"
+        ],
+        "oldDriverExitCode": 0,
+        "oldDriverStatus": "PASS",
+        "captureTaken": "stop-1",
+        "allCaptures": [
+          "stop-1"
+        ]
+      },
+      "workspaceIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-L80PTL\\workspace",
+      "graphProfileRelativeRoot": ".zcode/v2/graph-engineering/",
+      "recordVersion": 5,
+      "runStatuses": [
+        {
+          "version": 5,
+          "status": "NeedsHuman"
+        }
+      ],
+      "capturedFiles": [
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/f2a70494473213dd20e0c28c9b77d4482b6ba46c997f216ecef2ea4a0607169a/16aaf656e19bf3bc56103e6c7e8ae25155541ef7c9f6e2077bf0cc3506845449/c7d06aa95d6210ddf1a861a42fe238011fd2487ac02143c69e64dc676eccdd82.json",
+          "bytes": 634,
+          "sha256": "c0f80ef050b6d2fd6e502d3e73105a070e719b4cc796780ba56563e8b0148ebe"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/f2a70494473213dd20e0c28c9b77d4482b6ba46c997f216ecef2ea4a0607169a/16aaf656e19bf3bc56103e6c7e8ae25155541ef7c9f6e2077bf0cc3506845449/e912d35251b0c014b4fbfc441150b8387337806f9f01a0bddd516e41c77a3e5f.json",
+          "bytes": 634,
+          "sha256": "2ca5f41ef5a427895c5973f153d8b3e7a848e6300d78333e4021edd1bf673b71"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/f2a70494473213dd20e0c28c9b77d4482b6ba46c997f216ecef2ea4a0607169a.json",
+          "bytes": 25795,
+          "sha256": "517d197ccfcc7e830a690cdc8d445bb60a91507e47973629db3f96b42244d6d3"
+        }
+      ],
+      "exportedFiles": [
+        {
+          "path": "z75-needs-human-condition-missing/graph-engineering/artifacts/f2a70494473213dd20e0c28c9b77d4482b6ba46c997f216ecef2ea4a0607169a/16aaf656e19bf3bc56103e6c7e8ae25155541ef7c9f6e2077bf0cc3506845449/c7d06aa95d6210ddf1a861a42fe238011fd2487ac02143c69e64dc676eccdd82.json",
+          "bytes": 634,
+          "sha256": "c0f80ef050b6d2fd6e502d3e73105a070e719b4cc796780ba56563e8b0148ebe"
+        },
+        {
+          "path": "z75-needs-human-condition-missing/graph-engineering/artifacts/f2a70494473213dd20e0c28c9b77d4482b6ba46c997f216ecef2ea4a0607169a/16aaf656e19bf3bc56103e6c7e8ae25155541ef7c9f6e2077bf0cc3506845449/e912d35251b0c014b4fbfc441150b8387337806f9f01a0bddd516e41c77a3e5f.json",
+          "bytes": 634,
+          "sha256": "2ca5f41ef5a427895c5973f153d8b3e7a848e6300d78333e4021edd1bf673b71"
+        },
+        {
+          "path": "z75-needs-human-condition-missing/graph-engineering/f2a70494473213dd20e0c28c9b77d4482b6ba46c997f216ecef2ea4a0607169a.json",
+          "bytes": 25795,
+          "sha256": "517d197ccfcc7e830a690cdc8d445bb60a91507e47973629db3f96b42244d6d3"
+        }
+      ],
+      "byteForByteProducedByOldApp": true,
+      "sanitization": "none",
+      "harnessPatch": {
+        "patchedFile": "scripts/graph-engineering/isolation.mjs",
+        "patchedSha256": "18bd5566b16857b26c105f8016e9291b762934406bdf2937bd634dfbd7704f23",
+        "additionalPatches": [
+          {
+            "file": "scripts/graph-engineering/z2-native-helpers.mjs",
+            "patchedSha256": "1cdbef2e2470a2efcedb09cba52a5ab20669e217edb28ba60be1dbc12f29c8a7"
+          },
+          {
+            "file": "scripts/graph-engineering/z6-native-library.mjs",
+            "patchedSha256": "b2d48df857471531c8f40291014fd9b47af554ceec5f9f00c7a9f1b26de55472"
+          }
+        ]
+      }
+    },
+    "z75-needs-human-exhausted": {
+      "release": "graph-v3.14.0-z7.5",
+      "installerSha256": "0b643b91bf1f98ef9ee82d3dfa13706cb08669bf2918449ada259743127645f6",
+      "oldApp": {
+        "name": "@zcode/desktop",
+        "version": "3.14.0-z7.5",
+        "flavor": "graph",
+        "main": "out/main/graph-entry.mjs"
+      },
+      "scenario": {
+        "script": "z5-native-smoke.mjs",
+        "args": [
+          "--scenario=exhausted"
+        ],
+        "oldDriverExitCode": 0,
+        "oldDriverStatus": "PASS",
+        "captureTaken": "stop-1",
+        "allCaptures": [
+          "stop-1"
+        ]
+      },
+      "workspaceIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-EmYbaH\\workspace",
+      "graphProfileRelativeRoot": ".zcode/v2/graph-engineering/",
+      "recordVersion": 5,
+      "runStatuses": [
+        {
+          "version": 5,
+          "status": "BudgetExhausted"
+        }
+      ],
+      "capturedFiles": [
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238.json",
+          "bytes": 145979,
+          "sha256": "8e7c179a7af2d458766c487665576a76f00042ac4a36ee4d354aa6b15ffa213d"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/0e0d6b2b22353e01e13882d25dfaa97008044a6cdab669edf0831bee0126e101.json",
+          "bytes": 798,
+          "sha256": "c9efc978e71ceb23e5a1e08f5715ab8fb9ac46b9011d1e88bc4ccd19ae0fcabf"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/0ed0652f36f2d6fd1f221a9b8ebf9874a647039ae26301e53abd322e748ee269.json",
+          "bytes": 748,
+          "sha256": "73f56f7f1007ae020832538ac9be8e96870183c815990a6fb3d91a39a0383915"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/2a18df22f0582ac22f40a26042b54a1a8bb4a0c40dc252a49cff4f7babf9feec.json",
+          "bytes": 2005,
+          "sha256": "4094885c2cb3d26318a9a8970e328e35e23258aadd20311a99d0bc01c0c7c970"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/385ad35e8c1e8e141eef464acf29ce912b95d648099a8d29679808248f6a9b25.json",
+          "bytes": 1240,
+          "sha256": "c235efdc7aef090b6b254ac897c3afcf8839b0acf44aebd3be9a0ee7c38a1ed1"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/39f7ecfd31870956e5cc24805099a32396c3a380f367dc1d955d8d7a131e94d5.json",
+          "bytes": 1883,
+          "sha256": "47757fe893bb8ad5432f8f9df125935ee5400f7687c2b0a68e7374a21ba4b234"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/456ae8a77c0fa2d62d46c86a15337c91d4b29686b20278b071affbc0c85b337f.json",
+          "bytes": 1595,
+          "sha256": "594a50c93c287c16071e2ecad115cc954d28d2679249ca858353c7a57636a1da"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/598fc198eeadb60f495af2a4f5ab87f63c16c5a4504afc0caedcf176f364046e.json",
+          "bytes": 775,
+          "sha256": "f1412df621c8e498d25bd817bceb1e093f949382a997d16d170bf17e38f6812e"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/63dd93e78005bef7e9141d11971cc918ff691ce94fbff968e02742b268e70793.json",
+          "bytes": 960,
+          "sha256": "0a2361b797864e9d0a5a63984ccc26c078b8aea8a896600db92885e634ed7ec4"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/7096cb87aafa9e2f51056445eb624213b63acae571b31ef0dcd35cd2377b15a3.json",
+          "bytes": 1136,
+          "sha256": "28b8ed9f6494d35f587e1ff63399332aab62575611017fda386c97bbf635297d"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/768f12fd1a8af77246247686a1a6f390ddadcca97d1edb17f63d3b1cf4c33486.json",
+          "bytes": 1595,
+          "sha256": "437f3344fad3b9b6233124f30b69c9585bf819519d30c69e2354840ded963027"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/7b39de1198e6c2768da3aebe60b28e604a6a541a18849a60ce03da93b79ed265.json",
+          "bytes": 1240,
+          "sha256": "1726e195d519cf7f60cfe992cae29a06df7ae932530a4f0e0e858dd72b81d50e"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/7f1fe69c2cd0fb1620882bf093e5343ef1a5bb112057101e2b24a6fed7ed8f2e.json",
+          "bytes": 1517,
+          "sha256": "c1ae2c8ad8b7ed1c70ae79dbf8b50cdcd7d68268ac4f2b18010b4e31c4a505a8"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/836805dc8b36b0ba01d10e6d6009375e174ce5def74b9a50dce35823f2c4c4df.json",
+          "bytes": 1449,
+          "sha256": "0567a1f61be3c647b2b78d8abddb2d6de45a90dd26f70ca0afcb70379e6e1809"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/8567cd6a1717108da498a478d43161ea1e1482cb4a2e2112533124d60ef21231.json",
+          "bytes": 960,
+          "sha256": "bb15f8682d89687472620a7d8e53ac79fda7935c1624bbcf3bfd84ba755d83fe"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/9036f47dbc629c867c418814803a6311ee8ae93ab1d3432a2240c462b719bf91.json",
+          "bytes": 1595,
+          "sha256": "b79bb75223747b4a5ed9e27bfa8cbf2c1cd1791e91df7e73fc8b6ca00d42a9e3"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/b35df8c4b03f29ede9d0e87e9170ca57a76b377f55b7bfceed17a2a6200da25b.json",
+          "bytes": 798,
+          "sha256": "9eb6287a1a6e2edbf3dda00400a2f3c2215ab5df95b65a9ed495181bc3f54a15"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/b5c5f4b86d9c2a66e10cf70cf8eb1928f95c12f18c8a1f7d5cf3d649256b4b48.json",
+          "bytes": 2005,
+          "sha256": "bff29b7b7e80ab76a951a7bf4c0c38433498b823d64f0b150882d9e4cea40505"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/b5e9c416f9579d8f6d59d92c6ffb277368a9988e052caf3ecda4dfbf9ef104ad.json",
+          "bytes": 960,
+          "sha256": "fb32d515cb3980a426cc84f6c909ddb40531a5b9e629e362914d1beb2151c817"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/c1051aa41513516acbca7216d8b47843215c808fe53a3b62f17917dd05bb1bca.json",
+          "bytes": 960,
+          "sha256": "79a9fca76bdcd9dbe1055d97a3f59cafe271031346bb26a7ad9337b7c14d65e6"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/c36a280a3b5e28d97b2279dbcd5b6901d5ff1144dc8992e7d44fb16ddb3e33c3.json",
+          "bytes": 1883,
+          "sha256": "5042f237e0c027d9a42bf6f9e59d9504dfdb609090a8e1eaf81605c4f2102899"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/c653c9ece8e3b5cc824663c009a159c44feb058aa7097d16976db50a0ab62f28.json",
+          "bytes": 1449,
+          "sha256": "bef59b405d457eb53f625b000540e365074d1067f4ff1e41ee304fe49366dd37"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/c99a2e02a08987c18991242cd9d90db2979dfe128d7974ed72be6546f0e9dbc2.json",
+          "bytes": 1509,
+          "sha256": "9fbc3cbe1be6c7ddcd5955474667348667ed3ba786a462cb58794bd500cdda41"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/d84ceaa2bf46d361993989a49dcf710c478d2bbdd1fc1612676e405ba8eed497.json",
+          "bytes": 1517,
+          "sha256": "a46dd8c7d2fe916f308d78f574bbb514be11708bbef2d8e5d4a26a7483b8e2dc"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/e31dde12efd8e5c63b1ad89db000823172e5ba24f9309dca1f6a28513d12426f.json",
+          "bytes": 1883,
+          "sha256": "e0245aa52406756a978cf190342ebef41af6ac64a7eacd3069bff33a6d04e34a"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/e322ec8e0cde07451c89df14464f08b061a37c41135bc014255ccd10e594cfdb.json",
+          "bytes": 1449,
+          "sha256": "ef931824ead1dedd5f5204a9f208d26c5651b7187f12412c18c7d5e313805691"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/e9e5bc2660980ed5fc1204c1422002a653139b3cdf2c0db09fdb8ae7478a1149.json",
+          "bytes": 775,
+          "sha256": "f4d1e23bc59ac4fd422add3ea59edc02360c3dc496174468665fab17a7ab97ba"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/eacbf7525298ee87b09ebe1f139059a53eeb84928127037e1434eb02ce39ef14.json",
+          "bytes": 798,
+          "sha256": "20f8d0816c194c8fab72956ebc7bae3672ad43d88ec0a88d26da5ea3fa83a837"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/eb8db6acf878c22c7d5d580753cb5868d924ca7d4617584784aa46d97ce190d6.json",
+          "bytes": 1136,
+          "sha256": "100acfee016d8f0626ba808ac0ad6d0c774019ab047cd48d648ecd404267217e"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/ef1d913f9294b2d0a834b1b63a9ac98b5dda5d3e6f9800114a52c61bfabcc956.json",
+          "bytes": 2005,
+          "sha256": "238698700f8e18d5c204be5505d60ec564a3abd66f3421c27a4036ddc757e10c"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/f6ec92f6ee6620d6d741763b591ee8aed9f8b2bd298e93846369d13d1a8eee58.json",
+          "bytes": 1136,
+          "sha256": "2fb72d11dbe5b06411e2b193a0204e68572308bb6c6193820df75d830e2ae938"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/f8f72fc32b43c78228f7c4488ee1242d364092c7a1da1910ef0c923eae63b6be.json",
+          "bytes": 960,
+          "sha256": "fbc3ae9f856e46420dc12ef3529d91ca7a73c13237888f92b9e9ea46df877eae"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/f9f628b69fa019c48d395debe6d067ccd3e4185a52965bcaf069acd1c7c2dbb5.json",
+          "bytes": 1240,
+          "sha256": "f086e7f8389aa98b36e66c17031f2b1f2a050eb48b710f5a455cff5041c7897e"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/fe49c5dee50f2a687141e0e793642be23efab26c8b2e3c7edb196e41d37e7b50.json",
+          "bytes": 960,
+          "sha256": "6473a1e97e60741ffcc53f0146d8c2208f3fd7773bd5dcf2ce29d794d87cfafa"
+        }
+      ],
+      "exportedFiles": [
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238.json",
+          "bytes": 145979,
+          "sha256": "8e7c179a7af2d458766c487665576a76f00042ac4a36ee4d354aa6b15ffa213d"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/0e0d6b2b22353e01e13882d25dfaa97008044a6cdab669edf0831bee0126e101.json",
+          "bytes": 798,
+          "sha256": "c9efc978e71ceb23e5a1e08f5715ab8fb9ac46b9011d1e88bc4ccd19ae0fcabf"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/0ed0652f36f2d6fd1f221a9b8ebf9874a647039ae26301e53abd322e748ee269.json",
+          "bytes": 748,
+          "sha256": "73f56f7f1007ae020832538ac9be8e96870183c815990a6fb3d91a39a0383915"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/2a18df22f0582ac22f40a26042b54a1a8bb4a0c40dc252a49cff4f7babf9feec.json",
+          "bytes": 2005,
+          "sha256": "4094885c2cb3d26318a9a8970e328e35e23258aadd20311a99d0bc01c0c7c970"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/385ad35e8c1e8e141eef464acf29ce912b95d648099a8d29679808248f6a9b25.json",
+          "bytes": 1240,
+          "sha256": "c235efdc7aef090b6b254ac897c3afcf8839b0acf44aebd3be9a0ee7c38a1ed1"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/39f7ecfd31870956e5cc24805099a32396c3a380f367dc1d955d8d7a131e94d5.json",
+          "bytes": 1883,
+          "sha256": "47757fe893bb8ad5432f8f9df125935ee5400f7687c2b0a68e7374a21ba4b234"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/456ae8a77c0fa2d62d46c86a15337c91d4b29686b20278b071affbc0c85b337f.json",
+          "bytes": 1595,
+          "sha256": "594a50c93c287c16071e2ecad115cc954d28d2679249ca858353c7a57636a1da"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/598fc198eeadb60f495af2a4f5ab87f63c16c5a4504afc0caedcf176f364046e.json",
+          "bytes": 775,
+          "sha256": "f1412df621c8e498d25bd817bceb1e093f949382a997d16d170bf17e38f6812e"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/63dd93e78005bef7e9141d11971cc918ff691ce94fbff968e02742b268e70793.json",
+          "bytes": 960,
+          "sha256": "0a2361b797864e9d0a5a63984ccc26c078b8aea8a896600db92885e634ed7ec4"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/7096cb87aafa9e2f51056445eb624213b63acae571b31ef0dcd35cd2377b15a3.json",
+          "bytes": 1136,
+          "sha256": "28b8ed9f6494d35f587e1ff63399332aab62575611017fda386c97bbf635297d"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/768f12fd1a8af77246247686a1a6f390ddadcca97d1edb17f63d3b1cf4c33486.json",
+          "bytes": 1595,
+          "sha256": "437f3344fad3b9b6233124f30b69c9585bf819519d30c69e2354840ded963027"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/7b39de1198e6c2768da3aebe60b28e604a6a541a18849a60ce03da93b79ed265.json",
+          "bytes": 1240,
+          "sha256": "1726e195d519cf7f60cfe992cae29a06df7ae932530a4f0e0e858dd72b81d50e"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/7f1fe69c2cd0fb1620882bf093e5343ef1a5bb112057101e2b24a6fed7ed8f2e.json",
+          "bytes": 1517,
+          "sha256": "c1ae2c8ad8b7ed1c70ae79dbf8b50cdcd7d68268ac4f2b18010b4e31c4a505a8"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/836805dc8b36b0ba01d10e6d6009375e174ce5def74b9a50dce35823f2c4c4df.json",
+          "bytes": 1449,
+          "sha256": "0567a1f61be3c647b2b78d8abddb2d6de45a90dd26f70ca0afcb70379e6e1809"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/8567cd6a1717108da498a478d43161ea1e1482cb4a2e2112533124d60ef21231.json",
+          "bytes": 960,
+          "sha256": "bb15f8682d89687472620a7d8e53ac79fda7935c1624bbcf3bfd84ba755d83fe"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/9036f47dbc629c867c418814803a6311ee8ae93ab1d3432a2240c462b719bf91.json",
+          "bytes": 1595,
+          "sha256": "b79bb75223747b4a5ed9e27bfa8cbf2c1cd1791e91df7e73fc8b6ca00d42a9e3"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/b35df8c4b03f29ede9d0e87e9170ca57a76b377f55b7bfceed17a2a6200da25b.json",
+          "bytes": 798,
+          "sha256": "9eb6287a1a6e2edbf3dda00400a2f3c2215ab5df95b65a9ed495181bc3f54a15"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/b5c5f4b86d9c2a66e10cf70cf8eb1928f95c12f18c8a1f7d5cf3d649256b4b48.json",
+          "bytes": 2005,
+          "sha256": "bff29b7b7e80ab76a951a7bf4c0c38433498b823d64f0b150882d9e4cea40505"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/b5e9c416f9579d8f6d59d92c6ffb277368a9988e052caf3ecda4dfbf9ef104ad.json",
+          "bytes": 960,
+          "sha256": "fb32d515cb3980a426cc84f6c909ddb40531a5b9e629e362914d1beb2151c817"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/c1051aa41513516acbca7216d8b47843215c808fe53a3b62f17917dd05bb1bca.json",
+          "bytes": 960,
+          "sha256": "79a9fca76bdcd9dbe1055d97a3f59cafe271031346bb26a7ad9337b7c14d65e6"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/c36a280a3b5e28d97b2279dbcd5b6901d5ff1144dc8992e7d44fb16ddb3e33c3.json",
+          "bytes": 1883,
+          "sha256": "5042f237e0c027d9a42bf6f9e59d9504dfdb609090a8e1eaf81605c4f2102899"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/c653c9ece8e3b5cc824663c009a159c44feb058aa7097d16976db50a0ab62f28.json",
+          "bytes": 1449,
+          "sha256": "bef59b405d457eb53f625b000540e365074d1067f4ff1e41ee304fe49366dd37"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/c99a2e02a08987c18991242cd9d90db2979dfe128d7974ed72be6546f0e9dbc2.json",
+          "bytes": 1509,
+          "sha256": "9fbc3cbe1be6c7ddcd5955474667348667ed3ba786a462cb58794bd500cdda41"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/d84ceaa2bf46d361993989a49dcf710c478d2bbdd1fc1612676e405ba8eed497.json",
+          "bytes": 1517,
+          "sha256": "a46dd8c7d2fe916f308d78f574bbb514be11708bbef2d8e5d4a26a7483b8e2dc"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/e31dde12efd8e5c63b1ad89db000823172e5ba24f9309dca1f6a28513d12426f.json",
+          "bytes": 1883,
+          "sha256": "e0245aa52406756a978cf190342ebef41af6ac64a7eacd3069bff33a6d04e34a"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/e322ec8e0cde07451c89df14464f08b061a37c41135bc014255ccd10e594cfdb.json",
+          "bytes": 1449,
+          "sha256": "ef931824ead1dedd5f5204a9f208d26c5651b7187f12412c18c7d5e313805691"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/e9e5bc2660980ed5fc1204c1422002a653139b3cdf2c0db09fdb8ae7478a1149.json",
+          "bytes": 775,
+          "sha256": "f4d1e23bc59ac4fd422add3ea59edc02360c3dc496174468665fab17a7ab97ba"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/eacbf7525298ee87b09ebe1f139059a53eeb84928127037e1434eb02ce39ef14.json",
+          "bytes": 798,
+          "sha256": "20f8d0816c194c8fab72956ebc7bae3672ad43d88ec0a88d26da5ea3fa83a837"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/eb8db6acf878c22c7d5d580753cb5868d924ca7d4617584784aa46d97ce190d6.json",
+          "bytes": 1136,
+          "sha256": "100acfee016d8f0626ba808ac0ad6d0c774019ab047cd48d648ecd404267217e"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/ef1d913f9294b2d0a834b1b63a9ac98b5dda5d3e6f9800114a52c61bfabcc956.json",
+          "bytes": 2005,
+          "sha256": "238698700f8e18d5c204be5505d60ec564a3abd66f3421c27a4036ddc757e10c"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/f6ec92f6ee6620d6d741763b591ee8aed9f8b2bd298e93846369d13d1a8eee58.json",
+          "bytes": 1136,
+          "sha256": "2fb72d11dbe5b06411e2b193a0204e68572308bb6c6193820df75d830e2ae938"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/f8f72fc32b43c78228f7c4488ee1242d364092c7a1da1910ef0c923eae63b6be.json",
+          "bytes": 960,
+          "sha256": "fbc3ae9f856e46420dc12ef3529d91ca7a73c13237888f92b9e9ea46df877eae"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/f9f628b69fa019c48d395debe6d067ccd3e4185a52965bcaf069acd1c7c2dbb5.json",
+          "bytes": 1240,
+          "sha256": "f086e7f8389aa98b36e66c17031f2b1f2a050eb48b710f5a455cff5041c7897e"
+        },
+        {
+          "path": "z75-needs-human-exhausted/graph-engineering/artifacts/ac6fe3f5f5b54ce545a1ef1ee4380a8383491ddd2e7aa8312f7da61810333238/3a9c921e2593f99f318e9b7eb7f107235f9e8ccddae67284a666ecb7e1f3fcb4/fe49c5dee50f2a687141e0e793642be23efab26c8b2e3c7edb196e41d37e7b50.json",
+          "bytes": 960,
+          "sha256": "6473a1e97e60741ffcc53f0146d8c2208f3fd7773bd5dcf2ce29d794d87cfafa"
+        }
+      ],
+      "byteForByteProducedByOldApp": true,
+      "sanitization": "none",
+      "harnessPatch": {
+        "patchedFile": "scripts/graph-engineering/isolation.mjs",
+        "patchedSha256": "18bd5566b16857b26c105f8016e9291b762934406bdf2937bd634dfbd7704f23"
+      }
+    },
+    "z75-reviewer-pass-over-failing-test-needs-human": {
+      "release": "graph-v3.14.0-z7.5",
+      "installerSha256": "0b643b91bf1f98ef9ee82d3dfa13706cb08669bf2918449ada259743127645f6",
+      "oldApp": {
+        "name": "@zcode/desktop",
+        "version": "3.14.0-z7.5",
+        "flavor": "graph",
+        "main": "out/main/graph-entry.mjs"
+      },
+      "scenario": {
+        "script": "z5-native-smoke.mjs",
+        "args": [
+          "--scenario=reviewer-pass"
+        ],
+        "oldDriverExitCode": 0,
+        "oldDriverStatus": "PASS",
+        "captureTaken": "stop-1",
+        "allCaptures": [
+          "stop-1"
+        ]
+      },
+      "workspaceIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-c3jXCk\\workspace",
+      "graphProfileRelativeRoot": ".zcode/v2/graph-engineering/",
+      "recordVersion": 5,
+      "runStatuses": [
+        {
+          "version": 5,
+          "status": "NeedsHuman"
+        }
+      ],
+      "capturedFiles": [
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731.json",
+          "bytes": 59315,
+          "sha256": "077de2aa33c8577397a1c8b9a93d4d4a97963a1836e8826bbb79bc07b00bd23c"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/32290692713e30764ae8baf10bc021275d1c58a389a8fd37f96425015cb3c4fc.json",
+          "bytes": 1883,
+          "sha256": "3455ec52c5f6c8e8f37d177329efa761a17cb74a34eb3a585ee3171e99f2fd20"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/4af29971379f970916a33f296af490486c699767de9cbbcf4d94faab09b0b1ed.json",
+          "bytes": 951,
+          "sha256": "da18cdaf98ddb9b5490b98c3ddb7111876c2be6e94a8f2ee59f405e5757ec18c"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/603bca5c56b6e23471d469bd396c879fd1b7b7d1db97e25ea5159a6fe82e7420.json",
+          "bytes": 1449,
+          "sha256": "e0427f48e39518405aef4b18d0a1972e38af4ab953178c03c90d79d37e46a32e"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/62eb937421526d175e7a5b0280920eb23d1800389c9261699bc41923e066f291.json",
+          "bytes": 798,
+          "sha256": "39cd4eaf1a12cbaeec70d0712300d57f679a2fdeeb2e4299be145289627fccd0"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/71b0aab3b559f29c62486a78099dbdb26c05e2ad25931806d5d07a6f6ecbda60.json",
+          "bytes": 951,
+          "sha256": "cb02d2a0ea0169804d6f70fb62a1216561b30f929183ad8f07a5611b56d5b40d"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/866a0344b37bbb1725be8433e56028ed7a3ed029acfdae18108d299ab47304fc.json",
+          "bytes": 1240,
+          "sha256": "02705dd7e0f7da65ef5c405dff230a0b46cca87f21af8308941e395050a9d8e8"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/86f0e642fa5b3216bb3f75e15da6c980a66cca4de08f4ccd68cdb7d2dae651a7.json",
+          "bytes": 1595,
+          "sha256": "33d5980ad86a931f3f1ed363c51a075ba84055d75f6b96e0ff06c948f7739415"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/962b93b5ca33651d609aeec6051e48da15537f6f88b03e6d90343e0e3553ba6f.json",
+          "bytes": 1136,
+          "sha256": "aebba329ed97075bd5572e22a9fc6f6512054097e5724d78ee8fc9781d42f4a5"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/c3a8ff77ccd00190b3cc3feec6830aa372e5222bcf754d9d4fa7bd37f72800f6.json",
+          "bytes": 2005,
+          "sha256": "9841502ac03b6e6a4c18bbc9091b14e5f320d3f96eef2dfea3c498abe931920a"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/e0d72bef9b7b11f8a293c865df45a24e98468d3b25b9f7fffe9b8a3ac17f67d7.json",
+          "bytes": 1509,
+          "sha256": "321c84b05f7dffd0804bc8f6db58731f27d8c92288faabbe1be20bd93434d8e3"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/ed5aeb9b3a65714ecf708acd5a1a6de9e2225de931b6a0263bb3b66aa714e7c5.json",
+          "bytes": 748,
+          "sha256": "8ebd0cd43fa59078b03d799fe37493bafc6baec3d32036b4030d1dba5114d5c3"
+        }
+      ],
+      "exportedFiles": [
+        {
+          "path": "z75-reviewer-pass-over-failing-test-needs-human/graph-engineering/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731.json",
+          "bytes": 59315,
+          "sha256": "077de2aa33c8577397a1c8b9a93d4d4a97963a1836e8826bbb79bc07b00bd23c"
+        },
+        {
+          "path": "z75-reviewer-pass-over-failing-test-needs-human/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/32290692713e30764ae8baf10bc021275d1c58a389a8fd37f96425015cb3c4fc.json",
+          "bytes": 1883,
+          "sha256": "3455ec52c5f6c8e8f37d177329efa761a17cb74a34eb3a585ee3171e99f2fd20"
+        },
+        {
+          "path": "z75-reviewer-pass-over-failing-test-needs-human/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/4af29971379f970916a33f296af490486c699767de9cbbcf4d94faab09b0b1ed.json",
+          "bytes": 951,
+          "sha256": "da18cdaf98ddb9b5490b98c3ddb7111876c2be6e94a8f2ee59f405e5757ec18c"
+        },
+        {
+          "path": "z75-reviewer-pass-over-failing-test-needs-human/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/603bca5c56b6e23471d469bd396c879fd1b7b7d1db97e25ea5159a6fe82e7420.json",
+          "bytes": 1449,
+          "sha256": "e0427f48e39518405aef4b18d0a1972e38af4ab953178c03c90d79d37e46a32e"
+        },
+        {
+          "path": "z75-reviewer-pass-over-failing-test-needs-human/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/62eb937421526d175e7a5b0280920eb23d1800389c9261699bc41923e066f291.json",
+          "bytes": 798,
+          "sha256": "39cd4eaf1a12cbaeec70d0712300d57f679a2fdeeb2e4299be145289627fccd0"
+        },
+        {
+          "path": "z75-reviewer-pass-over-failing-test-needs-human/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/71b0aab3b559f29c62486a78099dbdb26c05e2ad25931806d5d07a6f6ecbda60.json",
+          "bytes": 951,
+          "sha256": "cb02d2a0ea0169804d6f70fb62a1216561b30f929183ad8f07a5611b56d5b40d"
+        },
+        {
+          "path": "z75-reviewer-pass-over-failing-test-needs-human/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/866a0344b37bbb1725be8433e56028ed7a3ed029acfdae18108d299ab47304fc.json",
+          "bytes": 1240,
+          "sha256": "02705dd7e0f7da65ef5c405dff230a0b46cca87f21af8308941e395050a9d8e8"
+        },
+        {
+          "path": "z75-reviewer-pass-over-failing-test-needs-human/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/86f0e642fa5b3216bb3f75e15da6c980a66cca4de08f4ccd68cdb7d2dae651a7.json",
+          "bytes": 1595,
+          "sha256": "33d5980ad86a931f3f1ed363c51a075ba84055d75f6b96e0ff06c948f7739415"
+        },
+        {
+          "path": "z75-reviewer-pass-over-failing-test-needs-human/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/962b93b5ca33651d609aeec6051e48da15537f6f88b03e6d90343e0e3553ba6f.json",
+          "bytes": 1136,
+          "sha256": "aebba329ed97075bd5572e22a9fc6f6512054097e5724d78ee8fc9781d42f4a5"
+        },
+        {
+          "path": "z75-reviewer-pass-over-failing-test-needs-human/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/c3a8ff77ccd00190b3cc3feec6830aa372e5222bcf754d9d4fa7bd37f72800f6.json",
+          "bytes": 2005,
+          "sha256": "9841502ac03b6e6a4c18bbc9091b14e5f320d3f96eef2dfea3c498abe931920a"
+        },
+        {
+          "path": "z75-reviewer-pass-over-failing-test-needs-human/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/e0d72bef9b7b11f8a293c865df45a24e98468d3b25b9f7fffe9b8a3ac17f67d7.json",
+          "bytes": 1509,
+          "sha256": "321c84b05f7dffd0804bc8f6db58731f27d8c92288faabbe1be20bd93434d8e3"
+        },
+        {
+          "path": "z75-reviewer-pass-over-failing-test-needs-human/graph-engineering/artifacts/77f3d4b8ac316fbf915912ae35f1a0578115f0a20812f888180565ec4880e731/e37d166f6915e8c7bf718e6e5f0b0e33dc834bfbec48db2d7ae4612b05dc662f/ed5aeb9b3a65714ecf708acd5a1a6de9e2225de931b6a0263bb3b66aa714e7c5.json",
+          "bytes": 748,
+          "sha256": "8ebd0cd43fa59078b03d799fe37493bafc6baec3d32036b4030d1dba5114d5c3"
+        }
+      ],
+      "byteForByteProducedByOldApp": true,
+      "sanitization": "none",
+      "harnessPatch": {
+        "patchedFile": "scripts/graph-engineering/isolation.mjs",
+        "patchedSha256": "ec592870030f861f4ac1ce62d13a98874d086dad566a056fd43a24e8f4ef326e",
+        "additionalPatches": [
+          {
+            "file": "scripts/graph-engineering/z2-native-helpers.mjs",
+            "patchedSha256": "a7d1cf18871f5726673dbdca4d8312bd785da1957899ec980d28135294567a31"
+          },
+          {
+            "file": "scripts/graph-engineering/z6-native-library.mjs",
+            "patchedSha256": "32952107c6bf221cd34ae2c89373e5352afa1bcc6b8c7d8fdc462ca686e3ccd9"
+          }
+        ]
+      }
+    },
+    "z75-sequential-completed": {
+      "release": "graph-v3.14.0-z7.5",
+      "installerSha256": "0b643b91bf1f98ef9ee82d3dfa13706cb08669bf2918449ada259743127645f6",
+      "oldApp": {
+        "name": "@zcode/desktop",
+        "version": "3.14.0-z7.5",
+        "flavor": "graph",
+        "main": "out/main/graph-entry.mjs"
+      },
+      "scenario": {
+        "script": "z2-native-smoke.mjs",
+        "args": [
+          "--scenario=complete"
+        ],
+        "oldDriverExitCode": 0,
+        "oldDriverStatus": "PASS",
+        "captureTaken": "stop-2",
+        "allCaptures": [
+          "stop-1",
+          "stop-2"
+        ]
+      },
+      "workspaceIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-zugLmY\\workspace",
+      "graphProfileRelativeRoot": ".zcode/v2/graph-engineering/",
+      "recordVersion": 2,
+      "runStatuses": [
+        {
+          "version": 2,
+          "status": "Completed"
+        }
+      ],
+      "capturedFiles": [
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/6399098cb5e199931f38c721d0b578d8a1caf54ece1b6986ec933c58b07b8ec7.json",
+          "bytes": 18040,
+          "sha256": "cffc5b8eaecc877ff99140a1697d667af0b83f2c1fcd1fcc9fd76cd660719994"
+        }
+      ],
+      "exportedFiles": [
+        {
+          "path": "z75-sequential-completed/graph-engineering/6399098cb5e199931f38c721d0b578d8a1caf54ece1b6986ec933c58b07b8ec7.json",
+          "bytes": 18040,
+          "sha256": "cffc5b8eaecc877ff99140a1697d667af0b83f2c1fcd1fcc9fd76cd660719994"
+        }
+      ],
+      "byteForByteProducedByOldApp": true,
+      "sanitization": "none",
+      "harnessPatch": {
+        "patchedFile": "scripts/graph-engineering/isolation.mjs",
+        "patchedSha256": "18bd5566b16857b26c105f8016e9291b762934406bdf2937bd634dfbd7704f23"
+      }
+    },
+    "z75-test-failure-despite-model-pass": {
+      "release": "graph-v3.14.0-z7.5",
+      "installerSha256": "0b643b91bf1f98ef9ee82d3dfa13706cb08669bf2918449ada259743127645f6",
+      "oldApp": {
+        "name": "@zcode/desktop",
+        "version": "3.14.0-z7.5",
+        "flavor": "graph",
+        "main": "out/main/graph-entry.mjs"
+      },
+      "scenario": {
+        "script": "z4-native-smoke.mjs",
+        "args": [
+          "--scenario=model-pass"
+        ],
+        "oldDriverExitCode": 0,
+        "oldDriverStatus": "PASS",
+        "captureTaken": "stop-1",
+        "allCaptures": [
+          "stop-1"
+        ]
+      },
+      "workspaceIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-aAk6YG\\workspace",
+      "graphProfileRelativeRoot": ".zcode/v2/graph-engineering/",
+      "recordVersion": 4,
+      "runStatuses": [
+        {
+          "version": 4,
+          "status": "Failed"
+        }
+      ],
+      "capturedFiles": [
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/0bb96bb08e58235b5ea67cf90e923e6b11effbb7281b2fef8a4b22ad4094e1cc.json",
+          "bytes": 728,
+          "sha256": "d3193e4bfd58e0e13e0c4a7a026780338ff4d7f0dec0390a7f43c48bdac858f5"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/2008fdba55274b7ef516f77ccab7827e5395d595db2e6cd5fc0901e323732f6b.json",
+          "bytes": 1449,
+          "sha256": "555b3ed1aace67c7ae2f45a50259e03a1c915094849945b77251de86e7daaf3b"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/282833561c4e2dcb3a03e40c4ac51b814b4ea9e09b1a5ae2e4592bf0b0ad90a0.json",
+          "bytes": 1883,
+          "sha256": "948e5f7b527d88cbbfc6383a221985354f5419a79d1b0f16af4043d52ddc49ae"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/3fb63fd05656b734724f58d798cfcfb6345a32749bc97f4659693f7d3184179f.json",
+          "bytes": 798,
+          "sha256": "17f3cdc1f9b8190e8c0324ddbbd6b89b16b1ae6d4931db2798049f99a423d6fa"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/6f3b1fa7f3971629ed0de53d768747a0373826e9ee63bc6c4d14aef21ad28bd3.json",
+          "bytes": 2005,
+          "sha256": "164ffbe31e1e3bc0c3244218bb8a2daf788695d85c54864c4769b4ce354e7731"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/7c565d8b38864b200a598dd7814418535b73917459583e6837cafddf05249b04.json",
+          "bytes": 1136,
+          "sha256": "aaa418494f17f15115f268ce92e7c18bef8c33d49e56f45d8c7572064d6211a1"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/8f52f84d6fd177c56467c00a262412d5fcbe4a1a05cbef462f99dee7e31daf57.json",
+          "bytes": 1509,
+          "sha256": "362b494c48ed8480b298a7bc5b7a8817efd287f7b8db692f4f2a166ee36688ac"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/af412fa695efce03547d0feaf872a38265d7abc44a9e09667a674fd15178b3a8.json",
+          "bytes": 728,
+          "sha256": "1b5a2d9675e1a3f3cc48e245d8c15bcb87845120e50cd57ef0ca38b3aa697d27"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/dfafde6a89143a2779a448ac5826c1f4bf341350ae1769ed51896b1298716acc.json",
+          "bytes": 1240,
+          "sha256": "5d8cb20aef21c401d0478b220cd8b3af9b6c35bb4fbfd7d7c6e09969112eed8e"
+        },
+        {
+          "profileRelative": ".zcode/v2/graph-engineering/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d.json",
+          "bytes": 30581,
+          "sha256": "bac8c69010ed531760247bf2adfcc3b79ae62dce1b07d068443b36ac3f0f6122"
+        }
+      ],
+      "exportedFiles": [
+        {
+          "path": "z75-test-failure-despite-model-pass/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/0bb96bb08e58235b5ea67cf90e923e6b11effbb7281b2fef8a4b22ad4094e1cc.json",
+          "bytes": 728,
+          "sha256": "d3193e4bfd58e0e13e0c4a7a026780338ff4d7f0dec0390a7f43c48bdac858f5"
+        },
+        {
+          "path": "z75-test-failure-despite-model-pass/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/2008fdba55274b7ef516f77ccab7827e5395d595db2e6cd5fc0901e323732f6b.json",
+          "bytes": 1449,
+          "sha256": "555b3ed1aace67c7ae2f45a50259e03a1c915094849945b77251de86e7daaf3b"
+        },
+        {
+          "path": "z75-test-failure-despite-model-pass/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/282833561c4e2dcb3a03e40c4ac51b814b4ea9e09b1a5ae2e4592bf0b0ad90a0.json",
+          "bytes": 1883,
+          "sha256": "948e5f7b527d88cbbfc6383a221985354f5419a79d1b0f16af4043d52ddc49ae"
+        },
+        {
+          "path": "z75-test-failure-despite-model-pass/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/3fb63fd05656b734724f58d798cfcfb6345a32749bc97f4659693f7d3184179f.json",
+          "bytes": 798,
+          "sha256": "17f3cdc1f9b8190e8c0324ddbbd6b89b16b1ae6d4931db2798049f99a423d6fa"
+        },
+        {
+          "path": "z75-test-failure-despite-model-pass/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/6f3b1fa7f3971629ed0de53d768747a0373826e9ee63bc6c4d14aef21ad28bd3.json",
+          "bytes": 2005,
+          "sha256": "164ffbe31e1e3bc0c3244218bb8a2daf788695d85c54864c4769b4ce354e7731"
+        },
+        {
+          "path": "z75-test-failure-despite-model-pass/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/7c565d8b38864b200a598dd7814418535b73917459583e6837cafddf05249b04.json",
+          "bytes": 1136,
+          "sha256": "aaa418494f17f15115f268ce92e7c18bef8c33d49e56f45d8c7572064d6211a1"
+        },
+        {
+          "path": "z75-test-failure-despite-model-pass/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/8f52f84d6fd177c56467c00a262412d5fcbe4a1a05cbef462f99dee7e31daf57.json",
+          "bytes": 1509,
+          "sha256": "362b494c48ed8480b298a7bc5b7a8817efd287f7b8db692f4f2a166ee36688ac"
+        },
+        {
+          "path": "z75-test-failure-despite-model-pass/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/af412fa695efce03547d0feaf872a38265d7abc44a9e09667a674fd15178b3a8.json",
+          "bytes": 728,
+          "sha256": "1b5a2d9675e1a3f3cc48e245d8c15bcb87845120e50cd57ef0ca38b3aa697d27"
+        },
+        {
+          "path": "z75-test-failure-despite-model-pass/graph-engineering/artifacts/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d/0c413718f9dc45bd17cb4ac7331b20308b2435b2e317926d37a359f781a9f488/dfafde6a89143a2779a448ac5826c1f4bf341350ae1769ed51896b1298716acc.json",
+          "bytes": 1240,
+          "sha256": "5d8cb20aef21c401d0478b220cd8b3af9b6c35bb4fbfd7d7c6e09969112eed8e"
+        },
+        {
+          "path": "z75-test-failure-despite-model-pass/graph-engineering/c457a84ad90d42f89c89cd2d887c9d94fc8adb2a0afe327b6c1a5d9d8555ce1d.json",
+          "bytes": 30581,
+          "sha256": "bac8c69010ed531760247bf2adfcc3b79ae62dce1b07d068443b36ac3f0f6122"
+        }
+      ],
+      "byteForByteProducedByOldApp": true,
+      "sanitization": "none",
+      "harnessPatch": {
+        "patchedFile": "scripts/graph-engineering/isolation.mjs",
+        "patchedSha256": "18bd5566b16857b26c105f8016e9291b762934406bdf2937bd634dfbd7704f23"
+      }
+    }
+  }
+}
