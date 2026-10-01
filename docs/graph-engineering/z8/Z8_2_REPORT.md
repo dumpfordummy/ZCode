@@ -1,5 +1,136 @@
 # Z8.2 report — historical upgrade, backup and conservative recovery
 
+**Final Z8.2 status: Z8.2 HISTORICAL UPGRADE AND CONSERVATIVE RECOVERY VERIFIED — SECURITY AND INSTALL ACCEPTANCE PENDING.**
+
+This file has two parts. **Part A** reports the approved compatibility and recovery correction and carries the final status. **Part B** is the first Z8.2 report, preserved as written; its blocker (two genuine z7.5 records that the current build could not read) is what Part A fixes. Nothing was installed, signed, tagged, published, pushed or merged; Z8.3–Z8.5 were not started. This is **not** installer-upgrade acceptance, and security acceptance is pending.
+
+# Part A — compatibility and recovery correction
+
+Spec: [Z8_2_SPEC.md](Z8_2_SPEC.md) section 13 (written before the behavior changed). Operator guide: [GRAPH_DATA_OPERATIONS.md](GRAPH_DATA_OPERATIONS.md). Evidence: [evidence/z8-2-correction/](evidence/z8-2-correction/).
+
+## A1. What was preserved
+
+- Branch `claude/z8-2-upgrade-recovery`, continued from `9544fa6cbf6d7ddda168a3e426c9951ca3cbc071`; every earlier commit, the 15 historical fixtures (byte-identical, hash-checked against `PROVENANCE.json`), the Part B report and all failed-attempt evidence are intact.
+- The **original candidate `dist-graph-z82`** (built from `8188a88`; installer SHA-256 `84cba5250f58cabc5f2047ea45c162f630e6f4a7f6a85c2349ce0fe69c0718dd`, manifest `785dbb14…`, inspection `bef5c67c…`) was not touched; its hashes were re-checked after the correction build.
+- The first matrix result for the original candidate (13 PASS + 2 fail-closed GAP) and the first expectation failure of the corrected matrix (A8) stay in the evidence folders.
+
+## A2. Instruction-resolution contract: what it is and what it is not
+
+Reconfirmed against the pinned tags and the genuine fixture bytes: z7.5's resolver returns `instructions + referenceSuffix`; the current one adds `evidenceSuffix` (only for a task whose JSON output schema has `evidenceReferences`; it embeds the artifact ids of the attempt's frozen bindings). `ed3bd3a` is the only commit after z7.5 that changed the resolver. Both validators (load-time routing check and continuation-time `bindingsMatch`) rebuild the instructions from the attempt's frozen inputs and compare.
+
+- **Marker.** Optional `instructionContract` on a **node attempt**, valid value `2` only. Per attempt, not per run, because a run explicitly continued by a newer build can hold attempts prepared by different builds. Independent of record version, workflow/template version and application version. No record-version bump.
+- **Who writes it.** `GraphSequencer`, at the single place that sets `resolvedInstructions`. Every attempt prepared after this change is marked 2 (including attempts of an older run prepared after explicit continuation). Already-prepared attempts are never re-resolved or rewritten.
+- **Marked 2:** reconstructed with the current contract only; exact equality of the complete instructions and bindings; **no fallback to the legacy rule** (tested: a marked attempt carrying the z7.5 text fails).
+- **Unmarked:** accepted only if its frozen instructions equal, completely and exactly, the reconstruction under contract 2 (post-suffix) **or** contract 1 (pre-suffix). No trimming, suffix stripping, substring/prefix matching or arbitrary trailing text (tested with appended text, whitespace, truncation, a corrupted or shortened evidence-id list). Schema, identity, artifact, digest and evidence checks are untouched.
+- **Unknown values.** Integer above 2 → readable "newer, unsupported" error (supported maximum reported as 2); `1`, `0`, strings, `null`, fractions → ordinary malformed-data error. Contract 1 is never written.
+- **Ambiguity, stated plainly.** For a task without `evidenceReferences` both contracts yield identical text (tested across the genuine v2/v4/v5 fixtures), so the writer of an unmarked attempt is unknown and irrelevant. For a task with `evidenceReferences` an unmarked attempt matches whichever full reconstruction it equals. Writer identity is never inferred from timestamps, file names or labels.
+- **Limits.** A discriminator and a content comparison are consistency checks. They are **not authentication**: anyone who can edit the file can write a self-consistent record. The mixed case (older unmarked attempts plus later marked ones) is accepted and tested.
+- **Compatibility.** Older readers (the original candidate and earlier) have a strict attempt schema and will reject a record containing the marker, fail-closed; downgrade stays unsupported. New readers accept every older writer's unmarked data.
+- **Reading is not acting.** Loading a historical record starts no native work (tested with a native stub that throws on any non-probe call, and in the packaged matrix: 0 model requests, 0 native inputs). Continuation keeps its existing freshness/ownership/release rules; the continuation-time audit uses the same per-attempt rules (tested; the audit's other release rules are unchanged).
+
+No genuine post-suffix **unmarked** record exists in the fixtures (no released binary in the evidence set wrote one); that case is covered with a record synthesized from the current resolver, and is labelled so.
+
+## A3. Idempotent cold-load reconciliation
+
+Reproduced first: every launch re-saved an already-reconciled record (`updatedAt` moved) and created a snapshot; with the bound of 20 the genuine pre-upgrade snapshot is gone after about 20 launches. Now the required state is computed before `updatedAt` is assigned; if the run already equals it, the bytes, `updatedAt` and snapshot set are untouched and retention is not invoked. A run in `Interrupted`/`AwaitingContinuation` is still evaluated (a stale `resumeRequired`, missing gate or checkpoint changes and snapshots). Genuine changes still snapshot the exact bytes first; a failed snapshot still aborts before mutation; the bound stays 20.
+
+Evidence (`adapters/reconcile-idempotence.test.ts`, real filesystem adapter, a fresh Host per open, clock advancing each time):
+
+- 4 historical fixtures × **50 independent cold loads**: record bytes, snapshot names, bytes and modification times unchanged after the first stabilizing open; the exact pre-upgrade snapshot still readable after all 50. For `z22-permission-interrupted-after-old-restart` the first open is already a no-op (no snapshot at all).
+- A later genuine change (stale `resumeRequired` on a gate whose status is already `AwaitingContinuation`; and an `Interrupted` status with a resumable gate) is not skipped: it changes, the replaced bytes are snapshotted, the original snapshot stays, and 50 further opens are again stable.
+- A terminal record is never rewritten or snapshotted.
+- **The tests discriminate**: with the previous `state.ts` restored, 5 of these 7 tests fail (the pre-fix behavior); with the fix they pass.
+- Packaged: after the first open, each non-terminal fixture was reopened twice in the real app: Graph files byte-identical and the same statuses shown, 0 model requests (3 transition fixtures and the no-op fixture, 8 reopens).
+
+## A4. Restore protection and retention (found by a new test)
+
+The spec's two statements about pre-restore snapshots are replaced by one policy (spec 13.5): they live in the same store and count toward the bound of 20; during one restore both the restore source and the just-preserved current record are protected from that restore's pruning; afterwards ordinary retention applies to everything; neither is a permanent backup. The new test (store at its bound, restore source the oldest snapshot) showed the old pruning kept 21 snapshots when it skipped the protected oldest one; `prune` now removes the oldest **unprotected** snapshots until the bound holds. Tests: source and preserved record survive; the bound holds; later ordinary retention does evict them; and (Windows) a failed replacement leaves both in the store and the record unchanged. The four failure-injection tests and all restore refusals still pass.
+
+## A5. Readable failures
+
+`GraphRecordIntegrityError` (code `GRAPH_RECORD_INTEGRITY`): "This Graph record could not be verified: Resolved instructions differ from exact frozen iteration bindings (run …, attempt …, node …, instruction contract …). …" — concise (< 900 characters), says nothing was changed or started, never says "upgrade", attaches the bounded original diagnostic and the original error as `cause`. Distinct from the unsupported-newer error and from the unchanged malformed-data error (tested with an edited instruction on a genuine record; file bytes unchanged, no snapshot, no native call). Validation is not bypassed to display anything.
+
+## A6. Corrected operations guide
+
+[GRAPH_DATA_OPERATIONS.md](GRAPH_DATA_OPERATIONS.md) no longer says to copy the private profile or provider settings. It lists exactly what a manual backup may contain (record files, `workflow-library.json`, `artifacts\`, `reconcile-snapshots\`) and what it excludes and does not restore (`workspaces\` project copies, locks, native sessions and ledger, Electron data, credentials, provider configuration, project source, project checks, `.zcode\config.json`); states that the mechanism excludes credential/provider-config files while records can still contain confidential or secret text, that snapshots are not support bundles and that bounded retention is not a permanent backup; describes the idempotent reopen; and uses `$env:USERPROFILE`/`Join-Path` PowerShell. **The documented commands were executed verbatim** (extracted from the guide by `scripts/graph-engineering/rehearse-data-operations.ps1`) in a disposable sandbox with `USERPROFILE` pointed at it, against a copy of a genuine historical record: the backup contained the record and `artifacts` but not `workspaces`, lock folders or the stand-in provider file; `list` showed the snapshot; `restore` without `--yes` was refused with the record unchanged; `restore --yes` returned the exact original bytes; the stand-in provider file was untouched; the sandbox was removed ([output](evidence/z8-2-correction/rehearse-data-operations.out.txt)). No real profile was touched.
+
+## A7. Source, build and harness identities
+
+| Item                                                       | Value                                                                                                                                                                                                 |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Product-code commit the corrected candidate was built from | `7df406255093e83f7907779a53e1103c4f524663` (clean tree, `dirty: false`)                                                                                                                               |
+| Harness commit recorded by the packaged run                | `8898c1d0b2474e3a84bd55a9a3c1dd4607715d99` (clean) — later commits are report/evidence only                                                                                                           |
+| Corrected candidate                                        | `packages/desktop/dist-graph-z82c/` — `ZCode Graph-3.14.3-z8.2-win-x64.exe`, 149,887,908 bytes, SHA-256 `90d75fb022d06e2adadff428872188fb151f337aa763737f91c9cf2252cf413b`, unsigned, never installed |
+| Unpacked tree                                              | 86 files, 680,337,866 bytes, digest `12e5a222045a68492b183311cd05c33fea12967c36153dfbc3feb10107a9968f`; `ZCode Graph.exe` `75d2da8b…`, `app.asar` `39df9532…`                                         |
+| Package inspection                                         | `PASS`, 0 unexplained hits, 147 explained                                                                                                                                                             |
+| Package hashes                                             | verified before and after the packaged run, identical                                                                                                                                                 |
+| Original candidate                                         | `dist-graph-z82/`, unchanged (see A1)                                                                                                                                                                 |
+| Version label                                              | `3.14.3-z8.2` (unreleased; root `package.json` stays `3.14.3`)                                                                                                                                        |
+| Order                                                      | emitting checks (typecheck, lint, architecture) and the test suites ran on `7df4062` before the build; the build ran last                                                                             |
+
+The build's embedded `validation` block is that pre-build run ([validation.pre-build.json](evidence/z8-2-correction/validation.pre-build.json)); the final validation is in A8. No second reproducibility build was made.
+
+## A8. Results
+
+**Upgrade matrix, corrected package** ([upgrade-matrix-final/](evidence/z8-2-correction/upgrade-matrix-final/)): 15/15 PASS. Every run of every fixture, including the two formerly unreadable z7.5 reviewer-loop records (`BudgetExhausted`, `NeedsHuman`), appears in the UI with the status recorded in the record.
+
+| Fixture class                                                                                                           | Fixtures | Result                                                                                                                                                                                                                        |
+| ----------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Terminal (Completed, Cancelled, Rejected, Failed, NeedsHuman, BudgetExhausted), including the two formerly unreadable   | 10       | record, artifacts and library bytes identical; no snapshot; 0 model requests; 0 native inputs                                                                                                                                 |
+| Unfinished → reconciled (WaitingForPermission, WaitingForUser → Interrupted; WaitingForApproval → AwaitingContinuation) | 3        | exact original bytes in the snapshot store; only status/message/`updatedAt`/`resumeRequired` differ; no approval, answer or tool attempt changed; 0 model requests; 0 native inputs; two packaged reopens each byte-identical |
+| Already reconciled by the old app (`z22-permission-interrupted-after-old-restart`)                                      | 1        | **no-op**: bytes identical, no snapshot; two reopens identical                                                                                                                                                                |
+| Workflow library (`z75-library-user-versions`)                                                                          | 1        | both Graph files identical                                                                                                                                                                                                    |
+
+The first corrected-package matrix run ([attempt 1](evidence/z8-2-correction/upgrade-matrix-attempt-1-expectation-failure/)) reported 1 FAIL: the driver still demanded a snapshot for the already-reconciled fixture (a stale expectation from before the idempotence fix). The driver was updated to the spec (no-op ⇒ no snapshot) and the whole matrix re-run (final). Unsupported-version cases on the corrected package ([newer-version/](evidence/z8-2-correction/newer-version/)): synthetic top-level version 6 and `definition.version` 9 both PASS (readable message, bytes unchanged, no snapshot, 0 model requests, 0 native inputs).
+
+**Packaged baseline, corrected package** — run once: full suite **13 passed, 0 failed, 0 not run**, smoke exit 0, `satisfiesFullReleaseGate: true` (ordinary-chat, no-provider, telemetry-canary, z1-literal-compatibility, z2-complete, z2-question, z2-cancel-question, z2-cancel-permission, z2-cancel-progress, z2-restart-interrupted, z2-restart-permission, z2-persistence-recovery, sequential-engineering-reviewer). [package/](evidence/z8-2-correction/package/).
+
+**Historical-fixture unit suite** (`historical-fixtures.test.ts`): all 15 fixtures + the library load; the `KNOWN_GAPS` escape hatch is gone, so any supported historical fixture that becomes unreadable fails the suite. Negative integrity tests are kept separately (`instruction-contract.test.ts`).
+
+**Validation (final run).**
+
+FINAL_VALIDATION_PLACEHOLDER
+
+**`z75-build-test-completed` old-driver failure — re-run** ([evidence](evidence/z8-2-correction/z75-build-test-completed.rerun.json)). Re-running the tagged z7.5 `z4-native-smoke --scenario=complete` against the already-downloaded z7.5 binary reproduced the failure (exit 1, a **separate** capture; the original fixture, capture and FAIL label are untouched). The full output was kept this time: the driver recorded its completion assertions, then its final step (artifact-tamper inspection after a restart) timed out after 30 s waiting for an alert matching `digest/byte length mismatch` (`z4-native-artifact-fault.mjs:32`). Whether the cause is the old product, the harness or this environment is **not diagnosed**; the scenario is not marked PASS and the original log is not recovered. In both captures every artifact's content matches its manifest digest and length, so the probe's edit did not reach the captured Graph bytes. The `z75-library-user-versions` driver failure (late dialog-hidden wait, after the library file was written) keeps its label.
+
+## A9. Mapping to Z8 acceptance IDs
+
+| ID                                             | Result                                                                                                                                                                                                                                                                                                        |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Z8-A03 historical upgrade                      | **Verified for the 15 captured data sets** with the current code and, in the packaged matrix, the corrected unpacked build copied over fresh profiles. Not NSIS installer-upgrade acceptance; no native-session migration is claimed (Graph data was copied into fresh profiles with an empty native ledger). |
+| Z8-A04 interrupted work across restart/upgrade | **Verified**: transitions with exact-original snapshots, no-op for already-reconciled records, 50-open stability at code level and two real reopens per fixture, packaged restart/permission/persistence cases pass.                                                                                          |
+| Z8-A05 migration/backup failure and restore    | **Verified at code level** (four injection points, retry, restore refusals, restore at the bound, failed replacement) and by rehearsal of the documented commands on disposable data; newer-version fail-closed in the packaged app.                                                                          |
+
+## A10. Failed or superseded attempts in the correction
+
+| Attempt                                                                 | Result                                                                                                                                                | Resolution                                                             |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| First run of the updated historical-fixture test                        | 1 failure: the already-reconciled fixture no longer produces a snapshot                                                                               | test now asserts the no-op explicitly                                  |
+| `record-version.test.ts` after adding `supported` to the finding        | 1 failure (expected shape)                                                                                                                            | test updated                                                           |
+| New restore-at-bound test                                               | failed: 21 snapshots remained                                                                                                                         | real defect in `prune`; fixed (A4)                                     |
+| Documentation rehearsal, first runs                                     | the "refused without `--yes`" check printed False although the tool refused (my text match was wrong) and a first run aborted on a native stderr line | check rewritten to use exit code and unchanged hash; sandboxes removed |
+| Corrected-package matrix, attempt 1                                     | 1 FAIL (stale driver expectation)                                                                                                                     | driver fixed, matrix re-run: 15/15                                     |
+| Several scripted edits lost backslashes or line breaks (shell escaping) | caught by `node --check`, the formatter and the tests before any commit                                                                               | re-applied with the editor                                             |
+
+## A11. NOT RUN / limits that remain
+
+- Installer (NSIS) upgrade, signing, Windows Sandbox/VM runs: not authorized, not run.
+- Native-session migration: not claimed. The matrix uses fresh profiles with an empty native ledger.
+- 50 GUI launches: not run (50 cold loads were run at code level; two real reopens per non-terminal fixture).
+- An end-to-end **explicit continuation** of a historical run in the packaged app: not run. Continuation-time validation is covered by the shared per-attempt rules, the audit test and the existing continuation suites.
+- A genuine historical `AwaitingContinuation` route-checkpoint record; a genuine post-suffix unmarked record: do not exist in the evidence set.
+- A process kill during a record write, a full disk, restore on non-Windows (the read-only failure test is Windows-only).
+- Newer-version handling for `workflow-library.json`.
+- The cause of the two old-driver failures (A8) and the original `z75-build-test-completed` log.
+
+---
+
+# Part B — the first Z8.2 report (preserved as written)
+
+> **Status of Part B.** Its blocker and its observation 1 (re-snapshot on every launch) are resolved by Part A; its text below is unchanged so that the original findings, numbers and failed attempts remain as first reported. Where Part B says the two z7.5 records are unreadable or that retention can prune the original after about 20 launches, read Part A.
+
+## Z8.2 report as first written
+
 **Status: the Z8.2 recovery mechanisms are verified, but the requested completion line is withheld.** The required line is _"Z8.2 HISTORICAL UPGRADE AND CONSERVATIVE RECOVERY VERIFIED — SECURITY AND INSTALL ACCEPTANCE PENDING"_. It is not justified, because the historical upgrade check found one confirmed compatibility defect:
 
 > **Blocker.** Two genuine records written by the published `graph-v3.14.0-z7.5` binary (a reviewer inside a routing loop: `needs-human-exhausted`, `reviewer-pass-over-failing-test-needs-human`) **cannot be loaded by the current build**. Opening such a workspace shows a raw schema error instead of its run history. Cause: commit `ed3bd3a` ("UI enhancement for graph engineering…", merged after z7.5) changed `resolveGraphInstructions` to append an "evidence contract" suffix; the record integrity check recomputes instructions with the _current_ code and compares them with the frozen text the old app stored, so every z7.5 reviewer attempt with `evidenceReferences` now mismatches. The failure is fail-closed (file untouched, no snapshot, no work) and I did not edit the fixtures or loosen validation. Fixing it changes record integrity semantics, so it needs your decision (section 5). Everything else requested was completed and passed.
