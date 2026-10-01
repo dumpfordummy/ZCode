@@ -11,6 +11,7 @@ import { approvalWaitRun, completedRun, failedTestRun, permissionWaitRun } from 
 import { T, boot, openLibrary, selectValue } from "./ux-m3-helpers.mjs";
 import { checkScenarios } from "./ux-m4-scenarios-checks.mjs";
 import { contrastScenario } from "./ux-m4-scenarios-contrast.mjs";
+import { disclosureScenarios } from "./ux-m4-scenarios-disclosure.mjs";
 
 const QUICK = process.env.M4_QUICK === "1";
 const THEMES = QUICK ? ["zai-dark"] : ["zai-dark", "zai-light"];
@@ -105,6 +106,20 @@ const scenario = (locale) => ({
     await T(page, "graph-run-review-gate").click();
     await T(page, "graph-approval-request").waitFor();
     await frames(page, shotsDir, "m4-approval-inspect", locale, undefined, 100000);
+    // 披露区：运行检查器里的技术性披露栈（逐个展开，结构化事实在前，原始记录在其下）
+    await page.locator('[data-testid="graph-run-tab-steps"]').click();
+    for (const id of [
+      "graph-routing-iterations",
+      "graph-routing-checkpoints",
+      "graph-frozen-provenance",
+    ])
+      if (await T(page, id).count()) await T(page, id).locator(":scope > summary").click();
+    await page.locator('[data-testid="graph-select-node-task"]').first().click();
+    await page
+      .locator("summary", { hasText: /Technical identities|技术标识/ })
+      .first()
+      .click();
+    await frames(page, shotsDir, "m4-disclosures-run", locale, undefined, 760);
     await openLibrary(page);
     await frames(page, shotsDir, "m4-library", locale);
   },
@@ -144,6 +159,7 @@ const stressScenario = (locale) => ({
 export const uxM4Scenarios = [
   ...checkScenarios,
   contrastScenario,
+  ...disclosureScenarios,
   readyScenario("en-US"),
   scenario("en-US"),
   stressScenario("en-US"),

@@ -8,6 +8,7 @@ import { useGraphProjectSetup } from "@/hooks/useGraphProjectSetup.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphEditorText } from "./GraphEditorMode.js";
 import { GraphContextChip } from "./GraphContextChip.js";
+import { GraphDisclosure } from "./GraphDisclosure.js";
 import {
   GraphContextPicker,
   type GraphContextApply,
@@ -267,9 +268,12 @@ export function GraphContextSection({
       <p className="sr-only" role="status" aria-live="polite" data-testid="graph-context-live">
         {announcement}
       </p>
-      <details data-testid="graph-context-advanced">
-        <summary className="cursor-pointer">{editor("advanced")}</summary>
-        <div className="space-y-2 pt-2">
+      <GraphDisclosure
+        testId="graph-context-advanced"
+        title={editor("advanced")}
+        className="border-y border-border"
+      >
+        <div className="space-y-2">
           <p className="text-foreground-subtle">{t("advancedHelp")}</p>
           {roles.map((role) => (
             <label key={role.id} className="block space-y-1">
@@ -288,7 +292,7 @@ export function GraphContextSection({
             </label>
           ))}
         </div>
-      </details>
+      </GraphDisclosure>
     </section>
   );
 }

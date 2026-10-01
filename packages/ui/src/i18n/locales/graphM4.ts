@@ -31,6 +31,28 @@ const messages: Record<string, [string, string]> = {
   ],
   // 一次 Test 失败后运行在到达人工批准之前停止：执行事实按字面写。
   executionTestFailed: ["Stopped after Test failure", "测试失败后停止"],
+  // 检查器里的披露区：已知结构按“标签/值”呈现，原始记录放在其下的“原始记录”里，内容逐字节不变。
+  rawRecord: ["Raw record (JSON)", "原始记录（JSON）"],
+  iterationLabel: ["Iteration {n}", "第 {n} 轮迭代"],
+  iterationsMeta: ["{count} iterations recorded", "已记录 {count} 轮迭代"],
+  iterationsMetaOne: ["1 iteration recorded", "已记录 1 轮迭代"],
+  checkpointsMetaOne: ["1 checkpoint recorded", "已记录 1 个检查点"],
+  checkpointsMeta: ["{count} checkpoints recorded", "已记录 {count} 个检查点"],
+  noneRecorded: ["None recorded", "没有记录"],
+  stepsVisited: ["Steps visited", "已访问的步骤"],
+  attemptsCount: ["Attempts", "尝试"],
+  feedbackText: ["Feedback to the next attempt", "给下一次尝试的反馈"],
+  fingerprint: ["Failure fingerprint", "失败指纹"],
+  createdAt: ["Created", "创建时间"],
+  checkpointId: ["Checkpoint", "检查点"],
+  nextStep: ["Next step", "下一步"],
+  checkpointState: ["State", "状态"],
+  checkpointWaiting: ["Waiting for explicit Continue", "等待明确继续"],
+  checkpointConsumed: ["Consumed {time}", "已于 {time} 使用"],
+  checkpointRecorded: ["Recorded", "已记录"],
+  decisionId: ["Decision", "决定"],
+  digestLabel: ["Digest", "摘要"],
+  requestForDesign: ["Request for this design", "此设计的请求"],
   // 新建运行：就绪只表示可以进入审阅，不表示检查通过。
   readyToReview: [
     "Ready to review. Nothing starts until you confirm.",

@@ -6,6 +6,30 @@ Direction **A — Focus page** with the review refinements was implemented on br
 
 Spec (written before the code): [UX_M4_SPEC.md](UX_M4_SPEC.md). Rules: [DESIGN.md](../../../DESIGN.md) (Graph section rewritten). User guide: [USER_GUIDE.md](USER_GUIDE.md). Direction record: [UX_M4_DIRECTION.md](UX_M4_DIRECTION.md).
 
+## 00. Final disclosure / inspector polish
+
+Spec addendum: [UX_M4_SPEC.md](UX_M4_SPEC.md) section 7. Presentation only: no runtime, Host/service, evidence, reviewer, approval, permission, persistence, version or execution change; no dependency; no global or shared component styling touched.
+
+**One Graph disclosure.** `GraphDisclosure` / `GraphDisclosureStack` (`GraphDisclosure.tsx`, Graph tokens only) replace the browser-default look for the same interaction: a semantic `details`/`summary` (native Enter/Space, expanded state, focus), our own chevron that rotates only for its own open state (the browser triangle is removed), a row at least 36px high, a title in Graph type with an optional one-line secondary summary, a hover surface, a visible keyboard focus (accent border + fill), the body indented under its header, hairline separators and no cards. `data-testid` stays on the `details` and the `summary` remains its direct child, so existing drivers (`:scope > summary`) still work. `GraphFacts` renders known structured facts as aligned label/value rows.
+
+**Applied to:**
+- Run inspection: *Iterations, attempts and feedback*, *Persisted route checkpoints*, *Frozen workflow provenance*, *Technical identities and captured facts*, *Instruction template*, *Binding evidence*, *Terminal proof*.
+- Workflows setup: *Workspace defaults for the next run*, *Bounded repair policy* / *Routing and repair limits*, the request disclosure.
+- Same top-level pattern elsewhere in Graph: the context *Advanced* field, the Checks .NET profile and raw-checks disclosures, the experimental-workflows footer.
+- Not converted on purpose: the consent-critical preflight and approval-evidence disclosures, the sections inside `GraphWorkflowProvenance`, the guided-task and parallel-workflow disclosures, and the legacy run details. The nested sections of the Frozen provenance still carry their own heading, so "Frozen workflow provenance" appears twice when it is open.
+
+**"New request".** It owns the request text of the current design and an *Apply request* action that edits the design draft; it starts nothing and does not touch runs. That is configuration, so it stays a disclosure with clearer UI-owned wording, **"Request for this design"** (Chinese 此设计的请求), and a one-line summary showing the current request. The stored message id and behaviour are unchanged.
+
+**Hierarchy.** Routing limits, each iteration (index/time, steps visited as names, attempts, feedback, fingerprint), each checkpoint (id, next step, state, time, decision, digest) and the technical identities are label/value rows. The exact raw JSON is byte-for-byte unchanged, now under a nested **Raw record (JSON)** disclosure instead of being the default view. Nothing that is a blocker, evidence, provenance or an execution fact is hidden.
+
+**Tests.** New browser scenario `disclosure pattern…` (UX-M4 suite, 21/21): collapsed state (own row, no list marker, ≥36px, summary line), expanded structured facts, nested raw record closed by default and showing the exact JSON, Enter and Space toggles with focus staying on the summary, visible focus (border and fill differ), a 360-character unbroken title causing no horizontal overflow, dark and light, and English/Chinese UI-owned copy (`已访问的步骤`, `原始记录（JSON）`, `已记录 N 轮迭代`). The harness stubs the Workflows editor, so that part is covered by the native run below. A React server-render unit test was tried and dropped: source `.tsx` files in this repository are only compiled with the automatic JSX runtime by the bundler.
+
+**Results (final build, emitting checks first):** `pnpm typecheck` exit 0; `pnpm lint` exit 0 (0 errors, 75 warnings, unchanged); architecture OK; Desktop rebuilt. Browser harness: UX-M1 30/30, M2 18/18, M3 31/31, **M4 21/21**, context picker 14/14; UI unit tests 220/220. Native: UX-M4 `states` (new step S6 asserts the real disclosure rows: no list marker, ≥36px) and `approval`, UX-M1 `context` and `runs` pass; UX-M1 `states-en` failed once on `unbound-report: result kind` (the run detail was read before the result block rendered, an existing timing sensitivity not touched by this change) and passed on rerun. The wider historical matrix was not repeated.
+
+**Captures (native, 1280×720, dark and light):** `ux-m4/disclosures/disclosures-run-{dark,light}-1280x720.png` (run technical/step inspector with several disclosures open) and `disclosures-workflows-{dark,light}-1280x720.png` (the Workflows disclosure stack: workspace defaults, bounded repair policy, request for this design). I looked at all four.
+
+Visual acceptance is still yours.
+
 ## 0. Final polish pass (after the first review)
 
 Three presentation corrections only; no redesign, no UX-M5. All validation and blockers are unchanged; nothing persisted or in a service enum was altered for copy.

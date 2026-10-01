@@ -192,6 +192,74 @@ async function statesJourney() {
         receipt,
       );
     });
+    await step(
+      receipt,
+      "S6",
+      "Disclosure stacks: the run technical/step inspector and the Workflows inspector",
+      async () => {
+        const open = async (id) => {
+          const summary = T(window, id).locator(":scope > summary");
+          if ((await T(window, id).count()) && !(await T(window, id).evaluate((n) => n.open)))
+            await summary.click();
+        };
+        await eachTheme(
+          window,
+          "disclosures-run",
+          async () => {
+            await openRuns(window);
+            await window.locator('[data-testid="graph-run"]').first().click();
+            await T(window, "graph-run-tab-steps").click();
+            await window.locator('[data-testid^="graph-select-node-"]').first().click();
+            for (const id of [
+              "graph-routing-iterations",
+              "graph-routing-checkpoints",
+              "graph-frozen-provenance",
+            ])
+              await open(id);
+            const technical = window
+              .locator("summary", { hasText: "Technical identities and captured facts" })
+              .first();
+            if (await technical.count()) await technical.click();
+            // 披露行是我们自己的行：没有浏览器默认三角，行高不小于 36px
+            const rows = await window
+              .locator('[data-testid="graph-routing-iterations"] > summary')
+              .evaluate((node) => {
+                const style = getComputedStyle(node);
+                return { list: style.listStyleType, height: node.getBoundingClientRect().height };
+              });
+            assert.equal(rows.list, "none");
+            assert.ok(rows.height >= 36);
+            await window.evaluate(() => {
+              const node = document.querySelector('[data-testid="graph-routing-iterations"]');
+              node?.scrollIntoView({ block: "start" });
+            });
+          },
+          isolation,
+          receipt,
+        );
+        await eachTheme(
+          window,
+          "disclosures-workflows",
+          async () => {
+            await openRuns(window);
+            await T(window, "graph-view-design").click();
+            for (const id of [
+              "graph-default-configuration",
+              "graph-routing-settings",
+              "graph-guided-repair",
+              "graph-repeat-request",
+            ])
+              await open(id);
+            await window.evaluate(() => {
+              const node = document.querySelector('[data-testid="graph-default-configuration"]');
+              node?.scrollIntoView({ block: "start" });
+            });
+          },
+          isolation,
+          receipt,
+        );
+      },
+    );
   } catch (caught) {
     error = caught;
   } finally {

@@ -4,6 +4,7 @@ import type { useGraphProjectSetup } from "@/hooks/useGraphProjectSetup.js";
 import { Button } from "@/components/ui/button.js";
 import { Checkbox } from "@/components/ui/checkbox.js";
 import { Textarea } from "@/components/ui/textarea.js";
+import { GraphDisclosure } from "./GraphDisclosure.js";
 import { useGraphDraftStore } from "@/store/graphDraftStore.js";
 import { GraphSetupField, useGraphSetupText } from "./GraphSetupFields.js";
 import { GraphDotnetTestScopes } from "./GraphDotnetTestScopes.js";
@@ -78,8 +79,11 @@ export function GraphDotnetPreset({
           })
         }
       />
-      <details className="space-y-3 text-ui-sm" data-testid="graph-dotnet-preset">
-        <summary className="cursor-pointer">{t("preset")}</summary>
+      <GraphDisclosure
+        testId="graph-dotnet-preset"
+        title={t("preset")}
+        className="border-y border-border"
+      >
         <p className="text-foreground-subtle">{t("presetHelp")}</p>
         <div className="grid gap-3 sm:grid-cols-2">
           {[
@@ -190,7 +194,7 @@ export function GraphDotnetPreset({
             {error || (state.status === "error" ? state.error : "")}
           </p>
         ) : null}
-      </details>
+      </GraphDisclosure>
     </div>
   );
 }

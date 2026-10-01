@@ -18,12 +18,12 @@ Out of scope (separate authorization required): push/merge/release, new dependen
 
 Surface roles (dark and light), each visibly different from its neighbour:
 
-| Role      | Used for                                         | Token(s) redefined                          |
-| --------- | ------------------------------------------------ | ------------------------------------------- |
-| `shell`   | rail, tab strip, footer                          | `--color-sidebar`, `--color-header`         |
-| `canvas`  | the main working area                            | `--color-background`, `--color-panel`       |
-| `raised`  | panels, rows, inputs, selected row               | `--color-card`, `--color-input`, `--color-surface*` |
-| `overlay` | dialogs, menus, popovers                         | `--color-popover`                           |
+| Role      | Used for                           | Token(s) redefined                                  |
+| --------- | ---------------------------------- | --------------------------------------------------- |
+| `shell`   | rail, tab strip, footer            | `--color-sidebar`, `--color-header`                 |
+| `canvas`  | the main working area              | `--color-background`, `--color-panel`               |
+| `raised`  | panels, rows, inputs, selected row | `--color-card`, `--color-input`, `--color-surface*` |
+| `overlay` | dialogs, menus, popovers           | `--color-popover`                                   |
 
 Accent: one restrained blue for the primary action, the current selection, the active tab and links (`--color-brand` and its derived focus/selection tokens, scoped). Warning and failure keep their own hues and always carry an icon and words. Status colour never tints body text that has to reach 4.5:1.
 
@@ -35,11 +35,11 @@ Grouping order: whitespace and alignment, then a hairline divider, then a surfac
 
 ### 2.2 Width rule (not a blanket 780 px)
 
-| Surface                                                   | Width                                   |
-| --------------------------------------------------------- | --------------------------------------- |
-| Task entry, concise summaries, banner, step strip, forms  | readable column, `max-w-3xl` (48rem)    |
-| Graph canvas, node inspector, commands, file differences, detailed evidence, library tables | full workspace width |
-| Runs rail                                                 | `clamp(13rem, 17vw, 17rem)`; never squeezes the task column below 30rem at 1280 px |
+| Surface                                                                                     | Width                                                                              |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Task entry, concise summaries, banner, step strip, forms                                    | readable column, `max-w-3xl` (48rem)                                               |
+| Graph canvas, node inspector, commands, file differences, detailed evidence, library tables | full workspace width                                                               |
+| Runs rail                                                                                   | `clamp(13rem, 17vw, 17rem)`; never squeezes the task column below 30rem at 1280 px |
 
 There is **no permanent right inspector** and no third permanent information column. Node inspection on the canvas is a contextual side panel that exists only while a node is selected, as today.
 
@@ -104,3 +104,13 @@ Visual (for the user): both themes; English and Simplified Chinese; 1280×720 an
 - Contrast measured on the implemented surfaces by `ux-m4-contrast.mjs` (computed styles in the running page), both themes.
 - Shared-token check: Chat, Settings and plugin store captured before/after the token change and compared; expected difference is none.
 - `pnpm typecheck`, `pnpm lint`, `pnpm architecture:check --changed` before the Desktop build; one integrated native regression pass on the final build.
+
+## 7. Addendum: one Graph disclosure pattern (final M4 polish)
+
+Presentation only; no runtime, Host, evidence, approval, permission, persistence or version behaviour changes.
+
+- **One component.** `GraphDisclosure` (Graph-only, M4 tokens) replaces the browser-default `<details>`/`<summary>` look for the same interaction: a semantic `details`/`summary` (Enter/Space, native expanded state, focus kept), a chevron that rotates, a row at least 36px high, a title in Graph typography with an optional one-line secondary summary, a hover surface, a visible keyboard focus (border/fill, per DESIGN.md), and an expanded body indented under its header. Rows sit in a `GraphDisclosureStack` separated by hairlines (no cards, no nested boxes). Existing `data-testid`s stay on the `details` element and the `summary` stays its direct child, so current drivers keep working.
+- **Applied to** run inspection (iterations/attempts/feedback, route checkpoints, frozen provenance, technical identities, instruction template, binding evidence, terminal proof) and the Workflows setup stack (workspace defaults, routing and bounded-repair settings, the request for this design), plus other Graph disclosures that are the same top-level pattern (context Advanced, Checks setup, experimental footer). Consent-critical preflight and approval-evidence disclosures keep their structure.
+- **"New request"** owns a text field and an _Apply request_ action that edits the request of the current design; it starts nothing and does not touch runs. It is configuration, so it stays a disclosure with UI-owned wording **"Request for this design"** (the stored message id is unchanged).
+- **Hierarchy.** Known structured facts (iteration, steps visited, checkpoint state, identities) render as aligned label/value rows (`GraphFacts`); the exact raw JSON/text is kept byte-for-byte under a "Raw record" disclosure inside the section, never the default view when a structure exists. Blockers, evidence, provenance and execution facts are never hidden by this.
+- **Acceptance.** Browser coverage for collapsed, expanded, keyboard toggle (Enter and Space), visible focus, long titles, optional summary, both themes and English/Chinese UI-owned copy; native capture of the run inspector and the Workflows inspector at 1280×720 in both themes.

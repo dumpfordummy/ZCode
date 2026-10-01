@@ -7,6 +7,7 @@ import { GraphEditor } from "./GraphEditor.js";
 import type { GraphPanelProps } from "./graphEngineeringView.js";
 import { GraphParallelPanel } from "./GraphParallelPanel.js";
 import { graphFocusClass } from "./graphFocus.js";
+import { GraphDisclosure } from "./GraphDisclosure.js";
 
 export default function GraphEngineeringPanel(props: GraphPanelProps) {
   const [parallel, setParallel] = useState(false);
@@ -72,10 +73,10 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
       )}
       {graph.local ? (
         <footer className="shrink-0 border-t border-border bg-header px-4 py-2">
-          <details className="text-ui-sm" data-testid="graph-advanced">
-            <summary className="cursor-pointer">
-              {intl.formatMessage({ id: "graph.preZ8.experimental" })}
-            </summary>
+          <GraphDisclosure
+            testId="graph-advanced"
+            title={intl.formatMessage({ id: "graph.preZ8.experimental" })}
+          >
             <Button
               variant={parallel ? "secondary" : "outline"}
               onClick={() => setParallel((value) => !value)}
@@ -83,7 +84,7 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
             >
               {t(parallel ? "z7.sequential" : "z7.title")}
             </Button>
-          </details>
+          </GraphDisclosure>
         </footer>
       ) : null}
     </main>

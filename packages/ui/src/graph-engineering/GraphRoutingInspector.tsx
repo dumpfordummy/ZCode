@@ -1,8 +1,12 @@
 import type { GraphConditionAttempt, GraphSequentialRun } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
+import { graphNodeLabel } from "./graphEditing.js";
 import { graphRoutingCanContinue } from "./graphRoutingView.js";
 import { useGraphTime } from "./GraphM2Text.js";
+import { useGraphM4Text } from "./GraphM4Text.js";
+import { GraphDisclosure, GraphDisclosureStack } from "./GraphDisclosure.js";
+import { GraphFacts } from "./GraphFacts.js";
 
 export function GraphRoutingInspector({
   run,
@@ -16,6 +20,12 @@ export function GraphRoutingInspector({
   const { intl } = useZCodeIntl(),
     t = (key: string) => intl.formatMessage({ id: `graph.z5.${key}` });
   const time = useGraphTime();
+  const m4 = useGraphM4Text();
+  const g = (key: string) => intl.formatMessage({ id: `graph.${key}` });
+  const label = (nodeId: string) => {
+    const node = run.definition.nodes.find((item) => item.id === nodeId);
+    return node ? graphNodeLabel(node, run.definition, g) : nodeId;
+  };
   const routing = run.routing,
     config = run.definition.routing;
   if (!routing || !config) return null;
@@ -30,35 +40,97 @@ export function GraphRoutingInspector({
       data-stop-reason={routing.stopReason?.kind ?? ""}
     >
       <h3 className="font-medium">{config.region?.name ?? t("routingRun")}</h3>
-      <dl className="grid gap-1 break-all">
-        <dt className="text-foreground-subtle">{t("admissions")}</dt>
-        <dd>
-          {routing.admissions} / {config.limits.maxNodeAdmissions}
-        </dd>
-        <dt className="text-foreground-subtle">{t("deadline")}</dt>
-        <dd>{time(routing.deadlineAt)}</dd>
-        <dt className="text-foreground-subtle">{t("maxRepairIterations")}</dt>
-        <dd>{config.region?.maxRepairIterations ?? 0}</dd>
-        <dt className="text-foreground-subtle">{t("usage")}</dt>
-        <dd>{t("usageUnknown")}</dd>
-      </dl>
+      <GraphFacts
+        facts={[
+          {
+            label: t("admissions"),
+            value: `${routing.admissions} / ${config.limits.maxNodeAdmissions}`,
+          },
+          { label: t("deadline"), value: time(routing.deadlineAt) },
+          { label: t("maxRepairIterations"), value: config.region?.maxRepairIterations ?? 0 },
+          { label: t("usage"), value: t("usageUnknown") },
+        ]}
+      />
       {routing.stopReason ? (
         <p role="status" data-testid="graph-routing-stop" className="text-warning">
           {routing.stopReason.kind}: {routing.stopReason.message}
         </p>
       ) : null}
-      <details data-testid="graph-routing-iterations">
-        <summary>{t("iterations")}</summary>
-        <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-xs">
-          {JSON.stringify(routing.iterations, null, 2)}
-        </pre>
-      </details>
-      <details>
-        <summary>{t("checkpoints")}</summary>
-        <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-xs">
-          {JSON.stringify(routing.checkpoints, null, 2)}
-        </pre>
-      </details>
+      <GraphDisclosureStack>
+        <GraphDisclosure
+          testId="graph-routing-iterations"
+          title={t("iterations")}
+          meta={
+            routing.iterations.length === 1
+              ? m4("iterationsMetaOne")
+              : m4("iterationsMeta", { count: routing.iterations.length })
+          }
+        >
+          {routing.iterations.map((iteration) => (
+            <GraphFacts
+              key={iteration.id}
+              facts={[
+                {
+                  label: m4("iterationLabel", { n: iteration.index }),
+                  value: time(iteration.createdAt),
+                },
+                {
+                  label: m4("stepsVisited"),
+                  value: iteration.visitedNodeIds.map(label).join(" › ") || m4("noneRecorded"),
+                },
+                { label: m4("attemptsCount"), value: Object.keys(iteration.attemptIds).length },
+                ...(iteration.feedback
+                  ? [{ label: m4("feedbackText"), value: iteration.feedback.text }]
+                  : []),
+                ...(iteration.failureFingerprint
+                  ? [{ label: m4("fingerprint"), value: iteration.failureFingerprint, mono: true }]
+                  : []),
+              ]}
+            />
+          ))}
+          <GraphDisclosure title={m4("rawRecord")}>
+            <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-sm">
+              {JSON.stringify(routing.iterations, null, 2)}
+            </pre>
+          </GraphDisclosure>
+        </GraphDisclosure>
+        <GraphDisclosure
+          testId="graph-routing-checkpoints"
+          title={t("checkpoints")}
+          meta={
+            routing.checkpoints.length === 1
+              ? m4("checkpointsMetaOne")
+              : m4("checkpointsMeta", { count: routing.checkpoints.length })
+          }
+        >
+          {routing.checkpoints.map((item) => (
+            <GraphFacts
+              key={item.id}
+              facts={[
+                { label: m4("checkpointId"), value: item.id, mono: true },
+                { label: m4("nextStep"), value: label(item.successorNodeId) },
+                {
+                  label: m4("checkpointState"),
+                  value:
+                    item.resumeRequired && !item.consumedAt
+                      ? m4("checkpointWaiting")
+                      : item.consumedAt
+                        ? m4("checkpointConsumed", { time: time(item.consumedAt) })
+                        : m4("checkpointRecorded"),
+                },
+                { label: m4("createdAt"), value: time(item.createdAt) },
+                { label: m4("decisionId"), value: item.decisionId, mono: true },
+                { label: m4("digestLabel"), value: item.digest, mono: true },
+              ]}
+            />
+          ))}
+          <GraphDisclosure title={m4("rawRecord")}>
+            <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-sm">
+              {JSON.stringify(routing.checkpoints, null, 2)}
+            </pre>
+          </GraphDisclosure>
+        </GraphDisclosure>
+      </GraphDisclosureStack>
       {checkpoint ? (
         <div className="space-y-2">
           <p className="text-foreground-subtle">{t("continueHelp")}</p>

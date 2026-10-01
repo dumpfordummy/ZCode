@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { useGraphEngineering } from "@/hooks/useGraphEngineering.js";
 import { Button } from "@/components/ui/button.js";
 import { Textarea } from "@/components/ui/textarea.js";
+import { GraphDisclosure } from "./GraphDisclosure.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphDraftStore } from "@/store/graphDraftStore.js";
 import { GraphRecipeReadStatus } from "./GraphRecipeReadStatus.js";
@@ -283,8 +284,7 @@ export function GraphProjectRecipes({
         onChange={change}
       />
       {/* 高级：原始配方 JSON，默认收起，不暴露在主路径 */}
-      <details className="space-y-3 text-ui-sm">
-        <summary className="cursor-pointer">{u("rawChecks")}</summary>
+      <GraphDisclosure title={u("rawChecks")} className="border-y border-border">
         <p className="text-foreground-subtle">{t("recipesHelp")}</p>
         <Button
           size="sm"
@@ -325,7 +325,7 @@ export function GraphProjectRecipes({
             )}
           </pre>
         </details>
-      </details>
+      </GraphDisclosure>
       <GraphChecksSetup
         workspaceKey={workspaceKey}
         workspacePath={workspacePath}
