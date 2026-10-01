@@ -62,7 +62,7 @@ export interface GraphSupportBundleFacts {
   feedbackSubmission: boolean;
 }
 
-export interface BuildSupportBundleInput {
+interface BuildSupportBundleInput {
   facts: GraphSupportBundleFacts;
   records: readonly GraphRecordInventoryEntry[];
   stores: GraphStoreShapes;

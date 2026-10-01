@@ -35,7 +35,7 @@ const sha256 = (text: string) => createHash("sha256").update(text).digest("hex")
  * 编译期常量与进程版本，没有任何环境变量读取：遥测策略以空环境求值，只取 enabled 布尔，不取端点。
  * 测试可以覆盖 flavor 与事实（例如固定版本号）。
  */
-export function defaultSupportBundleFacts(
+function defaultSupportBundleFacts(
   flavor: ZCodeProductFlavor,
   parallelPolicy: () => GraphParallelPolicy,
 ): GraphSupportBundleFacts {

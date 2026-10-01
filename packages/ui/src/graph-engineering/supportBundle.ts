@@ -63,13 +63,13 @@ export function prepareSupportBundle(result: GraphSupportBundleResult): Prepared
   return { bytes, byteLength: encoded.byteLength };
 }
 
-export class SupportBundleMismatchError extends Error {
+class SupportBundleMismatchError extends Error {
   constructor() {
     super("The support bundle did not match its reported size.");
   }
 }
 
-export type SupportBundleGeneration =
+type SupportBundleGeneration =
   | {
       status: "ready";
       result: GraphSupportBundleResult;
@@ -93,7 +93,7 @@ export async function generateSupportBundle(
   }
 }
 
-export type SupportBundleSave =
+type SupportBundleSave =
   | { status: "saved"; path?: string }
   | { status: "canceled" }
   | { status: "error"; errorId: "save-failed"; code?: string };

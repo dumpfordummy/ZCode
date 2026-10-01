@@ -193,7 +193,7 @@ export const supportBundleSchema = z
 export type GraphSupportBundle = z.infer<typeof supportBundleSchema>;
 
 /** 递归地按键排序，使序列化与源数据的插入顺序无关；数组顺序由投影明确给出。 */
-export function canonicalize(value: unknown): unknown {
+function canonicalize(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(canonicalize);
   if (value && typeof value === "object")
     return Object.fromEntries(
