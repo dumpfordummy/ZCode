@@ -45,17 +45,35 @@ export const ZCODE_BUILD_COMMIT_ID_ENV = "ZCODE_BUILD_COMMIT_ID" as const;
 export const RUNTIME_ZCODE_DEBUG =
   typeof process !== "undefined" ? process.env.ZCODE_DEBUG : undefined;
 
-// 恢复原因：写死 false 会让运行时已配置的数仓/ARMS 永远空转。
-// 功能保持可用；实际出网由各出口的运行时端点检查决定，未配置不上报。
-export const ZCODE_TELEMETRY_ENABLED: boolean = true;
+/**
+ * 自动遥测策略的唯一计算处。Graph 安装包有意关闭自动遥测：即使继承了端点环境变量也不启用。
+ * 其它身份与改动前完全一致：功能保持可用，实际出网由各出口的运行时端点检查决定，未配置不上报。
+ * 注意这些常量在模块加载时求值；Graph 入口在导入应用前就清理继承的变量，本函数是第二道独立防线。
+ */
+export function resolveAutomaticTelemetryPolicy(
+  flavor: ZCodeProductFlavor,
+  env: Record<string, string | undefined>,
+): { enabled: boolean; reportEndpoint: string; armsRumEndpoint: string } {
+  if (flavor === "graph") return { enabled: false, reportEndpoint: "", armsRumEndpoint: "" };
+  return {
+    enabled: true,
+    reportEndpoint: env.ZCODE_TELEMETRY_REPORT_ENDPOINT ?? "",
+    armsRumEndpoint: env.ZCODE_ARMS_RUM_ENDPOINT ?? "",
+  };
+}
 
-/** 数仓事件上报端点：由运行时环境变量提供，未配置即停用，构建产物不内嵌。 */
-export const ZCODE_TELEMETRY_REPORT_ENDPOINT =
-  typeof process !== "undefined" ? (process.env.ZCODE_TELEMETRY_REPORT_ENDPOINT ?? "") : "";
+const automaticTelemetry = resolveAutomaticTelemetryPolicy(
+  ZCODE_PRODUCT_FLAVOR,
+  typeof process !== "undefined" ? process.env : {},
+);
 
-/** ARMS RUM 接入端点：由运行时环境变量提供，未配置即停用，构建产物不内嵌。 */
-export const ZCODE_ARMS_RUM_ENDPOINT =
-  typeof process !== "undefined" ? (process.env.ZCODE_ARMS_RUM_ENDPOINT ?? "") : "";
+export const ZCODE_TELEMETRY_ENABLED: boolean = automaticTelemetry.enabled;
+
+/** 数仓事件上报端点：由运行时环境变量提供，未配置即停用，构建产物不内嵌。Graph 安装包恒为空。 */
+export const ZCODE_TELEMETRY_REPORT_ENDPOINT = automaticTelemetry.reportEndpoint;
+
+/** ARMS RUM 接入端点：由运行时环境变量提供，未配置即停用，构建产物不内嵌。Graph 安装包恒为空。 */
+export const ZCODE_ARMS_RUM_ENDPOINT = automaticTelemetry.armsRumEndpoint;
 
 /** 将本地运行态与编译期 ZCODE_ENV 映射为 ARMS 控制台识别的上报环境标签 */
 export function mapZCodeEnvToArmsRumEnv(runtimeEnv: ZCodeRuntimeEnv): ArmsRumEnv {

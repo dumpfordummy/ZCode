@@ -264,11 +264,11 @@ const lateReplies = {
     );
     const all = await drafts(page);
     assert.equal(
-      all[host.workspaces.A].templates["agent-assisted:1"].parameters.request,
+      all[host.workspaces.A].templates[host.library.key("agent-assisted")].parameters.request,
       "Draft A",
     );
     assert.equal(
-      all[host.workspaces.B].templates["agent-assisted:1"].parameters.request,
+      all[host.workspaces.B].templates[host.library.key("agent-assisted")].parameters.request,
       "Draft B",
     );
     const reads = started(host, "graph.recipes.read").map((call) => call.workspace);

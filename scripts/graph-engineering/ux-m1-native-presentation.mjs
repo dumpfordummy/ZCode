@@ -20,6 +20,7 @@ import {
   snapshot,
   step,
   waitRecord,
+  reloadToWorkspace,
 } from "./ux-m1-native-common.mjs";
 
 const HAN = /[一-鿿]/;
@@ -215,9 +216,7 @@ async function themePhase(ctx, tag, theme, locale) {
   const { isolation, window, receipt } = ctx;
   if (theme) {
     await window.evaluate((value) => localStorage.setItem("zcode-theme", value), theme);
-    await window.reload();
-    await window.waitForLoadState("domcontentloaded");
-    await T(window, "graph-engineering-open").waitFor({ timeout: 45000 });
+    await reloadToWorkspace(window);
     const applied = await window.evaluate(() => document.documentElement.className);
     assert.match(
       applied,

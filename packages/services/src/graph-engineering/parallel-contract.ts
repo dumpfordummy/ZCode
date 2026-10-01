@@ -117,6 +117,8 @@ export interface GraphParallelRecord {
   runs: GraphParallelRun[];
 }
 export interface GraphParallelView extends GraphParallelRecord {
+  /** Host 的并行能力策略；UI 只读取，不自行判断。 */
+  policy: import("@zcode/shared").GraphParallelPolicy;
   children: Record<string, GraphRun>;
   readOnly?: boolean;
 }

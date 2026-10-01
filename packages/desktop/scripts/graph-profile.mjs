@@ -28,3 +28,26 @@ export function createGraphProfile(originalHome, env = {}) {
     },
   };
 }
+
+const GRAPH_TELEMETRY_ENDPOINT_KEYS = new Set([
+  "ZCODE_ARMS_RUM_ENDPOINT",
+  "ZCODE_TELEMETRY_REPORT_ENDPOINT",
+]);
+
+/**
+ * Graph 安装包有意关闭自动遥测。继承的端点/OTLP 变量必须在应用模块导入前清除：
+ * `@zcode/shared` 在模块加载时读取端点，Main 随后还会把 OTEL_* 捕获后传给 Agent 进程，
+ * 导入之后再改环境变量已经来不及。这是第一道防线；共享策略与 Agent 启动环境是独立的第二、三道。
+ * 纯函数，供入口与测试共用；Windows 环境变量不区分大小写，所以按大写比较。
+ */
+export function graphAutomaticTelemetryEnv(env = {}) {
+  const remove = Object.keys(env).filter((key) => {
+    const name = key.toUpperCase();
+    return (
+      name.startsWith("OTEL_") ||
+      name.startsWith("ZCODE_TELEMETRY_") ||
+      GRAPH_TELEMETRY_ENDPOINT_KEYS.has(name)
+    );
+  });
+  return { remove, set: { ZCODE_MODEL_TELEMETRY_ENABLED: "0" } };
+}

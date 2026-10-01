@@ -1,0 +1,574 @@
+[
+  {
+    "suite": "emitting",
+    "at": "2026-10-01T05:26:42.747Z",
+    "results": [
+      {
+        "id": "typecheck",
+        "command": "pnpm typecheck",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 527,
+        "log": "emitting-typecheck-1790832400895.log",
+        "counts": {
+          "testsPassed": null,
+          "testsFailed": null,
+          "testsSkipped": null,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "lint",
+        "command": "pnpm lint",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 444,
+        "log": "emitting-lint-1790832401423.log",
+        "counts": {
+          "testsPassed": null,
+          "testsFailed": null,
+          "testsSkipped": null,
+          "lintWarnings": 75,
+          "lintErrors": 0,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "architecture",
+        "command": "pnpm architecture:check --changed",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 880,
+        "log": "emitting-architecture-1790832401867.log",
+        "counts": {
+          "testsPassed": null,
+          "testsFailed": null,
+          "testsSkipped": null,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      }
+    ]
+  },
+  {
+    "suite": "tests",
+    "at": "2026-10-01T05:26:56.554Z",
+    "results": [
+      {
+        "id": "script-tests",
+        "command": "node --test scripts/graph-engineering/distribution.test.mjs scripts/graph-engineering/publish.test.mjs scripts/graph-engineering/publish-git.test.mjs scripts/graph-engineering/acceptance-paths.test.mjs scripts/graph-engineering/z2-provider-fixture.test.mjs scripts/graph-engineering/release-manifest.test.mjs",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 1024,
+        "log": "tests-script-tests-1790832402916.log",
+        "counts": {
+          "testsPassed": 57,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "graph-service-tests",
+        "command": "node --import tsx --test packages/services/src/graph-engineering/app/*.test.ts packages/services/src/graph-engineering/adapters/*.test.ts packages/services/src/zcode-agent/expectedRuntimeClient.test.ts packages/services/src/zcode-agent/runtimeRetirement.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 8128,
+        "log": "tests-graph-service-tests-1790832403941.log",
+        "counts": {
+          "testsPassed": 372,
+          "testsFailed": 0,
+          "testsSkipped": 2,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "services-and-registry-tests",
+        "command": "node --import tsx --test packages/services/test/*.test.ts apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/interaction-registry.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 1034,
+        "log": "tests-services-and-registry-tests-1790832412069.log",
+        "counts": {
+          "testsPassed": 17,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "ui-tests",
+        "command": "node --import tsx --test packages/ui/test/*.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 2871,
+        "log": "tests-ui-tests-1790832413103.log",
+        "counts": {
+          "testsPassed": 227,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "format-scoped",
+        "command": "oxfmt --write on LF copies of files changed since the accepted baseline; compare ignoring CR",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 580,
+        "log": "tests-format-scoped-1790832416553.log",
+        "counts": {
+          "filesChecked": 48,
+          "nonconforming": 0
+        }
+      }
+    ]
+  },
+  {
+    "suite": "baseline",
+    "at": "2026-10-01T05:27:07.510Z",
+    "results": [
+      {
+        "id": "cli-lint",
+        "command": "pnpm --dir apps/zcode-cli lint",
+        "cwd": ".",
+        "exitCode": 1,
+        "status": "BASELINE-EXCEPTION",
+        "durationMs": 1242,
+        "log": "baseline-cli-lint-1790832423349.log",
+        "counts": {
+          "testsPassed": null,
+          "testsFailed": null,
+          "testsSkipped": null,
+          "lintWarnings": 0,
+          "lintErrors": 0,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "format-check",
+        "command": "pnpm fmt:check",
+        "cwd": ".",
+        "exitCode": 1,
+        "status": "BASELINE-EXCEPTION",
+        "durationMs": 2917,
+        "log": "baseline-format-check-1790832424592.log",
+        "counts": {
+          "testsPassed": null,
+          "testsFailed": null,
+          "testsSkipped": null,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": 4144
+        }
+      }
+    ]
+  },
+  {
+    "suite": "tests",
+    "at": "2026-10-01T05:49:26.967Z",
+    "results": [
+      {
+        "id": "script-tests",
+        "command": "node --test scripts/graph-engineering/distribution.test.mjs scripts/graph-engineering/publish.test.mjs scripts/graph-engineering/publish-git.test.mjs scripts/graph-engineering/acceptance-paths.test.mjs scripts/graph-engineering/z2-provider-fixture.test.mjs scripts/graph-engineering/release-manifest.test.mjs",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 1050,
+        "log": "tests-script-tests-1790833752873.log",
+        "counts": {
+          "testsPassed": 57,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "graph-service-tests",
+        "command": "node --import tsx --test packages/services/src/graph-engineering/app/*.test.ts packages/services/src/graph-engineering/adapters/*.test.ts packages/services/src/zcode-agent/expectedRuntimeClient.test.ts packages/services/src/zcode-agent/runtimeRetirement.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 8469,
+        "log": "tests-graph-service-tests-1790833753925.log",
+        "counts": {
+          "testsPassed": 372,
+          "testsFailed": 0,
+          "testsSkipped": 2,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "services-and-registry-tests",
+        "command": "node --import tsx --test packages/services/test/*.test.ts apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/interaction-registry.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 1040,
+        "log": "tests-services-and-registry-tests-1790833762394.log",
+        "counts": {
+          "testsPassed": 17,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "ui-tests",
+        "command": "node --import tsx --test packages/ui/test/*.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 2919,
+        "log": "tests-ui-tests-1790833763434.log",
+        "counts": {
+          "testsPassed": 227,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "format-scoped",
+        "command": "oxfmt --write on LF copies of files changed since the accepted baseline; compare ignoring CR",
+        "cwd": ".",
+        "exitCode": 1,
+        "status": "FAIL",
+        "durationMs": 614,
+        "log": "tests-format-scoped-1790833766966.log",
+        "counts": {
+          "filesChecked": 58,
+          "nonconforming": 7
+        }
+      }
+    ]
+  },
+  {
+    "suite": "tests",
+    "at": "2026-10-01T05:50:11.735Z",
+    "results": [
+      {
+        "id": "script-tests",
+        "command": "node --test scripts/graph-engineering/distribution.test.mjs scripts/graph-engineering/publish.test.mjs scripts/graph-engineering/publish-git.test.mjs scripts/graph-engineering/acceptance-paths.test.mjs scripts/graph-engineering/z2-provider-fixture.test.mjs scripts/graph-engineering/release-manifest.test.mjs",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 1015,
+        "log": "tests-script-tests-1790833798109.log",
+        "counts": {
+          "testsPassed": 57,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "graph-service-tests",
+        "command": "node --import tsx --test packages/services/src/graph-engineering/app/*.test.ts packages/services/src/graph-engineering/adapters/*.test.ts packages/services/src/zcode-agent/expectedRuntimeClient.test.ts packages/services/src/zcode-agent/runtimeRetirement.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 8100,
+        "log": "tests-graph-service-tests-1790833799125.log",
+        "counts": {
+          "testsPassed": 372,
+          "testsFailed": 0,
+          "testsSkipped": 2,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "services-and-registry-tests",
+        "command": "node --import tsx --test packages/services/test/*.test.ts apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/interaction-registry.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 1036,
+        "log": "tests-services-and-registry-tests-1790833807226.log",
+        "counts": {
+          "testsPassed": 17,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "ui-tests",
+        "command": "node --import tsx --test packages/ui/test/*.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 2920,
+        "log": "tests-ui-tests-1790833808263.log",
+        "counts": {
+          "testsPassed": 227,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "format-scoped",
+        "command": "oxfmt --write on LF copies of files changed since the accepted baseline; compare ignoring CR",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 551,
+        "log": "tests-format-scoped-1790833811734.log",
+        "counts": {
+          "filesChecked": 48,
+          "nonconforming": 0
+        }
+      }
+    ]
+  },
+  {
+    "suite": "baseline",
+    "at": "2026-10-01T05:50:16.097Z",
+    "results": [
+      {
+        "id": "cli-lint",
+        "command": "pnpm --dir apps/zcode-cli lint",
+        "cwd": ".",
+        "exitCode": 1,
+        "status": "BASELINE-EXCEPTION",
+        "durationMs": 1278,
+        "log": "baseline-cli-lint-1790833811910.log",
+        "counts": {
+          "testsPassed": null,
+          "testsFailed": null,
+          "testsSkipped": null,
+          "lintWarnings": 42,
+          "lintErrors": 56,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "format-check",
+        "command": "pnpm fmt:check",
+        "cwd": ".",
+        "exitCode": 1,
+        "status": "BASELINE-EXCEPTION",
+        "durationMs": 2907,
+        "log": "baseline-format-check-1790833813189.log",
+        "counts": {
+          "testsPassed": null,
+          "testsFailed": null,
+          "testsSkipped": null,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": 4150
+        }
+      }
+    ]
+  },
+  {
+    "suite": "tests",
+    "at": "2026-10-01T05:52:58.384Z",
+    "results": [
+      {
+        "id": "script-tests",
+        "command": "node --test scripts/graph-engineering/distribution.test.mjs scripts/graph-engineering/publish.test.mjs scripts/graph-engineering/publish-git.test.mjs scripts/graph-engineering/acceptance-paths.test.mjs scripts/graph-engineering/z2-provider-fixture.test.mjs scripts/graph-engineering/release-manifest.test.mjs",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 1080,
+        "log": "tests-script-tests-1790833964788.log",
+        "counts": {
+          "testsPassed": 57,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "graph-service-tests",
+        "command": "node --import tsx --test packages/services/src/graph-engineering/app/*.test.ts packages/services/src/graph-engineering/adapters/*.test.ts packages/services/src/zcode-agent/expectedRuntimeClient.test.ts packages/services/src/zcode-agent/runtimeRetirement.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 7989,
+        "log": "tests-graph-service-tests-1790833965869.log",
+        "counts": {
+          "testsPassed": 372,
+          "testsFailed": 0,
+          "testsSkipped": 2,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "services-and-registry-tests",
+        "command": "node --import tsx --test packages/services/test/*.test.ts apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/interaction-registry.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 1030,
+        "log": "tests-services-and-registry-tests-1790833973858.log",
+        "counts": {
+          "testsPassed": 17,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "ui-tests",
+        "command": "node --import tsx --test packages/ui/test/*.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 2921,
+        "log": "tests-ui-tests-1790833974888.log",
+        "counts": {
+          "testsPassed": 227,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "format-scoped",
+        "command": "oxfmt --write on LF copies of files changed since the accepted baseline; compare ignoring CR",
+        "cwd": ".",
+        "exitCode": 1,
+        "status": "FAIL",
+        "durationMs": 574,
+        "log": "tests-format-scoped-1790833978383.log",
+        "counts": {
+          "filesChecked": 49,
+          "nonconforming": 1
+        }
+      }
+    ]
+  },
+  {
+    "suite": "tests",
+    "at": "2026-10-01T05:53:26.908Z",
+    "results": [
+      {
+        "id": "script-tests",
+        "command": "node --test scripts/graph-engineering/distribution.test.mjs scripts/graph-engineering/publish.test.mjs scripts/graph-engineering/publish-git.test.mjs scripts/graph-engineering/acceptance-paths.test.mjs scripts/graph-engineering/z2-provider-fixture.test.mjs scripts/graph-engineering/release-manifest.test.mjs",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 1142,
+        "log": "tests-script-tests-1790833992756.log",
+        "counts": {
+          "testsPassed": 57,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "graph-service-tests",
+        "command": "node --import tsx --test packages/services/src/graph-engineering/app/*.test.ts packages/services/src/graph-engineering/adapters/*.test.ts packages/services/src/zcode-agent/expectedRuntimeClient.test.ts packages/services/src/zcode-agent/runtimeRetirement.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 8417,
+        "log": "tests-graph-service-tests-1790833993899.log",
+        "counts": {
+          "testsPassed": 372,
+          "testsFailed": 0,
+          "testsSkipped": 2,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "services-and-registry-tests",
+        "command": "node --import tsx --test packages/services/test/*.test.ts apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/interaction-registry.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 1059,
+        "log": "tests-services-and-registry-tests-1790834002316.log",
+        "counts": {
+          "testsPassed": 17,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "ui-tests",
+        "command": "node --import tsx --test packages/ui/test/*.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 2938,
+        "log": "tests-ui-tests-1790834003375.log",
+        "counts": {
+          "testsPassed": 227,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        }
+      },
+      {
+        "id": "format-scoped",
+        "command": "oxfmt --write on LF copies of files changed since the accepted baseline; compare ignoring CR",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 593,
+        "log": "tests-format-scoped-1790834006907.log",
+        "counts": {
+          "filesChecked": 49,
+          "nonconforming": 0
+        }
+      }
+    ]
+  }
+]

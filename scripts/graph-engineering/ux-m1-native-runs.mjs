@@ -314,7 +314,9 @@ export async function runsJourney() {
         await shot(isolation, window, receipt, "e-needs-you-go-to-run", [1280, 720]);
         // Open conversation now → Back to run，不回答权限。
         const before = await snapshot(isolation);
-        await T(window, "graph-needs-you-conversation").click();
+        // UX-M4：正在查看的就是等待的运行，条带只指路；“打开会话”的操作在运行横幅里。
+        assert.equal(await T(window, "graph-needs-you-conversation").count(), 0);
+        await T(window, "graph-run-open-native").click();
         await window
           .getByRole("option", { name: "Allow", exact: true })
           .waitFor({ timeout: 30000 });

@@ -5,7 +5,7 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphM1Text } from "./GraphM1Text.js";
 import { GraphProjectRecipes } from "./GraphProjectRecipes.js";
 import { useGraphM2Text } from "./GraphM2Text.js";
-import { useGraphRecipeChanges } from "./GraphRecipeChanges.js";
+import { useGraphRecipeChanges } from "./GraphRecipeChangeSummary.js";
 
 type GraphHook = ReturnType<typeof useGraphEngineering>;
 
@@ -47,12 +47,11 @@ export function GraphSetupPanel({
         // 粘性返回栏：编辑靠下的字段时，回到新建运行的入口始终在视口内。草稿从未离开 store。
         // -top-3/-mt-3/pt-3 抵消滚动容器的 p-3：粘性偏移不含内边距，否则滚动内容会从栏上方露出一条缝。
         <div
-          className="sticky -top-3 z-10 -mx-3 -mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-border bg-background px-3 pb-2 pt-3"
+          className="sticky -top-4 z-10 -mx-4 -mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-border bg-background px-4 pb-2 pt-4"
           data-testid="graph-return-bar"
         >
           <Button
             variant="outline"
-            size="sm"
             aria-describedby="graph-return-note"
             data-testid="graph-return-to-workflow"
             onClick={onReturn}
@@ -61,10 +60,10 @@ export function GraphSetupPanel({
           </Button>
           <p
             id="graph-return-note"
-            className="min-w-0 flex-1 text-ui-sm text-foreground-subtle"
+            className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-1 text-ui-sm text-foreground-subtle"
             data-testid="graph-return-note"
           >
-            {m1("returnKept")}
+            <span>{m1("returnKept")}</span>
             {unsaved ? (
               <GraphWarningNote as="span" className="flex" data-testid="graph-return-unsaved">
                 {m2("returnUnsaved")}

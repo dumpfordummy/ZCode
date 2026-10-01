@@ -46,13 +46,13 @@ function isGraphDistribution(env) {
 export function resolveGraphDistributionVersion(env, fallback) {
   if (!isGraphDistribution(env)) return fallback;
   const version = env.ZCODE_GRAPH_VERSION;
-  // Z7 发布已获明确授权；保留旧版本兼容，并继续拒绝未授权的里程碑标签。
+  // Z7、Z8 发布已获明确授权；保留旧版本兼容，并继续拒绝未授权的里程碑标签（不接受任意里程碑编号）。
   if (
     !version ||
-    !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-z[127]\.(0|[1-9]\d*)$/.test(version)
+    !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-z(?:1|2|7|8)\.(0|[1-9]\d*)$/.test(version)
   ) {
     throw new Error(
-      "ZCODE_GRAPH_VERSION must be an explicit Z1, Z2 or Z7 prerelease, e.g. 3.14.0-z7.1",
+      "ZCODE_GRAPH_VERSION must be an explicit Z1, Z2, Z7 or Z8 prerelease, e.g. 3.14.3-z8.1",
     );
   }
   return version;

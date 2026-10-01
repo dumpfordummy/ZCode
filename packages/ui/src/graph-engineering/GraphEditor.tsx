@@ -21,6 +21,7 @@ import {
 import { graphToolOnlySettings } from "./graphEditing.js";
 import { graphAdmission } from "./graphAdmission.js";
 import { useGraphM1Text } from "./GraphM1Text.js";
+import { GraphDesignOrigin } from "./GraphDesignOrigin.js";
 import { GraphLibrary } from "./GraphLibrary.js";
 import { GraphContextBar } from "./GraphContextBar.js";
 import { GraphNeedsYou } from "./GraphNeedsYou.js";
@@ -122,16 +123,12 @@ export function GraphEditor({
     defaults !== null &&
     readiness !== null &&
     readiness.errors.length === 0;
-  const creationReason = graph.pending
+  // 设计表单的编辑锁原因（不含“有运行占用”：占用只锁准入，浏览与预览资料库始终可用）。
+  const designLockReason = graph.pending
     ? u("busy")
     : (readOnlyReason ??
-      (view.readOnly
-        ? t("readOnlyHost")
-        : conflicted
-          ? t("conflict")
-          : activeRun
-            ? u("existingRun")
-            : undefined));
+      (view.readOnly ? t("readOnlyHost") : conflicted ? t("conflict") : undefined));
+  const creationReason = designLockReason ?? (activeRun ? u("existingRun") : undefined);
   const runReason =
     creationReason ??
     (!view.availability.available
@@ -201,7 +198,7 @@ export function GraphEditor({
   return (
     <div
       ref={focusRoot}
-      className={`${graphFocusClass} flex min-h-0 flex-1 flex-col gap-3 overflow-auto p-3`}
+      className={`${graphFocusClass} flex min-h-0 flex-1 flex-col gap-4 overflow-auto p-4`}
       data-view={selectedRun ? "run" : destination}
     >
       <GraphEditorNavigation
@@ -211,15 +208,19 @@ export function GraphEditor({
         conflicted={conflicted}
         runSelected={Boolean(selectedRun)}
         onSelect={go.destination}
-      />
-      <GraphContextBar
-        modelSelection={selection}
-        mode={config.draftConfig.mode}
-        recipeReadState={graph.recipeReadState}
-        onOpenChecks={() => go.destination("setup")}
+        context={
+          <GraphContextBar
+            modelSelection={selection}
+            mode={config.draftConfig.mode}
+            recipeReadState={graph.recipeReadState}
+            onOpenChecks={() => go.destination("setup")}
+          />
+        }
       />
       <GraphNeedsYou
         items={needsYou}
+        // UX-M4：正在查看的就是等待的那个运行时，横幅承载操作，条带退为安静的定位提示。
+        currentRunId={showingRuns ? selectedRun?.id : undefined}
         onGoToRun={go.goToRun}
         onOpenConversation={(item) => {
           if (item.sessionId) onOpenConversation(workspacePath, item.sessionId, workspaceIdentity);
@@ -276,13 +277,18 @@ export function GraphEditor({
       ) : null}
       {showingDesign ? (
         <>
+          <GraphDesignOrigin definition={displayed} />
           <GraphLibrary
             workspacePath={workspacePath}
             workspaceIdentity={workspaceIdentity}
             definition={displayed}
             dirty={dirty}
-            disabled={disabled || conflicted || Boolean(activeRun)}
-            disabledReason={creationReason}
+            disabled={disabled || conflicted}
+            disabledReason={designLockReason}
+            admissionReason={occupiedReason}
+            hostReadOnlyReason={readOnlyReason ?? (view.readOnly ? t("readOnlyHost") : undefined)}
+            onViewCurrentRun={activeRun ? () => go.viewRun(activeRun.id) : undefined}
+            onOpenInRuns={go.newRun}
             pending={graph.pending}
             error={graph.error}
             recipeReadState={graph.recipeReadState}

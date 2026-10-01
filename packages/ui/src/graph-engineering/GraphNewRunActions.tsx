@@ -2,6 +2,8 @@ import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphM1Text } from "./GraphM1Text.js";
+import { useGraphM3Text } from "./GraphM3Text.js";
+import { useGraphM4Text } from "./GraphM4Text.js";
 import { GraphFailureText } from "./GraphFailureText.js";
 
 /**
@@ -18,6 +20,7 @@ export function GraphNewRunActions({
   onSave,
   onViewCurrentRun,
   onGoToFirstField,
+  fieldsAction = "first-field",
   error,
   errorKind = "review",
 }: {
@@ -29,6 +32,8 @@ export function GraphNewRunActions({
   onSave(): void;
   onViewCurrentRun?(): void;
   onGoToFirstField?(): void;
+  /** UX-M4: in the library dialog off the Use tab the way to the missing fields is "Open Use". */
+  fieldsAction?: "first-field" | "open-use";
   /** A failed instantiate/preflight, shown here so it is seen next to the action that caused it. */
   error?: string;
   /** UX-M2.3: which admission step failed, for the UI-owned framing above the verbatim message. */
@@ -37,9 +42,11 @@ export function GraphNewRunActions({
   const { intl } = useZCodeIntl();
   const u = (key: string) => intl.formatMessage({ id: `graph.preZ8.${key}` });
   const m1 = useGraphM1Text();
+  const m3 = useGraphM3Text();
+  const m4 = useGraphM4Text();
   return (
     <div
-      className={`${allowReview ? "sticky -bottom-3 z-10 -mx-3 -mb-3 border-t border-border bg-background px-3 pb-5 pt-2 " : ""}flex flex-wrap items-center gap-2`}
+      className={`${allowReview ? "sticky -bottom-4 z-10 -mx-4 -mb-4 border-t border-border bg-background px-4 pb-4 pt-3 " : ""}flex flex-wrap items-center gap-x-3 gap-y-2`}
       data-testid="graph-new-run-actions"
     >
       {allowReview ? (
@@ -58,8 +65,7 @@ export function GraphNewRunActions({
         </Button>
       ) : null}
       <Button
-        size={allowReview ? "sm" : "default"}
-        variant={allowReview ? "outline" : "default"}
+        variant="outline"
         disabled={blocked}
         aria-describedby="graph-template-create-reason"
         data-testid="graph-library-instantiate"
@@ -68,8 +74,18 @@ export function GraphNewRunActions({
           onSave();
         }}
       >
-        {u(allowReview ? "saveAsWorkflow" : "createWorkflow")}
+        {allowReview ? u("saveAsWorkflow") : m3("loadIntoDesign")}
       </Button>
+      {/* 就绪指“可以进入下一步（审阅）”，不代表检查通过；确认之前不会开始任何执行。 */}
+      {allowReview && !blocked && !error ? (
+        <p
+          role="status"
+          className="text-ui-sm text-foreground-subtle"
+          data-testid="graph-new-run-ready"
+        >
+          {m4("readyToReview")}
+        </p>
+      ) : null}
       {error ? (
         <GraphFailureText
           testId="graph-new-run-error"
@@ -98,10 +114,12 @@ export function GraphNewRunActions({
           {blockedBy === "fields" && onGoToFirstField ? (
             <Button
               variant="outline"
-              data-testid="graph-go-to-first-field"
+              data-testid={
+                fieldsAction === "open-use" ? "graph-library-open-use" : "graph-go-to-first-field"
+              }
               onClick={onGoToFirstField}
             >
-              {m1("goToFirstField")}
+              {fieldsAction === "open-use" ? m4("openUse") : m1("goToFirstField")}
             </Button>
           ) : null}
         </div>

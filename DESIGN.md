@@ -536,21 +536,49 @@ Rules:
 - create components that only look correct in one theme
 - trade clarity for visual novelty in tool-heavy screens
 
-## Graph Engineering workbench (approved, being implemented)
+## Graph Engineering workbench (Focus page, UX-M4)
 
-Status: **approved 2026-09-30; implemented in stages.** Rationale, spec and evidence are in `docs/graph-engineering/ux-audit/` (`IMPLEMENTATION_SPEC.md`). Everything above still applies; this section only adds rules for the Graph Engineering surface (mode: Operate, an engineering workbench, not a marketing surface). It introduces no new colour, radius, type or shadow token.
+Status: **direction A (Focus page) selected 2026-10-01; implemented in UX-M4.2–M4.4.** Rationale, spec and evidence are in `docs/graph-engineering/ux-audit/` (`UX_M4_DIRECTION.md`, `UX_M4_SPEC.md`, `UX_M4_REPORT.md`). Everything above still applies; this section adds rules for the Graph Engineering surface (mode: Operate, an engineering workbench, not a marketing surface). The visual acceptance of UX-M4 belongs to the user and is recorded separately from the functional checks.
 
-- **Destinations.** Runs (compose, supervise, review, reuse), Workflows (graph editing, library, versions, transfer), Checks (saved project checks). A persistent context bar shows workspace, model, permission mode and saved-check status. Full paths appear in a title or copy action, not repeated in body text.
-- **Master-detail for Runs.** A list of runs on the leading side, the selected run or the new-run form on the trailing side. Below 1000px it collapses to one pane with a back action.
-- **Vocabulary.** Task is the request. Context is documents, instructions and skills, shown apart from the request. Check is saved configuration. Run is one execution. Permission (native tool authorisation) and Approval (Graph gate decision) are different words for different things and never share a label. "Task" in the app sidebar means a Chat session, so a Graph destination is never called Tasks.
-- **Context.** Set references are removable chips, one per reference slot; the schema stores one item per slot, so a chip is replaced, never doubled. Adding uses a searchable picker opened from **Add context**: nothing is active until the user moves, Enter selects only an option the user moved to and never submits, Escape restores focus. A chip states delivery only from the Host's validation and reads "Not checked yet" otherwise; nothing is described as inherited. Raw fields stay under one **Advanced** disclosure.
+### Surface roles and accent (scoped tokens)
+
+Graph has one additional token layer, `.graph-ui` (`packages/ui/src/graph-engineering/graphUi.css`). It redefines existing `--color-*` tokens **only inside** the Graph panel root and Graph dialog contents (Radix dialogs, selects and popovers portal out of the panel, so each carries the class itself). Nothing outside Graph changes; a Graph-only role is added here before any shared token is touched, and a shared token is only changed after the non-Graph consumers (Chat, Settings, plugin store) have been inspected.
+
+| Role      | Used for                                          | Zai Dark  | Zai Light |
+| --------- | ------------------------------------------------- | --------- | --------- |
+| `shell`   | list rail, tab strip, footers (`header`, `sidebar`) | `#15161a` | `#e7e8ec` |
+| `canvas`  | the main working area (`background`, `panel`)     | `#1b1c20` | `#f5f5f8` |
+| `raised`  | rows, panels, chips, selected check (`card`)      | `#25262b` | `#ffffff` |
+| `overlay` | dialogs, menus, popovers (`popover`)              | `#2b2d33` | `#ffffff` |
+
+- **One accent.** A restrained blue (`--color-brand`, `#6ea8fe` / `#1e5fd8`) for the one primary action of a state, the current tab, the selected row and links. It is never used for status.
+- **Warning and failure are different treatments.** Warning (needs you, uncertain outcome) is amber (`--color-warning`); a real failure is red (`--color-destructive`); success is green (`--color-success`). Each always carries an icon and words, and only the icon and a low-alpha surface are tinted; the label keeps `--color-foreground`.
+- **Contrast is measured on the implemented surfaces** (`scripts/graph-engineering/ux-m4-scenarios-contrast.mjs`, computed styles in the running page, both themes): foreground 7:1, secondary and tertiary text 4.5:1 on canvas, shell, raised and overlay, semantic text 4.5:1 on canvas, raised and their own 10% tints, button labels 4.5:1, control boundaries (input border) and the focus border 3:1. `foreground-subtlest` is still the placeholder/disabled tier in shared screens, but inside Graph it is raised to 4.5:1 because real sentences use it.
+- **Inputs.** The shared `Textarea` draws its border with the same colour as its fill, which is invisible on Graph surfaces; `.graph-ui textarea` therefore uses the Input tokens. The shared component is untouched.
+
+### Type, grouping and width
+
+- The `text-ui-*` scale and `--ui-font-size` stay the only mechanism; nothing is made smaller. Page title `text-ui-xl` semibold; section title `text-ui-base` semibold (one per section); body `text-ui-base`; secondary `text-ui-sm` in the secondary colour; `text-ui-xs` is not used for sentences in Graph (the canvas furniture keeps it).
+- Group by whitespace and alignment first, a hairline second, a surface change third, a border last. No box around a paragraph; no panel inside a panel; at most one raised level inside a page.
+- **Width.** Task entry, summaries, the run banner and the step strip use a readable column (`max-w-3xl` for New run, `max-w-5xl` for a run, `max-w-4xl` for the preflight). The graph canvas, node inspector, Checks, evidence and file differences use the full workspace width. The list of runs is `clamp(13rem, 17vw, 16rem)`; the task column never drops below 30rem at 1280px. There is no permanent right-hand inspector and no third permanent information column.
+
+### Structure
+
+- **One header.** Workflow name and saved/frozen state, then a single tab row: Runs, Workflows, Checks (`aria-current="page"`, accent underline). At the end of the row, inline and on every destination: *For the next run · Model · Mode · Checks N saved*. No second explanation row.
+- **Runs.** A slim list on the leading side; on the trailing side the new-run form, the preflight or the selected run. Below 1000px it collapses to one pane with a back action. A row is a status icon plus words, the time, the workflow and the test evidence; selection is a surface plus an accent bar.
+- **New run is task-first.** Title and one sentence; the workflow (and version) line; the task field; then Context, Checks and the step list separated by hairlines. Required parameters, required context and invalid configuration are never under Advanced. Ready means "ready for the next permitted action" (Review), never "tests passed"; saved checks say "Saved · not run". When the workspace is occupied, Review is blocked with its reason and **View current run**, the draft stays editable, and nothing starts when the run resolves.
+- **A selected run has one focal element: the banner.** It owns the single explanation of the state and the next action (one accent-filled action; the rest are plain). Under it: the step strip (built from the steps actually visited, never a fixed sequence), compact outcome facts (Execution, Test evidence, reviewer output, Human decision: rows that do not apply are quiet lines), then single-level tabs (Steps, Request and result, Evidence, Technical details). Decision-critical content is never only inside a tab.
+- **Commit bars.** A step that needs an explicit, per-run acknowledgment or decision keeps its controls in **one** sticky bar that is visible at 1280×720: New run (Review and run, Save as workflow only, the ready or blocked text), the preflight (acknowledgment and Start), the final approval (comment, reason, Approve, Reject), Checks (Back to new run, unsaved note). There is never a second copy of the primary button.
+- **Library.** One dialog, master–detail: the workflow list (Yours / Built-in), the selected workflow, tabs Versions / Use / Share / Advanced, and a fixed footer with **Open in Runs** and **Load into design**. A failure sits directly above the tabs with its recovery; a stale success is cleared when a new operation starts or fails. Panels stay mounted (hidden) so drafts and reviewed previews survive a tab change.
+
+### Kept rules
+
+- **Vocabulary.** Task is the request. Context is documents, instructions and skills, shown apart from the request. Check is saved configuration. Run is one execution. Permission (native tool authorisation) and Approval (Graph gate decision) are different words and never share a label. "Task" in the app sidebar means a Chat session, so a Graph destination is never called Tasks.
 - **Configuration is not a result.** Saved checks show a dashed-circle icon and "Saved · not run". A pass, fail or wait icon appears only for a captured result.
-- **Status is icon plus text.** Attention (waiting on you) uses `--color-warning`; a real failure uses `--color-destructive`; success uses `--color-success`; not-applicable states ("Not requested", "Not reached") use neutral. Never use destructive for a state that is merely absent. Keep the label in `--color-foreground`; tint only the icon and a low-alpha surface, because `--color-warning` in Zai Light does not reach 4.5:1 as text.
-- **Verdict trio.** A run always shows three separate facts: Execution, Checks, Your decision. A run that stopped before a gate was requested reads "Not requested", not "Pending".
-- **Stops and failures use one block:** what happened and why, what is still true, what you can do. Actions name their object ("Inspect reviewer output", "Start a new request from this one"). Do not show the same message twice on one screen.
-- **Commit bars.** A step that needs an explicit, per-run acknowledgment or decision keeps its controls in a sticky footer that is visible at 1280×720 without scrolling. One primary action per bar. Prefer an inline step to a modal for run review.
-- **Interruptions.** A "Needs you" strip is available on every Graph destination while any run waits on a permission, a question or an approval. It links to the exact place to act and never grants anything itself.
-- **Disclosure.** No nested disclosures on the primary path. One level is acceptable for rare diagnostics. Raw identities and digests are secondary details; a blocking warning is never only there.
-- **Controls.** Interactive controls are at least `h-7` (28px). Navigation uses `aria-current="page"`; tabbed detail uses the roving-tabindex tab pattern.
+- **Status is icon plus text.** Not-applicable states ("Not requested", "Not reached") are neutral. Never use destructive for a state that is merely absent.
+- **Stops and failures use one block** (the banner): what happened and why, what is still true, what you can do. Actions name their object. Do not show the same message twice on one screen.
+- **Interruptions.** A "Needs you" strip is available on every destination while any run waits on a permission, a question or an approval; it links to the exact place to act, never grants anything itself, and is a quiet pointer when that run is already open.
+- **Disclosure.** No nested disclosures on the primary path; one level for rare diagnostics. Raw identities and digests are secondary details; a blocking warning is never only there.
+- **Controls.** Interactive controls are at least `h-7` (28px). Navigation uses `aria-current="page"`; tabbed detail uses the Radix roving-tabindex tab pattern (`GraphTabs`).
 - **Focus.** The app resets `outline` and `box-shadow` on `:focus`/`:focus-visible` globally (`packages/ui/src/styles.css`), so focus in Graph is shown by a border-colour and fill change (at least 3:1 against the resting state) until that reset is revisited as a separate, app-wide decision.
-- **Localisation.** Display names and descriptions of built-in workflows are localised by UI-owned message ids keyed by template id and version; identities and digests are not translated.
+- **Localisation.** Display names and descriptions of built-in workflows are localised by UI-owned message ids keyed by template id and version; identities and digests are not translated. New copy lives in `graph.m4.*` with English and Simplified Chinese.

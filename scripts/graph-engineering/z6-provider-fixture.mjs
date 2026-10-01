@@ -55,7 +55,8 @@ export async function startZ6Fixture(workspace, scenario, responder = nativeResp
       return;
     }
     try {
-      const reply = responder({ body, prompt, stage, workspace, scenario });
+      // UX-M2：responder 可以返回 Promise，验收用它暂扣某个模型回复，从而在真实 Host 事件发生之前先浏览历史。
+      const reply = await responder({ body, prompt, stage, workspace, scenario });
       receipt.reply = reply;
       respond(response, body.stream, reply);
     } catch (error) {

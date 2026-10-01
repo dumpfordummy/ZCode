@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import path from "node:path";
 import { createIsolation, instruction } from "./isolation.mjs";
 import { approveNativePermissionOnce } from "./native-permission.mjs";
+import { openGraphDesign } from "./z2-native-helpers.mjs";
 import {
   COMPANION_COMPLETION,
   COMPANION_INSTRUCTION,
@@ -17,7 +18,26 @@ const mode = process.argv.includes("--chat")
   : process.argv.includes("--no-provider")
     ? "no-provider"
     : "graph";
-const isolation = await createIsolation({ noProvider: mode === "no-provider" });
+// Z8.1：遥测金丝雀。把继承的遥测端点指向本机夹具上的专用路径：金丝雀运行必须零命中，
+// 对照运行（非 Graph 身份的开发构建）必须有命中，证明这个观测方法确实能看到遥测。
+const canary = process.argv.includes("--telemetry-canary");
+const control = process.argv.includes("--telemetry-control");
+const canaryPrefix = "/telemetry-canary/";
+const isolation = await createIsolation({
+  noProvider: mode === "no-provider",
+  extraEnv:
+    canary || control
+      ? (fixture) => ({
+          // 对照运行不设置 ARMS：该 SDK 在这个 Electron 测试环境里初始化会失败并中断启动（见报告），
+          // 那样看不到任何上报。金丝雀运行三个端点都设置，用来证明 Graph 身份不会初始化其中任何一个。
+          ...(canary ? { ZCODE_ARMS_RUM_ENDPOINT: `${fixture.origin}${canaryPrefix}arms` } : {}),
+          ZCODE_TELEMETRY_REPORT_ENDPOINT: `${fixture.origin}${canaryPrefix}report`,
+          OTEL_EXPORTER_OTLP_ENDPOINT: `${fixture.origin}${canaryPrefix}otlp`,
+          OTEL_EXPORTER_OTLP_HEADERS: "authorization=Bearer synthetic-telemetry-canary",
+          ZCODE_MODEL_TELEMETRY_ENABLED: "1",
+        })
+      : {},
+});
 const cancel = process.argv.includes("--cancel");
 const question = process.argv.includes("--question");
 const restartInterrupted = process.argv.includes("--restart-interrupted");
@@ -102,7 +122,7 @@ try {
     await window.getByTestId("v4-composer-send").click();
   } else {
     summary.stage = "edit definition";
-    await window.getByTestId("graph-engineering-open").click();
+    await openGraphDesign(window);
     await window.getByTestId("graph-name").fill("Z1 synthetic verification");
     await window.getByTestId("graph-instructions").fill(taskInstruction);
     summary.stage = "save definition";
@@ -123,7 +143,7 @@ try {
     await window.getByTestId("graph-save").click();
     await waitForSaved();
     await window.getByRole("button", { name: "Back to chat", exact: true }).click();
-    await window.getByTestId("graph-engineering-open").click();
+    await openGraphDesign(window);
     assert.equal(await window.getByTestId("graph-name").inputValue(), "Z1 synthetic verification");
     assert.equal(await window.getByTestId("graph-instructions").inputValue(), taskInstruction);
     assert.notEqual(await task.getAttribute("style"), before);
@@ -349,7 +369,37 @@ try {
   }
   process.exitCode = 1;
 } finally {
+  let closed = false;
+  if (canary || control) {
+    // 退出时才会 flush 的上报也要计入，所以先关闭应用再统计。
+    await isolation.close();
+    closed = true;
+    const hits = isolation.fixture.requests.filter((r) => r.path.startsWith(canaryPrefix));
+    summary.telemetryCanary = {
+      kind: canary ? "inherited-settings-must-not-enable-telemetry" : "positive-control",
+      endpointsConfigured: canary ? ["arms", "report", "otlp"] : ["report", "otlp"],
+      hits: hits.length,
+      hitPaths: [...new Set(hits.map((r) => r.path))],
+      // ARMS 初始化一旦被尝试，日志里必有 SDK 的痕迹；Graph 身份下必须没有。
+      armsInitAttempted: /rum-electron|startArmsRum|\[arms\]/i.test(
+        await readFile(path.join(isolation.home, "native.log"), "utf8").catch(() => ""),
+      ),
+    };
+    if (canary && summary.telemetryCanary.armsInitAttempted && summary.status === "PASS") {
+      summary.status = "FAIL";
+      summary.error =
+        "ARMS initialization was attempted although endpoint variables were inherited.";
+      process.exitCode = 1;
+    }
+    if (summary.status === "PASS" && (canary ? hits.length !== 0 : hits.length === 0)) {
+      summary.status = "FAIL";
+      summary.error = canary
+        ? `Telemetry canary received ${hits.length} request(s).`
+        : "Positive control saw no telemetry; the canary method is not proven.";
+      process.exitCode = 1;
+    }
+  }
   await writeFile(path.join(isolation.home, "summary.json"), JSON.stringify(summary, null, 2));
   console.log(JSON.stringify(summary, null, 2));
-  await isolation.close();
+  if (!closed) await isolation.close();
 }

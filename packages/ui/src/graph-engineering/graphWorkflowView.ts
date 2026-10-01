@@ -147,16 +147,22 @@ export function toggleTemplateTestRecipe(
   };
 }
 
+/** The version is a portable v1 package over a canonical v5 graph, the only shape this app instantiates. */
+export function isCompatibleTemplateVersion(version: GraphTemplateVersion): boolean {
+  return (
+    version.template.format === "zcode-workflow" &&
+    version.template.version === 1 &&
+    version.template.graph.version === 5
+  );
+}
+
 export function latestCompatibleTemplateVersion(
   entry: GraphLibraryEntry,
 ): GraphTemplateVersion | undefined {
   if (entry.archived) return;
   return entry.versions.reduce<GraphTemplateVersion | undefined>(
     (latest, version) =>
-      version.template.format === "zcode-workflow" &&
-      version.template.version === 1 &&
-      version.template.graph.version === 5 &&
-      (!latest || version.version > latest.version)
+      isCompatibleTemplateVersion(version) && (!latest || version.version > latest.version)
         ? version
         : latest,
     undefined,

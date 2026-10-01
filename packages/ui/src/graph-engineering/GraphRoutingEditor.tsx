@@ -6,6 +6,7 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphSelect } from "./GraphSelect.js";
 import { useGraphEditorMode } from "./GraphEditorMode.js";
 import { GraphGuidedRepair } from "./GraphGuidedRepair.js";
+import { GraphDisclosure } from "./GraphDisclosure.js";
 export function GraphRoutingEditor(props: {
   definition: GraphSequentialDefinition;
   disabled: boolean;
@@ -42,8 +43,7 @@ function GraphRoutingAdvanced({
       .map((node) => ({ value: node.id, label: "name" in node ? node.name : node.type })),
   ];
   return (
-    <details className="space-y-3 text-ui-sm" data-testid="graph-routing-settings">
-      <summary>{t("routingSettings")}</summary>
+    <GraphDisclosure testId="graph-routing-settings" title={t("routingSettings")}>
       <GraphSelect
         label={t("finalGate")}
         testId="graph-routing-final-gate"
@@ -200,6 +200,6 @@ function GraphRoutingAdvanced({
           </Button>
         </div>
       )}
-    </details>
+    </GraphDisclosure>
   );
 }

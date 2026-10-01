@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button.js";
 import { Input } from "@/components/ui/input.js";
 import { useGraphEditorBuffer } from "@/hooks/useGraphEditorBuffer.js";
 import { GraphOpenAdvanced, useGraphEditorText } from "./GraphEditorMode.js";
+import { GraphDisclosure } from "./GraphDisclosure.js";
 
 export function GraphGuidedRepair({
   definition,
@@ -31,8 +32,7 @@ export function GraphGuidedRepair({
   );
   const fields = JSON.parse(buffer.text) as GraphRepairPolicyEdit;
   return (
-    <details className="space-y-3 text-ui-sm" data-testid="graph-guided-repair">
-      <summary>{t("repair")}</summary>
+    <GraphDisclosure testId="graph-guided-repair" title={t("repair")}>
       <p>{t("repairHelp")}</p>
       {!projection.supported ? (
         <>
@@ -117,6 +117,6 @@ export function GraphGuidedRepair({
           {buffer.conflict ? <p role="status">{t("bufferConflict")}</p> : null}
         </>
       )}
-    </details>
+    </GraphDisclosure>
   );
 }

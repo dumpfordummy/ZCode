@@ -1,0 +1,100 @@
+{
+  "journey": "checks",
+  "status": "PASS",
+  "startedAt": "2026-09-30T14:03:35.595Z",
+  "finishedAt": "2026-09-30T14:05:45.599Z",
+  "options": {
+    "scenario": "pass",
+    "locale": "en-US",
+    "dialog": false
+  },
+  "providerRequests": 12,
+  "providerErrors": [],
+  "steps": [
+    {
+      "id": "K0",
+      "title": "Prepare a request with the saved Build and Test checks",
+      "status": "PASS",
+      "seconds": 30.7
+    },
+    {
+      "id": "K1",
+      "title": "A. Edit -> Back: immediate, draft kept, disclosed; the saved check is shown and used",
+      "status": "PASS",
+      "seconds": 30.6
+    },
+    {
+      "id": "K2",
+      "title": "B. Edits on several visits (rename, rename, add, remove) are all in one Save summary",
+      "status": "PASS",
+      "seconds": 0.6
+    },
+    {
+      "id": "K3",
+      "title": "C. Save writes the whole intended list, clears the dirty state, selection follows stable ids",
+      "status": "PASS",
+      "seconds": 30.1
+    },
+    {
+      "id": "K4",
+      "title": "D. Discard names the whole list; Keep editing changes nothing; Discard resets the entire draft",
+      "status": "PASS",
+      "seconds": 0.4
+    },
+    {
+      "id": "K5",
+      "title": "E. While a real run owns the workspace: editing works, Save is refused, Discard is renderer-only",
+      "status": "PASS",
+      "seconds": 32.8
+    },
+    {
+      "id": "K6",
+      "title": "F. A real digest conflict: Save is refused once near Save, edits kept; the conflict flow is the only discard path",
+      "status": "PASS",
+      "seconds": 0.5
+    }
+  ],
+  "observations": [
+    {
+      "text": "New run unsaved-checks line",
+      "data": "Checks has unsaved edits. Review and the next run use the saved checks shown here."
+    },
+    {
+      "text": "row marker",
+      "data": "Unsaved edits in Checks are not used"
+    },
+    {
+      "text": "review 'Checks that will run'",
+      "data": "reviewer-build\nnode build.mjs {operationId} {sourceDigest}\nreviewer-test\nnode test.mjs {operationId} {sourceDigest} {buildDigest} {reportPath}"
+    },
+    {
+      "text": "Save summary",
+      "data": "Unsaved changes to saved checks\n\nAdded: Smoke check (new) (smoke-new)\nChanged: Build demo (second visit) (reviewer-build)\nChanged: Test demo content (unsaved edit) (reviewer-test)\nRemoved: Alternate test (alt-test)\n\nThey are not used by the next run. Review and runs use the saved checks until you save.\n\nSave checks writes the whole check list, including every change listed here, also those made earlier in this workspace."
+    },
+    {
+      "text": "Discard confirmation",
+      "data": "Discard all unsaved edits to the check list? Every check returns to the saved checks, not only the one that is open.\n\nChanged: Discard probe two (reviewer-build)\nChanged: Discard probe one (reviewer-test)\nDiscard all edits\nKeep editing"
+    },
+    {
+      "text": "Save refusal reason",
+      "data": "(reason element not found by id)"
+    },
+    {
+      "text": "Save failure text",
+      "data": "The saved checks were not changed. Your unsaved edits are kept.\n\nProject recipe configuration changed; reload before saving."
+    }
+  ],
+  "notRun": [],
+  "screenshots": [
+    "k-back-bar-unsaved-1280x720.png",
+    "k-new-run-unsaved-marker-1280x720.png",
+    "k-review-uses-saved-1280x720.png",
+    "k-save-summary-1280x720.png",
+    "k-save-summary-1920x1080.png",
+    "k-discard-confirmation-1280x720.png",
+    "k-discard-confirmation-1920x1080.png",
+    "k-active-run-save-refused-1280x720.png",
+    "k-save-conflict-framed-1280x720.png",
+    "k-conflict-flow-1280x720.png"
+  ]
+}

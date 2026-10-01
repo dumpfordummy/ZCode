@@ -1,0 +1,487 @@
+{
+  "exits": [
+    {
+      "name": "typecheck",
+      "exit": 0,
+      "duration": "76s",
+      "command": "pnpm typecheck\r"
+    },
+    {
+      "name": "lint",
+      "exit": 0,
+      "duration": "1s",
+      "command": "pnpm lint\r"
+    },
+    {
+      "name": "architecture",
+      "exit": 0,
+      "duration": "2s",
+      "command": "pnpm architecture:check\r"
+    },
+    {
+      "name": "ui-tests",
+      "exit": 0,
+      "duration": "8s",
+      "command": "node --import tsx --test test/*.test.ts\r"
+    },
+    {
+      "name": "services-graph-tests",
+      "exit": 0,
+      "duration": "8s",
+      "command": "node --import tsx --test packages/services/src/graph-engineering/adapters/artifacts.test.ts packages/services/src/graph-engineering/adapters/evidence-service.test.ts packages/services/src/graph-engineering/adapters/evidence.test.ts packages/services/src/graph-engineering/adapters/native.test.ts packages/services/src/graph-engineering/adapters/observer.test.ts packages/services/src/graph-engineering/adapters/parallel-workspaces.test.ts packages/services/src/graph-engineering/adapters/project-checks.test.ts packages/services/src/graph-engineering/adapters/project-discovery.test.ts packages/services/src/graph-engineering/adapters/project-references.test.ts packages/services/src/graph-engineering/adapters/recipes.test.ts packages/services/src/graph-engineering/adapters/recovery.test.ts packages/services/src/graph-engineering/adapters/release-validation.test.ts packages/services/src/graph-engineering/adapters/repository.test.ts packages/services/src/graph-engineering/adapters/reviewer-decisions.test.ts packages/services/src/graph-engineering/adapters/reviewer-reproduction.test.ts packages/services/src/graph-engineering/adapters/reviewer-version.test.ts packages/services/src/graph-engineering/adapters/tools.test.ts packages/services/src/graph-engineering/adapters/trx-capture.test.ts packages/services/src/graph-engineering/adapters/trx-evidence.test.ts packages/services/src/graph-engineering/adapters/workflow-library-versions.test.ts packages/services/src/graph-engineering/adapters/workflow-preflight.test.ts packages/services/src/graph-engineering/adapters/workflow-request.test.ts packages/services/src/graph-engineering/adapters/workflow-service.test.ts packages/services/src/graph-engineering/adapters/workflow-store.test.ts packages/services/src/graph-engineering/adapters/workflow-transfer.test.ts packages/services/src/graph-engineering/adapters/z4-review.test.ts packages/services/src/graph-engineering/app/agent-assisted.test.ts packages/services/src/graph-engineering/app/approval-faults.test.ts packages/services/src/graph-engineering/app/approval-service.test.ts packages/services/src/graph-engineering/app/artifacts.test.ts packages/services/src/graph-engineering/app/checks-admission.test.ts packages/services/src/graph-engineering/app/editor-capacity.test.ts packages/services/src/graph-engineering/app/editor-context.test.ts packages/services/src/graph-engineering/app/editor-prompt.test.ts packages/services/src/graph-engineering/app/editor-routing.test.ts packages/services/src/graph-engineering/app/legacy-persistence.test.ts packages/services/src/graph-engineering/app/parallel-domain.test.ts packages/services/src/graph-engineering/app/parallel-lifecycle.test.ts packages/services/src/graph-engineering/app/project-checks.test.ts packages/services/src/graph-engineering/app/recipe-compatibility.test.ts packages/services/src/graph-engineering/app/recipe-independence.test.ts packages/services/src/graph-engineering/app/reviewer-repro.test.ts packages/services/src/graph-engineering/app/routing-approval.test.ts packages/services/src/graph-engineering/app/routing-decision.test.ts packages/services/src/graph-engineering/app/routing-feedback.test.ts packages/services/src/graph-engineering/app/routing-plan.test.ts packages/services/src/graph-engineering/app/routing-preflight.test.ts packages/services/src/graph-engineering/app/routing-record.test.ts packages/services/src/graph-engineering/app/routing-region.test.ts packages/services/src/graph-engineering/app/routing-service.test.ts packages/services/src/graph-engineering/app/routing.test.ts packages/services/src/graph-engineering/app/sequential-domain.test.ts packages/services/src/graph-engineering/app/sequential-faults.test.ts packages/services/src/graph-engineering/app/sequential-service.test.ts packages/services/src/graph-engineering/app/service.test.ts packages/services/src/graph-engineering/app/tool-verification.test.ts packages/services/src/graph-engineering/app/trx-report.test.ts packages/services/src/graph-engineering/app/workflow-groups.test.ts packages/services/src/graph-engineering/app/workflow-samples.test.ts packages/services/src/graph-engineering/app/workflow.test.ts\r"
+    },
+    {
+      "name": "script-tests",
+      "exit": 0,
+      "duration": "18s",
+      "command": "node --import tsx --test scripts/graph-engineering/*.test.mjs\r"
+    },
+    {
+      "name": "native-search-tools",
+      "exit": 0,
+      "duration": "2s",
+      "command": "node scripts/prepare-native-search-tools.mjs\r"
+    },
+    {
+      "name": "build-cli",
+      "exit": 0,
+      "duration": "44s",
+      "command": "node scripts/build-desktop-agent-cli.mjs\r"
+    },
+    {
+      "name": "build-desktop",
+      "exit": 0,
+      "duration": "24s",
+      "command": "pnpm --filter @zcode/desktop build:no-runtime-assets\r"
+    },
+    {
+      "name": "browser-context-picker",
+      "exit": 0,
+      "duration": "17s",
+      "command": "node --import tsx scripts/graph-engineering/context-picker-browser.mjs \"--chromium=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\"\r"
+    },
+    {
+      "name": "browser-ux-m1",
+      "exit": 0,
+      "duration": "27s",
+      "command": "node --import tsx scripts/graph-engineering/ux-m1-browser.mjs \"--chromium=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\"\r"
+    },
+    {
+      "name": "browser-ux-m2",
+      "exit": 0,
+      "duration": "19s",
+      "command": "node --import tsx scripts/graph-engineering/ux-m2-browser.mjs \"--chromium=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\"\r"
+    },
+    {
+      "name": "browser-ux-m3",
+      "exit": 0,
+      "duration": "20s",
+      "command": "node --import tsx scripts/graph-engineering/ux-m3-browser.mjs \"--chromium=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\"\r"
+    },
+    {
+      "name": "history-u4",
+      "exit": 0,
+      "duration": "2s",
+      "command": "node scripts/graph-engineering/pre-z8-u4-history.mjs\r"
+    },
+    {
+      "name": "driver-z6-generic",
+      "exit": 1,
+      "duration": "9s",
+      "command": "node scripts/graph-engineering/z6-native-smoke.mjs --scenario=generic\r"
+    },
+    {
+      "name": "driver-z6-library",
+      "exit": 1,
+      "duration": "6s",
+      "command": "node scripts/graph-engineering/z6-native-library.mjs\r"
+    },
+    {
+      "name": "driver-u1-native",
+      "exit": 0,
+      "duration": "26s",
+      "command": "node scripts/graph-engineering/pre-z8-u1-native.mjs\r"
+    },
+    {
+      "name": "driver-u5-native",
+      "exit": 0,
+      "duration": "17s",
+      "command": "node scripts/graph-engineering/pre-z8-u5-native.mjs\r"
+    },
+    {
+      "name": "driver-z6-generic",
+      "exit": 0,
+      "duration": "25s",
+      "command": "node scripts/graph-engineering/z6-native-smoke.mjs --scenario=generic\r"
+    },
+    {
+      "name": "driver-z6-library",
+      "exit": 1,
+      "duration": "41s",
+      "command": "node scripts/graph-engineering/z6-native-library.mjs\r"
+    },
+    {
+      "name": "driver-z6-library",
+      "exit": 0,
+      "duration": "20s",
+      "command": "node scripts/graph-engineering/z6-native-library.mjs\r"
+    },
+    {
+      "name": "m3-library",
+      "exit": 1,
+      "duration": "6s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=library\r"
+    },
+    {
+      "name": "m3-library",
+      "exit": 1,
+      "duration": "10s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=library\r"
+    },
+    {
+      "name": "m3-library",
+      "exit": 0,
+      "duration": "11s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=library\r"
+    },
+    {
+      "name": "m3-share",
+      "exit": 1,
+      "duration": "37s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=share\r"
+    },
+    {
+      "name": "m3-share",
+      "exit": 1,
+      "duration": "38s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=share\r"
+    },
+    {
+      "name": "m3-share",
+      "exit": 1,
+      "duration": "39s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=share\r"
+    },
+    {
+      "name": "m3-share",
+      "exit": 1,
+      "duration": "38s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=share\r"
+    },
+    {
+      "name": "m3-share",
+      "exit": 1,
+      "duration": "37s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=share\r"
+    },
+    {
+      "name": "m3-share",
+      "exit": 0,
+      "duration": "81s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=share\r"
+    },
+    {
+      "name": "m3-pins",
+      "exit": 1,
+      "duration": "36s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=pins\r"
+    },
+    {
+      "name": "m3-pins",
+      "exit": 1,
+      "duration": "43s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=pins\r"
+    },
+    {
+      "name": "m3-pins",
+      "exit": 1,
+      "duration": "43s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=pins\r"
+    },
+    {
+      "name": "m3-pins",
+      "exit": 1,
+      "duration": "44s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=pins\r"
+    },
+    {
+      "name": "m3-pins",
+      "exit": 0,
+      "duration": "105s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=pins\r"
+    },
+    {
+      "name": "m3-pins",
+      "exit": 0,
+      "duration": "74s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=pins\r"
+    },
+    {
+      "name": "m3-presentation-en",
+      "exit": 1,
+      "duration": "50s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=presentation-en\r"
+    },
+    {
+      "name": "m3-presentation-en",
+      "exit": 1,
+      "duration": "45s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=presentation-en\r"
+    },
+    {
+      "name": "m3-presentation-en",
+      "exit": 1,
+      "duration": "45s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=presentation-en\r"
+    },
+    {
+      "name": "m3-presentation-en",
+      "exit": 0,
+      "duration": "27s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=presentation-en\r"
+    },
+    {
+      "name": "m3-presentation-zh",
+      "exit": 0,
+      "duration": "26s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=presentation-zh\r"
+    },
+    {
+      "name": "m1native-context",
+      "exit": 0,
+      "duration": "14s",
+      "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=context\r"
+    },
+    {
+      "name": "m1native-checks",
+      "exit": 0,
+      "duration": "16s",
+      "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=checks\r"
+    },
+    {
+      "name": "m1native-runs",
+      "exit": 0,
+      "duration": "35s",
+      "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=runs\r"
+    },
+    {
+      "name": "m1native-draft",
+      "exit": 0,
+      "duration": "16s",
+      "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=draft\r"
+    },
+    {
+      "name": "m1native-presentation-en",
+      "exit": 0,
+      "duration": "19s",
+      "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=presentation-en\r"
+    },
+    {
+      "name": "m1native-presentation-zh",
+      "exit": 1,
+      "duration": "50s",
+      "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=presentation-zh\r"
+    },
+    {
+      "name": "m2native-history",
+      "exit": 0,
+      "duration": "75s",
+      "command": "node scripts/graph-engineering/ux-m2-native.mjs --journey=history\r"
+    },
+    {
+      "name": "m2native-checks",
+      "exit": 0,
+      "duration": "131s",
+      "command": "node scripts/graph-engineering/ux-m2-native.mjs --journey=checks\r"
+    },
+    {
+      "name": "m2native-failures",
+      "exit": 0,
+      "duration": "14s",
+      "command": "node scripts/graph-engineering/ux-m2-native.mjs --journey=failures\r"
+    },
+    {
+      "name": "m2native-presentation-en",
+      "exit": 0,
+      "duration": "17s",
+      "command": "node scripts/graph-engineering/ux-m2-native.mjs --journey=presentation-en\r"
+    },
+    {
+      "name": "m2native-presentation-zh",
+      "exit": 1,
+      "duration": "59s",
+      "command": "node scripts/graph-engineering/ux-m2-native.mjs --journey=presentation-zh\r"
+    },
+    {
+      "name": "reviewer-pass",
+      "exit": 0,
+      "duration": "14s",
+      "command": "node scripts/graph-engineering/reviewer-native.mjs --scenario=pass\r"
+    },
+    {
+      "name": "reviewer-prose-fence",
+      "exit": 0,
+      "duration": "12s",
+      "command": "node scripts/graph-engineering/reviewer-native.mjs --scenario=prose-fence\r"
+    },
+    {
+      "name": "reviewer-unbound-report",
+      "exit": 0,
+      "duration": "12s",
+      "command": "node scripts/graph-engineering/reviewer-native.mjs --scenario=unbound-report\r"
+    },
+    {
+      "name": "reviewer-needs_changes",
+      "exit": 0,
+      "duration": "12s",
+      "command": "node scripts/graph-engineering/reviewer-native.mjs --scenario=needs_changes\r"
+    },
+    {
+      "name": "reviewer-needs_human",
+      "exit": 0,
+      "duration": "12s",
+      "command": "node scripts/graph-engineering/reviewer-native.mjs --scenario=needs_human\r"
+    },
+    {
+      "name": "reviewer-test-failure",
+      "exit": 0,
+      "duration": "11s",
+      "command": "node scripts/graph-engineering/reviewer-native.mjs --scenario=test-failure\r"
+    },
+    {
+      "name": "final-m3-library",
+      "exit": 0,
+      "duration": "11s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=library\r"
+    },
+    {
+      "name": "final-m3-share",
+      "exit": 0,
+      "duration": "79s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=share\r"
+    },
+    {
+      "name": "final-m3-pins",
+      "exit": 0,
+      "duration": "75s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=pins\r"
+    },
+    {
+      "name": "final-m3-presentation-en",
+      "exit": 0,
+      "duration": "27s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=presentation-en\r"
+    },
+    {
+      "name": "final-m3-presentation-zh",
+      "exit": 0,
+      "duration": "27s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=presentation-zh\r"
+    },
+    {
+      "name": "final-driver-z6-generic",
+      "exit": 0,
+      "duration": "25s",
+      "command": "node scripts/graph-engineering/z6-native-smoke.mjs --scenario=generic\r"
+    },
+    {
+      "name": "final-driver-z6-library",
+      "exit": 0,
+      "duration": "21s",
+      "command": "node scripts/graph-engineering/z6-native-library.mjs\r"
+    },
+    {
+      "name": "final-driver-u1-native",
+      "exit": 0,
+      "duration": "27s",
+      "command": "node scripts/graph-engineering/pre-z8-u1-native.mjs\r"
+    },
+    {
+      "name": "final-driver-u5-native",
+      "exit": 0,
+      "duration": "17s",
+      "command": "node scripts/graph-engineering/pre-z8-u5-native.mjs\r"
+    },
+    {
+      "name": "m1native-presentation-zh-rerun",
+      "exit": 0,
+      "duration": "18s",
+      "command": "node scripts/graph-engineering/ux-m1-native.mjs --journey=presentation-zh\r"
+    },
+    {
+      "name": "m2native-presentation-zh-rerun",
+      "exit": 0,
+      "duration": "17s",
+      "command": "node scripts/graph-engineering/ux-m2-native.mjs --journey=presentation-zh\r"
+    },
+    {
+      "name": "launcher-smoke-historical",
+      "exit": 0,
+      "duration": "11s",
+      "command": "node scripts/graph-engineering/ux-m3-launch-manual.mjs --smoke --historical-run\r"
+    },
+    {
+      "name": "lint-final",
+      "exit": 0,
+      "duration": "1s",
+      "command": "pnpm lint\r"
+    },
+    {
+      "name": "architecture-final",
+      "exit": 0,
+      "duration": "1s",
+      "command": "pnpm architecture:check\r"
+    },
+    {
+      "name": "ui-tests-final",
+      "exit": 0,
+      "duration": "3s",
+      "command": "node --import tsx --test test/*.test.ts\r"
+    },
+    {
+      "name": "script-tests-final",
+      "exit": 0,
+      "duration": "17s",
+      "command": "node --import tsx --test scripts/graph-engineering/*.test.mjs\r"
+    },
+    {
+      "name": "final-m3-share2",
+      "exit": 0,
+      "duration": "83s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=share\r"
+    },
+    {
+      "name": "final-m3-library2",
+      "exit": 0,
+      "duration": "13s",
+      "command": "node scripts/graph-engineering/ux-m3-native.mjs --journey=library"
+    }
+  ],
+  "journeys": {
+    "library": {
+      "status": "PASS",
+      "steps": 7,
+      "passed": 7
+    },
+    "pins": {
+      "status": "PASS",
+      "steps": 6,
+      "passed": 6
+    },
+    "presentation-en-US": {
+      "status": "PASS",
+      "steps": 15,
+      "passed": 15
+    },
+    "presentation-zh-CN": {
+      "status": "PASS",
+      "steps": 15,
+      "passed": 15
+    },
+    "share": {
+      "status": "PASS",
+      "steps": 7,
+      "passed": 7
+    }
+  }
+}

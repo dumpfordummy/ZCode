@@ -4,6 +4,8 @@ import { applyGraphRunRequest } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import { Textarea } from "@/components/ui/textarea.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
+import { useGraphM4Text } from "./GraphM4Text.js";
+import { GraphDisclosure } from "./GraphDisclosure.js";
 
 // 提取当前设计的请求文本：固定实例取 template.parameters.request（仅 string）；
 // 非固定顺序定义取唯一 Start 节点的 request。缺失/非 string/Start 数量不为 1 返回 undefined，
@@ -36,6 +38,7 @@ export function GraphRepeatRequest({
 }) {
   const { intl } = useZCodeIntl();
   const t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
+  const m4 = useGraphM4Text();
   const initial = currentRequest(definition);
   const supported = initial !== undefined;
   const [request, setRequest] = useState(initial ?? "");
@@ -54,8 +57,13 @@ export function GraphRepeatRequest({
     }
   };
   return (
-    <details className="space-y-2 text-ui-sm" data-testid="graph-repeat-request">
-      <summary className="cursor-pointer">{t("repeatRequest")}</summary>
+    // 它拥有的是当前设计的请求文本和一个“应用请求”操作（只改设计草稿，不启动、不改运行），
+    // 属于配置，因此仍是披露区；只是 UI 自有的标题改为“此设计的请求”。
+    <GraphDisclosure
+      testId="graph-repeat-request"
+      title={m4("requestForDesign")}
+      meta={initial ? <span className="line-clamp-1">{initial}</span> : undefined}
+    >
       <p className="text-foreground-subtle">{t("repeatRequestHelp")}</p>
       {supported ? (
         <>
@@ -84,6 +92,6 @@ export function GraphRepeatRequest({
           {error}
         </p>
       ) : null}
-    </details>
+    </GraphDisclosure>
   );
 }

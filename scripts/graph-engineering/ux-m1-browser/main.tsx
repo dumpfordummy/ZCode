@@ -29,6 +29,8 @@ declare global {
       set(patch: Partial<HarnessState>): void;
       drafts(): unknown;
       navigation(): unknown;
+      /** An unsaved edit of the design's name, as the Workflows editor would make (renderer draft only). */
+      editDesignName(workspace: string, name: string): void;
     };
   }
 }
@@ -88,6 +90,8 @@ const graphEngineeringService = guard("graphEngineeringService", {
 });
 const graphWorkflowService = guard("graphWorkflowService", {
   list: ux("list"),
+  mutate: ux("mutate"),
+  preview: ux("preview"),
   instantiate: ux("instantiate"),
   prepare: ux("prepare"),
   projectSetup: ux("projectSetup"),
@@ -95,9 +99,22 @@ const graphWorkflowService = guard("graphWorkflowService", {
 const services = guard("services", {
   graphEngineeringService,
   graphWorkflowService,
-  fileService: guard("fileService", { searchWorkspaceFiles: ux("searchFiles") }),
+  fileService: guard("fileService", {
+    searchWorkspaceFiles: ux("searchFiles"),
+    stat: ux("stat"),
+    readFileRange: async (params: unknown) =>
+      new Uint8Array((await window.__ux.readFileRange!(params)) as number[]),
+  }),
 });
-const platform = guard("platform", { canSelectFilePath: true, selectFile: ux("pickFile") });
+const platform = guard("platform", {
+  canSelectFilePath: true,
+  selectFile: ux("pickFile"),
+  saveFile: (request: { data: ArrayBuffer; suggestedName?: string }) =>
+    window.__ux.saveFile!({
+      suggestedName: request.suggestedName,
+      bytes: Array.from(new Uint8Array(request.data)),
+    }),
+});
 
 function Probe({ path }: { path: string }) {
   // 第二个真实的 useGraphEngineering 实例：让测试不经过任何按钮直接调用 run / prepareRunConfirmation。
@@ -128,6 +145,12 @@ function Harness() {
       drafts: () => JSON.parse(JSON.stringify(useGraphDraftStore.getState().workspaces)),
       navigation: () =>
         JSON.parse(JSON.stringify(useGraphEngineeringViewStore.getState().selections)),
+      editDesignName: (workspace, name) => {
+        const key = window.__WORKSPACES__[workspace]!;
+        const editor = useGraphDraftStore.getState().workspaces[key]?.definition;
+        if (editor)
+          useGraphDraftStore.getState().editDefinition(key, { ...editor.draft, name }, editor.base);
+      },
     };
   }, []);
   useEffect(() => {
@@ -150,13 +173,23 @@ function Harness() {
       <TabStoreProvider>
         <ServiceProvider services={services as never}>
           <PlatformProvider platform={platform as never}>
-            <div
-              className={`${graphFocusClass} mx-auto flex h-screen w-full flex-col bg-background text-foreground`}
-              style={{ maxWidth: 1200 }}
-            >
-              <Probe path={path} />
-              <div className="flex min-h-0 flex-1 flex-col" data-testid="graph-engineering-panel">
-                <Panel path={path} />
+            {/* 与真实应用一致的外壳：左侧是共享令牌的侧栏（不在 graph-ui 范围内），右侧是 Graph 面板。 */}
+            <div className="flex h-screen w-full bg-sidebar text-foreground">
+              <aside className="hidden w-[268px] shrink-0 bg-sidebar p-3 text-ui-base lg:block">
+                <div className="rounded-md bg-selected px-3 py-2">Graph Engineering</div>
+              </aside>
+              <div
+                className={`${graphFocusClass} graph-ui flex min-w-0 flex-1 flex-col bg-background text-foreground lg:my-1 lg:mr-1 lg:rounded-lg lg:border lg:border-border`}
+              >
+                <header className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 text-ui-base">
+                  <span>Back to chat</span>
+                  <strong>Graph Engineering</strong>
+                  <span className="text-foreground-subtle">C:/synthetic</span>
+                </header>
+                <Probe path={path} />
+                <div className="flex min-h-0 flex-1 flex-col" data-testid="graph-engineering-panel">
+                  <Panel path={path} />
+                </div>
               </div>
             </div>
           </PlatformProvider>

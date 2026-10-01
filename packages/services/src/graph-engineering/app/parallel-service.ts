@@ -1,3 +1,4 @@
+import type { GraphParallelPolicy } from "@zcode/shared";
 import type { IGraphEngineeringService, GraphWorkspaceTarget } from "../contract.js";
 import type {
   IGraphParallelService,
@@ -16,6 +17,11 @@ const requireId = (value: string) => {
   if (!/^[a-zA-Z0-9][a-zA-Z0-9-]{0,99}$/.test(value))
     throw new Error("Stable request/decision ID required.");
   return value;
+};
+const FAIL_CLOSED_POLICY: GraphParallelPolicy = {
+  mode: "disabled",
+  source: "default",
+  reason: "Parallel workflows are disabled.",
 };
 export class GraphParallelService implements IGraphParallelService {
   readonly owner: ParallelState;
@@ -46,6 +52,16 @@ export class GraphParallelService implements IGraphParallelService {
         }
     });
   }
+  /** 当前策略；每次读取，Host 之外没有第二份判断。 */
+  policy(): GraphParallelPolicy {
+    return this.state.options.parallelPolicy?.() ?? FAIL_CLOSED_POLICY;
+  }
+  /** 新的并行准入（保存启用计划、预览、准备、批准）在策略关闭时一律拒绝，先于任何副作用。 */
+  private assertAdmissionsAllowed(action: string): void {
+    const policy = this.policy();
+    if (policy.mode !== "experimental")
+      throw new Error(`Parallel workflows are disabled; cannot ${action}. ${policy.reason}`);
+  }
   async get(value: GraphWorkspaceTarget) {
     const target = localTarget(value);
     return this.state.serial(target, async () => {
@@ -63,12 +79,14 @@ export class GraphParallelService implements IGraphParallelService {
       for (const run of parallel.runs)
         for (const [slot, child] of await this.owner.children(run, true))
           children[`${run.id}:${slot}`] = child;
-      return { ...parallel, children, readOnly };
+      return { ...parallel, children, readOnly, policy: this.policy() };
     });
   }
   async save(params: Parameters<IGraphParallelService["save"]>[0]) {
     const target = localTarget(params.target),
       plan = parallelPlanSchema.parse(params.plan);
+    // 关闭策略下仍允许保存未启用的计划（等价于关闭它）；启用计划属于新的并行准入。
+    if (plan.enabled) this.assertAdmissionsAllowed("enable a parallel plan");
     return this.state.serial(target, async () => {
       const record = await this.state.load(target);
       if ((record.parallel?.plan?.revision ?? 0) !== params.expectedRevision)
@@ -93,12 +111,14 @@ export class GraphParallelService implements IGraphParallelService {
     return this.owner.port.preview(target, plan, graphSettingsSchema.parse(settings));
   }
   async preview(params: Parameters<IGraphParallelService["preview"]>[0]) {
+    this.assertAdmissionsAllowed("preview a parallel plan");
     const target = localTarget(params.target);
     return this.state.serial(target, () =>
       this.previewOwned(target, params.revision, params.settings),
     );
   }
   async prepare(params: Parameters<IGraphParallelService["prepare"]>[0]) {
+    this.assertAdmissionsAllowed("prepare parallel workspaces");
     const target = localTarget(params.target);
     requireId(params.requestId);
     return this.state.serial(target, async () => {
@@ -215,6 +235,8 @@ export class GraphParallelService implements IGraphParallelService {
           throw new Error("Conflicting repeated parallel decision.");
         return run;
       }
+      // 批准会让后续 worker/整合 Agent 准入；拒绝只会停止工作，始终允许。
+      if (params.approved) this.assertAdmissionsAllowed("approve a parallel review");
       if (
         params.phase === "plan"
           ? run.phase !== "Prepared" || run.preparedDigest !== params.digest

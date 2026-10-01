@@ -1,6 +1,7 @@
 import type { GraphSequentialDefinition } from "@zcode/services";
 import { GraphRoutingEditor } from "./GraphRoutingEditor.js";
 import { GraphRepeatRequest } from "./GraphRepeatRequest.js";
+import { GraphDisclosureStack } from "./GraphDisclosure.js";
 
 /**
  * GraphDesignSections —— v5 顺序设计视图的结构化区块容器。GraphEditor 已接近行数上限，
@@ -19,7 +20,7 @@ export function GraphDesignSections({
   workspaceKey: string;
 }) {
   return (
-    <>
+    <GraphDisclosureStack>
       <GraphRoutingEditor
         definition={definition}
         disabled={disabled}
@@ -27,6 +28,6 @@ export function GraphDesignSections({
         workspaceKey={workspaceKey}
       />
       <GraphRepeatRequest definition={definition} disabled={disabled} onChange={onChange} />
-    </>
+    </GraphDisclosureStack>
   );
 }

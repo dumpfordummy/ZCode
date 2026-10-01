@@ -4,15 +4,21 @@ import path from "node:path";
 import { T, chipValue, flush, sha256 } from "./ux-m1-native-common.mjs";
 
 export const REQUEST_C = "Checks journey: tidy docs/Notes.md";
+// UX-M2.2 添加的“未保存编辑不会被使用”标记属于新增披露，由 UX-M2 的原生用例单独断言；
+// UX-M1 用例比较的是草稿的选择本身（已保存的名称、种类与状态），所以比较文本时去掉这条标记。
+const UNSAVED_MARKER =
+  /\s*(Unsaved edits in Checks are not used|Removed in unsaved edits; the saved check is still used)/g;
 export const stepRows = (window, which) =>
   window
     .locator(`[data-testid="graph-selected-checks-${which}"] [data-testid="graph-selected-check"]`)
-    .evaluateAll((items) =>
-      items.map((item) => ({
-        id: item.getAttribute("data-check-id"),
-        state: item.getAttribute("data-state"),
-        text: item.innerText.replace(/\s+/g, " ").trim(),
-      })),
+    .evaluateAll(
+      (items, pattern) =>
+        items.map((item) => ({
+          id: item.getAttribute("data-check-id"),
+          state: item.getAttribute("data-state"),
+          text: item.innerText.replace(new RegExp(pattern, "g"), " ").replace(/\s+/g, " ").trim(),
+        })),
+      UNSAVED_MARKER.source,
     );
 export const pickRecipe = async (window, testId, value) => {
   await T(window, testId).click();

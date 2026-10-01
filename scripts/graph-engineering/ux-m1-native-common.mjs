@@ -112,6 +112,20 @@ export async function prepareUxWorkspace(isolation, { extraSkill = true } = {}) 
   return { outside: path.join(outside, OUTSIDE_NAME) };
 }
 
+export async function reloadToWorkspace(window) {
+  // 重新加载后应用有时先落在欢迎（连接账户）页，再次重新加载即可回到工作区；最多三次，仍回不来才算失败。
+  for (let attempt = 1; ; attempt += 1) {
+    await window.reload();
+    await window.waitForLoadState("domcontentloaded");
+    try {
+      await T(window, "graph-engineering-open").waitFor({ timeout: 20000 });
+      return;
+    } catch (error) {
+      if (attempt >= 3) throw error;
+    }
+  }
+}
+
 /** Launch one fresh isolated app. `scale` uses a Chromium switch inside the test process only. */
 export async function launchUx(journey, options = {}) {
   const {
@@ -153,9 +167,18 @@ export async function launchUx(journey, options = {}) {
   });
   if (theme) {
     await window.evaluate((value) => localStorage.setItem("zcode-theme", value), theme);
-    await window.reload();
-    await window.waitForLoadState("domcontentloaded");
-    await T(window, "graph-engineering-open").waitFor({ timeout: 45000 });
+    // 重新加载后应用有时先落在欢迎（连接账户）页，再次重新加载即可回到工作区（UX-M4 最终构建的观察，
+    // 与 Graph 界面无关）。最多重试三次；始终回不来才算真正的失败。
+    for (let attempt = 1; ; attempt += 1) {
+      await window.reload();
+      await window.waitForLoadState("domcontentloaded");
+      try {
+        await T(window, "graph-engineering-open").waitFor({ timeout: 20000 });
+        break;
+      } catch (error) {
+        if (attempt >= 3) throw error;
+      }
+    }
   }
   const dialogControl = controlFile
     ? {
@@ -269,19 +292,29 @@ export async function shot(isolation, window, receipt, name, size) {
 export async function shotSizes(isolation, window, receipt, name, prepare) {
   for (const size of SIZES) {
     // 先调整尺寸，再让调用方滚动到目标控件，最后截图。
-    const nativeWindow = await isolation.app.browserWindow(window);
-    try {
-      await nativeWindow.evaluate((browserWindow, [width, height]) => {
-        if (browserWindow.isMaximized()) browserWindow.unmaximize();
-        browserWindow.setContentSize(width, height);
-      }, size);
-    } finally {
-      await nativeWindow.dispose();
+    // 偶尔窗口没有响应一次 setContentSize（观察到于 UX-M4 的最终构建，与界面无关）：重发最多三次再判失败。
+    for (let attempt = 1; ; attempt += 1) {
+      const nativeWindow = await isolation.app.browserWindow(window);
+      try {
+        await nativeWindow.evaluate((browserWindow, [width, height]) => {
+          if (browserWindow.isMaximized()) browserWindow.unmaximize();
+          browserWindow.setContentSize(width, height);
+        }, size);
+      } finally {
+        await nativeWindow.dispose();
+      }
+      try {
+        await window.waitForFunction(
+          ([width, height]) =>
+            Math.abs(innerWidth - width) <= 2 && Math.abs(innerHeight - height) <= 2,
+          size,
+          { timeout: 10000 },
+        );
+        break;
+      } catch (error) {
+        if (attempt >= 3) throw error;
+      }
     }
-    await window.waitForFunction(
-      ([width, height]) => Math.abs(innerWidth - width) <= 2 && Math.abs(innerHeight - height) <= 2,
-      size,
-    );
     if (prepare) await prepare(size);
     await shot(isolation, window, receipt, name, size);
   }

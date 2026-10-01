@@ -4,12 +4,10 @@ import { Button } from "@/components/ui/button.js";
 import { Input } from "@/components/ui/input.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphAddNodes } from "./GraphAddNodes.js";
-import {
-  GraphConfiguration,
-  useGraphConfiguration,
-} from "./GraphConfiguration.js";
+import { GraphConfiguration, useGraphConfiguration } from "./GraphConfiguration.js";
 import { GraphDesignReadiness } from "./GraphDesignReadiness.js";
 import { GraphDesignSections } from "./GraphDesignSections.js";
+import { GraphDisclosure, GraphDisclosureStack } from "./GraphDisclosure.js";
 
 type GraphConfig = ReturnType<typeof useGraphConfiguration>;
 
@@ -79,9 +77,7 @@ export function GraphDesignPanel({
           data-testid="graph-name"
           value={displayed.name}
           disabled={disabled}
-          onChange={(event) =>
-            onChange({ ...displayed, name: event.target.value })
-          }
+          onChange={(event) => onChange({ ...displayed, name: event.target.value })}
         />
         <GraphAddNodes
           definition={displayed}
@@ -120,26 +116,16 @@ export function GraphDesignPanel({
         activeRunId={activeRunId}
         onOpenRun={onOpenRun}
       />
-      <details
-        className="shrink-0 text-ui-sm"
-        data-testid="graph-default-configuration"
-      >
-        <summary className="cursor-pointer">{t("workspaceDefaults")}</summary>
-        <div className="mt-2 space-y-2">
-          <GraphConfiguration
-            {...{ workspacePath, workspaceIdentity, config, disabled }}
-          />
+      <GraphDisclosureStack className="shrink-0">
+        <GraphDisclosure testId="graph-default-configuration" title={t("workspaceDefaults")}>
+          <GraphConfiguration {...{ workspacePath, workspaceIdentity, config, disabled }} />
           <p className="text-foreground-subtle">{t("sharedConfiguration")}</p>
-        </div>
-      </details>
+        </GraphDisclosure>
+      </GraphDisclosureStack>
       {!modelReady ? (
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-ui-sm text-foreground-subtle">{t("noModel")}</p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onOpenSettings("modelProvider")}
-          >
+          <Button variant="outline" size="sm" onClick={() => onOpenSettings("modelProvider")}>
             <Settings className="size-4" />
             {t("modelSettings")}
           </Button>
@@ -151,11 +137,7 @@ export function GraphDesignPanel({
             {availability.reason || t("prerequisite")}
           </p>
           {showGeneralSettingsButton ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onOpenSettings("general")}
-            >
+            <Button variant="outline" size="sm" onClick={() => onOpenSettings("general")}>
               {t("generalSettings")}
             </Button>
           ) : null}

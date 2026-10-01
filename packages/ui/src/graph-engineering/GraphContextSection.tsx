@@ -8,6 +8,7 @@ import { useGraphProjectSetup } from "@/hooks/useGraphProjectSetup.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphEditorText } from "./GraphEditorMode.js";
 import { GraphContextChip } from "./GraphContextChip.js";
+import { GraphDisclosure } from "./GraphDisclosure.js";
 import {
   GraphContextPicker,
   type GraphContextApply,
@@ -150,9 +151,12 @@ export function GraphContextSection({
           .join(" · ");
 
   return (
-    <section className="space-y-3 text-ui-sm" data-testid="graph-reference-bindings">
+    <section
+      className="space-y-3 border-t border-border pt-5 text-ui-base"
+      data-testid="graph-reference-bindings"
+    >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h4 className="text-ui-base font-medium">
+        <h4 className="text-ui-base font-semibold">
           {intl.formatMessage({ id: "graph.preZ8.contextLabel" })}
         </h4>
         <p className="text-foreground-subtle" data-testid="graph-context-summary">
@@ -230,7 +234,7 @@ export function GraphContextSection({
           ref={contentRef}
           align="start"
           aria-label={t("pickerTitle")}
-          className={`${graphFocusClass} w-[min(34rem,calc(100vw-2rem))] gap-2`}
+          className={`${graphFocusClass} graph-ui w-[min(34rem,calc(100vw-2rem))] gap-2`}
           data-testid="graph-context-popover"
           onOpenAutoFocus={(event) => {
             // 焦点进入搜索框，而不是弹层里第一个可聚焦元素。
@@ -264,9 +268,12 @@ export function GraphContextSection({
       <p className="sr-only" role="status" aria-live="polite" data-testid="graph-context-live">
         {announcement}
       </p>
-      <details data-testid="graph-context-advanced">
-        <summary className="cursor-pointer">{editor("advanced")}</summary>
-        <div className="space-y-2 pt-2">
+      <GraphDisclosure
+        testId="graph-context-advanced"
+        title={editor("advanced")}
+        className="border-y border-border"
+      >
+        <div className="space-y-2">
           <p className="text-foreground-subtle">{t("advancedHelp")}</p>
           {roles.map((role) => (
             <label key={role.id} className="block space-y-1">
@@ -285,7 +292,7 @@ export function GraphContextSection({
             </label>
           ))}
         </div>
-      </details>
+      </GraphDisclosure>
     </section>
   );
 }

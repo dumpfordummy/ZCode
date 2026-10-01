@@ -55,6 +55,9 @@ test("sequential native admission freezes all settings and exact dynamic handoff
   assert.equal(completed.result?.text, "independent test result");
   assert.equal(new Set(completed.nodeAttempts.map((a) => a.sessionId)).size, 3);
   assert.equal(await f.service.isSessionOwned({ ...target, sessionId: "native-1" }), false);
+  // Z8.2：每个新准备的 attempt 都带当前指令契约标记；冻结的文本与发送的文本一致。
+  assert.ok(completed.nodeAttempts.every((a) => a.instructionContract === 2));
+  assert.equal(completed.nodeAttempts[1]!.resolvedInstructions, f.sends[1]!.instructions);
   const snapshot = structuredClone(completed);
   f.emit(2, "failed", undefined, { seq: 999 });
   await f.settle();

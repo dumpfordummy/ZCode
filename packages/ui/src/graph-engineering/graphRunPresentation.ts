@@ -35,3 +35,23 @@ export function graphInspectionArtifacts(
         (isEnd && artifact.id === run.resultArtifactId)),
   );
 }
+
+/**
+ * UX-M4: a run that stopped on a failed Test before any approval gate was requested is stored as
+ * `NeedsHuman`. Read literally as an execution fact that contradicts "no reviewer was started" and
+ * "Human decision: Not requested", so the UI words it as "Stopped after Test failure". This is
+ * presentation only: the stored status, the evidence state and the gate facts are unchanged.
+ */
+export function graphStoppedAfterTestFailure(
+  run: {
+    status: string;
+    approvalAttempts?: ReadonlyArray<{ status: string; request?: unknown }>;
+  },
+  evidence: Pick<GraphRunEvidence, "state">,
+): boolean {
+  // 最终闸门的尝试可能存在但被跳过（Skipped，没有请求）：那仍然是“从未请求批准”。
+  const dispatched = (run.approvalAttempts ?? []).some(
+    (attempt) => !["Pending", "Skipped"].includes(attempt.status) || Boolean(attempt.request),
+  );
+  return run.status === "NeedsHuman" && evidence.state === "tests-failed" && !dispatched;
+}

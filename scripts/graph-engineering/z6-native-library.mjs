@@ -6,6 +6,12 @@ import { prepareZ5Fixture } from "./z5-fixture.mjs";
 import { instantiateNativeTemplate } from "./z6-native-ui.mjs";
 import { capture, ledger, modelCount, readGraphRecord } from "./z5-native-observe.mjs";
 import { selectValue } from "./z2-native-helpers.mjs";
+import {
+  choose as chooseWorkflow,
+  offeredBuiltin,
+  openAdvanced,
+  openShare,
+} from "./ux-m3-native-library.mjs";
 
 const isolation = await createIsolation({ noProvider: true });
 const summary = {
@@ -22,19 +28,11 @@ const libraryPath = path.join(
 );
 const library = async () => JSON.parse(await readFile(libraryPath, "utf8"));
 let window, failure;
-async function management() {
-  const panel = window.getByTestId("graph-library-management");
-  if ((await panel.getAttribute("open")) === null) await panel.locator(":scope > summary").click();
-}
 async function choose(id, version) {
-  await selectValue(window, "graph-library-entry", id);
-  await management();
-  await selectValue(window, "graph-library-version", String(version));
+  await chooseWorkflow(window, id, version);
 }
 async function transfer() {
-  await management();
-  const panel = window.getByTestId("graph-template-transfer");
-  if ((await panel.getAttribute("open")) === null) await panel.locator(":scope > summary").click();
+  await openShare(window);
 }
 async function bind() {
   await window
@@ -67,7 +65,7 @@ async function screenshot(name) {
 try {
   await prepareZ5Fixture(isolation);
   window = await isolation.launch();
-  await instantiateNativeTemplate(isolation, window, summary, "generic");
+  const generic = await instantiateNativeTemplate(isolation, window, summary, "generic");
   await window.getByTestId("graph-library-open").click();
   await transfer();
   await window.getByTestId("graph-library-name").fill("Captured synthetic design");
@@ -75,10 +73,12 @@ try {
     .getByTestId("graph-library-description")
     .fill("Reviewed portable design; local data excluded.");
   await window.getByTestId("graph-library-capture").click();
-  await window.getByTestId("graph-template-reviewed").waitFor();
-  await window.getByTestId("graph-template-reviewed").setChecked(true);
-  await window.getByTestId("graph-library-create").click();
-  await window.getByTestId("graph-template-saved").waitFor();
+  await window.getByTestId("graph-save-reviewed").waitFor();
+  await window.getByTestId("graph-save-reviewed").setChecked(true);
+  // 当前设计来自内置工作流：保存目标默认是“新工作流”，内置工作流不能新增版本。
+  assert.equal(await window.getByTestId("graph-save-target").innerText(), "A new workflow");
+  await window.getByTestId("graph-save-confirm").click();
+  await window.getByTestId("graph-library-result").waitFor();
   const created = (await library()).entries.find(
     (entry) => entry.name === "Captured synthetic design",
   );
@@ -88,7 +88,7 @@ try {
   summary.assertions.push(
     "Create from a reviewed current-design preview stores a portable immutable first version and strips local template bindings.",
   );
-  await choose("generic", 1);
+  await choose("generic", generic.version);
   assert.equal(await window.getByTestId("graph-library-archive").isDisabled(), true);
   await window.getByTestId("graph-library-duplicate-name").fill("Saved synthetic engineering");
   await window.getByTestId("graph-library-duplicate").click();
@@ -114,14 +114,14 @@ try {
   await choose(saved.id, 1);
   await transfer();
   await window.getByTestId("graph-library-export").click();
-  await window.getByTestId("graph-template-reviewed").waitFor();
-  const portableText = await window.getByTestId("graph-template-json").inputValue();
+  await window.getByTestId("graph-export-reviewed").waitFor();
+  const portableText = await window.getByTestId("graph-export-json").inputValue();
   assert.ok(!portableText.includes(isolation.workspace));
   assert.ok(!portableText.includes("PRIVATE_RUN_DATA_123"));
   assert.ok(!portableText.includes("fixture-build"));
   assert.ok(!portableText.includes("fixture-test"));
   assert.ok(!portableText.includes("operationalDecision"));
-  await window.getByTestId("graph-template-reviewed").setChecked(true);
+  await window.getByTestId("graph-export-reviewed").setChecked(true);
   await screenshot("z6-reviewed-portable-export");
   await writeFile(path.join(isolation.home, "reviewed-portable.json"), portableText);
   const changed = JSON.parse(portableText);
@@ -129,12 +129,16 @@ try {
   changed.graph.name = changed.name;
   changed.graph.nodes.find((node) => node.type === "task").instructions +=
     "\nVersion two explicitly reviewed note.";
-  await window.getByTestId("graph-template-json").fill(JSON.stringify(changed));
-  assert.equal(await window.getByTestId("graph-library-save-version").isDisabled(), true);
-  await window.getByTestId("graph-template-preview").click();
-  await window.getByTestId("graph-template-reviewed").setChecked(true);
-  await window.getByTestId("graph-library-save-version").click();
-  await window.getByTestId("graph-template-saved").waitFor();
+  // 手动 JSON 位于 Advanced；编辑后的 JSON 在预览并勾选审阅之前没有任何保存入口（按钮根本不存在）。
+  await openAdvanced(window);
+  await window.getByTestId("graph-manual-json").fill(JSON.stringify(changed));
+  assert.equal(await window.getByTestId("graph-manual-confirm").count(), 0);
+  await window.getByTestId("graph-manual-preview").click();
+  await window.getByTestId("graph-manual-reviewed").setChecked(true);
+  await selectValue(window, "graph-manual-target", `version:${saved.id}`);
+  assert.match(await window.getByTestId("graph-manual-save").innerText(), /New version of/);
+  await window.getByTestId("graph-manual-confirm").click();
+  await window.getByTestId("graph-library-result").waitFor();
   saved = (await library()).entries.find((entry) => entry.id === saved.id);
   assert.deepEqual(saved.versions[0], firstVersion);
   assert.equal(saved.versions[1].version, 2);
@@ -148,7 +152,7 @@ try {
   await window.getByTestId("graph-name").fill("UNSAVED_DRAFT_SENTINEL");
   await window.getByTestId("graph-library-open").click();
   await choose(saved.id, 2);
-  await transfer();
+  await openAdvanced(window);
   for (const [label, input] of [
     ["malformed", "{broken"],
     ["unsupported", JSON.stringify({ ...changed, version: 99 })],
@@ -161,10 +165,10 @@ try {
       JSON.stringify({ ...changed, description: "C:\\Users\\PrivateFixture\\confidential.txt" }),
     ],
   ]) {
-    await window.getByTestId("graph-template-json").fill(input);
-    await window.getByTestId("graph-template-preview").click();
-    await window.getByTestId("graph-template-preview-result").getByRole("alert").first().waitFor();
-    assert.equal(await window.getByTestId("graph-library-create").isDisabled(), true);
+    await window.getByTestId("graph-manual-json").fill(input);
+    await window.getByTestId("graph-manual-preview").click();
+    await window.getByTestId("graph-manual-preview-result").getByRole("alert").first().waitFor();
+    assert.equal(await window.getByTestId("graph-manual-confirm").isDisabled(), true);
     assert.deepEqual(await readGraphRecord(isolation), pinned);
     await screenshot(`z6-dry-preview-${label}-rejected`);
   }
@@ -179,6 +183,8 @@ try {
   assert.deepEqual(await readGraphRecord(isolation), pinned);
   await screenshot("z6-dirty-draft-explicit-replacement");
   await window.getByTestId("graph-replace-cancel").click();
+  // 取消替换后等第二层对话框真正卸载，Escape 才会落到资料库对话框上（否则被退出动画中的上层吞掉）。
+  await window.getByTestId("graph-replace-dialog").waitFor({ state: "hidden" });
   await closeLibrary();
   assert.equal(await window.getByTestId("graph-name").inputValue(), "UNSAVED_DRAFT_SENTINEL");
   assert.deepEqual(await readGraphRecord(isolation), pinned);
@@ -239,7 +245,7 @@ try {
     await handle.dispose();
   }
   await window.getByTestId("graph-library-open").click();
-  await choose("slot", 1);
+  await offeredBuiltin(window, "slot");
   assert.equal(
     await window.getByTestId("graph-template-parameter-normal").getAttribute("data-state"),
     "indeterminate",

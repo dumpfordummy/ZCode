@@ -206,3 +206,19 @@ Where the implementation differs from, or adds to, sections 2 to 4. Nothing abov
 7. **Pre-existing, confirmed, fixed here.** Before the change, a failed **Save checks** was rendered twice on the Checks destination (near Save and in the generic alert), and a native-chooser error was an unhandled rejection with nothing shown. Both were reproduced with a throwaway probe before any product change.
 8. **Not done, recorded.** A picker option chosen with the mouse can leave focus outside the search field, so Escape does not close the picker until the field is focused again; observed in the test harness only and not investigated (the keyboard path is unaffected). The run inspector's fixture `deadlineAt` (30 minutes in milliseconds) renders as a 1970 time, as before: it is a valid stored value, not an invented date. The check-run calibration review (`GraphChecksSetup`) still shows `graph.error` of any source; it is outside this journey.
 9. **Unchanged, pre-existing.** `pnpm lint` reports 75 warnings, none in changed files. Repo-wide `pnpm fmt:check` was not run (known unrelated findings); changed files were checked.
+
+## 6. Windows integration: module names must not collide on a case-insensitive file system
+
+Written **2026-09-30** during the Windows acceptance ([UX_M2_WINDOWS_REPORT.md](UX_M2_WINDOWS_REPORT.md)), before the fix. This is the only change the acceptance made to product source.
+
+### 6.1 Fact (reproduced on Windows, not assumed)
+
+UX-M2.2 added two modules in `packages/ui/src/graph-engineering/` whose names differ only in letter case and extension: the pure comparison `graphRecipeChanges.ts` and the component/hook module `GraphRecipeChanges.tsx`. Sources import them as `./graphRecipeChanges.js` and `./GraphRecipeChanges.js`. TypeScript maps `.js` to `.ts` before `.tsx`. On Linux `GraphRecipeChanges.ts` does not exist, so the second import reaches the component module. On a case-insensitive file system (Windows, default macOS) `GraphRecipeChanges.ts` **is** `graphRecipeChanges.ts`, so the import resolves to the pure module and `pnpm typecheck` fails with `TS2724`/`TS2305` and `TS1149` ("differs from already included file name ... only in casing") in `GraphProjectRecipes.tsx`, `GraphSetupPanel.tsx` and `GraphTemplateBindings.tsx`. The Cloud pass (Linux) could not see it.
+
+### 6.2 Rule
+
+No two source modules in one directory may share a name once case and the `.ts`/`.tsx`/`.js`/`.jsx` extension are ignored. The component module is renamed to `GraphRecipeChangeSummary.tsx` (after its main export); `graphRecipeChanges.ts` keeps its name and its test. Exports, behaviour, markup and test ids are unchanged; only three import specifiers change.
+
+### 6.3 Verification
+
+A focused unit test walks every package's `src` and fails on any pair of sibling modules that differ only by case or by TS-family extension. It fails on the pre-fix tree on any operating system, then passes; `pnpm typecheck` passes on Windows.

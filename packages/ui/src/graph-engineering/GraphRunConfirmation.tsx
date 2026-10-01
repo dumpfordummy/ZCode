@@ -45,7 +45,7 @@ export function GraphRunConfirmation({
     !snapshot.definition.template || Boolean(snapshot.provenance && acknowledged);
   return (
     <section
-      className="flex min-h-0 flex-col gap-3"
+      className="mx-auto flex min-h-0 w-full max-w-4xl flex-col gap-5"
       data-testid="graph-run-confirmation"
       aria-labelledby="graph-review-heading"
     >
@@ -58,11 +58,11 @@ export function GraphRunConfirmation({
           id="graph-review-heading"
           ref={heading}
           tabIndex={-1}
-          className="text-ui-lg font-medium outline-none"
+          className="text-ui-xl font-semibold outline-none"
         >
           {u("reviewTitle")}
         </h3>
-        <p className="text-ui-sm text-foreground-subtle">{t("confirmHelp")}</p>
+        <p className="text-ui-base text-foreground-subtle">{t("confirmHelp")}</p>
         <p className="break-all font-mono text-ui-sm" data-testid="graph-review-workspace">
           {workspacePath}
         </p>
@@ -71,7 +71,7 @@ export function GraphRunConfirmation({
       {snapshot.provenance ? (
         <GraphWorkflowProvenance provenance={snapshot.provenance} unknownsFirst />
       ) : null}
-      <dl className="grid gap-1 text-ui-sm sm:grid-cols-[max-content_1fr] sm:gap-x-4">
+      <dl className="grid gap-1 text-ui-base sm:grid-cols-[max-content_1fr] sm:gap-x-4">
         <dt className="text-foreground-subtle">{t("maxRepairIterations")}</dt>
         <dd>{snapshot.definition.routing?.region?.maxRepairIterations ?? 0}</dd>
         <dt className="text-foreground-subtle">{t("maxNodeAdmissions")}</dt>
@@ -79,14 +79,14 @@ export function GraphRunConfirmation({
         <dt className="text-foreground-subtle">{t("deadlineMs")}</dt>
         <dd>{snapshot.definition.routing?.limits.deadlineMs}</dd>
       </dl>
-      <details data-testid="graph-confirmation-definition" className="text-ui-sm">
+      <details data-testid="graph-confirmation-definition" className="text-ui-base">
         <summary className="cursor-pointer">{t("capturedDefinition")}</summary>
         <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-xs">
           {JSON.stringify(snapshot, null, 2)}
         </pre>
       </details>
       <div
-        className="sticky -bottom-3 z-10 -mx-3 -mb-3 mt-auto flex flex-wrap items-center gap-3 border-t border-border bg-background px-3 pb-5 pt-2"
+        className="sticky -bottom-4 z-10 -mx-4 -mb-4 mt-auto flex flex-wrap items-center gap-3 border-t border-border bg-background px-4 pb-4 pt-3"
         data-testid="graph-review-commit"
       >
         {error ? (
@@ -97,7 +97,7 @@ export function GraphRunConfirmation({
           />
         ) : null}
         {snapshot.provenance ? (
-          <label className="flex min-w-60 flex-1 items-start gap-2 text-ui-sm">
+          <label className="flex min-w-60 flex-1 items-start gap-2 text-ui-base">
             <Checkbox
               checked={acknowledged}
               disabled={disabled}

@@ -1,0 +1,185 @@
+{
+  "suite": "UX-M3",
+  "environment": {
+    "kind": "cloud-linux-chromium-harness",
+    "windowsNativeAcceptance": "PENDING",
+    "node": "v24.14.0",
+    "platform": "linux-x64",
+    "chromium": "141.0.7390.37",
+    "real": [
+      "GraphEditor, GraphRunsDestination, GraphLibrary, GraphTemplateBindings, Context picker, checks editor, inline review, Needs-you, draft store, view store, i18n",
+      "useGraphEngineering (the real hook, including its single-flight, retained-submission and admission guards)",
+      "Graph Host code over real temp workspaces: instantiateTemplate, validateReadiness, recipe store (.zcode/config.json, digest conflicts, schema), project-setup reference validation"
+    ],
+    "fixtures": [
+      "Graph engineering service: workspace view, run list, definition revision counter, run admission, change events",
+      "Graph workflow service: only the preflight (`prepare`, built from the real reference validation and recipe store, fixture native environment). The library operations list/mutate/preview/instantiate are the REAL GraphWorkflowService over an in-memory GraphLibraryStore (same revision rule and schema validation as the file store)",
+      "run records: the UI tests' summaryRun() (unit-only captured records), not native runs",
+      "file search, platform.selectFile/saveFile and fileService.stat/readFileRange (real temp files; no OS dialogs), transport (Playwright bridge instead of RPC)"
+    ],
+    "stubs": [
+      "GraphConfiguration (composer model/mode configuration hook)",
+      "GraphDesignPanel body (Workflows editor)",
+      "useSettings"
+    ]
+  },
+  "passed": 31,
+  "failed": 0,
+  "results": [
+    {
+      "name": "the library is one dialog with Workflow, Versions, Use, Share and Advanced; there is no second modal",
+      "ok": true,
+      "ms": 1070
+    },
+    {
+      "name": "workflows say Built-in or Yours, before and after selection, in English and Chinese",
+      "ok": true,
+      "ms": 1870
+    },
+    {
+      "name": "version rows: Version N, Latest only when several are offered, dates only for user versions, built-ins list what the Host offers",
+      "ok": true,
+      "ms": 1334
+    },
+    {
+      "name": "digest and library revision live under Advanced and match the Host; nothing else shows them",
+      "ok": true,
+      "ms": 1411
+    },
+    {
+      "name": "a chosen user version is exactly what New run shows and what the Host instantiates; the design's origin and Used-by follow from that fact",
+      "ok": true,
+      "ms": 2667
+    },
+    {
+      "name": "New run names the built-in workflow and the version the Host offers, without a version picker for a single version",
+      "ok": true,
+      "ms": 853
+    },
+    {
+      "name": "while a run owns the workspace the library can be browsed and previewed, every mutation is refused with a reason, and export to disk is blocked",
+      "ok": true,
+      "ms": 2187
+    },
+    {
+      "name": "a library revision conflict shows its error with Refresh right beside it; Refresh clears it and shows the other window's change",
+      "ok": true,
+      "ms": 1812
+    },
+    {
+      "name": "saving the design defaults to the workflow it came from, not to the Workflow dropdown, and the new version is selected from the returned list",
+      "ok": true,
+      "ms": 2576
+    },
+    {
+      "name": "unsaved design edits are disclosed before saving, for a version and for a new workflow, and the preview is built from that design",
+      "ok": true,
+      "ms": 2142
+    },
+    {
+      "name": "a version whose name differs from the workflow's says so before confirming; the service's derived name is unchanged",
+      "ok": true,
+      "ms": 2333
+    },
+    {
+      "name": "a design that came from a built-in explains that built-ins take no versions and defaults to a new workflow; Duplicate to edit selects the copy",
+      "ok": true,
+      "ms": 1675
+    },
+    {
+      "name": "export names the exact workflow and version, ignores the unsaved canvas, saves exactly the reviewed JSON, and treats a cancelled dialog as neither success nor failure",
+      "ok": true,
+      "ms": 2564
+    },
+    {
+      "name": "import is three steps: choosing and previewing mutate nothing, saving is an explicit choice of target with the reviewed gate",
+      "ok": true,
+      "ms": 2353
+    },
+    {
+      "name": "manual JSON lives under Advanced; editing it drops the preview and the review, so only a reviewed preview can be saved",
+      "ok": true,
+      "ms": 1847
+    },
+    {
+      "name": "after a library revision conflict the reviewed preview survives Refresh and the explicit retry succeeds",
+      "ok": true,
+      "ms": 1795
+    },
+    {
+      "name": "the Share tasks, disclosures and results read in Simplified Chinese",
+      "ok": true,
+      "ms": 2184
+    },
+    {
+      "name": "Open in Runs opens New run with the selected workflow and version and does nothing else, also while a run owns the workspace",
+      "ok": true,
+      "ms": 2091
+    },
+    {
+      "name": "Run again on a run pinned to a built-in version that is no longer offered says so, changes nothing on its own, and Continue carries the request to the offered version",
+      "ok": true,
+      "ms": 1016
+    },
+    {
+      "name": "the same version number with a different definition is not the version the run used",
+      "ok": true,
+      "ms": 972
+    },
+    {
+      "name": "a run whose workflow is no longer in the library says so and offers no version to continue with",
+      "ok": true,
+      "ms": 1104
+    },
+    {
+      "name": "a pin that is exactly offered (built-in current version, or a user version) seeds the form at once, as before",
+      "ok": true,
+      "ms": 1134
+    },
+    {
+      "name": "Continue carries only structurally compatible values by stable identity, lists the rest with reasons, and leaves missing required values blocking Review",
+      "ok": true,
+      "ms": 1038
+    },
+    {
+      "name": "a required value the historical form never had stays missing after Continue and Review stays blocked",
+      "ok": true,
+      "ms": 1016
+    },
+    {
+      "name": "the historical-pin notice and the carry report read in Simplified Chinese",
+      "ok": true,
+      "ms": 1075
+    },
+    {
+      "name": "screenshots (en-US): a historical pin that is no longer offered, and what Continue carried over",
+      "ok": true,
+      "ms": 129
+    },
+    {
+      "name": "screenshots (zh-CN): a historical pin that is no longer offered, and what Continue carried over",
+      "ok": true,
+      "ms": 134
+    },
+    {
+      "name": "screenshots (en-US): library dialog while a run waits, New run version line, and the design origin",
+      "ok": true,
+      "ms": 101
+    },
+    {
+      "name": "screenshots (zh-CN): library dialog while a run waits, New run version line, and the design origin",
+      "ok": true,
+      "ms": 125
+    },
+    {
+      "name": "screenshots (en-US): save current design with unsaved edits and a rename, export and import, and the saved result",
+      "ok": true,
+      "ms": 123
+    },
+    {
+      "name": "screenshots (zh-CN): save current design with unsaved edits and a rename, export and import, and the saved result",
+      "ok": true,
+      "ms": 133
+    }
+  ]
+}

@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox.js";
 import { Textarea } from "@/components/ui/textarea.js";
 import { GraphRunPanel } from "./GraphRunPanel.js";
 import type { GraphPanelProps } from "./graphEngineeringView.js";
-import { parallelConflicts } from "./graphParallelView.js";
+import { parallelAdmissionsBlocked, parallelConflicts } from "./graphParallelView.js";
 
 function ChildInspector({
   run,
@@ -85,6 +85,8 @@ export function GraphParallelRun({
       `${run.id}:${childId ?? (run.phase === "Validating" || run.phase === "Completed" ? "validation" : run.children[0]?.id)}`
     ];
   const disabled = actions.pending || view.readOnly;
+  // 新的批准会准入后续并行工作；策略关闭时只允许拒绝，检查/取消/释放/清理不受影响。
+  const approvalBlocked = parallelAdmissionsBlocked(view);
   const decision = (approved: boolean) =>
     actions.decide({
       runId: run.id,
@@ -227,7 +229,7 @@ export function GraphParallelRun({
           </label>
           <div className="flex flex-wrap gap-2">
             <Button
-              disabled={disabled || !ack || !comment.trim()}
+              disabled={disabled || approvalBlocked || !ack || !comment.trim()}
               onClick={() => void decision(true)}
               data-testid="parallel-approve"
             >

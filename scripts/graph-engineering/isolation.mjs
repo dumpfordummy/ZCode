@@ -18,6 +18,9 @@ export async function createIsolation({
   profile,
   fixtureFactory = startFixture,
   extraEnv = {},
+  // Z8.2 升级矩阵：采用一个已存在的合成工作区路径（记录的身份就是这个路径），
+  // 并由调用方事先把工作区内容放好；harness 不再覆盖其中的文件，也不重新 git init。
+  adoptWorkspace,
 } = {}) {
   const packagedExe = process.env.Z1_PACKAGED_EXE;
   if (packagedExe && (manual || profile))
@@ -46,7 +49,7 @@ export async function createIsolation({
     if (marker.kind !== "z1-isolated-manual" || marker.version !== 1)
       throw new Error("Unrecognized manual profile.");
   }
-  const workspace = path.join(home, "workspace");
+  const workspace = adoptWorkspace ? path.resolve(adoptWorkspace) : path.join(home, "workspace");
   if (!profile) {
     for (const name of [
       "home/.zcode/v2",
@@ -55,25 +58,27 @@ export async function createIsolation({
       "userData",
       "sessionData",
       "data/.zcode/v2",
-      "workspace",
+      ...(adoptWorkspace ? [] : ["workspace"]),
       "temp",
       "data/.zcode/workspace/default",
     ])
       await mkdir(path.join(home, name), { recursive: true });
-    await writeFile(path.join(workspace, ".env"), "");
     await writeFile(path.join(home, "data/.zcode/workspace/default/.env"), "");
-    await writeFile(
-      path.join(workspace, "AGENTS.md"),
-      "Synthetic Z1 workspace. Modify only fixture.mjs and run node --test fixture.test.mjs. Do not inspect parent directories or external files.\n",
-    );
-    await writeFile(
-      path.join(workspace, "fixture.mjs"),
-      "export const marker = 'Z1_BEFORE_7391';\n",
-    );
-    await writeFile(
-      path.join(workspace, "fixture.test.mjs"),
-      "import assert from 'node:assert/strict';\nimport test from 'node:test';\nimport { marker } from './fixture.mjs';\ntest('synthetic marker', () => assert.equal(marker, 'Z1_AFTER_7391'));\n",
-    );
+    if (!adoptWorkspace) {
+      await writeFile(path.join(workspace, ".env"), "");
+      await writeFile(
+        path.join(workspace, "AGENTS.md"),
+        "Synthetic Z1 workspace. Modify only fixture.mjs and run node --test fixture.test.mjs. Do not inspect parent directories or external files.\n",
+      );
+      await writeFile(
+        path.join(workspace, "fixture.mjs"),
+        "export const marker = 'Z1_BEFORE_7391';\n",
+      );
+      await writeFile(
+        path.join(workspace, "fixture.test.mjs"),
+        "import assert from 'node:assert/strict';\nimport test from 'node:test';\nimport { marker } from './fixture.mjs';\ntest('synthetic marker', () => assert.equal(marker, 'Z1_AFTER_7391'));\n",
+      );
+    }
     if (manual)
       await writeFile(
         path.join(home, "profile.json"),
@@ -135,7 +140,8 @@ export async function createIsolation({
     ZAI_OAUTH_ORIGIN: fixture.origin,
     ZAI_BUSINESS_BASE_URL: fixture.origin,
     BIGMODEL_API_BASE_URL: fixture.origin,
-    ...extraEnv,
+    // 函数形式在 fixture 的实际地址已知后再计算（遥测金丝雀端点需要它）。
+    ...(typeof extraEnv === "function" ? extraEnv(fixture) : extraEnv),
     ...(manual
       ? { Z1_ALLOW_PROVIDER_NETWORK: "1" }
       : {
@@ -146,7 +152,7 @@ export async function createIsolation({
   });
   if (!profile) await writeFile(env.GIT_CONFIG_GLOBAL, "");
   // 合成目录建立独立 Git 边界，避免向上发现开发 checkout；不暂存、不提交。
-  if (!profile)
+  if (!profile && !adoptWorkspace)
     await promisify(execFile)("git", ["-c", "init.templateDir=", "init", "--quiet", workspace], {
       env,
     });

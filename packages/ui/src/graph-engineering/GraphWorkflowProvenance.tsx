@@ -7,10 +7,13 @@ import { graphIsoTimestamp } from "./graphTimestamp.js";
 export function GraphWorkflowProvenance({
   provenance,
   unknownsFirst = false,
+  embedded = false,
 }: {
   provenance: GraphRunProvenance;
   /** Review puts the statements the user must accept before the long technical details. */
   unknownsFirst?: boolean;
+  /** UX-M4: rendered inside a disclosure whose header already owns the section title. */
+  embedded?: boolean;
 }) {
   const { intl } = useZCodeIntl(),
     t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
@@ -28,7 +31,7 @@ export function GraphWorkflowProvenance({
   ) : null;
   return (
     <section className="space-y-3 break-words text-ui-sm" data-testid="graph-workflow-provenance">
-      <h3 className="font-medium text-ui-base">{t("provenance")}</h3>
+      {embedded ? null : <h3 className="font-medium text-ui-base">{t("provenance")}</h3>}
       <p>
         {provenance.template.name} · {t("version")} {provenance.template.version}
       </p>

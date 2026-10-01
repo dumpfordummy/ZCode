@@ -1,0 +1,63 @@
+{
+  "schema": "zcode-graph-asar-integrity-check/2",
+  "exeDifferingRange": {
+    "first": 221572463,
+    "last": 221572526,
+    "differingBytes": 62
+  },
+  "builds": {
+    "a": {
+      "dist": "dist-graph-b1",
+      "recordedIntegrity": {
+        "resourceOffset": 221572408,
+        "valueOffset": 221572463,
+        "text": "[{\"file\":\"resources\\\\app.asar\",\"alg\":\"SHA256\",\"value\":\"0502727fe85c3e6426ce77c229e75985a7452059c78e9e268b29672a987d11f1\"}]"
+      },
+      "appAsarHeaderJsonSha256": "d00187640951ff9c6703020814e8414e98202fc2a7334b784c97524284a2d2c6",
+      "recordedValueEqualsHeaderJsonSha256": false,
+      "valueInsideDifferingRange": true,
+      "fuses": {
+        "RunAsNode": "1",
+        "EnableCookieEncryption": "0",
+        "EnableNodeOptionsEnvironmentVariable": "1",
+        "EnableNodeCliInspectArguments": "1",
+        "EnableEmbeddedAsarIntegrityValidation": "0",
+        "OnlyLoadAppFromAsar": "0",
+        "LoadBrowserProcessSpecificV8Snapshot": "0",
+        "GrantFileProtocolExtraPrivileges": "1",
+        "fuse8": "1"
+      }
+    },
+    "b": {
+      "dist": "dist-graph-b2",
+      "recordedIntegrity": {
+        "resourceOffset": 221572408,
+        "valueOffset": 221572463,
+        "text": "[{\"file\":\"resources\\\\app.asar\",\"alg\":\"SHA256\",\"value\":\"303748d893c501f65bd50fa242fe636ef0226f1f4adc939093efae31c7c26cab\"}]"
+      },
+      "appAsarHeaderJsonSha256": "b3dac7a6dd0950055fc6d4fdaa83b3635db82fd1b3510c641fde93400972e727",
+      "recordedValueEqualsHeaderJsonSha256": false,
+      "valueInsideDifferingRange": true,
+      "fuses": {
+        "RunAsNode": "1",
+        "EnableCookieEncryption": "0",
+        "EnableNodeOptionsEnvironmentVariable": "1",
+        "EnableNodeCliInspectArguments": "1",
+        "EnableEmbeddedAsarIntegrityValidation": "0",
+        "OnlyLoadAppFromAsar": "0",
+        "LoadBrowserProcessSpecificV8Snapshot": "0",
+        "GrantFileProtocolExtraPrivileges": "1",
+        "fuse8": "1"
+      }
+    }
+  },
+  "findings": {
+    "differingRegionIsTheAsarIntegrityRecord": true,
+    "recordedValuesEqualCurrentHeaderHashes": false,
+    "integrityValidationFuseEnabled": [
+      "0",
+      "0"
+    ]
+  },
+  "note": "Direct reads of the packaged executable and archive. Why a recorded value differs from the archive's current header hash is not determined here."
+}

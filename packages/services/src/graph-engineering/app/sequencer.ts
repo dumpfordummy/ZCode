@@ -5,7 +5,10 @@ import type {
   GraphWorkspaceTarget,
 } from "../contract.js";
 import { isConfirmedTerminal } from "../domain/definition.js";
-import { resolveGraphInstructions } from "../domain/bindings.js";
+import {
+  GRAPH_INSTRUCTION_CONTRACT_CURRENT,
+  resolveGraphInstructions,
+} from "../domain/bindings.js";
 import type { GraphNativeFact } from "./ports.js";
 import { nativeExecution, skipPending } from "./attempts.js";
 import { GraphState } from "./state.js";
@@ -163,6 +166,7 @@ export class GraphSequencer {
           run.provenance,
         );
         node.resolvedInstructions = resolved.instructions;
+        node.instructionContract = GRAPH_INSTRUCTION_CONTRACT_CURRENT;
         node.bindings = resolved.bindings;
       } catch (error) {
         node.status = "Failed";

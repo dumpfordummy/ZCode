@@ -8,9 +8,16 @@ import {
   routingInactive,
 } from "./routing.js";
 import { routingReadiness } from "./routing-readiness.js";
-import { resolveGraphInstructions } from "./bindings.js";
+import { instructionContractsFor, resolveGraphInstructions } from "./bindings.js";
 import { routeVerificationErrors } from "./routing-verification.js";
 import { routingHistoryErrors } from "./routing-history.js";
+
+/**
+ * Z8.2：冻结指令与重建结果不一致时的固定消息前缀。repository 据此把它归类为“完整性错误”，
+ * 与更新版本、数据损坏分开报告；消息后面附带 run/attempt 标识便于排查。
+ */
+export const FROZEN_INSTRUCTIONS_MISMATCH =
+  "Resolved instructions differ from exact frozen iteration bindings";
 
 /** Cold records cannot invent a fresh attempt, route, budget or machine acceptance. */
 export function routingRecordErrors(run: GraphSequentialRun): string[] {
@@ -152,24 +159,38 @@ export function routingRecordErrors(run: GraphSequentialRun): string[] {
           errors.push("Resolved routing artifact belongs to another iteration or is invalid.");
       }
     }
-    try {
-      const expected = resolveGraphInstructions(
-        node,
-        run.definition,
-        run.nodeAttempts.filter((a) => item.attemptIds[a.nodeId] === a.attemptId),
-        attempt.bindings.filter(
-          (b) => b.source.kind === "artifact" || b.source.kind === "repair-feedback",
-        ),
-        run.provenance,
-      );
-      if (
-        expected.instructions !== attempt.resolvedInstructions ||
-        JSON.stringify(expected.bindings) !== JSON.stringify(attempt.bindings)
-      )
-        errors.push("Resolved instructions differ from exact frozen iteration bindings.");
-    } catch {
-      errors.push("Resolved routing instructions are inconsistent.");
+    // 逐个允许的契约完整重建并要求逐字相等；已标记的 attempt 只能用当前契约，没有回退。
+    let reconstructed = false,
+      matched = false;
+    for (const contract of instructionContractsFor(attempt)) {
+      try {
+        const expected = resolveGraphInstructions(
+          node,
+          run.definition,
+          run.nodeAttempts.filter((a) => item.attemptIds[a.nodeId] === a.attemptId),
+          attempt.bindings.filter(
+            (b) => b.source.kind === "artifact" || b.source.kind === "repair-feedback",
+          ),
+          run.provenance,
+          contract,
+        );
+        reconstructed = true;
+        if (
+          expected.instructions === attempt.resolvedInstructions &&
+          JSON.stringify(expected.bindings) === JSON.stringify(attempt.bindings)
+        ) {
+          matched = true;
+          break;
+        }
+      } catch {
+        /* 这一契约无法重建；是否整体失败由下面决定 */
+      }
     }
+    if (!reconstructed) errors.push("Resolved routing instructions are inconsistent.");
+    else if (!matched)
+      errors.push(
+        `${FROZEN_INSTRUCTIONS_MISMATCH} (run ${run.id}, attempt ${attempt.attemptId}, node ${attempt.nodeId}, instruction contract ${attempt.instructionContract ?? "unmarked"}).`,
+      );
   }
   const decisions = new Set<string>();
   for (const condition of state.conditionAttempts) {

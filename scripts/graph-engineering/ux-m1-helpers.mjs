@@ -19,12 +19,17 @@ const ALLOWED_OPS = new Set([
   "validate",
   "graph.run",
   "wf.list",
+  "wf.mutate",
+  "wf.preview",
   "wf.instantiate",
   "wf.prepare",
   "reference-catalog",
   "validate-reference",
   "searchWorkspaceFiles",
   "selectFile",
+  "stat",
+  "readFileRange",
+  "saveFile",
   "openConversation",
 ]);
 
@@ -98,12 +103,27 @@ export async function shot(page, dir, name, viewport) {
 
 /** Pick an option of a Radix select by its `data-value` (same approach as the native scripts). */
 export async function selectValue(page, testId, value) {
+  // UX-M4：资料库对话框里的工作流是一个列表（不是下拉框）；New run 里仍是下拉框。
+  if (testId === "graph-library-entry") {
+    const option = page.locator(
+      `[data-testid="graph-library-entry-option"][data-value="${value}"]`,
+    );
+    if (await option.count()) {
+      await option.click();
+      await flush(page);
+      return;
+    }
+  }
   await T(page, testId).click();
   await page.locator(`[role="option"][data-value="${value}"]`).click();
   await flush(page);
 }
 /** Option values currently offered by a select (opened, read, closed with Escape). */
 export async function optionValues(page, testId) {
+  if (testId === "graph-library-entry" && (await page.getByTestId("graph-library-list").count()))
+    return page
+      .locator('[data-testid="graph-library-entry-option"]')
+      .evaluateAll((items) => items.map((item) => item.getAttribute("data-value")));
   await T(page, testId).click();
   const values = await page
     .locator('[role="option"][data-value]')
@@ -112,10 +132,13 @@ export async function optionValues(page, testId) {
   return values;
 }
 
-export const GENERIC_KEY = "generic:1";
 /** The retained draft of one template in one workspace (draft-store fact, not page text). */
-export const templateDraft = async (page, host, workspace = "A", key = GENERIC_KEY) =>
-  (await drafts(page))[host.workspaces[workspace]]?.templates[key];
+export const templateDraft = async (
+  page,
+  host,
+  workspace = "A",
+  key = host.library.key("generic"),
+) => (await drafts(page))[host.workspaces[workspace]]?.templates[key];
 export const recipesReady = (page) =>
   until(
     async () => (await T(page, "graph-recipe-read-state").getAttribute("data-state")) === "ready",

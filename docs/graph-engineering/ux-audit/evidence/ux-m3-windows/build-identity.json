@@ -1,0 +1,39 @@
+{
+  "testedIntegrationCommit": "c566b0e89baeb802bd8951aeb1287f5fa6d67aaa",
+  "note": "PR #7 merge into claude/zcde-graph-ux-audit-be80d8; built from that commit with no product source change (only scripts/ differ)",
+  "node": "v24.14.0",
+  "pnpm": "10.33.2",
+  "electron": "41.0.3",
+  "artifacts": {
+    "cli": {
+      "path": "packages/desktop/bundled-agents/win32-x64/glm/zcode.cjs",
+      "bytes": 16772230,
+      "sha256": "c5e85aaecb2884f48e3405707b9fdd809ba2931ac89b76156358816b7b9fcd47",
+      "builtAt": "2026-09-30T18:02:15.795Z",
+      "how": "node scripts/build-desktop-agent-cli.mjs (ZCODE_ENV=test), fresh"
+    },
+    "desktopMain": {
+      "path": "packages/desktop/out/main/index.js",
+      "bytes": 680505,
+      "sha256": "64fc133cac1a92d36ce6a27a49788a7bec1e3337263cc89adbda217b7a2096e9"
+    },
+    "desktopHost": {
+      "path": "packages/desktop/out/host",
+      "files": 18,
+      "aggregateSha256": "c0c56b24a5a6bd92ff2ffe9e8c4c0589a489fc34fbee39ab5d31232dbbeda328"
+    },
+    "desktopPreload": {
+      "path": "packages/desktop/out/preload",
+      "files": 6,
+      "aggregateSha256": "3b996bf4799dc212e5dc821d35357bfdef6267d794ca9fc64afcc2de59320de2"
+    },
+    "desktopRenderer": {
+      "path": "packages/desktop/out/renderer",
+      "files": 6605,
+      "aggregateSha256": "0f04c6a8807b537112a00df4d2220ae32f722e95d9ae8cac232fdc4cc3ce61a3",
+      "how": "pnpm --filter @zcode/desktop build:no-runtime-assets (ZCODE_ENV=test), fresh"
+    }
+  },
+  "aggregateMethod": "sha256 over (relative path, bytes) of every file in the folder, sorted by path",
+  "recheck": "computed again after the last native run: identical to the values recorded right after the build"
+}

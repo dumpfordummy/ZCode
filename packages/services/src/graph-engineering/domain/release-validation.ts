@@ -7,7 +7,7 @@ import type {
   GraphTerminalProof,
   GraphToolAttempt,
 } from "../contract.js";
-import { resolveGraphInstructions } from "./bindings.js";
+import { instructionContractsFor, resolveGraphInstructions } from "./bindings.js";
 import { workspaceKey } from "./definition.js";
 
 type Attempt = GraphLegacyRun | GraphNodeAttempt | GraphToolAttempt;
@@ -96,45 +96,49 @@ function bindingsMatch(run: GraphSequentialRun, attempt: GraphNodeAttempt): bool
   if (attempt.resolvedInstructions === undefined || attempt.bindings === undefined) return false;
   const task = run.definition.nodes.find((node) => node.id === attempt.nodeId);
   if (task?.type !== "task") return false;
-  try {
-    const expected = resolveGraphInstructions(
-      task,
-      run.definition,
-      run.version === 5
-        ? run.nodeAttempts.filter(
-            (a) =>
-              run.routing?.iterations.find((i) => i.id === attempt.iterationId)?.attemptIds[
-                a.nodeId
-              ] === a.attemptId,
-          )
-        : run.nodeAttempts,
-      attempt.bindings.filter(
-        (b) => b.source.kind === "artifact" || b.source.kind === "repair-feedback",
-      ),
-      run.provenance,
-    );
-    return (
-      expected.instructions === attempt.resolvedInstructions &&
-      expected.bindings.length === attempt.bindings.length &&
-      expected.bindings.every((binding, index) => {
-        const stored = attempt.bindings![index]!;
-        return (
-          binding.alias === stored.alias &&
-          binding.source.kind === stored.source.kind &&
-          (binding.source.kind !== "node" ||
-            (stored.source.kind === "node" && binding.source.nodeId === stored.source.nodeId)) &&
-          binding.text === stored.text &&
-          binding.sourceSessionId === stored.sourceSessionId &&
-          binding.sourceInputId === stored.sourceInputId &&
-          binding.sourceCommandId === stored.sourceCommandId &&
-          binding.artifactId === stored.artifactId &&
-          JSON.stringify(binding.source) === JSON.stringify(stored.source)
-        );
-      })
-    );
-  } catch {
-    return false;
-  }
+  // 与加载时的校验一致：只允许该 attempt 的契约，完整重建后逐字相等；已标记的没有回退。
+  return instructionContractsFor(attempt).some((contract) => {
+    try {
+      const expected = resolveGraphInstructions(
+        task,
+        run.definition,
+        run.version === 5
+          ? run.nodeAttempts.filter(
+              (a) =>
+                run.routing?.iterations.find((i) => i.id === attempt.iterationId)?.attemptIds[
+                  a.nodeId
+                ] === a.attemptId,
+            )
+          : run.nodeAttempts,
+        attempt.bindings!.filter(
+          (b) => b.source.kind === "artifact" || b.source.kind === "repair-feedback",
+        ),
+        run.provenance,
+        contract,
+      );
+      return (
+        expected.instructions === attempt.resolvedInstructions &&
+        expected.bindings.length === attempt.bindings!.length &&
+        expected.bindings.every((binding, index) => {
+          const stored = attempt.bindings![index]!;
+          return (
+            binding.alias === stored.alias &&
+            binding.source.kind === stored.source.kind &&
+            (binding.source.kind !== "node" ||
+              (stored.source.kind === "node" && binding.source.nodeId === stored.source.nodeId)) &&
+            binding.text === stored.text &&
+            binding.sourceSessionId === stored.sourceSessionId &&
+            binding.sourceInputId === stored.sourceInputId &&
+            binding.sourceCommandId === stored.sourceCommandId &&
+            binding.artifactId === stored.artifactId &&
+            JSON.stringify(binding.source) === JSON.stringify(stored.source)
+          );
+        })
+      );
+    } catch {
+      return false;
+    }
+  });
 }
 
 /** A release lifts guards on read, so its evidence must identify the complete original run. */

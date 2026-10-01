@@ -63,6 +63,8 @@ export const nodeAttemptSchema = z
     foregroundExecutionId: z.string().optional(),
     observationEpoch: z.string().optional(),
     resolvedInstructions: z.string().max(GRAPH_RESOLVED_LIMIT).optional(),
+    // Z8.2：唯一合法值是 2；缺省 = 未标记的旧数据。其它值由严格 schema 拒绝。
+    instructionContract: z.literal(2).optional(),
     bindings: z
       .array(
         z

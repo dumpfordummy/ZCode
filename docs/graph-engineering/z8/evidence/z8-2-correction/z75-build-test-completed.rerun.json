@@ -1,0 +1,36 @@
+{
+  "note": "Re-run of the undiagnosed old z7.5 z4-native-smoke --scenario=complete driver, using the already-downloaded z7.5 binary and the tagged z7.5 harness (same two recorded scratch-harness patches). The original fixture, its capture and its FAIL label are untouched; this is a separate capture. The original driver log is not recovered and is not claimed.",
+  "originalCapture": {
+    "oldDriverExitCode": 1,
+    "oldDriverStatus": "FAIL",
+    "captureTaken": "stop-2",
+    "recordSha256": "a02bf35ef11d4fb3b4699ac8e0d27f2491008a7d3fdc7a7cb45129f637032b07",
+    "recordVersion": 4,
+    "runStatus": "Completed",
+    "artifacts": 9,
+    "artifactsMatchingManifestDigest": 9
+  },
+  "rerunCapture": {
+    "oldDriverExitCode": 1,
+    "oldDriverStatus": "FAIL",
+    "captureTaken": "stop-2",
+    "recordSha256": "65b029d774e404b6758cf17404f5b94f8f2a3bc500da30629ab1ab7a4e9157f0",
+    "recordVersion": 4,
+    "runStatus": "Completed",
+    "artifacts": 9,
+    "artifactsMatchingManifestDigest": 9
+  },
+  "rerunDriverOutput": {
+    "status": "FAIL",
+    "error": "locator.waitFor: Timeout 30000ms exceeded. | Call log: ... at verifyArtifactTamper (z4-native-artifact-fault.mjs:32), called from z4-native-smoke.mjs:340",
+    "assertionsRecordedBeforeTheFailure": [
+      "Actual native editor saves named C# recipes, Tool nodes, explicit edges and captured approval artifact selections.",
+      "Real native C# process/exit/report/acceptance remain separate: only the exact current source/build and positive required test set can pass.",
+      "Actual application restart retains the exact completed run, operations, artifact manifests and input ledger with zero replay or model requests."
+    ],
+    "modelRequests": 5,
+    "providerErrors": []
+  },
+  "interpretation": "The driver's completion assertions were recorded, then its final step (the artifact-tamper inspection after a restart) timed out waiting for an alert matching /digest/byte length mismatch/ (30 s). That step is a later part of the scenario than the Graph data captured; whether the cause is the old product or the harness/environment is NOT diagnosed. The scenario is therefore not marked PASS. In both captures every artifact's stored content matches its manifest digest and byte length, so the tamper probe's modification did not leak into the captured Graph bytes (the driver restores the original bytes in a finally block before the final stop).",
+  "stdoutFile": "not committed (large; contains local synthetic paths): .tmp/z8-2/profiles-rerun/z75-build-test-completed/old-driver.stdout.txt"
+}

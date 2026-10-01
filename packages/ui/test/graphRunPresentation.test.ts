@@ -8,6 +8,7 @@ import {
   graphEvidenceActionLabels,
   graphEvidenceLabels,
   graphInspectionArtifacts,
+  graphStoppedAfterTestFailure,
 } from "../src/graph-engineering/graphRunPresentation.js";
 import { graphRunClarityEn } from "../src/i18n/locales/graphRunClarity.js";
 import { graphHistoryPage } from "../src/graph-engineering/graphRunHistoryView.js";
@@ -187,4 +188,43 @@ test("accepted failing assertions and invalid evidence keep different next-actio
     "inspectFailure",
     "inspectEvidence",
   ]);
+});
+
+test("a run stopped on a failed Test before any approval gate is worded literally; the stored facts are untouched", () => {
+  const run = summaryRun(),
+    failed = addCheck(run, "failed");
+  failed.status = "Failed";
+  Object.assign(failed.verification!, {
+    outcome: "fail",
+    passed: 0,
+    failed: 1,
+    acceptancePassed: false,
+    exitSuccessful: false,
+  });
+  run.status = "NeedsHuman";
+  run.approvalAttempts = [];
+  const evidence = graphRunEvidence(run);
+  assert.equal(evidence.state, "tests-failed");
+  assert.equal(graphStoppedAfterTestFailure(run, evidence), true);
+  assert.equal(run.status, "NeedsHuman", "the persisted status is not rewritten");
+  // 其他情形保持原措辞：已请求过批准、其他停止原因、没有失败的 Test。
+  // 真实运行里最终闸门的尝试是存在的，但状态为 Skipped 且没有请求：仍然是“从未请求批准”。
+  const skipped = { ...run, approvalAttempts: [{ status: "Skipped" }] };
+  assert.equal(graphStoppedAfterTestFailure(skipped, evidence), true);
+  assert.equal(
+    graphStoppedAfterTestFailure(
+      { ...run, approvalAttempts: [{ status: "WaitingForApproval" }] },
+      evidence,
+    ),
+    false,
+  );
+  assert.equal(
+    graphStoppedAfterTestFailure(
+      { ...run, approvalAttempts: [{ status: "Skipped", request: {} }] },
+      evidence,
+    ),
+    false,
+  );
+  assert.equal(graphStoppedAfterTestFailure({ ...run, status: "Failed" }, evidence), false);
+  assert.equal(graphStoppedAfterTestFailure(run, { state: "tests-passed" }), false);
 });

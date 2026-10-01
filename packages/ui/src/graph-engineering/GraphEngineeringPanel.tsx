@@ -6,24 +6,30 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphEditor } from "./GraphEditor.js";
 import type { GraphPanelProps } from "./graphEngineeringView.js";
 import { GraphParallelPanel } from "./GraphParallelPanel.js";
+import { useGraphParallel } from "@/hooks/useGraphParallel.js";
+import { parallelAdvancedVisible } from "./graphParallelView.js";
 import { graphFocusClass } from "./graphFocus.js";
+import { GraphDisclosure } from "./GraphDisclosure.js";
 
 export default function GraphEngineeringPanel(props: GraphPanelProps) {
   const [parallel, setParallel] = useState(false);
   const graph = useGraphEngineering(props);
+  // 并行能力策略只由 Host 给出（view.policy）；这里仅决定高级入口是否有内容可显示。
+  const parallelView = useGraphParallel(props).view;
+  const advanced = parallelAdvancedVisible(parallelView);
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
   return (
     <main
-      className={`${graphFocusClass} flex h-full min-h-0 flex-col bg-background text-foreground`}
+      className={`${graphFocusClass} graph-ui flex h-full min-h-0 flex-col bg-background text-foreground`}
       data-testid="graph-engineering-panel"
     >
-      <header className="flex flex-wrap items-center gap-2 border-b border-border p-3 [app-region:no-drag]">
-        <Button variant="ghost" size="sm" onClick={props.onBack}>
+      <header className="flex flex-wrap items-center gap-2 border-b border-border bg-header px-4 py-3 [app-region:no-drag]">
+        <Button variant="ghost" onClick={props.onBack}>
           <ArrowLeft className="size-4" />
           {t("backToChat")}
         </Button>
-        <h2 className="text-ui-base font-medium">{t("title")}</h2>
+        <h2 className="text-ui-base font-semibold">{t("title")}</h2>
         <p
           className="min-w-0 flex-1 break-all font-mono text-ui-sm text-foreground-subtle"
           data-testid="graph-workspace"
@@ -33,7 +39,12 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
       </header>
       {parallel ? (
         <p className="px-3 pt-3 text-ui-sm text-warning" data-testid="graph-parallel-experimental">
-          {intl.formatMessage({ id: "graph.preZ8.parallelLimit" })}
+          {intl.formatMessage({
+            id:
+              parallelView?.policy.mode === "disabled"
+                ? "graph.z8.parallelDisabledHistory"
+                : "graph.preZ8.parallelLimit",
+          })}
         </p>
       ) : null}
       {!graph.local ? (
@@ -70,21 +81,20 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
           </Button>
         </div>
       )}
-      {graph.local ? (
-        <footer className="shrink-0 border-t border-border px-3 py-2">
-          <details className="text-ui-sm" data-testid="graph-advanced">
-            <summary className="cursor-pointer">
-              {intl.formatMessage({ id: "graph.preZ8.experimental" })}
-            </summary>
+      {graph.local && advanced ? (
+        <footer className="shrink-0 border-t border-border bg-header px-4 py-2">
+          <GraphDisclosure
+            testId="graph-advanced"
+            title={intl.formatMessage({ id: "graph.preZ8.experimental" })}
+          >
             <Button
               variant={parallel ? "secondary" : "outline"}
-              size="sm"
               onClick={() => setParallel((value) => !value)}
               data-testid="graph-parallel-toggle"
             >
               {t(parallel ? "z7.sequential" : "z7.title")}
             </Button>
-          </details>
+          </GraphDisclosure>
         </footer>
       ) : null}
     </main>

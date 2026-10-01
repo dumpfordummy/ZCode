@@ -5,6 +5,8 @@ import { graphRunClarityEn } from "./graphRunClarity.js";
 import { graphContextPickerEn } from "./graphContextPicker.js";
 import { graphM1En } from "./graphM1.js";
 import { graphM2En } from "./graphM2.js";
+import { graphM3En } from "./graphM3.js";
+import { graphM4En } from "./graphM4.js";
 /** English translations */
 const enUS: Record<string, string> = {
   ...graphPreZ8En,
@@ -14,6 +16,8 @@ const enUS: Record<string, string> = {
   ...graphContextPickerEn,
   ...graphM1En,
   ...graphM2En,
+  ...graphM3En,
+  ...graphM4En,
   "graph.node.approval": "Human Approval",
   "graph.status.WaitingForApproval": "Waiting for approval",
   "graph.status.AwaitingContinuation": "Waiting for explicit Continue",
