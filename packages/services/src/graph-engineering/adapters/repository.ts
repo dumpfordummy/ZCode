@@ -2,7 +2,9 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { recordSchema } from "../domain/record.js";
+import { FROZEN_INSTRUCTIONS_MISMATCH } from "../domain/routing-record.js";
 import {
+  GraphRecordIntegrityError,
   GraphRecordUnsupportedVersionError,
   boundedDiagnostic,
   findNewerRecordVersion,
@@ -17,7 +19,7 @@ import { validateDefinition, workspaceKey } from "../domain/definition.js";
 
 /**
  * 把磁盘上的记录字节解析并校验为 GraphRecord。read 与恢复工具共用同一个解析器：
- * 更新的不支持版本得到专门的、有界的错误；其他任何问题仍是原来的通用校验错误。
+ * 更新的不支持版本和“冻结指令无法校验”各得到专门的、有界的错误；其他任何问题仍是原来的通用校验错误。
  */
 export function parseGraphRecordBytes(bytes: Buffer, target: GraphWorkspaceTarget): GraphRecord {
   const json: unknown = JSON.parse(bytes.toString("utf8"));
@@ -31,7 +33,22 @@ export function parseGraphRecordBytes(bytes: Buffer, target: GraphWorkspaceTarge
       result.success ? undefined : result.error,
     );
   }
-  const parsed = recordSchema.parse(json);
+  const result = recordSchema.safeParse(json);
+  if (!result.success) {
+    // 受支持格式的记录里，冻结的指令与其输入对不上：给出简洁、可读的完整性错误（保留原始诊断）；
+    // 其它任何校验失败仍是原来的通用错误。
+    const mismatch = result.error.issues.find((issue) =>
+      issue.message.startsWith(FROZEN_INSTRUCTIONS_MISMATCH),
+    );
+    if (mismatch)
+      throw new GraphRecordIntegrityError(
+        mismatch.message,
+        boundedDiagnostic(result.error.issues),
+        result.error,
+      );
+    throw result.error;
+  }
+  const parsed = result.data;
   if (parsed.workspaceKey !== workspaceKey(target))
     throw new Error("Graph workspace identity mismatch.");
   validateDefinition(parsed.definition);

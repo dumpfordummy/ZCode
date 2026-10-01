@@ -1,94 +1,125 @@
 # ZCode Graph data operations
 
-Operator guide for the data ZCode Graph keeps on disk: where it is, what the automatic pre-reconciliation snapshot protects, how to restore a record, and what happens with data from a newer version. There is no product UI for any of this; the restore tool is a local maintenance script. Status: Z8.2 development checkpoint — the procedure has been exercised on synthetic data only (see `Z8_2_REPORT.md`); it has **not** been through installer-upgrade acceptance.
+Operator guide for the data ZCode Graph keeps on disk: where it is, what the automatic pre-reconciliation snapshot protects, how to back up and restore a Graph record, and what happens with data the build cannot read. There is no product UI for any of this; the restore tool is a maintenance script in this repository. Status: Z8.2 development checkpoint. The procedures here were exercised on **disposable synthetic and copied-fixture data only**; they have not been through installer-upgrade acceptance.
 
 ## 1. Where the data lives
 
-ZCode Graph runs on a private profile so it never shares state with the regular ZCode app:
+ZCode Graph runs on a private profile so it never shares state with the regular ZCode app.
 
 | What                                                  | Location (Windows)                                                                       |
 | ----------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | Private profile root                                  | `%USERPROFILE%\.zcode-graph-engineering\`                                                |
-| Graph data directory (this guide)                     | `%USERPROFILE%\.zcode-graph-engineering\home\.zcode\v2\graph-engineering\`               |
+| **Graph data directory** (this guide)                 | `%USERPROFILE%\.zcode-graph-engineering\home\.zcode\v2\graph-engineering\`               |
 | One record per workspace                              | `<graph data directory>\<sha256 of the workspace key>.json`                              |
 | Run artifacts                                         | `<graph data directory>\artifacts\`                                                      |
 | Workflow library (user versions)                      | `<graph data directory>\workflow-library.json`                                           |
-| Parallel clones                                       | `<graph data directory>\workspaces\`                                                     |
 | Automatic snapshots (Z8.2)                            | `<graph data directory>\reconcile-snapshots\<workspace hash>\<sha256 of the bytes>.json` |
-| Native session ledger                                 | `%USERPROFILE%\.zcode-graph-engineering\home\.zcode\cli\db\db.sqlite`                    |
-| Electron/session data                                 | `%USERPROFILE%\.zcode-graph-engineering\electron\`                                       |
-| Provider settings and credentials                     | inside the same private profile (`...\home\.zcode\v2\`)                                  |
-| Project source and the project's `.zcode\config.json` | the project folder itself — never inside the profile                                     |
+| Parallel working copies of a project                  | `<graph data directory>\workspaces\` (copies of project source; **not** Graph records)   |
+| Ownership lock while Graph is open                    | `<graph data directory>\<hash>.json.lock\` (not data)                                    |
+| Native session ledger                                 | `...\home\.zcode\cli\db\db.sqlite` (outside the Graph data directory)                    |
+| Provider settings / credentials / Electron data       | elsewhere in the private profile (outside the Graph data directory)                      |
+| Project source and the project's `.zcode\config.json` | the project folder itself                                                                |
 
-The workspace key is the workspace path (or, for a remote workspace, its workspace identity). The record file name is the SHA-256 of that key.
+The workspace key is the workspace path (for a remote workspace, its workspace identity). The record file name is the SHA-256 of that key.
 
 ## 2. What the automatic snapshot is
 
-When ZCode Graph opens a workspace whose saved record contains work that was not finished, it converts that work to `Interrupted` (or `AwaitingContinuation` when a resumable checkpoint exists) and saves the record. **Immediately before that first change it keeps a copy of the exact bytes it just read from disk.**
+When ZCode Graph opens a workspace whose saved record contains unfinished work, it converts that work to `Interrupted` (or `AwaitingContinuation` when a resumable checkpoint or gate exists) and saves the record. **Immediately before that first change it keeps a copy of the exact bytes it read from disk.**
 
-- Taken **only** at that moment (cold-load reconciliation of an existing record). Ordinary saves, runs, approvals and edits never create snapshots.
-- It is the original file, byte for byte — not a re-serialization. It is named by the SHA-256 of its bytes, so identical content is stored once.
-- If the copy cannot be written or verified, or if the record changed on disk after it was read, the reconciliation is **aborted**: the original record is left untouched and nothing is started (no native session, model call, tool, permission answer or approval). Opening the workspace again retries from the unchanged original.
-- Bounded retention: at most **20** snapshots are kept per workspace; older ones are removed automatically and only from this snapshot folder. Nothing else is ever pruned.
-- A record that is already `Interrupted` or `AwaitingContinuation` is saved again on each open (its timestamp is refreshed), so each such open can add one snapshot; the bound of 20 still applies. This is existing behavior that Z8.2 does not change.
+- Taken **only** when a persisted change is actually required. Ordinary saves, runs, approvals and edits never create snapshots.
+- **Opening a record that is already in its reconciled state changes nothing**: record bytes, `updatedAt` and the snapshot set stay exactly as they were, and no retention runs. (Before the Z8.2 correction every launch re-saved such a record and added a snapshot; that is fixed.) If a checkpoint, gate or `resumeRequired` flag is missing or stale the record does change, and that change is snapshotted like any other.
+- It is the original file byte for byte, not a re-serialization, named by the SHA-256 of its bytes, so identical content is stored once.
+- If the copy cannot be written or verified, or the record changed on disk after it was read, the reconciliation is **aborted**: the original record is left untouched and nothing is started. Opening the workspace again retries from the unchanged original.
+- **Bounded retention.** At most **20** snapshots are kept per workspace; the oldest are removed automatically, only from this snapshot folder. This is a safety net for one specific transition, **not a permanent backup guarantee**: snapshots can be removed by later transitions and by restores (section 5). Copy a snapshot out yourself if you need to keep it.
 
 ### What a snapshot contains
 
-Only the one workspace's Graph record: its runs, node and approval attempts, tool attempts, definition and recorded evidence. It is plain JSON; the same file the application would have read.
+Only that workspace's Graph record: its runs, node/approval/tool attempts, definition and recorded evidence. It is plain JSON.
 
-### What a snapshot does **not** contain
+**A snapshot can contain confidential text.** A record holds the prompts that were sent, model replies, command and test output and handoff text. The mechanism does not copy credential-store or provider-configuration files, and some known secret shapes are redacted when evidence is captured, but a record can still contain secret or confidential text that a model, a tool or a project printed. Treat snapshots and backups as sensitive. **Snapshots are not support bundles**: do not attach them to an issue, mail them or commit them.
 
-- Provider settings, API keys, tokens or any credential.
-- Native sessions or the session ledger (`db.sqlite`).
-- Electron/session data, logs, settings.
-- Run artifacts, the workflow library, parallel clones.
-- Project source files or the project's `.zcode\config.json`.
+### What a snapshot does **not** contain or restore
 
-These are deliberately separate. A record points at native sessions and artifacts by identity; restoring a record brings the Graph's own bookkeeping back, it does not recreate a native session that has since changed, and it never rewinds your project files. If you need a project rolled back, use your version control.
+- Provider settings, API keys, tokens or any credential-store file.
+- Native sessions or the session ledger. A record refers to native sessions by identity; restoring a record never recreates or rewinds a session.
+- Run artifacts, the workflow library or other workspaces' records (unless you back them up yourself, section 4).
+- Project source files, project check results on disk, or the project's `.zcode\config.json`. Use version control for the project.
 
-## 3. Restoring a record
+## 3. Reading history is not acting
 
-Use this only when you decide an automatically reconciled record should be replaced by an earlier copy (for example, to inspect what a record looked like before it was marked `Interrupted`, or to recover from a damaged record file).
+Opening a historical record (including one written by an older release) only reads and, if required, reconciles it. It never sends a message, replays a request, approves, answers a question or releases a guard. Continuing a run is a separate, explicit action with its own freshness and ownership checks.
 
-1. **Close ZCode Graph completely** (including from the tray). The restore tool refuses while the application holds the record's lock and changes nothing.
+## 4. Manual backup of Graph-owned files
+
+Close ZCode Graph completely first. A manual backup may include exactly these Graph-owned items from the Graph data directory:
+
+- the workspace record files (`<64 hex characters>.json`),
+- `workflow-library.json`,
+- the `artifacts\` folder,
+- the `reconcile-snapshots\` folder.
+
+It must **not** include `workspaces\` (project copies), lock folders, the native ledger, Electron data, provider settings or credentials. This guide does not tell you to copy the private profile. A backup of these files restores Graph's own bookkeeping only; it does not restore native sessions, credentials, project source, project checks or anything not listed.
+
+```powershell
+$graph  = Join-Path $env:USERPROFILE '.zcode-graph-engineering\home\.zcode\v2\graph-engineering'
+$stamp  = Get-Date -Format 'yyyyMMdd-HHmmss'
+$backup = Join-Path $env:USERPROFILE "graph-engineering-backup-$stamp"
+New-Item -ItemType Directory -Path $backup | Out-Null
+Get-ChildItem -LiteralPath $graph -File |
+  Where-Object { $_.Name -match '^[0-9a-f]{64}\.json$' -or $_.Name -eq 'workflow-library.json' } |
+  Copy-Item -Destination $backup
+foreach ($name in 'artifacts', 'reconcile-snapshots') {
+  $source = Join-Path $graph $name
+  if (Test-Path -LiteralPath $source) { Copy-Item -LiteralPath $source -Destination $backup -Recurse }
+}
+(Get-ChildItem -LiteralPath $backup -Recurse -File | Measure-Object).Count
+```
+
+Keep the backup folder private and delete it when you no longer need it; it can contain confidential text (section 2).
+
+## 5. Restoring a record
+
+Use this only when you decide an automatically reconciled or damaged record should be replaced by an earlier copy. The script is a maintenance tool **in this repository** (it is not shipped inside the installer) and runs with the repository's Node and `tsx`; run it from the repository root.
+
+1. **Close ZCode Graph completely** (including from the tray). The tool refuses while the application holds the record's lock and changes nothing.
 2. List records and their snapshots (read-only):
 
-   ```bash
-   node --import tsx scripts/graph-engineering/graph-record-restore.mjs list "%USERPROFILE%\.zcode-graph-engineering\home\.zcode\v2\graph-engineering"
+   ```powershell
+   $graph = Join-Path $env:USERPROFILE '.zcode-graph-engineering\home\.zcode\v2\graph-engineering'
+   node --import tsx scripts/graph-engineering/graph-record-restore.mjs list $graph
    ```
 
-   The output shows each workspace key, the record's version and status summary, and every snapshot (id, bytes, modified time). The id is the SHA-256 of the snapshot's bytes.
+   For each record the output shows the workspace key, the record version and its run statuses, and every snapshot (id, bytes, modified time). A snapshot id is the SHA-256 of its bytes.
 
 3. Restore one snapshot (an id or a unique prefix of at least 8 characters):
 
-   ```bash
-   node --import tsx scripts/graph-engineering/graph-record-restore.mjs restore "%USERPROFILE%\.zcode-graph-engineering\home\.zcode\v2\graph-engineering" --workspace-key "<exact workspace key>" --snapshot <id-or-prefix> --yes
+   ```powershell
+   $key = '<exact workspace key from the list output>'
+   node --import tsx scripts/graph-engineering/graph-record-restore.mjs restore $graph --workspace-key $key --snapshot <id-or-prefix> --yes
    ```
 
-   The tool: takes the same ownership lock the application uses; validates the chosen snapshot with the same strict parser as the application (including the workspace key match and the version check); **first saves the current record — even if it is damaged — into the snapshot folder**; then replaces the record atomically with the snapshot's exact bytes. It prints what it restored and what it preserved.
+   The tool takes the same ownership lock the application uses; validates the chosen snapshot with the same strict parser as the application (including the workspace-key match and the version and integrity checks); **first saves the current record, even if damaged, into the snapshot folder**; then replaces the record atomically with the snapshot's exact bytes. Without `--yes` it refuses.
 
-4. Start ZCode Graph again. Be aware that a restored record that still contains unfinished work will be reconciled again on open (and snapshotted again). That is expected.
+4. Start ZCode Graph again. A restored record that still contains unfinished work is reconciled on open (and snapshotted once). That is expected.
 
-The tool never changes artifacts, the workflow library, credentials, native sessions, the ledger, project files or `.zcode\config.json`. The pre-restore copy is stored in the same snapshot folder and counts against the same bound of 20; if you want to keep a particular copy beyond that, copy the file out yourself.
+**Retention during a restore.** The pre-restore copy lives in the same store and counts toward the same bound of 20. During one restore, both the snapshot being restored and the just-saved copy of the previous record are protected from that restore's pruning, and if the replacement step fails both remain in the store. Afterwards ordinary retention applies to every snapshot, including those two; neither is a permanent backup. Copy a snapshot out if you need to keep it.
 
-If a restore is refused, read the message: it names the reason (application running, unknown or ambiguous snapshot id, snapshot fails validation, newer unsupported version, content does not match its name). A refused restore changes nothing.
+The tool never changes artifacts, the workflow library, credentials, native sessions, the ledger, project files or `.zcode\config.json`.
 
-## 4. Data from a newer version
+## 6. Data the build cannot read
 
-If a record's `version` (or its definition's or a run's `version`) is higher than this build supports (currently **5**), ZCode Graph refuses to load it with a bounded message: the record "appears to come from a newer, unsupported ZCode Graph version", the offending location and version, and the authoritative validation diagnostic (truncated). It then:
+Three situations are reported differently. In all of them the file is **not** rewritten, downgraded or repaired, and no run, session, tool, model call, permission or approval is started.
 
-- does **not** rewrite, downgrade or "repair" the file;
-- does **not** relax the strict schema or ignore unknown fields;
-- starts **no** run, session, tool, model call, permission or approval.
+| Situation                                                      | What you see                                                                                                                                                     | Meaning                                                                                                                                                                                                                                                                                                                           |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Newer, unsupported format**                                  | "This Graph record uses version N (location), which is newer than this ZCode Graph build supports (up to M)…"                                                    | The record, definition, run or an attempt's instruction contract carries a version above what this build supports (5 for record/definition/run versions, 2 for the instruction contract). Open it with the version that wrote it, or restore a snapshot made by a compatible build. Downgrading over newer data is not supported. |
+| **Supported format, recorded instructions cannot be verified** | "This Graph record could not be verified: Resolved instructions differ from exact frozen iteration bindings (run …, attempt …, node …, instruction contract …)…" | Every attempt's stored instructions are rebuilt from the inputs stored with it and must match exactly. A mismatch means the data was edited or damaged, or came from a writer whose format this build does not recognize. It is **not** by itself an upgrade problem. The full original diagnostic is attached to the error.      |
+| **Malformed data**                                             | the ordinary validation error                                                                                                                                    | The file does not fit the record format.                                                                                                                                                                                                                                                                                          |
 
-Open the data with the version that wrote it, or restore an earlier snapshot made by a compatible build (section 3). Downgrading the application over newer data is not supported. Unreadable JSON, and data of a supported version that fails validation, keep their ordinary error — they are not reported as "newer version".
+Instruction contracts: attempts prepared by this build carry `instructionContract: 2`. Attempts written by older releases carry no marker and are accepted only if they equal, exactly and completely, the instructions reconstructed under one of the two known historical formats (before and after the evidence-contract suffix). A format marker and a local comparison are consistency checks, **not** proof of who wrote the data.
 
-The workflow library file has its own version field; the newer-version handling described here applies to workspace records. See `Z8_2_REPORT.md` for the exact scope that was tested.
+The workflow-library file has its own version field; the newer-version handling above covers workspace records only.
 
-## 5. Backing up yourself
+## 7. Not covered
 
-The snapshot is a safety net for one specific transition, not a backup system. For a backup you control, close ZCode Graph and copy the whole Graph data directory (section 1) plus, if you want native sessions and settings to match, the rest of the private profile. Treat a copy of the profile as sensitive: it contains provider settings and credentials. Do not attach a profile copy to an issue or commit it.
-
-## 6. Not covered
-
-Installer (NSIS) upgrade behavior, code signing, credential migration, cross-machine migration and any retention or deletion UI are outside Z8.2.
+Installer (NSIS) upgrade behavior, code signing, credential migration, native-session migration, cross-machine migration and any retention or deletion UI are outside Z8.2. The upgrade tests copy Graph data into fresh profiles; they do not migrate native sessions.

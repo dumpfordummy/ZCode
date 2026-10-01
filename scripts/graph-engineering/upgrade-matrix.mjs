@@ -64,6 +64,23 @@ function diffPaths(before, after, prefix = "") {
   );
 }
 
+/** 打开 Graph 面板的 Runs 视图并读取各运行的状态（与首次打开用同一段步骤）。 */
+async function showRuns(window, expectedRuns) {
+  const open = window.getByTestId("graph-engineering-open");
+  if (!(await window.getByTestId("graph-engineering-panel").isVisible()) && (await open.count()))
+    await open.click();
+  await window.getByTestId("graph-engineering-panel").waitFor({ timeout: 30000 });
+  if (await window.getByTestId("graph-view-runs").count())
+    await window.getByTestId("graph-view-runs").click();
+  const runs = window.locator('[data-testid="graph-run"]');
+  if (expectedRuns)
+    await runs
+      .first()
+      .waitFor({ timeout: 30000 })
+      .catch(() => undefined);
+  return runs.evaluateAll((nodes) => nodes.map((node) => node.dataset.status));
+}
+
 async function runFixture(id, base = fixtureRoot) {
   const kept = path.join(base, id, "kept");
   const sourceGraph = path.join(kept, "profile-home/.zcode/v2/graph-engineering");
@@ -107,19 +124,7 @@ async function runFixture(id, base = fixtureRoot) {
     await cp(sourceGraph, graphDirectory, { recursive: true });
     assert.deepEqual([...(await walk(graphDirectory))], [...before], "copy is byte-identical");
     const window = await isolation.launch();
-    const open = window.getByTestId("graph-engineering-open");
-    if (!(await window.getByTestId("graph-engineering-panel").isVisible()) && (await open.count()))
-      await open.click();
-    await window.getByTestId("graph-engineering-panel").waitFor({ timeout: 30000 });
-    if (await window.getByTestId("graph-view-runs").count())
-      await window.getByTestId("graph-view-runs").click();
-    const runs = window.locator('[data-testid="graph-run"]');
-    if (parsed?.runs?.length)
-      await runs
-        .first()
-        .waitFor({ timeout: 30000 })
-        .catch(() => undefined);
-    result.uiStatuses = await runs.evaluateAll((nodes) => nodes.map((node) => node.dataset.status));
+    result.uiStatuses = await showRuns(window, Boolean(parsed?.runs?.length));
     const bodyText = await window
       .locator("body")
       .innerText({ timeout: 10000 })
@@ -187,6 +192,9 @@ async function runFixture(id, base = fixtureRoot) {
       expect(snapshotNames.length === 0, "uninterpretable record produced a snapshot");
       expect(changed.length === 0, `files changed: ${changed.join(", ")}`);
       result.gap = result.uiText.replace(/\s+/g, " ").slice(0, 900);
+    } else if (JSON.stringify(result.uiStatuses) !== JSON.stringify(result.statusesAfter)) {
+      result.class = "UI-MISMATCH";
+      expect(false, `UI shows ${result.uiStatuses} but the record says ${result.statusesAfter}`);
     } else if (!parsed?.runs?.length) {
       result.class = "library-or-empty";
       expect(snapshotNames.length === 0, "no record, so no snapshot");
@@ -238,6 +246,27 @@ async function runFixture(id, base = fixtureRoot) {
           `run ${index} approval status changed`,
         );
       });
+    }
+    if (result.class === "non-terminal") {
+      // 真实的重新打开：稳定后的记录再打开两次，字节和快照集合必须逐字节不变（幂等对账）。
+      result.reopen = [];
+      for (const attempt of [1, 2]) {
+        const reopened = await isolation.launch();
+        const statuses = await showRuns(reopened, true);
+        await isolation.stopApp();
+        const again = await walk(graphDirectory);
+        const identical = JSON.stringify([...again]) === JSON.stringify([...after]);
+        result.reopen.push({ attempt, statuses, graphFilesIdentical: identical });
+        expect(identical, `reopen ${attempt} changed Graph files`);
+        expect(
+          JSON.stringify(statuses) === JSON.stringify(result.statusesAfter),
+          `reopen ${attempt} shows ${statuses}`,
+        );
+      }
+      expect(
+        isolation.fixture.requests.filter(isModel).length === 0,
+        "model requests after reopening",
+      );
     }
     if (result.class === "NEWER-VERSION")
       expect(

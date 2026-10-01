@@ -106,12 +106,18 @@ export function createReconcileSnapshotStore(directory: string, io: SnapshotIo =
     return { id, path: target, created };
   }
 
-  /** 只修剪本机制创建的、超出上限的最旧快照；不修剪刚保存/确认的那一份。 */
+  /**
+   * 只修剪本机制创建的、超出上限的最旧快照；受保护的（刚保存/确认的、恢复源）永不修剪。
+   * 从最旧的开始跳过受保护项继续删，直到数量回到上限，所以上限在恢复期间也成立。
+   */
   async function prune(workspaceHash: string, keep: ReadonlySet<string>) {
-    const all = await list(workspaceHash);
-    for (const old of all.slice(MAX_RECONCILE_SNAPSHOTS)) {
+    const all = await list(workspaceHash); // 最新在前
+    let excess = all.length - MAX_RECONCILE_SNAPSHOTS;
+    for (let index = all.length - 1; index >= 0 && excess > 0; index--) {
+      const old = all[index]!;
       if (keep.has(old.id)) continue;
       await rm(join(folder(workspaceHash), `${old.id}.json`), { force: true });
+      excess--;
     }
   }
 

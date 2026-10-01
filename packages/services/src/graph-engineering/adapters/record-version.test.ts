@@ -23,14 +23,17 @@ test("only an integer version beyond the supported range counts as newer", () =>
   assert.deepEqual(findNewerRecordVersion({ version: newer }), {
     location: "version",
     version: newer,
+    supported: MAX_SUPPORTED_RECORD_VERSION,
   });
   assert.deepEqual(findNewerRecordVersion({ version: 3, definition: { version: 9 } }), {
     location: "definition.version",
     version: 9,
+    supported: MAX_SUPPORTED_RECORD_VERSION,
   });
   assert.deepEqual(findNewerRecordVersion({ version: 3, runs: [{ version: 2 }, { version: 7 }] }), {
     location: "runs[1].version",
     version: 7,
+    supported: MAX_SUPPORTED_RECORD_VERSION,
   });
   for (const json of [
     null,
@@ -54,7 +57,7 @@ test("the unsupported-version error is readable and bounded, names the guidance 
   assert.ok(diagnostic.length <= 2000);
   assert.match(diagnostic, /^runs\.0\.x: /);
   const error = new GraphRecordUnsupportedVersionError(
-    { location: "version", version: 9 },
+    { location: "version", version: 9, supported: MAX_SUPPORTED_RECORD_VERSION },
     diagnostic,
   );
   assert.match(error.message, /newer, unsupported ZCode Graph version/);

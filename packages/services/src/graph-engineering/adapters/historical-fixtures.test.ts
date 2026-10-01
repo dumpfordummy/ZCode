@@ -12,7 +12,8 @@ import { createWorkflowStore } from "./workflow-store.js";
 
 /**
  * Z8.2：旧版本二进制真实写出的数据（docs/graph-engineering/z8/fixtures/historical，来源见 PROVENANCE.json）
- * 由当前代码加载。这是代码级回归；不是安装器升级验收。fixture 不会被修改以通过测试。
+ * 由当前代码加载。这是代码级回归；不是安装器升级验收。fixture 不会被修改以通过测试，
+ * 也没有“已知缺口”豁免：任何一个受支持的历史 fixture 读不出来，整个套件就失败。
  */
 const historical = fileURLToPath(
   new URL("../../../../../docs/graph-engineering/z8/fixtures/historical/", import.meta.url),
@@ -69,16 +70,6 @@ async function listAll(directory: string, prefix = ""): Promise<string[]> {
   return found.sort();
 }
 
-/**
- * 真实的 z7.5 记录里，带 evidenceReferences 的 reviewer 任务的冻结指令不含后来加入的
- * “Permitted evidence artifact IDs”契约段（ed3bd3a 修改了 resolveGraphInstructions）；
- * 完整性检查用当前代码重新解析并比较，所以这两条记录今天无法被读取。
- */
-const KNOWN_GAPS = new Set([
-  "z75-needs-human-exhausted",
-  "z75-reviewer-pass-over-failing-test-needs-human",
-]);
-
 const provenance = JSON.parse(await readFile(join(historical, "PROVENANCE.json"), "utf8")) as {
   fixtures: Record<string, { workspaceIdentity: string; recordVersion: number }>;
 };
@@ -104,23 +95,6 @@ for (const id of Object.keys(provenance.fixtures)) {
         id: () => "id",
         now: () => 1_700_000_000_000,
       });
-      if (KNOWN_GAPS.has(id)) {
-        // 已确认的缺口（见 Z8_2_REPORT.md）：当前完整性检查拒绝这条真实的 z7.5 记录。
-        // 要求的是失败关闭：同样的错误、记录逐字节不变、没有快照、没有任何工作。
-        // 缺口修复后这里会失败——届时把该 fixture 移出 KNOWN_GAPS，让它走下面的正常断言。
-        await assert.rejects(
-          service.current.getWorkspace({ workspacePath }),
-          /Resolved instructions differ from exact frozen iteration bindings/,
-        );
-        assert.equal(Buffer.compare(await readFile(join(directory, recordName)), originalBytes), 0);
-        assert.deepEqual(
-          (await listAll(directory)).filter((file) => !file.includes(".lock/")),
-          filesBefore,
-          "no snapshot or other file was created",
-        );
-        assert.deepEqual(native.calls, []);
-        return;
-      }
       const view = await service.current.getWorkspace({ workspacePath });
       assert.deepEqual(native.calls, [], "loading old data never touches the native runtime");
       assert.equal(view.runs.length, original.runs.length);
@@ -142,6 +116,12 @@ for (const id of Object.keys(provenance.fixtures)) {
           view.runs.map((run) => run.status),
           original.runs.map((run: { status: string }) => run.status),
         );
+      } else if (Buffer.compare(afterRecord, originalBytes) === 0) {
+        // 旧应用自己已经写成 Interrupted/AwaitingContinuation：冷加载无需任何持久化变化，
+        // 所以字节、updatedAt 和快照集合都保持不变（Z8.2 幂等对账）。
+        for (const run of view.runs)
+          assert.ok(["Interrupted", "AwaitingContinuation"].includes(run.status), run.status);
+        assert.deepEqual(snapshots, [], "a no-op reconciliation creates no snapshot");
       } else {
         for (const run of view.runs)
           assert.ok(["Interrupted", "AwaitingContinuation"].includes(run.status), run.status);
