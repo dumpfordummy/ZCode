@@ -210,12 +210,20 @@ async function runFixture(id, base = fixtureRoot) {
         ),
         `unexpected statuses after: ${result.statusesAfter}`,
       );
-      expect(
-        snapshotNames.includes(
-          `reconcile-snapshots/${recordName.slice(0, -5)}/${sha256(originalRecord)}.json`,
-        ),
-        "exact original bytes are not in the snapshot store",
-      );
+      if (result.recordUnchanged) {
+        // 旧应用自己已经写成对账后的状态：幂等对账不改字节、不写 updatedAt、不产生快照。
+        result.reconcile = "no-op";
+        expect(snapshotNames.length === 0, "a no-op reconciliation created a snapshot");
+        expect(changed.length === 0, `files changed: ${changed.join(", ")}`);
+      } else {
+        result.reconcile = "transition";
+        expect(
+          snapshotNames.includes(
+            `reconcile-snapshots/${recordName.slice(0, -5)}/${sha256(originalRecord)}.json`,
+          ),
+          "exact original bytes are not in the snapshot store",
+        );
+      }
       if (snapshotNames.length)
         for (const name of snapshotNames) {
           const bytes = await readFile(path.join(graphDirectory, name));
