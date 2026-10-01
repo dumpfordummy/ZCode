@@ -22,7 +22,8 @@ async function files(directory, prefix = "") {
   const found = [];
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const relative = path.posix.join(prefix, entry.name);
-    if (entry.isDirectory()) found.push(...(await files(path.join(directory, entry.name), relative)));
+    if (entry.isDirectory())
+      found.push(...(await files(path.join(directory, entry.name), relative)));
     else found.push(relative);
   }
   return found.sort();
@@ -57,7 +58,11 @@ for (const id of (await readdir(profiles)).sort()) {
   const exported = [];
   for (const relative of await files(target)) {
     const bytes = await readFile(path.join(target, relative));
-    exported.push({ path: `${id}/graph-engineering/${relative}`, bytes: bytes.length, sha256: sha256(bytes) });
+    exported.push({
+      path: `${id}/graph-engineering/${relative}`,
+      bytes: bytes.length,
+      sha256: sha256(bytes),
+    });
   }
   const recordName = (await readdir(target)).find((name) => /^[0-9a-f]{64}\.json$/.test(name));
   const record = recordName
@@ -65,9 +70,13 @@ for (const id of (await readdir(profiles)).sort()) {
     : undefined;
   // capture.json 里记录的哈希必须与导出的字节一致，否则这不是「旧应用写出的原样字节」。
   for (const entry of capture.graphFiles) {
-    const match = exported.find((item) => item.path.endsWith(path.posix.basename(entry.profileRelative)));
+    const match = exported.find((item) =>
+      item.path.endsWith(path.posix.basename(entry.profileRelative)),
+    );
     if (!match || match.sha256 !== entry.sha256)
-      throw new Error(`${id}: exported bytes differ from the capture record for ${entry.profileRelative}`);
+      throw new Error(
+        `${id}: exported bytes differ from the capture record for ${entry.profileRelative}`,
+      );
   }
   fixtures[id] = {
     release: capture.sourceRelease,
@@ -77,7 +86,11 @@ for (const id of (await readdir(profiles)).sort()) {
     workspaceIdentity: record?.workspaceKey ?? null,
     graphProfileRelativeRoot: ".zcode/v2/graph-engineering/",
     recordVersion: record?.version ?? null,
-    runStatuses: record?.runs?.map((run) => ({ version: run.version ?? "z1-unversioned", status: run.status })) ?? [],
+    runStatuses:
+      record?.runs?.map((run) => ({
+        version: run.version ?? "z1-unversioned",
+        status: run.status,
+      })) ?? [],
     capturedFiles: capture.graphFiles,
     exportedFiles: exported,
     byteForByteProducedByOldApp: capture.byteForByteProducedByOldApp,
@@ -99,4 +112,6 @@ await writeFile(
     2,
   )}\n`,
 );
-console.log(`exported ${Object.keys(fixtures).length} fixtures to ${path.relative(root, destination)}`);
+console.log(
+  `exported ${Object.keys(fixtures).length} fixtures to ${path.relative(root, destination)}`,
+);

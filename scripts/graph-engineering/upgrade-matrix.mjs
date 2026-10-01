@@ -19,14 +19,24 @@ const option = (name, fallback) => {
 const exe = path.resolve(option("exe", ""));
 const fixtureRoot = path.resolve(option("fixtures", path.join(root, ".tmp/z8-2/profiles")));
 const outDir = path.resolve(
-  option("out", path.join(root, ".tmp/z8-2/upgrade-matrix", new Date().toISOString().replace(/[:.]/g, "-"))),
+  option(
+    "out",
+    path.join(root, ".tmp/z8-2/upgrade-matrix", new Date().toISOString().replace(/[:.]/g, "-")),
+  ),
 );
 const only = option("only", "");
 if (!option("exe")) throw new Error("--exe=<path to the unpacked ZCode Graph.exe> is required");
 process.env.Z1_PACKAGED_EXE = exe;
 
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
-const TERMINAL = new Set(["Completed", "Failed", "Cancelled", "Rejected", "NeedsHuman", "BudgetExhausted"]);
+const TERMINAL = new Set([
+  "Completed",
+  "Failed",
+  "Cancelled",
+  "Rejected",
+  "NeedsHuman",
+  "BudgetExhausted",
+]);
 
 async function walk(directory, prefix = "") {
   const found = new Map();
@@ -60,7 +70,9 @@ async function runFixture(id, base = fixtureRoot) {
   const names = (await readdir(sourceGraph)).filter(isRecord);
   assert.equal(names.length <= 1, true, "a fixture holds at most one workspace record");
   const recordName = names[0];
-  const originalRecord = recordName ? await readFile(path.join(sourceGraph, recordName)) : undefined;
+  const originalRecord = recordName
+    ? await readFile(path.join(sourceGraph, recordName))
+    : undefined;
   const parsed = originalRecord ? JSON.parse(originalRecord.toString("utf8")) : undefined;
   const workspacePath = parsed?.workspaceKey;
   const before = await walk(sourceGraph);
@@ -70,10 +82,16 @@ async function runFixture(id, base = fixtureRoot) {
   if (workspacePath) {
     // 旧 harness 留下的整个临时 home 只会被整体移到 .tmp（不删除、不读取其中的会话数据）；
     // 其它任何已存在的路径都拒绝复用。
-    if (await stat(workspacePath).then(() => true, () => false)) {
+    if (
+      await stat(workspacePath).then(
+        () => true,
+        () => false,
+      )
+    ) {
       const oldHome = path.dirname(workspacePath);
       assert.equal(
-        path.dirname(oldHome) === tmpdir() && /^zcode-graph-acceptance-/.test(path.basename(oldHome)),
+        path.dirname(oldHome) === tmpdir() &&
+          /^zcode-graph-acceptance-/.test(path.basename(oldHome)),
         true,
         `${workspacePath} already exists and is not a leftover acceptance home`,
       );
@@ -93,7 +111,8 @@ async function runFixture(id, base = fixtureRoot) {
     if (!(await window.getByTestId("graph-engineering-panel").isVisible()) && (await open.count()))
       await open.click();
     await window.getByTestId("graph-engineering-panel").waitFor({ timeout: 30000 });
-    if (await window.getByTestId("graph-view-runs").count()) await window.getByTestId("graph-view-runs").click();
+    if (await window.getByTestId("graph-view-runs").count())
+      await window.getByTestId("graph-view-runs").click();
     const runs = window.locator('[data-testid="graph-run"]');
     if (parsed?.runs?.length)
       await runs
@@ -106,10 +125,13 @@ async function runFixture(id, base = fixtureRoot) {
       .innerText({ timeout: 10000 })
       .catch((error) => `(page text unavailable: ${String(error.message).slice(0, 120)})`);
     result.uiText = bodyText.slice(0, 1500);
-    const isModel = (request) => Boolean(request.model) || String(request.path).includes("chat/completions");
+    const isModel = (request) =>
+      Boolean(request.model) || String(request.path).includes("chat/completions");
     result.modelRequests = isolation.fixture.requests.filter(isModel).length;
     // 其余是应用启动时对受控回环端点的配置查询（场景/配置），不是模型或工具活动；路径如实记录。
-    result.configRequestPaths = isolation.fixture.requests.filter((request) => !isModel(request)).map((request) => request.path);
+    result.configRequestPaths = isolation.fixture.requests
+      .filter((request) => !isModel(request))
+      .map((request) => request.path);
     await isolation.stopApp();
     let ledger = [];
     try {
@@ -123,14 +145,22 @@ async function runFixture(id, base = fixtureRoot) {
       before: Object.fromEntries(before),
       after: Object.fromEntries(after),
     };
-    const changed = [...after].filter(([name, hash]) => before.get(name) !== hash).map(([name]) => name);
+    const changed = [...after]
+      .filter(([name, hash]) => before.get(name) !== hash)
+      .map(([name]) => name);
     const removed = [...before].filter(([name]) => !after.has(name)).map(([name]) => name);
     result.changed = changed;
     result.removed = removed;
-    result.recordUnchanged = recordName ? after.get(recordName) === before.get(recordName) : undefined;
-    const afterRecord = recordName ? JSON.parse(await readFile(path.join(graphDirectory, recordName), "utf8")) : undefined;
+    result.recordUnchanged = recordName
+      ? after.get(recordName) === before.get(recordName)
+      : undefined;
+    const afterRecord = recordName
+      ? JSON.parse(await readFile(path.join(graphDirectory, recordName), "utf8"))
+      : undefined;
     result.statusesAfter = afterRecord?.runs?.map((run) => run.status) ?? [];
-    const snapshotNames = [...after.keys()].filter((name) => name.startsWith("reconcile-snapshots/"));
+    const snapshotNames = [...after.keys()].filter((name) =>
+      name.startsWith("reconcile-snapshots/"),
+    );
     result.snapshots = snapshotNames;
     const problems = [];
     const expect = (condition, message) => condition || problems.push(message);
@@ -167,17 +197,24 @@ async function runFixture(id, base = fixtureRoot) {
     } else {
       result.class = "non-terminal";
       expect(
-        result.statusesAfter.every((status) => ["Interrupted", "AwaitingContinuation"].includes(status)),
+        result.statusesAfter.every((status) =>
+          ["Interrupted", "AwaitingContinuation"].includes(status),
+        ),
         `unexpected statuses after: ${result.statusesAfter}`,
       );
       expect(
-        snapshotNames.includes(`reconcile-snapshots/${recordName.slice(0, -5)}/${sha256(originalRecord)}.json`),
+        snapshotNames.includes(
+          `reconcile-snapshots/${recordName.slice(0, -5)}/${sha256(originalRecord)}.json`,
+        ),
         "exact original bytes are not in the snapshot store",
       );
       if (snapshotNames.length)
         for (const name of snapshotNames) {
           const bytes = await readFile(path.join(graphDirectory, name));
-          expect(`reconcile-snapshots/${recordName.slice(0, -5)}/${sha256(bytes)}.json` === name, `snapshot ${name} does not match its name`);
+          expect(
+            `reconcile-snapshots/${recordName.slice(0, -5)}/${sha256(bytes)}.json` === name,
+            `snapshot ${name} does not match its name`,
+          );
         }
       // 不替人回答、不批准、不重放：记录前后的差异只允许是对账本身写入的字段
       //（状态/消息/时间戳，以及关口与路由检查点上的 resumeRequired 标记）；其余任何路径变化都是问题。
@@ -188,11 +225,16 @@ async function runFixture(id, base = fixtureRoot) {
       ];
       result.recordDiff = diffPaths(parsed, afterRecord);
       for (const changedPath of result.recordDiff)
-        expect(allowed.some((pattern) => pattern.test(changedPath)), `unexpected record change: ${changedPath}`);
+        expect(
+          allowed.some((pattern) => pattern.test(changedPath)),
+          `unexpected record change: ${changedPath}`,
+        );
       parsed.runs.forEach((run, index) => {
         const next = afterRecord.runs[index];
         expect(
-          (next.approvalAttempts ?? []).every((attempt, at) => attempt.status === run.approvalAttempts?.[at]?.status),
+          (next.approvalAttempts ?? []).every(
+            (attempt, at) => attempt.status === run.approvalAttempts?.[at]?.status,
+          ),
           `run ${index} approval status changed`,
         );
       });
@@ -210,7 +252,8 @@ async function runFixture(id, base = fixtureRoot) {
     try {
       const graphDirectory = path.dirname(acceptancePaths(isolation).record);
       result.recordBytesPreserved =
-        !recordName || sha256(await readFile(path.join(graphDirectory, recordName))) === sha256(originalRecord);
+        !recordName ||
+        sha256(await readFile(path.join(graphDirectory, recordName))) === sha256(originalRecord);
     } catch {
       /* 保留原因已记录在 error */
     }
@@ -218,7 +261,8 @@ async function runFixture(id, base = fixtureRoot) {
     await isolation.stopApp().catch(() => undefined);
     await isolation.close().catch(() => undefined);
     await rm(isolation.home, { recursive: true, force: true }).catch(() => undefined);
-    if (workspacePath) await rm(workspacePath, { recursive: true, force: true }).catch(() => undefined);
+    if (workspacePath)
+      await rm(workspacePath, { recursive: true, force: true }).catch(() => undefined);
   }
   return result;
 }
@@ -231,7 +275,10 @@ if (args.includes("--synthetic-newer")) {
   const template = path.join(fixtureRoot, "z22-completed-sequential/kept");
   const mutations = {
     "SYNTHETIC-newer-top-level-version-6": (json) => ({ ...json, version: 6 }),
-    "SYNTHETIC-newer-definition-version-9": (json) => ({ ...json, definition: { ...json.definition, version: 9 } }),
+    "SYNTHETIC-newer-definition-version-9": (json) => ({
+      ...json,
+      definition: { ...json.definition, version: 9 },
+    }),
   };
   for (const [name, mutate] of Object.entries(mutations)) {
     const kept = path.join(base, name, "kept");

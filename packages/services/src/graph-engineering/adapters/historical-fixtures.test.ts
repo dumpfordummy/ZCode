@@ -17,7 +17,14 @@ import { createWorkflowStore } from "./workflow-store.js";
 const historical = fileURLToPath(
   new URL("../../../../../docs/graph-engineering/z8/fixtures/historical/", import.meta.url),
 );
-const TERMINAL = new Set(["Completed", "Failed", "Cancelled", "Rejected", "NeedsHuman", "BudgetExhausted"]);
+const TERMINAL = new Set([
+  "Completed",
+  "Failed",
+  "Cancelled",
+  "Rejected",
+  "NeedsHuman",
+  "BudgetExhausted",
+]);
 const ALLOWED_CHANGES = [
   /^runs\.\d+\.(status|message|updatedAt)$/,
   /^runs\.\d+\..*\.resumeRequired$/,
@@ -125,9 +132,16 @@ for (const id of Object.keys(provenance.fixtures)) {
         TERMINAL.has(run.status),
       );
       if (everyRunTerminal) {
-        assert.equal(Buffer.compare(afterRecord, originalBytes), 0, "terminal history is not rewritten");
+        assert.equal(
+          Buffer.compare(afterRecord, originalBytes),
+          0,
+          "terminal history is not rewritten",
+        );
         assert.deepEqual(snapshots, [], "nothing to reconcile, so nothing to snapshot");
-        assert.deepEqual(view.runs.map((run) => run.status), original.runs.map((run: { status: string }) => run.status));
+        assert.deepEqual(
+          view.runs.map((run) => run.status),
+          original.runs.map((run: { status: string }) => run.status),
+        );
       } else {
         for (const run of view.runs)
           assert.ok(["Interrupted", "AwaitingContinuation"].includes(run.status), run.status);
@@ -152,13 +166,14 @@ for (const id of Object.keys(provenance.fixtures)) {
             `unexpected change to the old record: ${path}`,
           );
         // 不批准、不改答案：任何审批尝试的状态都保持原样。
-        original.runs.forEach((run: { approvalAttempts?: Array<{ status: string }> }, index: number) =>
-          assert.deepEqual(
-            (JSON.parse(afterRecord.toString("utf8")).runs[index].approvalAttempts ?? []).map(
-              (attempt: { status: string }) => attempt.status,
+        original.runs.forEach(
+          (run: { approvalAttempts?: Array<{ status: string }> }, index: number) =>
+            assert.deepEqual(
+              (JSON.parse(afterRecord.toString("utf8")).runs[index].approvalAttempts ?? []).map(
+                (attempt: { status: string }) => attempt.status,
+              ),
+              (run.approvalAttempts ?? []).map((attempt) => attempt.status),
             ),
-            (run.approvalAttempts ?? []).map((attempt) => attempt.status),
-          ),
         );
       }
       // 记录之外的每个 Graph 文件（产物、工作流库）都逐字节不变；只允许多出快照目录。

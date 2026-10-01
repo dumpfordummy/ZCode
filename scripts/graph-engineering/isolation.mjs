@@ -65,19 +65,19 @@ export async function createIsolation({
       await mkdir(path.join(home, name), { recursive: true });
     await writeFile(path.join(home, "data/.zcode/workspace/default/.env"), "");
     if (!adoptWorkspace) {
-    await writeFile(path.join(workspace, ".env"), "");
-    await writeFile(
-      path.join(workspace, "AGENTS.md"),
-      "Synthetic Z1 workspace. Modify only fixture.mjs and run node --test fixture.test.mjs. Do not inspect parent directories or external files.\n",
-    );
-    await writeFile(
-      path.join(workspace, "fixture.mjs"),
-      "export const marker = 'Z1_BEFORE_7391';\n",
-    );
-    await writeFile(
-      path.join(workspace, "fixture.test.mjs"),
-      "import assert from 'node:assert/strict';\nimport test from 'node:test';\nimport { marker } from './fixture.mjs';\ntest('synthetic marker', () => assert.equal(marker, 'Z1_AFTER_7391'));\n",
-    );
+      await writeFile(path.join(workspace, ".env"), "");
+      await writeFile(
+        path.join(workspace, "AGENTS.md"),
+        "Synthetic Z1 workspace. Modify only fixture.mjs and run node --test fixture.test.mjs. Do not inspect parent directories or external files.\n",
+      );
+      await writeFile(
+        path.join(workspace, "fixture.mjs"),
+        "export const marker = 'Z1_BEFORE_7391';\n",
+      );
+      await writeFile(
+        path.join(workspace, "fixture.test.mjs"),
+        "import assert from 'node:assert/strict';\nimport test from 'node:test';\nimport { marker } from './fixture.mjs';\ntest('synthetic marker', () => assert.equal(marker, 'Z1_AFTER_7391'));\n",
+      );
     }
     if (manual)
       await writeFile(

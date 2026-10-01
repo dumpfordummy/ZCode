@@ -6,19 +6,19 @@ Operator guide for the data ZCode Graph keeps on disk: where it is, what the aut
 
 ZCode Graph runs on a private profile so it never shares state with the regular ZCode app:
 
-| What                                          | Location (Windows)                                                                          |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Private profile root                          | `%USERPROFILE%\.zcode-graph-engineering\`                                                   |
-| Graph data directory (this guide)             | `%USERPROFILE%\.zcode-graph-engineering\home\.zcode\v2\graph-engineering\`                  |
-| One record per workspace                      | `<graph data directory>\<sha256 of the workspace key>.json`                                 |
-| Run artifacts                                 | `<graph data directory>\artifacts\`                                                         |
-| Workflow library (user versions)              | `<graph data directory>\workflow-library.json`                                              |
-| Parallel clones                               | `<graph data directory>\workspaces\`                                                        |
-| Automatic snapshots (Z8.2)                    | `<graph data directory>\reconcile-snapshots\<workspace hash>\<sha256 of the bytes>.json`    |
-| Native session ledger                         | `%USERPROFILE%\.zcode-graph-engineering\home\.zcode\cli\db\db.sqlite`                       |
-| Electron/session data                         | `%USERPROFILE%\.zcode-graph-engineering\electron\`                                          |
-| Provider settings and credentials             | inside the same private profile (`...\home\.zcode\v2\`)                                     |
-| Project source and the project's `.zcode\config.json` | the project folder itself — never inside the profile                                |
+| What                                                  | Location (Windows)                                                                       |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Private profile root                                  | `%USERPROFILE%\.zcode-graph-engineering\`                                                |
+| Graph data directory (this guide)                     | `%USERPROFILE%\.zcode-graph-engineering\home\.zcode\v2\graph-engineering\`               |
+| One record per workspace                              | `<graph data directory>\<sha256 of the workspace key>.json`                              |
+| Run artifacts                                         | `<graph data directory>\artifacts\`                                                      |
+| Workflow library (user versions)                      | `<graph data directory>\workflow-library.json`                                           |
+| Parallel clones                                       | `<graph data directory>\workspaces\`                                                     |
+| Automatic snapshots (Z8.2)                            | `<graph data directory>\reconcile-snapshots\<workspace hash>\<sha256 of the bytes>.json` |
+| Native session ledger                                 | `%USERPROFILE%\.zcode-graph-engineering\home\.zcode\cli\db\db.sqlite`                    |
+| Electron/session data                                 | `%USERPROFILE%\.zcode-graph-engineering\electron\`                                       |
+| Provider settings and credentials                     | inside the same private profile (`...\home\.zcode\v2\`)                                  |
+| Project source and the project's `.zcode\config.json` | the project folder itself — never inside the profile                                     |
 
 The workspace key is the workspace path (or, for a remote workspace, its workspace identity). The record file name is the SHA-256 of that key.
 
