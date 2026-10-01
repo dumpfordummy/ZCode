@@ -1,8 +1,10 @@
 # UX-M4 report: Focus-page visual system (M4.2 – M4.4)
 
-**Status: FUNCTIONAL CHECKS COMPLETE (automated, local) — VISUAL ACCEPTANCE PENDING (the user's).**
+**Status: FUNCTIONAL CHECKS COMPLETE — USER VISUAL ACCEPTANCE PASSED.**
 
-Direction **A — Focus page** with the review refinements was implemented on branch `claude/ux-m4-visual-clarity`. The M4.1 boards established the direction, not product acceptance; this report does not claim the user's visual or usability acceptance. Nothing was pushed, merged, released or tagged; no dependency, permission policy, reviewer retry or execution feature was added; Z8 was not started.
+Direction **A — Focus page** with the review refinements was implemented on branch `claude/ux-m4-visual-clarity`. The M4.1 boards established the direction, not product acceptance. No dependency, permission policy, reviewer retry or execution feature was added; Z8 was not started.
+
+**Acceptance record (as reported by the user, not by me).** After the manual run the user reported that the main M4 manual flow felt good. The user then raised one remaining concern, the disclosure/inspector sections that still looked like the old UI; that was addressed by the final disclosure polish (section 00), and the user reviewed the final disclosure screenshots. One last micro-polish, the duplicated "Frozen workflow provenance" heading, was removed (embedded prop, section 00). The user then reported UX-M4 visual acceptance as passed. This acceptance covers the visuals reviewed in the manual run and the screenshots; it does not change the NOT RUN items below (real Windows DPI, real Windows file dialogs for M4, non-Graph screens).
 
 Spec (written before the code): [UX_M4_SPEC.md](UX_M4_SPEC.md). Rules: [DESIGN.md](../../../DESIGN.md) (Graph section rewritten). User guide: [USER_GUIDE.md](USER_GUIDE.md). Direction record: [UX_M4_DIRECTION.md](UX_M4_DIRECTION.md).
 
@@ -146,13 +148,12 @@ Every image committed here was looked at. The earlier M4.1 prototype frames are 
 
 ## 7. Limitations and open points
 
-- **Visual acceptance is the user's.** I judged the captures for overlap, clipping, contrast and hierarchy; I did not judge taste.
-- The Workflows destination (graph canvas, node inspector, routing/bounded-repair editors) only gets the new surfaces, accent and tab style; its structure is unchanged. It is the least redesigned area. The "Workflow library" button and inspector tabs were adjusted; legacy controls there still use the shared look.
-- Preflight and the approval evidence still contain nested disclosures from earlier milestones (provenance sections, source changes); they were not restructured, only re-skinned, to avoid moving consent-critical content.
+- The Workflows destination's deeper structure (graph canvas, node inspector, routing editors) was not redesigned: it has the M4 surfaces, accent, tab style and the new disclosure pattern, and its legacy controls still use the shared look. This is the main remaining visual backlog.
+- Preflight and the approval evidence still carry denser nested disclosures from earlier milestones (provenance sections, source changes); they were only re-skinned, to avoid moving consent-critical content.
 - The wide-screen (1920px) New run column is centred with a large gap to the list; this follows direction A but is a judgement call for the user.
 - `text-ui-xl` (18px at the default size) is the page title; the prototype's 22px title was not added as a new type step.
-- The dialog footer repeats the New-run reason text ("…Review and run is available once that run is resolved") because the shared action bar is reused there; the copy is pre-existing.
-- Not exercised: real Windows DPI, real Windows file dialogs for M4, non-Graph screens (Chat, Settings, plugin store) beyond confirming that no shared token or component changed.
+- The library dialog footer now frames blockers as the Load into design operation (final polish); the New-run bar keeps its own wording.
+- NOT RUN / not exercised: real Windows DPI, real Windows file dialogs for M4, non-Graph screens (Chat, Settings, plugin store) beyond confirming that no shared token or component changed.
 - Native reload flake described in section 4.
 
 ## 8. Manual launcher and visual / usability checklist (for the user; separate from the automated results)
