@@ -14,6 +14,7 @@ import type {
 } from "../index.js";
 import { GraphEngineeringService } from "./app/service.js";
 import { createGraphRepository } from "./adapters/repository.js";
+import { createGraphSupportService } from "./adapters/support-bundle.js";
 import { createGraphNativePort } from "./adapters/native.js";
 import { createGraphEvidencePort } from "./adapters/evidence.js";
 import { createGraphArtifactStore } from "./adapters/artifacts.js";
@@ -40,6 +41,7 @@ export function createGraphEngineeringService(options: {
 }) {
   const preflight = createWorkflowPreflight(options);
   const project = createProjectSetupPort(options);
+  const repository = createGraphRepository(options.directory);
   const graph = new GraphEngineeringService({
     parallelPolicy:
       options.parallelPolicy ??
@@ -47,7 +49,7 @@ export function createGraphEngineeringService(options: {
     parallel: createGraphParallelPort(options),
     preflight,
     checks: project,
-    repository: createGraphRepository(options.directory),
+    repository,
     native: createGraphNativePort(options),
     evidence: createGraphEvidencePort(options.gitService),
     artifacts: createGraphArtifactStore(options.directory),
@@ -71,5 +73,6 @@ export function createGraphEngineeringService(options: {
     id: randomUUID,
     now: Date.now,
   });
-  return Object.assign(graph, { workflowService });
+  const supportService = createGraphSupportService({ directory: options.directory, repository });
+  return Object.assign(graph, { workflowService, supportService });
 }

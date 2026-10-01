@@ -3,11 +3,13 @@ import {
   TID_WORKSPACE_HELP_MENU_RESOURCE_MANAGER,
   TID_WORKSPACE_HELP_MENU_TRIGGER,
 } from "@zcode/shared";
+import { useState } from "react";
 import { FEEDBACK_SUBMISSION_AVAILABLE } from "@/feedback/feedbackAvailability.js";
 import {
   ActivityIcon,
   BookOpenIcon,
   CircleHelpIcon,
+  FileJsonIcon,
   LightbulbIcon,
   InfoIcon,
   MessageSquareIcon,
@@ -26,8 +28,11 @@ import {
 import { cn } from "@/components/lib/utils.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import { useFeedbackStore } from "@/feedback/feedbackStore.js";
+import { GraphSupportBundleDialog } from "@/graph-engineering/GraphSupportBundleDialog.js";
+import { GRAPH_SUPPORT_BUNDLE_AVAILABLE } from "@/graph-engineering/supportBundle.js";
 import { useDesktopUpdateMenu } from "@/hooks/useDesktopUpdateMenu.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
+import { useOptionalBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { createHelpMenuActionHandlers } from "@/lib/helpMenuActions.js";
 
@@ -47,6 +52,12 @@ export function WorkspaceHelpMenuButton({
   const updateMenu = useDesktopUpdateMenu(isDesktop);
   const openFeedbackSubmit = useFeedbackStore((state) => state.openSubmit);
   const openFeatureRequest = useFeedbackStore((state) => state.openFeatureRequest);
+  const [supportBundleOpen, setSupportBundleOpen] = useState(false);
+  // Z8.3-S1：本地支持包只在 Graph 内部版、平台能保存文件、且 Host 提供支持服务时出现。
+  const supportBundleAvailable =
+    GRAPH_SUPPORT_BUNDLE_AVAILABLE &&
+    Boolean(platform.saveFile) &&
+    Boolean(useOptionalBaseWorkspaceServices()?.graphSupportService);
   const helpMenuLabel = intl.formatMessage({ id: "workspaceHeader.help.menu" });
   const helpMenuActions = createHelpMenuActionHandlers({
     platform,
@@ -110,6 +121,15 @@ export function WorkspaceHelpMenuButton({
             </DropdownMenuItem>
           </>
         ) : null}
+        {supportBundleAvailable ? (
+          <DropdownMenuItem
+            data-testid="graph-support-bundle-menu-item"
+            onSelect={() => setSupportBundleOpen(true)}
+          >
+            <FileJsonIcon className="size-4" />
+            {intl.formatMessage({ id: "graph.s1.menu" })}
+          </DropdownMenuItem>
+        ) : null}
         {/* Windows/Linux 没有原生菜单栏，自绘标题栏箭头菜单也已下线，
             资源管理器只能从这里进；Web 端没有该窗口，不渲染。 */}
         {isDesktop ? (
@@ -152,6 +172,10 @@ export function WorkspaceHelpMenuButton({
           </>
         ) : null}
       </DropdownMenuContent>
+      {/* 对话框是 DropdownMenu 的兄弟内容而不在 Content 里：菜单关闭后对话框仍保持挂载。 */}
+      {supportBundleAvailable ? (
+        <GraphSupportBundleDialog open={supportBundleOpen} onOpenChange={setSupportBundleOpen} />
+      ) : null}
     </DropdownMenu>
   );
 }

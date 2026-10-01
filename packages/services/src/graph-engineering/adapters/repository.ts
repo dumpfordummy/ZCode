@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile } from "node:fs/promises";
+import { mkdir, readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { recordSchema } from "../domain/record.js";
 import { FROZEN_INSTRUCTIONS_MISMATCH } from "../domain/routing-record.js";
@@ -15,6 +15,7 @@ import { acquireFileLock, atomicWritePrivateTextFile } from "@zcode/shared/node"
 
 import type { GraphWorkspaceTarget } from "../contract.js";
 import type { GraphRecord, GraphRepository } from "../app/ports.js";
+import type { GraphRecordInventory, GraphRecordInventoryEntry } from "../app/support-bundle.js";
 import { validateDefinition, workspaceKey } from "../domain/definition.js";
 
 /**
@@ -71,13 +72,59 @@ export function parseGraphRecordBytes(bytes: Buffer, target: GraphWorkspaceTarge
   };
 }
 
+const RECORD_FILE = /^[0-9a-f]{64}\.json$/;
+
+/**
+ * Z8.3-S1：不依赖工作区 target 的只读解析。与 parseGraphRecordBytes 使用同一个 schema 和版本边界；
+ * 目标身份由“记录内的 workspaceKey 哈希必须等于文件名”代替。任何解析问题都只变成一个状态，不抛出、不改写文件。
+ */
+function inspectGraphRecordBytes(
+  bytes: Buffer,
+  hash: string,
+): Omit<GraphRecordInventoryEntry, "hash" | "bytes"> {
+  let json: unknown;
+  try {
+    json = JSON.parse(bytes.toString("utf8"));
+  } catch {
+    return { readStatus: "invalid", storedVersion: null };
+  }
+  const rawVersion = (json as { version?: unknown } | null)?.version;
+  const storedVersion =
+    typeof rawVersion === "number" && Number.isInteger(rawVersion) && rawVersion >= 0
+      ? rawVersion
+      : null;
+  if (findNewerRecordVersion(json))
+    return { readStatus: "unsupported-newer-version", storedVersion };
+  const result = recordSchema.safeParse(json);
+  if (!result.success) {
+    const mismatch = result.error.issues.some((issue) =>
+      issue.message.startsWith(FROZEN_INSTRUCTIONS_MISMATCH),
+    );
+    return {
+      readStatus: mismatch ? "integrity-error" : "invalid",
+      storedVersion,
+    };
+  }
+  if (sha256(result.data.workspaceKey) !== hash) return { readStatus: "invalid", storedVersion };
+  return {
+    readStatus: "ok",
+    storedVersion,
+    record: {
+      definition: result.data.definition,
+      runs: result.data.runs,
+      ...(result.data.parallel ? { parallel: result.data.parallel } : {}),
+      ...(result.data.parallelParent ? { parallelParent: result.data.parallelParent } : {}),
+    },
+  };
+}
+
 export const workspaceHash = (target: GraphWorkspaceTarget) =>
   createHash("sha256").update(workspaceKey(target)).digest("hex");
 
 export function createGraphRepository(
   directory: string,
   options: { snapshotIo?: SnapshotIo } = {},
-): GraphRepository {
+): GraphRepository & GraphRecordInventory {
   const pathFor = (target: GraphWorkspaceTarget) =>
     join(directory, `${workspaceHash(target)}.json`);
   const snapshots = createReconcileSnapshotStore(directory, options.snapshotIo);
@@ -128,6 +175,26 @@ export function createGraphRepository(
         owners.clear();
       })();
       return disposal;
+    },
+    /** Z8.3-S1：只读清单；不取得所有权、不写文件、不更新 lastRead。 */
+    async inventory(): Promise<GraphRecordInventoryEntry[]> {
+      let names: string[];
+      try {
+        names = await readdir(directory);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+        throw error;
+      }
+      const entries: GraphRecordInventoryEntry[] = [];
+      for (const name of names.filter((item) => RECORD_FILE.test(item)).sort()) {
+        const bytes = await readFile(join(directory, name));
+        entries.push({
+          hash: name.slice(0, -".json".length),
+          bytes: bytes.byteLength,
+          ...inspectGraphRecordBytes(bytes, name.slice(0, -".json".length)),
+        });
+      }
+      return entries;
     },
     async read(target): Promise<GraphRecord | null> {
       let bytes: Buffer;

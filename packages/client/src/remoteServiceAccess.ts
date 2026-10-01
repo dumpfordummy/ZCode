@@ -3,6 +3,7 @@ import {
   IGraphEngineeringService,
   IGraphWorkflowService,
   IGraphParallelService,
+  IGraphSupportService,
   IFileService,
   IMediaPreviewService,
   IGitService,
@@ -55,6 +56,7 @@ export class RemoteServiceAccess implements IServiceAccessor {
   readonly graphEngineeringService: IGraphEngineeringService;
   readonly graphWorkflowService: IGraphWorkflowService;
   readonly graphParallelService: IGraphParallelService;
+  readonly graphSupportService: IGraphSupportService;
   readonly fileService: IFileService;
   readonly mediaPreviewService: IMediaPreviewService;
   readonly gitService: IGitService;
@@ -102,6 +104,9 @@ export class RemoteServiceAccess implements IServiceAccessor {
   constructor(channelClient: IChannelClient) {
     this.graphParallelService = ProxyChannel.toService<IGraphParallelService>(
       channelClient.getChannel(IGraphParallelService.channelName),
+    );
+    this.graphSupportService = ProxyChannel.toService<IGraphSupportService>(
+      channelClient.getChannel(IGraphSupportService.channelName),
     );
     this.graphWorkflowService = ProxyChannel.toService<IGraphWorkflowService>(
       channelClient.getChannel(IGraphWorkflowService.channelName),

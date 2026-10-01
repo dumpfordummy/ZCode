@@ -42,12 +42,14 @@ import type { IConversationShareService } from "./conversation-share/conversatio
 import type { IGraphEngineeringService } from "./graph-engineering/contract.js";
 import type { IGraphWorkflowService } from "./graph-engineering/workflow-contract.js";
 import type { IGraphParallelService } from "./graph-engineering/parallel-contract.js";
+import type { IGraphSupportService } from "./graph-engineering/support-contract.js";
 
 /** UI 层消费的统一服务接口 */
 export interface IServiceAccessor {
   readonly graphEngineeringService?: IGraphEngineeringService;
   readonly graphWorkflowService?: IGraphWorkflowService;
   readonly graphParallelService?: IGraphParallelService;
+  readonly graphSupportService?: IGraphSupportService;
   readonly fileService: IFileService;
   readonly mediaPreviewService?: IMediaPreviewService;
   readonly gitService: IGitService;

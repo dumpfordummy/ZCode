@@ -8,6 +8,7 @@ import type { GitGraphWorkspace } from "@zcode/shared";
 import { IGraphEngineeringService } from "./graph-engineering/contract.js";
 import { IGraphWorkflowService } from "./graph-engineering/workflow-contract.js";
 import { IGraphParallelService } from "./graph-engineering/parallel-contract.js";
+import { IGraphSupportService } from "./graph-engineering/support-contract.js";
 import { createGraphEngineeringService } from "./graph-engineering/node.js";
 import {
   createNodeProviderRuntimePathEnv,
@@ -2474,6 +2475,7 @@ export function createLocalServices(options: {
     .register(IGraphEngineeringService, graphEngineeringService)
     .register(IGraphWorkflowService, graphEngineeringService.workflowService)
     .register(IGraphParallelService, graphEngineeringService.parallelService)
+    .register(IGraphSupportService, graphEngineeringService.supportService)
     .register(IFileService, fileService)
     .register(IMediaPreviewService, mediaPreviewService)
     .register(IGitService, gitService)

@@ -76,6 +76,8 @@ export const ServiceChannels = {
   GraphEngineering: "graphEngineering",
   GraphWorkflow: "graphWorkflow",
   GraphParallel: "graphParallel",
+  /** Z8.3-S1：本地 Graph 支持包；只读生成，保存由 renderer 经既有保存文件边界发起。 */
+  GraphSupport: "graphSupport",
   File: "file",
   MediaPreview: "media-preview",
   System: "system",

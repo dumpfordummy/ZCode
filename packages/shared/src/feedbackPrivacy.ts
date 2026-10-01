@@ -202,3 +202,16 @@ function redactText(text: string, diagnostic: boolean, depth: number): string {
 export function redactFeedbackText(text: string, options: { diagnostic?: boolean } = {}): string {
   return redactText(text, options.diagnostic === true, 0);
 }
+
+/**
+ * 凭据存储文件名（小写比较）。日志导出与 Graph 支持包共用这一份：这些文件不是排障材料，必须在收集清单阶段按文件名跳过，
+ * 不能等到内容脱敏。
+ */
+const SENSITIVE_CREDENTIAL_FILE_NAMES: ReadonlySet<string> = new Set([
+  "credentials.json",
+  ".credentials.json",
+]);
+
+export function isSensitiveCredentialFileName(fileName: string): boolean {
+  return SENSITIVE_CREDENTIAL_FILE_NAMES.has(fileName.toLowerCase());
+}
