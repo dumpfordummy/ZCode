@@ -113,8 +113,12 @@ export class GraphState {
         "The owning Host was interrupted. Inspect the original input; pending tasks will not be submitted automatically.";
       interrupted = true;
     }
-    if (interrupted) await this.commit(target, record);
-    else this.records.set(key, record);
+    if (interrupted) {
+      // Z8.2：只有对既有记录的冷加载对账才会走到这里。先保存磁盘上的原始字节；保存失败则抛出，
+      // 记录不变、缓存不填充，因此没有任何后续动作（所有动作都先经过 load），重试会重新读取原记录。
+      await this.options.repository.snapshotBeforeReconcile?.(target);
+      await this.commit(target, record);
+    } else this.records.set(key, record);
     return record;
   }
   async commit(target: GraphWorkspaceTarget, record: GraphRecord): Promise<void> {

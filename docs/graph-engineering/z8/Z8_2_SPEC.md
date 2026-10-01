@@ -48,14 +48,14 @@ Provenance per fixture (committed in `docs/graph-engineering/z8/fixtures/histori
 
 For every captured fixture the **current** product loads a copy of the old profile and the harness asserts before/after bytes and hashes of every Graph file:
 
-| Old state | Required result |
-| --- | --- |
-| Completed / terminal | byte-identical afterwards; no snapshot; zero native/model/tool activity |
+| Old state                                                | Required result                                                                                                                                                                                                                |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Completed / terminal                                     | byte-identical afterwards; no snapshot; zero native/model/tool activity                                                                                                                                                        |
 | Executing / unknown / waiting for permission or question | record becomes `Interrupted` (or the existing `AwaitingContinuation` mapping); exact original bytes present in the snapshot store; zero resends, Build/Test reruns, permission answers, guard releases, recreated native tasks |
-| Waiting for final approval | no approval; existing mapping preserved; explicit continuation still performs the existing freshness checks (existing tests; checked on the fixture where the release supports it) |
-| Failed / NeedsHuman / Cancelled | unchanged; no retry or repair |
-| Workflow library | historical versions remain exact; nothing synthesized |
-| Not interpretable by the current schema | fail closed, preserve the file, report the exact gap; the fixture is never edited to pass |
+| Waiting for final approval                               | no approval; existing mapping preserved; explicit continuation still performs the existing freshness checks (existing tests; checked on the fixture where the release supports it)                                             |
+| Failed / NeedsHuman / Cancelled                          | unchanged; no retry or repair                                                                                                                                                                                                  |
+| Workflow library                                         | historical versions remain exact; nothing synthesized                                                                                                                                                                          |
+| Not interpretable by the current schema                  | fail closed, preserve the file, report the exact gap; the fixture is never edited to pass                                                                                                                                      |
 
 This is current-product-over-old-data evidence from an unpacked binary running after another. It is **not** NSIS installer-upgrade acceptance.
 
