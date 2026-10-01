@@ -1,15 +1,20 @@
 import { createHash } from "node:crypto";
+import { ZCODE_PRODUCT_FLAVOR, type ZCodeProductFlavor } from "@zcode/shared";
 
 interface BuildAgentTelemetrySpawnEnvInput {
   telemetryEnv: Record<string, string>;
   deviceMid?: string;
   userId?: string;
   runtimeSurface: "desktop_local_host" | "remote_workspace_host";
+  /** 仅供测试覆盖；运行时使用编译期身份。 */
+  flavor?: ZCodeProductFlavor;
 }
 
 export function buildAgentTelemetrySpawnEnv(
   input: BuildAgentTelemetrySpawnEnvInput,
 ): Record<string, string> {
+  // Graph 安装包有意关闭自动遥测：即使宿主进程继承了 OTLP 变量，也不向 Agent 进程传递。
+  if ((input.flavor ?? ZCODE_PRODUCT_FLAVOR) === "graph") return {};
   if (
     !input.telemetryEnv.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT &&
     !input.telemetryEnv.OTEL_EXPORTER_OTLP_ENDPOINT

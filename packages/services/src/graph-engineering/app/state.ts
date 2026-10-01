@@ -13,6 +13,8 @@ import { routeCheckpoint } from "../domain/routing.js";
 import type { GraphPreflightPort } from "./workflow-ports.js";
 
 export interface GraphOptions extends GraphArtifactOptions {
+  /** 并行能力的唯一策略来源；缺省按关闭处理（fail closed）。 */
+  parallelPolicy?: () => import("@zcode/shared").GraphParallelPolicy;
   parallel?: import("./parallel-ports.js").GraphParallelPort;
   repository: GraphRepository;
   native: GraphNativePort;

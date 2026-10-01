@@ -1,0 +1,72 @@
+{
+  "schema": "zcode-graph-comparison-accounting/1",
+  "sourceCommit": "e555d800906d7ca76d43aa22e186ba8d8baedc24",
+  "inputs": {
+    "sameSourceCommit": true,
+    "sameLockfiles": true,
+    "sameToolchain": true,
+    "sameBuildEnvironment": true
+  },
+  "installerByteIdentical": false,
+  "winUnpacked": {
+    "label": "win-unpacked",
+    "membersInA": 86,
+    "membersInB": 86,
+    "pathsPresentInBoth": 86,
+    "byteIdenticalSamePath": 84,
+    "changedSamePath": 2,
+    "pathsOnlyInA": 0,
+    "pathsOnlyInB": 0,
+    "sumCheck": {
+      "A": "84 + 2 + 0 = 86",
+      "B": "84 + 2 + 0 = 86"
+    },
+    "normalizedDiagnostic": {
+      "changedSamePathIdenticalAfterNormalizing": 0,
+      "changedSamePathTotal": 2,
+      "onlyInOneSidePairsIdenticalAfterNormalizing": 0,
+      "onlyInOneSidePairsTotal": 0,
+      "meaning": "After replacing chunk-XXXXXXXX file-name tokens and ISO timestamps with placeholders, the compared text is equal. This localizes the differences; it is not byte reproducibility and not a behavioral-equivalence claim."
+    }
+  },
+  "appAsar": {
+    "label": "app.asar members",
+    "membersInA": 27573,
+    "membersInB": 27573,
+    "pathsPresentInBoth": 27562,
+    "byteIdenticalSamePath": 27553,
+    "changedSamePath": 9,
+    "pathsOnlyInA": 11,
+    "pathsOnlyInB": 11,
+    "sumCheck": {
+      "A": "27553 + 9 + 11 = 27573",
+      "B": "27553 + 9 + 11 = 27573"
+    },
+    "normalizedDiagnostic": {
+      "changedSamePathIdenticalAfterNormalizing": 9,
+      "changedSamePathTotal": 9,
+      "onlyInOneSidePairsIdenticalAfterNormalizing": 11,
+      "onlyInOneSidePairsTotal": 11,
+      "meaning": "After replacing chunk-XXXXXXXX file-name tokens and ISO timestamps with placeholders, the compared text is equal. This localizes the differences; it is not byte reproducibility and not a behavioral-equivalence claim."
+    }
+  },
+  "rawByteDifferences": [
+    {
+      "file": "ZCode Graph.exe",
+      "sameSize": true,
+      "differingBytes": 62,
+      "clusters": 1
+    },
+    {
+      "file": "resources/app.asar",
+      "sameSize": true,
+      "differingBytes": 2417880,
+      "clusters": 50
+    }
+  ],
+  "overlapNotes": [
+    "pathsPresentInBoth = byteIdenticalSamePath + changedSamePath. The earlier report line \"27,562 byte-identical\" used pathsPresentInBoth by mistake; byte-identical same-path members are pathsPresentInBoth minus changedSamePath.",
+    "The renamed chunk files are pathsOnlyInA/pathsOnlyInB. They are members of the 27,573 in each build but not of pathsPresentInBoth, so they are not counted among the changed same-path members.",
+    "The changed same-path members and the renamed chunks are disjoint sets."
+  ]
+}

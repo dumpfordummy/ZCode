@@ -1,0 +1,342 @@
+{
+  "note": "Every entry is keyed to one rule, one exact file path, exact matched texts with maximum counts, and a written reason that records what the matched text is in context. No directory-wide, wildcard or whole-rule exclusions are accepted (validateExceptions enforces this). Third-party entries describe files that the existing packager ships inside app.asar; Z8.1 did not change that. Chunk-hashed first-party asset names (IntlProvider-*.js) change with content, so a new hash surfaces as a new unexplained hit that must be reviewed again.",
+  "exceptions": [
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/@ai-sdk/provider-utils/src/validate-download-url.ts",
+      "matches": {
+        "10.0.0.0": 1,
+        "172.16.0.0": 1,
+        "192.168.0.0": 1
+      },
+      "reason": "Comment text naming the RFC 1918 and loopback CIDR base addresses next to the checks of an SSRF guard in a third-party library; these are range definitions, not host addresses."
+    },
+    {
+      "rule": "private-key-block",
+      "file": "app.asar/node_modules/@dotenvx/dotenvx/src/cli/examples.js",
+      "matches": {
+        "-----BEGIN OPENSSH PRIVATE KEY-----": 1
+      },
+      "reason": "CLI help text in the third-party dotenvx package showing how to set a multi-line value; the sample block is a one-line truncated placeholder, not a usable key."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.d.ts",
+      "matches": {
+        "10.0.1.2": 1,
+        "10.1.2.80": 2,
+        "10.0.0.1": 1,
+        "192.168.1.140": 1,
+        "172.16.8.21": 1,
+        "192.168.2.133": 1,
+        "192.168.0.1": 2
+      },
+      "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.js",
+      "matches": {
+        "10.0.1.2": 1,
+        "10.1.2.80": 2,
+        "10.0.0.1": 1,
+        "192.168.1.140": 1,
+        "172.16.8.21": 1,
+        "192.168.2.133": 1,
+        "192.168.0.1": 2
+      },
+      "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/stable_attributes.d.ts",
+      "matches": {
+        "10.1.2.80": 4,
+        "172.18.0.2": 1
+      },
+      "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/stable_attributes.js",
+      "matches": {
+        "10.1.2.80": 4,
+        "172.18.0.2": 1
+      },
+      "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.d.ts",
+      "matches": {
+        "10.0.1.2": 1,
+        "10.1.2.80": 2,
+        "10.0.0.1": 1,
+        "192.168.1.140": 1,
+        "172.16.8.21": 1,
+        "192.168.2.133": 1,
+        "192.168.0.1": 2
+      },
+      "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.js",
+      "matches": {
+        "10.0.1.2": 1,
+        "10.1.2.80": 2,
+        "10.0.0.1": 1,
+        "192.168.1.140": 1,
+        "172.16.8.21": 1,
+        "192.168.2.133": 1,
+        "192.168.0.1": 2
+      },
+      "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/stable_attributes.d.ts",
+      "matches": {
+        "10.1.2.80": 4,
+        "172.18.0.2": 1
+      },
+      "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/stable_attributes.js",
+      "matches": {
+        "10.1.2.80": 4,
+        "172.18.0.2": 1
+      },
+      "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.d.ts",
+      "matches": {
+        "10.0.1.2": 1,
+        "10.1.2.80": 2,
+        "10.0.0.1": 1,
+        "192.168.1.140": 1,
+        "172.16.8.21": 1,
+        "192.168.2.133": 1,
+        "192.168.0.1": 2
+      },
+      "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.js",
+      "matches": {
+        "10.0.1.2": 1,
+        "10.1.2.80": 2,
+        "10.0.0.1": 1,
+        "192.168.1.140": 1,
+        "172.16.8.21": 1,
+        "192.168.2.133": 1,
+        "192.168.0.1": 2
+      },
+      "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/stable_attributes.d.ts",
+      "matches": {
+        "10.1.2.80": 4,
+        "172.18.0.2": 1
+      },
+      "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/stable_attributes.js",
+      "matches": {
+        "10.1.2.80": 4,
+        "172.18.0.2": 1
+      },
+      "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/fast-uri/benchmark/benchmark.mjs",
+      "matches": {
+        "10.10.10.10": 1
+      },
+      "reason": "Benchmark input string inside the third-party fast-uri package; sample address."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/highlight.js/es/languages/routeros.js",
+      "matches": {
+        "192.168.0.0": 1,
+        "192.168.0.1": 2,
+        "192.168.0.34": 1,
+        "192.168.24.1": 1
+      },
+      "reason": "Comment text showing RouterOS IP-list syntax inside the highlight.js language definition (third party); documentation examples."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/highlight.js/lib/languages/routeros.js",
+      "matches": {
+        "192.168.0.0": 1,
+        "192.168.0.1": 2,
+        "192.168.0.34": 1,
+        "192.168.24.1": 1
+      },
+      "reason": "Comment text showing RouterOS IP-list syntax inside the highlight.js language definition (third party); documentation examples."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/ip-address/dist/ipv6.js",
+      "matches": {
+        "192.168.0.1": 2
+      },
+      "reason": "JSDoc @example in the third-party ip-address library; sample address."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/ip-address/src/ipv6.ts",
+      "matches": {
+        "192.168.0.1": 2
+      },
+      "reason": "JSDoc @example in the third-party ip-address library; sample address."
+    },
+    {
+      "rule": "private-key-block",
+      "file": "app.asar/node_modules/jose/dist/webapi/key/import.js",
+      "matches": {
+        "-----BEGIN PRIVATE KEY-----": 1
+      },
+      "reason": "PEM header string compared against in the third-party jose key-import code; no key material."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/linkify-it/index.js",
+      "matches": {
+        "192.168.1.1": 1
+      },
+      "reason": "Source comment describing a URL-ambiguity case in the third-party linkify-it library; sample address."
+    },
+    {
+      "rule": "windows-user-directory",
+      "file": "app.asar/node_modules/msw/src/core/utils/internal/getCallFrame.test.ts",
+      "matches": {
+        "C:\\\\Users\\\\mock\\\\": 9
+      },
+      "reason": "Mock stack-trace strings (user 'mock') in a unit test shipped inside the third-party msw package; not a real user directory."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/msw/src/core/utils/request/toPublicUrl.node.test.ts",
+      "matches": {
+        "192.168.0.10": 2
+      },
+      "reason": "Unit-test data shipped inside the third-party msw package; sample address."
+    },
+    {
+      "rule": "windows-user-directory",
+      "file": "app.asar/node_modules/node-pty/lib/windowsPtyAgent.test.js",
+      "matches": {
+        "C:\\\\Users\\\\alros\\\\": 2
+      },
+      "reason": "Command-line quoting test strings in the third-party node-pty package that mention another person's example path; not this build's user."
+    },
+    {
+      "rule": "windows-user-directory",
+      "file": "app.asar/node_modules/node-pty/src/windowsPtyAgent.test.ts",
+      "matches": {
+        "C:\\\\Users\\\\alros\\\\": 2
+      },
+      "reason": "Command-line quoting test strings in the third-party node-pty package that mention another person's example path; not this build's user."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/proxy-addr/index.js",
+      "matches": {
+        "10.0.0.0": 1,
+        "172.16.0.0": 1,
+        "192.168.0.0": 1
+      },
+      "reason": "CIDR base-address constants for the 'uniquelocal' trust preset of a third-party library; range definitions, not host addresses."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/proxy-from-env/test.js",
+      "matches": {
+        "10.0.0.1": 5,
+        "10.0.0.2": 5
+      },
+      "reason": "Test fixture strings for NO_PROXY parsing shipped inside the third-party package; no connection is made."
+    },
+    {
+      "rule": "private-key-block",
+      "file": "app.asar/node_modules/ssh2/lib/keygen.js",
+      "matches": {
+        "-----BEGIN OPENSSH PRIVATE KEY-----": 1
+      },
+      "reason": "PEM header string literal used by the third-party ssh2 key generator to assemble a freshly generated key; no key material present at rest."
+    },
+    {
+      "rule": "private-key-block",
+      "file": "app.asar/node_modules/ssh2/lib/protocol/constants.js",
+      "matches": {
+        "-----BEGIN PRIVATE KEY-----": 1
+      },
+      "reason": "Throwaway Ed25519 key literal hard-coded by the third-party ssh2 library to feature-test crypto.sign/verify support; it is part of the public npm package, belongs to no user or service, and is not used for authentication."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/node_modules/ssh2/lib/protocol/handlers.misc.js",
+      "matches": {
+        "192.168.7.38": 1
+      },
+      "reason": "RFC-style comment example (originator address) in the third-party ssh2 library; sample address."
+    },
+    {
+      "rule": "private-key-block",
+      "file": "app.asar/node_modules/ssh2/lib/protocol/keyParser.js",
+      "matches": {
+        "-----BEGIN OPENSSH PRIVATE KEY-----": 1
+      },
+      "reason": "PEM header inside a regular expression of the third-party ssh2 key parser; no key material."
+    },
+    {
+      "rule": "profile-directory-name",
+      "file": "app.asar/out/main/graph-profile.mjs",
+      "matches": {
+        ".zcode-graph-engineering": 2
+      },
+      "reason": "The Graph private-profile directory name constant in the packaged Graph entry's profile mapping; it is the intended profile name, not a user path."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/out/main/index.js",
+      "matches": {
+        "10.0.0.0": 1,
+        "172.16.0.0": 1,
+        "192.168.0.0": 1
+      },
+      "reason": "First-party bundled table of reserved/private IPv4 CIDR bases (0.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 and similar) used to classify addresses; range definitions, not host addresses (minified main bundle, line 1337)."
+    },
+    {
+      "rule": "private-address",
+      "file": "app.asar/out/renderer/assets/IntlProvider-BzvhqYAv.js",
+      "matches": {
+        "192.168.1.100": 2
+      },
+      "reason": "UI placeholder text 'enter host address, e.g. 192.168.1.100' in the Chinese and English locale tables of the SSH host field; example text."
+    },
+    {
+      "rule": "private-address",
+      "file": "win-unpacked/resources/glm/zcode.cjs",
+      "matches": {
+        "10.0.0.0": 1,
+        "172.16.0.0": 1,
+        "192.168.0.0": 1
+      },
+      "reason": "First-party agent bundle table of reserved/private IPv4 CIDR bases with human-readable reasons, used to classify addresses; range definitions, not host addresses."
+    }
+  ]
+}

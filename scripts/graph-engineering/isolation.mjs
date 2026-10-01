@@ -135,7 +135,8 @@ export async function createIsolation({
     ZAI_OAUTH_ORIGIN: fixture.origin,
     ZAI_BUSINESS_BASE_URL: fixture.origin,
     BIGMODEL_API_BASE_URL: fixture.origin,
-    ...extraEnv,
+    // 函数形式在 fixture 的实际地址已知后再计算（遥测金丝雀端点需要它）。
+    ...(typeof extraEnv === "function" ? extraEnv(fixture) : extraEnv),
     ...(manual
       ? { Z1_ALLOW_PROVIDER_NETWORK: "1" }
       : {

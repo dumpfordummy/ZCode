@@ -1,0 +1,1448 @@
+{
+  "schema": "zcode-graph-package-inspection/1",
+  "version": "3.14.3-z8.1",
+  "status": "PASS",
+  "checks": [
+    {
+      "id": "executable",
+      "status": "PASS",
+      "detail": "ZCode Graph.exe"
+    },
+    {
+      "id": "asar",
+      "status": "PASS",
+      "detail": "resources/app.asar"
+    },
+    {
+      "id": "resource:graph-build-identity.json",
+      "status": "PASS",
+      "detail": "resources/graph-build-identity.json"
+    },
+    {
+      "id": "resource:THIRD-PARTY-NOTICES.md",
+      "status": "PASS",
+      "detail": "resources/THIRD-PARTY-NOTICES.md"
+    },
+    {
+      "id": "resource:config/default.json",
+      "status": "PASS",
+      "detail": "resources/config/default.json"
+    },
+    {
+      "id": "resource:config/provider/zcode-builtin.json",
+      "status": "PASS",
+      "detail": "resources/config/provider/zcode-builtin.json"
+    },
+    {
+      "id": "resource:icon.png",
+      "status": "PASS",
+      "detail": "resources/icon.png"
+    },
+    {
+      "id": "resource:glm/zcode.cjs",
+      "status": "PASS",
+      "detail": "resources/glm/zcode.cjs"
+    },
+    {
+      "id": "asar-main-entry",
+      "status": "PASS",
+      "detail": "main=out/main/graph-entry.mjs"
+    },
+    {
+      "id": "asar-version",
+      "status": "PASS",
+      "detail": "version=3.14.3-z8.1"
+    },
+    {
+      "id": "asar-flavor",
+      "status": "PASS",
+      "detail": "zcodeProductFlavor=graph"
+    },
+    {
+      "id": "asar:out/main/graph-entry.mjs",
+      "status": "PASS",
+      "detail": "out/main/graph-entry.mjs"
+    },
+    {
+      "id": "asar:out/main/graph-profile.mjs",
+      "status": "PASS",
+      "detail": "out/main/graph-profile.mjs"
+    },
+    {
+      "id": "identity-version",
+      "status": "PASS",
+      "detail": "version=3.14.3-z8.1"
+    },
+    {
+      "id": "identity-product",
+      "status": "PASS",
+      "detail": "ZCode Graph dev.dumpfordummy.zcode.graph"
+    },
+    {
+      "id": "identity-parallel-disabled",
+      "status": "PASS",
+      "detail": "parallel=disabled"
+    },
+    {
+      "id": "identity-telemetry-disabled",
+      "status": "PASS",
+      "detail": "automaticTelemetry.enabled=false"
+    },
+    {
+      "id": "no-sourcemaps-outside-asar",
+      "status": "PASS",
+      "detail": "0 .map file(s) beside the asar"
+    },
+    {
+      "id": "no-sourcemaps-in-asar",
+      "status": "PASS",
+      "detail": "0 .map file(s) inside the asar"
+    },
+    {
+      "id": "no-env-files",
+      "status": "PASS",
+      "detail": "none"
+    },
+    {
+      "id": "content-scan-unexplained",
+      "status": "PASS",
+      "detail": "0 unexplained hit(s)"
+    }
+  ],
+  "scan": {
+    "note": "A content scan is not evidence of zero network egress or of security isolation.",
+    "scannedFiles": 27659,
+    "scannedBytes": 336616088,
+    "skippedBinaryFiles": 559,
+    "skippedLargeFiles": [],
+    "totalHits": 147,
+    "explained": 147,
+    "unexplained": [],
+    "unusedExceptions": [],
+    "explainedHits": [
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@ai-sdk/provider-utils/src/validate-download-url.ts",
+        "line": 97,
+        "match": "10.0.0.0",
+        "context": " // 0.0.0.0/8 if (a === 0) return true; // 10.0.0.0/8 if (a === 10) return true; // 127.0.0.0/8 ",
+        "classification": "benign",
+        "reason": "Comment text naming the RFC 1918 and loopback CIDR base addresses next to the checks of an SSRF guard in a third-party library; these are range definitions, not host addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@ai-sdk/provider-utils/src/validate-download-url.ts",
+        "line": 103,
+        "match": "172.16.0.0",
+        "context": "6 if (a === 169 && b === 254) return true; // 172.16.0.0/12 if (a === 172 && b >= 16 && b <= 31) return ",
+        "classification": "benign",
+        "reason": "Comment text naming the RFC 1918 and loopback CIDR base addresses next to the checks of an SSRF guard in a third-party library; these are range definitions, not host addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@ai-sdk/provider-utils/src/validate-download-url.ts",
+        "line": 105,
+        "match": "192.168.0.0",
+        "context": " === 172 && b >= 16 && b <= 31) return true; // 192.168.0.0/16 if (a === 192 && b === 168) return true; ",
+        "classification": "benign",
+        "reason": "Comment text naming the RFC 1918 and loopback CIDR base addresses next to the checks of an SSRF guard in a third-party library; these are range definitions, not host addresses."
+      },
+      {
+        "rule": "private-key-block",
+        "file": "app.asar/node_modules/@dotenvx/dotenvx/src/cli/examples.js",
+        "line": 86,
+        "match": "-----BEGIN OPENSSH PRIVATE KEY-----",
+        "context": "\"---value with a dash---\" $ dotenvx set KEY -- \"[private-key-block] b3BlbnNzaC1rZXktdjEAAAAAB",
+        "classification": "benign",
+        "reason": "CLI help text in the third-party dotenvx package showing how to set a multi-line value; the sample block is a one-line truncated placeholder, not a usable key."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.d.ts",
+        "line": 2077,
+        "match": "10.0.1.2",
+        "context": "a CI/CD system. * * @example abc123 * @example 10.0.1.2 * @example controller * * @experimental This a",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.d.ts",
+        "line": 4519,
+        "match": "10.1.2.80",
+        "context": "* * @example destination.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.d.ts",
+        "line": 4612,
+        "match": "10.0.0.1",
+        "context": "sses resolved during DNS lookup. * * @example [\"10.0.0.1\", \"2001:0db8:85a3:0000:0000:8a2e:0370:7334\"] * ",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.d.ts",
+        "line": 7669,
+        "match": "192.168.1.140",
+        "context": ", excluding loopback interfaces. * * @example [\"192.168.1.140\", \"fe80::abc2:4a28:737a:609e\"] * * @note IPv4 A",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.d.ts",
+        "line": 8210,
+        "match": "172.16.8.21",
+        "context": "apter (e.g. IP address, or WWPN) * * @example [\"172.16.8.21\", \"57.11.193.42\"] * * @experimental This attrib",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.d.ts",
+        "line": 9762,
+        "match": "192.168.2.133",
+        "context": " * * @example 77 <86>1 2015-08-06T21:58:59.694Z 192.168.2.133 inactive - - - Something happened * @example [IN",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.d.ts",
+        "line": 10713,
+        "match": "192.168.0.1",
+        "context": "ted, use `network.local.address`. * * @example \"192.168.0.1\" * * @experimental This attribute is experiment",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.d.ts",
+        "line": 10847,
+        "match": "192.168.0.1",
+        "context": "cated, use `network.peer.address`. * * @example 192.168.0.1 * * @experimental This attribute is experimenta",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.d.ts",
+        "line": 13276,
+        "match": "10.1.2.80",
+        "context": "me. * * @example source.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.js",
+        "line": 2084,
+        "match": "10.0.1.2",
+        "context": "a CI/CD system. * * @example abc123 * @example 10.0.1.2 * @example controller * * @experimental This a",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.js",
+        "line": 4526,
+        "match": "10.1.2.80",
+        "context": "* * @example destination.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.js",
+        "line": 4619,
+        "match": "10.0.0.1",
+        "context": "sses resolved during DNS lookup. * * @example [\"10.0.0.1\", \"2001:0db8:85a3:0000:0000:8a2e:0370:7334\"] * ",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.js",
+        "line": 7676,
+        "match": "192.168.1.140",
+        "context": ", excluding loopback interfaces. * * @example [\"192.168.1.140\", \"fe80::abc2:4a28:737a:609e\"] * * @note IPv4 A",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.js",
+        "line": 8217,
+        "match": "172.16.8.21",
+        "context": "apter (e.g. IP address, or WWPN) * * @example [\"172.16.8.21\", \"57.11.193.42\"] * * @experimental This attrib",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.js",
+        "line": 9769,
+        "match": "192.168.2.133",
+        "context": " * * @example 77 <86>1 2015-08-06T21:58:59.694Z 192.168.2.133 inactive - - - Something happened * @example [IN",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.js",
+        "line": 10720,
+        "match": "192.168.0.1",
+        "context": "ted, use `network.local.address`. * * @example \"192.168.0.1\" * * @experimental This attribute is experiment",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.js",
+        "line": 10854,
+        "match": "192.168.0.1",
+        "context": "cated, use `network.peer.address`. * * @example 192.168.0.1 * * @experimental This attribute is experimenta",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/experimental_attributes.js",
+        "line": 13283,
+        "match": "10.1.2.80",
+        "context": "me. * * @example source.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/stable_attributes.d.ts",
+        "line": 118,
+        "match": "10.1.2.80",
+        "context": "me. * * @example client.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/stable_attributes.d.ts",
+        "line": 1122,
+        "match": "172.18.0.2",
+        "context": "* IP address allocated to the Pod. * * @example 172.18.0.2 * * @note This attribute aligns with the `podIP",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/stable_attributes.d.ts",
+        "line": 1257,
+        "match": "10.1.2.80",
+        "context": "ddress or Unix domain socket name. * * @example 10.1.2.80 * @example /tmp/my.sock */ export declare const",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/stable_attributes.d.ts",
+        "line": 1270,
+        "match": "10.1.2.80",
+        "context": "ddress or Unix domain socket name. * * @example 10.1.2.80 * @example /tmp/my.sock */ export declare const",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/stable_attributes.d.ts",
+        "line": 1410,
+        "match": "10.1.2.80",
+        "context": "cket name. * * @example example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/stable_attributes.js",
+        "line": 125,
+        "match": "10.1.2.80",
+        "context": "me. * * @example client.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/stable_attributes.js",
+        "line": 1129,
+        "match": "172.18.0.2",
+        "context": "* IP address allocated to the Pod. * * @example 172.18.0.2 * * @note This attribute aligns with the `podIP",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/stable_attributes.js",
+        "line": 1264,
+        "match": "10.1.2.80",
+        "context": "ddress or Unix domain socket name. * * @example 10.1.2.80 * @example /tmp/my.sock */ export const ATTR_NE",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/stable_attributes.js",
+        "line": 1277,
+        "match": "10.1.2.80",
+        "context": "ddress or Unix domain socket name. * * @example 10.1.2.80 * @example /tmp/my.sock */ export const ATTR_NE",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esm/stable_attributes.js",
+        "line": 1417,
+        "match": "10.1.2.80",
+        "context": "cket name. * * @example example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.d.ts",
+        "line": 2077,
+        "match": "10.0.1.2",
+        "context": "a CI/CD system. * * @example abc123 * @example 10.0.1.2 * @example controller * * @experimental This a",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.d.ts",
+        "line": 4519,
+        "match": "10.1.2.80",
+        "context": "* * @example destination.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.d.ts",
+        "line": 4612,
+        "match": "10.0.0.1",
+        "context": "sses resolved during DNS lookup. * * @example [\"10.0.0.1\", \"2001:0db8:85a3:0000:0000:8a2e:0370:7334\"] * ",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.d.ts",
+        "line": 7669,
+        "match": "192.168.1.140",
+        "context": ", excluding loopback interfaces. * * @example [\"192.168.1.140\", \"fe80::abc2:4a28:737a:609e\"] * * @note IPv4 A",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.d.ts",
+        "line": 8210,
+        "match": "172.16.8.21",
+        "context": "apter (e.g. IP address, or WWPN) * * @example [\"172.16.8.21\", \"57.11.193.42\"] * * @experimental This attrib",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.d.ts",
+        "line": 9762,
+        "match": "192.168.2.133",
+        "context": " * * @example 77 <86>1 2015-08-06T21:58:59.694Z 192.168.2.133 inactive - - - Something happened * @example [IN",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.d.ts",
+        "line": 10713,
+        "match": "192.168.0.1",
+        "context": "ted, use `network.local.address`. * * @example \"192.168.0.1\" * * @experimental This attribute is experiment",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.d.ts",
+        "line": 10847,
+        "match": "192.168.0.1",
+        "context": "cated, use `network.peer.address`. * * @example 192.168.0.1 * * @experimental This attribute is experimenta",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.d.ts",
+        "line": 13276,
+        "match": "10.1.2.80",
+        "context": "me. * * @example source.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.js",
+        "line": 2084,
+        "match": "10.0.1.2",
+        "context": "a CI/CD system. * * @example abc123 * @example 10.0.1.2 * @example controller * * @experimental This a",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.js",
+        "line": 4526,
+        "match": "10.1.2.80",
+        "context": "* * @example destination.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.js",
+        "line": 4619,
+        "match": "10.0.0.1",
+        "context": "sses resolved during DNS lookup. * * @example [\"10.0.0.1\", \"2001:0db8:85a3:0000:0000:8a2e:0370:7334\"] * ",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.js",
+        "line": 7676,
+        "match": "192.168.1.140",
+        "context": ", excluding loopback interfaces. * * @example [\"192.168.1.140\", \"fe80::abc2:4a28:737a:609e\"] * * @note IPv4 A",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.js",
+        "line": 8217,
+        "match": "172.16.8.21",
+        "context": "apter (e.g. IP address, or WWPN) * * @example [\"172.16.8.21\", \"57.11.193.42\"] * * @experimental This attrib",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.js",
+        "line": 9769,
+        "match": "192.168.2.133",
+        "context": " * * @example 77 <86>1 2015-08-06T21:58:59.694Z 192.168.2.133 inactive - - - Something happened * @example [IN",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.js",
+        "line": 10720,
+        "match": "192.168.0.1",
+        "context": "ted, use `network.local.address`. * * @example \"192.168.0.1\" * * @experimental This attribute is experiment",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.js",
+        "line": 10854,
+        "match": "192.168.0.1",
+        "context": "cated, use `network.peer.address`. * * @example 192.168.0.1 * * @experimental This attribute is experimenta",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/experimental_attributes.js",
+        "line": 13283,
+        "match": "10.1.2.80",
+        "context": "me. * * @example source.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/stable_attributes.d.ts",
+        "line": 118,
+        "match": "10.1.2.80",
+        "context": "me. * * @example client.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/stable_attributes.d.ts",
+        "line": 1122,
+        "match": "172.18.0.2",
+        "context": "* IP address allocated to the Pod. * * @example 172.18.0.2 * * @note This attribute aligns with the `podIP",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/stable_attributes.d.ts",
+        "line": 1257,
+        "match": "10.1.2.80",
+        "context": "ddress or Unix domain socket name. * * @example 10.1.2.80 * @example /tmp/my.sock */ export declare const",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/stable_attributes.d.ts",
+        "line": 1270,
+        "match": "10.1.2.80",
+        "context": "ddress or Unix domain socket name. * * @example 10.1.2.80 * @example /tmp/my.sock */ export declare const",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/stable_attributes.d.ts",
+        "line": 1410,
+        "match": "10.1.2.80",
+        "context": "cket name. * * @example example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/stable_attributes.js",
+        "line": 125,
+        "match": "10.1.2.80",
+        "context": "me. * * @example client.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/stable_attributes.js",
+        "line": 1129,
+        "match": "172.18.0.2",
+        "context": "* IP address allocated to the Pod. * * @example 172.18.0.2 * * @note This attribute aligns with the `podIP",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/stable_attributes.js",
+        "line": 1264,
+        "match": "10.1.2.80",
+        "context": "ddress or Unix domain socket name. * * @example 10.1.2.80 * @example /tmp/my.sock */ export const ATTR_NE",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/stable_attributes.js",
+        "line": 1277,
+        "match": "10.1.2.80",
+        "context": "ddress or Unix domain socket name. * * @example 10.1.2.80 * @example /tmp/my.sock */ export const ATTR_NE",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/esnext/stable_attributes.js",
+        "line": 1417,
+        "match": "10.1.2.80",
+        "context": "cket name. * * @example example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.d.ts",
+        "line": 2077,
+        "match": "10.0.1.2",
+        "context": "a CI/CD system. * * @example abc123 * @example 10.0.1.2 * @example controller * * @experimental This a",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.d.ts",
+        "line": 4519,
+        "match": "10.1.2.80",
+        "context": "* * @example destination.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.d.ts",
+        "line": 4612,
+        "match": "10.0.0.1",
+        "context": "sses resolved during DNS lookup. * * @example [\"10.0.0.1\", \"2001:0db8:85a3:0000:0000:8a2e:0370:7334\"] * ",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.d.ts",
+        "line": 7669,
+        "match": "192.168.1.140",
+        "context": ", excluding loopback interfaces. * * @example [\"192.168.1.140\", \"fe80::abc2:4a28:737a:609e\"] * * @note IPv4 A",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.d.ts",
+        "line": 8210,
+        "match": "172.16.8.21",
+        "context": "apter (e.g. IP address, or WWPN) * * @example [\"172.16.8.21\", \"57.11.193.42\"] * * @experimental This attrib",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.d.ts",
+        "line": 9762,
+        "match": "192.168.2.133",
+        "context": " * * @example 77 <86>1 2015-08-06T21:58:59.694Z 192.168.2.133 inactive - - - Something happened * @example [IN",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.d.ts",
+        "line": 10713,
+        "match": "192.168.0.1",
+        "context": "ted, use `network.local.address`. * * @example \"192.168.0.1\" * * @experimental This attribute is experiment",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.d.ts",
+        "line": 10847,
+        "match": "192.168.0.1",
+        "context": "cated, use `network.peer.address`. * * @example 192.168.0.1 * * @experimental This attribute is experimenta",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.d.ts",
+        "line": 13276,
+        "match": "10.1.2.80",
+        "context": "me. * * @example source.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.js",
+        "line": 2121,
+        "match": "10.0.1.2",
+        "context": "a CI/CD system. * * @example abc123 * @example 10.0.1.2 * @example controller * * @experimental This a",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.js",
+        "line": 4568,
+        "match": "10.1.2.80",
+        "context": "* * @example destination.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.js",
+        "line": 4661,
+        "match": "10.0.0.1",
+        "context": "sses resolved during DNS lookup. * * @example [\"10.0.0.1\", \"2001:0db8:85a3:0000:0000:8a2e:0370:7334\"] * ",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.js",
+        "line": 7719,
+        "match": "192.168.1.140",
+        "context": ", excluding loopback interfaces. * * @example [\"192.168.1.140\", \"fe80::abc2:4a28:737a:609e\"] * * @note IPv4 A",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.js",
+        "line": 8260,
+        "match": "172.16.8.21",
+        "context": "apter (e.g. IP address, or WWPN) * * @example [\"172.16.8.21\", \"57.11.193.42\"] * * @experimental This attrib",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.js",
+        "line": 9820,
+        "match": "192.168.2.133",
+        "context": " * * @example 77 <86>1 2015-08-06T21:58:59.694Z 192.168.2.133 inactive - - - Something happened * @example [IN",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.js",
+        "line": 10771,
+        "match": "192.168.0.1",
+        "context": "ted, use `network.local.address`. * * @example \"192.168.0.1\" * * @experimental This attribute is experiment",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.js",
+        "line": 10905,
+        "match": "192.168.0.1",
+        "context": "cated, use `network.peer.address`. * * @example 192.168.0.1 * * @experimental This attribute is experimenta",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/experimental_attributes.js",
+        "line": 13341,
+        "match": "10.1.2.80",
+        "context": "me. * * @example source.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/stable_attributes.d.ts",
+        "line": 118,
+        "match": "10.1.2.80",
+        "context": "me. * * @example client.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/stable_attributes.d.ts",
+        "line": 1122,
+        "match": "172.18.0.2",
+        "context": "* IP address allocated to the Pod. * * @example 172.18.0.2 * * @note This attribute aligns with the `podIP",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/stable_attributes.d.ts",
+        "line": 1257,
+        "match": "10.1.2.80",
+        "context": "ddress or Unix domain socket name. * * @example 10.1.2.80 * @example /tmp/my.sock */ export declare const",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/stable_attributes.d.ts",
+        "line": 1270,
+        "match": "10.1.2.80",
+        "context": "ddress or Unix domain socket name. * * @example 10.1.2.80 * @example /tmp/my.sock */ export declare const",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/stable_attributes.d.ts",
+        "line": 1410,
+        "match": "10.1.2.80",
+        "context": "cket name. * * @example example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the generated type declarations of the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/stable_attributes.js",
+        "line": 131,
+        "match": "10.1.2.80",
+        "context": "me. * * @example client.example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/stable_attributes.js",
+        "line": 1150,
+        "match": "172.18.0.2",
+        "context": "* IP address allocated to the Pod. * * @example 172.18.0.2 * * @note This attribute aligns with the `podIP",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/stable_attributes.js",
+        "line": 1290,
+        "match": "10.1.2.80",
+        "context": "ddress or Unix domain socket name. * * @example 10.1.2.80 * @example /tmp/my.sock */ exports.ATTR_NETWORK",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/stable_attributes.js",
+        "line": 1303,
+        "match": "10.1.2.80",
+        "context": "ddress or Unix domain socket name. * * @example 10.1.2.80 * @example /tmp/my.sock */ exports.ATTR_NETWORK",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/@opentelemetry/semantic-conventions/build/src/stable_attributes.js",
+        "line": 1443,
+        "match": "10.1.2.80",
+        "context": "cket name. * * @example example.com * @example 10.1.2.80 * @example /tmp/my.sock * * @note When observe",
+        "classification": "benign",
+        "reason": "Documentation-comment @example values in the OpenTelemetry semantic conventions (third party); sample addresses, not deployment addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/fast-uri/benchmark/benchmark.mjs",
+        "line": 8,
+        "match": "10.10.10.10",
+        "context": "'https://example.com/foo#bar$fiz' const ipv4 = '//10.10.10.10' const ipv6 = '//[2001:db8::7]' const urn = 'urn:",
+        "classification": "benign",
+        "reason": "Benchmark input string inside the third-party fast-uri package; sample address."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/highlight.js/es/languages/routeros.js",
+        "line": 120,
+        "match": "192.168.0.0",
+        "context": "in: IPADDR_wBITMASK+'(,'+IPADDR_wBITMASK+')*'}, //192.168.0.0/24,1.2.3.0/24 {begin: IPADDR+'-",
+        "classification": "benign",
+        "reason": "Comment text showing RouterOS IP-list syntax inside the highlight.js language definition (third party); documentation examples."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/highlight.js/es/languages/routeros.js",
+        "line": 122,
+        "match": "192.168.0.1",
+        "context": " {begin: IPADDR+'(,'+IPADDR+')*'}, // 192.168.0.1,192.168.0.34,192.168.24.1,192.168.0.1 ",
+        "classification": "benign",
+        "reason": "Comment text showing RouterOS IP-list syntax inside the highlight.js language definition (third party); documentation examples."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/highlight.js/es/languages/routeros.js",
+        "line": 122,
+        "match": "192.168.0.34",
+        "context": " {begin: IPADDR+'(,'+IPADDR+')*'}, // 192.168.0.1,192.168.0.34,192.168.24.1,192.168.0.1 ] ",
+        "classification": "benign",
+        "reason": "Comment text showing RouterOS IP-list syntax inside the highlight.js language definition (third party); documentation examples."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/highlight.js/es/languages/routeros.js",
+        "line": 122,
+        "match": "192.168.24.1",
+        "context": "DR+'(,'+IPADDR+')*'}, // 192.168.0.1,192.168.0.34,192.168.24.1,192.168.0.1 ] }, ",
+        "classification": "benign",
+        "reason": "Comment text showing RouterOS IP-list syntax inside the highlight.js language definition (third party); documentation examples."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/highlight.js/es/languages/routeros.js",
+        "line": 122,
+        "match": "192.168.0.1",
+        "context": "R+')*'}, // 192.168.0.1,192.168.0.34,192.168.24.1,192.168.0.1 ] }, ",
+        "classification": "benign",
+        "reason": "Comment text showing RouterOS IP-list syntax inside the highlight.js language definition (third party); documentation examples."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/highlight.js/lib/languages/routeros.js",
+        "line": 120,
+        "match": "192.168.0.0",
+        "context": "in: IPADDR_wBITMASK+'(,'+IPADDR_wBITMASK+')*'}, //192.168.0.0/24,1.2.3.0/24 {begin: IPADDR+'-",
+        "classification": "benign",
+        "reason": "Comment text showing RouterOS IP-list syntax inside the highlight.js language definition (third party); documentation examples."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/highlight.js/lib/languages/routeros.js",
+        "line": 122,
+        "match": "192.168.0.1",
+        "context": " {begin: IPADDR+'(,'+IPADDR+')*'}, // 192.168.0.1,192.168.0.34,192.168.24.1,192.168.0.1 ",
+        "classification": "benign",
+        "reason": "Comment text showing RouterOS IP-list syntax inside the highlight.js language definition (third party); documentation examples."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/highlight.js/lib/languages/routeros.js",
+        "line": 122,
+        "match": "192.168.0.34",
+        "context": " {begin: IPADDR+'(,'+IPADDR+')*'}, // 192.168.0.1,192.168.0.34,192.168.24.1,192.168.0.1 ] ",
+        "classification": "benign",
+        "reason": "Comment text showing RouterOS IP-list syntax inside the highlight.js language definition (third party); documentation examples."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/highlight.js/lib/languages/routeros.js",
+        "line": 122,
+        "match": "192.168.24.1",
+        "context": "DR+'(,'+IPADDR+')*'}, // 192.168.0.1,192.168.0.34,192.168.24.1,192.168.0.1 ] }, ",
+        "classification": "benign",
+        "reason": "Comment text showing RouterOS IP-list syntax inside the highlight.js language definition (third party); documentation examples."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/highlight.js/lib/languages/routeros.js",
+        "line": 122,
+        "match": "192.168.0.1",
+        "context": "R+')*'}, // 192.168.0.1,192.168.0.34,192.168.24.1,192.168.0.1 ] }, ",
+        "classification": "benign",
+        "reason": "Comment text showing RouterOS IP-list syntax inside the highlight.js language definition (third party); documentation examples."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/ip-address/dist/ipv6.js",
+        "line": 239,
+        "match": "192.168.0.1",
+        "context": "ample * var address = Address6.fromAddress4('192.168.0.1'); * address.correctForm(); // '::ffff:c0a8:",
+        "classification": "benign",
+        "reason": "JSDoc @example in the third-party ip-address library; sample address."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/ip-address/dist/ipv6.js",
+        "line": 241,
+        "match": "192.168.0.1",
+        "context": ":ffff:c0a8:1' * address.to4in6(); // '::ffff:192.168.0.1' */ static fromAddress4(address) { ",
+        "classification": "benign",
+        "reason": "JSDoc @example in the third-party ip-address library; sample address."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/ip-address/src/ipv6.ts",
+        "line": 265,
+        "match": "192.168.0.1",
+        "context": "example * var address = Address6.fromAddress4('192.168.0.1'); * address.correctForm(); // '::ffff:c0a8:1'",
+        "classification": "benign",
+        "reason": "JSDoc @example in the third-party ip-address library; sample address."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/ip-address/src/ipv6.ts",
+        "line": 267,
+        "match": "192.168.0.1",
+        "context": "'::ffff:c0a8:1' * address.to4in6(); // '::ffff:192.168.0.1' */ static fromAddress4(address: string): Ad",
+        "classification": "benign",
+        "reason": "JSDoc @example in the third-party ip-address library; sample address."
+      },
+      {
+        "rule": "private-key-block",
+        "file": "app.asar/node_modules/jose/dist/webapi/key/import.js",
+        "line": 19,
+        "match": "-----BEGIN PRIVATE KEY-----",
+        "context": " if (typeof pkcs8 !== 'string' || pkcs8.indexOf('[private-key-block]') !== 0) { throw new TypeError('\"pkcs8\" m",
+        "classification": "benign",
+        "reason": "PEM header string compared against in the third-party jose key-import code; no key material."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/linkify-it/index.js",
+        "line": 479,
+        "match": "192.168.1.1",
+        "context": " check, because this cases are possible: // 192.168.1.1@gmail.com, my.in@example.com if ((me = text",
+        "classification": "benign",
+        "reason": "Source comment describing a URL-ambiguity case in the third-party linkify-it library; sample address."
+      },
+      {
+        "rule": "windows-user-directory",
+        "file": "app.asar/node_modules/msw/src/core/utils/internal/getCallFrame.test.ts",
+        "line": 52,
+        "match": "C:\\\\Users\\\\mock\\\\",
+        "context": "hStack([ 'Error: ', ' at getCallFrame (C:\\\\Users\\\\mock\\\\git\\\\msw\\\\lib\\\\node\\\\index.js:3735:22)', ' ",
+        "classification": "benign",
+        "reason": "Mock stack-trace strings (user 'mock') in a unit test shipped inside the third-party msw package; not a real user directory."
+      },
+      {
+        "rule": "windows-user-directory",
+        "file": "app.asar/node_modules/msw/src/core/utils/internal/getCallFrame.test.ts",
+        "line": 53,
+        "match": "C:\\\\Users\\\\mock\\\\",
+        "context": ".js:3735:22)', ' at graphQLRequestHandler (C:\\\\Users\\\\mock\\\\git\\\\msw\\\\lib\\\\node\\\\index.js:7071:25)', ' ",
+        "classification": "benign",
+        "reason": "Mock stack-trace strings (user 'mock') in a unit test shipped inside the third-party msw package; not a real user directory."
+      },
+      {
+        "rule": "windows-user-directory",
+        "file": "app.asar/node_modules/msw/src/core/utils/internal/getCallFrame.test.ts",
+        "line": 54,
+        "match": "C:\\\\Users\\\\mock\\\\",
+        "context": "de\\\\index.js:7071:25)', ' at Object.query (C:\\\\Users\\\\mock\\\\git\\\\msw\\\\lib\\\\node\\\\index.js:7182:18)', ' ",
+        "classification": "benign",
+        "reason": "Mock stack-trace strings (user 'mock') in a unit test shipped inside the third-party msw package; not a real user directory."
+      },
+      {
+        "rule": "windows-user-directory",
+        "file": "app.asar/node_modules/msw/src/core/utils/internal/getCallFrame.test.ts",
+        "line": 55,
+        "match": "C:\\\\Users\\\\mock\\\\",
+        "context": "dex.js:7182:18)', ' at Object.<anonymous> (C:\\\\Users\\\\mock\\\\git\\\\msw\\\\test\\\\msw-api\\\\setup-server\\\\listHandler",
+        "classification": "benign",
+        "reason": "Mock stack-trace strings (user 'mock') in a unit test shipped inside the third-party msw package; not a real user directory."
+      },
+      {
+        "rule": "windows-user-directory",
+        "file": "app.asar/node_modules/msw/src/core/utils/internal/getCallFrame.test.ts",
+        "line": 56,
+        "match": "C:\\\\Users\\\\mock\\\\",
+        "context": "// <-- this one ' at Object.asyncJestTest (C:\\\\Users\\\\mock\\\\git\\\\msw\\\\node_modules\\\\jest-jasmine2\\\\build\\\\jasm",
+        "classification": "benign",
+        "reason": "Mock stack-trace strings (user 'mock') in a unit test shipped inside the third-party msw package; not a real user directory."
+      },
+      {
+        "rule": "windows-user-directory",
+        "file": "app.asar/node_modules/msw/src/core/utils/internal/getCallFrame.test.ts",
+        "line": 57,
+        "match": "C:\\\\Users\\\\mock\\\\",
+        "context": "ild\\\\jasmineAsyncInstall.js:106:37)', ' at C:\\\\Users\\\\mock\\\\git\\\\msw\\\\node_modules\\\\jest-jasmine2\\\\build\\\\queu",
+        "classification": "benign",
+        "reason": "Mock stack-trace strings (user 'mock') in a unit test shipped inside the third-party msw package; not a real user directory."
+      },
+      {
+        "rule": "windows-user-directory",
+        "file": "app.asar/node_modules/msw/src/core/utils/internal/getCallFrame.test.ts",
+        "line": 59,
+        "match": "C:\\\\Users\\\\mock\\\\",
+        "context": "t new Promise (<anonymous>)', ' at mapper (C:\\\\Users\\\\mock\\\\git\\\\msw\\\\node_modules\\\\jest-jasmine2\\\\build\\\\queu",
+        "classification": "benign",
+        "reason": "Mock stack-trace strings (user 'mock') in a unit test shipped inside the third-party msw package; not a real user directory."
+      },
+      {
+        "rule": "windows-user-directory",
+        "file": "app.asar/node_modules/msw/src/core/utils/internal/getCallFrame.test.ts",
+        "line": 60,
+        "match": "C:\\\\Users\\\\mock\\\\",
+        "context": "mine2\\\\build\\\\queueRunner.js:28:19)', ' at C:\\\\Users\\\\mock\\\\git\\\\msw\\\\node_modules\\\\jest-jasmine2\\\\build\\\\queu",
+        "classification": "benign",
+        "reason": "Mock stack-trace strings (user 'mock') in a unit test shipped inside the third-party msw package; not a real user directory."
+      },
+      {
+        "rule": "windows-user-directory",
+        "file": "app.asar/node_modules/msw/src/core/utils/internal/getCallFrame.test.ts",
+        "line": 64,
+        "match": "C:\\\\Users\\\\mock\\\\",
+        "context": "', ]) expect(getCallFrame(error)).toBe( 'C:\\\\Users\\\\mock\\\\git\\\\msw\\\\test\\\\msw-api\\\\setup-server\\\\listHandler",
+        "classification": "benign",
+        "reason": "Mock stack-trace strings (user 'mock') in a unit test shipped inside the third-party msw package; not a real user directory."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/msw/src/core/utils/request/toPublicUrl.node.test.ts",
+        "line": 9,
+        "match": "192.168.0.10",
+        "context": "/path', ) expect(toPublicUrl(new URL('http://192.168.0.10/path'))).toBe( 'http://192.168.0.10/path', ",
+        "classification": "benign",
+        "reason": "Unit-test data shipped inside the third-party msw package; sample address."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/msw/src/core/utils/request/toPublicUrl.node.test.ts",
+        "line": 10,
+        "match": "192.168.0.10",
+        "context": "L('http://192.168.0.10/path'))).toBe( 'http://192.168.0.10/path', ) expect( toPublicUrl(new URL('ht",
+        "classification": "benign",
+        "reason": "Unit-test data shipped inside the third-party msw package; sample address."
+      },
+      {
+        "rule": "windows-user-directory",
+        "file": "app.asar/node_modules/node-pty/lib/windowsPtyAgent.test.js",
+        "line": 85,
+        "match": "C:\\\\Users\\\\alros\\\\",
+        "context": "on () { check('cmd.exe', ['/k', '\"C:\\\\Users\\\\alros\\\\Desktop\\\\test script.bat\"'], 'cmd.exe /k \\\\\"C:\\\\Us",
+        "classification": "benign",
+        "reason": "Command-line quoting test strings in the third-party node-pty package that mention another person's example path; not this build's user."
+      },
+      {
+        "rule": "windows-user-directory",
+        "file": "app.asar/node_modules/node-pty/lib/windowsPtyAgent.test.js",
+        "line": 85,
+        "match": "C:\\\\Users\\\\alros\\\\",
+        "context": "lros\\\\Desktop\\\\test script.bat\"'], 'cmd.exe /k \\\\\"C:\\\\Users\\\\alros\\\\Desktop\\\\test script.bat\\\\\"'); }); ",
+        "classification": "benign",
+        "reason": "Command-line quoting test strings in the third-party node-pty package that mention another person's example path; not this build's user."
+      },
+      {
+        "rule": "windows-user-directory",
+        "file": "app.asar/node_modules/node-pty/src/windowsPtyAgent.test.ts",
+        "line": 90,
+        "match": "C:\\\\Users\\\\alros\\\\",
+        "context": "uotes', () => { check('cmd.exe', ['/k', '\"C:\\\\Users\\\\alros\\\\Desktop\\\\test script.bat\"'], 'cmd.exe /k \\\\\"C:\\\\Us",
+        "classification": "benign",
+        "reason": "Command-line quoting test strings in the third-party node-pty package that mention another person's example path; not this build's user."
+      },
+      {
+        "rule": "windows-user-directory",
+        "file": "app.asar/node_modules/node-pty/src/windowsPtyAgent.test.ts",
+        "line": 90,
+        "match": "C:\\\\Users\\\\alros\\\\",
+        "context": "lros\\\\Desktop\\\\test script.bat\"'], 'cmd.exe /k \\\\\"C:\\\\Users\\\\alros\\\\Desktop\\\\test script.bat\\\\\"'); }); }); ",
+        "classification": "benign",
+        "reason": "Command-line quoting test strings in the third-party node-pty package that mention another person's example path; not this build's user."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/proxy-addr/index.js",
+        "line": 43,
+        "match": "10.0.0.0",
+        "context": "ack: ['127.0.0.1/8', '::1/128'], uniquelocal: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', 'fc00::/7'",
+        "classification": "benign",
+        "reason": "CIDR base-address constants for the 'uniquelocal' trust preset of a third-party library; range definitions, not host addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/proxy-addr/index.js",
+        "line": 43,
+        "match": "172.16.0.0",
+        "context": ".1/8', '::1/128'], uniquelocal: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', 'fc00::/7'] } /** * Get ",
+        "classification": "benign",
+        "reason": "CIDR base-address constants for the 'uniquelocal' trust preset of a third-party library; range definitions, not host addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/proxy-addr/index.js",
+        "line": 43,
+        "match": "192.168.0.0",
+        "context": ", uniquelocal: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', 'fc00::/7'] } /** * Get all addresses in t",
+        "classification": "benign",
+        "reason": "CIDR base-address constants for the 'uniquelocal' trust preset of a third-party library; range definitions, not host addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/proxy-from-env/test.js",
+        "line": 299,
+        "match": "10.0.0.1",
+        "context": "ple'); }); describe('no_proxy=[::1],[::2]:80,10.0.0.1,10.0.0.2:80 (IP addresses)', function() { ",
+        "classification": "benign",
+        "reason": "Test fixture strings for NO_PROXY parsing shipped inside the third-party package; no connection is made."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/proxy-from-env/test.js",
+        "line": 299,
+        "match": "10.0.0.2",
+        "context": "}); describe('no_proxy=[::1],[::2]:80,10.0.0.1,10.0.0.2:80 (IP addresses)', function() { var en",
+        "classification": "benign",
+        "reason": "Test fixture strings for NO_PROXY parsing shipped inside the third-party package; no connection is made."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/proxy-from-env/test.js",
+        "line": 304,
+        "match": "10.0.0.1",
+        "context": "ttp://proxy'; env.NO_PROXY = '[::1],[::2]:80,10.0.0.1,10.0.0.2:80'; testProxyUrl(env, '', 'http://[",
+        "classification": "benign",
+        "reason": "Test fixture strings for NO_PROXY parsing shipped inside the third-party package; no connection is made."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/proxy-from-env/test.js",
+        "line": 304,
+        "match": "10.0.0.2",
+        "context": "xy'; env.NO_PROXY = '[::1],[::2]:80,10.0.0.1,10.0.0.2:80'; testProxyUrl(env, '', 'http://[::1]/'); ",
+        "classification": "benign",
+        "reason": "Test fixture strings for NO_PROXY parsing shipped inside the third-party package; no connection is made."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/proxy-from-env/test.js",
+        "line": 313,
+        "match": "10.0.0.1",
+        "context": "[::2]:1337/'); testProxyUrl(env, '', 'http://10.0.0.1/'); testProxyUrl(env, '', 'http://10.0.0.1:80",
+        "classification": "benign",
+        "reason": "Test fixture strings for NO_PROXY parsing shipped inside the third-party package; no connection is made."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/proxy-from-env/test.js",
+        "line": 314,
+        "match": "10.0.0.1",
+        "context": "://10.0.0.1/'); testProxyUrl(env, '', 'http://10.0.0.1:80/'); testProxyUrl(env, '', 'http://10.0.0.1",
+        "classification": "benign",
+        "reason": "Test fixture strings for NO_PROXY parsing shipped inside the third-party package; no connection is made."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/proxy-from-env/test.js",
+        "line": 315,
+        "match": "10.0.0.1",
+        "context": "10.0.0.1:80/'); testProxyUrl(env, '', 'http://10.0.0.1:1337/'); testProxyUrl(env, '', 'http://10.0.",
+        "classification": "benign",
+        "reason": "Test fixture strings for NO_PROXY parsing shipped inside the third-party package; no connection is made."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/proxy-from-env/test.js",
+        "line": 317,
+        "match": "10.0.0.2",
+        "context": "0.0.1:1337/'); testProxyUrl(env, '', 'http://10.0.0.2/'); testProxyUrl(env, '', 'http://10.0.0.2:80",
+        "classification": "benign",
+        "reason": "Test fixture strings for NO_PROXY parsing shipped inside the third-party package; no connection is made."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/proxy-from-env/test.js",
+        "line": 318,
+        "match": "10.0.0.2",
+        "context": "://10.0.0.2/'); testProxyUrl(env, '', 'http://10.0.0.2:80/'); testProxyUrl(env, 'http://proxy', 'htt",
+        "classification": "benign",
+        "reason": "Test fixture strings for NO_PROXY parsing shipped inside the third-party package; no connection is made."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/proxy-from-env/test.js",
+        "line": 319,
+        "match": "10.0.0.2",
+        "context": "'); testProxyUrl(env, 'http://proxy', 'http://10.0.0.2:1337/'); }); describe('no_proxy=127.0.0.1/32",
+        "classification": "benign",
+        "reason": "Test fixture strings for NO_PROXY parsing shipped inside the third-party package; no connection is made."
+      },
+      {
+        "rule": "private-key-block",
+        "file": "app.asar/node_modules/ssh2/lib/keygen.js",
+        "line": 435,
+        "match": "-----BEGIN OPENSSH PRIVATE KEY-----",
+        "context": "rmat) { case 'new': { let privateB64 = '[private-key-block]\\n'; let publicB64; /* byte[] ",
+        "classification": "benign",
+        "reason": "PEM header string literal used by the third-party ssh2 key generator to assemble a freshly generated key; no key material present at rest."
+      },
+      {
+        "rule": "private-key-block",
+        "file": "app.asar/node_modules/ssh2/lib/protocol/constants.js",
+        "line": 16,
+        "match": "-----BEGIN PRIVATE KEY-----",
+        "context": "o.verify === 'function') { const key = '[private-key-block]\\r\\nMC4CAQAwBQYDK2VwBCIEIHKj+sVa9WcD' + '/q2",
+        "classification": "benign",
+        "reason": "Throwaway Ed25519 key literal hard-coded by the third-party ssh2 library to feature-test crypto.sign/verify support; it is part of the public npm package, belongs to no user or service, and is not used for authentication."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/node_modules/ssh2/lib/protocol/handlers.misc.js",
+        "line": 769,
+        "match": "192.168.7.38",
+        "context": "/* string originator address (e.g., \"192.168.7.38\") uint32 originator port */ ",
+        "classification": "benign",
+        "reason": "RFC-style comment example (originator address) in the third-party ssh2 library; sample address."
+      },
+      {
+        "rule": "private-key-block",
+        "file": "app.asar/node_modules/ssh2/lib/protocol/keyParser.js",
+        "line": 467,
+        "match": "-----BEGIN OPENSSH PRIVATE KEY-----",
+        "context": "Private.prototype = BaseKey; { const regexp = /^[private-key-block](?:\\r\\n|\\n)([\\s\\S]+)(?:\\r\\n|\\n)-----END OPENSSH PR",
+        "classification": "benign",
+        "reason": "PEM header inside a regular expression of the third-party ssh2 key parser; no key material."
+      },
+      {
+        "rule": "profile-directory-name",
+        "file": "app.asar/out/main/graph-profile.mjs",
+        "line": 9,
+        "match": ".zcode-graph-engineering",
+        "context": "ute(previous) && path.basename(previous) === \".zcode-graph-engineering\" && path.resolve(originalHome) === path.join(",
+        "classification": "benign",
+        "reason": "The Graph private-profile directory name constant in the packaged Graph entry's profile mapping; it is the intended profile name, not a user path."
+      },
+      {
+        "rule": "profile-directory-name",
+        "file": "app.asar/out/main/graph-profile.mjs",
+        "line": 12,
+        "match": ".zcode-graph-engineering",
+        "context": "us : path.join(path.resolve(originalHome), \".zcode-graph-engineering\"); const home = path.join(root, \"home\"); retu",
+        "classification": "benign",
+        "reason": "The Graph private-profile directory name constant in the packaged Graph entry's profile mapping; it is the intended profile name, not a user path."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/out/main/index.js",
+        "line": 1337,
+        "match": "10.0.0.0",
+        "context": "3e4,UC=5,Rd=new mF;for(let[e,t]of[[\"0.0.0.0\",8],[\"10.0.0.0\",8],[\"100.64.0.0\",10],[\"127.0.0.0\",8],[\"169.254.0",
+        "classification": "benign",
+        "reason": "First-party bundled table of reserved/private IPv4 CIDR bases (0.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 and similar) used to classify addresses; range definitions, not host addresses (minified main bundle, line 1337)."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/out/main/index.js",
+        "line": 1337,
+        "match": "172.16.0.0",
+        "context": ".64.0.0\",10],[\"127.0.0.0\",8],[\"169.254.0.0\",16],[\"172.16.0.0\",12],[\"192.0.0.0\",24],[\"192.0.2.0\",24],[\"192.168.",
+        "classification": "benign",
+        "reason": "First-party bundled table of reserved/private IPv4 CIDR bases (0.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 and similar) used to classify addresses; range definitions, not host addresses (minified main bundle, line 1337)."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/out/main/index.js",
+        "line": 1337,
+        "match": "192.168.0.0",
+        "context": "2.16.0.0\",12],[\"192.0.0.0\",24],[\"192.0.2.0\",24],[\"192.168.0.0\",16],[\"198.18.0.0\",15],[\"198.51.100.0\",24],[\"203.",
+        "classification": "benign",
+        "reason": "First-party bundled table of reserved/private IPv4 CIDR bases (0.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 and similar) used to classify addresses; range definitions, not host addresses (minified main bundle, line 1337)."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/out/renderer/assets/IntlProvider-BzvhqYAv.js",
+        "line": 4,
+        "match": "192.168.1.100",
+        "context": "h.host\":`主机`,\"ssh.hostPlaceholder\":`输入主机地址或 IP，例如 192.168.1.100`,\"ssh.port\":`端口`,\"ssh.username\":`用户名`,\"ssh.userna",
+        "classification": "benign",
+        "reason": "UI placeholder text 'enter host address, e.g. 192.168.1.100' in the Chinese and English locale tables of the SSH host field; example text."
+      },
+      {
+        "rule": "private-address",
+        "file": "app.asar/out/renderer/assets/IntlProvider-BzvhqYAv.js",
+        "line": 32,
+        "match": "192.168.1.100",
+        "context": ".hostPlaceholder\":`Enter host address or IP, e.g. 192.168.1.100`,\"ssh.port\":`Port`,\"ssh.username\":`Username`,\"ssh",
+        "classification": "benign",
+        "reason": "UI placeholder text 'enter host address, e.g. 192.168.1.100' in the Chinese and English locale tables of the SSH host field; example text."
+      },
+      {
+        "rule": "private-address",
+        "file": "win-unpacked/resources/glm/zcode.cjs",
+        "line": 98,
+        "match": "10.0.0.0",
+        "context": "ix:8,reason:\"unspecified IPv4 address\"},{address:\"10.0.0.0\",family:\"ipv4\",prefix:8,reason:\"private IPv4 addr",
+        "classification": "benign",
+        "reason": "First-party agent bundle table of reserved/private IPv4 CIDR bases with human-readable reasons, used to classify addresses; range definitions, not host addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "win-unpacked/resources/glm/zcode.cjs",
+        "line": 98,
+        "match": "172.16.0.0",
+        "context": "ix:16,reason:\"link-local IPv4 address\"},{address:\"172.16.0.0\",family:\"ipv4\",prefix:12,reason:\"private IPv4 add",
+        "classification": "benign",
+        "reason": "First-party agent bundle table of reserved/private IPv4 CIDR bases with human-readable reasons, used to classify addresses; range definitions, not host addresses."
+      },
+      {
+        "rule": "private-address",
+        "file": "win-unpacked/resources/glm/zcode.cjs",
+        "line": 98,
+        "match": "192.168.0.0",
+        "context": "refix:12,reason:\"private IPv4 address\"},{address:\"192.168.0.0\",family:\"ipv4\",prefix:16,reason:\"private IPv4 add",
+        "classification": "benign",
+        "reason": "First-party agent bundle table of reserved/private IPv4 CIDR bases with human-readable reasons, used to classify addresses; range definitions, not host addresses."
+      }
+    ]
+  }
+}

@@ -12,7 +12,7 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphConfiguration, useGraphConfiguration } from "./GraphConfiguration.js";
 import { GraphParallelPlan } from "./GraphParallelPlan.js";
 import { GraphParallelRun } from "./GraphParallelRun.js";
-import { emptyParallelPlan } from "./graphParallelView.js";
+import { emptyParallelPlan, parallelAdmissionsBlocked } from "./graphParallelView.js";
 import type { GraphPanelProps } from "./graphEngineeringView.js";
 
 export function GraphParallelPanel(props: GraphPanelProps) {
@@ -36,11 +36,22 @@ export function GraphParallelPanel(props: GraphPanelProps) {
           planEnabled: config.draftConfig.planEnabled ?? false,
         }
       : null;
-  const disabled = graph.pending || Boolean(props.readOnlyReason) || graph.view?.readOnly === true;
+  const blocked = parallelAdmissionsBlocked(graph.view);
+  const disabled =
+    graph.pending || Boolean(props.readOnlyReason) || graph.view?.readOnly === true || blocked;
   const current = graph.view?.runs.find((r) => r.id === runId) ?? graph.view?.runs.at(-1);
   const dirty = JSON.stringify(plan) !== JSON.stringify(graph.view?.plan);
   return (
     <div className="min-h-0 flex-1 space-y-3 overflow-auto p-3" data-testid="parallel-panel">
+      {blocked ? (
+        <p
+          role="status"
+          className="rounded-xl border border-border bg-card p-3 text-ui-sm"
+          data-testid="parallel-policy-disabled"
+        >
+          {intl.formatMessage({ id: "graph.z8.parallelDisabled" })}
+        </p>
+      ) : null}
       <p className="text-ui-sm text-foreground-subtle">{t("help")}</p>
       <p
         className="rounded-xl border border-border bg-card p-3 text-ui-sm"

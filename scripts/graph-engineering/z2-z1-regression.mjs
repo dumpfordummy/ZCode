@@ -7,6 +7,7 @@ import { createIsolation, instruction } from "./isolation.mjs";
 import { approveNativePermissionOnce } from "./native-permission.mjs";
 import {
   captureNative,
+  openGraphDesign,
   readGraphRecord,
   readNativeLedger,
   waitForSaved,
@@ -28,7 +29,7 @@ const capture = async (name) => {
 };
 try {
   window = await isolation.launch();
-  await window.getByTestId("graph-engineering-open").click();
+  await openGraphDesign(window);
   await window.getByTestId("graph-name").fill("Z1 literal compatibility under Z2");
   const literal = `${instruction}\nLiteral compatibility token remains unchanged: {{inputs.unbound}}`;
   await window.getByTestId("graph-instructions").fill(literal);

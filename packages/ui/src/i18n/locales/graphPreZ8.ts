@@ -63,6 +63,10 @@ export const graphPreZ8En: Record<string, string> = {
   "graph.preZ8.experimental": "Advanced: experimental parallel workflows",
   "graph.preZ8.parallelLimit":
     "Parallel is experimental. Fork/Join plans cannot be exported or imported as sequential workflows. Existing local plans are retained.",
+  "graph.z8.parallelDisabled":
+    "Parallel workflows are not enabled in this package. Existing parallel history can be inspected, cancelled or cleaned up, but no new parallel work can be saved, prepared or approved.",
+  "graph.z8.parallelDisabledHistory":
+    "Parallel workflows are not enabled in this package. This workspace has earlier parallel history; it stays readable and can be cancelled or cleaned up.",
   "graph.preZ8.workflowPreview": "Workflow steps",
   "graph.preZ8.taskSteps": "Task steps",
   "graph.preZ8.noTaskSteps": "No task steps",
@@ -134,6 +138,10 @@ export const graphPreZ8Zh: Record<string, string> = {
   "graph.preZ8.experimental": "高级：实验性并行工作流",
   "graph.preZ8.parallelLimit":
     "并行工作流属于实验功能。Fork/Join 计划无法作为顺序工作流导入或导出。已有本地计划将保留。",
+  "graph.z8.parallelDisabled":
+    "此安装包未启用并行工作流。已有的并行历史仍可查看、取消或清理，但不能再保存、准备或批准新的并行工作。",
+  "graph.z8.parallelDisabledHistory":
+    "此安装包未启用并行工作流。该工作区含有早前的并行历史；历史保持可读，并可取消或清理。",
   "graph.preZ8.workflowPreview": "工作流步骤",
   "graph.preZ8.taskSteps": "任务步骤",
   "graph.preZ8.noTaskSteps": "无任务步骤",

@@ -11,9 +11,10 @@ export async function verifyInterruptedRestart(isolation, summary, waiting) {
   if (!(await window.getByTestId("graph-engineering-panel").isVisible()))
     await window.getByTestId("graph-engineering-open").click();
   await window.getByTestId("graph-view-runs").click();
-  await window
-    .locator('[data-testid="graph-run"][data-status="Interrupted"]')
-    .waitFor({ timeout: 30000 });
+  const interruptedRun = window.locator('[data-testid="graph-run"][data-status="Interrupted"]');
+  await interruptedRun.waitFor({ timeout: 30000 });
+  // 重启后 Runs 默认显示「新建运行」；恢复面板属于被选中的运行，所以要先在列表里选中它。
+  await interruptedRun.first().click();
   const interrupted = (await readGraphRecord(isolation)).runs.at(-1);
   assert.equal(interrupted.id, waiting.id);
   assert.deepEqual(

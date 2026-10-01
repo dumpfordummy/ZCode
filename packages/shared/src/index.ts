@@ -69,6 +69,7 @@ export {
   ZCODE_ARMS_RUM_ENDPOINT,
   ZCODE_TELEMETRY_ENABLED,
   mapZCodeEnvToArmsRumEnv,
+  resolveAutomaticTelemetryPolicy,
   normalizeZCodeEnv,
   normalizeZCodeProductFlavor,
 } from "./env.js";
@@ -308,3 +309,10 @@ export * from "./pluginStoreOrdering.js";
 export * from "./session-debug.js";
 export { redactFeedbackText } from "./feedbackPrivacy.js";
 export type * from "./git-graph-workspace.js";
+export {
+  GRAPH_EXPERIMENTAL_PARALLEL_ENV,
+  resolveGraphParallelPolicy,
+  type GraphParallelPolicy,
+  type GraphParallelPolicyMode,
+  type GraphParallelPolicySource,
+} from "./graph-capabilities.js";
