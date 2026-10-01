@@ -43,12 +43,15 @@ export function graphInspectionArtifacts(
  * presentation only: the stored status, the evidence state and the gate facts are unchanged.
  */
 export function graphStoppedAfterTestFailure(
-  run: { status: string; approvalAttempts?: readonly unknown[] },
+  run: {
+    status: string;
+    approvalAttempts?: ReadonlyArray<{ status: string; request?: unknown }>;
+  },
   evidence: Pick<GraphRunEvidence, "state">,
 ): boolean {
-  return (
-    run.status === "NeedsHuman" &&
-    evidence.state === "tests-failed" &&
-    !(run.approvalAttempts?.length ?? 0)
+  // 最终闸门的尝试可能存在但被跳过（Skipped，没有请求）：那仍然是“从未请求批准”。
+  const dispatched = (run.approvalAttempts ?? []).some(
+    (attempt) => !["Pending", "Skipped"].includes(attempt.status) || Boolean(attempt.request),
   );
+  return run.status === "NeedsHuman" && evidence.state === "tests-failed" && !dispatched;
 }

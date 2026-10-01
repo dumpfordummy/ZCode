@@ -292,19 +292,29 @@ export async function shot(isolation, window, receipt, name, size) {
 export async function shotSizes(isolation, window, receipt, name, prepare) {
   for (const size of SIZES) {
     // 先调整尺寸，再让调用方滚动到目标控件，最后截图。
-    const nativeWindow = await isolation.app.browserWindow(window);
-    try {
-      await nativeWindow.evaluate((browserWindow, [width, height]) => {
-        if (browserWindow.isMaximized()) browserWindow.unmaximize();
-        browserWindow.setContentSize(width, height);
-      }, size);
-    } finally {
-      await nativeWindow.dispose();
+    // 偶尔窗口没有响应一次 setContentSize（观察到于 UX-M4 的最终构建，与界面无关）：重发最多三次再判失败。
+    for (let attempt = 1; ; attempt += 1) {
+      const nativeWindow = await isolation.app.browserWindow(window);
+      try {
+        await nativeWindow.evaluate((browserWindow, [width, height]) => {
+          if (browserWindow.isMaximized()) browserWindow.unmaximize();
+          browserWindow.setContentSize(width, height);
+        }, size);
+      } finally {
+        await nativeWindow.dispose();
+      }
+      try {
+        await window.waitForFunction(
+          ([width, height]) =>
+            Math.abs(innerWidth - width) <= 2 && Math.abs(innerHeight - height) <= 2,
+          size,
+          { timeout: 10000 },
+        );
+        break;
+      } catch (error) {
+        if (attempt >= 3) throw error;
+      }
     }
-    await window.waitForFunction(
-      ([width, height]) => Math.abs(innerWidth - width) <= 2 && Math.abs(innerHeight - height) <= 2,
-      size,
-    );
     if (prepare) await prepare(size);
     await shot(isolation, window, receipt, name, size);
   }

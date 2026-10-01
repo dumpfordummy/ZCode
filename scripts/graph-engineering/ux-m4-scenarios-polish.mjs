@@ -136,6 +136,16 @@ const failedWording = {
     await pick(page, "run-failed");
     assert.match(await text(T(page, "graph-run-execution")), /测试失败后停止/);
     assert.doesNotMatch(await text(T(page, "graph-run-execution")), /人工审阅/);
+    // 真实运行里最终闸门的尝试存在但被跳过（Skipped，没有请求）：措辞相同，存储的状态不变
+    const skipped = failedTestRun("run-failed-skipped");
+    const gate = { ...approvalWaitRun("x").approvalAttempts[0], status: "Skipped" };
+    delete gate.request;
+    delete gate.decision;
+    skipped.approvalAttempts = [gate];
+    host.setRuns("A", [skipped]);
+    await pick(page, "run-failed-skipped");
+    assert.match(await text(T(page, "graph-run-execution")), /测试失败后停止/);
+    assert.equal(await T(page, "graph-run-execution").getAttribute("data-state"), "NeedsHuman");
     // 其它停止原因保持原措辞：到达了审批但等待中的运行不受影响
     host.setRuns("A", [approvalWaitRun("run-approval")]);
     await pick(page, "run-approval");
