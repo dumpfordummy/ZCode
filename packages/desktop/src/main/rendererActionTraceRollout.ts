@@ -60,6 +60,8 @@ function resolveRendererActionTraceConfig(payload: unknown): RendererActionTrace
 export function createRendererActionTraceRollout(options: {
   fetchConfig: (signal: AbortSignal) => Promise<unknown>;
   logger: SingleFeatureRolloutLogger;
+  /** 自动网络策略的裁决（`desktopRollout`），必须显式传入；false 时不发请求。 */
+  automaticFetchAllowed: boolean;
   timeoutMs?: number;
   cacheTtlMs?: number;
 }): RendererActionTraceRollout {
@@ -69,6 +71,7 @@ export function createRendererActionTraceRollout(options: {
     logTag: "renderer-action-trace",
     fetchConfig: options.fetchConfig,
     logger: options.logger,
+    automaticFetchAllowed: options.automaticFetchAllowed,
     timeoutMs: options.timeoutMs,
     cacheTtlMs: options.cacheTtlMs,
   });

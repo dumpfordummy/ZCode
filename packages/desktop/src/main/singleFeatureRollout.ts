@@ -47,6 +47,11 @@ interface CreateSingleFeatureRolloutOptions<T extends SingleFeatureRolloutConfig
   logTag: string;
   fetchConfig: (signal: AbortSignal) => Promise<unknown>;
   logger: SingleFeatureRolloutLogger;
+  /**
+   * 自动网络策略（`resolveAutomaticNetworkPolicy(...).desktopRollout`）的裁决，必须显式传入。
+   * 为 false 时本机制永不发起请求、不创建计时器：refresh/awaitFirstDecision 立即返回 defaultValue。
+   */
+  automaticFetchAllowed: boolean;
   timeoutMs?: number;
   cacheTtlMs?: number;
 }
@@ -55,6 +60,15 @@ export function createSingleFeatureRollout<T extends SingleFeatureRolloutConfig>
   options: CreateSingleFeatureRolloutOptions<T>,
 ): SingleFeatureRollout<T> {
   let snapshot: T = options.defaultValue;
+  if (options.automaticFetchAllowed !== true) {
+    // Z8.3-N1：策略拒绝自动配置请求（Graph）。沿用随包默认快照，不请求、不重试、不等待首个 Host 裁决。
+    options.logger.info?.(`[${options.logTag}] automatic config fetch disabled by network policy`);
+    return {
+      refresh: () => Promise.resolve(snapshot),
+      getSnapshot: () => snapshot,
+      awaitFirstDecision: () => Promise.resolve(snapshot),
+    };
+  }
   let snapshotExpiresAt = 0;
   let inFlight: Promise<T> | undefined;
   const timeoutMs = Math.max(options.timeoutMs ?? SINGLE_FEATURE_REQUEST_TIMEOUT_MS, 1);

@@ -7,6 +7,7 @@ import {
 } from "@zcode/provider";
 import {
   isBuiltinModelProviderId,
+  resolveAutomaticNetworkPolicyFromEnv,
   resolveRuntimeZCodeEndpointOrigin,
   ZCODE_VERSION,
 } from "@zcode/shared";
@@ -83,6 +84,8 @@ export async function startProcessProviderRegistryRuntime(
           },
         }
       : {}),
+    // Z8.3-N1：Host 启动的 Agent 经 spawn 环境收到自动网络策略；Graph 不做后台 Built-in 目录下载。
+    automaticZCodeBuiltinRefresh: resolveAutomaticNetworkPolicyFromEnv(env).builtinProviderCatalog,
     onZCodeBuiltinRefreshError: options.standalone?.onBuiltinRefreshError,
     accountSource,
     ...(credentialStore

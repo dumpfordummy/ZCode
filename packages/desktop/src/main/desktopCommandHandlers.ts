@@ -13,6 +13,7 @@ import {
   resolveRuntimeZCodeEndpointOrigin,
   ZCODE_ENV,
   ZCODE_PRODUCT_FLAVOR,
+  resolveFeedbackSubmissionPolicy,
   buildZCodeEndpointUrls,
   getCommunityUrlFromConfigs,
   getFeedbackUrlFromConfig,
@@ -600,6 +601,11 @@ export async function executeDesktopCommand(options: {
       await options.onRelaunchApp();
       return;
     case DesktopCommandIds.OpenFeedback:
+      // Z8.3-N1：Graph 不提供 Feedback 提交/上传；既不打开应用内表单，也不打开上游外部表单 URL。
+      if (!resolveFeedbackSubmissionPolicy(ZCODE_PRODUCT_FLAVOR).allowed) {
+        options.logger.info("[feedback] submission is unavailable in this product flavor");
+        return;
+      }
       await openFeedback(options.logger, targetWindow, options.fetchHelpConfig);
       return;
     case DesktopCommandIds.OpenCommunity:

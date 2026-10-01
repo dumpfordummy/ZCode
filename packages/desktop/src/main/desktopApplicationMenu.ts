@@ -6,6 +6,7 @@ import {
   isValidShortcutBinding,
   ZCODE_ENV,
   ZCODE_PRODUCT_FLAVOR,
+  resolveFeedbackSubmissionPolicy,
   type DesktopCommandId,
   type Locale,
 } from "@zcode/shared";
@@ -333,10 +334,15 @@ function buildApplicationMenuTemplate(options: {
           click: () => void options.executeDesktopCommand(DesktopCommandIds.OpenResourceManager),
         },
         { type: "separator" as const },
-        {
-          label: getLabel(desktopMenuMessageIds.helpFeedback),
-          click: () => void options.executeDesktopCommand(DesktopCommandIds.OpenFeedback),
-        },
+        // Z8.3-N1：Graph 不提供 Feedback 提交/上传，不显示该入口（命令处理侧同样拒绝）。
+        ...(resolveFeedbackSubmissionPolicy(ZCODE_PRODUCT_FLAVOR).allowed
+          ? [
+              {
+                label: getLabel(desktopMenuMessageIds.helpFeedback),
+                click: () => void options.executeDesktopCommand(DesktopCommandIds.OpenFeedback),
+              },
+            ]
+          : []),
         {
           label: getLabel(desktopMenuMessageIds.helpExportLogs),
           click: () => void options.executeDesktopCommand(DesktopCommandIds.ExportLogs),

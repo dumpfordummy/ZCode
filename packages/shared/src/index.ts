@@ -70,9 +70,16 @@ export {
   ZCODE_TELEMETRY_ENABLED,
   mapZCodeEnvToArmsRumEnv,
   resolveAutomaticTelemetryPolicy,
+  AUTOMATIC_NETWORK_CLASSES,
+  ZCODE_AUTOMATIC_NETWORK_DENY_ENV,
+  encodeAutomaticNetworkDeny,
+  resolveAutomaticNetworkPolicy,
+  resolveAutomaticNetworkPolicyFromEnv,
+  resolveFeedbackSubmissionPolicy,
   normalizeZCodeEnv,
   normalizeZCodeProductFlavor,
 } from "./env.js";
+export type { AutomaticNetworkClass, AutomaticNetworkPolicy } from "./env.js";
 export * from "./errors.js";
 export type { SessionCreateSource } from "./sessionCreateSource.js";
 export { resolveSafeEndpointHostname } from "./endpointHostname.js";

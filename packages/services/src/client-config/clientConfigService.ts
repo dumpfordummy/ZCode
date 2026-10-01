@@ -2,7 +2,10 @@ import {
   buildZCodeEndpointUrls,
   clientConfigReadOptionsSchema,
   parseClientConfigSnapshot,
+  resolveAutomaticNetworkPolicy,
+  ZCODE_PRODUCT_FLAVOR,
   type ApiClient,
+  type AutomaticNetworkPolicy,
   type ClientConfigSnapshot,
 } from "@zcode/shared";
 import type { IClientConfigService } from "./clientConfig.js";
@@ -26,8 +29,13 @@ interface CacheEntry {
 export function createClientConfigService(dependencies: {
   apiClient: ApiClient;
   resolveRequestContext: () => RequestContext | Promise<RequestContext>;
+  /** 仅供测试覆盖；运行时使用编译期产品身份对应的策略。 */
+  automaticNetworkPolicy?: AutomaticNetworkPolicy;
 }): IClientConfigService {
   const entries = new Map<string, CacheEntry>();
+  const automaticFetchAllowed = (
+    dependencies.automaticNetworkPolicy ?? resolveAutomaticNetworkPolicy(ZCODE_PRODUCT_FLAVOR)
+  ).clientConfig;
 
   async function fetchSnapshot(url: URL): Promise<ClientConfigSnapshot> {
     const controller = new AbortController();
@@ -65,6 +73,9 @@ export function createClientConfigService(dependencies: {
   return {
     async getSnapshot(options = {}) {
       const { forceRefresh } = clientConfigReadOptionsSchema.parse(options);
+      // Z8.3-N1：策略拒绝自动请求（Graph）时，非强制读取一律返回随包默认快照，
+      // 不解析请求上下文、不碰缓存、不发请求。forceRefresh 是插件商店「刷新」按钮的显式用户操作，保持可用。
+      if (!automaticFetchAllowed && forceRefresh !== true) return { pluginStoreOrder: null };
       const context = await dependencies.resolveRequestContext();
       const url = new URL(
         "/api/v1/client/configs",

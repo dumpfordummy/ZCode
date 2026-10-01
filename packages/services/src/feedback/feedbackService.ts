@@ -4,9 +4,12 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import type { ApiClient, FeedbackDeviceInfo } from "@zcode/shared";
 import {
   buildRuntimeZCodeApiUrl,
+  resolveFeedbackSubmissionPolicy,
   ZCODE_BUILD_TIME,
   ZCODE_COMMIT,
+  ZCODE_PRODUCT_FLAVOR,
   ZCODE_VERSION,
+  type ZCodeProductFlavor,
 } from "@zcode/shared";
 import { Emitter } from "@zcode/rpc";
 import { arch, platform, release, type as osType } from "node:os";
@@ -21,7 +24,18 @@ import { FeedbackLocalTicketStore } from "#src/feedback/feedbackLocalTicketStore
 
 const ZCODE_JWT_TOKEN_KEY = "zcodejwttoken";
 
+/** Graph 等不提供 Feedback 提交/上传的产品身份：服务在任何副作用之前拒绝（Z8.3-N1）。 */
+export class FeedbackSubmissionDisabledError extends Error {
+  readonly code = "feedback_submission_disabled";
+  constructor() {
+    super("Feedback submission and uploads are not available in this product.");
+    this.name = "FeedbackSubmissionDisabledError";
+  }
+}
+
 export interface CreateFeedbackServiceOptions {
+  /** 仅供测试覆盖；运行时使用编译期产品身份。 */
+  flavor?: ZCodeProductFlavor;
   credentialService: ICredentialService;
   oauthService: IOAuthService;
   apiClient: ApiClient;
@@ -60,6 +74,13 @@ function buildDeviceSnapshot(): FeedbackDeviceInfo {
 }
 
 export function createFeedbackService(options: CreateFeedbackServiceOptions): IFeedbackService {
+  const submissionAllowed = resolveFeedbackSubmissionPolicy(
+    options.flavor ?? ZCODE_PRODUCT_FLAVOR,
+  ).allowed;
+  // 守卫必须是每个提交/上传入口的第一条语句：早于设备快照、进度事件、凭据读取、临时文件、日志打包与任何请求。
+  function assertSubmissionAllowed(): void {
+    if (!submissionAllowed) throw new FeedbackSubmissionDisabledError();
+  }
   const apiBaseUrl = resolveApiBaseUrl(options.apiBaseUrl);
   function getHostDeviceMid(): string | undefined {
     return options.getDeviceMid?.()?.trim() || undefined;
@@ -119,6 +140,7 @@ export function createFeedbackService(options: CreateFeedbackServiceOptions): IF
 
   return {
     create: async (input, createOptions) => {
+      assertSubmissionAllowed();
       const device = input.device ?? buildDeviceSnapshot();
       const operationId = createOptions?.operationId?.trim();
       const controller = new AbortController();
@@ -161,8 +183,12 @@ export function createFeedbackService(options: CreateFeedbackServiceOptions): IF
       return { items, total: items.length };
     },
     get: (id) => httpClient.get(id),
-    comment: (id, body) => httpClient.comment(id, body),
+    comment: async (id, body) => {
+      assertSubmissionAllowed();
+      return httpClient.comment(id, body);
+    },
     uploadAttachment: async (id, kind, file) => {
+      assertSubmissionAllowed();
       const filename = file.filename ?? basename(file.path);
       const contentType = file.contentType ?? (kind === "image" ? "image/png" : "application/zip");
       return httpClient.uploadFile(id, kind, file.path, filename, contentType, {
@@ -170,6 +196,7 @@ export function createFeedbackService(options: CreateFeedbackServiceOptions): IF
       });
     },
     uploadAttachmentWithProgress: async (id, kind, file, progressId) => {
+      assertSubmissionAllowed();
       const filename = file.filename ?? basename(file.path);
       const contentType = file.contentType ?? (kind === "image" ? "image/png" : "application/zip");
       const emitter = getUploadProgressEmitter(progressId);
@@ -214,6 +241,7 @@ export function createFeedbackService(options: CreateFeedbackServiceOptions): IF
     },
     onDynamicUploadProgress: (id) => getUploadProgressEmitter(id).event,
     uploadAttachmentData: async (id, kind, file) => {
+      assertSubmissionAllowed();
       const attachmentRootDir = getFeedbackAttachmentDir();
       await mkdir(attachmentRootDir, { recursive: true });
       const tempDir = await mkdtemp(join(attachmentRootDir, "attachment-"));
@@ -230,6 +258,7 @@ export function createFeedbackService(options: CreateFeedbackServiceOptions): IF
       }
     },
     attachLogsFromExport: async (id, attachOptions) => {
+      assertSubmissionAllowed();
       const archive = await prepareCompactLogArchive({
         full: attachOptions?.full,
         createFullArchive: options.createFullLogArchive,
@@ -248,6 +277,8 @@ export function createFeedbackService(options: CreateFeedbackServiceOptions): IF
     },
     getDeviceSnapshot: async () => buildDeviceSnapshot(),
     prepareCompactLogArchive: async (archiveOptions) => {
+      // 日志打包只为上传准备；Graph 不生成该归档（本任务不提供本地支持包）。
+      assertSubmissionAllowed();
       const progressId = archiveOptions?.progressId;
       const progressEmitter = progressId ? getUploadProgressEmitter(progressId) : null;
       return prepareCompactLogArchive({

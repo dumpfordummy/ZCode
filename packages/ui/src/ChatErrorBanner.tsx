@@ -1,3 +1,4 @@
+import { FEEDBACK_SUBMISSION_AVAILABLE } from "@/feedback/feedbackAvailability.js";
 import { CodingPlanEntryButton } from "@/settings/CodingPlanEntryButton.js";
 /**
  * ChatErrorBanner — 错误提示组件
@@ -288,7 +289,7 @@ export function ChatErrorBanner({
 
         {/* 错误横幅本身就是异常态，不能再经过 Radix Tooltip 的 Popper/Slot 状态链。
             这里改成普通 Button，避免无可用模型等错误触发横幅时发生 Maximum update depth 循环。 */}
-        {!modelConfigMissing ? (
+        {!modelConfigMissing && FEEDBACK_SUBMISSION_AVAILABLE ? (
           <Button
             type="button"
             variant="outline"

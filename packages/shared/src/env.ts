@@ -62,6 +62,79 @@ export function resolveAutomaticTelemetryPolicy(
   };
 }
 
+/** 自动（非用户触发）上游配置/目录请求的分类；每一类对应一个具体出口。 */
+export const AUTOMATIC_NETWORK_CLASSES = [
+  "desktopRollout",
+  "helpConfig",
+  "clientConfig",
+  "clientScenes",
+  "builtinProviderCatalog",
+  "pluginMarketplace",
+] as const;
+export type AutomaticNetworkClass = (typeof AUTOMATIC_NETWORK_CLASSES)[number];
+export type AutomaticNetworkPolicy = Readonly<Record<AutomaticNetworkClass, boolean>>;
+
+function buildAutomaticNetworkPolicy(allowed: boolean): AutomaticNetworkPolicy {
+  return Object.freeze(
+    Object.fromEntries(AUTOMATIC_NETWORK_CLASSES.map((name) => [name, allowed])) as Record<
+      AutomaticNetworkClass,
+      boolean
+    >,
+  );
+}
+
+function isSupportedUpstreamFlavor(flavor: ZCodeProductFlavor): boolean {
+  return flavor === "production" || flavor === "preview";
+}
+
+/**
+ * 自动网络请求策略的唯一计算处（Z8.3-N1）。Graph 不发起任何自动的上游配置/目录请求，
+ * 使用随包的默认配置；Production/Preview 与改动前完全一致。
+ * 未知 flavor 同样拒绝：策略缺失或无法识别时，受影响的自动动作一律不执行。
+ * 用户显式触发的操作（强制刷新、设置页刷新等）不经过本策略。
+ */
+export function resolveAutomaticNetworkPolicy(flavor: ZCodeProductFlavor): AutomaticNetworkPolicy {
+  return buildAutomaticNetworkPolicy(isSupportedUpstreamFlavor(flavor));
+}
+
+/** Feedback 提交与上传（工单、附件、日志）的策略；与自动网络策略同一判据，Graph 内部版不提供上传。 */
+export function resolveFeedbackSubmissionPolicy(flavor: ZCodeProductFlavor): {
+  readonly allowed: boolean;
+} {
+  return Object.freeze({ allowed: isSupportedUpstreamFlavor(flavor) });
+}
+
+/** Host 经既有的 Agent spawn 环境通道下发被拒绝的类别（逗号分隔）；Agent 进程不再自行判断 flavor。 */
+export const ZCODE_AUTOMATIC_NETWORK_DENY_ENV = "ZCODE_AUTOMATIC_NETWORK_DENY" as const;
+
+export function encodeAutomaticNetworkDeny(policy: AutomaticNetworkPolicy): string {
+  return AUTOMATIC_NETWORK_CLASSES.filter((name) => policy[name] !== true).join(",");
+}
+
+/**
+ * 从 Host 下发的环境值还原策略。变量缺失或为空表示进程不受产品 flavor 约束（独立 CLI），
+ * Host 启动的 Agent 一定带有该变量；出现任何未知类别名则整体拒绝（fail closed）。
+ */
+export function resolveAutomaticNetworkPolicyFromEnv(
+  env: Readonly<Record<string, string | undefined>>,
+): AutomaticNetworkPolicy {
+  const raw = env[ZCODE_AUTOMATIC_NETWORK_DENY_ENV]?.trim();
+  if (!raw) return buildAutomaticNetworkPolicy(true);
+  const denied = new Set<string>();
+  for (const token of raw.split(",")) {
+    const name = token.trim();
+    if (!(AUTOMATIC_NETWORK_CLASSES as readonly string[]).includes(name)) {
+      return buildAutomaticNetworkPolicy(false);
+    }
+    denied.add(name);
+  }
+  return Object.freeze(
+    Object.fromEntries(
+      AUTOMATIC_NETWORK_CLASSES.map((name) => [name, !denied.has(name)]),
+    ) as Record<AutomaticNetworkClass, boolean>,
+  );
+}
+
 const automaticTelemetry = resolveAutomaticTelemetryPolicy(
   ZCODE_PRODUCT_FLAVOR,
   typeof process !== "undefined" ? process.env : {},

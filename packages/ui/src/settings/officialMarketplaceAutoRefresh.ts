@@ -12,6 +12,8 @@
 // - 商店页每次进入都是重新挂载（key 带 pluginStoreOpenVersion），组件内 ref 无法承载节流状态，
 //   所以放在模块级。
 
+import { resolveAutomaticNetworkPolicy, ZCODE_PRODUCT_FLAVOR } from "@zcode/shared";
+
 const OFFICIAL_MARKETPLACE_AUTO_REFRESH_INTERVAL_MS = 10 * 60_000;
 
 const lastAttemptAtByMarketplace = new Map<string, number>();
@@ -40,7 +42,12 @@ export function claimMarketplaceAutoRefresh(
   marketplaceId: string,
   lastUpdated: string | undefined,
   now: number = Date.now(),
+  /** 自动网络策略的 `pluginMarketplace` 裁决；默认取当前产品身份。 */
+  automaticRefreshAllowed: boolean = resolveAutomaticNetworkPolicy(ZCODE_PRODUCT_FLAVOR)
+    .pluginMarketplace,
 ): boolean {
+  // Z8.3-N1：Graph 进入商店页不自动刷新官方目录（使用随包/已缓存目录）；用户点刷新仍走显式更新。
+  if (!automaticRefreshAllowed) return false;
   const shouldRefresh = shouldAutoRefreshMarketplace({
     lastUpdated,
     lastAttemptAt: lastAttemptAtByMarketplace.get(marketplaceId),
