@@ -192,6 +192,8 @@ _Update: the `Packaged evidence` column below is the original manifest's record 
 - The runner's first CLI-lint attempt could not find `turbo` (PATH); the first scoped-format runs found three files to format; the CLI-lint counter originally read only the first package. All corrected; the runner keeps every attempt.
 - During development two new tests failed once each (an un-awaited `asar.createPackage`; a secret literal leaking into a neighbouring context snippet) and were fixed.
 
+- At closeout, one run of the Graph service tests (docs-only change) failed 3 Z7 native-Git-capture tests because a spawned `git` exited with `3221225781` (0xC0000135, a missing-DLL style process failure). Two immediate re-runs of the same suite passed (372 pass, 2 skipped). Recorded as a transient environment failure, not diagnosed further; the failed log is kept locally.
+
 ## 10. Blockers and remaining Z8 work
 
 Blockers before any internal release (not new work for Z8.1, but now known):
