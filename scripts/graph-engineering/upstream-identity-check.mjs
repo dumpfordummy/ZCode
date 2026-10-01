@@ -23,11 +23,11 @@ const blob = async (ref, file) => {
   }
 };
 
-export async function compareUpstreamContent() {
+export async function compareUpstreamContent(headRef = "HEAD") {
   const reference = await readUpstreamReference(root);
   const pinned = reference.contentReference.sha;
-  const head = (await git(["rev-parse", "HEAD"])).trim();
-  const mergeBase = (await git(["merge-base", "HEAD", pinned])).trim();
+  const head = (await git(["rev-parse", headRef])).trim();
+  const mergeBase = (await git(["merge-base", headRef, pinned])).trim();
   const changed = (await git(["diff", "--name-status", "--no-renames", mergeBase, pinned]))
     .split("\n")
     .filter(Boolean)
@@ -41,7 +41,7 @@ export async function compareUpstreamContent() {
   const scratch = await mkdtemp(path.join(tmpdir(), "upstream-identity-"));
   try {
     for (const [status, file] of changed) {
-      const mine = await blob("HEAD", file);
+      const mine = await blob(headRef, file);
       if (status === "D") {
         if (mine) result.deletedUpstreamStillPresent.push(file);
         else result.identical++;
@@ -85,7 +85,7 @@ export async function compareUpstreamContent() {
   } finally {
     await rm(scratch, { recursive: true, force: true });
   }
-  const wholeTree = (await git(["diff", "--name-status", "--no-renames", pinned, "HEAD"]))
+  const wholeTree = (await git(["diff", "--name-status", "--no-renames", pinned, headRef]))
     .split("\n")
     .filter(Boolean)
     .map((line) => line[0]);
@@ -98,7 +98,7 @@ export async function compareUpstreamContent() {
       "merge-base",
       "--is-ancestor",
       pinned,
-      "HEAD",
+      headRef,
     ]).then(
       () => true,
       () => false,
@@ -115,8 +115,9 @@ export async function compareUpstreamContent() {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === import.meta.filename) {
+  // 用法：upstream-identity-check.mjs [输出文件] [提交]；提交缺省为 HEAD（构建时应传入构建源提交）。
   const output = process.argv[2];
-  const result = await compareUpstreamContent();
+  const result = await compareUpstreamContent(process.argv[3] ?? "HEAD");
   const text = `${JSON.stringify(result, null, 2)}\n`;
   if (output) await writeFile(output, text);
   else process.stdout.write(text);

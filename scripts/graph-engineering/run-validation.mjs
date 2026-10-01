@@ -79,8 +79,9 @@ const SUITES = {
 };
 
 const ACCEPTED_BASE = "51f6ed67f63ff3500abca1bd86023f40bb29543d";
-// 审计记录按原样保留，不为格式化而改动。
+// 审计记录按原样保留；z8/evidence 下是工具生成的原始证据（清单、报告、摘要），也不为格式化而改写。
 const FORMAT_EXCLUDED = new Set(["docs/graph-engineering/z8/Z8_DELTA_AUDIT.md"]);
+const FORMAT_EXCLUDED_PREFIXES = ["docs/graph-engineering/z8/evidence/"];
 
 /**
  * oxfmt 在 Windows 检出里偏好 CRLF，几乎所有文件都会被 fmt:check 标记，这个信号没有信息量。
@@ -97,7 +98,11 @@ async function scopedFormat(step) {
   ]);
   const files = [...names].filter(
     (f) =>
-      f && /\.(ts|tsx|mjs|js|json|md)$/.test(f) && !f.endsWith(".d.ts") && !FORMAT_EXCLUDED.has(f),
+      f &&
+      /\.(ts|tsx|mjs|js|json|md)$/.test(f) &&
+      !f.endsWith(".d.ts") &&
+      !FORMAT_EXCLUDED.has(f) &&
+      !FORMAT_EXCLUDED_PREFIXES.some((prefix) => f.startsWith(prefix)),
   );
   const scratch = await mkdtemp(path.join(tmpdir(), "z81-format-"));
   await writeFile(
@@ -133,7 +138,11 @@ async function scopedFormat(step) {
   await writeFile(
     log,
     JSON.stringify(
-      { checked: original.size, nonconforming, excluded: [...FORMAT_EXCLUDED] },
+      {
+        checked: original.size,
+        nonconforming,
+        excluded: [...FORMAT_EXCLUDED, ...FORMAT_EXCLUDED_PREFIXES],
+      },
       null,
       2,
     ),
@@ -176,6 +185,10 @@ function run(step) {
       const text = Buffer.concat(chunks).toString("utf8");
       await writeFile(log, text);
       const count = (re) => Number(re.exec(text)?.[1]);
+      const sum = (re) => {
+        const matches = [...text.matchAll(re)];
+        return matches.length ? matches.reduce((total, m) => total + Number(m[1]), 0) : Number.NaN;
+      };
       resolve({
         id: step.id,
         command: [step.command, ...step.args].join(" "),
@@ -188,8 +201,9 @@ function run(step) {
           testsPassed: count(/ℹ pass (\d+)/),
           testsFailed: count(/ℹ fail (\d+)/),
           testsSkipped: count(/ℹ skipped (\d+)/),
-          lintWarnings: count(/Found (\d+) warnings?/),
-          lintErrors: count(/Found \d+ warnings? and (\d+) errors?/),
+          // 多个包各打印一行 "Found N warnings and M errors"：求和，而不是只取第一行。
+          lintWarnings: sum(/Found (\d+) warnings? and \d+ errors?/g),
+          lintErrors: sum(/Found \d+ warnings? and (\d+) errors?/g),
           formatFlagged: count(/Format issues found in above (\d+) files/),
         },
       });
