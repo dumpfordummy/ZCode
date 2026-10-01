@@ -18,6 +18,7 @@ import { Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { ZipFile } from "yazl";
 
+import { isSensitiveCredentialFileName } from "@zcode/shared";
 import {
   createFeedbackDiagnosticArchive,
   getAppConfigDir,
@@ -145,7 +146,6 @@ const NON_LOG_STATE_ARCHIVE_PATHS = [
   "session-bindings",
   "checkpoints",
 ] as const;
-const SENSITIVE_CREDENTIAL_ARCHIVE_FILE_NAMES = new Set(["credentials.json", ".credentials.json"]);
 const EXCLUDED_ARCHIVE_DIRECTORY_NAMES = new Set(["debug"]);
 const DEFAULT_LOG_EXPORT_LOOKBACK_DAYS = 3;
 const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -709,7 +709,7 @@ function isNonLogStateArchivePath(relativePath: string): boolean {
 function isSensitiveCredentialArchivePath(relativePath: string): boolean {
   const normalizedRelativePath = normalizeArchivePath(relativePath).toLowerCase();
   const fileName = normalizedRelativePath.split("/").at(-1) ?? "";
-  return SENSITIVE_CREDENTIAL_ARCHIVE_FILE_NAMES.has(fileName);
+  return isSensitiveCredentialFileName(fileName);
 }
 
 function isExcludedDirectoryArchivePath(relativePath: string): boolean {

@@ -76,6 +76,7 @@ export {
   resolveAutomaticNetworkPolicy,
   resolveAutomaticNetworkPolicyFromEnv,
   resolveFeedbackSubmissionPolicy,
+  resolveGraphSupportBundlePolicy,
   normalizeZCodeEnv,
   normalizeZCodeProductFlavor,
 } from "./env.js";
@@ -314,7 +315,7 @@ export * from "./pluginStoreOrder.js";
 export * from "./clientConfig.js";
 export * from "./pluginStoreOrdering.js";
 export * from "./session-debug.js";
-export { redactFeedbackText } from "./feedbackPrivacy.js";
+export { isSensitiveCredentialFileName, redactFeedbackText } from "./feedbackPrivacy.js";
 export type * from "./git-graph-workspace.js";
 export {
   GRAPH_EXPERIMENTAL_PARALLEL_ENV,

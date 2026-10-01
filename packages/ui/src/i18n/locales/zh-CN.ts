@@ -7,6 +7,7 @@ import { graphM1Zh } from "./graphM1.js";
 import { graphM2Zh } from "./graphM2.js";
 import { graphM3Zh } from "./graphM3.js";
 import { graphM4Zh } from "./graphM4.js";
+import { graphS1Zh } from "./graphS1.js";
 /** 中文翻译 */
 const zhCN: Record<string, string> = {
   ...graphPreZ8Zh,
@@ -18,6 +19,7 @@ const zhCN: Record<string, string> = {
   ...graphM2Zh,
   ...graphM3Zh,
   ...graphM4Zh,
+  ...graphS1Zh,
   "graph.node.approval": "人工审批",
   "graph.status.WaitingForApproval": "等待审批",
   "graph.status.AwaitingContinuation": "等待明确继续",

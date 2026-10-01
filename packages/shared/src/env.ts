@@ -104,6 +104,16 @@ export function resolveFeedbackSubmissionPolicy(flavor: ZCodeProductFlavor): {
   return Object.freeze({ allowed: isSupportedUpstreamFlavor(flavor) });
 }
 
+/**
+ * 本地 Graph 支持包（Z8.3-S1）的可用性策略。仅 Graph 内部版提供；Production/Preview 不出现入口，Host 方法也拒绝。
+ * 未知 flavor 同样不可用（fail closed）。Host 与 UI 读取同一个结果，不各自判断 flavor。
+ */
+export function resolveGraphSupportBundlePolicy(flavor: ZCodeProductFlavor): {
+  readonly available: boolean;
+} {
+  return Object.freeze({ available: flavor === "graph" });
+}
+
 /** Host 经既有的 Agent spawn 环境通道下发被拒绝的类别（逗号分隔）；Agent 进程不再自行判断 flavor。 */
 export const ZCODE_AUTOMATIC_NETWORK_DENY_ENV = "ZCODE_AUTOMATIC_NETWORK_DENY" as const;
 

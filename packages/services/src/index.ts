@@ -27,6 +27,7 @@ export {
 export { IGraphEngineeringService } from "./graph-engineering/contract.js";
 export * from "./graph-engineering/workflow-contract.js";
 export * from "./graph-engineering/parallel-contract.js";
+export * from "./graph-engineering/support-contract.js";
 export type {
   GraphPredicate,
   GraphConditionNode,

@@ -7,6 +7,7 @@ import { graphM1En } from "./graphM1.js";
 import { graphM2En } from "./graphM2.js";
 import { graphM3En } from "./graphM3.js";
 import { graphM4En } from "./graphM4.js";
+import { graphS1En } from "./graphS1.js";
 /** English translations */
 const enUS: Record<string, string> = {
   ...graphPreZ8En,
@@ -18,6 +19,7 @@ const enUS: Record<string, string> = {
   ...graphM2En,
   ...graphM3En,
   ...graphM4En,
+  ...graphS1En,
   "graph.node.approval": "Human Approval",
   "graph.status.WaitingForApproval": "Waiting for approval",
   "graph.status.AwaitingContinuation": "Waiting for explicit Continue",

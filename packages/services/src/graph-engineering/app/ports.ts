@@ -34,7 +34,10 @@ export interface GraphRecipePort {
   fingerprint(
     target: GraphWorkspaceTarget,
     paths: string[],
-  ): Promise<{ digest: string; files: Array<{ path: string; bytes: number; digest: string }> }>;
+  ): Promise<{
+    digest: string;
+    files: Array<{ path: string; bytes: number; digest: string }>;
+  }>;
   validatePaths(target: GraphWorkspaceTarget, paths: string[]): Promise<void>;
   observeFiles(target: GraphWorkspaceTarget, paths: string[]): Promise<GraphFileObservation[]>;
 }
@@ -67,7 +70,11 @@ export interface GraphArtifactOptions {
 
 export interface GraphRecord {
   parallel?: import("../parallel-contract.js").GraphParallelRecord;
-  parallelParent?: { target: GraphWorkspaceTarget; runId: string; slot: string };
+  parallelParent?: {
+    target: GraphWorkspaceTarget;
+    runId: string;
+    slot: string;
+  };
   definition: GraphDefinition;
   runs: GraphRun[];
 }
@@ -89,6 +96,8 @@ export interface GraphRepository {
    * 失败必须抛出（对账随之中止，原记录不变）。不建模磁盘字节的测试替身可以不实现。
    */
   snapshotBeforeReconcile?(target: GraphWorkspaceTarget): Promise<unknown>;
+  /** Z8.3-S1：只读清单（见 GraphRecordInventoryEntry）。不建模磁盘的测试替身可以不实现。 */
+  inventory?(): Promise<GraphRecordInventoryEntry[]>;
 }
 export interface GraphNativeFact {
   sourceCommandId: string;
@@ -135,4 +144,17 @@ export interface GraphNativePort {
   cancel(run: GraphNativeExecution): Promise<void>;
   reconcile(run: GraphNativeExecution): Promise<"same-runtime" | "interrupted">;
   inspect(run: GraphNativeExecution): Promise<GraphNativeInspection>;
+}
+
+/**
+ * Z8.3-S1：只读的记录清单。仓库按自己的磁盘布局列出 `<sha256(workspace key)>.json` 记录，并用与 read 相同的 schema 与版本边界解析；
+ * 不做对账、不取得所有权、不写任何文件。`record` 只在 `readStatus === "ok"` 时存在，供 Host 内存里的支持包投影使用。
+ */
+export interface GraphRecordInventoryEntry {
+  /** 记录文件名中的 sha256（即 workspaceHash）。 */
+  hash: string;
+  bytes: number;
+  readStatus: "ok" | "unsupported-newer-version" | "integrity-error" | "invalid";
+  storedVersion: number | null;
+  record?: GraphRecord;
 }

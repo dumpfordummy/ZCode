@@ -4,6 +4,7 @@ import {
   ZCODE_PRODUCT_FLAVOR,
   type GitGraphWorkspace,
   type GraphParallelPolicy,
+  type ZCodeProductFlavor,
 } from "@zcode/shared";
 import type {
   IZCodeAgentService,
@@ -14,6 +15,7 @@ import type {
 } from "../index.js";
 import { GraphEngineeringService } from "./app/service.js";
 import { createGraphRepository } from "./adapters/repository.js";
+import { createGraphSupportService } from "./adapters/support-bundle.js";
 import { createGraphNativePort } from "./adapters/native.js";
 import { createGraphEvidencePort } from "./adapters/evidence.js";
 import { createGraphArtifactStore } from "./adapters/artifacts.js";
@@ -37,9 +39,12 @@ export function createGraphEngineeringService(options: {
   cleanupWorkspace?: (workspace: GitGraphWorkspace) => Promise<GitGraphWorkspace>;
   /** 仅供测试覆盖；运行时由编译期身份与显式开发 opt-in 决定。 */
   parallelPolicy?: () => GraphParallelPolicy;
+  /** 仅供测试覆盖；运行时使用编译期产品身份。 */
+  supportBundleFlavor?: ZCodeProductFlavor;
 }) {
   const preflight = createWorkflowPreflight(options);
   const project = createProjectSetupPort(options);
+  const repository = createGraphRepository(options.directory);
   const graph = new GraphEngineeringService({
     parallelPolicy:
       options.parallelPolicy ??
@@ -47,7 +52,7 @@ export function createGraphEngineeringService(options: {
     parallel: createGraphParallelPort(options),
     preflight,
     checks: project,
-    repository: createGraphRepository(options.directory),
+    repository,
     native: createGraphNativePort(options),
     evidence: createGraphEvidencePort(options.gitService),
     artifacts: createGraphArtifactStore(options.directory),
@@ -71,5 +76,10 @@ export function createGraphEngineeringService(options: {
     id: randomUUID,
     now: Date.now,
   });
-  return Object.assign(graph, { workflowService });
+  const supportService = createGraphSupportService({
+    directory: options.directory,
+    repository,
+    ...(options.supportBundleFlavor ? { flavor: options.supportBundleFlavor } : {}),
+  });
+  return Object.assign(graph, { workflowService, supportService });
 }
