@@ -1,0 +1,96 @@
+{
+  "note": "Derived from PACKAGED_VALIDATION_SUPPLEMENT.json for build-source e555d800906d7ca76d43aa22e186ba8d8baedc24. A capability is packaged-verified only if every mapped case passed.",
+  "capabilities": [
+    {
+      "capability": "ordinary-chat",
+      "cases": [
+        "ordinary-chat"
+      ],
+      "packagedVerified": true
+    },
+    {
+      "capability": "startup-without-provider-no-model-request",
+      "cases": [
+        "no-provider"
+      ],
+      "packagedVerified": true
+    },
+    {
+      "capability": "sequential-graph-legacy-compatibility",
+      "cases": [
+        "z1-literal-compatibility"
+      ],
+      "packagedVerified": true
+    },
+    {
+      "capability": "sequential-graph-multi-session-handoff",
+      "cases": [
+        "z2-complete",
+        "z2-question"
+      ],
+      "packagedVerified": true
+    },
+    {
+      "capability": "cancellation-preserves-unrelated-chat",
+      "cases": [
+        "z2-cancel-question",
+        "z2-cancel-permission",
+        "z2-cancel-progress"
+      ],
+      "packagedVerified": true
+    },
+    {
+      "capability": "restart-and-conservative-recovery",
+      "cases": [
+        "z2-restart-interrupted",
+        "z2-restart-permission",
+        "z2-persistence-recovery"
+      ],
+      "packagedVerified": true
+    },
+    {
+      "capability": "built-in-sequential-engineering-template-instantiation",
+      "cases": [
+        "sequential-engineering-reviewer"
+      ],
+      "packagedVerified": true
+    },
+    {
+      "capability": "build-test-checks-through-native-runtime",
+      "cases": [
+        "sequential-engineering-reviewer"
+      ],
+      "packagedVerified": true
+    },
+    {
+      "capability": "strict-reviewer-output-bound-to-verification-artifact",
+      "cases": [
+        "sequential-engineering-reviewer"
+      ],
+      "packagedVerified": true
+    },
+    {
+      "capability": "final-human-gate-presented-and-left-pending",
+      "cases": [
+        "sequential-engineering-reviewer"
+      ],
+      "packagedVerified": true
+    },
+    {
+      "capability": "automatic-telemetry-inherited-settings-three-paths",
+      "cases": [
+        "telemetry-canary"
+      ],
+      "packagedVerified": true
+    }
+  ],
+  "notExercisedInPackage": [
+    "final-gate approve/reject decisions and approval-evidence freshness (Z3)",
+    "bounded repair routing and NeedsHuman stops (Z5)",
+    "workflow library save/version/archive, portable import/export, historical pins (Z6, UX-M3)",
+    "Build/Test failure paths (a genuine failing Test) and reviewer negative outputs",
+    "Fork/Join parallel (disabled by policy; Host rejection is unit-tested, not packaged-tested)",
+    "installer install/upgrade/uninstall, upgrade over older profiles, signing",
+    "production-environment network egress; Feedback uploader"
+  ]
+}

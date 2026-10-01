@@ -1,6 +1,8 @@
 # Z8.1 report — local candidate built and inspected
 
-**Status: Z8.1 LOCAL CANDIDATE BUILT AND INSPECTED — UPGRADE, SECURITY AND INSTALL ACCEPTANCE PENDING.**
+**Status (as first reported): Z8.1 LOCAL CANDIDATE BUILT AND INSPECTED — UPGRADE, SECURITY AND INSTALL ACCEPTANCE PENDING.**
+
+> **Follow-up (packaged baseline).** [Z8_1_PACKAGED_FOLLOWUP.md](Z8_1_PACKAGED_FOLLOWUP.md) repaired the packaged drivers and ran all 13 packaged scenarios, including a new current sequential journey, against the unchanged b1 binary: 13/13 PASS, process exit 0, full release gate satisfied, hashes unchanged before and after. Current status: **Z8.1 PACKAGED BASELINE RESTORED — UPGRADE, SECURITY AND INSTALL ACCEPTANCE PENDING.** The sections below are the historical first report; where the follow-up supersedes a statement, an "Update" note says so and the original text is kept.
 
 This is not an internal-release approval. Nothing was pushed, merged, tagged, signed, published or installed. Z8.2–Z8.5 were not started. Spec: [Z8_1_SPEC.md](Z8_1_SPEC.md). Plan and decisions: [Z8_PLAN.md](Z8_PLAN.md). Audit record: [Z8_DELTA_AUDIT.md](Z8_DELTA_AUDIT.md) (unchanged). Raw evidence: [evidence/](evidence/).
 
@@ -133,7 +135,7 @@ Same source commit (clean), lockfiles, toolchain and build environment; built se
 - Installer: different hashes and sizes (149,891,508 vs 149,890,252 bytes).
 - Identical in both builds: the embedded identity, notices, default and provider configs, the `glm/` agent bundle tree (32 files) and the `tools/` tree (8 files), and 84 of 86 files in `win-unpacked`.
 - Different: `ZCode Graph.exe` (same size; **62 bytes** differ, in one contiguous 64-byte region — consistent with the embedded ASAR integrity digest, since the asar differs; not further verified) and `resources/app.asar` (same size).
-- Inside `app.asar` (27,573 members): 27,562 are byte-identical. **9 members differ**: four `out/.*-build-ready` marker files and `out/metadata/build-meta.json` (ISO timestamps), and `out/host/index.js`, `out/host/tasksStorageWorker.js`, `out/main/index.js`, `out/main/storageScanWorker.js`. In addition **11 chunk files exist under different content-hash names** in each build. After replacing `chunk-XXXXXXXX` name tokens and ISO timestamps with placeholders, all 9 differing members and all 11 renamed chunks become identical (11/11 paired). So every measured difference reduces to the bundler's chunk filename hashes plus embedded timestamps. Why the chunk hashes change between runs was not investigated.
+- Inside `app.asar` (27,573 members): 27,562 are byte-identical. **9 members differ**: _(Update: this line mis-stated the count — 27,562 is the number of paths present in both builds, which includes the 9 changed ones. The reconciled, disjoint accounts are 27,553 byte-identical + 9 changed same-path + 11 only in each build = 27,573; see follow-up section 6 and [build-comparison.accounting.json](evidence/packaged-followup/build-comparison.accounting.json).)_ four `out/.*-build-ready` marker files and `out/metadata/build-meta.json` (ISO timestamps), and `out/host/index.js`, `out/host/tasksStorageWorker.js`, `out/main/index.js`, `out/main/storageScanWorker.js`. In addition **11 chunk files exist under different content-hash names** in each build. After replacing `chunk-XXXXXXXX` name tokens and ISO timestamps with placeholders, all 9 differing members and all 11 renamed chunks become identical (11/11 paired). So every measured difference reduces to the bundler's chunk filename hashes plus embedded timestamps. Why the chunk hashes change between runs was not investigated.
 - The first pair (`a1`, commit `da3a3a8`) shows the same pattern ([attempt 1](evidence/build-comparison.attempt1.json)).
 - The packaging toolchain was not changed to remove these differences.
 
@@ -147,11 +149,15 @@ Existing detached packaged smoke: the whole `win-unpacked` tree copied to a temp
 | `telemetry-canary` (new)                                      | **PASS**: ARMS, warehouse and OTLP variables pointed at loopback canary paths; **0 hits**, ARMS initialization not attempted |
 | `no-provider`, `z1-literal-compatibility`, the 8 `z2-*` cases | **FAIL** — see below                                                                                                         |
 
+_Update: the ten failures are described more accurately as "blocked at stale harness navigation; downstream behavior not exercised". After the drivers were repaired, all of them passed against this same binary — see [the follow-up](Z8_1_PACKAGED_FOLLOWUP.md). The paragraph below is the original text._
+
 **The ten failures are a stale test harness, not a product failure, and they are a release blocker for the CI gate.** These drivers (`native-smoke.mjs` graph mode, `z2-z1-regression.mjs`, `z2-native-helpers.mjs`) reach the Graph editor with old test IDs (`graph-name`, `graph-upgrade`) that exist in the UI but sit behind the Design tab introduced by UX-M1–M4; the drivers never switch tabs, so they time out after 30 s. The elements exist (`GraphDesignPanel.tsx`, `GraphAddNodes.tsx`). The UX milestones restored other native drivers but not these. The release workflow runs this smoke and publishes only if it passes, so the current HEAD **cannot be published through that workflow** until these drivers are updated. This was not fixed in Z8.1 (it is Z8.4 harness work); the failures are retained as evidence.
 
-Telemetry positive control (development build, ordinary non-Graph flavor, same method, ARMS endpoint omitted — with it set, the ARMS SDK throws "Failed to get 'userData' path" in this harness and startup stalls; that is upstream behavior, observed only in the dev harness): **13 hits** (this run: all to `/telemetry-canary/report`; an earlier control run also showed the OTLP metrics path). The canary method therefore can see telemetry, and the Graph package produced none for the same inherited settings. [Control summary](evidence/telemetry-control.dev.json). Scope: three inherited-setting paths only; not a claim of zero egress.
+Telemetry positive control (development build, ordinary non-Graph flavor, same method, ARMS endpoint omitted — with it set, the ARMS SDK throws "Failed to get 'userData' path" in this harness and startup stalls; that is upstream behavior, observed only in the dev harness): **13 hits** (this run: all to `/telemetry-canary/report`; an earlier control run also showed the OTLP metrics path). The canary method therefore can see telemetry, and the Graph package produced none for the same inherited settings. _(Update: that sentence over-generalized. Per path, the positive control ran successfully only for the warehouse/report path; the OTLP control was seen in two early runs and not reproduced in later ones, and no ARMS control produced traffic. See follow-up section 7 and [telemetry-positive-controls.json](evidence/packaged-followup/telemetry-positive-controls.json).)_ [Control summary](evidence/telemetry-control.dev.json). Scope: three inherited-setting paths only; not a claim of zero egress.
 
 ## 8. Enabled versus verified (from the manifest)
+
+_Update: the `Packaged evidence` column below is the original manifest's record (two packaged cases). The current packaged record for b1 is the generated supplement and the derived [capability-coverage.json](evidence/packaged-followup/capability-coverage.json); both are summarized in follow-up section 8. The original manifest is unchanged._
 
 `packageVerified` lists only packaged-run cases that passed; `devVerified` points to development documents, unchanged by Z8.1.
 
@@ -182,7 +188,7 @@ Telemetry positive control (development build, ordinary non-Graph flavor, same m
 
 Blockers before any internal release (not new work for Z8.1, but now known):
 
-1. **Packaged harness is stale against the UX-M1–M4 UI** (10 of 12 packaged cases fail); the CI release gate would block publication. Needed in Z8.4 at the latest.
+1. ~~Packaged harness is stale against the UX-M1–M4 UI~~ _(Update: resolved by the follow-up — drivers repaired, 13/13 packaged cases pass on b1. Original text kept for the record: 10 of 12 packaged cases failed and the CI gate would have blocked publication.)_
 2. The installer has never been run: install, upgrade, uninstall, rollback and OS side effects are all unverified.
 3. Real-profile upgrade fixtures (z2.2/z7.5-produced data) do not exist; only Z1 has a real historical record (Z8.2).
 4. Default credential-key derivation (`platform:homedir:username`, or `ZCODE_CREDENTIAL_SECRET`) is a named **Z8.3 security decision**; it is not OS-protected storage and no credential migration is authorized.

@@ -74,3 +74,13 @@ All items in §7 pass or are reported with the exact reason; the package inspect
 - **Validation runner** (`run-validation.mjs`) records commands, exit codes, counts and logs, keeps failed attempts, and includes a **scoped format check**: `pnpm fmt:check` flags nearly every file in a Windows checkout because oxfmt prefers CRLF there, so the runner formats LF copies of the files this milestone changed and compares ignoring CR. The audit record is excluded from reformatting.
 - **Upstream identity check** (`upstream-identity-check.mjs`) regenerates the path-level comparison; its output is kept at `evidence/upstream-identity.json`.
 - **Scan-exception format.** An exception is one rule + one exact file + exact matched texts with maximum counts + a written reason; the private-address rule ignores digits inside longer numbers (an SVG path coordinate was a false positive).
+
+## 11. Packaged-baseline follow-up (approved after the first report)
+
+Scope: harness, tooling, evidence and docs only; the b1 binary is not rebuilt. See [Z8_1_PACKAGED_FOLLOWUP.md](Z8_1_PACKAGED_FOLLOWUP.md). Contract:
+
+- Packaged drivers reach the editor through the real Workflows destination (`graph-view-design`) and select a run before inspecting its recovery; no assertion is weakened and legacy scenarios keep their legacy data.
+- One current sequential journey runs in the packaged app by reusing the existing reviewer journey (`reviewer-native.mjs`, packaged mode); the driver never approves the final gate, seeds artifacts or runs checks itself.
+- Suite semantics live in `packaged-suite.mjs`: only a complete suite with every case passing satisfies the full release gate; subsets are labelled and written separately; any failed or never-run selected case yields a nonzero exit, including under keep-going; earlier results are archived, never overwritten.
+- `run-packaged-acceptance.mjs` verifies the package hashes against the unchanged manifest before and after, records the real process exit code, build-source and harness-source commits separately, and writes a generated `PACKAGED_VALIDATION_SUPPLEMENT.json` that points at the manifest by hash. Nothing is written into a manifest.
+- Evidence accounting uses retained comparison data only (`reconcile-comparison.mjs`); raw and normalized comparisons stay separate; the executable integrity region is read directly (`verify-asar-integrity.mjs`).
