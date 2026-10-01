@@ -18,4 +18,11 @@ export const packagedCases = [
     script: "z2-native-smoke.mjs",
     args: [`--scenario=${scenario}`],
   })),
+  // 当前的顺序工程旅程（内置 generic v2 模板、已保存的 Node Build/Test 检查、原生 Read/Edit、
+  // Graph Tool 执行、严格 reviewer JSON）。最终人工门保持待定，不自动批准。
+  {
+    name: "sequential-engineering-reviewer",
+    script: "reviewer-native.mjs",
+    args: ["--scenario=pass"],
+  },
 ];

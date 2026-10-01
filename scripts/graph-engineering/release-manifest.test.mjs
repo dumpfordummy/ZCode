@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { createRequire } from "node:module";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { expected, syntheticPackage } from "./package-fixture.mjs";
 import {
   buildCapabilityTable,
   buildEmbeddedIdentity,
@@ -22,7 +22,6 @@ import {
 } from "./package-inspect.mjs";
 
 const root = path.resolve(import.meta.dirname, "../..");
-const requireFromDesktop = createRequire(path.join(root, "packages/desktop/package.json"));
 
 test("side-by-side output directories are restricted to dist-graph names", () => {
   assert.equal(resolveDistDirName(undefined), "dist-graph");
@@ -169,52 +168,6 @@ test("scan exceptions must be narrow and explained", () => {
   ])
     assert.throws(() => validateExceptions([bad]));
 });
-
-async function syntheticPackage(directory, { leak }) {
-  const unpacked = path.join(directory, "win-unpacked");
-  const resources = path.join(unpacked, "resources");
-  const app = path.join(directory, "app-source");
-  await mkdir(path.join(app, "out/main"), { recursive: true });
-  await mkdir(path.join(resources, "glm"), { recursive: true });
-  await mkdir(path.join(resources, "config/provider"), { recursive: true });
-  await writeFile(
-    path.join(app, "package.json"),
-    JSON.stringify({
-      name: "zcode",
-      main: "out/main/graph-entry.mjs",
-      version: "3.14.3-z8.1",
-      zcodeProductFlavor: "graph",
-    }),
-  );
-  await writeFile(path.join(app, "out/main/graph-entry.mjs"), leak ? `// ${leak}\n` : "// entry\n");
-  await writeFile(path.join(app, "out/main/graph-profile.mjs"), "// profile\n");
-  await requireFromDesktop("@electron/asar").createPackage(app, path.join(resources, "app.asar"));
-  await writeFile(path.join(unpacked, "ZCode Graph.exe"), "MZ");
-  await writeFile(path.join(resources, "THIRD-PARTY-NOTICES.md"), "notices");
-  await writeFile(path.join(resources, "icon.png"), "png");
-  await writeFile(path.join(resources, "config/default.json"), "{}");
-  await writeFile(path.join(resources, "config/provider/zcode-builtin.json"), "{}");
-  await writeFile(path.join(resources, "glm/zcode.cjs"), "// agent\n");
-  await writeFile(
-    path.join(resources, "graph-build-identity.json"),
-    JSON.stringify({
-      version: "3.14.3-z8.1",
-      product: { productName: "ZCode Graph", appId: "dev.dumpfordummy.zcode.graph" },
-      capabilityPolicy: { parallel: { mode: "disabled" }, automaticTelemetry: { enabled: false } },
-    }),
-  );
-}
-const expected = {
-  appId: "dev.dumpfordummy.zcode.graph",
-  resources: [
-    "graph-build-identity.json",
-    "THIRD-PARTY-NOTICES.md",
-    "config/default.json",
-    "config/provider/zcode-builtin.json",
-    "icon.png",
-    "glm/zcode.cjs",
-  ],
-};
 
 test("package inspection passes a clean synthetic package and fails on a planted leak", async () => {
   const clean = await mkdtemp(path.join(tmpdir(), "graph-inspect-clean-"));

@@ -182,8 +182,18 @@ export async function addBinding(window, alias, source, index) {
   await selectValue(window, `graph-binding-source-${index}`, source);
 }
 
-export async function createSequentialGraph(window, summary) {
+/**
+ * UX-M1 起 Graph 面板默认进入「运行 / 新建运行」；设计表单（名称、节点、保存、Run）在 Workflows
+ * 目的地（`graph-view-design`）。老场景要证明的是设计、保存与运行本身，所以这里只补上导航，
+ * 不改变任何断言：打开面板，再切到设计目的地。
+ */
+export async function openGraphDesign(window) {
   await window.getByTestId("graph-engineering-open").click();
+  await window.getByTestId("graph-view-design").click();
+}
+
+export async function createSequentialGraph(window, summary) {
+  await openGraphDesign(window);
   await window.getByTestId("graph-upgrade").click();
   // Guided 模式为默认值且不渲染 instruction-mode 等高级控件；切换到 Advanced 后才能操作。
   await window.getByTestId("graph-editor-advanced").click();

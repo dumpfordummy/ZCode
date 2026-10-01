@@ -40,6 +40,8 @@ const SUITES = {
         "scripts/graph-engineering/acceptance-paths.test.mjs",
         "scripts/graph-engineering/z2-provider-fixture.test.mjs",
         "scripts/graph-engineering/release-manifest.test.mjs",
+        "scripts/graph-engineering/package-evidence.test.mjs",
+        "scripts/graph-engineering/packaged-suite.test.mjs",
       ],
     },
     {
@@ -132,7 +134,11 @@ async function scopedFormat(step) {
   const nonconforming = [];
   for (const [file, text] of original) {
     const formatted = (await readFile(path.join(scratch, file), "utf8")).replace(/\r\n/g, "\n");
-    if (formatted !== text) nonconforming.push(file);
+    if (formatted !== text) {
+      nonconforming.push(file);
+      // 显式开启时把格式化结果写回（仅限本里程碑改动的文件，LF）；默认只检查。
+      if (process.env.Z8_FORMAT_FIX === "1") await writeFile(path.join(root, file), formatted);
+    }
   }
   const log = path.join(outputDirectory, `${suite}-${step.id}-${Date.now()}.log`);
   await writeFile(

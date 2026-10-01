@@ -20,11 +20,10 @@ import { proveReviewerNative } from "./reviewer-native-proof.mjs";
 
 const scenario = process.argv.find((arg) => arg.startsWith("--scenario="))?.slice(11) ?? "pass";
 assert.ok(SCENARIOS.includes(scenario));
-assert.equal(
-  process.env.Z1_PACKAGED_EXE,
-  undefined,
-  "Use only the newly built isolated application.",
-);
+// Z8.1 后续：同一个旅程也可以对打包应用运行（Z1_PACKAGED_EXE，未改动的入口）。打包运行是基线验收，
+// 不做 UX 审计（缩放、截图矩阵、检查编辑），其余断言与开发运行完全相同。
+const packagedExe = process.env.Z1_PACKAGED_EXE;
+const packaged = Boolean(packagedExe);
 const isolation = await createIsolation({
   fixtureFactory: (workspace) => startZ6Fixture(workspace, scenario, reviewerNativeResponse),
 });
@@ -37,31 +36,64 @@ const summary = {
   assertions: [],
   notRun: ["Live model adherence", "Final human approval", "Publication", "Z8"],
 };
-const evidence = path.join(
-  root,
-  "docs/graph-engineering/ux-audit/evidence",
-  `${scenario}-${path.basename(isolation.home)}`,
-);
+const evidence = packaged
+  ? path.join(isolation.home, "evidence")
+  : path.join(
+      root,
+      "docs/graph-engineering/ux-audit/evidence",
+      `${scenario}-${path.basename(isolation.home)}`,
+    );
 await mkdir(evidence, { recursive: true });
 console.error(`Reviewer ${scenario}: ${isolation.home}`);
 let window, failure;
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
 try {
-  const renderer = (await readdir(path.join(root, "packages/desktop/out/renderer/assets"))).filter(
-    (file) => file.endsWith(".js"),
-  );
-  summary.testedBuild = await Promise.all(
-    [
-      "apps/zcode-cli/packages/cli/dist/zcode.cjs",
-      "packages/desktop/out/main/index.js",
-      "packages/desktop/out/host/index.js",
-      "packages/desktop/out/preload/index.cjs",
-      ...renderer.map((file) => `packages/desktop/out/renderer/assets/${file}`),
-    ].map(async (file) => ({ file, sha256: hash(await readFile(path.join(root, file))) })),
-  );
+  if (packaged) {
+    // 记录被测二进制自己的哈希（与发布清单中的组件哈希逐项可比），不是开发输出。
+    const resources = path.join(path.dirname(packagedExe), "resources");
+    summary.testedBuild = await Promise.all(
+      [
+        [path.basename(packagedExe), packagedExe],
+        ["resources/app.asar", path.join(resources, "app.asar")],
+        ["resources/graph-build-identity.json", path.join(resources, "graph-build-identity.json")],
+      ].map(async ([name, file]) => ({ file: name, sha256: hash(await readFile(file)) })),
+    );
+  } else {
+    const renderer = (
+      await readdir(path.join(root, "packages/desktop/out/renderer/assets"))
+    ).filter((file) => file.endsWith(".js"));
+    summary.testedBuild = await Promise.all(
+      [
+        "apps/zcode-cli/packages/cli/dist/zcode.cjs",
+        "packages/desktop/out/main/index.js",
+        "packages/desktop/out/host/index.js",
+        "packages/desktop/out/preload/index.cjs",
+        ...renderer.map((file) => `packages/desktop/out/renderer/assets/${file}`),
+      ].map(async (file) => ({ file, sha256: hash(await readFile(path.join(root, file))) })),
+    );
+  }
   const files = await prepareReviewerFixture(isolation);
   window = await isolation.launch();
-  await instantiateReviewer(isolation, window, summary, scenario === "pass");
+  if (packaged) {
+    summary.packagedIdentity = await isolation.app.evaluate(({ app }) => ({
+      name: app.getName(),
+      isPackaged: app.isPackaged,
+      version: app.getVersion(),
+      userData: app.getPath("userData"),
+      home: app.getPath("home"),
+    }));
+    assert.equal(summary.packagedIdentity.name, "ZCode Graph");
+    assert.equal(summary.packagedIdentity.isPackaged, true);
+    assert.equal(
+      summary.packagedIdentity.userData,
+      isolation.graphProfile.env.ZCODE_DESKTOP_USER_DATA_DIR,
+    );
+    assert.equal(summary.packagedIdentity.home, isolation.graphProfile.env.HOME);
+    summary.assertions.push(
+      "Uninstrumented packaged ZCode Graph (isPackaged) uses its own home and Electron profile; test-environment overrides are explicit and this is not production network-egress acceptance",
+    );
+  }
+  await instantiateReviewer(isolation, window, summary, scenario === "pass" && !packaged);
   await startNativeTemplate(isolation, window, summary);
   const run = await driveUntil(isolation, window, summary, (value) =>
     ["Failed", "WaitingForApproval", "NeedsHuman"].includes(value.status),
@@ -89,7 +121,13 @@ try {
       window,
       run.nodeAttempts.find((item) => item.nodeId === "reviewer"),
     );
-  if (["pass", "prose-fence", "unbound-report"].includes(scenario))
+  if (packaged) {
+    // 最终人工门必须仍在等待：本场景不批准它。
+    const screenshot = path.join(isolation.home, `packaged-reviewer-${scenario}.png`);
+    await window.evaluate(() => document.fonts.ready);
+    await window.screenshot({ path: screenshot });
+    summary.screenshots.push(screenshot);
+  } else if (["pass", "prose-fence", "unbound-report"].includes(scenario))
     await captureReviewerSizes(
       isolation,
       window,
@@ -108,9 +146,14 @@ try {
       .locator("body")
       .innerText()
       .catch(() => "Unavailable");
-    await captureReviewerSizes(isolation, window, summary, `failed-attempt-${scenario}`).catch(
-      () => {},
-    );
+    if (packaged) {
+      const screenshot = path.join(isolation.home, `packaged-reviewer-failure-${scenario}.png`);
+      await window.screenshot({ path: screenshot }).catch(() => {});
+      summary.screenshots.push(screenshot);
+    } else
+      await captureReviewerSizes(isolation, window, summary, `failed-attempt-${scenario}`).catch(
+        () => {},
+      );
   }
 } finally {
   summary.status = failure ? "FAIL" : "PASS";
@@ -145,6 +188,12 @@ try {
         status: summary.status,
         scenario,
         evidence,
+        home: isolation.home,
+        screenshots: summary.screenshots,
+        assertions: summary.assertions,
+        packagedIdentity: summary.packagedIdentity,
+        testedBuild: packaged ? summary.testedBuild : undefined,
+        finalRunStatus: summary.finalRecord?.runs.at(-1)?.status,
         runId: summary.executionReached?.runId,
         error: summary.error,
       },

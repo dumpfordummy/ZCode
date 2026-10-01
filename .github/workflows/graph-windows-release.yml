@@ -59,7 +59,7 @@ jobs:
         run: node node_modules/electron/install.js
       - name: Verify source
         run: |
-          node --test scripts/graph-engineering/distribution.test.mjs scripts/graph-engineering/publish.test.mjs scripts/graph-engineering/publish-git.test.mjs scripts/graph-engineering/acceptance-paths.test.mjs scripts/graph-engineering/z2-provider-fixture.test.mjs scripts/graph-engineering/release-manifest.test.mjs
+          node --test scripts/graph-engineering/distribution.test.mjs scripts/graph-engineering/publish.test.mjs scripts/graph-engineering/publish-git.test.mjs scripts/graph-engineering/acceptance-paths.test.mjs scripts/graph-engineering/z2-provider-fixture.test.mjs scripts/graph-engineering/release-manifest.test.mjs scripts/graph-engineering/package-evidence.test.mjs scripts/graph-engineering/packaged-suite.test.mjs
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           node --import tsx --test packages/services/src/graph-engineering/app/*.test.ts packages/services/src/graph-engineering/adapters/*.test.ts packages/services/src/zcode-agent/expectedRuntimeClient.test.ts packages/services/src/zcode-agent/runtimeRetirement.test.ts
           if ($LASTEXITCODE) { exit $LASTEXITCODE }

@@ -5,6 +5,7 @@ import { promisify } from "node:util";
 import path from "node:path";
 import { createIsolation, instruction } from "./isolation.mjs";
 import { approveNativePermissionOnce } from "./native-permission.mjs";
+import { openGraphDesign } from "./z2-native-helpers.mjs";
 import {
   COMPANION_COMPLETION,
   COMPANION_INSTRUCTION,
@@ -121,7 +122,7 @@ try {
     await window.getByTestId("v4-composer-send").click();
   } else {
     summary.stage = "edit definition";
-    await window.getByTestId("graph-engineering-open").click();
+    await openGraphDesign(window);
     await window.getByTestId("graph-name").fill("Z1 synthetic verification");
     await window.getByTestId("graph-instructions").fill(taskInstruction);
     summary.stage = "save definition";
@@ -142,7 +143,7 @@ try {
     await window.getByTestId("graph-save").click();
     await waitForSaved();
     await window.getByRole("button", { name: "Back to chat", exact: true }).click();
-    await window.getByTestId("graph-engineering-open").click();
+    await openGraphDesign(window);
     assert.equal(await window.getByTestId("graph-name").inputValue(), "Z1 synthetic verification");
     assert.equal(await window.getByTestId("graph-instructions").inputValue(), taskInstruction);
     assert.notEqual(await task.getAttribute("style"), before);
