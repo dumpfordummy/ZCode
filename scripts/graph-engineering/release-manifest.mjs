@@ -408,6 +408,10 @@ export async function buildReleaseManifest({
       distDirectory: distName,
     },
     capabilities: buildCapabilityTable({ policies, packagedCases }),
+    // 打包运行的用例结果原样列出（含失败）。没有运行则为 not-run；这里不做任何“通过”的概括。
+    packagedAcceptance: Object.keys(packagedCases).length
+      ? { status: "recorded", cases: packagedCases }
+      : { status: "not-run" },
     inspection: inspection ?? { status: "not-run" },
     validation: validation ?? { status: "not-recorded", results: [], exceptions: [] },
     reproducibility: {

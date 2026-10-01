@@ -20,7 +20,14 @@ const output = path.join(
 const detached = await mkdtemp(path.join(tmpdir(), "zcode-graph-package-"));
 await cp(path.join(output, "win-unpacked"), detached, { recursive: true });
 const results = [];
-for (const scenario of packagedCases) {
+// 默认行为不变（运行全部用例，首个失败即停止）。Z8.1 增加两个显式开关，用来在 Graph 界面驱动
+// 落后于 UX-M1–M4 时仍能如实记录每个用例的状态，而不是被第一个失败掩盖其余用例。
+const only = process.env.ZCODE_GRAPH_SMOKE_CASES?.split(",").filter(Boolean);
+const keepGoing = process.env.ZCODE_GRAPH_SMOKE_KEEP_GOING === "1";
+const unknown = (only ?? []).filter((name) => !packagedCases.some((c) => c.name === name));
+if (unknown.length) throw new Error(`Unknown packaged case(s): ${unknown.join(", ")}`);
+const failures = [];
+for (const scenario of packagedCases.filter((c) => !only || only.includes(c.name))) {
   const evidence = path.join(output, "smoke-evidence", scenario.name);
   await mkdir(evidence, { recursive: true });
   const chunks = [];
@@ -68,9 +75,14 @@ for (const scenario of packagedCases) {
   if (exitCode !== 0 || result.status !== "PASS") {
     // 失败也先保存原始合成日志和截图，避免 CI 清理临时目录后无法定位真实失败阶段。
     await cp(path.join(result.home, "native.log"), path.join(evidence, "native.log"));
-    throw new Error(`Packaged smoke exited ${exitCode}; evidence: ${evidence}`);
+    if (!keepGoing) throw new Error(`Packaged smoke exited ${exitCode}; evidence: ${evidence}`);
+    failures.push(scenario.name);
+    continue;
   }
   if (scenario.name === "ordinary-chat" && result.packagedIdentity?.version !== version)
     throw new Error(`Packaged app version does not match ${version}; evidence: ${evidence}`);
 }
-process.stdout.write(`Packaged acceptance PASS; evidence: ${output}\n`);
+if (failures.length) {
+  process.stdout.write(`Packaged acceptance FAILED cases: ${failures.join(", ")}; evidence: ${output}\n`);
+  process.exitCode = 1;
+} else process.stdout.write(`Packaged acceptance PASS; evidence: ${output}\n`);
