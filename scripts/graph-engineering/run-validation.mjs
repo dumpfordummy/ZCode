@@ -13,7 +13,7 @@ import { resolveSpawnRuntimeOptions } from "../spawn-command.mjs";
 const root = path.resolve(import.meta.dirname, "../..");
 const [outputDirectory, suite = "emitting"] = process.argv.slice(2);
 if (!outputDirectory)
-  throw new Error("usage: run-validation.mjs <output-dir> [emitting|tests|baseline]");
+  throw new Error("usage: run-validation.mjs <output-dir> [emitting|tests|baseline|assemble]");
 
 const services = [
   "packages/services/src/graph-engineering/app/*.test.ts",
@@ -195,6 +195,74 @@ function run(step) {
       });
     });
   });
+}
+
+// 清单要引用的验证摘要：每个检查取最近一次结果，并如实保留失败的尝试数量与明确的未运行项。
+const NOT_RUN = [
+  "Installing the NSIS installer anywhere (install, upgrade, uninstall, rollback)",
+  "Production-environment network-egress measurement of the packaged app (Z8.3)",
+  "Native Feedback uploader review (Z8.3)",
+  "Code signing and signing reputation",
+  "Packaged acceptance of Z3-Z7 and UX-M1-M4 behavior (development-mode evidence only)",
+  "Live-provider, company-project and mobile/remote/non-Windows runs",
+  "Fork/Join (disabled in the package; Z7-A12 remains FAIL)",
+];
+async function assemble() {
+  const exec = promisify(execFile);
+  const git = async (...args) => (await exec("git", args, { cwd: root })).stdout.trim();
+  const attempts = JSON.parse(
+    await readFile(path.join(outputDirectory, "validation-attempts.json"), "utf8"),
+  );
+  const latest = new Map();
+  for (const attempt of attempts)
+    for (const r of attempt.results)
+      latest.set(r.id, { ...r, suite: attempt.suite, at: attempt.at });
+  const results = [...latest.values()];
+  const failedAttempts = attempts
+    .flatMap((a) => a.results)
+    .filter((r) => r.status === "FAIL").length;
+  const blocking = results.filter((r) => r.status !== "BASELINE-EXCEPTION");
+  const document = {
+    status: blocking.every((r) => r.status === "PASS") ? "PASS" : "FAIL",
+    sourceCommit: await git("rev-parse", "HEAD"),
+    sourceDirty: (await git("status", "--porcelain=v1", "--untracked-files=all")).length > 0,
+    results: results.map(
+      ({ id, suite, command, cwd, exitCode, status, durationMs, counts, at }) => ({
+        id,
+        suite,
+        command,
+        cwd,
+        exitCode,
+        status,
+        durationMs,
+        counts,
+        at,
+      }),
+    ),
+    retainedFailedAttempts: failedAttempts,
+    exceptions: [
+      ...results
+        .filter((r) => r.status === "BASELINE-EXCEPTION")
+        .map((r) => ({
+          id: r.id,
+          kind: "baseline",
+          counts: r.counts,
+          note: "Pre-existing failure re-measured on this checkout; not hidden and not suppressed.",
+        })),
+      ...NOT_RUN.map((what) => ({ kind: "not-run", what })),
+    ],
+  };
+  await writeFile(
+    path.join(outputDirectory, "manifest-validation.json"),
+    `${JSON.stringify(document, null, 2)}
+`,
+  );
+  process.stdout.write(`${document.status} assembled ${results.length} checks
+`);
+}
+if (suite === "assemble") {
+  await assemble();
+  process.exit(0);
 }
 
 await mkdir(outputDirectory, { recursive: true });
