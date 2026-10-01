@@ -125,22 +125,24 @@ All with disposable synthetic or copied data, in `packages/services/src/graph-en
 
 `run-packaged-acceptance.mjs 3.14.3-z8.2 --dist-dir dist-graph-z82`: **full suite, 13 passed, 0 failed, 0 not run**, smoke exit 0, `satisfiesFullReleaseGate: true`; package hashes verified before and after and equal. Cases: ordinary-chat, no-provider, telemetry-canary, z1-literal-compatibility, z2-complete, z2-question, z2-cancel-question, z2-cancel-permission, z2-cancel-progress, z2-restart-interrupted, z2-restart-permission, z2-persistence-recovery, sequential-engineering-reviewer (the current reviewer journey). Harness commit `bd62acf` (clean), build commit `8188a88`. [package/](evidence/z8-2/package/).
 
-## 8. Validation (final, on `4da46c0` plus doc-only and trivial lint edits; see note)
+## 8. Validation (final, on `a5c643f`, clean tree)
 
-| Check                                              | Result                                                                                                                               |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `pnpm typecheck`                                   | PASS                                                                                                                                 |
-| `pnpm lint`                                        | PASS, 0 errors, 79 warnings at `4da46c0` (75 at `8188a88`; 4 came from the new matrix script and were removed afterwards — see note) |
-| `pnpm architecture:check --changed`                | PASS                                                                                                                                 |
-| Script tests                                       | 65 passed, 0 failed                                                                                                                  |
-| Graph-service tests                                | 407 passed, 0 failed, 2 skipped (pre-existing skips)                                                                                 |
-| Services/registry tests                            | 17 passed                                                                                                                            |
-| UI tests                                           | 227 passed                                                                                                                           |
-| Scoped format check                                | PASS, 81 files, 0 nonconforming (fixtures excluded by design)                                                                        |
-| **Baseline exception** CLI lint (`apps/zcode-cli`) | exit 1 (53 warnings, 85 errors this run; counts vary per run) — not cleaned up                                                       |
-| **Baseline exception** `pnpm fmt:check`            | exit 1 (4,176 flagged; Windows CRLF noise) — not cleaned up                                                                          |
+Run by `run-validation.mjs` in the documented toolchain shell (Node 24.14.0, pnpm 10.33.2, `ZCODE_ENV=test`); source recorded `dirty: false`. [validation.json](evidence/z8-2/validation.json), earlier attempts in [validation-attempts.json](evidence/z8-2/validation-attempts.json) and [validation-attempts.earlier-run-at-4da46c0.json](evidence/z8-2/validation-attempts.earlier-run-at-4da46c0.json).
 
-Note: after this run I removed three unused-variable warnings and one regex-style warning from `upgrade-matrix.mjs` and edited two doc lines; the final run is recorded in the section "Final validation" at the end of this file.
+| Check                                              | Result                                                                                                  |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `pnpm typecheck`                                   | PASS                                                                                                    |
+| `pnpm lint`                                        | PASS, 0 errors, 75 warnings (same as at `8188a88`)                                                      |
+| `pnpm architecture:check --changed`                | PASS                                                                                                    |
+| Script tests                                       | 65 passed, 0 failed                                                                                     |
+| Graph-service tests                                | 407 passed, 0 failed, 2 skipped (pre-existing skips)                                                    |
+| Services/registry tests                            | 17 passed                                                                                               |
+| UI tests                                           | 227 passed                                                                                              |
+| Scoped format check                                | PASS, 82 files, 0 nonconforming (historical fixtures and `evidence/` excluded by design)                |
+| **Baseline exception** CLI lint (`apps/zcode-cli`) | exit 1 (24 warnings, 31 errors this run; counts vary per run: 53/85 in an earlier run) — not cleaned up |
+| **Baseline exception** `pnpm fmt:check`            | exit 1 (4,176 flagged; Windows CRLF noise) — not cleaned up                                             |
+
+The packaged binary was built from `8188a88`; everything after it is harness, tests, fixtures, evidence and documentation (no product source), so the packaged results in section 7 describe the code that is validated here.
 
 ## 9. Mapping to Z8 acceptance IDs
 
@@ -182,7 +184,3 @@ Note: after this run I removed three unused-variable warnings and one regex-styl
 ## 12. Boundaries observed
 
 Authorized and done: exact release downloads; read-only extraction; execution of extracted old binaries in isolated temporary profiles with the loopback provider; one local `3.14.3-z8.2` build; local commits. Not done: installing any NSIS (old or new), Windows Sandbox/VM, real credentials, live provider, company project, signing, tagging, publishing, pushing, merging, Z8.3–Z8.5, retention/deletion UI, credential migration, new database or migration engine. The harness left old run homes in the system temp directory; they were moved (not deleted) to `.tmp/z8-2/old-run-homes/`. The final commit list is in `git log claude/z8-2-upgrade-recovery`.
-
-## Final validation
-
-_(filled in below after the last run)_
