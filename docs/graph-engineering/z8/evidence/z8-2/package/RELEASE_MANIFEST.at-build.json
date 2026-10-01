@@ -1,0 +1,509 @@
+{
+  "schema": "zcode-graph-release-manifest/1",
+  "product": {
+    "productName": "ZCode Graph",
+    "appId": "dev.dumpfordummy.zcode.graph",
+    "flavor": "graph"
+  },
+  "version": "3.14.3-z8.2",
+  "baseVersion": "3.14.3",
+  "platform": {
+    "os": "win32",
+    "arch": "x64"
+  },
+  "artifact": {
+    "installer": {
+      "path": "ZCode Graph-3.14.3-z8.2-win-x64.exe",
+      "sha256": "84cba5250f58cabc5f2047ea45c162f630e6f4a7f6a85c2349ce0fe69c0718dd",
+      "bytes": 149891157,
+      "signing": "unsigned"
+    },
+    "checksumFile": "SHA256SUMS.txt",
+    "unpackedHashes": "unpacked-file-hashes.json",
+    "unpackedTree": {
+      "path": "win-unpacked",
+      "files": 86,
+      "bytes": 680335595,
+      "digest": "ae8a3c7098d1e50f192abe096d5169d0a7163751f2d58687ab619d4162a2ff9c"
+    },
+    "components": {
+      "ZCode Graph.exe": {
+        "sha256": "2d9f2fe015c30ad9a95261fa957ec4bc2afa7fd9cff6e9aef0a5a2233c79dac1",
+        "bytes": 222854144
+      },
+      "resources/app.asar": {
+        "sha256": "0621516cd8fdef9dfa3b8b2f980cffc79eab7eaab2198bb936661141d5598337",
+        "bytes": 312835996
+      },
+      "resources/graph-build-identity.json": {
+        "sha256": "1fe1829bfe4efbef158736dc593e56955b51c4171ad8931c4b643c827930bd77",
+        "bytes": 1120
+      },
+      "resources/THIRD-PARTY-NOTICES.md": {
+        "sha256": "874bf7c10bdcadd0df0b50fc782f39f077669c6e41bbdbccd868409cd714dec3",
+        "bytes": 1978939
+      },
+      "resources/config/default.json": {
+        "sha256": "71e4ed4ab9fab16d6643f674272bef3557d7a0fa4133e2dd08d116117af6d723",
+        "bytes": 349
+      },
+      "resources/config/provider/zcode-builtin.json": {
+        "sha256": "c239da43e00e3e212ca874fe48a13ebbb3896ebc59ebeb28e003bd29856e38f9",
+        "bytes": 186892
+      },
+      "resources/glm/": {
+        "files": 32,
+        "bytes": 19138098,
+        "treeDigest": "35f1e7f80c41ac4eebd1a8ddf3388bf2f85d7c0c2671a2a6bbc91e9342819c83"
+      },
+      "resources/tools/": {
+        "files": 8,
+        "bytes": 8447304,
+        "treeDigest": "64defa546d9426ecf5d0be9d1ded4796e87dade03fb3076900cd115bf460ba49"
+      }
+    }
+  },
+  "source": {
+    "commit": "8188a88d817784f98326d5badc167db29b244e92",
+    "branch": "claude/z8-2-upgrade-recovery",
+    "dirty": false,
+    "dirtyPathCount": 0,
+    "dirtyPaths": [],
+    "mergeBase": "872ad960de7ec172591f7e1952f7849229f94521",
+    "contentReference": {
+      "tag": "v3.14.3",
+      "sha": "29628c9acdb81b703bbd4080c207a0e7ce5e276e",
+      "presentInRepository": true,
+      "scope": "Upstream paths changed between the merge-base and this SHA are byte-identical here, or contain the upstream change plus named fork edits (version string and README excepted). This is a path-level comparison, not a claim of whole-tree equality or of upstream ancestry."
+    },
+    "afterBuild": {
+      "dirty": true,
+      "dirtyPaths": [
+        "apps/zcode-cli/packages/node-repl-host/dist-types/browser-bridge.d.ts",
+        "apps/zcode-cli/packages/node-repl-host/dist-types/cua-bridge.d.ts",
+        "apps/zcode-cli/packages/node-repl-host/dist-types/cua-broker.d.ts",
+        "apps/zcode-cli/packages/node-repl-host/dist-types/process-lifecycle.d.ts",
+        "apps/zcode-cli/packages/node-repl-host/dist-types/result.d.ts",
+        "apps/zcode-cli/packages/node-repl-host/dist-types/runtime-bridge.d.ts",
+        "apps/zcode-cli/packages/node-repl-host/dist-types/server.d.ts",
+        "apps/zcode-cli/packages/node-repl-host/dist-types/tool-contract.d.ts",
+        "scripts/graph-engineering/isolation.mjs"
+      ]
+    }
+  },
+  "embeddedIdentity": {
+    "resource": "resources/graph-build-identity.json",
+    "sha256": "1fe1829bfe4efbef158736dc593e56955b51c4171ad8931c4b643c827930bd77"
+  },
+  "toolchain": {
+    "node": "24.14.0",
+    "pnpm": "10.33.2",
+    "electron": "41.0.3",
+    "electronBuilder": "26.8.1",
+    "zcodeCli": "0.16.9",
+    "pinned": {
+      "node": "24.14.0",
+      "pnpm": "10.33.2"
+    }
+  },
+  "protocol": {
+    "zcode": 1,
+    "v4Wire": 3
+  },
+  "lockfiles": {
+    "pnpm-lock.yaml": {
+      "sha256": "e30f59a8dbd8563bb34bd766f3391036a8858fc0a8fcd16a7604ad9308efe3d6"
+    },
+    "apps/zcode-cli/pnpm-lock.yaml": {
+      "sha256": "d4c6acd20e979070b7d5b5610a4466f8ac2b3ea4c7d6dbb785a4cf7c13531733"
+    }
+  },
+  "build": {
+    "command": "node scripts/graph-engineering/build-windows.mjs 3.14.3-z8.2 --dist-dir dist-graph-z82",
+    "environment": {
+      "ZCODE_GRAPH_DISTRIBUTION": "1",
+      "ZCODE_GRAPH_VERSION": "3.14.3-z8.2",
+      "ZCODE_ENV": "production",
+      "ZCODE_SKIP_REMOTE_ASSETS": "1",
+      "ZCODE_DESKTOP_DIST_DIR": "dist-graph-z82",
+      "CSC_IDENTITY_AUTO_DISCOVERY": "false",
+      "ZCODE_ELECTRON_RUNTIME_MIRROR": "https://github.com/electron/electron/releases/download/",
+      "ELECTRON_BUILDER_BINARIES_MIRROR": "https://github.com/electron-userland/electron-builder-binaries/releases/download/"
+    },
+    "distDirectory": "dist-graph-z82"
+  },
+  "capabilities": [
+    {
+      "id": "ordinary-chat",
+      "enabled": true,
+      "devVerified": [
+        "docs/graph-engineering/evidence/chat-summary.json",
+        "docs/graph-engineering/Z6_SPEC.md"
+      ],
+      "packageVerified": []
+    },
+    {
+      "id": "no-provider-startup",
+      "enabled": true,
+      "devVerified": [
+        "docs/graph-engineering/evidence/no-provider-summary.json"
+      ],
+      "packageVerified": []
+    },
+    {
+      "id": "sequential-graph",
+      "enabled": true,
+      "devVerified": [
+        "docs/graph-engineering/Z2_REPORT.md",
+        "docs/graph-engineering/Z6_SPEC.md"
+      ],
+      "packageVerified": []
+    },
+    {
+      "id": "build-test-checks",
+      "enabled": true,
+      "devVerified": [
+        "docs/graph-engineering/Z4_REPORT.md",
+        "docs/graph-engineering/pre-z8/U2_CONTRACT_DRAFT.md"
+      ],
+      "packageVerified": []
+    },
+    {
+      "id": "reviewer-and-repair",
+      "enabled": true,
+      "devVerified": [
+        "docs/graph-engineering/Z5_REPORT.md"
+      ],
+      "packageVerified": []
+    },
+    {
+      "id": "final-approval",
+      "enabled": true,
+      "devVerified": [
+        "docs/graph-engineering/Z3_REPORT.md"
+      ],
+      "packageVerified": []
+    },
+    {
+      "id": "workflow-library",
+      "enabled": true,
+      "devVerified": [
+        "docs/graph-engineering/ux-audit/UX_M3_WINDOWS_REPORT.md",
+        "docs/graph-engineering/Z6_SPEC.md"
+      ],
+      "packageVerified": []
+    },
+    {
+      "id": "sequential-import-export",
+      "enabled": true,
+      "devVerified": [
+        "docs/graph-engineering/ux-audit/UX_M3_WINDOWS_REPORT.md"
+      ],
+      "packageVerified": []
+    },
+    {
+      "id": "historical-pins",
+      "enabled": true,
+      "devVerified": [
+        "docs/graph-engineering/ux-audit/UX_M3_WINDOWS_REPORT.md"
+      ],
+      "packageVerified": []
+    },
+    {
+      "id": "restart-and-recovery",
+      "enabled": true,
+      "devVerified": [
+        "docs/graph-engineering/Z2_REPORT.md",
+        "docs/graph-engineering/Z3_REPORT.md",
+        "docs/graph-engineering/Z5_REPORT.md"
+      ],
+      "packageVerified": []
+    },
+    {
+      "id": "parallel-fork-join",
+      "enabled": false,
+      "policy": {
+        "mode": "disabled",
+        "source": "supported-package"
+      },
+      "devVerified": [
+        "docs/graph-engineering/Z7_SPEC.md"
+      ],
+      "packageVerified": [],
+      "note": "Z7-A12 (export/import) FAIL; not part of the supported set."
+    },
+    {
+      "id": "remote-or-mobile-graph",
+      "enabled": false,
+      "devVerified": [],
+      "packageVerified": []
+    },
+    {
+      "id": "scheduled-or-background-graph",
+      "enabled": false,
+      "devVerified": [],
+      "packageVerified": []
+    },
+    {
+      "id": "automatic-telemetry",
+      "enabled": false,
+      "devVerified": [],
+      "packageVerified": [],
+      "note": "Disabled by policy. The canary covers inherited ARMS, warehouse and OTLP settings only; no claim about all network egress."
+    }
+  ],
+  "packagedAcceptance": {
+    "status": "not-run"
+  },
+  "inspection": {
+    "status": "FAIL",
+    "report": "package-inspection.json",
+    "unexplainedHits": 2,
+    "explainedHits": 145,
+    "note": "A content scan is not evidence of zero network egress or of security isolation."
+  },
+  "validation": {
+    "status": "PASS",
+    "sourceCommit": "8188a88d817784f98326d5badc167db29b244e92",
+    "sourceDirty": false,
+    "results": [
+      {
+        "id": "typecheck",
+        "suite": "emitting",
+        "command": "pnpm typecheck",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 2321,
+        "counts": {
+          "testsPassed": null,
+          "testsFailed": null,
+          "testsSkipped": null,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        },
+        "at": "2026-10-01T08:08:58.206Z"
+      },
+      {
+        "id": "lint",
+        "suite": "emitting",
+        "command": "pnpm lint",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 410,
+        "counts": {
+          "testsPassed": null,
+          "testsFailed": null,
+          "testsSkipped": null,
+          "lintWarnings": 75,
+          "lintErrors": 0,
+          "formatFlagged": null
+        },
+        "at": "2026-10-01T08:08:58.206Z"
+      },
+      {
+        "id": "architecture",
+        "suite": "emitting",
+        "command": "pnpm architecture:check --changed",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 820,
+        "counts": {
+          "testsPassed": null,
+          "testsFailed": null,
+          "testsSkipped": null,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        },
+        "at": "2026-10-01T08:08:58.206Z"
+      },
+      {
+        "id": "script-tests",
+        "suite": "tests",
+        "command": "node --test scripts/graph-engineering/distribution.test.mjs scripts/graph-engineering/publish.test.mjs scripts/graph-engineering/publish-git.test.mjs scripts/graph-engineering/acceptance-paths.test.mjs scripts/graph-engineering/z2-provider-fixture.test.mjs scripts/graph-engineering/release-manifest.test.mjs scripts/graph-engineering/package-evidence.test.mjs scripts/graph-engineering/packaged-suite.test.mjs",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 1195,
+        "counts": {
+          "testsPassed": 65,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        },
+        "at": "2026-10-01T08:09:10.994Z"
+      },
+      {
+        "id": "graph-service-tests",
+        "suite": "tests",
+        "command": "node --import tsx --test packages/services/src/graph-engineering/app/*.test.ts packages/services/src/graph-engineering/adapters/*.test.ts packages/services/src/zcode-agent/expectedRuntimeClient.test.ts packages/services/src/zcode-agent/runtimeRetirement.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 7265,
+        "counts": {
+          "testsPassed": 391,
+          "testsFailed": 0,
+          "testsSkipped": 2,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        },
+        "at": "2026-10-01T08:09:10.994Z"
+      },
+      {
+        "id": "services-and-registry-tests",
+        "suite": "tests",
+        "command": "node --import tsx --test packages/services/test/*.test.ts apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/interaction-registry.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 953,
+        "counts": {
+          "testsPassed": 17,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        },
+        "at": "2026-10-01T08:09:10.994Z"
+      },
+      {
+        "id": "ui-tests",
+        "suite": "tests",
+        "command": "node --import tsx --test packages/ui/test/*.test.ts",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 2608,
+        "counts": {
+          "testsPassed": 227,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": null
+        },
+        "at": "2026-10-01T08:09:10.994Z"
+      },
+      {
+        "id": "format-scoped",
+        "suite": "tests",
+        "command": "oxfmt --write on LF copies of files changed since the accepted baseline; compare ignoring CR",
+        "cwd": ".",
+        "exitCode": 0,
+        "status": "PASS",
+        "durationMs": 600,
+        "counts": {
+          "filesChecked": 76,
+          "nonconforming": 0
+        },
+        "at": "2026-10-01T08:09:10.994Z"
+      },
+      {
+        "id": "cli-lint",
+        "suite": "baseline",
+        "command": "pnpm --dir apps/zcode-cli lint",
+        "cwd": ".",
+        "exitCode": 1,
+        "status": "BASELINE-EXCEPTION",
+        "durationMs": 2122,
+        "counts": {
+          "testsPassed": null,
+          "testsFailed": null,
+          "testsSkipped": null,
+          "lintWarnings": 42,
+          "lintErrors": 56,
+          "formatFlagged": null
+        },
+        "at": "2026-10-01T08:09:16.662Z"
+      },
+      {
+        "id": "format-check",
+        "suite": "baseline",
+        "command": "pnpm fmt:check",
+        "cwd": ".",
+        "exitCode": 1,
+        "status": "BASELINE-EXCEPTION",
+        "durationMs": 3376,
+        "counts": {
+          "testsPassed": null,
+          "testsFailed": null,
+          "testsSkipped": null,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": 4153
+        },
+        "at": "2026-10-01T08:09:16.662Z"
+      }
+    ],
+    "retainedFailedAttempts": 0,
+    "exceptions": [
+      {
+        "id": "cli-lint",
+        "kind": "baseline",
+        "counts": {
+          "testsPassed": null,
+          "testsFailed": null,
+          "testsSkipped": null,
+          "lintWarnings": 42,
+          "lintErrors": 56,
+          "formatFlagged": null
+        },
+        "note": "Pre-existing failure re-measured on this checkout; not hidden and not suppressed."
+      },
+      {
+        "id": "format-check",
+        "kind": "baseline",
+        "counts": {
+          "testsPassed": null,
+          "testsFailed": null,
+          "testsSkipped": null,
+          "lintWarnings": null,
+          "lintErrors": null,
+          "formatFlagged": 4153
+        },
+        "note": "Pre-existing failure re-measured on this checkout; not hidden and not suppressed."
+      },
+      {
+        "kind": "not-run",
+        "what": "Installing the NSIS installer anywhere (install, upgrade, uninstall, rollback)"
+      },
+      {
+        "kind": "not-run",
+        "what": "Production-environment network-egress measurement of the packaged app (Z8.3)"
+      },
+      {
+        "kind": "not-run",
+        "what": "Native Feedback uploader review (Z8.3)"
+      },
+      {
+        "kind": "not-run",
+        "what": "Code signing and signing reputation"
+      },
+      {
+        "kind": "not-run",
+        "what": "Packaged acceptance of Z3-Z7 and UX-M1-M4 behavior (development-mode evidence only)"
+      },
+      {
+        "kind": "not-run",
+        "what": "Live-provider, company-project and mobile/remote/non-Windows runs"
+      },
+      {
+        "kind": "not-run",
+        "what": "Fork/Join (disabled in the package; Z7-A12 remains FAIL)"
+      }
+    ]
+  },
+  "reproducibility": {
+    "status": "not-assessed",
+    "note": "Measured by compare-builds.mjs; never asserted here."
+  }
+}

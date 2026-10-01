@@ -12,12 +12,34 @@ import {
   graphReferenceSuffix,
 } from "./prompt-parts.js";
 
+/**
+ * Z8.2：指令解析契约。1 = z7.5 及更早（没有 evidence 契约后缀）；2 = 当前。
+ * 新准备的 attempt 一律写 `instructionContract: 2`；没有标记表示“旧数据、未标记”，从不写 1。
+ */
+export type GraphInstructionContract = 1 | 2;
+export const GRAPH_INSTRUCTION_CONTRACT_CURRENT = 2 satisfies GraphInstructionContract;
+
+/**
+ * 一个已冻结的 attempt 允许用哪些契约重建期望指令。标记为 2 的只能用 2（没有回退）；
+ * 未标记的数据可能由两种已知写入方产生，依次尝试 2、1，每次都要求完整、逐字相等。
+ * 未知标记值返回空数组（schema 已先行拒绝；这里是第二道失败关闭）。
+ */
+export function instructionContractsFor(attempt: {
+  instructionContract?: number;
+}): GraphInstructionContract[] {
+  if (attempt.instructionContract === undefined) return [GRAPH_INSTRUCTION_CONTRACT_CURRENT, 1];
+  return attempt.instructionContract === GRAPH_INSTRUCTION_CONTRACT_CURRENT
+    ? [GRAPH_INSTRUCTION_CONTRACT_CURRENT]
+    : [];
+}
+
 export function resolveGraphInstructions(
   task: GraphTaskNode,
   graph: GraphSequentialDefinition,
   attempts: GraphNodeAttempt[],
   artifacts: GraphResolvedBinding[] = [],
   provenance?: GraphRunProvenance,
+  contract: GraphInstructionContract = GRAPH_INSTRUCTION_CONTRACT_CURRENT,
 ) {
   const references = graphPromptReferences(graph, task.id, provenance?.references);
   if (references.some((ref) => ref.kind === "skill" && !ref.nativeName))
@@ -71,7 +93,7 @@ export function resolveGraphInstructions(
   const values = new Map(bindings.map((b) => [b.alias, b.text]));
   // 对于声明了 evidenceReferences 结构化输出的节点，把该 attempt 实际允许引用的证据
   // artifact ID 显式追加到提示中；模型只能从该清单选取，校验层据此拒绝越界引用。
-  const evidenceSuffix = graphEvidenceContractSuffix(task, bindings);
+  const evidenceSuffix = contract >= 2 ? graphEvidenceContractSuffix(task, bindings) : "";
   let length = suffix.length + evidenceSuffix.length;
   const instructions = graphInstructionParts(task.instructions)
     .map((part) => {
@@ -92,7 +114,10 @@ function graphEvidenceContractSuffix(
 ): string {
   if (task.output?.kind !== "json") return "";
   const schema = task.output.schema;
-  if (schema.type !== "object" || !Object.prototype.hasOwnProperty.call(schema.properties, "evidenceReferences"))
+  if (
+    schema.type !== "object" ||
+    !Object.prototype.hasOwnProperty.call(schema.properties, "evidenceReferences")
+  )
     return "";
   const permitted = bindings
     .filter((binding) => binding.source.kind === "artifact" && binding.artifactId)

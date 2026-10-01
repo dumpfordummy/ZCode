@@ -85,36 +85,41 @@ export class GraphState {
     }
     for (const run of record.runs) {
       if (isConfirmedTerminal(run)) continue;
+      // Z8.2：先确定“需要的对账结果”，再决定要不要写。已经处于该结果的 run 不动 updatedAt，
+      // 否则每次启动都会让记录字节变化、产生新快照，并把最早的原始快照挤出保留上限。
+      // 状态本身不能绕过检查：检查点、关口、resumeRequired 缺失或过期时仍然会变化并快照。
+      const before = JSON.stringify(run);
       const checkpoint = run.version === 5 ? routeCheckpoint(run) : undefined;
       if (checkpoint) {
         checkpoint.resumeRequired = true;
         run.status = "AwaitingContinuation";
         run.message =
           "The Host restarted at a persisted route checkpoint. Inspect and explicitly Continue; no work resumed.";
-        run.updatedAt = Math.max(run.createdAt, this.options.now());
-        interrupted = true;
-        continue;
+      } else {
+        const gate = run.version !== undefined && run.version >= 3 ? resumableGate(run) : undefined;
+        if (gate) {
+          gate.resumeRequired = true;
+          run.status = "AwaitingContinuation";
+          run.message =
+            "The owning app restarted. Continue explicitly to verify this gate; no native work has resumed.";
+        } else {
+          if (run.status === "StaleEvidence") continue;
+          // 冷恢复绝不推进后继，即使旧 turn header 看起来成功；先保留证据再显式核验。
+          run.status = "Interrupted";
+          run.message =
+            "The owning Host was interrupted. Inspect the original input; pending tasks will not be submitted automatically.";
+        }
       }
-      const gate = run.version !== undefined && run.version >= 3 ? resumableGate(run) : undefined;
-      if (gate) {
-        gate.resumeRequired = true;
-        run.status = "AwaitingContinuation";
-        run.message =
-          "The owning app restarted. Continue explicitly to verify this gate; no native work has resumed.";
-        run.updatedAt = Math.max(run.createdAt, this.options.now());
-        interrupted = true;
-        continue;
-      }
-      if (run.status === "StaleEvidence") continue;
-      // 冷恢复绝不推进后继，即使旧 turn header 看起来成功；先保留证据再显式核验。
-      run.status = "Interrupted";
+      if (JSON.stringify(run) === before) continue;
       run.updatedAt = Math.max(run.createdAt, this.options.now());
-      run.message =
-        "The owning Host was interrupted. Inspect the original input; pending tasks will not be submitted automatically.";
       interrupted = true;
     }
-    if (interrupted) await this.commit(target, record);
-    else this.records.set(key, record);
+    if (interrupted) {
+      // Z8.2：只有对既有记录的冷加载对账才会走到这里。先保存磁盘上的原始字节；保存失败则抛出，
+      // 记录不变、缓存不填充，因此没有任何后续动作（所有动作都先经过 load），重试会重新读取原记录。
+      await this.options.repository.snapshotBeforeReconcile?.(target);
+      await this.commit(target, record);
+    } else this.records.set(key, record);
     return record;
   }
   async commit(target: GraphWorkspaceTarget, record: GraphRecord): Promise<void> {

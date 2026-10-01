@@ -172,6 +172,8 @@ export interface GraphNodeAttempt {
   foregroundExecutionId?: string;
   observationEpoch?: string;
   resolvedInstructions?: string;
+  /** Z8.2：指令解析契约。仅新准备的 attempt 写 2；缺省表示旧数据（未标记）。 */
+  instructionContract?: 2;
   bindings?: GraphResolvedBinding[];
   terminalProof?: GraphTerminalProof;
   finalOutput?: GraphFinalOutput;

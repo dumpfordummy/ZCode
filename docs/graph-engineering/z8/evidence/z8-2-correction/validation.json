@@ -1,0 +1,240 @@
+{
+  "status": "PASS",
+  "sourceCommit": "a4bef48917d03053608778ae4721d87d6c5848a0",
+  "sourceDirty": false,
+  "results": [
+    {
+      "id": "typecheck",
+      "suite": "emitting",
+      "command": "pnpm typecheck",
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "durationMs": 493,
+      "counts": {
+        "testsPassed": null,
+        "testsFailed": null,
+        "testsSkipped": null,
+        "lintWarnings": null,
+        "lintErrors": null,
+        "formatFlagged": null
+      },
+      "at": "2026-10-01T09:21:48.765Z"
+    },
+    {
+      "id": "lint",
+      "suite": "emitting",
+      "command": "pnpm lint",
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "durationMs": 419,
+      "counts": {
+        "testsPassed": null,
+        "testsFailed": null,
+        "testsSkipped": null,
+        "lintWarnings": 75,
+        "lintErrors": 0,
+        "formatFlagged": null
+      },
+      "at": "2026-10-01T09:21:48.765Z"
+    },
+    {
+      "id": "architecture",
+      "suite": "emitting",
+      "command": "pnpm architecture:check --changed",
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "durationMs": 837,
+      "counts": {
+        "testsPassed": null,
+        "testsFailed": null,
+        "testsSkipped": null,
+        "lintWarnings": null,
+        "lintErrors": null,
+        "formatFlagged": null
+      },
+      "at": "2026-10-01T09:21:48.765Z"
+    },
+    {
+      "id": "script-tests",
+      "suite": "tests",
+      "command": "node --test scripts/graph-engineering/distribution.test.mjs scripts/graph-engineering/publish.test.mjs scripts/graph-engineering/publish-git.test.mjs scripts/graph-engineering/acceptance-paths.test.mjs scripts/graph-engineering/z2-provider-fixture.test.mjs scripts/graph-engineering/release-manifest.test.mjs scripts/graph-engineering/package-evidence.test.mjs scripts/graph-engineering/packaged-suite.test.mjs",
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "durationMs": 1200,
+      "counts": {
+        "testsPassed": 65,
+        "testsFailed": 0,
+        "testsSkipped": 0,
+        "lintWarnings": null,
+        "lintErrors": null,
+        "formatFlagged": null
+      },
+      "at": "2026-10-01T09:22:02.262Z"
+    },
+    {
+      "id": "graph-service-tests",
+      "suite": "tests",
+      "command": "node --import tsx --test packages/services/src/graph-engineering/app/*.test.ts packages/services/src/graph-engineering/adapters/*.test.ts packages/services/src/zcode-agent/expectedRuntimeClient.test.ts packages/services/src/zcode-agent/runtimeRetirement.test.ts",
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "durationMs": 7887,
+      "counts": {
+        "testsPassed": 425,
+        "testsFailed": 0,
+        "testsSkipped": 2,
+        "lintWarnings": null,
+        "lintErrors": null,
+        "formatFlagged": null
+      },
+      "at": "2026-10-01T09:22:02.262Z"
+    },
+    {
+      "id": "services-and-registry-tests",
+      "suite": "tests",
+      "command": "node --import tsx --test packages/services/test/*.test.ts apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/interaction-registry.test.ts",
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "durationMs": 960,
+      "counts": {
+        "testsPassed": 17,
+        "testsFailed": 0,
+        "testsSkipped": 0,
+        "lintWarnings": null,
+        "lintErrors": null,
+        "formatFlagged": null
+      },
+      "at": "2026-10-01T09:22:02.262Z"
+    },
+    {
+      "id": "ui-tests",
+      "suite": "tests",
+      "command": "node --import tsx --test packages/ui/test/*.test.ts",
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "durationMs": 2617,
+      "counts": {
+        "testsPassed": 227,
+        "testsFailed": 0,
+        "testsSkipped": 0,
+        "lintWarnings": null,
+        "lintErrors": null,
+        "formatFlagged": null
+      },
+      "at": "2026-10-01T09:22:02.262Z"
+    },
+    {
+      "id": "format-scoped",
+      "suite": "tests",
+      "command": "oxfmt --write on LF copies of files changed since the accepted baseline; compare ignoring CR",
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "durationMs": 663,
+      "counts": {
+        "filesChecked": 92,
+        "nonconforming": 0
+      },
+      "at": "2026-10-01T09:22:02.262Z"
+    },
+    {
+      "id": "cli-lint",
+      "suite": "baseline",
+      "command": "pnpm --dir apps/zcode-cli lint",
+      "cwd": ".",
+      "exitCode": 1,
+      "status": "BASELINE-EXCEPTION",
+      "durationMs": 1336,
+      "counts": {
+        "testsPassed": null,
+        "testsFailed": null,
+        "testsSkipped": null,
+        "lintWarnings": 42,
+        "lintErrors": 56,
+        "formatFlagged": null
+      },
+      "at": "2026-10-01T09:22:06.632Z"
+    },
+    {
+      "id": "format-check",
+      "suite": "baseline",
+      "command": "pnpm fmt:check",
+      "cwd": ".",
+      "exitCode": 1,
+      "status": "BASELINE-EXCEPTION",
+      "durationMs": 2869,
+      "counts": {
+        "testsPassed": null,
+        "testsFailed": null,
+        "testsSkipped": null,
+        "lintWarnings": null,
+        "lintErrors": null,
+        "formatFlagged": 4212
+      },
+      "at": "2026-10-01T09:22:06.632Z"
+    }
+  ],
+  "retainedFailedAttempts": 0,
+  "exceptions": [
+    {
+      "id": "cli-lint",
+      "kind": "baseline",
+      "counts": {
+        "testsPassed": null,
+        "testsFailed": null,
+        "testsSkipped": null,
+        "lintWarnings": 42,
+        "lintErrors": 56,
+        "formatFlagged": null
+      },
+      "note": "Pre-existing failure re-measured on this checkout; not hidden and not suppressed."
+    },
+    {
+      "id": "format-check",
+      "kind": "baseline",
+      "counts": {
+        "testsPassed": null,
+        "testsFailed": null,
+        "testsSkipped": null,
+        "lintWarnings": null,
+        "lintErrors": null,
+        "formatFlagged": 4212
+      },
+      "note": "Pre-existing failure re-measured on this checkout; not hidden and not suppressed."
+    },
+    {
+      "kind": "not-run",
+      "what": "Installing the NSIS installer anywhere (install, upgrade, uninstall, rollback)"
+    },
+    {
+      "kind": "not-run",
+      "what": "Production-environment network-egress measurement of the packaged app (Z8.3)"
+    },
+    {
+      "kind": "not-run",
+      "what": "Native Feedback uploader review (Z8.3)"
+    },
+    {
+      "kind": "not-run",
+      "what": "Code signing and signing reputation"
+    },
+    {
+      "kind": "not-run",
+      "what": "Packaged acceptance of Z3-Z7 and UX-M1-M4 behavior (development-mode evidence only)"
+    },
+    {
+      "kind": "not-run",
+      "what": "Live-provider, company-project and mobile/remote/non-Windows runs"
+    },
+    {
+      "kind": "not-run",
+      "what": "Fork/Join (disabled in the package; Z7-A12 remains FAIL)"
+    }
+  ]
+}

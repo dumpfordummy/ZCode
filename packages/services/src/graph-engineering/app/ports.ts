@@ -84,6 +84,11 @@ export interface GraphRepository {
   dispose?(): Promise<void>;
   read(target: GraphWorkspaceTarget): Promise<GraphRecord | null>;
   write(target: GraphWorkspaceTarget, record: GraphRecord): Promise<void>;
+  /**
+   * 冷加载对账会改写既有记录之前调用：保存最近一次 read 的原始磁盘字节。
+   * 失败必须抛出（对账随之中止，原记录不变）。不建模磁盘字节的测试替身可以不实现。
+   */
+  snapshotBeforeReconcile?(target: GraphWorkspaceTarget): Promise<unknown>;
 }
 export interface GraphNativeFact {
   sourceCommandId: string;

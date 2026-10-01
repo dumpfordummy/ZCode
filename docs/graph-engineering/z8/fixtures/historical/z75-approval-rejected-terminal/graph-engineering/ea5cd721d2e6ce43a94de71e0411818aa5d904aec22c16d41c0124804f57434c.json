@@ -1,0 +1,689 @@
+{
+  "version": 3,
+  "workspaceKey": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-4qdrFS\\workspace",
+  "definition": {
+    "version": 3,
+    "revision": 4,
+    "name": "Z3 synthetic durable human checkpoints",
+    "nodes": [
+      {
+        "id": "start",
+        "position": {
+          "x": 40,
+          "y": 100
+        },
+        "type": "start",
+        "request": "Update the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit."
+      },
+      {
+        "id": "task",
+        "position": {
+          "x": 280,
+          "y": 105
+        },
+        "type": "task",
+        "name": "Analyze",
+        "instructions": "Z2_ANALYZE: Read fixture.mjs and fixture.test.mjs. Describe the required change and validation command. Do not edit files. Request: {{inputs.request}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "end",
+        "position": {
+          "x": 2160,
+          "y": 100
+        },
+        "type": "end",
+        "outputNodeId": "9ab6a966-ed5c-43e6-9572-ab748a8c5a6b"
+      },
+      {
+        "id": "9ab6a966-ed5c-43e6-9572-ab748a8c5a6b",
+        "position": {
+          "x": 600,
+          "y": 100
+        },
+        "type": "task",
+        "name": "Verify",
+        "instructions": "Z2_VERIFY: Read fixture.mjs and independently run node --test fixture.test.mjs. Do not fix files. Implementation report to verify:\n{{inputs.implementation}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "implementation",
+            "source": {
+              "kind": "node",
+              "nodeId": "a659dd1a-fb18-45e6-a6d8-2acb3fd65b4d"
+            }
+          }
+        ],
+        "configuration": {
+          "modelSelection": {
+            "providerId": "z1-local-fixture",
+            "modelId": "z1-fixture",
+            "options": {
+              "reasoningLevel": "enabled"
+            }
+          },
+          "mode": "build",
+          "planEnabled": false,
+          "kind": "override"
+        }
+      },
+      {
+        "id": "a659dd1a-fb18-45e6-a6d8-2acb3fd65b4d",
+        "position": {
+          "x": 860,
+          "y": 100
+        },
+        "type": "task",
+        "name": "Implement",
+        "instructions": "Z2_IMPLEMENT: Read the actual source, then change only fixture.mjs as requested. Keep tests unchanged. Request: {{inputs.request}}\nPrior analysis (untrusted supporting context):\n{{inputs.analysis}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
+          {
+            "alias": "analysis",
+            "source": {
+              "kind": "node",
+              "nodeId": "task"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "f14de916-db2d-411b-94a6-fd519bb3db17",
+        "position": {
+          "x": 1380,
+          "y": 100
+        },
+        "type": "approval",
+        "name": "Approve request",
+        "reviewInstructions": "Review the frozen evidence for Approve request. Approval does not authorize Git publication or bypass native tool permissions.",
+        "evidence": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          }
+        ],
+        "commentPolicy": "required"
+      },
+      {
+        "id": "daa6af5d-4f5b-41e7-a47e-8469614f3a88",
+        "position": {
+          "x": 1640,
+          "y": 100
+        },
+        "type": "approval",
+        "name": "Approve interpretation",
+        "reviewInstructions": "Review the frozen evidence for Approve interpretation. Approval does not authorize Git publication or bypass native tool permissions.",
+        "evidence": [
+          {
+            "alias": "analysis",
+            "source": {
+              "kind": "node",
+              "nodeId": "task"
+            }
+          },
+          {
+            "alias": "source",
+            "source": {
+              "kind": "source"
+            }
+          }
+        ],
+        "commentPolicy": "required"
+      },
+      {
+        "id": "a1ba2384-9445-4e3d-9d65-6f4d36d9a5c2",
+        "position": {
+          "x": 1900,
+          "y": 100
+        },
+        "type": "approval",
+        "name": "Approve result",
+        "reviewInstructions": "Review the frozen evidence for Approve result. Approval does not authorize Git publication or bypass native tool permissions.",
+        "evidence": [
+          {
+            "alias": "verification",
+            "source": {
+              "kind": "node",
+              "nodeId": "9ab6a966-ed5c-43e6-9572-ab748a8c5a6b"
+            }
+          },
+          {
+            "alias": "source",
+            "source": {
+              "kind": "source"
+            }
+          }
+        ],
+        "commentPolicy": "required"
+      }
+    ],
+    "edges": [
+      {
+        "source": "a659dd1a-fb18-45e6-a6d8-2acb3fd65b4d",
+        "target": "9ab6a966-ed5c-43e6-9572-ab748a8c5a6b"
+      },
+      {
+        "source": "a1ba2384-9445-4e3d-9d65-6f4d36d9a5c2",
+        "target": "end"
+      },
+      {
+        "source": "start",
+        "target": "f14de916-db2d-411b-94a6-fd519bb3db17"
+      },
+      {
+        "source": "f14de916-db2d-411b-94a6-fd519bb3db17",
+        "target": "task"
+      },
+      {
+        "source": "task",
+        "target": "daa6af5d-4f5b-41e7-a47e-8469614f3a88"
+      },
+      {
+        "source": "daa6af5d-4f5b-41e7-a47e-8469614f3a88",
+        "target": "a659dd1a-fb18-45e6-a6d8-2acb3fd65b4d"
+      },
+      {
+        "source": "9ab6a966-ed5c-43e6-9572-ab748a8c5a6b",
+        "target": "a1ba2384-9445-4e3d-9d65-6f4d36d9a5c2"
+      }
+    ]
+  },
+  "runs": [
+    {
+      "id": "518d9b4f-e9e8-499b-92b5-856eee77222e",
+      "requestId": "dd26c87a-c21a-4bfb-a9df-29254f9fe1bf",
+      "target": {
+        "workspacePath": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-4qdrFS\\workspace"
+      },
+      "status": "Rejected",
+      "createdAt": 1790841555878,
+      "updatedAt": 1790841558705,
+      "message": "The human review was rejected; no successor will run.",
+      "version": 3,
+      "requestFingerprint": "{\"mode\":\"build\",\"modelSelection\":{\"modelId\":\"z1-fixture\",\"options\":{\"reasoningLevel\":\"enabled\"},\"providerId\":\"z1-local-fixture\"},\"planEnabled\":false,\"revision\":4,\"target\":{\"workspacePath\":\"C:\\\\Users\\\\USER\\\\AppData\\\\Local\\\\Temp\\\\zcode-graph-acceptance-4qdrFS\\\\workspace\"}}",
+      "definition": {
+        "version": 3,
+        "revision": 4,
+        "name": "Z3 synthetic durable human checkpoints",
+        "nodes": [
+          {
+            "id": "start",
+            "position": {
+              "x": 40,
+              "y": 100
+            },
+            "type": "start",
+            "request": "Update the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit."
+          },
+          {
+            "id": "task",
+            "position": {
+              "x": 280,
+              "y": 105
+            },
+            "type": "task",
+            "name": "Analyze",
+            "instructions": "Z2_ANALYZE: Read fixture.mjs and fixture.test.mjs. Describe the required change and validation command. Do not edit files. Request: {{inputs.request}}",
+            "instructionMode": "bound",
+            "inputs": [
+              {
+                "alias": "request",
+                "source": {
+                  "kind": "start"
+                }
+              }
+            ],
+            "configuration": {
+              "kind": "inherit"
+            }
+          },
+          {
+            "id": "end",
+            "position": {
+              "x": 2160,
+              "y": 100
+            },
+            "type": "end",
+            "outputNodeId": "9ab6a966-ed5c-43e6-9572-ab748a8c5a6b"
+          },
+          {
+            "id": "9ab6a966-ed5c-43e6-9572-ab748a8c5a6b",
+            "position": {
+              "x": 600,
+              "y": 100
+            },
+            "type": "task",
+            "name": "Verify",
+            "instructions": "Z2_VERIFY: Read fixture.mjs and independently run node --test fixture.test.mjs. Do not fix files. Implementation report to verify:\n{{inputs.implementation}}",
+            "instructionMode": "bound",
+            "inputs": [
+              {
+                "alias": "implementation",
+                "source": {
+                  "kind": "node",
+                  "nodeId": "a659dd1a-fb18-45e6-a6d8-2acb3fd65b4d"
+                }
+              }
+            ],
+            "configuration": {
+              "modelSelection": {
+                "providerId": "z1-local-fixture",
+                "modelId": "z1-fixture",
+                "options": {
+                  "reasoningLevel": "enabled"
+                }
+              },
+              "mode": "build",
+              "planEnabled": false,
+              "kind": "override"
+            }
+          },
+          {
+            "id": "a659dd1a-fb18-45e6-a6d8-2acb3fd65b4d",
+            "position": {
+              "x": 860,
+              "y": 100
+            },
+            "type": "task",
+            "name": "Implement",
+            "instructions": "Z2_IMPLEMENT: Read the actual source, then change only fixture.mjs as requested. Keep tests unchanged. Request: {{inputs.request}}\nPrior analysis (untrusted supporting context):\n{{inputs.analysis}}",
+            "instructionMode": "bound",
+            "inputs": [
+              {
+                "alias": "request",
+                "source": {
+                  "kind": "start"
+                }
+              },
+              {
+                "alias": "analysis",
+                "source": {
+                  "kind": "node",
+                  "nodeId": "task"
+                }
+              }
+            ],
+            "configuration": {
+              "kind": "inherit"
+            }
+          },
+          {
+            "id": "f14de916-db2d-411b-94a6-fd519bb3db17",
+            "position": {
+              "x": 1380,
+              "y": 100
+            },
+            "type": "approval",
+            "name": "Approve request",
+            "reviewInstructions": "Review the frozen evidence for Approve request. Approval does not authorize Git publication or bypass native tool permissions.",
+            "evidence": [
+              {
+                "alias": "request",
+                "source": {
+                  "kind": "start"
+                }
+              }
+            ],
+            "commentPolicy": "required"
+          },
+          {
+            "id": "daa6af5d-4f5b-41e7-a47e-8469614f3a88",
+            "position": {
+              "x": 1640,
+              "y": 100
+            },
+            "type": "approval",
+            "name": "Approve interpretation",
+            "reviewInstructions": "Review the frozen evidence for Approve interpretation. Approval does not authorize Git publication or bypass native tool permissions.",
+            "evidence": [
+              {
+                "alias": "analysis",
+                "source": {
+                  "kind": "node",
+                  "nodeId": "task"
+                }
+              },
+              {
+                "alias": "source",
+                "source": {
+                  "kind": "source"
+                }
+              }
+            ],
+            "commentPolicy": "required"
+          },
+          {
+            "id": "a1ba2384-9445-4e3d-9d65-6f4d36d9a5c2",
+            "position": {
+              "x": 1900,
+              "y": 100
+            },
+            "type": "approval",
+            "name": "Approve result",
+            "reviewInstructions": "Review the frozen evidence for Approve result. Approval does not authorize Git publication or bypass native tool permissions.",
+            "evidence": [
+              {
+                "alias": "verification",
+                "source": {
+                  "kind": "node",
+                  "nodeId": "9ab6a966-ed5c-43e6-9572-ab748a8c5a6b"
+                }
+              },
+              {
+                "alias": "source",
+                "source": {
+                  "kind": "source"
+                }
+              }
+            ],
+            "commentPolicy": "required"
+          }
+        ],
+        "edges": [
+          {
+            "source": "a659dd1a-fb18-45e6-a6d8-2acb3fd65b4d",
+            "target": "9ab6a966-ed5c-43e6-9572-ab748a8c5a6b"
+          },
+          {
+            "source": "a1ba2384-9445-4e3d-9d65-6f4d36d9a5c2",
+            "target": "end"
+          },
+          {
+            "source": "start",
+            "target": "f14de916-db2d-411b-94a6-fd519bb3db17"
+          },
+          {
+            "source": "f14de916-db2d-411b-94a6-fd519bb3db17",
+            "target": "task"
+          },
+          {
+            "source": "task",
+            "target": "daa6af5d-4f5b-41e7-a47e-8469614f3a88"
+          },
+          {
+            "source": "daa6af5d-4f5b-41e7-a47e-8469614f3a88",
+            "target": "a659dd1a-fb18-45e6-a6d8-2acb3fd65b4d"
+          },
+          {
+            "source": "9ab6a966-ed5c-43e6-9572-ab748a8c5a6b",
+            "target": "a1ba2384-9445-4e3d-9d65-6f4d36d9a5c2"
+          }
+        ]
+      },
+      "defaults": {
+        "modelSelection": {
+          "providerId": "z1-local-fixture",
+          "modelId": "z1-fixture",
+          "options": {
+            "reasoningLevel": "enabled"
+          }
+        },
+        "mode": "build",
+        "planEnabled": false
+      },
+      "plannedPath": [
+        "f14de916-db2d-411b-94a6-fd519bb3db17",
+        "task",
+        "daa6af5d-4f5b-41e7-a47e-8469614f3a88",
+        "a659dd1a-fb18-45e6-a6d8-2acb3fd65b4d",
+        "9ab6a966-ed5c-43e6-9572-ab748a8c5a6b",
+        "a1ba2384-9445-4e3d-9d65-6f4d36d9a5c2"
+      ],
+      "startInput": "Update the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit.",
+      "nodeAttempts": [
+        {
+          "nodeId": "task",
+          "attemptId": "c24e9615-7988-4fd7-b678-67c2934132f9",
+          "commandId": "cdb54e1b-186b-4663-b4d2-a7d647f62850",
+          "inputId": "cdb54e1b-186b-4663-b4d2-a7d647f62850",
+          "status": "Completed",
+          "dispatchPhase": "accepted",
+          "settings": {
+            "modelSelection": {
+              "providerId": "z1-local-fixture",
+              "modelId": "z1-fixture",
+              "options": {
+                "reasoningLevel": "enabled"
+              }
+            },
+            "mode": "build",
+            "planEnabled": false,
+            "source": "workspace"
+          },
+          "createdAt": 1790841555878,
+          "updatedAt": 1790841557615,
+          "sessionId": "sess_0e39394d-531d-4098-9769-2cbcbde071c7",
+          "runtimeIdentity": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-4qdrFS\\workspace:1:29528:agent-5d4b6ad4-31c2-4bb5-97f5-4922712afb78",
+          "foregroundExecutionId": "runtime_command_2",
+          "observationEpoch": "mup8togi-z26hl16p",
+          "resolvedInstructions": "Z2_ANALYZE: Read fixture.mjs and fixture.test.mjs. Describe the required change and validation command. Do not edit files. Request: Update the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit.",
+          "bindings": [
+            {
+              "alias": "request",
+              "source": {
+                "kind": "start"
+              },
+              "text": "Update the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit."
+            }
+          ],
+          "terminalProof": {
+            "sourceCommandId": "cdb54e1b-186b-4663-b4d2-a7d647f62850",
+            "state": "completedSuccess",
+            "logEpoch": "mup8togi-z26hl16p",
+            "seq": 75,
+            "turnId": "msg_mup8toto_19014b74-9886-41aa-9beb-fedb27206f95"
+          },
+          "finalOutput": {
+            "text": "Z2_FRESH_ANALYSIS_14fc339f-756b-4b75-8a6f-98a375fe24d3\nRead both source and unchanged test. Replace Z1_BEFORE_7391 with Z1_AFTER_7391 in fixture.mjs; validate with node --test fixture.test.mjs.",
+            "turnId": "msg_mup8toto_19014b74-9886-41aa-9beb-fedb27206f95",
+            "rowId": 6,
+            "entityId": "msg_mup8tpgh_928cbbb2-5e80-491b-8b7e-afa634fe22a2",
+            "assistantResponseId": "msg_mup8tpgh_928cbbb2-5e80-491b-8b7e-afa634fe22a2"
+          }
+        },
+        {
+          "nodeId": "a659dd1a-fb18-45e6-a6d8-2acb3fd65b4d",
+          "attemptId": "a9e338cf-07cf-465a-9e47-0f9f9faabf3b",
+          "commandId": "61d19f54-c44f-44bc-a0fe-f3b396aa52a1",
+          "inputId": "61d19f54-c44f-44bc-a0fe-f3b396aa52a1",
+          "status": "Skipped",
+          "dispatchPhase": "planned",
+          "settings": {
+            "modelSelection": {
+              "providerId": "z1-local-fixture",
+              "modelId": "z1-fixture",
+              "options": {
+                "reasoningLevel": "enabled"
+              }
+            },
+            "mode": "build",
+            "planEnabled": false,
+            "source": "workspace"
+          },
+          "createdAt": 1790841555878,
+          "updatedAt": 1790841558705
+        },
+        {
+          "nodeId": "9ab6a966-ed5c-43e6-9572-ab748a8c5a6b",
+          "attemptId": "94814703-a3f7-4992-99c3-5358b634aee6",
+          "commandId": "e11f272d-ddb7-4dfe-937c-e2e10e66a74b",
+          "inputId": "e11f272d-ddb7-4dfe-937c-e2e10e66a74b",
+          "status": "Skipped",
+          "dispatchPhase": "planned",
+          "settings": {
+            "modelSelection": {
+              "providerId": "z1-local-fixture",
+              "modelId": "z1-fixture",
+              "options": {
+                "reasoningLevel": "enabled"
+              }
+            },
+            "mode": "build",
+            "planEnabled": false,
+            "source": "node"
+          },
+          "createdAt": 1790841555878,
+          "updatedAt": 1790841558705
+        }
+      ],
+      "approvalAttempts": [
+        {
+          "nodeId": "f14de916-db2d-411b-94a6-fd519bb3db17",
+          "attemptId": "404cc0b8-31d4-43e3-8a21-4743e13ef0de",
+          "status": "Approved",
+          "createdAt": 1790841555878,
+          "updatedAt": 1790841556176,
+          "request": {
+            "id": "3c84e9d6-ad3a-4291-be4d-1652364de9d6",
+            "version": 1,
+            "runId": "518d9b4f-e9e8-499b-92b5-856eee77222e",
+            "nodeId": "f14de916-db2d-411b-94a6-fd519bb3db17",
+            "attemptId": "404cc0b8-31d4-43e3-8a21-4743e13ef0de",
+            "target": {
+              "workspacePath": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-4qdrFS\\workspace"
+            },
+            "graphDigest": "3d95dc4e780ad6194199b18d5e409772199de488f7b2845ecb4387bcb8d57336",
+            "digest": "7db27d0c8823b165babc6739aa8a51c3b44b37909dea05f8645cf87aba15b9a0",
+            "title": "Approve request",
+            "reviewText": "Review the frozen evidence for Approve request. Approval does not authorize Git publication or bypass native tool permissions.",
+            "commentPolicy": "required",
+            "successorNodeId": "task",
+            "evidence": [
+              {
+                "alias": "request",
+                "source": {
+                  "kind": "start"
+                },
+                "digest": "2953de73e23c71fe0fa7b740a5e13240daee7f6f111c271e6dded88bbd7b2e50",
+                "text": "Update the synthetic fixture to match the existing independent test. Preserve tests, stay in this workspace, and do not install dependencies or commit."
+              }
+            ],
+            "complete": true,
+            "issues": [],
+            "createdAt": 1790841555885
+          },
+          "decision": {
+            "id": "8ab9b74a-4521-425d-8d3d-1ab5a38326a3",
+            "requestId": "3c84e9d6-ad3a-4291-be4d-1652364de9d6",
+            "requestVersion": 1,
+            "requestDigest": "7db27d0c8823b165babc6739aa8a51c3b44b37909dea05f8645cf87aba15b9a0",
+            "value": "approve",
+            "comment": "Typing review notes is not a decision.",
+            "decidedAt": 1790841556176,
+            "actor": {
+              "kind": "local-user",
+              "hostSessionId": "208a212d-7242-40c9-8bcf-62c8752fc2fe"
+            }
+          },
+          "successorIntent": {
+            "id": "31abf7b2-21cf-423c-a4b8-682077ff3034",
+            "successorNodeId": "task"
+          }
+        },
+        {
+          "nodeId": "daa6af5d-4f5b-41e7-a47e-8469614f3a88",
+          "attemptId": "01e15e72-63b5-4b0f-be6e-e0e6675a11ec",
+          "status": "Rejected",
+          "createdAt": 1790841555878,
+          "updatedAt": 1790841558705,
+          "request": {
+            "id": "70e3757b-7189-4f87-aa4d-fa0f81b17347",
+            "version": 1,
+            "runId": "518d9b4f-e9e8-499b-92b5-856eee77222e",
+            "nodeId": "daa6af5d-4f5b-41e7-a47e-8469614f3a88",
+            "attemptId": "01e15e72-63b5-4b0f-be6e-e0e6675a11ec",
+            "target": {
+              "workspacePath": "C:\\Users\\USER\\AppData\\Local\\Temp\\zcode-graph-acceptance-4qdrFS\\workspace"
+            },
+            "graphDigest": "3d95dc4e780ad6194199b18d5e409772199de488f7b2845ecb4387bcb8d57336",
+            "digest": "208a6eae7a3e189cb013b5eb7ffe775b4cdaaf79a30fca9d4ae27976f30a4771",
+            "title": "Approve interpretation",
+            "reviewText": "Review the frozen evidence for Approve interpretation. Approval does not authorize Git publication or bypass native tool permissions.",
+            "commentPolicy": "required",
+            "successorNodeId": "a659dd1a-fb18-45e6-a6d8-2acb3fd65b4d",
+            "evidence": [
+              {
+                "alias": "analysis",
+                "source": {
+                  "kind": "node",
+                  "nodeId": "task"
+                },
+                "digest": "33afa6fb005270e309dd25402d95addc56027910f0bcdf25d59676ed5d28d0ac",
+                "text": "Z2_FRESH_ANALYSIS_14fc339f-756b-4b75-8a6f-98a375fe24d3\nRead both source and unchanged test. Replace Z1_BEFORE_7391 with Z1_AFTER_7391 in fixture.mjs; validate with node --test fixture.test.mjs.",
+                "sourceSessionId": "sess_0e39394d-531d-4098-9769-2cbcbde071c7",
+                "sourceInputId": "cdb54e1b-186b-4663-b4d2-a7d647f62850",
+                "sourceCommandId": "cdb54e1b-186b-4663-b4d2-a7d647f62850"
+              },
+              {
+                "alias": "source",
+                "source": {
+                  "kind": "source"
+                },
+                "digest": "eaef94791a026c4cc9634718155b4f1941dad34ae0bf3fd8dcfbc2f6225ff9b5",
+                "snapshot": {
+                  "baseline": "{\"version\":1,\"head\":\"a702d3e4e32afb36f799804d3f8ce547382e463d\",\"index\":\"8fb7271b93065caa0de21329d93a7581923a6605d54580138933f53dad832b42\",\"status\":\"84bd976d5c992c5a0f6a471b6e76f3c83f980d2f504dd5beec78f07e75b62cc5\"}",
+                  "scope": "Git changes and non-ignored untracked paths in the captured workspace; ignored and unchanged contents excluded. Limits: 64 paths, 128 KiB/text, 256 KiB/diff, 1 MiB retained content, 512 KiB/manifest.",
+                  "complete": true,
+                  "issues": [],
+                  "files": [
+                    {
+                      "path": "review-note.txt",
+                      "status": "untracked",
+                      "beforeText": "",
+                      "afterText": "Z3 synthetic untracked review note: inspect this exact snapshot.\n"
+                    }
+                  ]
+                }
+              }
+            ],
+            "complete": true,
+            "issues": [],
+            "createdAt": 1790841557852
+          },
+          "decision": {
+            "id": "2d7ec9db-8e6b-4634-abe6-6a527ebf2cc1",
+            "requestId": "70e3757b-7189-4f87-aa4d-fa0f81b17347",
+            "requestVersion": 1,
+            "requestDigest": "208a6eae7a3e189cb013b5eb7ffe775b4cdaaf79a30fca9d4ae27976f30a4771",
+            "value": "reject",
+            "comment": "Reject this exact synthetic review; no work may follow.",
+            "decidedAt": 1790841558705,
+            "actor": {
+              "kind": "local-user",
+              "hostSessionId": "208a212d-7242-40c9-8bcf-62c8752fc2fe"
+            }
+          }
+        },
+        {
+          "nodeId": "a1ba2384-9445-4e3d-9d65-6f4d36d9a5c2",
+          "attemptId": "44a5a370-8508-4de3-8385-e7469e2ee2be",
+          "status": "Skipped",
+          "createdAt": 1790841555878,
+          "updatedAt": 1790841558705
+        }
+      ]
+    }
+  ]
+}
