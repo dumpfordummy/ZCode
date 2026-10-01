@@ -39,7 +39,7 @@ export function GraphCheckCalibrationReview({
       }}
     >
       <DialogContent
-        className="max-h-[90vh] overflow-auto sm:max-w-3xl"
+        className="graph-ui max-h-[90vh] overflow-auto sm:max-w-3xl"
         data-testid="graph-check-preview"
         showCloseButton={!pending}
       >

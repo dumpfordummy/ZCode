@@ -7,6 +7,7 @@ import { GraphRunDetails } from "./GraphRunDetails.js";
 import { GraphRoutingInspector } from "./GraphRoutingInspector.js";
 import { GraphRecovery } from "./GraphRecovery.js";
 import { GraphWorkflowProvenance } from "./GraphWorkflowProvenance.js";
+import { GraphDisclosure, GraphDisclosureStack } from "./GraphDisclosure.js";
 export function GraphRunPanel({
   selectedRun,
   nodeId,
@@ -44,10 +45,14 @@ export function GraphRunPanel({
         />
       ) : null}
       {selectedRun.version !== undefined && selectedRun.provenance ? (
-        <details className="text-ui-sm" data-testid="graph-frozen-provenance">
-          <summary>{intl.formatMessage({ id: "graph.z6.provenance" })}</summary>
-          <GraphWorkflowProvenance provenance={selectedRun.provenance} />
-        </details>
+        <GraphDisclosureStack>
+          <GraphDisclosure
+            testId="graph-frozen-provenance"
+            title={intl.formatMessage({ id: "graph.z6.provenance" })}
+          >
+            <GraphWorkflowProvenance provenance={selectedRun.provenance} embedded />
+          </GraphDisclosure>
+        </GraphDisclosureStack>
       ) : null}
       {selectedRun.version !== undefined && !regionSelected ? (
         <GraphRunInspector

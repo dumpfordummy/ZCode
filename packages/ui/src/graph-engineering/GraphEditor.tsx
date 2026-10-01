@@ -198,7 +198,7 @@ export function GraphEditor({
   return (
     <div
       ref={focusRoot}
-      className={`${graphFocusClass} flex min-h-0 flex-1 flex-col gap-3 overflow-auto p-3`}
+      className={`${graphFocusClass} flex min-h-0 flex-1 flex-col gap-4 overflow-auto p-4`}
       data-view={selectedRun ? "run" : destination}
     >
       <GraphEditorNavigation
@@ -208,15 +208,19 @@ export function GraphEditor({
         conflicted={conflicted}
         runSelected={Boolean(selectedRun)}
         onSelect={go.destination}
-      />
-      <GraphContextBar
-        modelSelection={selection}
-        mode={config.draftConfig.mode}
-        recipeReadState={graph.recipeReadState}
-        onOpenChecks={() => go.destination("setup")}
+        context={
+          <GraphContextBar
+            modelSelection={selection}
+            mode={config.draftConfig.mode}
+            recipeReadState={graph.recipeReadState}
+            onOpenChecks={() => go.destination("setup")}
+          />
+        }
       />
       <GraphNeedsYou
         items={needsYou}
+        // UX-M4：正在查看的就是等待的那个运行时，横幅承载操作，条带退为安静的定位提示。
+        currentRunId={showingRuns ? selectedRun?.id : undefined}
         onGoToRun={go.goToRun}
         onOpenConversation={(item) => {
           if (item.sessionId) onOpenConversation(workspacePath, item.sessionId, workspaceIdentity);

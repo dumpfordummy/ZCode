@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import type {
   GraphParameterValue,
   GraphTemplateBindings as TemplateBindings,
@@ -20,6 +21,7 @@ import { GraphContextSection } from "./GraphContextSection.js";
 import { GraphNewRunActions } from "./GraphNewRunActions.js";
 import { useGraphTemplateText } from "./graphTemplateText.js";
 import { useGraphM1Text } from "./GraphM1Text.js";
+import { useGraphM4Text } from "./GraphM4Text.js";
 
 const normalizedBindings = (bindings: TemplateBindings): TemplateBindings => ({
   ...bindings,
@@ -42,6 +44,8 @@ export function GraphTemplateBindings({
   onLoadRecipes,
   onOpenSetup,
   allowReview = false,
+  actionsHost,
+  onOpenUse,
   onInstantiate,
 }: {
   version: GraphTemplateVersion;
@@ -64,6 +68,13 @@ export function GraphTemplateBindings({
   onOpenSetup(checkId?: string): void;
   /** "review" = Review and run; "save" = create the workflow only (explicit, no preflight). */
   allowReview?: boolean;
+  /** UX-M4: the library dialog's fixed footer. The one action bar is rendered there instead of after the form. */
+  actionsHost?: HTMLElement | null;
+  /**
+   * UX-M4 (library dialog only): switch to the Use tab, where field-level readiness lives. Absent when
+   * the form is already on screen (Use tab or New run).
+   */
+  onOpenUse?(): void;
   onInstantiate(
     parameters: Record<string, GraphParameterValue>,
     bindings: TemplateBindings,
@@ -74,6 +85,7 @@ export function GraphTemplateBindings({
   const t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
   const u = (key: string) => intl.formatMessage({ id: `graph.preZ8.${key}` });
   const m1 = useGraphM1Text();
+  const m4 = useGraphM4Text();
   const template = version.template;
   const display = useGraphTemplateText();
   const initial = useMemo<GraphTemplateFormDraft>(
@@ -111,14 +123,22 @@ export function GraphTemplateBindings({
   // 处理函数自身也检查，不依赖按钮的禁用样式。
   const occupied = Boolean(admissionReason);
   const actionsBlocked = disabled || occupied || readBlocked || errors.length > 0;
+  // 资料库页脚里的原因只描述“载入设计”这一操作，不用新建运行的审阅措辞；校验与阻止条件不变。
+  const inLibrary = Boolean(actionsHost);
   const blockedReason = disabled
     ? disabledReason || u("creationLocked")
     : occupied
-      ? admissionReason
+      ? inLibrary
+        ? m4("libraryLoadBlockedByRun")
+        : admissionReason
       : readBlocked
         ? u("readChecksFirst")
         : errors.length
-          ? m1("fieldsNeedAttention", { count: errors.length })
+          ? inLibrary
+            ? errors.length === 1
+              ? m4("libraryOneFieldNeedsUse")
+              : m4("libraryFieldsNeedUse", { count: errors.length })
+            : m1("fieldsNeedAttention", { count: errors.length })
           : undefined;
   const blockedBy = disabled
     ? "draft-lock"
@@ -181,18 +201,32 @@ export function GraphTemplateBindings({
     if (disclosure) disclosure.open = true;
     field?.querySelector<HTMLElement>("input,textarea,button")?.focus();
   };
+  const actionBar = (
+    <GraphNewRunActions
+      allowReview={allowReview}
+      blocked={actionsBlocked}
+      reason={blockedReason}
+      blockedBy={blockedBy}
+      onReview={() => onInstantiate(parameters, normalizedBindings(bindings), "review")}
+      onSave={() => onInstantiate(parameters, normalizedBindings(bindings), "save")}
+      onViewCurrentRun={onViewCurrentRun}
+      error={error}
+      errorKind={errorKind}
+      onGoToFirstField={
+        errors[0] ? (onOpenUse ? onOpenUse : () => focusIssue(errors[0]!)) : undefined
+      }
+      fieldsAction={onOpenUse ? "open-use" : "first-field"}
+    />
+  );
   return (
-    <section ref={root} className="space-y-3" data-testid="graph-template-bindings">
-      <p className="rounded-lg bg-surface p-3 text-ui-sm" data-testid="graph-template-verification">
-        {u(hasTools ? "configuredChecks" : "agentLed")}
-      </p>
+    <section ref={root} className="space-y-5" data-testid="graph-template-bindings">
       {template.parameters.map((parameter) => (
         <label
-          className="block space-y-1 text-ui-sm"
+          className="block space-y-1.5 text-ui-base"
           key={parameter.id}
           id={`graph-template-field-parameter-${parameter.id}`}
         >
-          <span>
+          <span className="font-medium">
             {display.parameter(parameter.id, parameter.label)}
             {parameter.required ? " *" : ""}
           </span>
@@ -224,7 +258,8 @@ export function GraphTemplateBindings({
             </div>
           ) : parameter.type === "string" && parameter.id === "request" ? (
             <Textarea
-              rows={4}
+              rows={5}
+              className="text-ui-base"
               data-testid={`graph-template-parameter-${parameter.id}`}
               disabled={disabled}
               value={String(parameters[parameter.id] ?? "")}
@@ -254,6 +289,9 @@ export function GraphTemplateBindings({
           )}
         </label>
       ))}
+      <p className="text-ui-sm text-foreground-subtle" data-testid="graph-template-verification">
+        {u(hasTools ? "configuredChecks" : "agentLed")}
+      </p>
       <GraphContextSection
         target={{ workspacePath, workspaceIdentity }}
         contextKey={`${workspaceKey}\u0000${templateKey}`}
@@ -266,9 +304,11 @@ export function GraphTemplateBindings({
         }
       />
       {hasTools ? (
-        <div className="space-y-1" data-testid="graph-template-checks-heading">
-          <h4 className="text-ui-base font-medium">{u("checksHeading")}</h4>
-          <p className="text-ui-sm text-foreground-subtle">{u("savedChecksNotRun")}</p>
+        <div
+          className="space-y-1 border-t border-border pt-5"
+          data-testid="graph-template-checks-heading"
+        >
+          <h4 className="text-ui-base font-semibold">{u("checksHeading")}</h4>
         </div>
       ) : null}
       {hasTools ? (
@@ -306,8 +346,11 @@ export function GraphTemplateBindings({
           />
         </label>
       ) : null}
-      <div className="space-y-1 text-ui-sm" data-testid="graph-template-step-preview">
-        <p className="font-medium">{u("workflowPreview")}</p>
+      <div
+        className="space-y-1.5 border-t border-border pt-5 text-ui-base"
+        data-testid="graph-template-step-preview"
+      >
+        <p className="font-semibold">{u("workflowPreview")}</p>
         <p className="text-foreground-subtle">
           {template.graph.nodes
             .filter((node) => "name" in node)
@@ -317,7 +360,7 @@ export function GraphTemplateBindings({
       </div>
       {errors.length ? (
         <div
-          className="space-y-1 text-ui-sm text-warning"
+          className="space-y-1 text-ui-base text-warning"
           data-testid="graph-template-unresolved"
           role="status"
         >
@@ -336,18 +379,7 @@ export function GraphTemplateBindings({
           </div>
         </div>
       ) : null}
-      <GraphNewRunActions
-        allowReview={allowReview}
-        blocked={actionsBlocked}
-        reason={blockedReason}
-        blockedBy={blockedBy}
-        onReview={() => onInstantiate(parameters, normalizedBindings(bindings), "review")}
-        onSave={() => onInstantiate(parameters, normalizedBindings(bindings), "save")}
-        onViewCurrentRun={onViewCurrentRun}
-        error={error}
-        errorKind={errorKind}
-        onGoToFirstField={errors[0] ? () => focusIssue(errors[0]!) : undefined}
-      />
+      {actionsHost ? createPortal(actionBar, actionsHost) : actionBar}
     </section>
   );
 }

@@ -101,7 +101,7 @@ export function GraphContextChip({
       data-testid={`graph-context-chip-${chip.roleId}`}
       data-role={chip.roleId}
       data-status={status.key}
-      className="flex items-start gap-2 rounded-lg border border-border bg-surface p-2"
+      className="flex items-start gap-3 rounded-lg border border-border bg-card p-3"
     >
       <Icon className="mt-0.5 size-4 shrink-0 text-foreground-subtle" aria-hidden="true" />
       <div className="min-w-0 flex-1 space-y-0.5">

@@ -69,7 +69,7 @@ export function GraphRunsDestination(props: {
   const u = (id: string) => intl.formatMessage({ id: `graph.preZ8.${id}` });
   return (
     <div
-      className="grid min-w-0 gap-3 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]"
+      className="grid min-w-0 gap-x-6 gap-y-4 lg:grid-cols-[clamp(13rem,17vw,16rem)_minmax(0,1fr)]"
       data-testid="graph-runs-layout"
     >
       <GraphRunHistory
@@ -81,7 +81,10 @@ export function GraphRunsDestination(props: {
         onNewRun={props.onNewRun}
         onSelect={props.onSelectRun}
       />
-      <div className="flex min-w-0 flex-col gap-3" data-testid="graph-runs-detail">
+      <div
+        className="mx-auto flex w-full min-w-0 max-w-5xl flex-col gap-4"
+        data-testid="graph-runs-detail"
+      >
         {confirmation ? (
           <GraphRunConfirmation
             key={`${confirmation.definition.revision}:${confirmation.provenance?.digest ?? "graph"}`}
@@ -95,7 +98,7 @@ export function GraphRunsDestination(props: {
             errorKind={admission?.kind}
           />
         ) : props.newRunPane ? (
-          <section className="space-y-3" data-testid="graph-new-run-pane">
+          <section className="mx-auto w-full max-w-3xl space-y-4" data-testid="graph-new-run-pane">
             <GraphDesignReadiness
               reason={props.draftLockReason}
               errors={[]}
@@ -127,12 +130,6 @@ export function GraphRunsDestination(props: {
           </section>
         ) : selectedRun ? (
           <>
-            {selectedRun.version !== undefined &&
-            !selectedRun.definition.nodes.some((node) => node.type === "tool") ? (
-              <p className="text-ui-sm text-foreground-subtle" data-testid="graph-run-verification">
-                {u("agentLed")}
-              </p>
-            ) : null}
             <GraphEditorSurface
               definition={props.definition}
               displayed={props.displayed}

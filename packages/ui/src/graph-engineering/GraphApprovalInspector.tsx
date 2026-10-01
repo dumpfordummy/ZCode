@@ -159,7 +159,7 @@ export function GraphApprovalInspector({
       {gate.message ? (
         <p className="break-words text-ui-sm text-foreground-subtle">{gate.message}</p>
       ) : null}
-      {blockedReason ? (
+      {blockedReason && !(request && !decision) ? (
         <p role="status" className="text-ui-sm text-warning" data-testid="graph-approval-blocked">
           {blockedReason}
         </p>
@@ -170,7 +170,6 @@ export function GraphApprovalInspector({
       {enabled.continue && command ? (
         <Button
           variant="outline"
-          size="sm"
           data-testid="graph-approval-continue"
           disabled={actions.disabled}
           onClick={() => void actions.continueApproval(command)}
@@ -179,14 +178,27 @@ export function GraphApprovalInspector({
         </Button>
       ) : null}
       {request && !decision ? (
-        <>
+        // UX-M4：最终批准的提交栏只有一个：评论、被阻止的原因与 Approve/Reject 始终在可见的粘性栏里。
+        <div
+          className="sticky -bottom-4 z-10 -mx-4 space-y-2 border-t border-border bg-background px-4 pb-4 pt-3"
+          data-testid="graph-approval-commit"
+        >
+          {blockedReason ? (
+            <p
+              role="status"
+              className="text-ui-sm text-warning"
+              data-testid="graph-approval-blocked"
+            >
+              {blockedReason}
+            </p>
+          ) : null}
           <label className="block space-y-1 text-ui-sm">
             <span>
               {t("comment")}
               {request.commentPolicy === "required" ? ` · ${t("commentRequired")}` : ""}
             </span>
             <Textarea
-              rows={3}
+              rows={2}
               maxLength={2000}
               value={retained?.comment ?? comment}
               disabled={actions.disabled || Boolean(retained) || !enabled.decide}
@@ -196,7 +208,6 @@ export function GraphApprovalInspector({
           </label>
           <div className="flex flex-wrap gap-2">
             <Button
-              size="sm"
               data-testid="graph-approval-approve"
               disabled={!allowed || Boolean(retained && retained.value !== "approve")}
               onClick={() => {
@@ -207,7 +218,6 @@ export function GraphApprovalInspector({
               {t("approve")}
             </Button>
             <Button
-              size="sm"
               variant="outline"
               data-testid="graph-approval-reject"
               disabled={!allowed || Boolean(retained && retained.value !== "reject")}
@@ -219,7 +229,7 @@ export function GraphApprovalInspector({
               {t("reject")}
             </Button>
           </div>
-        </>
+        </div>
       ) : null}
       {decision ? (
         <section

@@ -89,7 +89,11 @@ if (dialogControlPath) {
     if (intent?.fail) throw new Error(intent.fail);
     if (intent?.cancel) return { canceled: true, filePath: undefined };
     if (intent?.path) return { canceled: false, filePath: intent.path };
-    return originalShowSave.apply(electronDialog, args);
+    // 真实对话框路径：记录它何时返回以及返回了什么（UX-M3 验收用它诊断真实的另存为对话框）。
+    dialogLog(`showSaveDialog (real) options=${JSON.stringify(args.at(-1))}`);
+    const real = await originalShowSave.apply(electronDialog, args);
+    dialogLog(`showSaveDialog (real) returned ${JSON.stringify(real)}`);
+    return real;
   };
 }
 app.whenReady().then(() => {

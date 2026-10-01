@@ -173,13 +173,23 @@ function Harness() {
       <TabStoreProvider>
         <ServiceProvider services={services as never}>
           <PlatformProvider platform={platform as never}>
-            <div
-              className={`${graphFocusClass} mx-auto flex h-screen w-full flex-col bg-background text-foreground`}
-              style={{ maxWidth: 1200 }}
-            >
-              <Probe path={path} />
-              <div className="flex min-h-0 flex-1 flex-col" data-testid="graph-engineering-panel">
-                <Panel path={path} />
+            {/* 与真实应用一致的外壳：左侧是共享令牌的侧栏（不在 graph-ui 范围内），右侧是 Graph 面板。 */}
+            <div className="flex h-screen w-full bg-sidebar text-foreground">
+              <aside className="hidden w-[268px] shrink-0 bg-sidebar p-3 text-ui-base lg:block">
+                <div className="rounded-md bg-selected px-3 py-2">Graph Engineering</div>
+              </aside>
+              <div
+                className={`${graphFocusClass} graph-ui flex min-w-0 flex-1 flex-col bg-background text-foreground lg:my-1 lg:mr-1 lg:rounded-lg lg:border lg:border-border`}
+              >
+                <header className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 text-ui-base">
+                  <span>Back to chat</span>
+                  <strong>Graph Engineering</strong>
+                  <span className="text-foreground-subtle">C:/synthetic</span>
+                </header>
+                <Probe path={path} />
+                <div className="flex min-h-0 flex-1 flex-col" data-testid="graph-engineering-panel">
+                  <Panel path={path} />
+                </div>
               </div>
             </div>
           </PlatformProvider>

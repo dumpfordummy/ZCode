@@ -1,0 +1,127 @@
+{
+  "journey": "share",
+  "status": "PASS",
+  "startedAt": "2026-09-30T18:51:28.390Z",
+  "finishedAt": "2026-09-30T18:52:50.133Z",
+  "options": {
+    "scenario": "pass",
+    "locale": "en-US",
+    "dialog": true
+  },
+  "providerRequests": 7,
+  "providerErrors": [],
+  "steps": [
+    {
+      "id": "S0",
+      "title": "A Yours workflow with one version, pinned as the current design",
+      "status": "PASS",
+      "seconds": 1.1
+    },
+    {
+      "id": "S1",
+      "title": "Save current design: default target, unsaved edits and renames disclosed BEFORE confirming; preview mutates nothing",
+      "status": "PASS",
+      "seconds": 0.7
+    },
+    {
+      "id": "S2",
+      "title": "A design from a built-in: built-ins take no versions; Duplicate to edit selects the copy",
+      "status": "PASS",
+      "seconds": 1
+    },
+    {
+      "id": "S3",
+      "title": "Export: exact workflow and version, the real Windows Save dialog, cancel is neither success nor failure",
+      "status": "PASS",
+      "seconds": 2.6
+    },
+    {
+      "id": "S4",
+      "title": "Import through the real Windows Open dialog: choose and preview mutate nothing; saving is explicit",
+      "status": "PASS",
+      "seconds": 1.3
+    },
+    {
+      "id": "S5",
+      "title": "Bad files through the real Open dialog: not JSON, unsupported, secret, private path, over 256 KB, not UTF-8; 256 KB limit unchanged",
+      "status": "PASS",
+      "seconds": 69.6
+    },
+    {
+      "id": "S6",
+      "title": "A real library revision conflict: Refresh beside the error, the reviewed preview survives, the explicit retry succeeds",
+      "status": "PASS",
+      "seconds": 0.7
+    }
+  ],
+  "observations": [
+    {
+      "text": "rename disclosure",
+      "data": "The workflow will be renamed from “Share flow” to “Renamed on save”."
+    },
+    {
+      "text": "the real Save dialog (cancelled)",
+      "data": {
+        "title": "Save As",
+        "className": "#32770"
+      }
+    },
+    {
+      "text": "the real Save dialog",
+      "data": {
+        "title": "Save As",
+        "className": "#32770"
+      }
+    },
+    {
+      "text": "the real Open dialog",
+      "data": {
+        "title": "Open",
+        "className": "#32770"
+      }
+    },
+    {
+      "text": "bad file not-json.json",
+      "data": "Expected property name or '}' in JSON at position 2 (line 1 column 3)"
+    },
+    {
+      "text": "bad file unsupported.json",
+      "data": "[ { \"code\": \"invalid_value\", \"values\": [ 1 ], \"path\": [ \"version\" ], \"message\": \"Invalid input: expected 1\" } ]"
+    },
+    {
+      "text": "bad file secret.json",
+      "data": "Portable content contains a possible secret or private absolute path. Remove it and review the preview."
+    },
+    {
+      "text": "bad file private-path.json",
+      "data": "Portable content contains a possible secret or private absolute path. Remove it and review the preview."
+    },
+    {
+      "text": "bad file too-large.json",
+      "data": "Selected file exceeds the 256 KB transfer limit."
+    },
+    {
+      "text": "bad file not-utf8.json",
+      "data": "Selected file is not valid UTF-8; review the encoding and try again."
+    },
+    {
+      "text": "library conflict",
+      "data": "Workflow library revision changed; refresh before saving.\n\nRefresh library"
+    },
+    {
+      "text": "conflict error versus the pressed Save button (viewport 1280x720)",
+      "data": {
+        "errorInViewport": false,
+        "confirmInViewport": true
+      }
+    }
+  ],
+  "notRun": [],
+  "screenshots": [
+    "s-save-disclosures-1280x720.png",
+    "s-export-saved-1280x720.png",
+    "s-import-preview-1280x720.png",
+    "s-library-conflict-at-save-1280x720.png",
+    "s-library-conflict-error-1280x720.png"
+  ]
+}

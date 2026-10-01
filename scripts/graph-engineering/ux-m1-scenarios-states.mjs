@@ -163,7 +163,8 @@ const distinct = (locale) => ({
       for (const id of ["run-failed-test", "run-invalid-evidence", "run-malformed-reviewer"])
         assert.doesNotMatch(read[id].resultText, CJK);
     }
-    // 捕获的请求原文不被改写
+    // 捕获的请求原文不被改写（UX-M4：请求与结果在“请求与结果”标签里）
+    await T(page, "graph-run-tab-request").click();
     assert.match(
       await T(page, "graph-run-request").innerText(),
       /Captured request of the current run/,

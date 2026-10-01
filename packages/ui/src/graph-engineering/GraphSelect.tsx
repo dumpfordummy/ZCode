@@ -28,7 +28,7 @@ export function GraphSelect({
         <SelectTrigger aria-label={label} data-testid={testId} className="w-full">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="graph-ui">
           {options.map((option) => (
             <SelectItem
               key={option.value}

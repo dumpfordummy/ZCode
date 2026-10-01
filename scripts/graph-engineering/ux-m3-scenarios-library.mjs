@@ -15,6 +15,7 @@ import {
   openAdvanced,
   openLibrary,
   openShare,
+  openVersions,
   optionLabels,
   selectValue,
   versionRowsOf,
@@ -30,23 +31,21 @@ const sections = {
     await boot(page, host, url);
     await openLibrary(page);
     const order = await page
-      .locator(
-        '[data-testid="graph-library-dialog"] [data-section], [data-testid="graph-library-share"], [data-testid="graph-library-advanced"]',
-      )
-      .evaluateAll((items) =>
-        items.map((item) => item.getAttribute("data-section") ?? item.getAttribute("data-testid")),
-      );
+      .locator('[data-testid="graph-library-dialog"] [role="tabpanel"]')
+      .evaluateAll((items) => items.map((item) => item.getAttribute("data-testid")));
+    // UX-M4：一个对话框，左侧是工作流列表，右侧是单层标签 Versions / Use / Share / Advanced。
     assert.deepEqual(order, [
-      "workflow",
-      "versions",
-      "use",
+      "graph-library-panel-versions",
+      "graph-library-panel-use",
       "graph-library-share",
       "graph-library-advanced",
     ]);
-    const headings = await page
-      .locator('[data-testid="graph-library-dialog"] h3')
+    const tabs = await page
+      .locator('[data-testid="graph-library-dialog"] [role="tab"]')
       .evaluateAll((items) => items.map((item) => item.textContent));
-    assert.deepEqual(headings, ["Workflow", "Versions", "Use"]);
+    assert.deepEqual(tabs, ["Versions", "Use", "Share", "Advanced"]);
+    assert.equal(await T(page, "graph-library-list").count(), 1, "the workflow list");
+    assert.equal(await T(page, "graph-library-footer").count(), 1, "the fixed footer");
     assert.equal(
       await T(page, "graph-library-manage").count(),
       0,
@@ -323,6 +322,7 @@ const readOnly = {
       "the notice goes",
     );
     assert.equal(await T(page, "graph-manual-confirm").isDisabled(), false);
+    await openVersions(page);
     await T(page, "graph-library-duplicate-name").fill("Copy");
     assert.equal(await T(page, "graph-library-duplicate").isDisabled(), false);
     assert.deepEqual(mutationCalls(host), [], "nothing happened by itself");
@@ -338,6 +338,7 @@ const conflict = {
     await openLibrary(page);
     await selectValue(page, "graph-library-entry", entry.id);
     await host.library.externalChange(); // 另一窗口改了资料库
+    await openVersions(page);
     await T(page, "graph-library-duplicate-name").fill("Team release copy");
     await T(page, "graph-library-duplicate").click();
     const error = T(page, "graph-library-error");

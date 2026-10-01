@@ -5,7 +5,7 @@ import type { useGraphWorkflow } from "@/hooks/useGraphWorkflow.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphM3Text } from "./GraphM3Text.js";
 
-/** The Advanced section: the technical identities the everyday sections no longer show. */
+/** The Advanced tab: the technical identities the everyday tabs no longer show (UX-M4: a tab panel, not a disclosure). */
 export function GraphLibraryAdvanced({
   workflow,
   digest,
@@ -22,8 +22,7 @@ export function GraphLibraryAdvanced({
   const t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
   const m3 = useGraphM3Text();
   return (
-    <details className="space-y-3 text-ui-sm" data-testid="graph-library-advanced">
-      <summary className="cursor-pointer">{m3("sectionAdvanced")}</summary>
+    <div className="space-y-3 text-ui-base">
       <p className="text-foreground-subtle">{m3("advancedHelp")}</p>
       <dl className="space-y-1">
         <div>
@@ -42,7 +41,6 @@ export function GraphLibraryAdvanced({
         ) : null}
       </dl>
       <Button
-        size="sm"
         variant="outline"
         disabled={workflow.pending}
         onClick={() => void workflow.read()}
@@ -51,6 +49,6 @@ export function GraphLibraryAdvanced({
         {t("refresh")}
       </Button>
       {children}
-    </details>
+    </div>
   );
 }

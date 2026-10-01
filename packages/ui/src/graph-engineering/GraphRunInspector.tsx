@@ -9,6 +9,8 @@ import { GraphConditionInspector } from "./GraphRoutingInspector.js";
 import { GraphToolInspector } from "./GraphToolInspector.js";
 import { GraphArtifactInspector, type GraphEvidenceActions } from "./GraphArtifactInspector.js";
 import { useGraphRunText } from "./GraphRunText.js";
+import { GraphDisclosure, GraphDisclosureStack } from "./GraphDisclosure.js";
+import { GraphFacts } from "./GraphFacts.js";
 
 export function GraphRunInspector({
   run,
@@ -149,75 +151,73 @@ export function GraphRunInspector({
           {["WaitingForPermission", "WaitingForUser"].includes(attempt.status) ? (
             <p className="text-ui-sm text-foreground-subtle">{t("waitingHelp")}</p>
           ) : null}
-          <details className="text-ui-sm">
-            <summary>{u("technical")}</summary>
-            <dl className="mt-2 grid grid-cols-1 gap-1 break-all text-ui-sm">
-              <dt className="text-foreground-subtle">{t("configurationSource")}</dt>
-              <dd>
-                {attempt.settings.source === "workspace"
-                  ? t("inheritSettings")
-                  : t("overrideSettings")}
-              </dd>
-              <dt className="text-foreground-subtle">{t("configuration")}</dt>
-              <dd>
-                {attempt.settings.modelSelection.providerId} /{" "}
-                {attempt.settings.modelSelection.modelId} · {attempt.settings.mode}
-                {attempt.settings.modelSelection.options?.reasoningLevel
-                  ? ` · ${attempt.settings.modelSelection.options.reasoningLevel}`
-                  : ""}
-                {attempt.settings.planEnabled ? ` · ${t("planEnabled")}` : ""}
-              </dd>
-              <dt className="text-foreground-subtle">{t("attempt")}</dt>
-              <dd className="font-mono">{attempt.attemptId}</dd>
-              <dt className="text-foreground-subtle">{t("session")}</dt>
-              <dd className="font-mono">{attempt.sessionId ?? "—"}</dd>
-              <dt className="text-foreground-subtle">{t("input")}</dt>
-              <dd className="font-mono">{attempt.inputId}</dd>
-              <dt className="text-foreground-subtle">{t("command")}</dt>
-              <dd className="font-mono">{attempt.commandId}</dd>
-              <dt className="text-foreground-subtle">{t("runtime")}</dt>
-              <dd className="font-mono">{attempt.runtimeIdentity ?? "—"}</dd>
-              <dt className="text-foreground-subtle">{t("dispatchPhase")}</dt>
-              <dd>{attempt.dispatchPhase}</dd>
-            </dl>
-          </details>
+          <GraphDisclosureStack>
+            <GraphDisclosure title={u("technical")}>
+              <GraphFacts
+                facts={[
+                  {
+                    label: t("configurationSource"),
+                    value:
+                      attempt.settings.source === "workspace"
+                        ? t("inheritSettings")
+                        : t("overrideSettings"),
+                  },
+                  {
+                    label: t("configuration"),
+                    value: `${attempt.settings.modelSelection.providerId} / ${attempt.settings.modelSelection.modelId} · ${attempt.settings.mode}${
+                      attempt.settings.modelSelection.options?.reasoningLevel
+                        ? ` · ${attempt.settings.modelSelection.options.reasoningLevel}`
+                        : ""
+                    }${attempt.settings.planEnabled ? ` · ${t("planEnabled")}` : ""}`,
+                  },
+                  { label: t("attempt"), value: attempt.attemptId, mono: true },
+                  { label: t("session"), value: attempt.sessionId ?? "—", mono: true },
+                  { label: t("input"), value: attempt.inputId, mono: true },
+                  { label: t("command"), value: attempt.commandId, mono: true },
+                  { label: t("runtime"), value: attempt.runtimeIdentity ?? "—", mono: true },
+                  { label: t("dispatchPhase"), value: attempt.dispatchPhase },
+                ]}
+              />
+            </GraphDisclosure>
+          </GraphDisclosureStack>
           <TextEvidence
             title={t("resolvedInstructions")}
             text={attempt.resolvedInstructions ?? t("notSubmitted")}
           />
-          <details className="text-ui-sm">
-            <summary>{t("instructionTemplate")}</summary>
-            <p className="mt-2 whitespace-pre-wrap break-words">{node.instructions}</p>
-          </details>
-          {attempt.bindings?.length ? (
-            <details className="text-ui-sm" data-testid="graph-frozen-bindings">
-              <summary>{t("bindingEvidence")}</summary>
-              <pre className="mt-2 max-h-80 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-sm">
-                {JSON.stringify(attempt.bindings, null, 2)}
-              </pre>
-            </details>
-          ) : null}
+          <GraphDisclosureStack>
+            <GraphDisclosure title={t("instructionTemplate")}>
+              <p className="whitespace-pre-wrap break-words">{node.instructions}</p>
+            </GraphDisclosure>
+            {attempt.bindings?.length ? (
+              <GraphDisclosure testId="graph-frozen-bindings" title={t("bindingEvidence")}>
+                <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-sm">
+                  {JSON.stringify(attempt.bindings, null, 2)}
+                </pre>
+              </GraphDisclosure>
+            ) : null}
+          </GraphDisclosureStack>
           {attempt.finalOutput ? (
             <TextEvidence title={t("finalOutput")} text={attempt.finalOutput.text} />
           ) : null}
           {attempt.outputIssue ? (
             <p className="text-ui-sm text-warning">{attempt.outputIssue}</p>
           ) : null}
-          <details className="text-ui-sm">
-            <summary>{t("terminalProof")}</summary>
-            <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-sm">
-              {JSON.stringify(
-                {
-                  terminalProof: attempt.terminalProof ?? null,
-                  finalOutput: attempt.finalOutput
-                    ? { ...attempt.finalOutput, text: undefined }
-                    : null,
-                },
-                null,
-                2,
-              )}
-            </pre>
-          </details>
+          <GraphDisclosureStack>
+            <GraphDisclosure title={t("terminalProof")}>
+              <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-sm">
+                {JSON.stringify(
+                  {
+                    terminalProof: attempt.terminalProof ?? null,
+                    finalOutput: attempt.finalOutput
+                      ? { ...attempt.finalOutput, text: undefined }
+                      : null,
+                  },
+                  null,
+                  2,
+                )}
+              </pre>
+            </GraphDisclosure>
+          </GraphDisclosureStack>
         </>
       ) : null}
       {run.version >= 4 ? (

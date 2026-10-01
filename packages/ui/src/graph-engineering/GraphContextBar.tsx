@@ -7,8 +7,10 @@ import { useGraphRunText } from "./GraphRunText.js";
  * The effective configuration a new run will start from, visible on every destination:
  * model, permission/submission mode and saved-check status. It only displays the existing
  * workspace defaults; changing them stays where it is (Workflows → Workspace defaults).
- * UX-M1.2: labelled as next-run configuration; the Checks chip is the project-wide count, while the
+ * UX-M1.2: labelled as next-run configuration; the Checks entry is the project-wide count, while the
  * checks a particular workflow will use are listed per step in the New-run pane.
+ * UX-M4: compact inline text at the trailing end of the tab row (no chips), so the model and the
+ * permission mode stay discoverable without a separate explanation row.
  */
 export function GraphContextBar({
   modelSelection,
@@ -31,15 +33,15 @@ export function GraphContextBar({
         : u("ctxChecksUnread");
   return (
     <div
-      className="flex flex-wrap items-center gap-2 text-ui-sm"
+      className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-0.5 pb-1 text-ui-sm"
       role="group"
       aria-label={u("ctxLabel")}
       data-testid="graph-context-bar"
     >
-      <span className="text-foreground-subtle" data-testid="graph-context-label">
+      <span className="font-medium text-foreground-subtle" data-testid="graph-context-label">
         {m1("nextRunLabel")}
       </span>
-      <span className="rounded-md border border-border bg-surface px-2 py-0.5">
+      <span className="min-w-0 break-all">
         <span className="text-foreground-subtle">{u("ctxModel")} </span>
         <span data-testid="graph-context-model">
           {modelSelection
@@ -48,14 +50,14 @@ export function GraphContextBar({
         </span>
       </span>
       {mode ? (
-        <span className="rounded-md border border-border bg-surface px-2 py-0.5">
+        <span>
           <span className="text-foreground-subtle">{u("ctxMode")} </span>
           <span data-testid="graph-context-mode">{mode}</span>
         </span>
       ) : null}
       <button
         type="button"
-        className="rounded-md border border-border bg-surface px-2 py-0.5 hover:bg-surface-hover"
+        className="rounded-sm text-left underline-offset-4 hover:text-brand hover:underline"
         data-testid="graph-context-checks"
         onClick={onOpenChecks}
       >

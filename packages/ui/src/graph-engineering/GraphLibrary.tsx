@@ -1,32 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import type { GraphDefinition, GraphSequentialDefinition } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog.js";
+import { Dialog, DialogContent } from "@/components/ui/dialog.js";
 import { useGraphWorkflow } from "@/hooks/useGraphWorkflow.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphDraftStore } from "@/store/graphDraftStore.js";
 import { useGraphTemplateText } from "./graphTemplateText.js";
 import { GraphTemplateBindings } from "./GraphTemplateBindings.js";
-import { GraphLibraryAdvanced } from "./GraphLibraryAdvanced.js";
-import { GraphLibraryBlocked } from "./GraphLibraryBlocked.js";
-import { GraphLibraryManage } from "./GraphLibraryManage.js";
 import { GraphLibraryPicker } from "./GraphLibraryPicker.js";
+import { GraphLibraryDialogContent } from "./GraphLibraryDialogContent.js";
 import { GraphLibraryReplace } from "./GraphLibraryReplace.js";
 import { useGraphLibraryReplacement } from "./useGraphLibraryReplacement.js";
 import { useGraphLibrarySelection } from "./useGraphLibrarySelection.js";
 import { GraphCarryReport } from "./GraphCarryReport.js";
 import { GraphPinNotice } from "./GraphPinNotice.js";
 import { GraphRunWorkflowVersion } from "./GraphRunWorkflowVersion.js";
-import { GraphLibrarySection } from "./GraphLibrarySections.js";
-import { GraphLibraryVersions } from "./GraphLibraryVersions.js";
-import { GraphShare } from "./GraphShare.js";
-import { GraphShareImport } from "./GraphShareImport.js";
 import type { GraphMutationResult } from "./graphLibrarySave.js";
 import { useGraphM3Text } from "./GraphM3Text.js";
 import { designPin, libraryGates, versionRows } from "./graphLibraryView.js";
@@ -99,6 +87,10 @@ export function GraphLibrary({
   const workflow = useGraphWorkflow(target);
   const choose = useGraphDraftStore((state) => state.selectLibrary);
   const [open, setOpen] = useState(false);
+  // UX-M4：对话框固定页脚的承载节点；使用标签里的操作栏通过 portal 渲染到这里。
+  const [actionsHost, setActionsHost] = useState<HTMLElement | null>(null);
+  // UX-M4：对话框的当前标签由这里持有，页脚里的“打开使用”才能切换到“使用”标签。
+  const [libraryTab, setLibraryTab] = useState("versions");
   // UX-M3.2：最近一次创建/新版本/复制的结果，来自服务返回的列表；用户改选后清除。
   const [saved, setSaved] = useState<GraphMutationResult | "unknown" | null>(null);
   const entries = workflow.view?.entries ?? [];
@@ -107,6 +99,10 @@ export function GraphLibrary({
   useEffect(() => {
     if (inline) void workflow.read();
   }, [inline, workflow.read]);
+  // UX-M4：新的库操作一开始就清除上一次的成功提示，失败与成功不会同时竞争注意力。
+  useEffect(() => {
+    if (workflow.pending) setSaved(null);
+  }, [workflow.pending]);
   const locked = disabled || workflow.pending;
   // 表单编辑只受 locked 限制；创建/替换/审阅这类准入动作还受占用限制。
   const actionsLocked = locked || Boolean(admissionReason);
@@ -182,7 +178,7 @@ export function GraphLibrary({
           disabled={locked || entry.archived}
           disabledReason={entry.archived ? u("noCompatibleVersion") : disabledReason}
           admissionReason={admissionReason}
-          onViewCurrentRun={viewCurrentRun}
+          onViewCurrentRun={inline ? viewCurrentRun : undefined}
           error={inline ? workflow.error || error || undefined : undefined}
           errorKind={workflow.error ? "review" : errorKind}
           onLoadRecipes={onLoadRecipes}
@@ -191,6 +187,8 @@ export function GraphLibrary({
             onOpenSetup(checkId);
           }}
           allowReview={inline && Boolean(onReview)}
+          actionsHost={inline ? null : actionsHost}
+          onOpenUse={inline || libraryTab === "use" ? undefined : () => setLibraryTab("use")}
           onInstantiate={requestInstantiate}
         />
       </>
@@ -217,10 +215,12 @@ export function GraphLibrary({
       onSelect={(id) => select(id)}
     />
   );
-  const content = inline ? (
-    <div className="space-y-4">
-      {picker}
-      {description}
+  const inlineContent = (
+    <div className="space-y-5">
+      <div className="space-y-2">
+        {picker}
+        {description}
+      </div>
       {entry && version ? (
         <GraphRunWorkflowVersion
           entry={entry}
@@ -232,144 +232,30 @@ export function GraphLibrary({
       ) : null}
       {bindings}
     </div>
-  ) : (
-    <div className="space-y-5">
-      <p
-        className="break-all font-mono text-ui-sm text-foreground-subtle"
-        data-testid="graph-library-workspace"
-      >
-        {workspacePath}
-      </p>
-      {workflow.error ? (
-        <div
-          role="alert"
-          className="flex flex-wrap items-center gap-2"
-          data-testid="graph-library-error"
-        >
-          <p className="min-w-0 flex-1 break-words text-ui-sm text-destructive">{workflow.error}</p>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={workflow.pending}
-            data-testid="graph-library-error-refresh"
-            onClick={() => void workflow.read()}
-          >
-            {t("refresh")}
-          </Button>
-        </div>
-      ) : null}
-      {saved ? (
-        <p role="status" className="text-ui-sm font-medium" data-testid="graph-library-result">
-          {saved === "unknown"
-            ? m3("savedUnknown")
-            : m3("saved", { name: saved.name, version: saved.version })}
-        </p>
-      ) : null}
-      {admissionReason ? (
-        <GraphLibraryBlocked
-          id={blockedId}
-          reason={m3("blockedBrowse")}
-          onViewCurrentRun={viewCurrentRun}
-        />
-      ) : gates.mutation ? (
-        <GraphLibraryBlocked id={blockedId} reason={gates.mutation} />
-      ) : null}
-      <GraphLibrarySection id="workflow" title={m3("sectionWorkflow")}>
-        {picker}
-        {description}
-      </GraphLibrarySection>
-      {entry ? (
-        <GraphLibrarySection id="versions" title={m3("sectionVersions")}>
-          <GraphLibraryVersions
-            entry={entry}
-            rows={rows}
-            selected={version?.version}
-            disabled={workflow.pending}
-            onSelect={(next) => select(entry.id, next)}
-          />
-          <GraphLibraryManage
-            key={entry.id}
-            workflow={workflow}
-            entry={entry}
-            version={version?.version}
-            mutationBlocked={gates.mutation}
-            blockedId={blockedId}
-            onSaved={onSaved}
-          />
-        </GraphLibrarySection>
-      ) : null}
-      <GraphLibrarySection id="use" title={m3("sectionUse")}>
-        {bindings}
-        {onOpenInRuns ? (
-          <div
-            className="flex flex-wrap items-center gap-2"
-            data-testid="graph-library-open-runs-row"
-          >
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={!entry || !version || entry.archived}
-              data-testid="graph-library-open-runs"
-              onClick={() => {
-                setOpen(false);
-                onOpenInRuns();
-              }}
-            >
-              {m3("openInRuns")}
-            </Button>
-            <p className="text-ui-xs text-foreground-subtle">{m3("openInRunsHelp")}</p>
-          </div>
-        ) : null}
-      </GraphLibrarySection>
-      <details className="space-y-3" data-testid="graph-library-share">
-        <summary className="cursor-pointer text-ui-sm font-medium">{m3("sectionShare")}</summary>
-        {workflow.view ? (
-          <GraphShare
-            workflow={workflow}
-            view={workflow.view}
-            definition={definition}
-            dirty={dirty}
-            entry={entry}
-            version={version?.version}
-            mutationBlocked={gates.mutation}
-            exportBlocked={gates.exportToDisk}
-            blockedId={blockedId}
-            target={target}
-            onSaved={onSaved}
-          />
-        ) : null}
-      </details>
-      <GraphLibraryAdvanced workflow={workflow} digest={version?.digest} entry={entry}>
-        {workflow.view ? (
-          <GraphShareImport
-            manual
-            workflow={workflow}
-            view={workflow.view}
-            mutationBlocked={gates.mutation}
-            blockedId={blockedId}
-            target={target}
-            onSaved={onSaved}
-          />
-        ) : null}
-      </GraphLibraryAdvanced>
-    </div>
   );
+  // UX-M4：一个较新的失败不能和旧的成功提示并排；新操作开始时旧结果也已清除（见上面的 effect）。
+  const shownSaved = saved && !workflow.error ? saved : null;
   return (
     <>
       {inline ? (
-        <section className="space-y-4" data-testid="graph-library-dialog">
-          <h3 className="text-ui-base font-medium">{u("useWorkflow")}</h3>
-          <p className="text-ui-sm text-foreground-subtle">{u("workflowHelp")}</p>
-          {content}
+        <section className="space-y-5" data-testid="graph-library-dialog">
+          <header className="space-y-1">
+            <h3 className="text-ui-xl font-semibold">
+              {intl.formatMessage({ id: "graph.run.newRun" })}
+            </h3>
+            <p className="text-ui-base text-foreground-subtle">{u("workflowHelp")}</p>
+          </header>
+          {inlineContent}
         </section>
       ) : (
         <>
           <Button
-            size="sm"
             variant="outline"
+            className="self-start"
             disabled={!workflow.supported}
             data-testid="graph-library-open"
             onClick={() => {
+              setLibraryTab("versions");
               setOpen(true);
               void workflow.read();
             }}
@@ -383,14 +269,40 @@ export function GraphLibrary({
             }}
           >
             <DialogContent
-              className="max-h-[90vh] overflow-auto sm:max-w-3xl"
+              className="graph-ui h-[min(88vh,46rem)] max-h-[88vh] gap-0 overflow-hidden p-0 sm:max-w-5xl"
               data-testid="graph-library-dialog"
             >
-              <DialogHeader>
-                <DialogTitle>{t("library")}</DialogTitle>
-                <DialogDescription>{u("workflowHelp")}</DialogDescription>
-              </DialogHeader>
-              {content}
+              <GraphLibraryDialogContent
+                workspacePath={workspacePath}
+                target={target}
+                entries={entries}
+                entry={entry}
+                version={version}
+                rows={rows}
+                workflow={workflow}
+                gates={gates}
+                admissionReason={admissionReason}
+                blockedId={blockedId}
+                saved={shownSaved}
+                definition={definition}
+                dirty={dirty}
+                description={description}
+                bindings={bindings}
+                select={select}
+                onSaved={onSaved}
+                viewCurrentRun={viewCurrentRun}
+                onOpenInRuns={
+                  onOpenInRuns
+                    ? () => {
+                        setOpen(false);
+                        onOpenInRuns();
+                      }
+                    : undefined
+                }
+                setActionsHost={setActionsHost}
+                tab={libraryTab}
+                onTabChange={setLibraryTab}
+              />
             </DialogContent>
           </Dialog>
         </>

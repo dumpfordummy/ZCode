@@ -1,0 +1,107 @@
+/*
+ * Graph Engineering 的语义表面与强调色（UX-M4.2）。
+ * 只在 `.graph-ui`（Graph 面板根与 Graph 对话框内容）内重定义已有的 --color-* 令牌，
+ * 因此 Chat、设置、插件商店等共享界面不受影响。Radix 对话框会被 portal 到 body，
+ * 所以对话框内容需要自己带上 graph-ui 类。
+ *
+ * 表面层级（深色/浅色都必须肉眼可分）：shell（导航与页脚）< canvas（主工作区）< raised（面板、行、输入）< overlay（对话框）。
+ * 强调色只有一个，用于主操作、当前选择、当前标签与链接；警告与失败保留各自色相，并始终配图标和文字。
+ * 对比度在实际实现的表面上测量（ux-m4-contrast.mjs），不沿用原型数值。
+ */
+.theme-zai-dark .graph-ui {
+  --color-background: #1b1c20; /* canvas */
+  --color-panel: #1b1c20;
+  --color-header: #15161a; /* shell */
+  --color-sidebar: #15161a;
+  --color-card: #25262b; /* raised */
+  --color-card-selected: #2d2f36;
+  --color-input: #202126;
+  --color-input-focused: #202126;
+  --color-input-border: rgba(255, 255, 255, 0.36);
+  --color-input-border-hover: rgba(255, 255, 255, 0.5);
+  --color-input-border-focused: var(--color-brand);
+  --color-popover: #2b2d33; /* overlay */
+  --color-popover-header: #25262b;
+  --color-menu: #2b2d33;
+  --color-menu-hover: #353840;
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-border-hover: rgba(255, 255, 255, 0.22);
+  --color-card-border: var(--color-border);
+  --color-popover-border: var(--color-border);
+  --color-surface: rgba(255, 255, 255, 0.045);
+  --color-surface-hover: rgba(255, 255, 255, 0.08);
+  --color-hover: rgba(255, 255, 255, 0.06);
+  --color-selected: #263650;
+  --color-foreground: #ececf0;
+  --color-foreground-subtle: #b4b7c1;
+  --color-foreground-subtlest: #969aa7;
+  --color-foreground-inverse: #0a1322;
+  --color-brand: #6ea8fe; /* the one accent */
+  --color-accent: #243553;
+  --color-primary: #6ea8fe;
+  --color-primary-foreground: #0a1322;
+  --color-secondary: #30323a;
+  --color-success: #62d08f;
+  --color-success-foreground: #06170e;
+  --color-warning: #f2b453;
+  --color-warning-foreground: #1c1300;
+  --color-destructive: #ff8484;
+  --color-destructive-foreground: #1c0709;
+  --color-tag: #30323a;
+  --color-tooltip: #30323a;
+}
+
+.theme-zai-light .graph-ui {
+  --color-background: #f5f5f8; /* canvas */
+  --color-panel: #f5f5f8;
+  --color-header: #e7e8ec; /* shell */
+  --color-sidebar: #e7e8ec;
+  --color-card: #ffffff; /* raised */
+  --color-card-selected: #edf2fc;
+  --color-input: #ffffff;
+  --color-input-focused: #ffffff;
+  --color-input-border: rgba(21, 22, 26, 0.55);
+  --color-input-border-hover: rgba(21, 22, 26, 0.7);
+  --color-input-border-focused: var(--color-brand);
+  --color-popover: #ffffff; /* overlay */
+  --color-popover-header: #f5f5f8;
+  --color-menu: #ffffff;
+  --color-menu-hover: #edeef2;
+  --color-border: rgba(21, 22, 26, 0.14);
+  --color-border-hover: rgba(21, 22, 26, 0.26);
+  --color-card-border: var(--color-border);
+  --color-popover-border: var(--color-border);
+  --color-surface: rgba(21, 22, 26, 0.04);
+  --color-surface-hover: rgba(21, 22, 26, 0.07);
+  --color-hover: rgba(21, 22, 26, 0.06);
+  --color-selected: #dce7fb;
+  --color-foreground: #15161a;
+  --color-foreground-subtle: #444853;
+  --color-foreground-subtlest: #626774;
+  --color-foreground-inverse: #ffffff;
+  --color-brand: #1e5fd8; /* the one accent */
+  --color-accent: #e1eafb;
+  --color-primary: #1e5fd8;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #e3e4ea;
+  --color-success: #19743f;
+  --color-success-foreground: #ffffff;
+  --color-warning: #8a5a00;
+  --color-warning-foreground: #ffffff;
+  --color-destructive: #b3261e;
+  --color-destructive-foreground: #ffffff;
+  --color-tag: #e3e4ea;
+  --color-tooltip: #26282d;
+}
+
+/*
+ * 共享 Textarea 用 border-input / bg-input/20，在 Graph 的表面上边框与填充同色、几乎看不见。
+ * 只在 Graph 范围内让它使用与 Input 相同的边框与填充令牌，不改共享组件。
+ */
+.graph-ui textarea {
+  border-color: var(--color-input-border);
+  background-color: var(--color-input);
+}
+.graph-ui textarea:hover:not(:disabled) {
+  border-color: var(--color-input-border-hover);
+}

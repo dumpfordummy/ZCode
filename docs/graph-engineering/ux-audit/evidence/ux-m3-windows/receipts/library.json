@@ -1,0 +1,123 @@
+{
+  "journey": "library",
+  "status": "PASS",
+  "startedAt": "2026-09-30T18:54:29.696Z",
+  "finishedAt": "2026-09-30T18:54:41.694Z",
+  "options": {
+    "scenario": "pass",
+    "locale": "en-US",
+    "dialog": true
+  },
+  "providerRequests": 12,
+  "providerErrors": [],
+  "steps": [
+    {
+      "id": "L0",
+      "title": "One dialog, five sections, no nested management modal; Built-in versus Yours",
+      "status": "PASS",
+      "seconds": 1.3
+    },
+    {
+      "id": "L0b",
+      "title": "Every built-in offers its real, exact version set (read from what the Host offers; never a constant)",
+      "status": "PASS",
+      "seconds": 0.2
+    },
+    {
+      "id": "L1",
+      "title": "Duplicate to edit creates Yours; rows show a real date; the result is selected",
+      "status": "PASS",
+      "seconds": 0.3
+    },
+    {
+      "id": "L2",
+      "title": "New run and Workflows name the workflow and version; Used by current design follows the pin",
+      "status": "PASS",
+      "seconds": 0.7
+    },
+    {
+      "id": "L3",
+      "title": "A second version: Latest appears, Used by current design stays on the pinned version",
+      "status": "PASS",
+      "seconds": 0.4
+    },
+    {
+      "id": "L4",
+      "title": "A real run owns the workspace: browse, versions, Advanced and previews work; every mutation and Export are refused",
+      "status": "PASS",
+      "seconds": 4.1
+    },
+    {
+      "id": "L5",
+      "title": "Cancel the run (cleanup); mutations are available again",
+      "status": "PASS",
+      "seconds": 0.6
+    }
+  ],
+  "observations": [
+    {
+      "text": "workflow options",
+      "data": [
+        "Sequential engineering · Built-in",
+        "Bounded verified bug fix · Built-in",
+        "Sequential slot refinement · Built-in",
+        "Agent-assisted task · Built-in"
+      ]
+    },
+    {
+      "text": "built-in generic version rows",
+      "data": [
+        {
+          "version": 2,
+          "latest": false,
+          "used": false,
+          "checked": true,
+          "text": "Version 2"
+        }
+      ]
+    },
+    {
+      "text": "offered versions per built-in",
+      "data": {
+        "generic": [2],
+        "bugfix": [2],
+        "slot": [2],
+        "agent-assisted": [2]
+      }
+    },
+    {
+      "text": "user version row",
+      "data": "Version 1 Created 10/1/2026, 2:54:35 AM"
+    },
+    {
+      "text": "Workflows origin line",
+      "data": "Started from Windows team flow · Version 1"
+    },
+    {
+      "text": "New run version line",
+      "data": "This run will use Windows team flow · Version 1 · Yours"
+    },
+    {
+      "text": "occupied banner",
+      "data": "A run still owns this workspace. You can browse workflows, inspect versions and preview; changes are unavailable until it finishes.\n\nView current run"
+    },
+    {
+      "text": "mutation controls present and refused while occupied",
+      "data": [
+        "graph-library-instantiate",
+        "graph-library-duplicate",
+        "graph-library-archive",
+        "graph-template-export-file",
+        "graph-save-confirm",
+        "graph-import-confirm"
+      ]
+    }
+  ],
+  "notRun": [],
+  "screenshots": [
+    "l-dialog-builtin-1280x720.png",
+    "l-dialog-used-by-1280x720.png",
+    "l-dialog-occupied-1280x720.png",
+    "l-dialog-occupied-1920x1080.png"
+  ]
+}

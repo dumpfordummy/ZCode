@@ -7,6 +7,7 @@ import { GraphEditor } from "./GraphEditor.js";
 import type { GraphPanelProps } from "./graphEngineeringView.js";
 import { GraphParallelPanel } from "./GraphParallelPanel.js";
 import { graphFocusClass } from "./graphFocus.js";
+import { GraphDisclosure } from "./GraphDisclosure.js";
 
 export default function GraphEngineeringPanel(props: GraphPanelProps) {
   const [parallel, setParallel] = useState(false);
@@ -15,15 +16,15 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
   return (
     <main
-      className={`${graphFocusClass} flex h-full min-h-0 flex-col bg-background text-foreground`}
+      className={`${graphFocusClass} graph-ui flex h-full min-h-0 flex-col bg-background text-foreground`}
       data-testid="graph-engineering-panel"
     >
-      <header className="flex flex-wrap items-center gap-2 border-b border-border p-3 [app-region:no-drag]">
-        <Button variant="ghost" size="sm" onClick={props.onBack}>
+      <header className="flex flex-wrap items-center gap-2 border-b border-border bg-header px-4 py-3 [app-region:no-drag]">
+        <Button variant="ghost" onClick={props.onBack}>
           <ArrowLeft className="size-4" />
           {t("backToChat")}
         </Button>
-        <h2 className="text-ui-base font-medium">{t("title")}</h2>
+        <h2 className="text-ui-base font-semibold">{t("title")}</h2>
         <p
           className="min-w-0 flex-1 break-all font-mono text-ui-sm text-foreground-subtle"
           data-testid="graph-workspace"
@@ -71,20 +72,19 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
         </div>
       )}
       {graph.local ? (
-        <footer className="shrink-0 border-t border-border px-3 py-2">
-          <details className="text-ui-sm" data-testid="graph-advanced">
-            <summary className="cursor-pointer">
-              {intl.formatMessage({ id: "graph.preZ8.experimental" })}
-            </summary>
+        <footer className="shrink-0 border-t border-border bg-header px-4 py-2">
+          <GraphDisclosure
+            testId="graph-advanced"
+            title={intl.formatMessage({ id: "graph.preZ8.experimental" })}
+          >
             <Button
               variant={parallel ? "secondary" : "outline"}
-              size="sm"
               onClick={() => setParallel((value) => !value)}
               data-testid="graph-parallel-toggle"
             >
               {t(parallel ? "z7.sequential" : "z7.title")}
             </Button>
-          </details>
+          </GraphDisclosure>
         </footer>
       ) : null}
     </main>

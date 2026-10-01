@@ -1,0 +1,113 @@
+{
+  "journey": "pins",
+  "status": "PASS",
+  "startedAt": "2026-09-30T18:45:35.808Z",
+  "finishedAt": "2026-09-30T18:46:50.170Z",
+  "options": {
+    "scenario": "pass",
+    "locale": "en-US",
+    "dialog": true
+  },
+  "providerRequests": 19,
+  "providerErrors": [],
+  "steps": [
+    {
+      "id": "P0",
+      "title": "Open in Runs opens Runs -> New run with exactly the chosen workflow and version; it reviews and starts nothing",
+      "status": "PASS",
+      "seconds": 1.3
+    },
+    {
+      "id": "P1",
+      "title": "Two real runs are started and stopped with Cancel (they become the historical runs)",
+      "status": "PASS",
+      "seconds": 2.4
+    },
+    {
+      "id": "P2",
+      "title": "Rewrite the captured pins on disk (app closed) to built-in version 1; relaunch; the app accepts the records",
+      "status": "PASS",
+      "seconds": 5.2
+    },
+    {
+      "id": "P3",
+      "title": "Run again on built-in v1 (no longer offered): notice, no silent v1->v2, no other form, nothing synthesized",
+      "status": "PASS",
+      "seconds": 0.6
+    },
+    {
+      "id": "P4",
+      "title": "Continue with the offered version carries only compatible values and lists the rest; the run stays untouched",
+      "status": "PASS",
+      "seconds": 0.2
+    },
+    {
+      "id": "P5",
+      "title": "A required value the old form never had stays missing: Review is blocked and the field is named",
+      "status": "PASS",
+      "seconds": 60.1
+    }
+  ],
+  "observations": [
+    {
+      "text": "New run version line (Yours)",
+      "data": "This run will use Pins flow · Version 1 · Yours"
+    },
+    {
+      "text": "New run version line (Built-in)",
+      "data": "This run will use Sequential engineering · Version 2 · Built-in"
+    },
+    {
+      "text": "rewritten pins",
+      "data": [
+        {
+          "id": "ca6c6a53-aee6-4374-a895-05003c8be2d8",
+          "workflow": "generic",
+          "from": {
+            "version": 2,
+            "digest": "7307e6439e16b1a0006845f6ac5d66d80b747b2982c9411ff92294a619b853a4"
+          }
+        },
+        {
+          "id": "3d84e4d9-b4fc-46d0-8400-9d6d3cb96a7f",
+          "workflow": "generic",
+          "from": {
+            "version": 2,
+            "digest": "7307e6439e16b1a0006845f6ac5d66d80b747b2982c9411ff92294a619b853a4"
+          }
+        }
+      ]
+    },
+    {
+      "text": "historical pin notice",
+      "data": "Version 1 used by this run is no longer offered. Version 2 is available. Your request and choices from that run are kept. Nothing starts: continue explicitly, or choose another workflow above. Continue with version 2"
+    },
+    {
+      "text": "carried request",
+      "data": "Modify zz-demo.txt file content to after"
+    },
+    {
+      "text": "carried / not carried (run 1)",
+      "data": {
+        "carried": "Carried over: parameter request, check build, check test",
+        "not": "Not carried over parameter legacyNote — not declared in this version"
+      }
+    },
+    {
+      "text": "not carried (run 2)",
+      "data": ""
+    },
+    {
+      "text": "unresolved list",
+      "data": "Complete or correct these fields: Build Test configured criteria"
+    }
+  ],
+  "notRun": [],
+  "screenshots": [
+    "p-open-in-runs-1280x720.png",
+    "p-historical-pin-notice-1280x720.png",
+    "p-historical-pin-notice-1920x1080.png",
+    "p-carry-report-1280x720.png",
+    "p-carry-missing-required-1280x720.png"
+  ]
+}
