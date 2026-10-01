@@ -142,6 +142,7 @@ const supplement = {
       },
       testedBuild: r.testedBuild,
       finalRunStatus: r.finalRunStatus,
+      proof: r.proof,
       telemetryCanary: r.telemetryCanary,
       failure: r.error
         ? String(r.error)

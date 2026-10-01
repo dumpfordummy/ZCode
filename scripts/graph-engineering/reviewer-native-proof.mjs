@@ -95,6 +95,56 @@ export async function proveReviewerNative(isolation, window, summary, run, files
     }
   }
   assert.deepEqual(isolation.fixture.errors, []);
+  // 通过全部断言之后，把「被证明了什么」压缩成可直接检查的记录（不含提示词或源码内容之外的数据）。
+  summary.proof = {
+    runStatus: run.status,
+    sourceEdit: {
+      file: "zz-demo.txt",
+      content: await readFile(path.join(isolation.workspace, "zz-demo.txt"), "utf8"),
+    },
+    build: {
+      operationId: build.operationId,
+      status: build.status,
+      exitCode: build.operation.result.exitCode,
+      sourceDigest: build.sourceDigest,
+      outputDigest: build.outputDigest,
+    },
+    test: {
+      operationId: test.operationId,
+      status: test.status,
+      exitCode: test.operation.result.exitCode,
+      sourceDigest: test.sourceDigest,
+      buildDigest: test.buildDigest,
+      testCount: test.verification.testCount,
+      acceptancePassed: test.verification.acceptancePassed,
+      passingAssertions: report.value.tests
+        .filter((item) => item.status === "passed")
+        .map((item) => item.name),
+    },
+    matchingEvidence: {
+      testSourceEqualsBuildSource: test.sourceDigest === build.sourceDigest,
+      testBuildEqualsBuildOutput: test.buildDigest === build.outputDigest,
+      reportMatchesOperation: report.value.operationId === test.operationId,
+      verificationArtifactId: verification.artifact.id,
+      reportArtifactId: report.artifact.id,
+    },
+    reviewer:
+      failedTest || invalid
+        ? { status: review.status, outputValidation: review.outputValidation.status }
+        : {
+            status: review.status,
+            outputValidation: review.outputValidation.status,
+            outcome: JSON.parse(review.finalOutput.text).outcome,
+            evidenceReferences: JSON.parse(review.finalOutput.text).evidenceReferences,
+            boundArtifactIds: review.bindings
+              .filter((item) => item.artifactId)
+              .map((item) => item.artifactId),
+          },
+    finalGate: { status: gate?.status, decisionRecorded: Boolean(gate?.decision) },
+    nativeAgentInputs: identity.agents.length,
+    nativeToolOperations: identity.tools.length,
+    modelRequests: isolation.fixture.requests.filter((item) => item.model).length,
+  };
   summary.reviewer = review;
   summary.finalGate = gate;
   summary.assertions.push(

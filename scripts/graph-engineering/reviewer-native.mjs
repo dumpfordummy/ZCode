@@ -194,6 +194,7 @@ try {
         packagedIdentity: summary.packagedIdentity,
         testedBuild: packaged ? summary.testedBuild : undefined,
         finalRunStatus: summary.finalRecord?.runs.at(-1)?.status,
+        proof: summary.proof,
         runId: summary.executionReached?.runId,
         error: summary.error,
       },
