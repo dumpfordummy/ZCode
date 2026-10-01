@@ -21,6 +21,7 @@ import {
   resolveDesktopProductIdentity,
 } from "./scripts/desktop-product-identity.mjs";
 import { verifyStagedKoffi } from "./scripts/koffi-package-assets.mjs";
+import { createGraphWindowsAsarIntegrityLifecycle } from "./scripts/windows-asar-integrity.mjs";
 const ELECTRON_BUILDER_ARCH = {
   1: "x64",
   3: "arm64",
@@ -74,6 +75,10 @@ const builtinProviderConfig = await loadBuiltinProviderConfig();
 const desktopProductIdentity = resolveDesktopProductIdentity({
   ...process.env,
   ZCODE_ENV: builtinProviderConfig.environment,
+});
+// Z8.3-A：仅 Graph + Windows 修复 ELECTRONASAR 记录并打开完整性校验 fuse；其余配置不受影响。
+const graphWindowsAsarIntegrity = createGraphWindowsAsarIntegrityLifecycle({
+  enabled: desktopProductIdentity.flavor === "graph" && targetPlatform.os === "win32",
 });
 const nativeSearchReleasePlan = resolveNativeSearchReleasePlan({
   platform: targetPlatform.os,
@@ -580,7 +585,29 @@ export default {
         writeWindowsInstallManifest(context),
       );
     }
+    // 必须保持为 afterPack 的最后一步：app.asar 的最后一次重写（注入运行时模块、剥离 sourcemap 引用）
+    // 已在上面完成，electron-builder 在 afterPack 之前写入的 ELECTRONASAR 记录此时已过期，
+    // 这里按最终归档头部哈希原位替换。非 Graph/Windows 配置下为空操作。
+    await runTimedAsync("afterPack:refreshWindowsAsarIntegrity", () =>
+      graphWindowsAsarIntegrity.refreshAfterFinalAsarRewrite(context),
+    );
   },
+  // electron-builder 在 afterPack 之后、签名之前翻转 fuse；这里只打开 ASAR 完整性校验，
+  // 其余 fuse（含 RunAsNode：agent 与 CUA helper 以 ELECTRON_RUN_AS_NODE 启动）不出现在配置里，保持 Electron 默认。
+  ...(graphWindowsAsarIntegrity.electronFuses
+    ? { electronFuses: graphWindowsAsarIntegrity.electronFuses }
+    : {}),
+  // artifactBuildStarted 只会在 doPack（含翻转 fuse 与签名）完成后由 target.build 发出，
+  // 因此“记录等于头部哈希且 fuse 已开”的最终断言放在这里，而不是 afterPack 或 afterSign
+  // （未签名构建时 builder 会跳过 afterSign）。
+  ...(graphWindowsAsarIntegrity.electronFuses
+    ? {
+        artifactBuildStarted: (event) =>
+          runTimedAsync("artifactBuildStarted:assertWindowsAsarIntegrity", () =>
+            graphWindowsAsarIntegrity.assertAfterFuses(event),
+          ),
+      }
+    : {}),
   extraResources: [
     { from: resolve(workspaceRoot, noticesFileName), to: noticesFileName },
     ...(targetPlatform.os === "darwin"
