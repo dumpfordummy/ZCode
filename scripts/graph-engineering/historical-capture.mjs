@@ -310,7 +310,8 @@ export async function runFixture(fixtureId) {
   if (!fixture) throw new Error(`Unknown fixture ${fixtureId}`);
   const release = RELEASES[fixture.release];
   const base = await prepare(fixture.release);
-  const out = path.join(scratch, "profiles", fixtureId);
+  // Z8_CAPTURE_ROOT 让重跑写到独立目录，不覆盖原始 fixture 的捕获。
+  const out = path.join(process.env.Z8_CAPTURE_ROOT ?? path.join(scratch, "profiles"), fixtureId);
   await mkdir(out, { recursive: true });
   const captureDir = path.join(out, "captures");
   const exe = path.join(scratch, "historical", fixture.release, "app", "ZCode Graph.exe");
@@ -324,6 +325,7 @@ export async function runFixture(fixtureId) {
   const environment = { ...process.env, Z1_PACKAGED_EXE: exe, Z8_CAPTURE_DIR: captureDir };
   delete environment.ZCODE_ENV;
   let stdout = "";
+  let stderr = "";
   const exit = await new Promise((resolve) => {
     const child = spawn(process.execPath, [harness, ...fixture.args], {
       cwd: root,
@@ -332,9 +334,12 @@ export async function runFixture(fixtureId) {
       stdio: ["ignore", "pipe", "pipe"],
     });
     child.stdout.on("data", (d) => (stdout += d));
-    child.stderr.on("data", () => {});
+    child.stderr.on("data", (d) => (stderr += d));
     child.on("close", resolve);
   });
+  // 旧驱动的完整输出随捕获保存，失败时才有可诊断的原因。
+  await writeFile(path.join(out, "old-driver.stdout.txt"), stdout);
+  await writeFile(path.join(out, "old-driver.stderr.txt"), stderr);
   const summary = (() => {
     try {
       return JSON.parse(stdout.slice(stdout.indexOf("{")));

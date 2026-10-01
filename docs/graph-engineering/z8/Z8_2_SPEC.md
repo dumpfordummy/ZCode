@@ -85,3 +85,51 @@ Installer upgrade (NSIS over an installed app) remains out of reach for Z8.2 and
 - For non-terminal fixtures the matrix allows only reconciliation-written differences (`runs.N.status|message|updatedAt`, `resumeRequired`, a parallel run's `phase|message|updatedAt`) and requires every run in the record to be visible in the UI. A record the current build cannot show is classified `UNINTERPRETABLE` and must fail closed (bytes unchanged, no snapshot, no work); it is reported as a GAP, never edited. Two genuine z7.5 records fall in this class (see `Z8_2_REPORT.md`).
 - Historical fixtures are stored `-text` and excluded from the formatters (`.gitattributes`, `.oxfmtrc.json`, `run-validation.mjs`) so that their recorded hashes remain true.
 - The restore listing reports snapshot id (the SHA-256 of its bytes), size and modification time.
+
+## 13. Addendum — compatibility and recovery correction (approved after the first Z8.2 report)
+
+Written before the behavior changes below. Scope: this addendum only; no Z8.3, no migration framework, no digest-only validation, no change to built-in workflow v1 or to library versions. Branch `claude/z8-2-upgrade-recovery`, started from `9544fa6cbf6d7ddda168a3e426c9951ca3cbc071`; the original candidate `dist-graph-z82` and every earlier commit, fixture and failed-evidence file are preserved.
+
+### 13.1 Facts being corrected (reconfirmed from the pinned tags and the genuine fixture bytes)
+
+- `graph-v3.14.0-z7.5` `resolveGraphInstructions` returns `instructions + referenceSuffix`. Current code returns `instructions + referenceSuffix + evidenceSuffix`, where `evidenceSuffix` is non-empty only for a task whose JSON output schema has an `evidenceReferences` property, and embeds `JSON.stringify` of the artifact ids among the attempt's frozen bindings. `bindings.ts` between z7.5 and now differs only by this suffix; between z2.2 and z7.5 it differs by the prompt-reference suffix and the artifact/repair-feedback bindings (all derived from the frozen definition and provenance). No other resolver difference exists in the pinned history (the only commit after z7.5 that touches the file is `ed3bd3a`).
+- Two validators recompute the instructions with the current resolver and require exact equality with the attempt's frozen `resolvedInstructions` and `bindings`: the load-time routing check (`routing-record.ts`, version-5 runs) and the continuation-time check (`release-validation.ts` `bindingsMatch`). In both genuine failing z7.5 records the frozen text of every reviewer attempt lacks the evidence suffix (verified on the committed bytes); the current resolver therefore mismatches.
+- Cold-load reconciliation sets `status`, `message`, `resumeRequired` and a new `updatedAt` for every non-terminal run on every load, even when the stored values are already identical. The new `updatedAt` makes the bytes differ, so every launch writes a new snapshot; with the bound of 20, the genuine pre-upgrade snapshot is pruned after about 20 launches (observed: `z22-permission-interrupted-after-old-restart` was re-committed with only `updatedAt` changed).
+
+### 13.2 Versioned instruction-resolution contract
+
+- **Discriminator.** A new optional node-attempt field `instructionContract`, whose only valid value is the integer `2`. Contract 1 = the pre-evidence-suffix resolver (z7.5 and earlier); contract 2 = the current resolver. The marker is never written as `1`; **absent means "unmarked legacy"**.
+- **Level: per attempt**, because the instructions are frozen per attempt and a run can legitimately hold attempts prepared by different builds (an old run explicitly continued by a newer build prepares new attempts while earlier attempts stay as written). A per-run marker would misdescribe such a run. The field lives in the existing version-5 run shape through the shared node-attempt schema; no record `version` bump, and no relation to the workflow/template version or the application version (three independent notions).
+- **Writing.** `GraphSequencer` stamps `instructionContract: 2` at the one place where it sets `resolvedInstructions`, i.e. for every attempt prepared after this change, including attempts of a pre-existing run that are prepared after explicit continuation. Already-prepared attempts are never re-resolved, re-marked or rewritten; their stored instructions, bindings, ids and evidence stay byte-for-byte.
+- **Validation (per attempt, both validators, one shared helper).**
+  - Marked `2`: reconstruct with contract 2 only and require exact equality (instructions text and the full binding list). There is **no fallback**: a marked-current attempt that fails never reaches the legacy rule.
+  - Unmarked: try contract 2, then contract 1. Each path reconstructs the **complete** expected instructions and bindings from the attempt's frozen inputs and requires exact equality. No trimming, suffix stripping, substring or prefix matching, regex acceptance or "arbitrary trailing text". All other schema, identity, artifact, digest and evidence checks are unchanged.
+  - Any other marker value: the strict schema rejects the record. An integer greater than 2 is reported as a newer, unsupported format (13.4); other values are ordinary malformed data.
+- **Ambiguity (documented, not resolved).** For a task without `evidenceReferences`, contracts 1 and 2 produce identical text, so which writer produced an unmarked attempt is neither known nor needed. For a task with `evidenceReferences`, an unmarked attempt is accepted if it equals either full reconstruction. Writer identity is never inferred from timestamps, file names or display labels.
+- **Limits.** A format discriminator and a content comparison are consistency checks, not authenticated proof of who wrote the data; anyone who can edit the file can write a self-consistent record. Nothing here claims authenticity.
+- **Compatibility.** Older readers (the original Z8.2 candidate and earlier) have a strict node-attempt schema and reject a record containing `instructionContract`; that is fail-closed and consistent with the existing "do not downgrade" rule. New readers accept unmarked data from every older writer.
+- **Reading is not acting.** Loading and inspecting a historical record sends, replays, approves, answers and releases nothing. Continuation keeps its existing freshness, ownership and release rules; the legacy path only decides whether frozen history is internally consistent.
+
+### 13.3 Idempotent cold-load reconciliation
+
+For each non-terminal run the required reconciled state (status, message, `resumeRequired` on the route checkpoint or resumable gate) is determined **before** `updatedAt` is assigned. If the run already equals that state, nothing about it is touched. `updatedAt` is assigned, the record is committed and the exact-bytes snapshot is taken only if some run actually changed. A run in `Interrupted` or `AwaitingContinuation` is still evaluated: if a checkpoint, gate or flag is missing or stale it changes and snapshots like any other transition. When nothing changes, the record bytes, `updatedAt`, the snapshot set and its modification times are untouched and retention is not invoked. Lock ownership, parallel-run handling, runtime-identity checks and the no-replay rule are unchanged. A failed snapshot still aborts before the record is mutated. The bound stays 20.
+
+### 13.4 Readable validation failures
+
+Three distinct outcomes, none of which modifies bytes or starts work:
+
+- **Unsupported newer format**: the existing `GraphRecordUnsupportedVersionError`, extended to carry the supported maximum (5 for record/definition/run versions, 2 for the instruction contract).
+- **Supported format, frozen instructions cannot be validated**: a new `GraphRecordIntegrityError` (`code GRAPH_RECORD_INTEGRITY`) with a concise message that names the run/attempt, says the stored instructions do not match the inputs stored with them (damage, editing, or an unrecognized writer format), that nothing was changed or started, and where the guidance is; the full original validation issues are kept as `diagnostic` (bounded) and `cause`. It does not say "upgrade".
+- **Malformed data**: unchanged generic error.
+
+### 13.5 Restore protection and retention wording (replaces the contradictory §3/§4 statements)
+
+Pre-restore preserved records live in the same snapshot store and count toward the same bound of 20. During one restore, **both the restore source and the just-preserved current record are protected from that restore's pruning**. After the restore, ordinary retention applies to every snapshot, including those two; neither is a permanent backup. If any restore step fails after preservation, both remain in the store. No pinning mechanism and no UI are added.
+
+### 13.6 Evidence hygiene and rebuild
+
+Genuine fixture bytes are not edited, reformatted or overwritten. The undiagnosed old `z75-build-test-completed` driver failure is re-run from the downloaded binary and tagged harness into a separate capture root, keeping the full driver output; the original capture and its FAIL label stay as they are. Product code changes, so one corrected local candidate is built into a distinct directory (the original `dist-graph-z82` stays); the version label `3.14.3-z8.2` is unchanged because it is unreleased. The 15-fixture matrix, the unsupported-version cases and the 13-case packaged baseline run once against it. The matrix copies Graph data into fresh profiles: it does not migrate native sessions, and no such claim is made.
+
+### 13.7 Acceptance of this correction
+
+The Z8.2 completion line is used only if: both formerly failing z7.5 fixtures load unchanged and appear in the UI; unmarked post-suffix records still load; marked records cannot use the legacy path; unknown contracts and altered instructions, binding values or evidence ids fail closed; at least 50 independent cold loads leave a stabilized record and snapshot set unchanged and the original snapshot survives; a genuine later change snapshots; the four failure injections and restore refusals still pass; a required supported historical fixture that is unreadable fails the suite.
