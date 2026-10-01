@@ -1,10 +1,18 @@
 # Z8.1 report — local candidate built and inspected
 
+**Final Z8.1 status: Z8.1 PACKAGED BASELINE RESTORED — UPGRADE, SECURITY AND INSTALL ACCEPTANCE PENDING.**
+
+**The superseding packaged evidence is in [Z8_1_PACKAGED_FOLLOWUP.md](Z8_1_PACKAGED_FOLLOWUP.md).** This report is the historical first report and is kept as written, with "Update" notes where the follow-up corrects it. "Packaged" here means the unpacked application run from a detached copy by the existing smoke harness. **This is not installer or install acceptance:** the NSIS installer was never executed, and upgrade, uninstall, security (egress, credential-key derivation, Feedback uploader) and signing remain pending.
+
+Source distinction: the **b1 binary** was built from `e555d800906d7ca76d43aa22e186ba8d8baedc24`. Everything committed after that (test drivers, tooling, evidence, documentation) is later harness/documentation source and is not what built the binary.
+
+Standing exceptions that remain visible: the CLI lint failure (turbo aborts, counts vary per run) and the repo-wide `pnpm fmt:check` failure (about 4,150 paths; on Windows oxfmt prefers CRLF, so it flags LF files at the baseline too). Neither was suppressed, fixed or reformatted; a scoped content-level format check covers the files this milestone changed.
+
 **Status (as first reported): Z8.1 LOCAL CANDIDATE BUILT AND INSPECTED — UPGRADE, SECURITY AND INSTALL ACCEPTANCE PENDING.**
 
 > **Follow-up (packaged baseline).** [Z8_1_PACKAGED_FOLLOWUP.md](Z8_1_PACKAGED_FOLLOWUP.md) repaired the packaged drivers and ran all 13 packaged scenarios, including a new current sequential journey, against the unchanged b1 binary: 13/13 PASS, process exit 0, full release gate satisfied, hashes unchanged before and after. Current status: **Z8.1 PACKAGED BASELINE RESTORED — UPGRADE, SECURITY AND INSTALL ACCEPTANCE PENDING.** The sections below are the historical first report; where the follow-up supersedes a statement, an "Update" note says so and the original text is kept.
 
-This is not an internal-release approval. Nothing was pushed, merged, tagged, signed, published or installed. Z8.2–Z8.5 were not started. Spec: [Z8_1_SPEC.md](Z8_1_SPEC.md). Plan and decisions: [Z8_PLAN.md](Z8_PLAN.md). Audit record: [Z8_DELTA_AUDIT.md](Z8_DELTA_AUDIT.md) (unchanged). Raw evidence: [evidence/](evidence/).
+This is not an internal-release approval. Nothing was merged, tagged, signed, published or installed (the branch was pushed for integration review only after the checkpoint was accepted). Z8.2–Z8.5 were not started. Spec: [Z8_1_SPEC.md](Z8_1_SPEC.md). Plan and decisions: [Z8_PLAN.md](Z8_PLAN.md). Audit record: [Z8_DELTA_AUDIT.md](Z8_DELTA_AUDIT.md) (unchanged). Raw evidence: [evidence/](evidence/).
 
 ## 1. Source and artifacts
 
