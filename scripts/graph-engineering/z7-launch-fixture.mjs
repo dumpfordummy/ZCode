@@ -7,7 +7,11 @@ const scenario = process.argv.find((v) => v.startsWith("--scenario="))?.slice(11
 if (!["complete", "conflict", "combined-failure", "failure", "restart"].includes(scenario))
   throw new Error("Use complete, conflict, combined-failure, failure or restart.");
 // 保持自动验收的私有目录和回环 provider 限制；不能使用允许真实账户网络的 manual profile。
-const isolation = await createIsolation({ fixtureFactory: (w) => startZ7Provider(w, scenario) });
+const isolation = await createIsolation({
+  fixtureFactory: (w) => startZ7Provider(w, scenario),
+  // Z8.1：Z7 实验并行默认关闭；这些开发期验收脚本显式 opt-in（不受支持，不会影响安装包）。
+  extraEnv: { ZCODE_GRAPH_EXPERIMENTAL_PARALLEL: "1" },
+});
 let input;
 try {
   const fixture = await prepareZ7Fixture(isolation);

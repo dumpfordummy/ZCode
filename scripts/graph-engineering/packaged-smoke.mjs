@@ -4,13 +4,15 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { packagedCases } from "./packaged-cases.mjs";
 import { resolveGraphDistributionVersion } from "../../packages/desktop/scripts/desktop-product-identity.mjs";
+import { resolveDistDirName } from "./release-manifest.mjs";
 
 const root = path.resolve(import.meta.dirname, "../..");
 const version = resolveGraphDistributionVersion(
   { ZCODE_GRAPH_DISTRIBUTION: "1", ZCODE_GRAPH_VERSION: process.argv[2] },
   "",
 );
-const output = path.join(root, "packages/desktop/dist-graph");
+// 与构建器相同的并排输出目录规则；默认仍是 dist-graph。
+const output = path.join(root, "packages/desktop", resolveDistDirName(process.env.ZCODE_GRAPH_DIST_DIR));
 const detached = await mkdtemp(path.join(tmpdir(), "zcode-graph-package-"));
 await cp(path.join(output, "win-unpacked"), detached, { recursive: true });
 const results = [];

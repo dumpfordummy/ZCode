@@ -6,12 +6,17 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GraphEditor } from "./GraphEditor.js";
 import type { GraphPanelProps } from "./graphEngineeringView.js";
 import { GraphParallelPanel } from "./GraphParallelPanel.js";
+import { useGraphParallel } from "@/hooks/useGraphParallel.js";
+import { parallelAdvancedVisible } from "./graphParallelView.js";
 import { graphFocusClass } from "./graphFocus.js";
 import { GraphDisclosure } from "./GraphDisclosure.js";
 
 export default function GraphEngineeringPanel(props: GraphPanelProps) {
   const [parallel, setParallel] = useState(false);
   const graph = useGraphEngineering(props);
+  // 并行能力策略只由 Host 给出（view.policy）；这里仅决定高级入口是否有内容可显示。
+  const parallelView = useGraphParallel(props).view;
+  const advanced = parallelAdvancedVisible(parallelView);
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
   return (
@@ -34,7 +39,12 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
       </header>
       {parallel ? (
         <p className="px-3 pt-3 text-ui-sm text-warning" data-testid="graph-parallel-experimental">
-          {intl.formatMessage({ id: "graph.preZ8.parallelLimit" })}
+          {intl.formatMessage({
+            id:
+              parallelView?.policy.mode === "disabled"
+                ? "graph.z8.parallelDisabledHistory"
+                : "graph.preZ8.parallelLimit",
+          })}
         </p>
       ) : null}
       {!graph.local ? (
@@ -71,7 +81,7 @@ export default function GraphEngineeringPanel(props: GraphPanelProps) {
           </Button>
         </div>
       )}
-      {graph.local ? (
+      {graph.local && advanced ? (
         <footer className="shrink-0 border-t border-border bg-header px-4 py-2">
           <GraphDisclosure
             testId="graph-advanced"

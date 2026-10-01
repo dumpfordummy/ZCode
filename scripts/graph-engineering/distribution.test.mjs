@@ -69,7 +69,15 @@ test("Graph release version is explicit and cannot change ordinary package versi
   );
   for (const version of [
     "3.14.0-z3.1",
-    "3.14.0-z8.1",
+    "3.14.3-z4.1",
+    "3.14.3-z5.1",
+    "3.14.3-z6.1",
+    "3.14.3-z9.1",
+    "3.14.3-z10.1",
+    "3.14.3-z18.1",
+    "3.14.3-z8.01",
+    "3.14.3-z8",
+    "3.14.3-Z8.1",
     "3.14.0-z7.01",
     "03.14.0-z2.1",
     "3.14.0-z2.01",
@@ -83,6 +91,14 @@ test("Graph release version is explicit and cannot change ordinary package versi
       ),
     );
   }
+  for (const version of ["3.14.3-z8.1", "3.14.3-z8.0", "3.14.3-z8.12", "3.14.3-z1.2", "3.14.3-z2.2", "3.14.3-z7.5"])
+    assert.equal(
+      resolveGraphDistributionVersion(
+        { ZCODE_GRAPH_DISTRIBUTION: "1", ZCODE_GRAPH_VERSION: version },
+        "3.14.3",
+      ),
+      version,
+    );
   assert.equal(
     resolveGraphDistributionVersion(
       { ZCODE_GRAPH_DISTRIBUTION: "1", ZCODE_GRAPH_VERSION: "3.14.0-z1.1" },
@@ -101,4 +117,30 @@ test("Graph release version is explicit and cannot change ordinary package versi
       "3.14.0",
     ),
   );
+});
+
+test("Graph entry scrubs every inherited automatic-telemetry setting before application import", async () => {
+  const { graphAutomaticTelemetryEnv } = await import(
+    "../../packages/desktop/scripts/graph-profile.mjs"
+  );
+  const inherited = {
+    ZCODE_ARMS_RUM_ENDPOINT: "https://rum.synthetic.invalid/x",
+    ZCODE_TELEMETRY_REPORT_ENDPOINT: "https://report.synthetic.invalid/x",
+    OTEL_EXPORTER_OTLP_ENDPOINT: "https://otlp.synthetic.invalid",
+    otel_exporter_otlp_traces_headers: "authorization=Bearer synthetic-canary",
+    ZCODE_TELEMETRY_DEVICE_MID: "synthetic-device",
+    ZCODE_MODEL_TELEMETRY_ENABLED: "1",
+    PATH: "C:\\Windows",
+    ZCODE_ENV: "production",
+  };
+  const policy = graphAutomaticTelemetryEnv(inherited);
+  assert.deepEqual(policy.remove.sort(), [
+    "OTEL_EXPORTER_OTLP_ENDPOINT",
+    "ZCODE_ARMS_RUM_ENDPOINT",
+    "ZCODE_TELEMETRY_DEVICE_MID",
+    "ZCODE_TELEMETRY_REPORT_ENDPOINT",
+    "otel_exporter_otlp_traces_headers",
+  ]);
+  assert.deepEqual(policy.set, { ZCODE_MODEL_TELEMETRY_ENABLED: "0" });
+  assert.deepEqual(graphAutomaticTelemetryEnv({}).remove, []);
 });

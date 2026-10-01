@@ -136,6 +136,12 @@ export function parallelFixture() {
     digest: hash(recipes),
     sourcePath: ".zcode/config.json",
   });
+  // 既有 Z7 行为测试显式选择实验策略；默认（缺省）策略为关闭，见 parallel-policy.test.ts。
+  f.options.parallelPolicy = () => ({
+    mode: "experimental",
+    source: "development-opt-in",
+    reason: "fixture",
+  });
   f.options.parallel = {
     preview: async (t, p) => {
       parallelPlanSchema.parse(p);

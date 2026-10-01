@@ -28,7 +28,11 @@ const concurrency = Number(
   process.argv.find((v) => v.startsWith("--concurrency="))?.slice(14) ?? 2,
 );
 assert.ok(["complete", "combined-failure", "failure", "restart", "conflict"].includes(scenario));
-const isolation = await createIsolation({ fixtureFactory: (w) => startZ7Provider(w, scenario) });
+const isolation = await createIsolation({
+  fixtureFactory: (w) => startZ7Provider(w, scenario),
+  // Z8.1：Z7 实验并行默认关闭；这些开发期验收脚本显式 opt-in（不受支持，不会影响安装包）。
+  extraEnv: { ZCODE_GRAPH_EXPERIMENTAL_PARALLEL: "1" },
+});
 const summary = {
   scenario,
   concurrency,

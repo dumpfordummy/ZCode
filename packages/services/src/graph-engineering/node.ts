@@ -1,5 +1,10 @@
 import { randomUUID } from "node:crypto";
-import type { GitGraphWorkspace } from "@zcode/shared";
+import {
+  resolveGraphParallelPolicy,
+  ZCODE_PRODUCT_FLAVOR,
+  type GitGraphWorkspace,
+  type GraphParallelPolicy,
+} from "@zcode/shared";
 import type {
   IZCodeAgentService,
   IZCodeSessionService,
@@ -30,10 +35,15 @@ export function createGraphEngineeringService(options: {
   settingService: ISettingService;
   gitService: IGitService;
   cleanupWorkspace?: (workspace: GitGraphWorkspace) => Promise<GitGraphWorkspace>;
+  /** 仅供测试覆盖；运行时由编译期身份与显式开发 opt-in 决定。 */
+  parallelPolicy?: () => GraphParallelPolicy;
 }) {
   const preflight = createWorkflowPreflight(options);
   const project = createProjectSetupPort(options);
   const graph = new GraphEngineeringService({
+    parallelPolicy:
+      options.parallelPolicy ??
+      (() => resolveGraphParallelPolicy({ flavor: ZCODE_PRODUCT_FLAVOR, env: process.env })),
     parallel: createGraphParallelPort(options),
     preflight,
     checks: project,

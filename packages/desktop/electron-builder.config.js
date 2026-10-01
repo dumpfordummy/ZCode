@@ -657,6 +657,15 @@ export default {
       to: `tools/${toolId}`,
       filter: ["**/*"],
     })),
+    // Graph 内嵌构建身份：由 Graph 构建器在打包前写入，不含安装包自身哈希或任何构建机路径。
+    ...(desktopProductIdentity.flavor === "graph"
+      ? [
+          {
+            from: resolve(desktopPackageRoot, "out/metadata/graph-build-identity.json"),
+            to: "graph-build-identity.json",
+          },
+        ]
+      : []),
   ],
   // postinstall 会先优先复用 node-pty 自带的 Windows 预编译产物，其他平台再按需 electron-rebuild。
   // 打包阶段统一复用安装时准备好的原生文件，避免 electron-builder 再触发一轮不受控的本地编译。
