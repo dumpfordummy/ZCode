@@ -2,7 +2,7 @@
 
 Status: Z8.1 approved (2026-10-01). Z8.2–Z8.5 are **not** approved and not started. [Z8_DELTA_AUDIT.md](Z8_DELTA_AUDIT.md) is the audit record and is not edited by later work; this file records what was approved and what changed relative to the audit's proposals.
 
-Branch policy: Z8.1 work happens on the local branch `claude/z8-1-release-package`, started from the accepted UX integration commit `51f6ed67f63ff3500abca1bd86023f40bb29543d` (the remote-tracking branch `origin/claude/zcde-graph-ux-audit-be80d8` points there; the *local* branch of that name is stale at `8bf69e5`, UX-M2, and was deliberately not used). Normal scoped local commits are allowed. No push, merge, tag, signing, publication or installation.
+Branch policy: Z8.1 work happens on the local branch `claude/z8-1-release-package`, started from the accepted UX integration commit `51f6ed67f63ff3500abca1bd86023f40bb29543d` (the remote-tracking branch `origin/claude/zcde-graph-ux-audit-be80d8` points there; the _local_ branch of that name is stale at `8bf69e5`, UX-M2, and was deliberately not used). Normal scoped local commits are allowed. No push, merge, tag, signing, publication or installation.
 
 ## Approved decisions (Z8.1)
 

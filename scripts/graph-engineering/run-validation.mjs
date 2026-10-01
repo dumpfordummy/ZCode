@@ -1,6 +1,8 @@
-import { spawn } from "node:child_process";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { execFile, spawn } from "node:child_process";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
+import { promisify } from "node:util";
 import { resolveSpawnRuntimeOptions } from "../spawn-command.mjs";
 
 /**
@@ -62,6 +64,7 @@ const SUITES = {
       args: ["--import", "tsx", "--test", "packages/ui/test/*.test.ts"],
       env: { TSX_TSCONFIG_PATH: "packages/ui/tsconfig.json" },
     },
+    { id: "format-scoped", scoped: true },
   ],
   // 已知基线例外：重新测量，不沿用旧数字；失败是基线例外而非通过。
   baseline: [
@@ -75,14 +78,94 @@ const SUITES = {
   ],
 };
 
+const ACCEPTED_BASE = "51f6ed67f63ff3500abca1bd86023f40bb29543d";
+// 审计记录按原样保留，不为格式化而改动。
+const FORMAT_EXCLUDED = new Set(["docs/graph-engineering/z8/Z8_DELTA_AUDIT.md"]);
+
+/**
+ * oxfmt 在 Windows 检出里偏好 CRLF，几乎所有文件都会被 fmt:check 标记，这个信号没有信息量。
+ * 这里按内容检查本里程碑改动的文件：把去掉 CR 的副本交给 oxfmt，格式化结果与原文不同即不符合。
+ */
+async function scopedFormat(step) {
+  const exec = promisify(execFile);
+  const started = Date.now();
+  const git = async (...args) =>
+    (await exec("git", args, { cwd: root, maxBuffer: 64_000_000 })).stdout;
+  const names = new Set([
+    ...(await git("diff", "--name-only", ACCEPTED_BASE)).split("\n"),
+    ...(await git("ls-files", "--others", "--exclude-standard")).split("\n"),
+  ]);
+  const files = [...names].filter(
+    (f) =>
+      f && /\.(ts|tsx|mjs|js|json|md)$/.test(f) && !f.endsWith(".d.ts") && !FORMAT_EXCLUDED.has(f),
+  );
+  const scratch = await mkdtemp(path.join(tmpdir(), "z81-format-"));
+  await writeFile(
+    path.join(scratch, ".oxfmtrc.json"),
+    await readFile(path.join(root, ".oxfmtrc.json")),
+  );
+  const original = new Map();
+  for (const file of files) {
+    let text;
+    try {
+      text = (await readFile(path.join(root, file), "utf8")).replace(/\r\n/g, "\n");
+    } catch {
+      continue; // 已删除的文件
+    }
+    original.set(file, text);
+    await mkdir(path.dirname(path.join(scratch, file)), { recursive: true });
+    await writeFile(path.join(scratch, file), text);
+  }
+  const oxfmt = path.join(root, "node_modules/.bin/oxfmt.cmd");
+  await new Promise((resolve) =>
+    spawn(oxfmt, ["--write", ...original.keys()], {
+      cwd: scratch,
+      shell: true,
+      windowsHide: true,
+    }).on("close", resolve),
+  );
+  const nonconforming = [];
+  for (const [file, text] of original) {
+    const formatted = (await readFile(path.join(scratch, file), "utf8")).replace(/\r\n/g, "\n");
+    if (formatted !== text) nonconforming.push(file);
+  }
+  const log = path.join(outputDirectory, `${suite}-${step.id}-${Date.now()}.log`);
+  await writeFile(
+    log,
+    JSON.stringify(
+      { checked: original.size, nonconforming, excluded: [...FORMAT_EXCLUDED] },
+      null,
+      2,
+    ),
+  );
+  return {
+    id: step.id,
+    command:
+      "oxfmt --write on LF copies of files changed since the accepted baseline; compare ignoring CR",
+    cwd: ".",
+    exitCode: nonconforming.length ? 1 : 0,
+    status: nonconforming.length ? "FAIL" : "PASS",
+    durationMs: Date.now() - started,
+    log: path.relative(outputDirectory, log).split(path.sep).join("/"),
+    counts: { filesChecked: original.size, nonconforming: nonconforming.length },
+  };
+}
+
 function run(step) {
+  if (step.scoped) return scopedFormat(step);
   const log = path.join(outputDirectory, `${suite}-${step.id}-${Date.now()}.log`);
   return new Promise((resolve) => {
     const started = Date.now();
     const chunks = [];
     const child = spawn(step.command, step.args, {
       cwd: root,
-      env: { ...process.env, ZCODE_ENV: "test", ...step.env },
+      // turbo 等本地二进制在 node_modules/.bin（CI 里同样这样加）。
+      env: {
+        ...process.env,
+        PATH: `${path.join(root, "node_modules/.bin")}${path.delimiter}${process.env.PATH ?? ""}`,
+        ZCODE_ENV: "test",
+        ...step.env,
+      },
       windowsHide: true,
       ...resolveSpawnRuntimeOptions(step.command),
     });
@@ -107,6 +190,7 @@ function run(step) {
           testsSkipped: count(/ℹ skipped (\d+)/),
           lintWarnings: count(/Found (\d+) warnings?/),
           lintErrors: count(/Found \d+ warnings? and (\d+) errors?/),
+          formatFlagged: count(/Format issues found in above (\d+) files/),
         },
       });
     });

@@ -16,13 +16,14 @@ Scope is exactly what [Z8_PLAN.md](Z8_PLAN.md) approves. Behavior changes below 
 
 One pure resolver, `resolveGraphParallelPolicy({ flavor, env })`, in `@zcode/shared` (`graph-capabilities.ts`), returns `{ mode: "disabled" | "experimental", source, reason }`.
 
-| Situation | Result |
-| --- | --- |
-| `flavor === "graph"` (the supported package) | `disabled`, `source: "supported-package"`. Environment is **ignored**. |
+| Situation                                           | Result                                                                  |
+| --------------------------------------------------- | ----------------------------------------------------------------------- |
+| `flavor === "graph"` (the supported package)        | `disabled`, `source: "supported-package"`. Environment is **ignored**.  |
 | other flavor, `ZCODE_GRAPH_EXPERIMENTAL_PARALLEL=1` | `experimental`, `source: "development-opt-in"` (explicitly unsupported) |
-| other flavor, anything else | `disabled`, `source: "default"` |
+| other flavor, anything else                         | `disabled`, `source: "default"`                                         |
 
 Owners and enforcement:
+
 - **Host (authority).** `GraphEngineeringService` options carry `parallelPolicy`; omission means `disabled`. `GraphParallelService` rejects with a clear message, in the serialized section before any effect: `save` of a plan with `enabled: true`, `preview`, `prepare`, and `decide` with `approved: true` (plan or integration). Allowed regardless: `get`, `control` (`cancel`, `inspect`, `release`, `cleanup`, `preserve`), and `decide` with `approved: false` (a rejection only stops work). `get` returns the policy as `view.policy`.
 - **UI (projection).** Reads `view.policy`. When disabled: the Advanced toggle is hidden unless historical parallel data exists; the panel explains the policy, disables Save/Preview/Prepare and approval actions, and leaves inspect/cancel/release/cleanup usable. UI never decides policy.
 - **Manifest.** Records the value the builder computes with the same resolver for the Graph flavor.
@@ -33,6 +34,7 @@ Owners and enforcement:
 Traced initialization: (1) `@zcode/shared` `env.ts` reads `ZCODE_ARMS_RUM_ENDPOINT` / `ZCODE_TELEMETRY_REPORT_ENDPOINT` from `process.env` **at module load**; (2) Main `appARMSBootstrap.ts` starts ARMS RUM only when `ZCODE_TELEMETRY_ENABLED && ZCODE_ARMS_RUM_ENDPOINT` and `index.ts` gates stability/resource telemetry the same way; (3) the Host `telemetryCore` sends only when `ZCODE_TELEMETRY_ENABLED && ZCODE_TELEMETRY_REPORT_ENDPOINT`; (4) the agent CLI exports OTLP traces/metrics when `OTEL_EXPORTER_OTLP_*` is present — Main captures those variables (`sanitizeZCodeRuntimeEnvInPlace`) and `buildAgentTelemetrySpawnEnv` re-injects them into the agent process.
 
 Deliberate Graph policy, three independent layers (each sufficient for its own path; none is a claim of zero egress):
+
 - **Entry (before any application import):** the Graph entry removes inherited `ZCODE_ARMS_RUM_ENDPOINT`, `ZCODE_TELEMETRY_REPORT_ENDPOINT`, every `OTEL_*` and `ZCODE_TELEMETRY_*` variable and sets `ZCODE_MODEL_TELEMETRY_ENABLED=0`. The key set is a pure, tested function next to the profile mapping. Child processes inherit the scrubbed environment.
 - **Shared policy (`resolveAutomaticTelemetryPolicy`)**: for the `graph` flavor `ZCODE_TELEMETRY_ENABLED` is `false` and both endpoints are empty even if present. Other flavors compute exactly the previous values.
 - **Agent spawn:** `buildAgentTelemetrySpawnEnv` returns `{}` for the Graph flavor.
@@ -65,3 +67,10 @@ Candidate notes are prepared at `docs/graph-engineering/release-notes/3.14.3-z8.
 ## 9. Acceptance
 
 All items in §7 pass or are reported with the exact reason; the package inspection has zero unexplained hits; two serialized builds from the same clean commit exist side by side with a comparison; the report states the justified status line from the plan and does not claim internal-release readiness.
+
+## 10. Additions made while implementing (recorded so the spec matches the build)
+
+- **Runtime telemetry canary.** Static policy tests are not enough for "inherited settings cannot enable Graph telemetry", so a packaged case (`telemetry-canary`, in the existing detached smoke) launches the packaged app with ARMS, warehouse and OTLP variables pointing at dedicated paths on the loopback fixture, runs one ordinary Chat turn, closes the app, and requires zero hits and no ARMS initialization. A **positive control** (`--telemetry-control`, development build of the ordinary flavor, ARMS endpoint omitted because that SDK fails to initialize in this harness and stops startup) must show hits, otherwise the canary method is not proven. The canary covers those three inherited-setting paths only.
+- **Validation runner** (`run-validation.mjs`) records commands, exit codes, counts and logs, keeps failed attempts, and includes a **scoped format check**: `pnpm fmt:check` flags nearly every file in a Windows checkout because oxfmt prefers CRLF there, so the runner formats LF copies of the files this milestone changed and compares ignoring CR. The audit record is excluded from reformatting.
+- **Upstream identity check** (`upstream-identity-check.mjs`) regenerates the path-level comparison; its output is kept at `evidence/upstream-identity.json`.
+- **Scan-exception format.** An exception is one rule + one exact file + exact matched texts with maximum counts + a written reason; the private-address rule ignores digits inside longer numbers (an SVG path coordinate was a false positive).
