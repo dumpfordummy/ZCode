@@ -18,7 +18,7 @@ const R = GRAPH_NATIVE_REQUIREMENTS;
 const allMethods = [...R.sessionMethods, ...R.recipeMethods];
 function response(
   patch: {
-    protocol?: Partial<typeof R.protocol>;
+    protocol?: Partial<{ name: string; version: number; v4WireVersion: number }>;
     methods?: string[];
     commands?: string[];
     features?: string[];

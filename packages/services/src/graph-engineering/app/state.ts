@@ -11,7 +11,6 @@ import type {
 import { resumableGate } from "../domain/approvals.js";
 import { routeCheckpoint } from "../domain/routing.js";
 import type { GraphPreflightPort } from "./workflow-ports.js";
-import type { GraphRuntimeGate } from "./runtime-ports.js";
 
 export interface GraphOptions extends GraphArtifactOptions {
   /** 并行能力的唯一策略来源；缺省按关闭处理（fail closed）。 */
@@ -19,8 +18,6 @@ export interface GraphOptions extends GraphArtifactOptions {
   parallel?: import("./parallel-ports.js").GraphParallelPort;
   repository: GraphRepository;
   native: GraphNativePort;
-  /** 缺省仅用于不涉及原生边界的测试夹具；生产组合根（node.ts）必须提供。 */
-  runtime?: GraphRuntimeGate;
   evidence?: GraphEvidencePort;
   preflight?: GraphPreflightPort;
   checks?: import("./project-ports.js").GraphChecksPort;
