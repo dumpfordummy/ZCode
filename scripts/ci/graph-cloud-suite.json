@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "description": "CLOUD-BOOTSTRAP-1 Linux PR suite. Every tracked *.test.* file must be selected, excluded with a reason, or listed in notSelected; graph-cloud-suite.mjs fails on any unclassified or stale entry.",
+  "groups": [
+    {
+      "id": "scripts",
+      "description": "Graph engineering script tests (Node test runner, tsx loader for .ts imports).",
+      "env": {},
+      "dirs": [{ "dir": "scripts/graph-engineering", "suffix": ".test.mjs" }],
+      "exclude": [
+        {
+          "file": "scripts/graph-engineering/pre-z8-dotnet-fixture.test.mjs",
+          "reason": "Environment exclusion: requires the .NET SDK (dotnet/vstest) which the Linux Cloud job does not provision; native toolchain tests are out of scope for CLOUD-BOOTSTRAP-1."
+        },
+        {
+          "file": "scripts/graph-engineering/pre-z8-u4-manifest-wait.test.mjs",
+          "reason": "Environment exclusion: launches the Microsoft Edge browser channel (msedge), which the Linux Cloud job does not provision."
+        },
+        {
+          "file": "scripts/graph-engineering/z4-fixture.test.mjs",
+          "reason": "Environment exclusion: spawns dotnet (spawn dotnet ENOENT without the .NET SDK)."
+        },
+        {
+          "file": "scripts/graph-engineering/z5-fixture.test.mjs",
+          "reason": "Environment exclusion: spawns dotnet (spawn dotnet ENOENT without the .NET SDK)."
+        },
+        {
+          "file": "scripts/graph-engineering/z6-fixture.test.mjs",
+          "reason": "Environment exclusion: spawns dotnet in two of three tests (spawn dotnet ENOENT without the .NET SDK)."
+        }
+      ],
+      "expectedSkipped": 0
+    },
+    {
+      "id": "services",
+      "description": "Graph engineering and agent-client service tests plus the protocol interaction registry.",
+      "env": {},
+      "dirs": [
+        { "dir": "packages/services/src/graph-engineering/app", "suffix": ".test.ts" },
+        { "dir": "packages/services/src/graph-engineering/adapters", "suffix": ".test.ts" },
+        { "dir": "packages/services/src/zcode-agent", "suffix": ".test.ts" },
+        { "dir": "packages/services/src/git", "suffix": ".test.ts" },
+        { "dir": "packages/services/test", "suffix": ".test.ts" },
+        {
+          "dir": "apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4",
+          "suffix": ".test.ts"
+        }
+      ],
+      "exclude": [],
+      "expectedSkipped": 4,
+      "skippedNote": "Two tests are Windows-only (read-only replacement) and two need PRE_Z8_TRX_FIXTURE_MANIFEST (an owned genuine fixture receipt); all four skip themselves by design."
+    },
+    {
+      "id": "ui",
+      "description": "UI store, hook and protocol unit tests.",
+      "env": { "TSX_TSCONFIG_PATH": "packages/ui/tsconfig.json" },
+      "dirs": [{ "dir": "packages/ui/test", "suffix": ".test.ts" }],
+      "exclude": [],
+      "expectedSkipped": 0
+    }
+  ],
+  "notSelected": [
+    {
+      "prefix": "docs/graph-engineering/evidence/",
+      "reason": "Byte-preserved historical evidence fixtures; they are inputs to recorded runs, not CI tests."
+    },
+    {
+      "prefix": "apps/zcode-cli/",
+      "reason": "The CLI package has its own runner and toolchain; not selected for CLOUD-BOOTSTRAP-1 (the protocol interaction registry test is selected explicitly in the services group)."
+    }
+  ]
+}

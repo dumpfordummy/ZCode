@@ -1,0 +1,157 @@
+name: Graph cloud PR checks
+
+# CLOUD-BOOTSTRAP-1: portable Linux PR gate for the Graph development integration branch.
+# Spec and owner runbook: docs/graph-engineering/ci/GRAPH_CLOUD_REQUIRED.md
+#
+# Security posture
+# - `pull_request` only (never `pull_request_target`): PR code runs with a read-only token and no secrets.
+# - No third-party Actions: checkout is a plain `git fetch` of the merge commit, the toolchain comes from
+#   the pinned npm packages. There is therefore nothing to SHA-pin; any Action added later must be pinned
+#   to a verified full commit SHA and reviewed by the owner.
+# - Credentials are never persisted: the token is passed to a single `git fetch` through GIT_CONFIG_*
+#   environment variables and is not written to .git/config.
+# - This workflow does not touch the Windows release workflow (graph-windows-release.yml).
+# Changes to this file, scripts/ci/** or the repository rules are gate changes: owner review only,
+# never eligible for unattended self-merge.
+
+on:
+  pull_request:
+    branches:
+      - claude/zcde-graph-ux-audit-be80d8
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: graph-cloud-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  CI: "true"
+  HUSKY: "0"
+  PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out the PR merge commit (no persisted credentials)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/${REPO}.git"
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          echo "::add-mask::$auth"
+          GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.https://github.com/.extraheader \
+            GIT_CONFIG_VALUE_0="AUTHORIZATION: basic ${auth}" \
+            git fetch --no-tags --depth=2 origin "+${GITHUB_SHA}:refs/remotes/origin/pr-merge"
+          git checkout --detach -q "$GITHUB_SHA"
+      - name: Toolchain, locked install and tested identity
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: bash scripts/ci/cloud-setup.sh
+      - name: Typecheck (tsc -b project references; the only emitting step in this job)
+        run: pnpm typecheck
+
+  static-checks:
+    name: static-checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out the PR merge commit (no persisted credentials)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/${REPO}.git"
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          echo "::add-mask::$auth"
+          GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.https://github.com/.extraheader \
+            GIT_CONFIG_VALUE_0="AUTHORIZATION: basic ${auth}" \
+            git fetch --no-tags --depth=2 origin "+${GITHUB_SHA}:refs/remotes/origin/pr-merge"
+          git checkout --detach -q "$GITHUB_SHA"
+      - name: Toolchain, locked install and tested identity
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: bash scripts/ci/cloud-setup.sh
+      # Later steps use !cancelled() so every failure is reported; each failing step still fails the job.
+      - name: Lint (oxlint; warnings are the recorded baseline, errors fail)
+        run: pnpm lint
+      - name: Architecture check scoped to the PR diff
+        if: ${{ !cancelled() }}
+        run: node scripts/ci/architecture-changed.mjs
+      - name: Format check of changed files only (read-only, never rewrites)
+        if: ${{ !cancelled() }}
+        run: node scripts/ci/format-changed.mjs
+      - name: CI script self-tests (includes the aggregator rejection proof)
+        if: ${{ !cancelled() }}
+        run: node --test scripts/ci/*.test.mjs
+
+  graph-tests:
+    name: graph-tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    outputs:
+      ok: ${{ steps.suite.outputs.ok }}
+      tests: ${{ steps.suite.outputs.tests }}
+      pass: ${{ steps.suite.outputs.pass }}
+      fail: ${{ steps.suite.outputs.fail }}
+      cancelled: ${{ steps.suite.outputs.cancelled }}
+      skipped: ${{ steps.suite.outputs.skipped }}
+    steps:
+      - name: Check out the PR merge commit (no persisted credentials)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/${REPO}.git"
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          echo "::add-mask::$auth"
+          GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.https://github.com/.extraheader \
+            GIT_CONFIG_VALUE_0="AUTHORIZATION: basic ${auth}" \
+            git fetch --no-tags --depth=2 origin "+${GITHUB_SHA}:refs/remotes/origin/pr-merge"
+          git checkout --detach -q "$GITHUB_SHA"
+      - name: Toolchain, locked install and tested identity
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: bash scripts/ci/cloud-setup.sh
+      - name: Graph, service and script tests (suite and exclusions in scripts/ci/graph-cloud-suite.json)
+        id: suite
+        run: node scripts/ci/graph-cloud-suite.mjs
+
+  graph-cloud-required:
+    name: graph-cloud-required
+    # always(): a failed, cancelled or skipped prerequisite must fail this job instead of skipping it.
+    if: ${{ always() }}
+    needs: [typecheck, static-checks, graph-tests]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out the PR merge commit (no persisted credentials)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/${REPO}.git"
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          echo "::add-mask::$auth"
+          GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.https://github.com/.extraheader \
+            GIT_CONFIG_VALUE_0="AUTHORIZATION: basic ${auth}" \
+            git fetch --no-tags --depth=1 origin "+${GITHUB_SHA}:refs/remotes/origin/pr-merge"
+          git checkout --detach -q "$GITHUB_SHA"
+      - name: Evaluate mandatory job results
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: node scripts/ci/graph-cloud-gate.mjs
