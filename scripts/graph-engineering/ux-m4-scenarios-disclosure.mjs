@@ -96,4 +96,61 @@ const disclosure = {
   },
 };
 
-export const disclosureScenarios = [disclosure];
+// 冻结来源：披露区头部拥有标题，嵌入的内容不再重复同一标题；独立渲染（预检）不变
+const provenanceRun = () => {
+  const run = approvalWaitRun("run-prov");
+  run.provenance = {
+    digest: "d".repeat(64),
+    unknowns: [],
+    template: {
+      id: "generic",
+      name: "Sequential engineering",
+      version: 2,
+      digest: "a".repeat(64),
+      excluded: [],
+      parameters: {},
+    },
+    environment: {
+      status: "available",
+      configDigest: "c".repeat(64),
+      executables: [],
+      hooks: [],
+      instructions: [],
+      mcp: [],
+      plugins: [],
+      skills: [],
+    },
+    auxiliary: [],
+    models: [],
+    permissions: [],
+    recipes: [],
+    references: [],
+  };
+  return run;
+};
+const provenance = {
+  name: "frozen provenance: the disclosure header owns the title once; the content is unchanged",
+  async run({ page, host, url }) {
+    host.setRuns("A", [provenanceRun()]);
+    await boot(page, host, url);
+    await page.locator('[data-testid="graph-run"][data-run-id="run-prov"]').first().click();
+    await T(page, "graph-run-summary").waitFor();
+    const box = T(page, "graph-frozen-provenance");
+    await box.locator(":scope > summary").click();
+    const titled = box.getByText("Frozen workflow provenance", { exact: true });
+    assert.equal(await titled.count(), 1, "the title appears once");
+    assert.equal(
+      await box.locator(":scope > summary").getByText("Frozen workflow provenance").count(),
+      1,
+    );
+    const content = T(page, "graph-workflow-provenance");
+    assert.equal(await content.locator("h3").count(), 0, "no inner heading when embedded");
+    // the content itself is intact: template name, version, identities and digest
+    const text = await content.innerText();
+    assert.match(text, /Sequential engineering · Version 2/);
+    assert.ok(text.includes("a".repeat(64)), "the template digest is shown");
+    assertClean(host);
+  },
+};
+
+export const disclosureScenarios = [disclosure, provenance];

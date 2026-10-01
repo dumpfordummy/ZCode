@@ -50,7 +50,7 @@ export function GraphRunPanel({
             testId="graph-frozen-provenance"
             title={intl.formatMessage({ id: "graph.z6.provenance" })}
           >
-            <GraphWorkflowProvenance provenance={selectedRun.provenance} />
+            <GraphWorkflowProvenance provenance={selectedRun.provenance} embedded />
           </GraphDisclosure>
         </GraphDisclosureStack>
       ) : null}

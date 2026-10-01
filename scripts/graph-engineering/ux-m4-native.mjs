@@ -220,6 +220,18 @@ async function statesJourney() {
               .locator("summary", { hasText: "Technical identities and captured facts" })
               .first();
             if (await technical.count()) await technical.click();
+            // 冻结来源：标题只在披露区头部出现一次，嵌入内容没有重复标题
+            if (await T(window, "graph-frozen-provenance").count()) {
+              const box = T(window, "graph-frozen-provenance");
+              assert.equal(
+                await box.getByText("Frozen workflow provenance", { exact: true }).count(),
+                1,
+              );
+              assert.equal(
+                await box.locator('[data-testid="graph-workflow-provenance"] h3').count(),
+                0,
+              );
+            }
             // 披露行是我们自己的行：没有浏览器默认三角，行高不小于 36px
             const rows = await window
               .locator('[data-testid="graph-routing-iterations"] > summary')
