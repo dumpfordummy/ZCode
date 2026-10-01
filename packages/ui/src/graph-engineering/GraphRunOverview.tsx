@@ -7,7 +7,8 @@ import { GraphRunActions, type GraphRunInspection } from "./GraphRunActions.js";
 import { GraphRunBanner, type GraphBannerIcon, type GraphBannerTone } from "./GraphRunBanner.js";
 import { GraphRunStepStrip } from "./GraphRunStepStrip.js";
 import type { GraphPanelProps } from "./graphEngineeringView.js";
-import { graphEvidenceLabels } from "./graphRunPresentation.js";
+import { graphEvidenceLabels, graphStoppedAfterTestFailure } from "./graphRunPresentation.js";
+import { useGraphM4Text } from "./GraphM4Text.js";
 import { graphRequestText } from "./graphRequestText.js";
 import { graphRunOutputs } from "./graphRunOutputs.js";
 import { graphRunResult } from "./graphRunResult.js";
@@ -41,6 +42,7 @@ export function GraphRunOverview({
   onOpenConversation: GraphPanelProps["onOpenConversation"];
 }) {
   const u = useGraphRunText();
+  const m4 = useGraphM4Text();
   const { intl } = useZCodeIntl();
   const summary = useMemo(() => graphRunSummary(run), [run]);
   const evidenceLabels = graphEvidenceLabels(summary.evidence);
@@ -51,6 +53,9 @@ export function GraphRunOverview({
   const step = summary.execution.currentStep;
   const title = graphRequestText(run.definition, summary.requestText).trim().split(/\r?\n/, 1)[0];
   const status = summary.execution.status;
+  const executionText = graphStoppedAfterTestFailure(run, summary.evidence)
+    ? m4("executionTestFailed")
+    : u(`execution.${status}`);
   // 横幅的语气：真正的失败用 danger；需要你处理或结果不确定用 warning；其余是中性/进行中/完成。
   const { tone, icon } = bannerStyle(result.kind, permission.length > 0, gates.length > 0, status);
   const plainTitle =
@@ -119,7 +124,7 @@ export function GraphRunOverview({
           testId="graph-run-execution"
           label={u("execution")}
           state={status}
-          value={u(`execution.${status}`)}
+          value={executionText}
           quiet
         />
         <Fact

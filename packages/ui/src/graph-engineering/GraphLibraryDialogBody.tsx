@@ -20,6 +20,8 @@ export function GraphLibraryDialogBody({
   notices,
   panels,
   footer,
+  tab,
+  onTabChange,
 }: {
   title: string;
   help: string;
@@ -31,6 +33,8 @@ export function GraphLibraryDialogBody({
   notices: ReactNode;
   panels: { versions: ReactNode; use: ReactNode; share: ReactNode; advanced: ReactNode };
   footer: ReactNode;
+  tab: string;
+  onTabChange(tab: string): void;
 }) {
   const m3 = useGraphM3Text();
   return (
@@ -51,7 +55,11 @@ export function GraphLibraryDialogBody({
         <div className="min-h-0 overflow-auto border-b border-border bg-header p-3 md:border-b-0 md:border-r">
           {list}
         </div>
-        <GraphTabs defaultValue="versions" className="flex min-h-0 min-w-0 flex-col">
+        <GraphTabs
+          value={tab}
+          onValueChange={onTabChange}
+          className="flex min-h-0 min-w-0 flex-col"
+        >
           <div className="shrink-0 space-y-3 px-6 pt-4">
             {detail}
             {notices}

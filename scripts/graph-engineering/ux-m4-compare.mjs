@@ -16,6 +16,10 @@ const dirs = {
   afterMain: path.resolve(arg("after-main")),
   afterFailure: path.resolve(arg("after-failure")),
 };
+const labelBefore = arg("label-before") ?? "BEFORE — UX-M3 build";
+const labelAfter = arg("label-after") ?? "AFTER — UX-M4 build";
+const onlySize = arg("size");
+const onlyScreens = arg("screens")?.split(",");
 const out = path.resolve(
   arg("out") ?? path.join(root, "docs/graph-engineering/ux-audit/ux-m4/compare"),
 );
@@ -29,15 +33,15 @@ const screens = [
 const data = async (file) => `data:image/png;base64,${(await readFile(file)).toString("base64")}`;
 const browser = await chromium.launch({ channel: "msedge", headless: true });
 try {
-  for (const size of ["1280x720", "1920x1080"])
+  for (const size of onlySize ? [onlySize] : ["1280x720", "1920x1080"])
     for (const theme of ["dark", "light"])
-      for (const [key, title, group] of screens) {
+      for (const [key, title, group] of screens.filter(([name]) => !onlyScreens || onlyScreens.includes(name))) {
         const file = `${key}-${theme}-${size}.png`;
         const before = path.join(group === "main" ? dirs.beforeMain : dirs.beforeFailure, file);
         const after = path.join(group === "main" ? dirs.afterMain : dirs.afterFailure, file);
         const cols = [
-          ["BEFORE — UX-M3 build", await data(before)],
-          ["AFTER — UX-M4 build", await data(after)],
+          [labelBefore, await data(before)],
+          [labelAfter, await data(after)],
         ];
         const page = await browser.newPage({ viewport: { width: 2000, height: 600 } });
         await page.setContent(

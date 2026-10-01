@@ -21,6 +21,7 @@ import {
   questionWaitRun,
 } from "./ux-m1-runs.mjs";
 import { T, boot, openLibrary, openVersions, selectValue } from "./ux-m3-helpers.mjs";
+import { polishScenarios } from "./ux-m4-scenarios-polish.mjs";
 
 const pick = async (page, id) => {
   await page.locator(`[data-testid="graph-run"][data-run-id="${id}"]`).first().click();
@@ -333,6 +334,7 @@ const questionBanner = {
 };
 
 export const checkScenarios = [
+  ...polishScenarios,
   header,
   newRunActions,
   permission,

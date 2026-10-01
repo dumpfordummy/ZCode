@@ -21,6 +21,7 @@ import { GraphContextSection } from "./GraphContextSection.js";
 import { GraphNewRunActions } from "./GraphNewRunActions.js";
 import { useGraphTemplateText } from "./graphTemplateText.js";
 import { useGraphM1Text } from "./GraphM1Text.js";
+import { useGraphM4Text } from "./GraphM4Text.js";
 
 const normalizedBindings = (bindings: TemplateBindings): TemplateBindings => ({
   ...bindings,
@@ -44,6 +45,7 @@ export function GraphTemplateBindings({
   onOpenSetup,
   allowReview = false,
   actionsHost,
+  onOpenUse,
   onInstantiate,
 }: {
   version: GraphTemplateVersion;
@@ -68,6 +70,11 @@ export function GraphTemplateBindings({
   allowReview?: boolean;
   /** UX-M4: the library dialog's fixed footer. The one action bar is rendered there instead of after the form. */
   actionsHost?: HTMLElement | null;
+  /**
+   * UX-M4 (library dialog only): switch to the Use tab, where field-level readiness lives. Absent when
+   * the form is already on screen (Use tab or New run).
+   */
+  onOpenUse?(): void;
   onInstantiate(
     parameters: Record<string, GraphParameterValue>,
     bindings: TemplateBindings,
@@ -78,6 +85,7 @@ export function GraphTemplateBindings({
   const t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
   const u = (key: string) => intl.formatMessage({ id: `graph.preZ8.${key}` });
   const m1 = useGraphM1Text();
+  const m4 = useGraphM4Text();
   const template = version.template;
   const display = useGraphTemplateText();
   const initial = useMemo<GraphTemplateFormDraft>(
@@ -115,14 +123,22 @@ export function GraphTemplateBindings({
   // 处理函数自身也检查，不依赖按钮的禁用样式。
   const occupied = Boolean(admissionReason);
   const actionsBlocked = disabled || occupied || readBlocked || errors.length > 0;
+  // 资料库页脚里的原因只描述“载入设计”这一操作，不用新建运行的审阅措辞；校验与阻止条件不变。
+  const inLibrary = Boolean(actionsHost);
   const blockedReason = disabled
     ? disabledReason || u("creationLocked")
     : occupied
-      ? admissionReason
+      ? inLibrary
+        ? m4("libraryLoadBlockedByRun")
+        : admissionReason
       : readBlocked
         ? u("readChecksFirst")
         : errors.length
-          ? m1("fieldsNeedAttention", { count: errors.length })
+          ? inLibrary
+            ? errors.length === 1
+              ? m4("libraryOneFieldNeedsUse")
+              : m4("libraryFieldsNeedUse", { count: errors.length })
+            : m1("fieldsNeedAttention", { count: errors.length })
           : undefined;
   const blockedBy = disabled
     ? "draft-lock"
@@ -196,7 +212,10 @@ export function GraphTemplateBindings({
       onViewCurrentRun={onViewCurrentRun}
       error={error}
       errorKind={errorKind}
-      onGoToFirstField={errors[0] ? () => focusIssue(errors[0]!) : undefined}
+      onGoToFirstField={
+        errors[0] ? (onOpenUse ? onOpenUse : () => focusIssue(errors[0]!)) : undefined
+      }
+      fieldsAction={onOpenUse ? "open-use" : "first-field"}
     />
   );
   return (

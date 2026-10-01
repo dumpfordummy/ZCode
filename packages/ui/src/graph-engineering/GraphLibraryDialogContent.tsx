@@ -48,6 +48,8 @@ export function GraphLibraryDialogContent({
   viewCurrentRun,
   onOpenInRuns,
   setActionsHost,
+  tab,
+  onTabChange,
 }: {
   workspacePath: string;
   target: GraphWorkspaceTarget;
@@ -74,6 +76,8 @@ export function GraphLibraryDialogContent({
   viewCurrentRun?(): void;
   onOpenInRuns?(): void;
   setActionsHost(node: HTMLElement | null): void;
+  tab: string;
+  onTabChange(tab: string): void;
 }) {
   const { intl } = useZCodeIntl();
   const t = (key: string) => intl.formatMessage({ id: `graph.z6.${key}` });
@@ -83,6 +87,8 @@ export function GraphLibraryDialogContent({
   const shownSaved = saved;
   return (
     <GraphLibraryDialogBody
+      tab={tab}
+      onTabChange={onTabChange}
       title={t("library")}
       help={u("workflowHelp")}
       workspacePath={workspacePath}

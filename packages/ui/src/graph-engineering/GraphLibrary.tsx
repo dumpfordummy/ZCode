@@ -89,6 +89,8 @@ export function GraphLibrary({
   const [open, setOpen] = useState(false);
   // UX-M4：对话框固定页脚的承载节点；使用标签里的操作栏通过 portal 渲染到这里。
   const [actionsHost, setActionsHost] = useState<HTMLElement | null>(null);
+  // UX-M4：对话框的当前标签由这里持有，页脚里的“打开使用”才能切换到“使用”标签。
+  const [libraryTab, setLibraryTab] = useState("versions");
   // UX-M3.2：最近一次创建/新版本/复制的结果，来自服务返回的列表；用户改选后清除。
   const [saved, setSaved] = useState<GraphMutationResult | "unknown" | null>(null);
   const entries = workflow.view?.entries ?? [];
@@ -186,6 +188,7 @@ export function GraphLibrary({
           }}
           allowReview={inline && Boolean(onReview)}
           actionsHost={inline ? null : actionsHost}
+          onOpenUse={inline || libraryTab === "use" ? undefined : () => setLibraryTab("use")}
           onInstantiate={requestInstantiate}
         />
       </>
@@ -252,6 +255,7 @@ export function GraphLibrary({
             disabled={!workflow.supported}
             data-testid="graph-library-open"
             onClick={() => {
+              setLibraryTab("versions");
               setOpen(true);
               void workflow.read();
             }}
@@ -296,6 +300,8 @@ export function GraphLibrary({
                     : undefined
                 }
                 setActionsHost={setActionsHost}
+                tab={libraryTab}
+                onTabChange={setLibraryTab}
               />
             </DialogContent>
           </Dialog>

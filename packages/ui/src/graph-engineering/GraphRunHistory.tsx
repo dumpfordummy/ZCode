@@ -7,6 +7,8 @@ import { graphHistoryPage, graphRunsNewestFirst } from "./graphRunHistoryView.js
 import { useGraphM2Text, useGraphTime } from "./GraphM2Text.js";
 import { useGraphRunText } from "./GraphRunText.js";
 import { graphRunEvidence } from "./graphRunEvidence.js";
+import { graphStoppedAfterTestFailure } from "./graphRunPresentation.js";
+import { useGraphM4Text } from "./GraphM4Text.js";
 import { graphFocusClass } from "./graphFocus.js";
 import { graphRequestText } from "./graphRequestText.js";
 
@@ -75,6 +77,7 @@ export function GraphRunHistory({
   const t = (id: string) => intl.formatMessage({ id: `graph.${id}` });
   const u = useGraphRunText();
   const m2 = useGraphM2Text();
+  const m4 = useGraphM4Text();
   const time = useGraphTime();
   const ordered = useMemo(() => graphRunsNewestFirst(runs), [runs]);
   const [requestedPage, setPage] = useState(
@@ -150,7 +153,9 @@ export function GraphRunHistory({
                     </div>
                   ) : null}
                   <div className="break-words text-ui-sm text-foreground-subtle">
-                    {u(`execution.${run.status}`)}
+                    {graphStoppedAfterTestFailure(run, evidence)
+                      ? m4("executionTestFailed")
+                      : u(`execution.${run.status}`)}
                   </div>
                   <div
                     className="truncate text-ui-sm text-foreground-subtle"

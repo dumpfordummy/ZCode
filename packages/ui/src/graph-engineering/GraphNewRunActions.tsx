@@ -20,6 +20,7 @@ export function GraphNewRunActions({
   onSave,
   onViewCurrentRun,
   onGoToFirstField,
+  fieldsAction = "first-field",
   error,
   errorKind = "review",
 }: {
@@ -31,6 +32,8 @@ export function GraphNewRunActions({
   onSave(): void;
   onViewCurrentRun?(): void;
   onGoToFirstField?(): void;
+  /** UX-M4: in the library dialog off the Use tab the way to the missing fields is "Open Use". */
+  fieldsAction?: "first-field" | "open-use";
   /** A failed instantiate/preflight, shown here so it is seen next to the action that caused it. */
   error?: string;
   /** UX-M2.3: which admission step failed, for the UI-owned framing above the verbatim message. */
@@ -111,10 +114,12 @@ export function GraphNewRunActions({
           {blockedBy === "fields" && onGoToFirstField ? (
             <Button
               variant="outline"
-              data-testid="graph-go-to-first-field"
+              data-testid={
+                fieldsAction === "open-use" ? "graph-library-open-use" : "graph-go-to-first-field"
+              }
               onClick={onGoToFirstField}
             >
-              {m1("goToFirstField")}
+              {fieldsAction === "open-use" ? m4("openUse") : m1("goToFirstField")}
             </Button>
           ) : null}
         </div>

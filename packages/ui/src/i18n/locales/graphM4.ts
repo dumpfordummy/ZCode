@@ -10,6 +10,27 @@ const messages: Record<string, [string, string]> = {
   tabRequest: ["Request and result", "请求与结果"],
   tabEvidence: ["Evidence", "证据"],
   tabTechnical: ["Technical details", "技术详情"],
+  // 资料库对话框的页脚：载入设计这一操作自己的阻止原因，不使用新建运行的“审阅”措辞。
+  libraryFieldsNeedUse: [
+    "{count} required fields need configuration in Use",
+    "“使用”标签中有 {count} 项必填内容需要配置",
+  ],
+  libraryOneFieldNeedsUse: [
+    "1 required field needs configuration in Use",
+    "“使用”标签中有 1 项必填内容需要配置",
+  ],
+  libraryLoadBlockedByRun: [
+    "Load into design is unavailable while a run owns this workspace.",
+    "有运行占用此工作区时，无法载入设计。",
+  ],
+  openUse: ["Open Use", "打开“使用”"],
+  // 正在查看的运行就是等待你的那个：条带只是指路，操作在该运行的横幅里。
+  needsYouHere: [
+    "This run is waiting for you. Its banner below has the action.",
+    "此运行正在等你处理，操作在下方它的横幅里。",
+  ],
+  // 一次 Test 失败后运行在到达人工批准之前停止：执行事实按字面写。
+  executionTestFailed: ["Stopped after Test failure", "测试失败后停止"],
   // 新建运行：就绪只表示可以进入审阅，不表示检查通过。
   readyToReview: [
     "Ready to review. Nothing starts until you confirm.",
