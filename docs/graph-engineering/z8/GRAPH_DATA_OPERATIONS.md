@@ -118,6 +118,8 @@ Three situations are reported differently. In all of them the file is **not** re
 
 Instruction contracts: attempts prepared by this build carry `instructionContract: 2`. Attempts written by older releases carry no marker and are accepted only if they equal, exactly and completely, the instructions reconstructed under one of the two known historical formats (before and after the evidence-contract suffix). A format marker and a local comparison are consistency checks, **not** proof of who wrote the data.
 
+**Rollback.** A record containing attempts marked with `instructionContract` is rejected by older strict readers (builds before the Z8.2 correction), so reinstalling an older binary does not restore access to such data. Rolling back requires data taken before those attempts were written (a snapshot or your own backup), and everything recorded after that point is lost. There is no supported rollback procedure yet.
+
 The workflow-library file has its own version field; the newer-version handling above covers workspace records only.
 
 ## 7. Not covered

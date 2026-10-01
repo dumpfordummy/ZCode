@@ -2,6 +2,8 @@
 
 **Final Z8.2 status: Z8.2 HISTORICAL UPGRADE AND CONSERVATIVE RECOVERY VERIFIED — SECURITY AND INSTALL ACCEPTANCE PENDING.**
 
+**Scope of the status.** "Verified" means: for the supported record formats and for the 15 genuine z2.2/z7.5 data sets, the synthetic cases and the focused tests listed below. It does not mean every possible historical profile, workspace shape or release was tested.
+
 This file has two parts. **Part A** reports the approved compatibility and recovery correction and carries the final status. **Part B** is the first Z8.2 report, preserved as written; its blocker (two genuine z7.5 records that the current build could not read) is what Part A fixes. Nothing was installed, signed, tagged, published, pushed or merged; Z8.3–Z8.5 were not started. This is **not** installer-upgrade acceptance, and security acceptance is pending.
 
 # Part A — compatibility and recovery correction
@@ -137,6 +139,25 @@ New or extended focused tests in this correction: `instruction-contract.test.ts`
 - A process kill during a record write, a full disk, restore on non-Windows (the read-only failure test is Windows-only).
 - Newer-version handling for `workflow-library.json`.
 - The cause of the two old-driver failures (A8) and the original `z75-build-test-completed` log.
+
+## A12. Closeout: identities and open gates
+
+**Provenance (kept separate; the binary was not built from a later docs commit).**
+
+| Identity                                               | Value                                                                                                                                                                                             |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Corrected binary build-source (`dist-graph-z82c`)      | `7df406255093e83f7907779a53e1103c4f524663`                                                                                                                                                        |
+| Packaged harness-source (recorded by the packaged run) | `8898c1d0b2474e3a84bd55a9a3c1dd4607715d99`                                                                                                                                                        |
+| Final validation-source (all suites, clean tree)       | `a4bef48917d03053608778ae4721d87d6c5848a0`                                                                                                                                                        |
+| Last report-content commit before closeout             | `ce93a72a690aa606d8ff84f96c001a7305817f8e`                                                                                                                                                        |
+| Branch tip                                             | the commit that contains this section; its full SHA is given in the handoff message and by `git rev-parse` on `claude/z8-2-upgrade-recovery` (a document cannot name the commit that contains it) |
+| Original candidate (preserved)                         | `dist-graph-z82`, build-source `8188a88d817784f98326d5badc167db29b244e92`                                                                                                                         |
+
+Commits after `7df4062` change only the harness driver, tests, evidence and documentation; no product source.
+
+**Rollback and downgrade.** Older strict readers (the original Z8.2 candidate and earlier) reject any record whose attempts carry `instructionContract`, so data written or continued by this build cannot simply be opened by reinstalling an older binary. A future rollback procedure must use compatible data (a snapshot or backup taken before this build wrote marked attempts) and must say what later history is lost. Reinstalling an older binary alone is not a safe rollback procedure. No such procedure exists yet.
+
+**Release gaps that remain open.** Installer (NSIS) upgrade over an installed app; native-session migration; explicit continuation of a historical run in the packaged app; security review (Z8.3), install and signing acceptance (Z8.4+); the other items listed under A11. Nothing here is an internal-release approval.
 
 ---
 
