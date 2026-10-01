@@ -119,6 +119,9 @@ async function main() {
   const outDir = process.env.RUNNER_TEMP ?? os.tmpdir();
   const resultsDir = path.join(outDir, "graph-cloud-results");
   await mkdir(resultsDir, { recursive: true });
+  // pre-z8-u2/u3 的 fixture 以仓库根的 .tmp（已被 git 忽略的本地暂存目录）为父目录并要求它已存在；
+  // 全新检出里没有它，开发机上则是此前运行留下的。这里只创建空目录，不改动任何测试或断言。
+  await mkdir(path.join(repoRoot, ".tmp"), { recursive: true });
 
   const results = [];
   for (const group of manifest.groups) {

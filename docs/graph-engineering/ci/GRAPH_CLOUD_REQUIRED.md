@@ -57,6 +57,9 @@ not run, so native setup is incomplete by design**; nothing in the selected suit
     `packages/services/test`, and the CLI protocol `interaction-registry.test.ts`. Expected skips: 4 (two Windows-only,
     two requiring `PRE_Z8_TRX_FIXTURE_MANIFEST`; all self-skip by design).
   - `ui`: `packages/ui/test/*.test.ts` with `TSX_TSCONFIG_PATH=packages/ui/tsconfig.json`.
+  - Preparation: the runner creates the git-ignored, empty `<repo>/.tmp` directory first. The pre-z8 u2/u3 fixtures
+    use it as their parent and fail with `ENOENT` in a fresh checkout without it (found by a fresh-clone dry run).
+    No test or assertion is changed.
   - Every tracked `*.test.*` file must be selected, excluded with a reason, or covered by `notSelected`; an
     unclassified or stale entry fails the suite.
 
