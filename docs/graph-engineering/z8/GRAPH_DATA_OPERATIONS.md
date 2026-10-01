@@ -57,7 +57,7 @@ Use this only when you decide an automatically reconciled record should be repla
    node --import tsx scripts/graph-engineering/graph-record-restore.mjs list "%USERPROFILE%\.zcode-graph-engineering\home\.zcode\v2\graph-engineering"
    ```
 
-   The output shows each workspace key, the record's version and status summary, and every snapshot (id, bytes, modified time, record version).
+   The output shows each workspace key, the record's version and status summary, and every snapshot (id, bytes, modified time). The id is the SHA-256 of the snapshot's bytes.
 
 3. Restore one snapshot (an id or a unique prefix of at least 8 characters):
 

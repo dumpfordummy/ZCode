@@ -91,7 +91,7 @@ async function runFixture(id, base = fixtureRoot) {
       const oldHome = path.dirname(workspacePath);
       assert.equal(
         path.dirname(oldHome) === tmpdir() &&
-          /^zcode-graph-acceptance-/.test(path.basename(oldHome)),
+          path.basename(oldHome).startsWith("zcode-graph-acceptance-"),
         true,
         `${workspacePath} already exists and is not a leftover acceptance home`,
       );
@@ -294,7 +294,6 @@ const results = [];
 for (const id of ids) {
   const result = await runFixture(id, base);
   results.push(result);
-  const { files, ...summary } = result;
   console.log(
     `${result.outcome.padEnd(5)} ${id.padEnd(52)} ${result.class ?? "-"} ${result.statusesBefore.join("|")} -> ${result.statusesAfter?.join("|") ?? "?"}${result.problems?.length ? "  PROBLEMS: " + result.problems.join("; ") : ""}${result.error ? "  ERROR: " + result.error.split("\n")[0] : ""}`,
   );
@@ -306,7 +305,7 @@ await writeFile(
     {
       exe: path.relative(root, exe),
       generatedAt: new Date().toISOString(),
-      results: results.map(({ files, ...rest }) => rest),
+      results: results.map((result) => ({ ...result, files: undefined })),
     },
     null,
     2,

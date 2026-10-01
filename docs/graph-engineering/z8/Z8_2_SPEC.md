@@ -27,7 +27,7 @@ At most **20** snapshots are kept per workspace directory. After a successful sn
 
 `scripts/graph-engineering/graph-record-restore.mjs` (run with `node --import tsx`, the repository toolchain):
 
-- `list <graph-dir>` — lists workspace records (key, record version, run count/status summary) and each one's snapshots (id, bytes, modified time, record version).
+- `list <graph-dir>` — lists workspace records (key, record version, run count/status summary) and each one's snapshots (id, bytes, modified time).
 - `restore <graph-dir> --workspace-key <exact key> --snapshot <id or unique prefix> [--yes]`.
 
 Restore refuses unless the Graph app/Host is closed: it takes the same ownership lock; if it cannot, it exits nonzero and changes nothing. Then: validate the selected snapshot with the same parser as `read` (strict schema, integrity, workspace key match, definition validation) → snapshot the **current** record bytes (even if damaged or unparseable) into the same store → atomically replace the record with the snapshot's exact bytes → release the lock. It never touches artifacts, credentials, native sessions, project files or `.zcode/config.json`. All tests use disposable synthetic data.
@@ -78,3 +78,10 @@ If product code changes (it does), one local candidate `3.14.3-z8.2` is built wi
 - **Z8-A05** migration/backup failure and restore: sections 2–4, 8.
 
 Installer upgrade (NSIS over an installed app) remains out of reach for Z8.2 and is not claimed.
+
+## 12. Implementation notes (added after the work; the contract above is unchanged)
+
+- The upgrade matrix runs the unpacked candidate through the harness `createIsolation` with an `adoptWorkspace` option, because a record's identity is its workspace path; the synthetic workspace is recreated at that path.
+- For non-terminal fixtures the matrix allows only reconciliation-written differences (`runs.N.status|message|updatedAt`, `resumeRequired`, a parallel run's `phase|message|updatedAt`) and requires every run in the record to be visible in the UI. A record the current build cannot show is classified `UNINTERPRETABLE` and must fail closed (bytes unchanged, no snapshot, no work); it is reported as a GAP, never edited. Two genuine z7.5 records fall in this class (see `Z8_2_REPORT.md`).
+- Historical fixtures are stored `-text` and excluded from the formatters (`.gitattributes`, `.oxfmtrc.json`, `run-validation.mjs`) so that their recorded hashes remain true.
+- The restore listing reports snapshot id (the SHA-256 of its bytes), size and modification time.
