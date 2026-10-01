@@ -26,6 +26,12 @@ export interface NodeProviderConfigRuntimeOptions {
     EndpointScopedZCodeBuiltinSourceOptions,
     "bundledFilePath"
   >;
+  /**
+   * 自动（启动时与每 60 秒的后台）Built-in 目录刷新是否允许；由自动网络策略的
+   * `builtinProviderCatalog` 裁决传入。false 时只使用 Bundled/Active 文件，不下载、不重试；
+   * 显式 `refreshZCodeBuiltin()`（用户在设置页触发的强制刷新）不受影响。省略保持既有行为。
+   */
+  readonly automaticZCodeBuiltinRefresh?: boolean;
   readonly onZCodeBuiltinRefreshError?: (error: unknown) => void;
   readonly onPersonalConfigRecovery?: (event: PersonalProviderConfigRecoveryEvent) => void;
   readonly onPersonalConfigPollingError?: (error: unknown) => void;
@@ -46,6 +52,7 @@ export class NodeProviderConfigRuntime {
   readonly #personalRepository: NodePersonalProviderConfigRepository;
   readonly #remoteSynchronizer?: ZCodeBuiltinRemoteSynchronizer;
   readonly #onRemoteRefreshError?: (error: unknown) => void;
+  readonly #automaticBuiltinRefresh: boolean;
   #startPromise: Promise<void> | null = null;
   #disposed = false;
   readonly #checkListeners = new Set<() => Promise<void>>();
@@ -72,6 +79,7 @@ export class NodeProviderConfigRuntime {
           })
         : undefined;
     this.#onRemoteRefreshError = options.onZCodeBuiltinRefreshError;
+    this.#automaticBuiltinRefresh = options.automaticZCodeBuiltinRefresh !== false;
     this.#personalRepository = new NodePersonalProviderConfigRepository({
       filePath: options.personalFilePath,
       onRecovery: options.onPersonalConfigRecovery,
@@ -112,9 +120,11 @@ export class NodeProviderConfigRuntime {
       if (this.#disposed) return;
       void this.#checkBackground();
       // Managed Worker 无下载配置也无恢复 owner，不建立周期任务。
+      // 自动刷新被策略拒绝时，只有本地的恢复 listener 才需要周期任务，不再为下载保留计时器。
       if (
-        this.#remoteSynchronizer ||
-        this.#zcodeBuiltinSource instanceof EndpointScopedZCodeBuiltinSource ||
+        (this.#automaticBuiltinRefresh &&
+          (this.#remoteSynchronizer ||
+            this.#zcodeBuiltinSource instanceof EndpointScopedZCodeBuiltinSource)) ||
         this.#checkListeners.size > 0
       ) {
         this.#checkTimer = setInterval(() => {
@@ -142,7 +152,8 @@ export class NodeProviderConfigRuntime {
     if (this.#disposed) return Promise.resolve();
     if (this.#checkInFlight) return this.#checkInFlight;
     const check = Promise.allSettled([
-      this.refreshZCodeBuiltin(),
+      // 后台检查属于自动请求：策略拒绝时跳过下载，但本地恢复 listener 照常运行。
+      this.#automaticBuiltinRefresh ? this.refreshZCodeBuiltin() : Promise.resolve("skipped"),
       ...[...this.#checkListeners].map((listener) => Promise.resolve().then(listener)),
     ])
       .then((results) => {

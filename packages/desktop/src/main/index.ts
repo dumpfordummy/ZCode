@@ -69,6 +69,7 @@ import {
   PlatformChannels,
   ZCODE_ENV,
   ZCODE_PRODUCT_FLAVOR,
+  resolveAutomaticNetworkPolicy,
   DEFAULT_ZCODE_ENDPOINT_ORIGIN,
   DEFAULT_LOCALE,
   ZCODE_VERSION,
@@ -790,10 +791,13 @@ const remoteSessionManager = createRemoteWorkspaceSessionManager({
 
 const deviceMid = ensureDesktopDeviceMidSync();
 // 帮助配置是公开读取，不能复用下面附带账号鉴权的灰度响应缓存。
+// Z8.3-N1：自动网络请求策略的唯一裁决点；Graph 下帮助配置与灰度 rollout 都不发起请求，使用随包默认值。
+const automaticNetworkPolicy = resolveAutomaticNetworkPolicy(ZCODE_PRODUCT_FLAVOR);
 const readHelpConfig = createDesktopHelpConfigReader({
   appVersion: ZCODE_VERSION || app.getVersion(),
   deviceMid,
   resolveEndpointOrigin: resolveCurrentZCodeEndpointOrigin,
+  automaticFetchAllowed: automaticNetworkPolicy.helpConfig,
 });
 // 同一个 /api/v1/client/configs fetcher 供两个灰度 rollout 共用（请求参数与鉴权完全一致，
 // 各自独立缓存/去重，服务端按 data.configs.<key> 区分功能）。
@@ -805,10 +809,12 @@ const electronClientConfigsFetcher = createElectronDesktopContextPromptConfigFet
 desktopContextPromptRollout = createDesktopContextPromptRollout({
   fetchConfig: electronClientConfigsFetcher,
   logger,
+  automaticFetchAllowed: automaticNetworkPolicy.desktopRollout,
 });
 const rendererActionTraceRollout = createRendererActionTraceRollout({
   fetchConfig: electronClientConfigsFetcher,
   logger,
+  automaticFetchAllowed: automaticNetworkPolicy.desktopRollout,
 });
 const localTtftExporter = createLocalTtftExporter({
   env: { ...hostProcessLocalEnv, ...process.env },

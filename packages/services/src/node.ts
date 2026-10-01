@@ -18,6 +18,8 @@ import { getAppConfigDir as resolveAppConfigDir } from "./paths.js";
 import {
   buildLocalMediaPreviewUrl,
   isProviderProvisioningAccountCredentialKey,
+  resolveAutomaticNetworkPolicy,
+  ZCODE_PRODUCT_FLAVOR,
   type ProviderProvisioningTrigger,
 } from "@zcode/shared";
 
@@ -350,6 +352,7 @@ import { createBroadcastService } from "./broadcast/broadcastService.js";
 import { createZCodeAgentService } from "./zcode-agent/zcodeAgentService.js";
 import type { ZCodeAgentCommandResolver } from "./zcode-agent/zcodeAgentProcessManager.js";
 import { buildAgentTelemetrySpawnEnv } from "./zcode-agent/agentTelemetryEnv.js";
+import { buildAgentAutomaticNetworkEnv } from "./zcode-agent/agentNetworkPolicyEnv.js";
 import { resolveZCodeAgentPresentationSurface } from "./zcode-agent/zcodeAgentPresentationSurface.js";
 import { createZCodeTaskServiceAdapter } from "./zcode-agent/zcodeTaskServiceAdapter.js";
 import { createZCodeSessionService } from "./zcode-session/zcodeSessionService.js";
@@ -1542,6 +1545,9 @@ export function createLocalServices(options: {
           platform: clientConfigPlatform,
         }),
     },
+    // Z8.3-N1：Graph 只使用随包 Built-in 目录；设置页的显式刷新（refreshSources, force）不受影响。
+    automaticZCodeBuiltinRefresh:
+      resolveAutomaticNetworkPolicy(ZCODE_PRODUCT_FLAVOR).builtinProviderCatalog,
     onZCodeBuiltinRefreshError: (error) => {
       providerConfigLog.warn(undefined, "ZCode Built-in Config 远端刷新失败", { error });
     },
@@ -2242,6 +2248,8 @@ export function createLocalServices(options: {
         // 上面 cuaProductHelperEnv 已完成代际校验与 unavailable 兜底，取代 staging 侧
         // 直接调用 buildCuaProductHelperAgentEnv 的旧路径。
         ...cuaProductHelperEnv,
+        // Z8.3-N1：Host 是自动网络策略的唯一裁决方，经既有 spawn 环境通道把被拒绝的类别下发给 Agent。
+        ...buildAgentAutomaticNetworkEnv(),
         ...buildAgentTelemetrySpawnEnv({
           deviceMid: telemetryDeviceMid,
           runtimeSurface: options?.agentRuntimeContext?.runtimeSurface ?? "remote_workspace_host",

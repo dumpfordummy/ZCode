@@ -1,3 +1,4 @@
+import { FEEDBACK_SUBMISSION_AVAILABLE } from "@/feedback/feedbackAvailability.js";
 import { redactFeedbackText } from "@zcode/shared";
 import { useCallback, useEffect, useRef } from "react";
 import { AlertTriangleIcon, LoaderIcon } from "lucide-react";
@@ -132,17 +133,19 @@ export function RemoteConnectionConnectingStep({
           >
             <AlertTriangleIcon className="mt-0.5 size-4 shrink-0" />
             <span className="min-w-0 flex-1">{errorMessage}</span>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                void handleOpenFeedback();
-              }}
-              className="h-7 shrink-0 border-warning/30 text-warning hover:bg-warning/10"
-            >
-              {intl.formatMessage({ id: "remoteConnection.feedback" })}
-            </Button>
+            {FEEDBACK_SUBMISSION_AVAILABLE ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  void handleOpenFeedback();
+                }}
+                className="h-7 shrink-0 border-warning/30 text-warning hover:bg-warning/10"
+              >
+                {intl.formatMessage({ id: "remoteConnection.feedback" })}
+              </Button>
+            ) : null}
           </div>
         ) : null}
       </div>

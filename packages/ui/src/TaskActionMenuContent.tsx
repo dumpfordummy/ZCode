@@ -1,3 +1,4 @@
+import { FEEDBACK_SUBMISSION_AVAILABLE } from "@/feedback/feedbackAvailability.js";
 import { TID_V4_TASK_OPEN_IN_SPLIT } from "@zcode/shared";
 
 interface TaskActionMenuItemProps {
@@ -196,7 +197,7 @@ export function TaskActionMenuContent({
           </Item>
         </>
       ) : null}
-      {onOpenTaskFeedback ? (
+      {onOpenTaskFeedback && FEEDBACK_SUBMISSION_AVAILABLE ? (
         <>
           <Separator />
           <Item disabled={taskTargetActionsDisabled} onSelect={onOpenTaskFeedback}>

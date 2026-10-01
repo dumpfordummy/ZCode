@@ -1,3 +1,4 @@
+import { FEEDBACK_SUBMISSION_AVAILABLE } from "@/feedback/feedbackAvailability.js";
 import type { ZCodeTaskMeta } from "@zcode/shared";
 import {
   ContextMenuContent,
@@ -173,10 +174,14 @@ export function GroupedTaskContextMenuContent({
       >
         {intl.formatMessage({ id: "appHeader.copySessionId" })}
       </ContextMenuItem>
-      <ContextMenuSeparator />
-      <ContextMenuItem onSelect={onOpenTaskFeedback}>
-        {intl.formatMessage({ id: "taskList.feedback" })}
-      </ContextMenuItem>
+      {FEEDBACK_SUBMISSION_AVAILABLE ? (
+        <>
+          <ContextMenuSeparator />
+          <ContextMenuItem onSelect={onOpenTaskFeedback}>
+            {intl.formatMessage({ id: "taskList.feedback" })}
+          </ContextMenuItem>
+        </>
+      ) : null}
     </ContextMenuContent>
   );
 }

@@ -2,6 +2,7 @@
 // 与 plugins.ts（安装/市场/启停等管理面）分文件：本查询是会话/草稿 Picker 的只读投影，
 // 且 plugins.ts 已接近 max-lines 门禁。
 import {
+  resolveAutomaticNetworkPolicyFromEnv,
   ZCODE_OFFICIAL_PLUGIN_MARKETPLACE_ID,
   zcodeProtocolNotifications,
   zcodePluginsReferenceCatalogParamsSchema,
@@ -138,6 +139,16 @@ export async function resolveSuggestedPluginReference(
 
   const initial = readState();
   if (initial.entry) return toResult(initial.entry);
+
+  // Z8.3-N1：Host 经 spawn 环境下发的自动网络策略（Graph 拒绝 pluginMarketplace）。
+  // 本地没有该推荐插件时，这里的官方目录刷新是自动请求；拒绝则不请求，并按「禁止用旧快照安装」的既有语义报不可用。
+  // 用户在插件商店的显式刷新走 plugins/marketplace/update，不经过此处。
+  if (!resolveAutomaticNetworkPolicyFromEnv(process.env).pluginMarketplace) {
+    return unavailable(
+      "plugin_suggested_reference_refresh_disabled",
+      "官方插件目录的自动刷新在此产品中不可用，且本地没有该插件",
+    );
+  }
 
   // 旧流程只有官方 Marketplace 刷新完成后才把 missing 结果返回 UI，网络等待期间
   // 没有任何反馈，用户会误以为点击未生效。首次本地检查缺失后先通知同一 operation 进入 loading。

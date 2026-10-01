@@ -63,6 +63,8 @@ function resolveDesktopContextPromptConfig(payload: unknown): DesktopContextProm
 export function createDesktopContextPromptRollout(options: {
   fetchConfig: (signal: AbortSignal) => Promise<unknown>;
   logger: DesktopContextPromptRolloutLogger;
+  /** 自动网络策略的裁决（`desktopRollout`），必须显式传入；false 时不发请求。 */
+  automaticFetchAllowed: boolean;
   timeoutMs?: number;
   cacheTtlMs?: number;
 }): DesktopContextPromptRollout {
@@ -72,6 +74,7 @@ export function createDesktopContextPromptRollout(options: {
     logTag: "desktop-context-prompt",
     fetchConfig: options.fetchConfig,
     logger: options.logger,
+    automaticFetchAllowed: options.automaticFetchAllowed,
     timeoutMs: options.timeoutMs,
     cacheTtlMs: options.cacheTtlMs,
   });

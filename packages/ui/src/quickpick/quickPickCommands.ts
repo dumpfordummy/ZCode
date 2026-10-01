@@ -1,3 +1,5 @@
+import { FEEDBACK_SUBMISSION_AVAILABLE } from "@/feedback/feedbackAvailability.js";
+
 export type QuickPickCommandIcon =
   | "book"
   | "browser"
@@ -229,24 +231,26 @@ export function createQuickPickCommands({
     },
   ];
 
-  commands.push({
-    id: "feedback",
-    sectionId: "app",
-    titleId: "quickPick.command.feedback",
-    icon: "feedback",
-    keywords: [
-      "feedback",
-      "issue",
-      "support",
-      "tickets",
-      "问题上报",
-      "问题反馈",
-      "反馈",
-      "我的反馈",
-      "工单",
-    ],
-    run: handlers.openFeedback,
-  });
+  // Z8.3-N1：Graph 不提供 Feedback 提交/上传，命令面板也不列出该入口。
+  if (FEEDBACK_SUBMISSION_AVAILABLE)
+    commands.push({
+      id: "feedback",
+      sectionId: "app",
+      titleId: "quickPick.command.feedback",
+      icon: "feedback",
+      keywords: [
+        "feedback",
+        "issue",
+        "support",
+        "tickets",
+        "问题上报",
+        "问题反馈",
+        "反馈",
+        "我的反馈",
+        "工单",
+      ],
+      run: handlers.openFeedback,
+    });
 
   if (canOpenCommunity) {
     commands.push({
