@@ -4,7 +4,6 @@ const fs = require("node:fs");
 const path = require("node:path");
 const out = process.env.PROBE_OUT;
 const ud = process.env.PROBE_UD;
-const ud2 = process.env.PROBE_UD2;
 app.setPath("userData", ud);
 app.disableHardwareAcceleration();
 const result = { electron: process.versions.electron, chrome: process.versions.chrome, node: process.versions.node, platform: process.platform };
