@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
+import { createRequire } from "node:module";
 import { createReadStream } from "node:fs";
 import { readdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -73,10 +74,10 @@ export async function hashTree(root, files) {
   return { count: list.length, bytes, digest: digest.digest("hex"), files: entries };
 }
 
-async function git(root, args) {
+async function git(root, args, { trim = true } = {}) {
   try {
     const { stdout } = await execFileAsync("git", args, { cwd: root, maxBuffer: 64_000_000 });
-    return stdout.trim();
+    return trim ? stdout.trim() : stdout;
   } catch {
     return undefined;
   }
@@ -91,7 +92,10 @@ export async function readUpstreamReference(root) {
 
 export async function collectSourceIdentity(root, reference) {
   const commit = await git(root, ["rev-parse", "HEAD"]);
-  const status = (await git(root, ["status", "--porcelain=v1", "--untracked-files=all"])) ?? "?";
+  // 不能 trim：porcelain 每行以状态列开头（可能是空格），整体 trim 会吃掉第一行的前导空格。
+  const status =
+    (await git(root, ["status", "--porcelain=v1", "--untracked-files=all"], { trim: false })) ??
+    "?";
   const dirtyPaths = status
     .split(/\r?\n/)
     .filter(Boolean)
@@ -129,7 +133,7 @@ export async function protocolVersions(root) {
   return {
     zcode: await read("packages/shared/src/zcode-protocol/index.ts", "ZCODE_PROTOCOL_VERSION"),
     v4Wire: await read(
-      "packages/shared/src/zcode-protocol-v4/index.ts",
+      "packages/shared/src/zcode-protocol-v4/core.ts",
       "V4_WIRE_PROTOCOL_VERSION",
     ),
   };
@@ -137,7 +141,8 @@ export async function protocolVersions(root) {
 
 async function installedVersion(root, from, name) {
   try {
-    const manifest = path.join(root, from, "node_modules", name, "package.json");
+    // pnpm 提升后依赖可能在根 node_modules；按 Node 的解析规则从该包出发查找。
+    const manifest = createRequire(path.join(root, from, "package.json")).resolve(`${name}/package.json`);
     return (await readJson(manifest)).version;
   } catch {
     return undefined;

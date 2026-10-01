@@ -319,3 +319,48 @@ test("the committed scan exceptions are narrow, explained and exact", async () =
   const keys = file.exceptions.map((e) => `${e.rule}|${e.file}`);
   assert.equal(new Set(keys).size, keys.length, "one entry per rule and file");
 });
+
+test("recorded protocol and toolchain versions are real numbers and strings, not blanks", async () => {
+  const { collectToolchain, protocolVersions } = await import("./release-manifest.mjs");
+  const protocol = await protocolVersions(root);
+  assert.ok(Number.isInteger(protocol.zcode) && Number.isInteger(protocol.v4Wire));
+  const toolchain = await collectToolchain(root, "10.33.2");
+  for (const key of ["node", "pnpm", "electron", "electronBuilder", "zcodeCli"])
+    assert.match(String(toolchain[key]), /^\d+\.\d+\.\d+/, key);
+});
+
+test("source identity lists dirty paths exactly, including a leading-space status line", async () => {
+  const { execFile } = await import("node:child_process");
+  const { promisify } = await import("node:util");
+  const { collectSourceIdentity } = await import("./release-manifest.mjs");
+  const run = promisify(execFile);
+  const repo = await mkdtemp(path.join(tmpdir(), "graph-source-identity-"));
+  try {
+    const git = (...args) =>
+      run("git", ["-c", "user.name=t", "-c", "user.email=t@example.invalid", ...args], { cwd: repo });
+    await git("init", "-q");
+    await writeFile(path.join(repo, "tracked.txt"), "one\n");
+    await git("add", "tracked.txt");
+    await git("commit", "-q", "-m", "init");
+    const reference = { contentReference: { tag: "v0", sha: "f".repeat(40), scope: "synthetic" } };
+    const clean = await collectSourceIdentity(repo, reference);
+    assert.equal(clean.dirty, false);
+    assert.equal(clean.mergeBase, "unavailable");
+    assert.equal(clean.contentReference.presentInRepository, false);
+    await writeFile(path.join(repo, "tracked.txt"), "two\n");
+    await writeFile(path.join(repo, "new.txt"), "x\n");
+    const dirty = await collectSourceIdentity(repo, reference);
+    assert.equal(dirty.dirty, true);
+    assert.deepEqual([...dirty.dirtyPaths].sort(), ["new.txt", "tracked.txt"]);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("every development-evidence reference in the capability table points at an existing file", async () => {
+  const { access } = await import("node:fs/promises");
+  const policies = await resolvePackagePolicies(root);
+  for (const capability of buildCapabilityTable({ policies, packagedCases: {} }))
+    for (const reference of capability.devVerified)
+      await access(path.join(root, reference)).catch(() => assert.fail(`${capability.id}: ${reference}`));
+});
