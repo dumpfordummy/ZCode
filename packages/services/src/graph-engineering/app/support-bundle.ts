@@ -16,7 +16,25 @@ import {
   GRAPH_SUPPORT_BUNDLE_SCHEMA_VERSION,
   type GraphSupportBundleSection,
 } from "../support-bundle-types.js";
-import type { GraphRecordInventoryEntry } from "./ports.js";
+import type { GraphRecord } from "./ports.js";
+
+/**
+ * 只读的记录清单（既有 GraphRepository 的扩展，不是第二个仓库）。仓库按自己的磁盘布局列出 `<sha256(workspace key)>.json`
+ * 记录，并用与 read 相同的 schema 与版本边界解析；不做对账、不取得所有权、不写任何文件。
+ * `record` 只在 `readStatus === "ok"` 时存在，仅供 Host 内存里的投影使用。
+ * 放在本文件而不是 ports.ts：ports.ts 是 sequencer 等核心文件的传递依赖，不为只读诊断功能改它。
+ */
+export interface GraphRecordInventoryEntry {
+  /** 记录文件名中的 sha256（即 workspaceHash）。 */
+  hash: string;
+  bytes: number;
+  readStatus: "ok" | "unsupported-newer-version" | "integrity-error" | "invalid";
+  storedVersion: number | null;
+  record?: GraphRecord;
+}
+export interface GraphRecordInventory {
+  inventory(): Promise<GraphRecordInventoryEntry[]>;
+}
 
 /** 非记录存储的形状：只有存在性、大小、数量；由适配器通过 stat/目录列表得到。 */
 export interface GraphStoreShapes {

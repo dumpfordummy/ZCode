@@ -4,7 +4,6 @@ import {
   ZCODE_PRODUCT_FLAVOR,
   type GitGraphWorkspace,
   type GraphParallelPolicy,
-  type ZCodeProductFlavor,
 } from "@zcode/shared";
 import type {
   IZCodeAgentService,
@@ -39,8 +38,6 @@ export function createGraphEngineeringService(options: {
   cleanupWorkspace?: (workspace: GitGraphWorkspace) => Promise<GitGraphWorkspace>;
   /** 仅供测试覆盖；运行时由编译期身份与显式开发 opt-in 决定。 */
   parallelPolicy?: () => GraphParallelPolicy;
-  /** 仅供测试覆盖；运行时使用编译期产品身份。 */
-  supportBundleFlavor?: ZCodeProductFlavor;
 }) {
   const preflight = createWorkflowPreflight(options);
   const project = createProjectSetupPort(options);
@@ -76,10 +73,6 @@ export function createGraphEngineeringService(options: {
     id: randomUUID,
     now: Date.now,
   });
-  const supportService = createGraphSupportService({
-    directory: options.directory,
-    repository,
-    ...(options.supportBundleFlavor ? { flavor: options.supportBundleFlavor } : {}),
-  });
+  const supportService = createGraphSupportService({ directory: options.directory, repository });
   return Object.assign(graph, { workflowService, supportService });
 }

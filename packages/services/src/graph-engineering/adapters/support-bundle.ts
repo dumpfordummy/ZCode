@@ -15,8 +15,11 @@ import {
   type GraphParallelPolicy,
   type ZCodeProductFlavor,
 } from "@zcode/shared";
-import type { GraphRepository } from "../app/ports.js";
-import { buildSupportBundle, type GraphSupportBundleFacts } from "../app/support-bundle.js";
+import {
+  buildSupportBundle,
+  type GraphRecordInventory,
+  type GraphSupportBundleFacts,
+} from "../app/support-bundle.js";
 import type { IGraphSupportService } from "../support-contract.js";
 import { GraphSupportBundleError, serializeSupportBundle } from "../domain/support-bundle.js";
 import {
@@ -64,7 +67,7 @@ export function defaultSupportBundleFacts(
  */
 export function createGraphSupportService(options: {
   directory: string;
-  repository: GraphRepository;
+  repository: GraphRecordInventory;
   flavor?: ZCodeProductFlavor;
   parallelPolicy?: () => GraphParallelPolicy;
   facts?: (flavor: ZCodeProductFlavor) => GraphSupportBundleFacts;

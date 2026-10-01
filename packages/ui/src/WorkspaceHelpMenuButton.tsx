@@ -53,7 +53,7 @@ export function WorkspaceHelpMenuButton({
   const openFeedbackSubmit = useFeedbackStore((state) => state.openSubmit);
   const openFeatureRequest = useFeedbackStore((state) => state.openFeatureRequest);
   const [supportBundleOpen, setSupportBundleOpen] = useState(false);
-  // Z8.3-S1：本地支持包只在 Graph 内部版、平台能保存文件、且 Host 提供 Graph 服务时出现。
+  // Z8.3-S1：本地支持包只在 Graph 内部版、平台能保存文件、且 Host 提供支持服务时出现。
   const supportBundleAvailable =
     GRAPH_SUPPORT_BUNDLE_AVAILABLE &&
     Boolean(platform.saveFile) &&
@@ -76,113 +76,106 @@ export function WorkspaceHelpMenuButton({
   };
 
   return (
-    <>
-      <DropdownMenu>
-        <ControlHintTooltip title={helpMenuLabel} side="bottom">
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-md"
-              // Settings 页会把帮助按钮绝对定位在 Electron 顶部拖拽区上方。
-              // 只依赖外层容器 no-drag 时，真实 trigger 仍可能被标题栏 drag 区吞掉点击。
-              className={cn(
-                "text-foreground hover:bg-hover hover:text-foreground [app-region:no-drag]",
-                className,
-              )}
-              aria-label={helpMenuLabel}
-              data-testid={TID_WORKSPACE_HELP_MENU_TRIGGER}
-            >
-              <CircleHelpIcon className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-        </ControlHintTooltip>
-        <DropdownMenuContent
-          align="end"
-          className="min-w-0 w-max [&_[data-slot=dropdown-menu-item]]:pr-6"
-        >
-          <DropdownMenuItem onSelect={helpMenuActions.openProductDocs}>
-            <BookOpenIcon className="size-4" />
-            {intl.formatMessage({ id: "workspaceHeader.help.docs" })}
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={handleOpenCommunity}>
-            <UsersIcon className="size-4" />
-            {intl.formatMessage({ id: "workspaceHeader.help.community" })}
-          </DropdownMenuItem>
-          {/* Z8.3-N1：Graph 不提供 Feedback 提交/上传，两个入口都不显示。 */}
-          {FEEDBACK_SUBMISSION_AVAILABLE ? (
-            <>
-              <DropdownMenuItem onSelect={helpMenuActions.openIssueReport}>
-                <MessageSquareIcon className="size-4" />
-                {intl.formatMessage({ id: "workspaceHeader.help.issueReport" })}
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={openFeatureRequest}>
-                <LightbulbIcon className="size-4" />
-                {intl.formatMessage({
-                  id: "workspaceHeader.help.productRequest",
-                })}
-              </DropdownMenuItem>
-            </>
-          ) : null}
-          {supportBundleAvailable ? (
-            <DropdownMenuItem
-              data-testid="graph-support-bundle-menu-item"
-              onSelect={() => setSupportBundleOpen(true)}
-            >
-              <FileJsonIcon className="size-4" />
-              {intl.formatMessage({ id: "graph.s1.menu" })}
+    <DropdownMenu>
+      <ControlHintTooltip title={helpMenuLabel} side="bottom">
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-md"
+            // Settings 页会把帮助按钮绝对定位在 Electron 顶部拖拽区上方。
+            // 只依赖外层容器 no-drag 时，真实 trigger 仍可能被标题栏 drag 区吞掉点击。
+            className={cn(
+              "text-foreground hover:bg-hover hover:text-foreground [app-region:no-drag]",
+              className,
+            )}
+            aria-label={helpMenuLabel}
+            data-testid={TID_WORKSPACE_HELP_MENU_TRIGGER}
+          >
+            <CircleHelpIcon className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+      </ControlHintTooltip>
+      <DropdownMenuContent
+        align="end"
+        className="min-w-0 w-max [&_[data-slot=dropdown-menu-item]]:pr-6"
+      >
+        <DropdownMenuItem onSelect={helpMenuActions.openProductDocs}>
+          <BookOpenIcon className="size-4" />
+          {intl.formatMessage({ id: "workspaceHeader.help.docs" })}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={handleOpenCommunity}>
+          <UsersIcon className="size-4" />
+          {intl.formatMessage({ id: "workspaceHeader.help.community" })}
+        </DropdownMenuItem>
+        {/* Z8.3-N1：Graph 不提供 Feedback 提交/上传，两个入口都不显示。 */}
+        {FEEDBACK_SUBMISSION_AVAILABLE ? (
+          <>
+            <DropdownMenuItem onSelect={helpMenuActions.openIssueReport}>
+              <MessageSquareIcon className="size-4" />
+              {intl.formatMessage({ id: "workspaceHeader.help.issueReport" })}
             </DropdownMenuItem>
-          ) : null}
-          {/* Windows/Linux 没有原生菜单栏，自绘标题栏箭头菜单也已下线，
+            <DropdownMenuItem onSelect={openFeatureRequest}>
+              <LightbulbIcon className="size-4" />
+              {intl.formatMessage({ id: "workspaceHeader.help.productRequest" })}
+            </DropdownMenuItem>
+          </>
+        ) : null}
+        {supportBundleAvailable ? (
+          <DropdownMenuItem
+            data-testid="graph-support-bundle-menu-item"
+            onSelect={() => setSupportBundleOpen(true)}
+          >
+            <FileJsonIcon className="size-4" />
+            {intl.formatMessage({ id: "graph.s1.menu" })}
+          </DropdownMenuItem>
+        ) : null}
+        {/* Windows/Linux 没有原生菜单栏，自绘标题栏箭头菜单也已下线，
             资源管理器只能从这里进；Web 端没有该窗口，不渲染。 */}
-          {isDesktop ? (
-            <>
-              <DropdownMenuSeparator />
+        {isDesktop ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              data-testid={TID_WORKSPACE_HELP_MENU_RESOURCE_MANAGER}
+              onSelect={handleOpenResourceManager}
+            >
+              <ActivityIcon className="size-4" />
+              {intl.formatMessage({ id: "titleBar.menu.help.resourceManager" })}
+            </DropdownMenuItem>
+            {updateMenu.visible ? (
               <DropdownMenuItem
-                data-testid={TID_WORKSPACE_HELP_MENU_RESOURCE_MANAGER}
-                onSelect={handleOpenResourceManager}
+                disabled={updateMenu.disabled}
+                onSelect={updateMenu.checkForUpdates}
               >
-                <ActivityIcon className="size-4" />
-                {intl.formatMessage({
-                  id: "titleBar.menu.help.resourceManager",
-                })}
+                <RefreshCwIcon className="size-4" />
+                {updateMenu.labelId === "desktopMenu.help.restartToUpdate" ? (
+                  <>
+                    <span className="whitespace-nowrap">
+                      {intl.formatMessage({ id: "desktopMenu.help.restartUpdateAction" })}
+                    </span>
+                    <Badge
+                      variant="secondary"
+                      className="h-4 px-1.5 py-0 bg-success/10 text-success"
+                    >
+                      {updateMenu.labelValues?.version}
+                    </Badge>
+                  </>
+                ) : (
+                  intl.formatMessage({ id: updateMenu.labelId }, updateMenu.labelValues)
+                )}
               </DropdownMenuItem>
-              {updateMenu.visible ? (
-                <DropdownMenuItem
-                  disabled={updateMenu.disabled}
-                  onSelect={updateMenu.checkForUpdates}
-                >
-                  <RefreshCwIcon className="size-4" />
-                  {updateMenu.labelId === "desktopMenu.help.restartToUpdate" ? (
-                    <>
-                      <span className="whitespace-nowrap">
-                        {intl.formatMessage({
-                          id: "desktopMenu.help.restartUpdateAction",
-                        })}
-                      </span>
-                      <Badge
-                        variant="secondary"
-                        className="h-4 px-1.5 py-0 bg-success/10 text-success"
-                      >
-                        {updateMenu.labelValues?.version}
-                      </Badge>
-                    </>
-                  ) : (
-                    intl.formatMessage({ id: updateMenu.labelId }, updateMenu.labelValues)
-                  )}
-                </DropdownMenuItem>
-              ) : null}
-              <DropdownMenuItem onSelect={handleShowAbout}>
-                <InfoIcon className="size-4" />
-                {intl.formatMessage({ id: "titleBar.menu.help.about" })}
-              </DropdownMenuItem>
-            </>
-          ) : null}
-        </DropdownMenuContent>
-      </DropdownMenu>
+            ) : null}
+            <DropdownMenuItem onSelect={handleShowAbout}>
+              <InfoIcon className="size-4" />
+              {intl.formatMessage({ id: "titleBar.menu.help.about" })}
+            </DropdownMenuItem>
+          </>
+        ) : null}
+      </DropdownMenuContent>
+      {/* 对话框是 DropdownMenu 的兄弟内容而不在 Content 里：菜单关闭后对话框仍保持挂载。 */}
       {supportBundleAvailable ? (
         <GraphSupportBundleDialog open={supportBundleOpen} onOpenChange={setSupportBundleOpen} />
       ) : null}
-    </>
+    </DropdownMenu>
   );
 }

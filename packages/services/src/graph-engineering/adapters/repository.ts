@@ -14,7 +14,8 @@ import { isZCodeFileLockTimeoutError } from "@zcode/shared";
 import { acquireFileLock, atomicWritePrivateTextFile } from "@zcode/shared/node";
 
 import type { GraphWorkspaceTarget } from "../contract.js";
-import type { GraphRecord, GraphRecordInventoryEntry, GraphRepository } from "../app/ports.js";
+import type { GraphRecord, GraphRepository } from "../app/ports.js";
+import type { GraphRecordInventory, GraphRecordInventoryEntry } from "../app/support-bundle.js";
 import { validateDefinition, workspaceKey } from "../domain/definition.js";
 
 /**
@@ -123,7 +124,7 @@ export const workspaceHash = (target: GraphWorkspaceTarget) =>
 export function createGraphRepository(
   directory: string,
   options: { snapshotIo?: SnapshotIo } = {},
-): GraphRepository {
+): GraphRepository & GraphRecordInventory {
   const pathFor = (target: GraphWorkspaceTarget) =>
     join(directory, `${workspaceHash(target)}.json`);
   const snapshots = createReconcileSnapshotStore(directory, options.snapshotIo);

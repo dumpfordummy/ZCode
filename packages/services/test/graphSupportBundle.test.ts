@@ -701,7 +701,7 @@ test("Graph-only availability; Production, Preview and unknown flavors refuse be
     await assert.rejects(
       createGraphSupportService({
         directory: profile.graphDir,
-        repository: { read: async () => null, write: async () => {} },
+        repository: {} as never,
         flavor: "graph",
         facts: () => FACTS,
       }).supportBundle(),
@@ -729,8 +729,6 @@ test("unreadable data, oversize and malformed records become fixed, path-free ou
     const failing = createGraphSupportService({
       directory: profile.graphDir,
       repository: {
-        read: async () => null,
-        write: async () => {},
         inventory: async () => {
           throw new Error(`EACCES: permission denied, open '${secretPath}'`);
         },
@@ -754,8 +752,6 @@ test("unreadable data, oversize and malformed records become fixed, path-free ou
     const huge = createGraphSupportService({
       directory: profile.graphDir,
       repository: {
-        read: async () => null,
-        write: async () => {},
         inventory: async () =>
           Array.from({ length: 60_000 }, (_, index) => ({
             hash: sha256(String(index)),
