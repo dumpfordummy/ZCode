@@ -12,7 +12,8 @@ import { hashTree, listFiles } from "./release-manifest.mjs";
  */
 const root = path.resolve(import.meta.dirname, "../..");
 const [first, second, output] = process.argv.slice(2);
-if (!first || !second) throw new Error("usage: compare-builds.mjs <dist-dir-a> <dist-dir-b> [output.json]");
+if (!first || !second)
+  throw new Error("usage: compare-builds.mjs <dist-dir-a> <dist-dir-b> [output.json]");
 const a = path.join(root, "packages/desktop", first);
 const b = path.join(root, "packages/desktop", second);
 const readJson = async (file) => JSON.parse(await readFile(file, "utf8"));
@@ -53,12 +54,20 @@ async function byteDifference(fileA, fileB) {
       }
     offset += x.length;
   }
-  return { differingBytes: differing, firstOffset: first, lastOffset: last, clusters: runs.length, clusterRanges: runs.slice(0, 12) };
+  return {
+    differingBytes: differing,
+    firstOffset: first,
+    lastOffset: last,
+    clusters: runs.length,
+    clusterRanges: runs.slice(0, 12),
+  };
 }
 
 // 把构建标识类差异归一化后再比较：chunk 文件名哈希与 ISO 时间戳。
 const normalize = (text) =>
-  text.replace(/chunk-[A-Z0-9]{8}/g, "chunk-X").replace(/\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d+Z/g, "T");
+  text
+    .replace(/chunk-[A-Z0-9]{8}/g, "chunk-X")
+    .replace(/\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d+Z/g, "T");
 
 async function compareTrees(label, rootA, rootB) {
   const filesA = await listFiles(rootA);
@@ -67,7 +76,9 @@ async function compareTrees(label, rootA, rootB) {
   const treeB = await hashTree(rootB, filesB);
   const onlyA = filesA.filter((f) => !treeB.files[f]);
   const onlyB = filesB.filter((f) => !treeA.files[f]);
-  const different = filesA.filter((f) => treeB.files[f] && treeB.files[f].sha256 !== treeA.files[f].sha256);
+  const different = filesA.filter(
+    (f) => treeB.files[f] && treeB.files[f].sha256 !== treeA.files[f].sha256,
+  );
   const details = [];
   for (const file of different) {
     const left = await readFile(path.join(rootA, ...file.split("/")));
@@ -86,7 +97,10 @@ async function compareTrees(label, rootA, rootB) {
         : {
             binary: true,
             ...(left.length === right.length
-              ? await byteDifference(path.join(rootA, ...file.split("/")), path.join(rootB, ...file.split("/")))
+              ? await byteDifference(
+                  path.join(rootA, ...file.split("/")),
+                  path.join(rootB, ...file.split("/")),
+                )
               : {}),
           }),
     });
@@ -97,7 +111,9 @@ async function compareTrees(label, rootA, rootB) {
     return isText(buffer) ? normalize(buffer.toString("utf8")) : buffer.toString("base64");
   };
   const pairs = [];
-  const remainingB = new Map(await Promise.all(onlyB.map(async (f) => [f, await normalizedHash(rootB, f)])));
+  const remainingB = new Map(
+    await Promise.all(onlyB.map(async (f) => [f, await normalizedHash(rootB, f)])),
+  );
   for (const f of onlyA) {
     const key = await normalizedHash(rootA, f);
     const match = [...remainingB].find(([, value]) => value === key);
@@ -120,7 +136,11 @@ async function compareTrees(label, rootA, rootB) {
 
 const manifestA = await readJson(path.join(a, "RELEASE_MANIFEST.json"));
 const manifestB = await readJson(path.join(b, "RELEASE_MANIFEST.json"));
-const unpacked = await compareTrees("win-unpacked", path.join(a, "win-unpacked"), path.join(b, "win-unpacked"));
+const unpacked = await compareTrees(
+  "win-unpacked",
+  path.join(a, "win-unpacked"),
+  path.join(b, "win-unpacked"),
+);
 
 // app.asar 的成员级比较：把两个归档展开到临时目录。
 const asar = createRequire(path.join(root, "packages/desktop/package.json"))("@electron/asar");
@@ -129,7 +149,11 @@ let asarComparison;
 try {
   asar.extractAll(path.join(a, "win-unpacked/resources/app.asar"), path.join(scratch, "a"));
   asar.extractAll(path.join(b, "win-unpacked/resources/app.asar"), path.join(scratch, "b"));
-  asarComparison = await compareTrees("app.asar members", path.join(scratch, "a"), path.join(scratch, "b"));
+  asarComparison = await compareTrees(
+    "app.asar members",
+    path.join(scratch, "a"),
+    path.join(scratch, "b"),
+  );
 } finally {
   await rm(scratch, { recursive: true, force: true });
 }
@@ -149,8 +173,7 @@ const result = {
   sameSourceCommit: manifestA.source.commit === manifestB.source.commit,
   sourceCommit: manifestA.source.commit,
   sourceDirtyAtStart: [manifestA.source.dirty, manifestB.source.dirty],
-  sameLockfiles:
-    JSON.stringify(manifestA.lockfiles) === JSON.stringify(manifestB.lockfiles),
+  sameLockfiles: JSON.stringify(manifestA.lockfiles) === JSON.stringify(manifestB.lockfiles),
   sameToolchain: JSON.stringify(manifestA.toolchain) === JSON.stringify(manifestB.toolchain),
   sameBuildEnvironment:
     JSON.stringify({ ...manifestA.build.environment, ZCODE_DESKTOP_DIST_DIR: 0 }) ===
@@ -158,7 +181,8 @@ const result = {
   installer: {
     a: manifestA.artifact.installer,
     b: manifestB.artifact.installer,
-    byteForByteIdentical: manifestA.artifact.installer.sha256 === manifestB.artifact.installer.sha256,
+    byteForByteIdentical:
+      manifestA.artifact.installer.sha256 === manifestB.artifact.installer.sha256,
   },
   components,
   unpackedTree: unpacked,

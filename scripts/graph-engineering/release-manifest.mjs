@@ -132,17 +132,16 @@ export async function protocolVersions(root) {
   };
   return {
     zcode: await read("packages/shared/src/zcode-protocol/index.ts", "ZCODE_PROTOCOL_VERSION"),
-    v4Wire: await read(
-      "packages/shared/src/zcode-protocol-v4/core.ts",
-      "V4_WIRE_PROTOCOL_VERSION",
-    ),
+    v4Wire: await read("packages/shared/src/zcode-protocol-v4/core.ts", "V4_WIRE_PROTOCOL_VERSION"),
   };
 }
 
 async function installedVersion(root, from, name) {
   try {
     // pnpm 提升后依赖可能在根 node_modules；按 Node 的解析规则从该包出发查找。
-    const manifest = createRequire(path.join(root, from, "package.json")).resolve(`${name}/package.json`);
+    const manifest = createRequire(path.join(root, from, "package.json")).resolve(
+      `${name}/package.json`,
+    );
     return (await readJson(manifest)).version;
   } catch {
     return undefined;

@@ -337,7 +337,9 @@ test("source identity lists dirty paths exactly, including a leading-space statu
   const repo = await mkdtemp(path.join(tmpdir(), "graph-source-identity-"));
   try {
     const git = (...args) =>
-      run("git", ["-c", "user.name=t", "-c", "user.email=t@example.invalid", ...args], { cwd: repo });
+      run("git", ["-c", "user.name=t", "-c", "user.email=t@example.invalid", ...args], {
+        cwd: repo,
+      });
     await git("init", "-q");
     await writeFile(path.join(repo, "tracked.txt"), "one\n");
     await git("add", "tracked.txt");
@@ -362,5 +364,7 @@ test("every development-evidence reference in the capability table points at an 
   const policies = await resolvePackagePolicies(root);
   for (const capability of buildCapabilityTable({ policies, packagedCases: {} }))
     for (const reference of capability.devVerified)
-      await access(path.join(root, reference)).catch(() => assert.fail(`${capability.id}: ${reference}`));
+      await access(path.join(root, reference)).catch(() =>
+        assert.fail(`${capability.id}: ${reference}`),
+      );
 });

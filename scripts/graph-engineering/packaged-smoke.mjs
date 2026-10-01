@@ -83,6 +83,8 @@ for (const scenario of packagedCases.filter((c) => !only || only.includes(c.name
     throw new Error(`Packaged app version does not match ${version}; evidence: ${evidence}`);
 }
 if (failures.length) {
-  process.stdout.write(`Packaged acceptance FAILED cases: ${failures.join(", ")}; evidence: ${output}\n`);
+  process.stdout.write(
+    `Packaged acceptance FAILED cases: ${failures.join(", ")}; evidence: ${output}\n`,
+  );
   process.exitCode = 1;
 } else process.stdout.write(`Packaged acceptance PASS; evidence: ${output}\n`);
