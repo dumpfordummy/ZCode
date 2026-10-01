@@ -6,6 +6,8 @@ Status: bounded implementation of Decision 3 in `Z8_3_DECISIONS.md`. The rest of
 
 electron-builder 26.8.1 writes the `ELECTRONASAR` integrity resource into the Windows executable before `afterPack`. The repo's `afterPack` then rewrites `app.asar` twice, so the recorded header hash is stale. No `electronFuses` is configured, so `EnableEmbeddedAsarIntegrityValidation` stays off.
 
+Observation while implementing (synthetic probe, app-builder-lib 26.8.1 + resedit 1.7.2): calling `addWinAsarIntegrity` a second time on an executable whose existing entry has the same language produced one entry (the later value won), not two. Decision 3's "would duplicate" therefore holds only when an entry with a different language already exists. The design does not depend on either behaviour: the refresh replaces in place, and a second `ELECTRONASAR` entry in any language is rejected as `resource-ambiguous`.
+
 ## Product rules
 
 1. **Graph Windows only.** Everything below applies when the product flavor is `graph` and the electron-builder target is `win32`. Production, Preview, macOS and Linux configurations are byte-for-byte unchanged (no hook behaviour, no fuse setting).
