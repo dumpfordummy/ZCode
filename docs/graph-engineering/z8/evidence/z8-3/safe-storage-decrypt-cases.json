@@ -1,0 +1,55 @@
+{
+  "electron": "41.0.3",
+  "chromium": "146.0.7680.80",
+  "platform": "win32",
+  "synthetic": true,
+  "cases": {
+    "good": {
+      "case": "good",
+      "result": "decrypted-ok"
+    },
+    "tampered": {
+      "case": "tampered",
+      "result": "throws",
+      "message": "Error while decrypting the ciphertext provided to safeStorage.decryptString."
+    },
+    "truncated3": {
+      "result": "PROCESS ABORT (out_of_range in Chromium C++; exit 127)"
+    },
+    "truncated8": {
+      "result": "PROCESS ABORT (out_of_range in Chromium C++; exit 127)"
+    },
+    "truncated15": {
+      "case": "truncated15",
+      "result": "throws",
+      "message": "Error while decrypting the ciphertext provided to safeStorage.decryptString."
+    },
+    "truncatedHalf": {
+      "case": "truncatedHalf",
+      "result": "throws",
+      "message": "Error while decrypting the ciphertext provided to safeStorage.decryptString."
+    },
+    "prefixOnly": {
+      "result": "PROCESS ABORT (out_of_range in Chromium C++; exit 127)"
+    },
+    "garbage": {
+      "case": "garbage",
+      "result": "throws",
+      "message": "Error while decrypting the ciphertext provided to safeStorage.decryptString. Ciphertext does not app"
+    },
+    "empty": {
+      "case": "empty",
+      "result": "returned length 0"
+    },
+    "legacyFormat": {
+      "case": "legacyFormat",
+      "result": "throws",
+      "message": "Error while decrypting the ciphertext provided to safeStorage.decryptString. Ciphertext does not app"
+    },
+    "wrongPrefixSameLength": {
+      "case": "wrongPrefixSameLength",
+      "result": "throws",
+      "message": "Error while decrypting the ciphertext provided to safeStorage.decryptString. Ciphertext does not app"
+    }
+  }
+}

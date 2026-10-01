@@ -1,0 +1,129 @@
+{
+  "electron": "41.0.3",
+  "node": "24.14.0",
+  "results": {
+    "main-net-fetch-http": "status 502",
+    "main-net-fetch-https": "error net::ERR_TUNNEL_CONNECTION_FAILED",
+    "renderer": "error Failed to fetch",
+    "utilityWithoutEnvProxy": {
+      "label": "without NODE_USE_ENV_PROXY",
+      "chromiumNetFetch": "status 502",
+      "nodeFetchLoopback": "status 200",
+      "nodeFetchReservedName": "not attempted (would resolve locally, i.e. not contained)",
+      "rawTcpLoopback": "connected"
+    },
+    "utilityWithEnvProxy": {
+      "label": "with NODE_USE_ENV_PROXY=1",
+      "chromiumNetFetch": "status 502",
+      "nodeFetchLoopback": "error fetch failed",
+      "nodeFetchReservedName": "error fetch failed",
+      "rawTcpLoopback": "connected"
+    }
+  },
+  "proxyEvents": [
+    {
+      "kind": "http",
+      "method": "GET",
+      "target": "http://probe-main.test/ping",
+      "headerNames": [
+        "accept-encoding",
+        "accept-language",
+        "host",
+        "proxy-connection",
+        "user-agent"
+      ]
+    },
+    {
+      "kind": "connect",
+      "target": "probe-main-tls.test:443",
+      "headerNames": [
+        "host",
+        "proxy-connection",
+        "user-agent"
+      ]
+    },
+    {
+      "kind": "http",
+      "method": "GET",
+      "target": "http://probe-renderer.test/ping",
+      "headerNames": [
+        "accept",
+        "accept-encoding",
+        "accept-language",
+        "host",
+        "origin",
+        "proxy-connection",
+        "user-agent"
+      ]
+    },
+    {
+      "kind": "http",
+      "method": "GET",
+      "target": "http://probe-utility-chromium.test/ping",
+      "headerNames": [
+        "accept-encoding",
+        "host",
+        "proxy-connection",
+        "user-agent"
+      ]
+    },
+    {
+      "kind": "http",
+      "method": "GET",
+      "target": "http://probe-utility-chromium.test/ping",
+      "headerNames": [
+        "accept-encoding",
+        "host",
+        "proxy-connection",
+        "user-agent"
+      ]
+    },
+    {
+      "kind": "connect",
+      "target": "127.0.0.1:60934",
+      "headerNames": [
+        "connection",
+        "host",
+        "proxy-connection"
+      ]
+    },
+    {
+      "kind": "connect",
+      "target": "probe-utility-node.test:80",
+      "headerNames": [
+        "connection",
+        "host",
+        "proxy-connection"
+      ]
+    }
+  ],
+  "directEvents": [
+    {
+      "method": "GET",
+      "url": "/node-fetch-loopback",
+      "host": "127.0.0.1:60934"
+    },
+    {
+      "method": "GET",
+      "url": "/raw-tcp"
+    },
+    {
+      "method": "GET",
+      "url": "/raw-tcp"
+    }
+  ],
+  "netlogUrls": [
+    "host:http://probe-main.test",
+    "host:http://probe-renderer.test",
+    "host:http://probe-utility-chromium.test",
+    "host:https://probe-main-tls.test",
+    "host:probe-main-tls.test",
+    "host:probe-main.test",
+    "host:probe-renderer.test",
+    "host:probe-utility-chromium.test",
+    "http://probe-main.test/ping",
+    "http://probe-renderer.test/ping",
+    "http://probe-utility-chromium.test/ping",
+    "https://probe-main-tls.test/ping"
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "schema": "zcode-graph-asar-integrity-check/2",
+  "builds": {
+    "a": {
+      "dist": "dist-graph-z82c",
+      "recordedIntegrity": {
+        "resourceOffset": 221572408,
+        "valueOffset": 221572463,
+        "text": "[{\"file\":\"resources\\\\app.asar\",\"alg\":\"SHA256\",\"value\":\"a5db15a77012fff1704cb3dc92f215dcb1e612598e95565638fc32302d491b29\"}]"
+      },
+      "appAsarHeaderJsonSha256": "32178ad0425ddd45f0823089e257c6c7e77480da172f2fca1728ffee7cd1cc0e",
+      "recordedValueEqualsHeaderJsonSha256": false,
+      "fuses": {
+        "RunAsNode": "1",
+        "EnableCookieEncryption": "0",
+        "EnableNodeOptionsEnvironmentVariable": "1",
+        "EnableNodeCliInspectArguments": "1",
+        "EnableEmbeddedAsarIntegrityValidation": "0",
+        "OnlyLoadAppFromAsar": "0",
+        "LoadBrowserProcessSpecificV8Snapshot": "0",
+        "GrantFileProtocolExtraPrivileges": "1",
+        "fuse8": "1"
+      }
+    },
+    "b": {
+      "dist": "dist-graph-z82",
+      "recordedIntegrity": {
+        "resourceOffset": 221572408,
+        "valueOffset": 221572463,
+        "text": "[{\"file\":\"resources\\\\app.asar\",\"alg\":\"SHA256\",\"value\":\"91428e4bfd38ad4a70f320920410de5140752566410832875857220c9c50c60e\"}]"
+      },
+      "appAsarHeaderJsonSha256": "9d403788592fe6fda7a82bef7f3b830181b62c89f6dc89f018639d4d9ebf2c93",
+      "recordedValueEqualsHeaderJsonSha256": false,
+      "fuses": {
+        "RunAsNode": "1",
+        "EnableCookieEncryption": "0",
+        "EnableNodeOptionsEnvironmentVariable": "1",
+        "EnableNodeCliInspectArguments": "1",
+        "EnableEmbeddedAsarIntegrityValidation": "0",
+        "OnlyLoadAppFromAsar": "0",
+        "LoadBrowserProcessSpecificV8Snapshot": "0",
+        "GrantFileProtocolExtraPrivileges": "1",
+        "fuse8": "1"
+      }
+    }
+  },
+  "findings": {
+    "differingRegionIsTheAsarIntegrityRecord": false,
+    "recordedValuesEqualCurrentHeaderHashes": false,
+    "integrityValidationFuseEnabled": [
+      "0",
+      "0"
+    ]
+  },
+  "note": "Direct reads of the packaged executable and archive. Why a recorded value differs from the archive's current header hash is not determined here."
+}
