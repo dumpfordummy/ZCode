@@ -21,6 +21,7 @@ import { createGraphArtifactStore } from "./adapters/artifacts.js";
 import { createGraphRecipeStore } from "./adapters/recipes.js";
 import { assertWorkspaceFilePath } from "./adapters/artifact-files.js";
 import { createGraphToolPort } from "./adapters/tools.js";
+import { createGraphRuntimeGate } from "./adapters/runtime-gate.js";
 import { createWorkflowPreflight, workflowDigest } from "./adapters/workflow-preflight.js";
 import { createWorkflowStore } from "./adapters/workflow-store.js";
 import { GraphWorkflowService } from "./app/workflow-service.js";
@@ -51,6 +52,7 @@ export function createGraphEngineeringService(options: {
     checks: project,
     repository,
     native: createGraphNativePort(options),
+    runtime: createGraphRuntimeGate(options),
     evidence: createGraphEvidencePort(options.gitService),
     artifacts: createGraphArtifactStore(options.directory),
     reports: createGraphReportCapture(),

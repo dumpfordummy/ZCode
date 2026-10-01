@@ -613,6 +613,10 @@ export interface IZCodeAgentService {
   getWorkspaceRuntimeIdentity(
     params: ZCodeAgentWorkspaceTarget,
   ): Promise<ZCodeAgentWorkspaceRuntimeIdentity>;
+  /** Raw `runtime/capabilities` result of the workspace agent; compatibility is judged by the caller. */
+  readRuntimeCapabilities(
+    params: ZCodeAgentWorkspaceTarget,
+  ): Promise<import("./runtimeCapabilities.js").ZCodeAgentRuntimeCapabilitiesRead>;
   /** Read-only exact-identity query. Null means unproven, never permission to replay or release. */
   getWorkspaceRuntimeRetirement(
     params: ZCodeAgentWorkspaceTarget & { expectedRuntimeIdentity: string },

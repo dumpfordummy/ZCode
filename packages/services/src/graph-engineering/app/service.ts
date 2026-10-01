@@ -185,12 +185,14 @@ export class GraphEngineeringService implements IGraphEngineeringService {
         if (ready.errors.length) throw new Error(ready.errors.join("\n"));
         const toolOnly =
           (definition.version ?? 0) >= 4 && !definition.nodes.some((n) => n.type === "task");
-        const availability =
-          toolOnly && this.state.options.tools
-            ? await this.state.options.tools.available()
-            : await this.state.options.native.available();
+        const useTools = toolOnly && !!this.state.options.tools;
+        const availability = useTools
+          ? await this.state.options.tools!.available()
+          : await this.state.options.native.available();
         if (!availability.available)
           throw new Error(availability.reason ?? "Native agent unavailable.");
+        // 准入阶段核验原生运行时能力：失败时尚无记录、native session 或输入（零副作用）。
+        await this.state.options.runtime?.require(target, useTools ? "tool" : "model");
         run = await createRunPlan(this.state.options, {
           definition,
           target,

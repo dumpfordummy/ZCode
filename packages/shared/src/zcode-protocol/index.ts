@@ -28,6 +28,7 @@ import {
   zcodeRecipeSnapshotSchema,
 } from "../native-recipe.js";
 export * from "../native-recipe.js";
+export * from "../native-runtime-contract.js";
 export * from "../process-diagnostic.js";
 import { errorAttributionSchema } from "../zcode-protocol-v4/snapshot.js";
 import { modelSelectionSchema } from "../model-selection.js";
