@@ -12,6 +12,7 @@ import {
 /* oxlint-disable eslint(max-lines) -- ZCode Protocol transport、通知 wiring 和 app-facing session 方法必须共享同一个 client/emitter 上下文。 */
 import { randomUUID } from "node:crypto";
 import { ensureIndependentPlanSupport } from "./independentPlanSupport.js";
+import { readRuntimeCapabilities } from "./runtimeCapabilities.js";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { Emitter } from "@zcode/rpc";
@@ -3438,6 +3439,10 @@ export function createZCodeAgentService(
       // 查询 runtime identity 只能观察现有进程，不能把 dormant workspace 变成活动进程。
       await getReadOnlyClient(params, "existing-only");
       return await processManager.getRuntimeIdentity(params);
+    },
+
+    async readRuntimeCapabilities(params: ZCodeAgentWorkspaceTarget) {
+      return readRuntimeCapabilities(await getReadOnlyClient(params));
     },
 
     async getWorkspaceRuntimeRetirement(params) {

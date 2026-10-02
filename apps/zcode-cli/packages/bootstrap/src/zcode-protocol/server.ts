@@ -1,7 +1,10 @@
 import { querySessionDebug } from "./session-debug.js";
 import { previewExecutionEnvironment } from "./execution-environment.js";
 import { startNativeRecipe, readNativeRecipe } from "./native-recipe.js";
+import { NATIVE_HANDLERS } from "../zcode-protocol-v4/commands/handlers/index.js";
+import { buildNativeContract } from "../zcode-protocol-v4/native-contract.js";
 import {
+  ZCODE_NATIVE_CONTRACT_KEY,
   zcodePluginsCancelOperationParamsSchema,
   zcodeProtocolMethods,
   zcodeWorkspaceCancelGenerateTextParamsSchema,
@@ -686,7 +689,10 @@ export class ZCodeProtocolAgentServer {
       case zcodeProtocolMethods.processChildProcesses:
         return listChildProcesses(this.context.deps.mcpTelemetry?.listProcesses() ?? []);
       case zcodeProtocolMethods.runtimeCapabilities:
-        return { independentPlanState: true };
+        return {
+          independentPlanState: true,
+          [ZCODE_NATIVE_CONTRACT_KEY]: buildNativeContract(Object.keys(NATIVE_HANDLERS)),
+        };
       case zcodeProtocolMethods.pluginsMarketplaceAdd:
         return await this.withPluginOperationSignal(request, (signal) =>
           addPluginMarketplace(this.context, request.params, signal),

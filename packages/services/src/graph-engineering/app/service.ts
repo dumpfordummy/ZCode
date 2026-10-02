@@ -20,6 +20,7 @@ import { GraphRecovery } from "./recovery.js";
 import { createRunPlan } from "./run-plan.js";
 import { GraphSequencer } from "./sequencer.js";
 import { GraphState, MetadataOwnedElsewhere, type GraphOptions } from "./state.js";
+import type { GraphRuntimeGate } from "./runtime-ports.js";
 import { GraphApprovals } from "./approvals.js";
 import { GraphParallelService } from "./parallel-service.js";
 import { parallelUnresolved } from "../domain/parallel.js";
@@ -29,14 +30,20 @@ import type { GraphInputGuardRequest } from "./ports.js";
 import { checksStartSchema } from "../domain/checks-record.js";
 import { GRAPH_CHECKS_ADMISSION_REJECTED } from "../checks-types.js";
 export type { GraphInputGuardRequest } from "./ports.js";
+export interface GraphServiceOptions extends GraphOptions {
+  /** 缺省仅用于不涉及原生边界的测试夹具；生产组合根（node.ts）必须提供并有测试固定。 */
+  runtime?: GraphRuntimeGate;
+}
 export class GraphEngineeringService implements IGraphEngineeringService {
   readonly parallelService: GraphParallelService;
   private readonly state: GraphState;
   private readonly sequencer: GraphSequencer;
   private readonly recovery: GraphRecovery;
+  private readonly runtime?: GraphRuntimeGate;
   private readonly approvals: GraphApprovals;
   readonly onDidChange;
-  constructor(options: GraphOptions) {
+  constructor(options: GraphServiceOptions) {
+    this.runtime = options.runtime;
     this.state = new GraphState(options);
     this.approvals = new GraphApprovals(this.state);
     this.sequencer = new GraphSequencer(this.state, this.approvals);
@@ -185,12 +192,14 @@ export class GraphEngineeringService implements IGraphEngineeringService {
         if (ready.errors.length) throw new Error(ready.errors.join("\n"));
         const toolOnly =
           (definition.version ?? 0) >= 4 && !definition.nodes.some((n) => n.type === "task");
-        const availability =
-          toolOnly && this.state.options.tools
-            ? await this.state.options.tools.available()
-            : await this.state.options.native.available();
+        const useTools = toolOnly && !!this.state.options.tools;
+        const availability = useTools
+          ? await this.state.options.tools!.available()
+          : await this.state.options.native.available();
         if (!availability.available)
           throw new Error(availability.reason ?? "Native agent unavailable.");
+        // 准入阶段核验原生运行时能力：失败时尚无记录、native session 或输入（零副作用）。
+        await this.runtime?.require(target, useTools ? "tool" : "model");
         run = await createRunPlan(this.state.options, {
           definition,
           target,
