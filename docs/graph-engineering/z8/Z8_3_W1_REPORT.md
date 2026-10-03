@@ -4,6 +4,12 @@ Scope: one hands-on-ready validation of the merged Z8.3-A (ASAR integrity), N1 (
 
 **Headline.** Candidate 1 exposed a real N1 regression: the packaged Graph app sent two automatic `/api/v1/client/configs` requests on cold start. A minimal fix was made, verified by a new candidate 2, and everything except the operator click-through passed on candidate 2. The operator checklist is **OPERATOR-PENDING**.
 
+**Update (CI formatter, candidate 3).** The required CI formatter check (`scripts/ci/format-changed.mjs`) then failed on 28 PR files. Canonicalizing them changed the bytes of one production source file, so candidate 2 is no longer the exact source that will be merged. **Candidate 3 (`3.14.3-z8.303`, source `f7cd061…`) is the final merge candidate**; the targeted validation was rerun on it (§12). The historical sections above describe candidates 1 and 2 and are unchanged.
+
+- **Candidate 1 (`z8.301`) — FAIL on N1.** Exposed the regression. Its failed evidence is kept.
+- **Candidate 2 (`z8.302`) — PASS** after the product fix (automated; operator click-through pending).
+- **Candidate 3 (`z8.303`) — final merge candidate**, created only because CI-required formatting changed the final source bytes after candidate 2. Targeted rerun: PASS. Operator click-through still **OPERATOR-PENDING**.
+
 ## 1. Identity
 
 | Item                       | Value                                                                                                                                                                                                                                                          |
@@ -152,19 +158,20 @@ Candidate 1's failed evidence, exit codes and identity were not overwritten (`c1
 
 ## 10. Remaining manual checklist (OP-1) — OPERATOR-PENDING
 
-One combined session on candidate 2, about 10 minutes. **Not marked passed.** Report each line OK / NOT OK / could not do, plus anything surprising.
+One combined session on the **final candidate 3** (the earlier candidate-2 copy `zw1-operator-c2` is superseded), about 10 minutes. **Not marked passed.** Report each line OK / NOT OK / could not do, plus anything surprising.
 
 Start (PowerShell, repository root of this worktree; fresh synthetic profile, never your own; do **not** run the installer):
 
 ```powershell
+Set-Location C:\Users\USER\Desktop\Personal\ZCode\.claude\worktrees\z8-3-w1-windows-validation-21dcde
 . C:\Users\USER\Desktop\Personal\ZCode\.tmp\z1-env.ps1
-$env:Z1_PACKAGED_EXE = "C:\Users\USER\AppData\Local\Temp\zw1-operator-c2\ZCode Graph.exe"
+$env:Z1_PACKAGED_EXE = "C:\Users\USER\AppData\Local\Temp\zw1-operator-c3\ZCode Graph.exe"
 node scripts/graph-engineering/w1-launch-manual.mjs
 ```
 
-(`zw1-operator-c2` is a hash-identical copy of `dist-graph-w2\win-unpacked`; recreate it with `robocopy packages\desktop\dist-graph-w2\win-unpacked <dest> /E` if the temp folder was cleaned.) The script prepares one completed Tool-only run, prints the profile folder, leaves the app open, and prints the recorder's request list when you quit.
+(`zw1-operator-c3` is a hash-identical copy of `dist-graph-w3\win-unpacked` (86/86 files compared); recreate it with `robocopy packages\desktop\dist-graph-w3\win-unpacked <dest> /E` if the temp folder was cleaned.) The script prepares one completed Tool-only run, prints the profile folder, leaves the app open, and prints the recorder's request list when you quit.
 
-1. Title bar and Help → About show "ZCode Graph", version `3.14.3-z8.302`.
+1. Title bar and Help → About show "ZCode Graph", version `3.14.3-z8.303`.
 2. Help menu (the "?" in the workspace header) has Product docs, User community, Graph support bundle…, Resource manager, About — and no feedback, report-issue or feature-request entry. Also look at the application menu bar → Help.
 3. Help → Graph support bundle…: the dialog opens, the menu is gone, the dialog stays open for 5 s, the preview scrolls, Tab/Escape behave normally.
 4. It lists 8 included categories, a "Not included" paragraph, an exact byte count, the whole JSON and a "nothing is sent" line. No Upload/Send/Submit button.
@@ -180,3 +187,41 @@ node scripts/graph-engineering/w1-launch-manual.mjs
 - This report, the plan (with its addendum), the W1 drivers (`scripts/graph-engineering/w1-*`), the product fix and tests, and the reviewed synthetic evidence in `Z8_3_W1_EVIDENCE/`. Raw evidence, binaries, screenshots and profile folders stay local.
 - One PR into `claude/zcde-graph-ux-audit-be80d8`; not merged and no auto-merge.
 - Open points for a decision, not acted on: (a) whether the remaining Feedback entry points should get a packaged check; (b) whether the other automatic Host-side readers outside the N1 table (none were observed on candidate 2 in the recorded windows) deserve a standing packaged guard; (c) whether to run the full 13-case packaged matrix on candidate 2 before any release step. Z8.4 installer acceptance and release approval remain separate and untouched.
+
+## 12. Candidate 3 — final merge candidate (CI-formatting follow-up)
+
+**Why it exists.** On PR head `271ff67` the required changed-file formatter (`scripts/ci/format-changed.mjs`) reported 28 files not in oxfmt canonical form (static-checks and graph-cloud-required red; typecheck and graph-tests green). Formatting touched one production file (`packages/provider-node/src/provider-config-runtime.ts`, one guard line wrapped), so the candidate-2 bytes are not the bytes that will be merged. Nothing in CI, `.github/**`, `scripts/ci/**` or the formatter configuration was changed.
+
+**Formatting step.** Targets = exactly what the selector picks against base `a3fa063` (60 files, no byte-preserved exclusions applied), formatted with the repository's `oxfmt` (write mode, only those paths; no repository-wide run). 28 files changed: 15 evidence JSON files (parsed deep-equal to the previous commit), markdown (table padding, `_emphasis_`), harness scripts (whitespace/wrapping only, equal after whitespace/paren normalization) and the one production line. Locally 32 files failed because 4 more were CRLF-only on this Windows checkout; they produce no git diff. Verified on an LF export of the commits: the previous commit fails with the same 28 files, `f7cd061` passes. (`format-changed.mjs` itself cannot spawn `pnpm` on Windows, exit 127; `oxfmt` was invoked directly with the same arguments.)
+
+**Source checks on `f7cd061`** (pinned Node 24.14.0 / pnpm 10.33.2, serial): `graphAutomaticNetworkConsumers.test.ts` 17/17 pass; `pnpm typecheck` exit 0; `pnpm lint` exit 0, 0 errors, 75 warnings (baseline); architecture changed-check against `a3fa063`: 60 files, 0 violations, 0 new; `node --test scripts/ci/*.test.mjs` 18/18. The full Cloud suite (`graph-cloud-suite.mjs`) run **locally on Windows** is not a valid gate (its skip counts are Linux-specific) and showed failures unrelated to this change: two Z8.3-A tests (`z8-3-a-windows-asar-*.test.mjs`) import an absolute Windows path as a non-`file://` URL (`ERR_UNSUPPORTED_ESM_URL_SCHEME`), and a 3 s timing-sensitive Production positive control in the services file failed once in the suite and passed in isolation. The authoritative gate for those is GitHub CI on Linux.
+
+| Item                                      | Candidate 3 (`3.14.3-z8.303`, `packages/desktop/dist-graph-w3`)                   |
+| ----------------------------------------- | --------------------------------------------------------------------------------- |
+| Source SHA (clean tree at build start)    | `f7cd061a6cf6c59ba66a636e515554aa805aac7d`                                        |
+| `ZCode Graph.exe`                         | `1b50fa84f45fe4666c3f0eebfc46ea6088c603154aeeb50081ef92ba2a911e91`                |
+| `resources/app.asar`                      | `0127c18ad9caadc386b0e882441076b488cbec2500752609a564943095e4bed7`                |
+| `resources/glm/zcode.cjs` (bundled agent) | `875a139d88a940d55731bca799acb8deaf9b433f454058cd16ecdc570af3967b`                |
+| `resources/graph-build-identity.json`     | `1496d1dcc05d12c32b05d47db6fae1b945034da5234eb4073922faf18ffaec86`                |
+| Installer (**NOT RUN**)                   | `7c42e4b5a0ba20a01f70620830e5d8ad5af8c823b09de904016bb106a78c6386`, 149 906 516 B |
+| ASAR header hash = embedded record        | `96cb3639a46ef5ee895cd8472e89278fcf08261937d588cc7cbb29151a729134` (one record)   |
+| Fuses                                     | identical to candidate 2 (`RunAsNode=1`, integrity validation `=1`, others as §5) |
+
+The bundled agent is byte-identical to candidate 2's (same SHA-256); the build identity names the new commit and `dirty:false`. As before, `build-record.json` lists the eight CLI `dist-types/*.d.ts` files under `sourceAfterBuild` (line endings, restored with `git checkout`, never committed). The frozen directory was never rebuilt or patched; all cases ran from a hash-verified detached copy and the retained package was unchanged afterwards (`retainedUnchanged: true`). Candidates 1 and 2 were not touched. Documentation/evidence commits after `f7cd061` do not change any packaged byte.
+
+**Targeted results (candidate 3).**
+
+| ID    | Case                                                                            | Result                                                                                                     |
+| ----- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| A     | header == embedded record, one record, integrity fuse on, other fuses unchanged | PASS (retained and detached)                                                                               |
+| A-3   | packaged app launches; bundled agent runs through the real runtime path         | PASS                                                                                                       |
+| R-2   | Tool-only workflow, owned harmless fixture, real native process                 | PASS (`processStarted: true`, exit 0, **0 model requests**, 0 agent inputs)                                |
+| R-3   | small normal Graph workflow, loopback model                                     | PASS (`z2-complete`, incl. restart with zero new inputs)                                                   |
+| R-4/5 | smoke subset `ordinary-chat`, `no-provider`, `sequential-engineering-reviewer`  | SUBSET-PASS 3/3 (a subset, not the full gate); reviewer final gate left `WaitingForApproval`, not approved |
+| R-1   | `admission-record` against the real bundled agent                               | PASS (same capability set as §4; still a separate probe, not a tap of the packaged Host)                   |
+| R-6   | negative capability fixtures                                                    | not rerun: formatting only touched `w1-admission.ts`/`w1-agent-recorder.cjs`; candidate 2 results stand    |
+| N-1   | fresh profile, cold start, Help menu, Plugin Store entry, 70 s idle             | PASS: `coldStart`/`helpMenu`/`pluginStoreOpened` empty, 0 automatic requests; case wall time about 89 s    |
+| N-2   | explicit marketplace refresh reaches loopback; user-selected model request      | PASS: `GET /api/v1/client/configs` + CDN `CONNECT` after the click; 2 `POST /v1/chat/completions`          |
+| S     | Help menu, dialog open after menu closes, 8 categories, preview, Cancel/Save As | PASS: 2545 B displayed = previewed = saved (same SHA-256), 13 needles absent, 0 requests, real `#32770`    |
+
+Evidence: `Z8_3_W1_EVIDENCE/dist-graph-w3__c3-attempt1/` (path-sanitized). The limits of §4, §6 and the header apply unchanged: network observation is not all-egress coverage and not OS confinement; raw sockets, MCP, hooks and tools are outside the claim; the other Feedback entry points were not packaged-clicked; the full 13-case matrix was not rerun; the installer was built but never run. **OP-1 remains OPERATOR-PENDING.**

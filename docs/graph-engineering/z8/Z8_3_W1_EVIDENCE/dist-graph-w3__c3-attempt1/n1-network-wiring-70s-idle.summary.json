@@ -1,0 +1,76 @@
+{
+  "case": "n1",
+  "assertions": [
+    "Cold start, Help menu and Plugin Store entry produced no covered automatic config/catalog request; Feedback entries are absent from the Help menu.",
+    "User-selected loopback model traffic still reaches the fixture (chat request recorded)."
+  ],
+  "notes": ["The explicit refresh reached the loopback recorder."],
+  "executable": {
+    "file": "ZCode Graph.exe",
+    "sha256": "1b50fa84f45fe4666c3f0eebfc46ea6088c603154aeeb50081ef92ba2a911e91"
+  },
+  "agentBundle": {
+    "file": "resources/glm/zcode.cjs",
+    "sha256": "875a139d88a940d55731bca799acb8deaf9b433f454058cd16ecdc570af3967b"
+  },
+  "positiveControl": {
+    "recorded": ["/w1-positive-control/http", "CONNECT w1-positive-control.invalid:443"]
+  },
+  "packagedIdentity": {
+    "name": "ZCode Graph",
+    "isPackaged": true,
+    "version": "3.14.3-z8.303"
+  },
+  "stages": {
+    "coldStart": [],
+    "helpMenu": [],
+    "pluginStoreOpened": []
+  },
+  "helpMenu": [
+    "Product docs",
+    "User community",
+    "Graph support bundle…",
+    "Resource manager",
+    "About ZCode"
+  ],
+  "automaticRequests": [],
+  "violations": [],
+  "explicitCatalogRequests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/client/configs?app_version=3.14.3-z8.303&platform=win32-x64"
+    },
+    {
+      "method": "CONNECT",
+      "path": "CONNECT cdn-zcode.z.ai:443"
+    }
+  ],
+  "modelRequestsAfterChat": 2,
+  "status": "PASS",
+  "network": [
+    {
+      "method": "GET",
+      "path": "/api/v1/client/configs?app_version=3.14.3-z8.303&platform=win32-x64",
+      "userAgent": "ZCode/3.14.3-z8.303",
+      "at": 1791043743840
+    },
+    {
+      "method": "CONNECT",
+      "path": "CONNECT cdn-zcode.z.ai:443"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "model": true,
+      "userAgent": "ZCode/3.14.3-z8.303 ai-sdk/provider-utils/4.0.39 runtime/node.js/24",
+      "at": 1791043750760
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "model": true,
+      "userAgent": "ZCode/3.14.3-z8.303 ai-sdk/provider-utils/4.0.39 runtime/node.js/24",
+      "at": 1791043750848
+    }
+  ]
+}
