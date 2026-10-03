@@ -15,7 +15,7 @@ Scope: validation of the merged Z8.3-A, N1, S1 and R1 changes on one real Window
 | Output directory    | `packages/desktop/dist-graph-w1` (new; `dist-graph-a1-*`, `dist-graph-b1/b2` and all Z8.1/Z8.2 evidence untouched)                                              |
 | Build entry         | `node scripts/graph-engineering/build-windows.mjs 3.14.3-z8.301 --dist-dir dist-graph-w1` (existing). The NSIS installer is produced as an artifact and **never run** |
 | Executed copy       | hash-verified detached copy of `win-unpacked` in a fresh temp directory (done by the existing `packaged-smoke.mjs` / the new W1 driver); the retained output is never patched |
-| Component hashes    | `ZCode Graph.exe`, `resources/app.asar`, `resources/agent/glm/zcode.cjs` (actual bundled path is recorded in the report), `resources/graph-build-identity.json`, installer |
+| Component hashes    | `ZCode Graph.exe`, `resources/app.asar`, `resources/glm/zcode.cjs` (actual bundled path is recorded in the report), `resources/graph-build-identity.json`, installer |
 
 ## Build order (serialized; nothing else emits while a step runs)
 
@@ -63,3 +63,18 @@ Not claimed (carried over): all-egress coverage, Windows confinement, raw socket
 The original failure, exit code, candidate identity and logs are kept. Small harness adaptations and focused regression tests are authorized. A product fix needs an explanation first, a new identified candidate, and a rerun of affected cases plus the smoke subset; earlier failed evidence stays.
 
 Raw evidence stays local (gitignored output directory / temp). Only reviewed, path-sanitized, synthetic evidence and the report are committed.
+
+## Addendum 1 (written before the product fix): what candidate 1 showed
+
+Candidate 1 (`3.14.3-z8.301`, source `b43e25c2f32791395c8d7b23a35057757ab77a0a`) passed A (ASAR record = header hash, integrity fuse on), the selected smoke subset, the Tool-only workflow, the normal model workflow and the support-bundle dialog/Save/Cancel path. The N-1 case **failed**: on cold start with synthetic profile and redirected endpoints the packaged Host (utility process; attributed by client port) sent two automatic `GET /api/v1/client/configs` requests, 150 ms apart, before any user action:
+
+1. `platform=windows-x86_64` — the built-in provider catalog download. The Root component calls `providerSettingsService.refresh("root-provider-state-refresh")` at startup; the Host's `refreshSources` always calls `refreshZCodeBuiltin({ force: true })`, and `force` is the N1 "explicit" signal. This is a **regression inside the approved N1 behavior** (class `builtinProviderCatalog`): a startup call arrived under the explicit label.
+2. `platform=win32-x64` — the coding-plan provider's dynamic-workflow (and Off-Peak) client-config read, an automatic read of the same endpoint that `IClientConfigService` gates (class `clientConfig`) but through a second client the N1 table did not list.
+
+Intended minimal fix (no new policy class, no hostname logic, Production/Preview unchanged):
+
+- `NodeProviderConfigRuntime.refreshZCodeBuiltin` accepts `automatic: true`; when the runtime's `automaticZCodeBuiltinRefresh` is denied it skips. `ProviderRuntime.refreshSources` passes `automatic` for every reason except the settings refresh button (`settings:settings-manual`).
+- `BigModelCodingPlanSubscriptionProvider.getDynamicWorkflowClientConfig` / `getOffPeakClientConfig` read the existing `clientConfig` policy: under Graph a non-forced read returns the default/closed configuration without a request; `forceRefresh` and the settings-page plan reads keep their paths.
+- Regression tests in the already-selected `packages/services/test/graphAutomaticNetworkConsumers.test.ts` (Graph: zero requests, explicit path reachable, Production positive control) and a by-hand mutation (the new tests fail without the fix).
+
+Then: new candidate `3.14.3-z8.302` in `dist-graph-w2`, rerun of N-1, the Tool-only/support case, admission cases and the smoke subset. Candidate 1 and all its evidence stay.
