@@ -22,6 +22,8 @@ import { createDesktopHelpConfigReader } from "../../desktop/src/main/desktopHel
 import { createRendererActionTraceRollout } from "../../desktop/src/main/rendererActionTraceRollout.js";
 import { createClientConfigService } from "../src/client-config/clientConfigService.js";
 import { createClientScenesService } from "../src/client-scenes/clientScenesService.js";
+import { BigModelCodingPlanSubscriptionProvider } from "../src/coding-plan-subscription/bigmodelCodingPlanSubscriptionProvider.js";
+import { createProviderRuntime } from "../src/model-provider/providerRuntime.js";
 import {
   FeedbackSubmissionDisabledError,
   createFeedbackService,
@@ -398,6 +400,108 @@ test("positive control: Production policy built-in sync downloads in the backgro
     await waitFor(() => fetchReleaseCalls() >= 1, "the background built-in download");
     assert.deepEqual(recorder.requests, [{ method: "GET", path: "/builtin-release" }]);
   });
+});
+
+// ───────────── Z8.3-W1: automatic callers that were labelled as explicit or were never covered ─────────────
+// 打包的 Graph 应用在冷启动时实测发出两个自动 /api/v1/client/configs 请求：
+//  1) Root 启动调用 providerSettingsService.refresh("root-provider-state-refresh")，经 refreshSources 以 force: true 触发 Built-in 目录下载；
+//  2) Host 启动时读取动态工作流灰度配置（coding-plan 提供者的 getClientConfigs）。
+// 下面的测试固定修复后的语义：只有设置页“刷新”（settings-manual）和 forceRefresh 是显式路径。
+
+async function withProviderRuntime(
+  policy: typeof GRAPH,
+  body: (context: {
+    runtime: ReturnType<typeof createProviderRuntime>;
+    fetchReleaseCalls: () => number;
+    recorder: Recorder;
+  }) => Promise<void>,
+): Promise<void> {
+  const recorder = await startRecorder();
+  const dir = await mkdtemp(join(tmpdir(), "z83w1-provider-runtime-"));
+  let calls = 0;
+  const runtime = createProviderRuntime({
+    zcodeBuiltinFilePath: join(import.meta.dirname, "../../../config/provider/zcode-builtin.json"),
+    zcodeBuiltinActiveFilePath: join(dir, "active.json"),
+    personalFilePath: join(dir, "provider_config.json"),
+    personalPollingIntervalMs: false,
+    watch: false,
+    automaticZCodeBuiltinRefresh: policy.builtinProviderCatalog,
+    zcodeBuiltinRemote: {
+      controlFilePath: join(dir, "control.json"),
+      resolveEndpointKey: () => recorder.origin,
+      // MOCK fetchRelease that performs a real loopback request so that a restored download shows up in the recorder.
+      fetchRelease: async () => {
+        calls += 1;
+        await fetch(`${recorder.origin}/builtin-release`);
+        return null;
+      },
+    },
+  });
+  try {
+    await body({ runtime, fetchReleaseCalls: () => calls, recorder });
+  } finally {
+    runtime.dispose();
+    await recorder.close();
+    await rm(dir, { recursive: true, force: true });
+  }
+}
+
+test("Root-style provider refresh is automatic: under Graph policy it never downloads the built-in catalog, the settings refresh button still does", async () => {
+  await withProviderRuntime(GRAPH, async ({ runtime, fetchReleaseCalls, recorder }) => {
+    await runtime.start();
+    for (const reason of [
+      "root-provider-state-refresh",
+      "oauth-restore-entitlement",
+      "account-connection-switched",
+    ])
+      await runtime.providerSettings.refresh(reason);
+    assert.equal(fetchReleaseCalls(), 0, "automatic callers must not reach the downloader");
+    assert.deepEqual(recorder.requests, []);
+    await runtime.providerSettings.refresh("settings-manual"); // the Provider Settings refresh button
+    assert.equal(fetchReleaseCalls(), 1, "the explicit button keeps the download path");
+    assert.deepEqual(recorder.requests, [{ method: "GET", path: "/builtin-release" }]);
+  });
+});
+
+test("positive control: under Production policy the same Root-style refresh still downloads (force) exactly as before", async () => {
+  await withProviderRuntime(PRODUCTION, async ({ runtime, fetchReleaseCalls, recorder }) => {
+    await runtime.start();
+    await runtime.providerSettings.refresh("root-provider-state-refresh");
+    assert.ok(fetchReleaseCalls() >= 1);
+    assert.ok(recorder.requests.some((request) => request.path === "/builtin-release"));
+  });
+});
+
+test("coding-plan automatic client-config reads (dynamic workflow, Off-Peak) make no request under Graph policy; forceRefresh and Production do", async () => {
+  const recorder = await startRecorder();
+  try {
+    const make = (policy: typeof GRAPH) =>
+      new BigModelCodingPlanSubscriptionProvider({
+        apiClient: createLoopbackApiClient(recorder.origin),
+        credentialService: { load: async () => null } as never,
+        automaticNetworkPolicy: policy,
+      });
+    const graph = make(GRAPH);
+    const closed = await graph.getDynamicWorkflowClientConfig();
+    assert.equal(closed.source, "default");
+    await graph.getOffPeakClientConfig();
+    assert.deepEqual(recorder.requests, [], "Graph: no automatic request");
+    await graph.getDynamicWorkflowClientConfig({ forceRefresh: true });
+    assert.equal(
+      recorder.requests.filter((request) => request.path === "/api/v1/client/configs").length,
+      1,
+      "forceRefresh is the explicit path",
+    );
+    recorder.requests.length = 0;
+    await make(PRODUCTION).getDynamicWorkflowClientConfig();
+    assert.equal(
+      recorder.requests.filter((request) => request.path === "/api/v1/client/configs").length,
+      1,
+      "positive control: Production reads the remote config",
+    );
+  } finally {
+    await recorder.close();
+  }
 });
 
 // ───────────── Unchanged: user-selected model traffic ─────────────

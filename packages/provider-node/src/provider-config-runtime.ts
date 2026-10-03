@@ -140,8 +140,17 @@ export class NodeProviderConfigRuntime {
     return startPromise;
   }
 
-  refreshZCodeBuiltin(options?: { readonly force?: boolean }): Promise<ZCodeBuiltinRefreshResult> {
+  /**
+   * `automatic: true` 标记调用方不是用户自己的刷新操作（例如 Root 启动时的 Provider 状态刷新）。
+   * Z8.3-W1 修复：这类调用即使带 `force: true`，在自动刷新被策略拒绝（Graph）时也必须跳过下载，
+   * 否则 `force` 会把启动期的后台请求冒充成“显式刷新”。用户的显式刷新不传该标记，行为不变。
+   */
+  refreshZCodeBuiltin(options?: {
+    readonly force?: boolean;
+    readonly automatic?: boolean;
+  }): Promise<ZCodeBuiltinRefreshResult> {
     if (this.#disposed) return Promise.resolve("disposed");
+    if (options?.automatic === true && !this.#automaticBuiltinRefresh) return Promise.resolve("skipped");
     if (this.#zcodeBuiltinSource instanceof EndpointScopedZCodeBuiltinSource) {
       return this.#zcodeBuiltinSource.refresh(options);
     }

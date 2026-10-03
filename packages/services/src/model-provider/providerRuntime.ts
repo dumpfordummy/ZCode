@@ -25,6 +25,9 @@ import {
   type ProviderSettingsConnectivityTester,
 } from "./providerFacadeServices.js";
 
+/** 设置页“刷新”按钮的 reason（UI 传 `settings-manual`，ProviderSettingsFacade 加 `settings:` 前缀）。 */
+const EXPLICIT_PROVIDER_SETTINGS_REFRESH_REASON = "settings:settings-manual";
+
 export interface ProviderRuntimeOptions extends ProviderConfigRuntimeOptions {
   readonly accountSource?: RefreshableProviderSource<AccountProviderConfigSnapshot>;
   readonly testConnectivity?: ProviderSettingsConnectivityTester;
@@ -180,7 +183,12 @@ function createSettingsMutationTarget(
     refresh: (reason) => registryService.refresh(reason),
     refreshSources: async (reason) => {
       const sourceResults = await Promise.allSettled([
-        configRuntime.refreshZCodeBuiltin({ force: true }),
+        // 只有设置页的“刷新”按钮（facade 加前缀后的 settings:settings-manual）是用户的显式刷新；
+        // Root 启动、OAuth 恢复、账号切换等路径同样经过这里，对 Graph 属于自动请求（见 Z8.3-W1 报告）。
+        configRuntime.refreshZCodeBuiltin({
+          force: true,
+          automatic: reason !== EXPLICIT_PROVIDER_SETTINGS_REFRESH_REASON,
+        }),
         accountSource.refresh?.(reason) ?? Promise.resolve(),
       ]);
       const snapshot = await registryService.refresh(reason);
