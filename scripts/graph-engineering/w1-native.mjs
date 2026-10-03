@@ -20,10 +20,18 @@ import {
   TOOL_OUTPUT,
   WORKFLOW_CANARY,
 } from "./w1-tool-graph.mjs";
-import { allowTool, openToolPermission, waitTool, waitStatus, ledger, modelCount } from "./z4-native-helpers.mjs";
+import {
+  allowTool,
+  openToolPermission,
+  waitTool,
+  waitStatus,
+  ledger,
+  modelCount,
+} from "./z4-native-helpers.mjs";
 import { instruction } from "./isolation.mjs";
 
-const arg = (name) => process.argv.find((item) => item.startsWith(`--${name}=`))?.slice(name.length + 3);
+const arg = (name) =>
+  process.argv.find((item) => item.startsWith(`--${name}=`))?.slice(name.length + 3);
 const caseName = arg("case");
 const mode = arg("mode");
 assert.ok(["tool-only-support", "n1"].includes(caseName), "unknown --case");
@@ -62,8 +70,14 @@ async function positiveControls() {
   });
   await new Promise((resolve) => setTimeout(resolve, 200));
   const added = isolation.fixture.requests.slice(startCount).map((item) => item.path);
-  assert.ok(added.some((item) => item.includes("/w1-positive-control/http")), "positive control (HTTP) not recorded");
-  assert.ok(added.includes("CONNECT w1-positive-control.invalid:443"), "positive control (CONNECT) not recorded");
+  assert.ok(
+    added.some((item) => item.includes("/w1-positive-control/http")),
+    "positive control (HTTP) not recorded",
+  );
+  assert.ok(
+    added.includes("CONNECT w1-positive-control.invalid:443"),
+    "positive control (CONNECT) not recorded",
+  );
   summary.positiveControl = { recorded: added };
   // Control traffic is not application traffic: drop it so the application readings stay clean.
   isolation.fixture.requests.splice(startCount, added.length);
@@ -97,27 +111,48 @@ try {
     // Canaries (synthetic, planted only inside the throw-away profile / workspace).
     const dataHome = isolation.graphProfile.env.ZCODE_DATA_BASE_DIR;
     await mkdir(path.join(dataHome, ".zcode", "v2", "logs"), { recursive: true });
-    await writeFile(path.join(dataHome, ".zcode", "v2", "credentials.json"), JSON.stringify({ token: CANARIES[1] }));
+    await writeFile(
+      path.join(dataHome, ".zcode", "v2", "credentials.json"),
+      JSON.stringify({ token: CANARIES[1] }),
+    );
     await writeFile(path.join(dataHome, ".zcode", "v2", "logs", "w1.log"), `${CANARIES[2]}\n`);
     await writeFile(path.join(isolation.workspace, "canary-source.txt"), `${CANARIES[3]}\n`);
     window = await launchAndIdentify();
     const ids = await createToolOnlyGraph(window, summary);
-    assert.equal(await window.getByTestId("graph-run-button").isDisabled(), false, "Run must be enabled for the Tool-only workflow");
+    assert.equal(
+      await window.getByTestId("graph-run-button").isDisabled(),
+      false,
+      "Run must be enabled for the Tool-only workflow",
+    );
     const requestsBefore = modelCount(isolation);
     await window.getByTestId("graph-run-button").click();
 
     {
       await openToolPermission(isolation, window, summary, ids.build, "w1-build");
-      assert.equal(modelCount(isolation), requestsBefore, "no model request before the Tool permission");
+      assert.equal(
+        modelCount(isolation),
+        requestsBefore,
+        "no model request before the Tool permission",
+      );
       await allowTool(window);
-      const built = await waitTool(isolation, ids.build, (attempt) => attempt.status === "Completed");
+      const built = await waitTool(
+        isolation,
+        ids.build,
+        (attempt) => attempt.status === "Completed",
+      );
       assert.equal(built.attempt.operation.processStarted, true);
       assert.equal(built.attempt.operation.result.exitCode, 0);
       assert.equal(built.attempt.verification.acceptancePassed, true);
       await waitStatus(window, isolation, "Completed");
-      const receipt = JSON.parse(await readFile(path.join(isolation.workspace, TOOL_OUTPUT), "utf8"));
+      const receipt = JSON.parse(
+        await readFile(path.join(isolation.workspace, TOOL_OUTPUT), "utf8"),
+      );
       assert.equal(receipt.ran, true);
-      assert.equal(receipt.operationId, built.attempt.operationId, "the fixture output belongs to this exact native operation");
+      assert.equal(
+        receipt.operationId,
+        built.attempt.operationId,
+        "the fixture output belongs to this exact native operation",
+      );
       assert.equal(modelCount(isolation), 0);
       assert.equal((await ledger(isolation)).length, 0);
       summary.toolRun = {
@@ -129,7 +164,9 @@ try {
         modelRequests: modelCount(isolation),
         agentInputs: 0,
       };
-      summary.assertions.push("Tool-only Graph workflow executed a real native recipe process (real permission, real session, zero model requests).");
+      summary.assertions.push(
+        "Tool-only Graph workflow executed a real native recipe process (real permission, real session, zero model requests).",
+      );
 
       await supportBundleFlow();
     }
@@ -152,8 +189,16 @@ async function supportBundleFlow() {
   await window.getByTestId("workspace-help-menu-trigger").first().click();
   const menu = window.locator('[role="menu"]');
   await menu.waitFor();
-  summary.helpMenu = (await menu.locator('[role="menuitem"]').allInnerTexts()).map((text) => text.trim());
-  assert.equal(summary.helpMenu.some((text) => /feedback|report.*(issue|bug)|feature request|submit/i.test(text)), false, `Feedback entry visible: ${summary.helpMenu}`);
+  summary.helpMenu = (await menu.locator('[role="menuitem"]').allInnerTexts()).map((text) =>
+    text.trim(),
+  );
+  assert.equal(
+    summary.helpMenu.some((text) =>
+      /feedback|report.*(issue|bug)|feature request|submit/i.test(text),
+    ),
+    false,
+    `Feedback entry visible: ${summary.helpMenu}`,
+  );
   await window.getByTestId("graph-support-bundle-menu-item").click();
   const dialog = window.getByTestId("graph-support-bundle-dialog");
   await dialog.waitFor();
@@ -161,7 +206,9 @@ async function supportBundleFlow() {
   // The menu content unmounts after its exit animation; wait for that, then record how long it took.
   const menuClosedAt = Date.now();
   await window
-    .waitForFunction(() => document.querySelectorAll('[role="menu"]').length === 0, undefined, { timeout: 8000 })
+    .waitForFunction(() => document.querySelectorAll('[role="menu"]').length === 0, undefined, {
+      timeout: 8000,
+    })
     .catch(() => {});
   summary.menuStillPresentMsAfterDialog = Date.now() - menuClosedAt;
   assert.equal(await menu.count(), 0, "the Help menu closed");
@@ -169,14 +216,27 @@ async function supportBundleFlow() {
   assert.equal(await dialog.isVisible(), true, "the dialog stays open after the menu closed");
   const preview = await window.getByTestId("graph-support-bundle-preview").textContent();
   const sizeText = await window.getByTestId("graph-support-bundle-size").innerText();
-  const sections = await window.getByTestId("graph-support-bundle-sections").locator("li").allInnerTexts();
+  const sections = await window
+    .getByTestId("graph-support-bundle-sections")
+    .locator("li")
+    .allInnerTexts();
   const displayed = Number(/(\d[\d,]*)/.exec(sizeText)?.[1].replaceAll(",", ""));
   const previewBytes = Buffer.from(preview, "utf8");
   assert.ok(sections.length >= 5, `included categories render: ${sections.length}`);
-  assert.equal(displayed, previewBytes.length, "displayed byte count equals the UTF-8 length of the preview");
+  assert.equal(
+    displayed,
+    previewBytes.length,
+    "displayed byte count equals the UTF-8 length of the preview",
+  );
   const parsed = JSON.parse(preview);
   assert.equal(parsed.schema, "zcode.graph.support-bundle");
-  summary.support = { sections, displayedBytes: displayed, previewBytes: previewBytes.length, previewSha256: sha256(previewBytes), schemaVersion: parsed.schemaVersion };
+  summary.support = {
+    sections,
+    displayedBytes: displayed,
+    previewBytes: previewBytes.length,
+    previewSha256: sha256(previewBytes),
+    schemaVersion: parsed.schemaVersion,
+  };
   await window.screenshot({ path: path.join(isolation.home, "w1-support-dialog.png") });
   summary.screenshots.push(path.join(isolation.home, "w1-support-dialog.png"));
 
@@ -184,11 +244,21 @@ async function supportBundleFlow() {
   await window.getByTestId("graph-support-bundle-save").click();
   summary.cancelDialog = await driveOsDialog(isolation, "cancel");
   assert.equal(summary.cancelDialog.ok, true);
-  await window.waitForFunction(() => !document.querySelector('[data-testid="graph-support-bundle-save"]')?.disabled, undefined, { timeout: 15000 });
-  assert.equal(await window.getByTestId("graph-support-bundle-saved").count(), 0, "cancel shows no saved confirmation");
+  await window.waitForFunction(
+    () => !document.querySelector('[data-testid="graph-support-bundle-save"]')?.disabled,
+    undefined,
+    { timeout: 15000 },
+  );
+  assert.equal(
+    await window.getByTestId("graph-support-bundle-saved").count(),
+    0,
+    "cancel shows no saved confirmation",
+  );
   const treeAfterCancel = await Promise.all(folders.map(listTree));
   assert.deepEqual(treeAfterCancel, treeBefore, "cancel wrote nothing");
-  summary.assertions.push("Cancelling the real OS Save dialog left no file and no saved confirmation.");
+  summary.assertions.push(
+    "Cancelling the real OS Save dialog left no file and no saved confirmation.",
+  );
 
   // Save through the REAL Save dialog.
   const destination = path.join(home, "Documents", "w1-support-bundle.json");
@@ -201,7 +271,9 @@ async function supportBundleFlow() {
   assert.ok(saved.equals(previewBytes), "saved bytes equal the previewed payload exactly");
   summary.support.savedBytes = saved.length;
   summary.support.savedSha256 = sha256(saved);
-  summary.assertions.push("The real OS Save dialog wrote exactly the previewed UTF-8 bytes; the displayed count equals the file length.");
+  summary.assertions.push(
+    "The real OS Save dialog wrote exactly the previewed UTF-8 bytes; the displayed count equals the file length.",
+  );
 
   // Canaries and original paths must be absent from the saved bytes.
   const text = saved.toString("utf8");
@@ -218,16 +290,29 @@ async function supportBundleFlow() {
     "credentials",
   ];
   const leaked = needles.filter((needle) => text.includes(needle));
-  summary.support.scan = { needlesChecked: needles.length, leaked: leaked.map((item) => sanitize(item, isolation)) };
+  summary.support.scan = {
+    needlesChecked: needles.length,
+    leaked: leaked.map((item) => sanitize(item, isolation)),
+  };
   assert.deepEqual(leaked, [], "no canary or original path in the saved bundle");
-  assert.equal((text.match(/[A-Za-z]:[\\/]/g) ?? []).length, 0, "no drive-letter path in the bundle");
+  assert.equal(
+    (text.match(/[A-Za-z]:[\\/]/g) ?? []).length,
+    0,
+    "no drive-letter path in the bundle",
+  );
   await window.screenshot({ path: path.join(isolation.home, "w1-support-saved.png") });
   summary.screenshots.push(path.join(isolation.home, "w1-support-saved.png"));
 
   const added = isolation.fixture.requests.slice(requestsBefore);
   summary.support.requestsDuringGenerationAndSave = added.map((item) => item.path);
-  assert.deepEqual(added, [], "generation and saving triggered no request at all (so no Feedback upload)");
-  summary.assertions.push("Generation and saving produced no recorded request (recorder positive control passed at start).");
+  assert.deepEqual(
+    added,
+    [],
+    "generation and saving triggered no request at all (so no Feedback upload)",
+  );
+  summary.assertions.push(
+    "Generation and saving produced no recorded request (recorder positive control passed at start).",
+  );
   await window.keyboard.press("Escape");
 }
 
@@ -243,8 +328,16 @@ async function n1Flow() {
   await window.getByTestId("workspace-help-menu-trigger").first().click();
   const menu = window.locator('[role="menu"]');
   await menu.waitFor();
-  summary.helpMenu = (await menu.locator('[role="menuitem"]').allInnerTexts()).map((text) => text.trim());
-  assert.equal(summary.helpMenu.some((text) => /feedback|report.*(issue|bug)|feature request|submit/i.test(text)), false, `Feedback entry visible: ${summary.helpMenu}`);
+  summary.helpMenu = (await menu.locator('[role="menuitem"]').allInnerTexts()).map((text) =>
+    text.trim(),
+  );
+  assert.equal(
+    summary.helpMenu.some((text) =>
+      /feedback|report.*(issue|bug)|feature request|submit/i.test(text),
+    ),
+    false,
+    `Feedback entry visible: ${summary.helpMenu}`,
+  );
   await window.keyboard.press("Escape");
   await quiet(1500);
   mark("helpMenu");
@@ -256,21 +349,40 @@ async function n1Flow() {
   await window.getByTestId("plugin-store-refresh").waitFor();
   await quiet(4000);
   mark("pluginStoreOpened");
-  const automatic = isolation.fixture.requests.filter((item) => !item.path.startsWith("/w1-positive-control"));
-  summary.automaticRequests = automatic.map((item) => ({ method: item.method ?? "HTTP", path: item.path, userAgent: item.userAgent, client: item.client }));
+  const automatic = isolation.fixture.requests.filter(
+    (item) => !item.path.startsWith("/w1-positive-control"),
+  );
+  summary.automaticRequests = automatic.map((item) => ({
+    method: item.method ?? "HTTP",
+    path: item.path,
+    userAgent: item.userAgent,
+    client: item.client,
+  }));
   const covered = automatic.filter((item) =>
-    /\/api\/v1\/client\/(configs|scenes)|builtin|marketplace|catalog|provider-config/i.test(item.path),
+    /\/api\/v1\/client\/(configs|scenes)|builtin|marketplace|catalog|provider-config/i.test(
+      item.path,
+    ),
   );
   // Keep going after a violation so that the explicit-action and model-traffic evidence is still collected.
-  summary.violations = covered.map((item) => ({ path: item.path, userAgent: item.userAgent, at: item.at, client: item.client }));
+  summary.violations = covered.map((item) => ({
+    path: item.path,
+    userAgent: item.userAgent,
+    at: item.at,
+    client: item.client,
+  }));
   if (!covered.length)
-    summary.assertions.push("Cold start, Help menu and Plugin Store entry produced no covered automatic config/catalog request; Feedback entries are absent from the Help menu.");
+    summary.assertions.push(
+      "Cold start, Help menu and Plugin Store entry produced no covered automatic config/catalog request; Feedback entries are absent from the Help menu.",
+    );
   // Explicit catalog action (separately): the Plugin Store refresh button.
   const beforeExplicit = isolation.fixture.requests.length;
   await window.getByTestId("plugin-store-refresh").click();
   await quiet(6000);
   const explicit = isolation.fixture.requests.slice(beforeExplicit);
-  summary.explicitCatalogRequests = explicit.map((item) => ({ method: item.method ?? "HTTP", path: item.path }));
+  summary.explicitCatalogRequests = explicit.map((item) => ({
+    method: item.method ?? "HTTP",
+    path: item.path,
+  }));
   summary.notes.push(
     explicit.length
       ? "The explicit refresh reached the loopback recorder."
@@ -283,11 +395,26 @@ async function n1Flow() {
   const modelBefore = modelCount(isolation);
   await composer.fill(instruction);
   await window.getByTestId("v4-composer-send").click();
-  await window.waitForFunction(() => document.querySelector('[data-permission-option-kind="allowOnce"]') || document.body.innerText.includes("Allow"), undefined, { timeout: 60000 });
-  assert.ok(modelCount(isolation) > modelBefore, "the user-selected loopback model endpoint received chat traffic");
+  await window.waitForFunction(
+    () =>
+      document.querySelector('[data-permission-option-kind="allowOnce"]') ||
+      document.body.innerText.includes("Allow"),
+    undefined,
+    { timeout: 60000 },
+  );
+  assert.ok(
+    modelCount(isolation) > modelBefore,
+    "the user-selected loopback model endpoint received chat traffic",
+  );
   summary.modelRequestsAfterChat = modelCount(isolation) - modelBefore;
-  summary.assertions.push("User-selected loopback model traffic still reaches the fixture (chat request recorded).");
-  assert.deepEqual(summary.violations, [], "covered automatic config/catalog requests stay blocked");
+  summary.assertions.push(
+    "User-selected loopback model traffic still reaches the fixture (chat request recorded).",
+  );
+  assert.deepEqual(
+    summary.violations,
+    [],
+    "covered automatic config/catalog requests stay blocked",
+  );
 }
 
 await finish(isolation, summary, window, failure);

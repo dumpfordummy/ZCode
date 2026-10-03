@@ -6,9 +6,18 @@ import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "../..");
 const [output, ...targets] = process.argv.slice(2);
-if (!output || !targets.length) throw new Error("usage: w1-collect-evidence.mjs <output dir> <dist>:<label> ...");
+if (!output || !targets.length)
+  throw new Error("usage: w1-collect-evidence.mjs <output dir> <dist>:<label> ...");
 
-const DROP = new Set(["body", "uiText", "home", "screenshots", "stack", "detachedDirectory", "detached"]);
+const DROP = new Set([
+  "body",
+  "uiText",
+  "home",
+  "screenshots",
+  "stack",
+  "detachedDirectory",
+  "detached",
+]);
 function clean(value) {
   if (Array.isArray(value)) return value.map(clean);
   if (value && typeof value === "object")
@@ -22,7 +31,10 @@ function clean(value) {
 }
 function sanitizeText(text) {
   return text
-    .replace(/[A-Za-z]:(?:\\\\|\\|\/)[^\s"')]*(?:zcode-graph-acceptance-|zcode-graph-w1-|zw1-)[^\s"')]*/g, "<sandbox>")
+    .replace(
+      /[A-Za-z]:(?:\\\\|\\|\/)[^\s"')]*(?:zcode-graph-acceptance-|zcode-graph-w1-|zw1-)[^\s"')]*/g,
+      "<sandbox>",
+    )
     .replace(/[A-Za-z]:(?:\\\\|\\|\/)Users(?:\\\\|\\|\/)[^\s"')]+/g, "<user-path>")
     .split("\n")
     .slice(0, 12)
@@ -38,7 +50,11 @@ for (const target of targets) {
   const out = path.join(output, `${dist}__${label}`);
   await mkdir(out, { recursive: true });
   for (const name of await readdir(dir)) {
-    if (!name.endsWith(".json") || !/summary|inspect|suite|detached-component|retained-hash-check/.test(name)) continue;
+    if (
+      !name.endsWith(".json") ||
+      !/summary|inspect|suite|detached-component|retained-hash-check/.test(name)
+    )
+      continue;
     const parsed = JSON.parse(await readFile(path.join(dir, name), "utf8"));
     await writeFile(path.join(out, name), `${JSON.stringify(clean(parsed), null, 2)}\n`);
     index.push(`${dist}__${label}/${name}`);

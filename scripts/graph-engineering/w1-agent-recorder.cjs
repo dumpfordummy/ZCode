@@ -24,10 +24,13 @@ const logFile = process.env.W1_RECORDER_LOG;
 const agentExe = process.env.W1_REAL_AGENT_EXE;
 const agentBundle = process.env.W1_REAL_AGENT_BUNDLE;
 if (!logFile || !agentExe || !agentBundle) {
-  process.stderr.write("w1-agent-recorder: W1_RECORDER_LOG, W1_REAL_AGENT_EXE and W1_REAL_AGENT_BUNDLE are required\n");
+  process.stderr.write(
+    "w1-agent-recorder: W1_RECORDER_LOG, W1_REAL_AGENT_EXE and W1_REAL_AGENT_BUNDLE are required\n",
+  );
   process.exit(2);
 }
-const write = (event) => appendFileSync(logFile, `${JSON.stringify({ at: Date.now(), ...event })}\n`);
+const write = (event) =>
+  appendFileSync(logFile, `${JSON.stringify({ at: Date.now(), ...event })}\n`);
 const bounded = (value) =>
   Array.isArray(value) ? value.filter((item) => typeof item === "string").slice(0, 256) : value;
 
@@ -113,11 +116,17 @@ agent.stdout.on("data", (chunk) => {
         if (mode === "strip-contract" && message.result && typeof message.result === "object") {
           delete message.result.nativeContract;
           out = JSON.stringify(message);
-          write({ event: "synthetic-mutation", mutation: "nativeContract deleted from the real response" });
+          write({
+            event: "synthetic-mutation",
+            mutation: "nativeContract deleted from the real response",
+          });
         } else if (mode === "wrong-wire" && contract?.protocol) {
           contract.protocol.v4WireVersion = (contract.protocol.v4WireVersion ?? 0) + 1000;
           out = JSON.stringify(message);
-          write({ event: "synthetic-mutation", mutation: "protocol.v4WireVersion changed in the real response" });
+          write({
+            event: "synthetic-mutation",
+            mutation: "protocol.v4WireVersion changed in the real response",
+          });
         }
       }
     } catch {

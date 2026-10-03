@@ -17,7 +17,10 @@ const isolation = await createW1Isolation({ provider: true });
 await prepareToolFixture(isolation);
 const dataHome = isolation.graphProfile.env.ZCODE_DATA_BASE_DIR;
 await mkdir(path.join(dataHome, ".zcode", "v2", "logs"), { recursive: true });
-await writeFile(path.join(dataHome, ".zcode", "v2", "credentials.json"), JSON.stringify({ token: "W1_MANUAL_CANARY_CREDENTIAL" }));
+await writeFile(
+  path.join(dataHome, ".zcode", "v2", "credentials.json"),
+  JSON.stringify({ token: "W1_MANUAL_CANARY_CREDENTIAL" }),
+);
 let prepared = "not prepared";
 try {
   const window = await isolation.launch();
@@ -35,13 +38,19 @@ try {
   prepared = `preparation stopped: ${String(error.message).split("\n")[0]}`;
 }
 console.log(`Synthetic profile: ${isolation.home}`);
-console.log(`Prepared state: ${prepared}. Workflow name carries the canary ${WORKFLOW_CANARY} (it must NOT appear in the bundle).`);
-console.log(`Loopback recorder so far: ${JSON.stringify(recorderSnapshot(isolation).map((item) => `${item.method} ${item.path}`))}`);
+console.log(
+  `Prepared state: ${prepared}. Workflow name carries the canary ${WORKFLOW_CANARY} (it must NOT appear in the bundle).`,
+);
+console.log(
+  `Loopback recorder so far: ${JSON.stringify(recorderSnapshot(isolation).map((item) => `${item.method} ${item.path}`))}`,
+);
 if (smoke) {
   await isolation.close();
 } else {
   console.log("The app is open. Follow the manual checklist, then quit the app to finish.");
   await new Promise((resolve) => isolation.app.process().once("exit", resolve));
-  console.log(`Requests the loopback recorder saw during your session: ${JSON.stringify(recorderSnapshot(isolation).map((item) => `${item.method} ${item.path}`))}`);
+  console.log(
+    `Requests the loopback recorder saw during your session: ${JSON.stringify(recorderSnapshot(isolation).map((item) => `${item.method} ${item.path}`))}`,
+  );
   await isolation.close();
 }

@@ -83,6 +83,8 @@ export async function createToolOnlyGraph(window, summary) {
   await selectValue(window, "graph-end-output", build);
   await window.getByTestId("graph-save").click();
   await waitForSaved(window);
-  summary.assertions.push("Real Graph editor saved a Tool-only workflow (Start → Tool → End), no Task node, no model provider.");
+  summary.assertions.push(
+    "Real Graph editor saved a Tool-only workflow (Start → Tool → End), no Task node, no model provider.",
+  );
   return { build };
 }

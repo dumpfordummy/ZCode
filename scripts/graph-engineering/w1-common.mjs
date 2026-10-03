@@ -59,7 +59,11 @@ export async function listTree(root) {
 /** Replace the synthetic profile root and workspace with a fixed token before a value is shown as evidence. */
 export function sanitize(value, isolation) {
   const text = typeof value === "string" ? value : JSON.stringify(value, null, 2);
-  const roots = [isolation.workspace, isolation.home, process.env.Z1_PACKAGED_EXE && path.dirname(process.env.Z1_PACKAGED_EXE)]
+  const roots = [
+    isolation.workspace,
+    isolation.home,
+    process.env.Z1_PACKAGED_EXE && path.dirname(process.env.Z1_PACKAGED_EXE),
+  ]
     .filter(Boolean)
     .flatMap((root) => [root, root.replaceAll("\\", "/"), root.replaceAll("\\", "\\\\")]);
   let out = text;
@@ -71,9 +75,14 @@ export async function finish(isolation, summary, window, error) {
   summary.status = error ? "FAIL" : "PASS";
   if (error) {
     summary.error = error instanceof Error ? error.stack : String(error);
-    summary.body = await window?.locator("body").innerText().catch(() => "Unavailable");
+    summary.body = await window
+      ?.locator("body")
+      .innerText()
+      .catch(() => "Unavailable");
     if (window)
-      await window.screenshot({ path: path.join(isolation.home, "w1-failure.png") }).catch(() => {});
+      await window
+        .screenshot({ path: path.join(isolation.home, "w1-failure.png") })
+        .catch(() => {});
     process.exitCode = 1;
   }
   summary.home = isolation.home;

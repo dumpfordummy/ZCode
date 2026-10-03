@@ -150,7 +150,8 @@ export class NodeProviderConfigRuntime {
     readonly automatic?: boolean;
   }): Promise<ZCodeBuiltinRefreshResult> {
     if (this.#disposed) return Promise.resolve("disposed");
-    if (options?.automatic === true && !this.#automaticBuiltinRefresh) return Promise.resolve("skipped");
+    if (options?.automatic === true && !this.#automaticBuiltinRefresh)
+      return Promise.resolve("skipped");
     if (this.#zcodeBuiltinSource instanceof EndpointScopedZCodeBuiltinSource) {
       return this.#zcodeBuiltinSource.refresh(options);
     }

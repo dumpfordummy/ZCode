@@ -29,7 +29,10 @@ import {
 } from "../../packages/services/src/graph-engineering/app/sequential.fixture.js";
 
 const mode = process.argv.find((item) => item.startsWith("--mode="))?.slice(7) ?? "record";
-assert.ok(["record", "strip-contract", "wrong-wire", "method-missing"].includes(mode), "unknown --mode");
+assert.ok(
+  ["record", "strip-contract", "wrong-wire", "method-missing"].includes(mode),
+  "unknown --mode",
+);
 const exe = process.env.Z1_PACKAGED_EXE;
 assert.ok(exe, "Z1_PACKAGED_EXE must point at the detached packaged ZCode Graph.exe");
 const here = import.meta.dirname;
@@ -56,8 +59,20 @@ const child = spawn(process.execPath, [path.join(here, "w1-agent-recorder.cjs")]
     ZCODE_STORAGE_DIR: path.join(work, "data", ".zcode"),
     ZCODE_ENV: "test",
     // The real Host passes these two paths when it spawns the agent (the agent refuses to start without them).
-    ZCODE_BUILTIN_PROVIDER_CONFIG_FILE: path.join(path.dirname(exe), "resources", "config", "provider", "zcode-builtin.json"),
-    ZCODE_PERSONAL_PROVIDER_CONFIG_FILE: path.join(work, "data", ".zcode", "v2", "provider_config.json"),
+    ZCODE_BUILTIN_PROVIDER_CONFIG_FILE: path.join(
+      path.dirname(exe),
+      "resources",
+      "config",
+      "provider",
+      "zcode-builtin.json",
+    ),
+    ZCODE_PERSONAL_PROVIDER_CONFIG_FILE: path.join(
+      work,
+      "data",
+      ".zcode",
+      "v2",
+      "provider_config.json",
+    ),
     W1_RECORDER_MODE: mode,
     W1_RECORDER_LOG: log,
     W1_REAL_AGENT_EXE: exe,
@@ -81,7 +96,11 @@ const graph = createGraphEngineeringService({
       try {
         return await readRuntimeCapabilities(client);
       } catch (error) {
-        probeError = { name: (error as Error).name, code: (error as { code?: unknown }).code, message: String((error as Error).message).slice(0, 160) };
+        probeError = {
+          name: (error as Error).name,
+          code: (error as { code?: unknown }).code,
+          message: String((error as Error).message).slice(0, 160),
+        };
         throw error;
       }
     },
@@ -113,11 +132,21 @@ const graph = createGraphEngineeringService({
   gitService: {} as never,
 });
 
-const summary: Record<string, unknown> = { mode, label: mode === "record" ? "real agent, unmodified" : "SYNTHETIC process-backed negative fixture around the REAL bundled agent; not an actual historical packaged agent" };
+const summary: Record<string, unknown> = {
+  mode,
+  label:
+    mode === "record"
+      ? "real agent, unmodified"
+      : "SYNTHETIC process-backed negative fixture around the REAL bundled agent; not an actual historical packaged agent",
+};
 let failure: unknown;
 try {
   const view = await graph.getWorkspace(target);
-  await graph.saveDefinition({ target, definition: sequenceDefinition(), expectedRevision: view.definition.revision });
+  await graph.saveDefinition({
+    target,
+    definition: sequenceDefinition(),
+    expectedRevision: view.definition.revision,
+  });
   let admission: Record<string, unknown>;
   try {
     await graph.run({
@@ -138,18 +167,28 @@ try {
         diagnostic: (error as { diagnostic?: unknown }).diagnostic,
       };
     } else {
-      admission = { outcome: "admitted-then-stub-stopped", stubError: String((error as Error).message).slice(0, 120) };
+      admission = {
+        outcome: "admitted-then-stub-stopped",
+        stubError: String((error as Error).message).slice(0, 120),
+      };
     }
   }
-  const events = (await readFile(log, "utf8")).split("\n").filter(Boolean).map((line) => JSON.parse(line));
-  const methods = events.filter((event) => event.event === "host-to-agent").map((event) => event.method as string);
+  const events = (await readFile(log, "utf8"))
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => JSON.parse(line));
+  const methods = events
+    .filter((event) => event.event === "host-to-agent")
+    .map((event) => event.method as string);
   const response = events.find((event) => event.event === "capabilities-response");
   summary.admission = admission;
   summary.hostCalls = calls;
   summary.probeError = probeError;
   summary.agentMethodsRequestedByHost = methods;
   summary.capabilitiesAsDeliveredToHost = response;
-  summary.mutations = events.filter((event) => event.event === "synthetic-mutation" || event.event === "synthetic-method-not-found");
+  summary.mutations = events.filter(
+    (event) => event.event === "synthetic-mutation" || event.event === "synthetic-method-not-found",
+  );
   summary.runsPersisted = (await graph.getWorkspace(target)).runs.length;
   assert.ok(methods.includes("runtime/capabilities"), "the real admission probe asked the agent");
   if (mode === "record") {
@@ -162,8 +201,16 @@ try {
   } else {
     assert.equal(admission.outcome, "rejected");
     assert.equal(summary.runsPersisted, 0, "no run persisted");
-    assert.ok(!calls.includes("createSession") && !calls.includes("identity"), "no native session creation attempted");
-    for (const forbidden of ["session/create", "v4/command", "session/recipe/start", "v4/conversation/subscribe"])
+    assert.ok(
+      !calls.includes("createSession") && !calls.includes("identity"),
+      "no native session creation attempted",
+    );
+    for (const forbidden of [
+      "session/create",
+      "v4/command",
+      "session/recipe/start",
+      "v4/conversation/subscribe",
+    ])
       assert.ok(!methods.includes(forbidden), `the agent never received ${forbidden}`);
   }
   summary.status = "PASS";

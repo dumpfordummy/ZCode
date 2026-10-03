@@ -253,7 +253,11 @@ export function providerConfig(origin) {
 function attributeClient(socket) {
   try {
     const script = `$c = Get-NetTCPConnection -LocalPort ${socket.remotePort} -RemotePort ${socket.localPort} -ErrorAction SilentlyContinue | Select-Object -First 1; if ($c) { $p = Get-CimInstance Win32_Process -Filter ("ProcessId=" + $c.OwningProcess); $line = [string]$p.CommandLine; $type = [regex]::Match($line, '--type=([a-z-]+)').Groups[1].Value; $svc = [regex]::Match($line, '--service-sandbox-type=([a-z-]+)').Groups[1].Value; $utilName = [regex]::Match($line, '--utility-sub-type=([A-Za-z.]+)').Groups[1].Value; ConvertTo-Json -Compress @{ pid = $c.OwningProcess; exe = $p.Name; type = $type; sandbox = $svc; utility = $utilName; parent = $p.ParentProcessId } }`;
-    const out = execFileSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], { encoding: "utf8", timeout: 8000 });
+    const out = execFileSync(
+      "powershell.exe",
+      ["-NoProfile", "-NonInteractive", "-Command", script],
+      { encoding: "utf8", timeout: 8000 },
+    );
     return { client: out.trim() ? JSON.parse(out) : "unattributed" };
   } catch {
     return { client: "attribution-failed" };
