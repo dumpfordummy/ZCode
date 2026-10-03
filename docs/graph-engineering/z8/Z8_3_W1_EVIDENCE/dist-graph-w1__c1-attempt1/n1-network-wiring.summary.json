@@ -1,0 +1,124 @@
+{
+  "case": "n1",
+  "assertions": [
+    "User-selected loopback model traffic still reaches the fixture (chat request recorded)."
+  ],
+  "notes": [
+    "The explicit refresh reached the loopback recorder."
+  ],
+  "executable": {
+    "file": "ZCode Graph.exe",
+    "sha256": "2ec326d92dc159c5ce6b8d434fb2128ba053e52ce1b5cd5eec864fa6db023d19"
+  },
+  "agentBundle": {
+    "file": "resources/glm/zcode.cjs",
+    "sha256": "0a3b4e841bfd6bd94adb98e3a36b17dc8f57aefa411af89c5bb14d70232852b9"
+  },
+  "positiveControl": {
+    "recorded": [
+      "/w1-positive-control/http",
+      "CONNECT w1-positive-control.invalid:443"
+    ]
+  },
+  "packagedIdentity": {
+    "name": "ZCode Graph",
+    "isPackaged": true,
+    "version": "3.14.3-z8.301"
+  },
+  "stages": {
+    "coldStart": [
+      "/api/v1/client/configs?app_version=3.14.3-z8.301&platform=win32-x64",
+      "/api/v1/client/configs?app_version=3.14.3-z8.301&platform=windows-x86_64"
+    ],
+    "helpMenu": [
+      "/api/v1/client/configs?app_version=3.14.3-z8.301&platform=win32-x64",
+      "/api/v1/client/configs?app_version=3.14.3-z8.301&platform=windows-x86_64"
+    ],
+    "pluginStoreOpened": [
+      "/api/v1/client/configs?app_version=3.14.3-z8.301&platform=win32-x64",
+      "/api/v1/client/configs?app_version=3.14.3-z8.301&platform=windows-x86_64"
+    ]
+  },
+  "helpMenu": [
+    "Product docs",
+    "User community",
+    "Graph support bundle…",
+    "Resource manager",
+    "About ZCode"
+  ],
+  "automaticRequests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/client/configs?app_version=3.14.3-z8.301&platform=win32-x64",
+      "userAgent": "ZCode/3.14.3-z8.301"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/client/configs?app_version=3.14.3-z8.301&platform=windows-x86_64",
+      "userAgent": "ZCode/3.14.3-z8.301"
+    }
+  ],
+  "violations": [
+    {
+      "path": "/api/v1/client/configs?app_version=3.14.3-z8.301&platform=win32-x64",
+      "userAgent": "ZCode/3.14.3-z8.301",
+      "at": 1791040029008
+    },
+    {
+      "path": "/api/v1/client/configs?app_version=3.14.3-z8.301&platform=windows-x86_64",
+      "userAgent": "ZCode/3.14.3-z8.301",
+      "at": 1791040029163
+    }
+  ],
+  "explicitCatalogRequests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/client/configs?app_version=3.14.3-z8.301&platform=win32-x64"
+    },
+    {
+      "method": "CONNECT",
+      "path": "CONNECT cdn-zcode.z.ai:443"
+    }
+  ],
+  "modelRequestsAfterChat": 2,
+  "status": "FAIL",
+  "error": "AssertionError [ERR_ASSERTION]: covered automatic config/catalog requests stay blocked\n+ actual - expected\n\n+ [\n+   {\n+     at: 1791040029008,\n+     client: undefined,\n+     path: '/api/v1/client/configs?app_version=3.14.3-z8.301&platform=win32-x64',\n+     userAgent: 'ZCode/3.14.3-z8.301'\n+   },\n+   {\n+     at: 1791040029163,",
+  "network": [
+    {
+      "method": "GET",
+      "path": "/api/v1/client/configs?app_version=3.14.3-z8.301&platform=win32-x64",
+      "userAgent": "ZCode/3.14.3-z8.301",
+      "at": 1791040029008
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/client/configs?app_version=3.14.3-z8.301&platform=windows-x86_64",
+      "userAgent": "ZCode/3.14.3-z8.301",
+      "at": 1791040029163
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/client/configs?app_version=3.14.3-z8.301&platform=win32-x64",
+      "userAgent": "ZCode/3.14.3-z8.301",
+      "at": 1791040041187
+    },
+    {
+      "method": "CONNECT",
+      "path": "CONNECT cdn-zcode.z.ai:443"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "model": true,
+      "userAgent": "ZCode/3.14.3-z8.301 ai-sdk/provider-utils/4.0.39 runtime/node.js/24",
+      "at": 1791040047872
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "model": true,
+      "userAgent": "ZCode/3.14.3-z8.301 ai-sdk/provider-utils/4.0.39 runtime/node.js/24",
+      "at": 1791040047939
+    }
+  ]
+}

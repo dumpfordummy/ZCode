@@ -32,6 +32,8 @@ const CASES = [
   // a small normal Graph workflow against the loopback model fixture.
   { name: "normal-graph-loopback-model", script: "z2-native-smoke.mjs", args: ["--scenario=complete"] },
   { name: "n1-network-wiring", script: "w1-native.mjs", args: ["--case=n1"] },
+  // Same case with a 70 s idle window so the 60 s background timers are inside the observation.
+  { name: "n1-network-wiring-70s-idle", script: "w1-native.mjs", args: ["--case=n1", "--idle-seconds=70"] },
 ];
 const only = option("only")?.split(",");
 const selected = only ? CASES.filter((item) => only.includes(item.name)) : CASES;

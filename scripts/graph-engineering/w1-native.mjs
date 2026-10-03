@@ -234,7 +234,8 @@ async function supportBundleFlow() {
 async function n1Flow() {
   const quiet = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   window = await launchAndIdentify();
-  await quiet(6000);
+  // --idle-seconds=70 also spans the 60 s background check of the built-in catalog (default keeps the case short).
+  await quiet(Number(arg("idle-seconds") ?? 6) * 1000);
   const stages = (summary.stages = {});
   const mark = (name) => (stages[name] = isolation.fixture.requests.map((item) => item.path));
   mark("coldStart");
