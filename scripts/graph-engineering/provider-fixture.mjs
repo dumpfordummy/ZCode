@@ -1,4 +1,5 @@
 import http from "node:http";
+import { execFileSync } from "node:child_process";
 
 const COMPANION_MARKER = "Z1_COMPANION_TASK";
 export const COMPANION_TOOL_ID = "z1_companion_question";
@@ -7,7 +8,8 @@ export const COMPANION_INSTRUCTION = `${COMPANION_MARKER}: Ask for explicit conf
 export const COMPANION_COMPLETION =
   "Z1_COMPANION_COMPLETED: The unrelated native chat received its explicit answer after graph cancellation.";
 
-export async function startFixture(workspace) {
+// Z8.3-W1：recordConnect 为 true 时，额外把 HTTPS 代理的 CONNECT 目标记入 requests（不应答隧道）。默认关闭，既有用例行为不变。
+export async function startFixture(workspace, { recordConnect = false } = {}) {
   const requests = [];
   const toolResults = [];
   const server = http.createServer(async (req, res) => {
@@ -40,6 +42,15 @@ export async function startFixture(workspace) {
       stream: body.stream,
       roles: messages.map((message) => message.role),
       scenario: source.includes(COMPANION_MARKER) ? "companion" : "graph-fixture",
+      // Z8.3-W1：只在 recordConnect 下附带来源线索（方法、UA、到达时间），不记录请求头的其余内容。
+      ...(recordConnect
+        ? {
+            method: req.method,
+            userAgent: String(req.headers["user-agent"] ?? "").slice(0, 80),
+            at: Date.now(),
+            ...(process.env.W1_ATTRIBUTE_SOCKETS === "1" ? attributeClient(req.socket) : {}),
+          }
+        : {}),
     });
     if (!req.url.includes("chat/completions")) {
       res.writeHead(200, { "Content-Type": "application/json" });
@@ -188,6 +199,11 @@ export async function startFixture(workspace) {
       );
     }
   });
+  if (recordConnect)
+    server.on("connect", (req, socket) => {
+      requests.push({ path: `CONNECT ${req.url}`, method: "CONNECT" });
+      socket.end(["HTTP/1.1 502 Bad Gateway", "Connection: close", "", ""].join("\r\n"));
+    });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   return {
     origin: `http://127.0.0.1:${server.address().port}`,
@@ -230,4 +246,20 @@ export function providerConfig(origin) {
       defaultModelSelection: { providerId: "z1-local-fixture", modelId: "z1-fixture" },
     },
   };
+}
+
+// Z8.3-W1 诊断（仅在 W1_ATTRIBUTE_SOCKETS=1 且 recordConnect 时启用）：把到达的连接按客户端端口归属到本机进程，
+// 只记录进程类型线索（--type= 参数与可执行文件名），不记录命令行其余内容。
+function attributeClient(socket) {
+  try {
+    const script = `$c = Get-NetTCPConnection -LocalPort ${socket.remotePort} -RemotePort ${socket.localPort} -ErrorAction SilentlyContinue | Select-Object -First 1; if ($c) { $p = Get-CimInstance Win32_Process -Filter ("ProcessId=" + $c.OwningProcess); $line = [string]$p.CommandLine; $type = [regex]::Match($line, '--type=([a-z-]+)').Groups[1].Value; $svc = [regex]::Match($line, '--service-sandbox-type=([a-z-]+)').Groups[1].Value; $utilName = [regex]::Match($line, '--utility-sub-type=([A-Za-z.]+)').Groups[1].Value; ConvertTo-Json -Compress @{ pid = $c.OwningProcess; exe = $p.Name; type = $type; sandbox = $svc; utility = $utilName; parent = $p.ParentProcessId } }`;
+    const out = execFileSync(
+      "powershell.exe",
+      ["-NoProfile", "-NonInteractive", "-Command", script],
+      { encoding: "utf8", timeout: 8000 },
+    );
+    return { client: out.trim() ? JSON.parse(out) : "unattributed" };
+  } catch {
+    return { client: "attribution-failed" };
+  }
 }

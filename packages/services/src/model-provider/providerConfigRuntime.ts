@@ -71,7 +71,7 @@ export class ProviderConfigRuntime {
     return this.#runtime.resolveZCodeBuiltinActiveFilePath();
   }
 
-  refreshZCodeBuiltin(options?: { readonly force?: boolean }) {
+  refreshZCodeBuiltin(options?: { readonly force?: boolean; readonly automatic?: boolean }) {
     return this.#runtime.refreshZCodeBuiltin(options);
   }
 

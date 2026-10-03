@@ -1,0 +1,85 @@
+{
+  "case": "tool-only-support",
+  "assertions": [
+    "Real Graph editor saved a Tool-only workflow (Start → Tool → End), no Task node, no model provider.",
+    "Tool-only Graph workflow executed a real native recipe process (real permission, real session, zero model requests).",
+    "Cancelling the real OS Save dialog left no file and no saved confirmation.",
+    "The real OS Save dialog wrote exactly the previewed UTF-8 bytes; the displayed count equals the file length.",
+    "Generation and saving produced no recorded request (recorder positive control passed at start)."
+  ],
+  "notes": [],
+  "executable": {
+    "file": "ZCode Graph.exe",
+    "sha256": "1ecb69daf2cf952a5b435488d2f9bacec687a5256647ab74b2fb522da7471a8a"
+  },
+  "agentBundle": {
+    "file": "resources/glm/zcode.cjs",
+    "sha256": "875a139d88a940d55731bca799acb8deaf9b433f454058cd16ecdc570af3967b"
+  },
+  "positiveControl": {
+    "recorded": ["/w1-positive-control/http", "CONNECT w1-positive-control.invalid:443"]
+  },
+  "packagedIdentity": {
+    "name": "ZCode Graph",
+    "isPackaged": true,
+    "version": "3.14.3-z8.302"
+  },
+  "toolRun": {
+    "runStatus": "Completed",
+    "operationStatus": "completed",
+    "exitCode": 0,
+    "processStarted": true,
+    "acceptancePassed": true,
+    "modelRequests": 0,
+    "agentInputs": 0
+  },
+  "helpMenu": [
+    "Product docs",
+    "User community",
+    "Graph support bundle…",
+    "Resource manager",
+    "About ZCode"
+  ],
+  "menuStillPresentMsAfterDialog": 86,
+  "support": {
+    "sections": [
+      "Product identity and build",
+      "Runtime and protocol versions",
+      "Operating system and architecture",
+      "Capability flags",
+      "Network and telemetry policy in effect",
+      "Shape of the Graph data (stores, sizes, versions)",
+      "Workspaces (hashes): 1",
+      "Runs (ids, statuses, node kinds, timestamps, error classes): 1"
+    ],
+    "displayedBytes": 2545,
+    "previewBytes": 2545,
+    "previewSha256": "fee36fcacd00b1f6bff353e08d31c4383bd5e79846a6960eb2e8a160d8b2174f",
+    "schemaVersion": 1,
+    "savedBytes": 2545,
+    "savedSha256": "fee36fcacd00b1f6bff353e08d31c4383bd5e79846a6960eb2e8a160d8b2174f",
+    "scan": {
+      "needlesChecked": 13,
+      "leaked": []
+    },
+    "requestsDuringGenerationAndSave": []
+  },
+  "cancelDialog": {
+    "ok": true,
+    "action": "cancel",
+    "title": "Save As",
+    "className": "#32770",
+    "error": null
+  },
+  "saveDialog": {
+    "ok": true,
+    "action": "select",
+    "title": "Save As",
+    "className": "#32770",
+    "error": null,
+    "fileNameBefore": "zcode-graph-support-bundle.json",
+    "acceptedPath": "<sandbox>"
+  },
+  "status": "PASS",
+  "network": []
+}

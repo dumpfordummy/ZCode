@@ -1,0 +1,143 @@
+{
+  "schema": "w1-smoke-subset-summary/1",
+  "note": "selected regression subset of the existing packaged smoke; NOT the full release gate",
+  "version": "3.14.3-z8.301",
+  "scope": "subset",
+  "requestedCases": ["ordinary-chat", "no-provider", "sequential-engineering-reviewer"],
+  "harness": {
+    "commit": "b43e25c2f32791395c8d7b23a35057757ab77a0a",
+    "dirty": true
+  },
+  "matchesReleaseManifest": true,
+  "packageHashes": {
+    "ZCode Graph.exe": "2ec326d92dc159c5ce6b8d434fb2128ba053e52ce1b5cd5eec864fa6db023d19",
+    "resources/app.asar": "17ebed43bbd1039852f9b2c9516dd26a7bbce47de8df9a29e5e901e1649b29f6",
+    "resources/graph-build-identity.json": "1da43d4493595ab3e2af96276263b47f7b87ba64f45093e532924af959901ed7"
+  },
+  "summary": {
+    "scope": "subset",
+    "status": "SUBSET-PASS",
+    "satisfiesFullReleaseGate": false,
+    "exitCode": 0,
+    "failed": [],
+    "notRun": [],
+    "notSelected": [
+      "telemetry-canary",
+      "z1-literal-compatibility",
+      "z2-complete",
+      "z2-question",
+      "z2-cancel-question",
+      "z2-cancel-permission",
+      "z2-cancel-progress",
+      "z2-restart-interrupted",
+      "z2-restart-permission",
+      "z2-persistence-recovery"
+    ],
+    "passed": ["ordinary-chat", "no-provider", "sequential-engineering-reviewer"]
+  },
+  "cases": [
+    {
+      "name": "ordinary-chat",
+      "status": "PASS",
+      "exitCode": 0,
+      "assertions": [
+        "Uninstrumented packaged ZCode Graph uses its own home and Electron profile",
+        "Real CLI Read/Edit/Bash events, changed synthetic file and independent node:test pass"
+      ],
+      "packagedIdentity": {
+        "name": "ZCode Graph",
+        "version": "3.14.3-z8.301",
+        "isPackaged": true
+      }
+    },
+    {
+      "name": "no-provider",
+      "status": "PASS",
+      "exitCode": 0,
+      "assertions": [
+        "Uninstrumented packaged ZCode Graph uses its own home and Electron profile",
+        "Native tab, instructions/name and keyboard layout persist after navigation",
+        "No provider: run unavailable without probing a model"
+      ],
+      "packagedIdentity": {
+        "name": "ZCode Graph",
+        "version": "3.14.3-z8.301",
+        "isPackaged": true
+      }
+    },
+    {
+      "name": "sequential-engineering-reviewer",
+      "status": "PASS",
+      "exitCode": 0,
+      "assertions": [
+        "Uninstrumented packaged ZCode Graph (isPackaged) uses its own home and Electron profile; test-environment overrides are explicit and this is not production network-egress acceptance",
+        "Built-in generic v2; genuine native Analyze/Edit/Build/Test; ignored untracked source; accepted current machine report; strict reviewer decision/validation; no automatic human approval."
+      ],
+      "packagedIdentity": {
+        "name": "ZCode Graph",
+        "version": "3.14.3-z8.301",
+        "isPackaged": true
+      },
+      "finalRunStatus": "WaitingForApproval",
+      "proof": {
+        "runStatus": "WaitingForApproval",
+        "sourceEdit": {
+          "file": "zz-demo.txt",
+          "content": "after"
+        },
+        "build": {
+          "operationId": "5de3fa34-2402-4b2a-9a8a-e4035c3319bf",
+          "status": "Completed",
+          "exitCode": 0,
+          "sourceDigest": "faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2",
+          "outputDigest": "6e4c9326ff188b3bb3220ea4e163c762032549026968086de35b49741ac2d4ef"
+        },
+        "test": {
+          "operationId": "ad4631b0-f52c-4694-ae3a-9e81b997851a",
+          "status": "Completed",
+          "exitCode": 0,
+          "sourceDigest": "faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2",
+          "buildDigest": "6e4c9326ff188b3bb3220ea4e163c762032549026968086de35b49741ac2d4ef",
+          "testCount": 1,
+          "acceptancePassed": true,
+          "passingAssertions": ["zz-demo contains after"]
+        },
+        "matchingEvidence": {
+          "testSourceEqualsBuildSource": true,
+          "testBuildEqualsBuildOutput": true,
+          "reportMatchesOperation": true,
+          "verificationArtifactId": "125c3ef4-1db8-4ef2-862f-3aa62346156e",
+          "reportArtifactId": "3c23640d-f901-4eaa-99f6-3bfecd095f4a"
+        },
+        "reviewer": {
+          "status": "Completed",
+          "outputValidation": "valid",
+          "outcome": "pass",
+          "evidenceReferences": ["125c3ef4-1db8-4ef2-862f-3aa62346156e"],
+          "boundArtifactIds": ["125c3ef4-1db8-4ef2-862f-3aa62346156e"]
+        },
+        "finalGate": {
+          "status": "WaitingForApproval",
+          "decisionRecorded": false
+        },
+        "nativeAgentInputs": 3,
+        "nativeToolOperations": 2,
+        "modelRequests": 9
+      },
+      "testedBuild": [
+        {
+          "file": "ZCode Graph.exe",
+          "sha256": "2ec326d92dc159c5ce6b8d434fb2128ba053e52ce1b5cd5eec864fa6db023d19"
+        },
+        {
+          "file": "resources/app.asar",
+          "sha256": "17ebed43bbd1039852f9b2c9516dd26a7bbce47de8df9a29e5e901e1649b29f6"
+        },
+        {
+          "file": "resources/graph-build-identity.json",
+          "sha256": "1da43d4493595ab3e2af96276263b47f7b87ba64f45093e532924af959901ed7"
+        }
+      ]
+    }
+  ]
+}
