@@ -17,9 +17,11 @@ $null = New-Item -ItemType Directory -Force -Path (Join-Path $Work 'evidence'), 
 function Test-DisposableGuest {
   $checks = [ordered]@{}
   # Windows Sandbox always runs as WDAGUtilityAccount; a host profile directory must not exist.
+  # ContainerAdministrator/ContainerUser are the sandbox container's own built-in profiles (observed on the first real
+  # guest boot); any other profile name, in particular a host user's, still fails the gate.
   $checks.user = ($env:USERNAME -eq 'WDAGUtilityAccount')
   $checks.noHostProfiles = -not (Get-ChildItem C:\Users -Directory -ErrorAction SilentlyContinue |
-      Where-Object { $_.Name -notin 'WDAGUtilityAccount', 'Public', 'Default', 'Default User', 'All Users' })
+      Where-Object { $_.Name -notin 'WDAGUtilityAccount', 'ContainerAdministrator', 'ContainerUser', 'Public', 'Default', 'Default User', 'All Users' })
   $checks.mappedInputReadOnly = $false
   if (Test-Path 'C:\i1-input') {
     try { New-Item -ItemType File -Path 'C:\i1-input\.ro-probe' -ErrorAction Stop | Out-Null; Remove-Item 'C:\i1-input\.ro-probe' }
@@ -104,8 +106,9 @@ switch ($Step) {
     [pscustomobject]@{ step = 'install'; which = $Which; exitCode = $p.ExitCode } | ConvertTo-Json | Set-Content (Join-Path $Work "evidence\install-exit-$Label.json")
   }
   'Uninstall' {
-    $e = @(Get-UninstallEntries | Where-Object { $_.displayName -eq 'ZCode Graph' })
+    $e = @(Get-UninstallEntries | Where-Object { $_.displayName -like 'ZCode Graph*' })
     if ($e.Count -ne 1) { throw "Expected exactly one ZCode Graph uninstall entry, found $($e.Count)" }
+    # DisplayName carries the version (observed: 'ZCode Graph 3.14.3-z8.303'), so match the prefix.
     # Run the registered uninstaller through its real UI path; do not pass --delete-app-data.
     $p = Start-Process -FilePath 'cmd.exe' -ArgumentList "/c $($e[0].uninstallString)" -Wait -PassThru
     [pscustomobject]@{ step = 'uninstall'; registeredCommand = $e[0].uninstallString; exitCode = $p.ExitCode } | ConvertTo-Json | Set-Content (Join-Path $Work "evidence\uninstall-exit-$Label.json")

@@ -1,6 +1,6 @@
 import { _electron as electron } from "playwright-core";
 import { mkdir, mkdtemp, writeFile, readFile, realpath } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
@@ -25,6 +25,16 @@ export async function createIsolation({
   const packagedExe = process.env.Z1_PACKAGED_EXE;
   if (packagedExe && (manual || profile))
     throw new Error("Packaged acceptance requires a fresh automated profile.");
+  // Z8.4-I1：安装器生命周期验收要求已安装的应用使用来宾自己的真实默认 profile（不重定向 HOME/APPDATA/userData），
+  // 这样安装、升级、卸载留存的才是真实数据位置。该模式只允许在一次性 Windows Sandbox 来宾内运行，
+  // 在宿主机上会直接拒绝，避免触碰操作者的真实 profile。
+  const installedProfile = process.env.Z1_INSTALLED_PROFILE === "1";
+  if (installedProfile && (!packagedExe || process.env.USERNAME !== "WDAGUtilityAccount"))
+    throw new Error(
+      "Z1_INSTALLED_PROFILE is only allowed with Z1_PACKAGED_EXE inside the disposable Windows Sandbox guest.",
+    );
+  // 升级/卸载后的核对只读取已有 profile：不改写 provider_config.json 与 setting.json，否则无法证明它们被保留。
+  const preserveProfile = installedProfile && process.env.Z1_PRESERVE_PROFILE === "1";
   const home = profile
     ? path.resolve(profile)
     : packagedExe
@@ -86,16 +96,17 @@ export async function createIsolation({
       );
   }
   const fixture = await fixtureFactory(workspace);
-  const graphProfile = packagedExe ? createGraphProfile(path.join(home, "home")) : undefined;
+  const profileBase = installedProfile ? homedir() : path.join(home, "home");
+  const graphProfile = packagedExe ? createGraphProfile(profileBase) : undefined;
   const settingsHome = graphProfile?.env.HOME ?? path.join(home, "home");
   const dataHome = graphProfile?.env.ZCODE_DATA_BASE_DIR ?? path.join(home, "data");
   await mkdir(path.join(dataHome, ".zcode/v2"), { recursive: true });
-  if (!manual && !noProvider)
+  if (!manual && !noProvider && !preserveProfile)
     await writeFile(
       path.join(dataHome, ".zcode/v2/provider_config.json"),
       JSON.stringify(providerConfig(fixture.origin)),
     );
-  if (!profile)
+  if (!profile && !preserveProfile)
     await writeFile(
       path.join(settingsHome, ".zcode/v2/setting.json"),
       JSON.stringify({
@@ -118,19 +129,43 @@ export async function createIsolation({
       "PROCESSOR_ARCHITECTURE",
     ].flatMap((key) => (process.env[key] ? [[key, process.env[key]]] : [])),
   );
+  // 已安装应用保留来宾的真实用户目录变量；其余合成目录仍在本次 mkdtemp 下。
+  const profileEnv = installedProfile
+    ? Object.fromEntries(
+        [
+          "USERPROFILE",
+          "APPDATA",
+          "LOCALAPPDATA",
+          "TEMP",
+          "TMP",
+          "USERNAME",
+          "USERDOMAIN",
+          "COMPUTERNAME",
+          "HOMEDRIVE",
+          "HOMEPATH",
+          "ProgramData",
+          "ProgramFiles",
+          "ALLUSERSPROFILE",
+          "PUBLIC",
+          "SystemDrive",
+        ].flatMap((key) => (process.env[key] ? [[key, process.env[key]]] : [])),
+      )
+    : {
+        HOME: path.join(home, "home"),
+        USERPROFILE: path.join(home, "home"),
+        APPDATA: path.join(home, "appdata"),
+        LOCALAPPDATA: path.join(home, "localappdata"),
+        TEMP: path.join(home, "temp"),
+        TMP: path.join(home, "temp"),
+        ZCODE_DATA_BASE_DIR: path.join(home, "data"),
+        ZCODE_DESKTOP_HOME_DIR: path.join(home, "home"),
+        ZCODE_DESKTOP_USER_DATA_DIR: path.join(home, "userData"),
+        ZCODE_DESKTOP_SESSION_DATA_DIR: path.join(home, "sessionData"),
+      };
   Object.assign(env, {
-    HOME: path.join(home, "home"),
-    USERPROFILE: path.join(home, "home"),
-    APPDATA: path.join(home, "appdata"),
-    LOCALAPPDATA: path.join(home, "localappdata"),
-    TEMP: path.join(home, "temp"),
-    TMP: path.join(home, "temp"),
+    ...profileEnv,
     GIT_CONFIG_GLOBAL: path.join(home, "empty-gitconfig"),
     GIT_CONFIG_NOSYSTEM: "1",
-    ZCODE_DATA_BASE_DIR: path.join(home, "data"),
-    ZCODE_DESKTOP_HOME_DIR: path.join(home, "home"),
-    ZCODE_DESKTOP_USER_DATA_DIR: path.join(home, "userData"),
-    ZCODE_DESKTOP_SESSION_DATA_DIR: path.join(home, "sessionData"),
     ZCODE_ENV: "test",
     ZCODE_E2E_RUN_ID: path.basename(home),
     ZCODE_MODEL_TELEMETRY_ENABLED: "0",
@@ -221,6 +256,9 @@ export async function createIsolation({
   };
   return {
     home,
+    // 文件对话框和用户文件夹所在的用户目录：隔离模式是合成 home/home，已安装模式是来宾真实用户目录。
+    shellHome: installedProfile ? homedir() : path.join(home, "home"),
+    installedProfile,
     workspace,
     fixture,
     env,

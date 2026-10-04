@@ -46,8 +46,16 @@ export async function launchUx(journey, options = {}) {
  */
 export async function ensureShellFolders(isolation) {
   const { mkdir } = await import("node:fs/promises");
-  for (const name of ["Desktop", "Documents", "Downloads"])
-    await mkdir(path.join(isolation.home, "home", name), { recursive: true });
+  // 已安装模式（Z8.4-I1）下，应用进程内的 USERPROFILE 是 Graph 私有 home，对话框也可能按它解析默认文件夹；两处都建。
+  const roots = new Set([
+    isolation.shellHome ?? path.join(isolation.home, "home"),
+    ...(isolation.installedProfile && isolation.graphProfile
+      ? [isolation.graphProfile.env.HOME]
+      : []),
+  ]);
+  for (const root of roots)
+    for (const name of ["Desktop", "Documents", "Downloads"])
+      await mkdir(path.join(root, name), { recursive: true });
 }
 
 /**
