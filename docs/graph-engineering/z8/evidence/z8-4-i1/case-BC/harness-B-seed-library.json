@@ -1,0 +1,305 @@
+﻿{
+  "assertions": [],
+  "screenshots": [],
+  "notes": [],
+  "identity": {
+    "name": "ZCode Graph",
+    "version": "3.14.3-z8.2",
+    "exePath": "C:\\Users\\WDAGUtilityAccount\\AppData\\Local\\Programs\\ZCode Graph\\ZCode Graph.exe"
+  },
+  "instantiatedDefinition": {
+    "version": 5,
+    "revision": 2,
+    "name": "Sequential engineering",
+    "nodes": [
+      {
+        "id": "start",
+        "position": {
+          "x": 40,
+          "y": 100
+        },
+        "type": "start",
+        "request": "Explicit workflow parameters (data, never command interpolation):\n{\n  \"request\": \"Modify zz-demo.txt file content to after\"\n}\nExcluded behavior: []\nRTP comparison is N/A unless both an approved target and sampling/acceptance rule are supplied."
+      },
+      {
+        "id": "analyze",
+        "position": {
+          "x": 300,
+          "y": 100
+        },
+        "type": "task",
+        "name": "Analyze",
+        "instructions": "Workflow task: analyze.\nAnalyze the explicit request and selected project. Read relevant native project instructions and selected source references. Identify affected behavior, unknowns and acceptance criteria. Link each rule to a source reference or label it a question. Do not edit or execute commands.\nrequest:\n{{inputs.request}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "implement",
+        "position": {
+          "x": 560,
+          "y": 100
+        },
+        "type": "task",
+        "name": "Implement",
+        "instructions": "Workflow task: implement.\nImplement only the approved request using the explicit Analyze handoff and normal native project tools. Preserve unrelated work and test authority. Do not invent missing rules or tooling; ask when blocked. Configured Build/Test nodes execute the verification recipes afterward.\nrequest:\n{{inputs.request}}\n\nanalyze:\n{{inputs.analyze}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
+          {
+            "alias": "analyze",
+            "source": {
+              "kind": "node",
+              "nodeId": "analyze"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        }
+      },
+      {
+        "id": "build",
+        "position": {
+          "x": 820,
+          "y": 100
+        },
+        "type": "tool",
+        "name": "Build",
+        "recipeId": "reviewer-build"
+      },
+      {
+        "id": "test",
+        "position": {
+          "x": 1080,
+          "y": 100
+        },
+        "type": "tool",
+        "name": "Test configured criteria",
+        "recipeId": "reviewer-test"
+      },
+      {
+        "id": "reviewer",
+        "position": {
+          "x": 1340,
+          "y": 100
+        },
+        "type": "task",
+        "name": "Review current verification",
+        "instructions": "Workflow task: reviewer.\nReview the explicit request against the current Test verification supplied as evidence. Decide whether the verified machine result satisfies the request's stated acceptance criteria. Return exactly one JSON object with outcome pass, needs_changes or needs_human; findings as {code,message} records; and evidenceReferences containing only the permitted evidence artifact IDs supplied below. A failed Test can never be pass. A passing Test is evidence of the machine check, not a guarantee that the requested change is correct; return needs_changes only for a concrete issue grounded in the supplied request and verification evidence, otherwise pass. Do not invent acceptance criteria the request did not state; in particular, do not require Git-tracked or committed source unless an explicit supplied criterion says so. Unsupported uncertainty must be needs_human, not an invented blocking rule. Do not edit files or run commands; the verification artifact already contains the machine result.\nrequest:\n{{inputs.request}}\n\nverification:\n{{inputs.verification}}",
+        "instructionMode": "bound",
+        "inputs": [
+          {
+            "alias": "request",
+            "source": {
+              "kind": "start"
+            }
+          },
+          {
+            "alias": "verification",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "test",
+              "selector": "verification"
+            }
+          }
+        ],
+        "configuration": {
+          "kind": "inherit"
+        },
+        "output": {
+          "kind": "json",
+          "schema": {
+            "type": "object",
+            "required": [
+              "outcome",
+              "findings",
+              "evidenceReferences"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "enum": [
+                  "pass",
+                  "needs_changes",
+                  "needs_human"
+                ]
+              },
+              "findings": {
+                "type": "array",
+                "maxItems": 10,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  }
+                }
+              },
+              "evidenceReferences": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 8,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "final-gate",
+        "position": {
+          "x": 40,
+          "y": 320
+        },
+        "type": "approval",
+        "name": "Final human review",
+        "reviewInstructions": "Review this exact source-linked evidence, diff and unresolved questions. Approve only the selected scope. This does not authorize publication or answer native permissions.",
+        "evidence": [
+          {
+            "alias": "evidence",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "test",
+              "selector": "test"
+            }
+          },
+          {
+            "alias": "review",
+            "source": {
+              "kind": "artifact",
+              "nodeId": "reviewer",
+              "selector": "structured"
+            }
+          },
+          {
+            "alias": "source",
+            "source": {
+              "kind": "source"
+            }
+          }
+        ],
+        "commentPolicy": "required"
+      },
+      {
+        "id": "end",
+        "position": {
+          "x": 300,
+          "y": 320
+        },
+        "type": "end",
+        "outputNodeId": "test"
+      }
+    ],
+    "edges": [
+      {
+        "source": "start",
+        "target": "analyze"
+      },
+      {
+        "source": "analyze",
+        "target": "implement"
+      },
+      {
+        "source": "implement",
+        "target": "build"
+      },
+      {
+        "source": "build",
+        "target": "test"
+      },
+      {
+        "source": "test",
+        "target": "reviewer"
+      },
+      {
+        "source": "reviewer",
+        "target": "final-gate"
+      },
+      {
+        "source": "final-gate",
+        "target": "end"
+      }
+    ],
+    "routing": {
+      "finalGateId": "final-gate",
+      "limits": {
+        "maxNodeAdmissions": 24,
+        "deadlineMs": 1800000
+      }
+    },
+    "template": {
+      "id": "generic",
+      "name": "Sequential engineering",
+      "version": 2,
+      "digest": "7307e6439e16b1a0006845f6ac5d66d80b747b2982c9411ff92294a619b853a4",
+      "parameters": {
+        "request": "Modify zz-demo.txt file content to after"
+      },
+      "bindings": {
+        "references": {
+          "instructions": "Context.md"
+        },
+        "recipes": {
+          "build": "reviewer-build",
+          "test": "reviewer-test"
+        },
+        "sourcePaths": []
+      },
+      "references": [
+        {
+          "id": "instructions",
+          "kind": "instruction",
+          "nodeIds": [
+            "analyze",
+            "implement"
+          ]
+        }
+      ],
+      "excluded": []
+    }
+  },
+  "library": [
+    {
+      "id": "6c76405c-b50c-439f-b98d-298f9697a4f7",
+      "name": "I1 synthetic library design",
+      "versions": 1
+    }
+  ],
+  "status": "PASS",
+  "home": "C:\\Users\\WDAGUtilityAccount\\AppData\\Local\\Temp\\zcode-graph-acceptance-ieovJL",
+  "workspace": "C:\\Users\\WDAGUtilityAccount\\AppData\\Local\\Temp\\zcode-graph-acceptance-ieovJL\\workspace"
+}
+

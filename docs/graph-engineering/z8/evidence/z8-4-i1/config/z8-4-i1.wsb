@@ -1,0 +1,25 @@
+﻿<Configuration>
+  <VGpu>Disable</VGpu>
+  <Networking>Disable</Networking>
+  <AudioInput>Disable</AudioInput>
+  <VideoInput>Disable</VideoInput>
+  <PrinterRedirection>Disable</PrinterRedirection>
+  <ClipboardRedirection>Disable</ClipboardRedirection>
+  <ProtectedClient>Enable</ProtectedClient>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder><staging-root>\input</HostFolder>
+      <SandboxFolder>C:\i1-input</SandboxFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+    <MappedFolder>
+      <HostFolder><staging-root>\evidence-export</HostFolder>
+      <SandboxFolder>C:\i1-export</SandboxFolder>
+      <ReadOnly>false</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <LogonCommand>
+    <Command>powershell.exe -NoProfile -ExecutionPolicy Bypass -NoExit -Command "Copy-Item C:\i1-input C:\i1 -Recurse -Force; Set-Location C:\i1; .\i1-guest.ps1 -Step Preflight"</Command>
+  </LogonCommand>
+</Configuration>
+

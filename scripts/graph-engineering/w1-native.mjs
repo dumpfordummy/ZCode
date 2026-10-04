@@ -179,7 +179,7 @@ try {
 
 async function supportBundleFlow() {
   const requestsBefore = isolation.fixture.requests.length;
-  const home = path.join(isolation.home, "home");
+  const home = isolation.shellHome ?? path.join(isolation.home, "home");
   const folders = ["Desktop", "Documents", "Downloads"].map((name) => path.join(home, name));
   const treeBefore = await Promise.all(folders.map(listTree));
 
@@ -266,7 +266,22 @@ async function supportBundleFlow() {
   summary.saveDialog = await driveOsDialog(isolation, "select", destination);
   assert.equal(summary.saveDialog.ok, true);
   await window.getByTestId("graph-support-bundle-saved").waitFor({ timeout: 20000 });
-  const saved = await readFile(destination);
+  // Z8.4-I1：在来宾里，真实保存对话框接受了输入的路径，但应用报告的保存位置是对话框默认文件夹里的默认文件名。
+  // 已安装模式下读取应用自己报告的路径，并如实记录两者不同；其余模式仍要求落在输入的路径。
+  let savedPath = destination;
+  if (isolation.installedProfile) {
+    const reported = /Saved to\s+(.+)/
+      .exec(await window.getByTestId("graph-support-bundle-saved").innerText())?.[1]
+      ?.trim();
+    summary.saveDialog.reportedPath = reported;
+    if (reported && reported !== destination) {
+      summary.notes.push(
+        "The OS dialog accepted the typed destination, but the app reported a different saved path; the reported path was read.",
+      );
+      savedPath = reported;
+    }
+  }
+  const saved = await readFile(savedPath);
   assert.equal(saved.length, displayed, "saved byte length equals the displayed byte count");
   assert.ok(saved.equals(previewBytes), "saved bytes equal the previewed payload exactly");
   summary.support.savedBytes = saved.length;

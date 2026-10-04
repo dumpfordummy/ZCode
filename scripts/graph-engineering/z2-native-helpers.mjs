@@ -131,11 +131,16 @@ export function readNativeLedger(isolation) {
     readOnly: true,
   });
   try {
+    // Z8.4-I1：已安装应用使用来宾的真实 profile，账本里还有同一 profile 里其他验收运行留下的输入；
+    // 此时只看本次工作区下的会话，其余模式保持原样（账本整体即本次夹具产生）。
+    const scoped = Boolean(isolation.installedProfile);
     return db
       .prepare(
-        "select id, session_id, kind, delivery, payload, status, time_created, time_updated from session_input order by time_created, id",
+        `select id, session_id, kind, delivery, payload, status, time_created, time_updated from session_input${
+          scoped ? " where session_id in (select id from session where directory = ?)" : ""
+        } order by time_created, id`,
       )
-      .all()
+      .all(...(scoped ? [isolation.workspace] : []))
       .map((row) => ({ ...row, payload: JSON.parse(row.payload) }));
   } finally {
     db.close();
