@@ -8,9 +8,9 @@ Status words: PASS / FAIL / UNVERIFIED / BLOCKED / OPERATOR-PENDING.
 
 | Case                                                               | First session | Now                                                 | Evidence                            |
 | ------------------------------------------------------------------ | ------------- | --------------------------------------------------- | ----------------------------------- |
-| A — clean install, payload, launch, smoke, restart, support bundle | BLOCKED       | **PASS** (with one OPERATOR-PENDING sub-item, §9.2) | `Z8_4_I1_EVIDENCE/case-A/`          |
-| B — real upgrade z8.2 → Candidate 3                                | BLOCKED       | **PASS**                                            | `Z8_4_I1_EVIDENCE/case-BC/` (`B-*`) |
-| C — uninstall / retention / reinstall                              | BLOCKED       | **PASS**                                            | `Z8_4_I1_EVIDENCE/case-BC/` (`C-*`) |
+| A — clean install, payload, launch, smoke, restart, support bundle | BLOCKED       | **PASS** (with one OPERATOR-PENDING sub-item, §9.2) | `evidence/z8-4-i1/case-A/`          |
+| B — real upgrade z8.2 → Candidate 3                                | BLOCKED       | **PASS**                                            | `evidence/z8-4-i1/case-BC/` (`B-*`) |
+| C — uninstall / retention / reinstall                              | BLOCKED       | **PASS**                                            | `evidence/z8-4-i1/case-BC/` (`C-*`) |
 | Ordinary-ZCode coexistence                                         | not started   | **UNVERIFIED**                                      | `case-BC/C-coexistence.json`        |
 
 B and C ran in **one** Sandbox boot because C starts "from the upgraded guest state"; A ran in its own fresh instance. Both were run from a clean tree at harness commit `2234ac4`. Earlier development runs (which exposed the tooling defects in §9.1) are not cited as evidence.
@@ -144,7 +144,7 @@ The per-case configs run unattended and power the guest off, so they are not sui
 
 ## 12. Evidence index
 
-`docs/graph-engineering/z8/Z8_4_I1_EVIDENCE/` — path-sanitized, synthetic, exported only through the writable mapping (guest profile path replaced by `<guest-profile>`, guest host name by `<guest-host>`; no credentials, no binaries, no environment dumps, no screenshots): `case-A/` and `case-BC/` (`progress.log`, isolation gate, inventories, install/uninstall wizard records, installer and old-uninstaller logs, payload/ASAR comparisons, pre/post profile and sentinel snapshots, harness results, persistence inspections, support bundle), and `config/` (the three sandbox configs with the staging root replaced, `TOOLS-MANIFEST.json`, `SHA256SUMS.txt`). Debug screenshots of the guest desktop and the first-run failure archives stay on the operator's staging folder and are not committed.
+`docs/graph-engineering/z8/evidence/z8-4-i1/` — path-sanitized, synthetic, exported only through the writable mapping (guest profile path replaced by `<guest-profile>`, guest host name by `<guest-host>`; no credentials, no binaries, no environment dumps, no screenshots): `case-A/` and `case-BC/` (`progress.log`, isolation gate, inventories, install/uninstall wizard records, installer and old-uninstaller logs, payload/ASAR comparisons, pre/post profile and sentinel snapshots, harness results, persistence inspections, support bundle), and `config/` (the three sandbox configs with the staging root replaced, `TOOLS-MANIFEST.json`, `SHA256SUMS.txt`). Debug screenshots of the guest desktop and the first-run failure archives stay on the operator's staging folder and are not committed.
 
 ## Appendix A — first-session record (BLOCKED), kept as written
 
