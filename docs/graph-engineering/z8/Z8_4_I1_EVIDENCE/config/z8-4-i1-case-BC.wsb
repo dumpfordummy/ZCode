@@ -1,0 +1,25 @@
+﻿<Configuration>
+  <VGpu>Disable</VGpu>
+  <Networking>Disable</Networking>
+  <AudioInput>Disable</AudioInput>
+  <VideoInput>Disable</VideoInput>
+  <PrinterRedirection>Disable</PrinterRedirection>
+  <ClipboardRedirection>Disable</ClipboardRedirection>
+  <ProtectedClient>Enable</ProtectedClient>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder><staging-root>\input</HostFolder>
+      <SandboxFolder>C:\i1-input</SandboxFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+    <MappedFolder>
+      <HostFolder><staging-root>\evidence-export</HostFolder>
+      <SandboxFolder>C:\i1-export</SandboxFolder>
+      <ReadOnly>false</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <LogonCommand>
+    <Command>powershell.exe -NoProfile -ExecutionPolicy Bypass -Command &quot;robocopy C:\i1-input C:\i1 /E /XD git /NFL /NDL /NJH /NJS /NP | Out-Null; Set-Location C:\i1; .\i1-auto.ps1 -Case BC *&gt;&gt; C:\i1-export\logon-BC.out&quot;</Command>
+  </LogonCommand>
+</Configuration>
+
