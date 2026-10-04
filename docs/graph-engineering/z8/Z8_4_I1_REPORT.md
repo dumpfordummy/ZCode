@@ -6,12 +6,12 @@ The first session's **BLOCKED** record is preserved unchanged in Appendix A.
 
 Status words: PASS / FAIL / UNVERIFIED / BLOCKED / OPERATOR-PENDING.
 
-| Case                                                               | First session | Now                                                 | Evidence                            |
-| ------------------------------------------------------------------ | ------------- | --------------------------------------------------- | ----------------------------------- |
-| A — clean install, payload, launch, smoke, restart, support bundle | BLOCKED       | **PASS** (with one OPERATOR-PENDING sub-item, §9.2) | `evidence/z8-4-i1/case-A/`          |
-| B — real upgrade z8.2 → Candidate 3                                | BLOCKED       | **PASS**                                            | `evidence/z8-4-i1/case-BC/` (`B-*`) |
-| C — uninstall / retention / reinstall                              | BLOCKED       | **PASS**                                            | `evidence/z8-4-i1/case-BC/` (`C-*`) |
-| Ordinary-ZCode coexistence                                         | not started   | **UNVERIFIED**                                      | `case-BC/C-coexistence.json`        |
+| Case                                                               | First session | Now                                                                   | Evidence                            |
+| ------------------------------------------------------------------ | ------------- | --------------------------------------------------------------------- | ----------------------------------- |
+| A — clean install, payload, launch, smoke, restart, support bundle | BLOCKED       | **PASS** (Save As first-run error box observed by the operator, §9.2) | `evidence/z8-4-i1/case-A/`          |
+| B — real upgrade z8.2 → Candidate 3                                | BLOCKED       | **PASS**                                                              | `evidence/z8-4-i1/case-BC/` (`B-*`) |
+| C — uninstall / retention / reinstall                              | BLOCKED       | **PASS**                                                              | `evidence/z8-4-i1/case-BC/` (`C-*`) |
+| Ordinary-ZCode coexistence                                         | not started   | **UNVERIFIED**                                                        | `case-BC/C-coexistence.json`        |
 
 B and C ran in **one** Sandbox boot because C starts "from the upgraded guest state"; A ran in its own fresh instance. Both were run from a clean tree at harness commit `2234ac4`. Earlier development runs (which exposed the tooling defects in §9.1) are not cited as evidence.
 
@@ -122,7 +122,7 @@ Least invasive route first, no production debug bypass added: Playwright's `elec
 ### 9.2 Product observations (no installer defect; operator decides)
 
 1. **Close-to-tray / processes after closing the window.** After the Case A shortcut launch, closing the main window left 6 `ZCode Graph.exe` processes alive for 30 s; the driver then ended them. Cause not isolated (consistent with the close-to-tray default that the harness profile turns off). Uninstall or upgrade **with the app running** was therefore **not exercised** (UNVERIFIED); the uninstaller only tells the user to close the app.
-2. **Save As in a clean installed profile.** On the first installed run the support-bundle Save dialog showed "Location is not available / Path does not exist" naming a path under `…\.zcode-graph-engineering\…\zcode-graph-support-bundle.json`, and the run stopped. After empty `Desktop`, `Documents`, `Downloads` folders were created under the private profile home (as the UX-M2 report already notes for isolated profiles) the dialog worked — **but** the app then reported saving to `…\.zcode-graph-engineering\home\Desktop\zcode-graph-support-bundle.json` although the automation had typed a different destination. The harness therefore reads the path the app reports and records the difference. Whether a real user sees the "Location is not available" box, and whether a typed destination is honored, is **OPERATOR-PENDING** (§10). Not an installer matter; no fix attempted.
+2. **Save As in a clean installed profile — confirmed by the operator by hand.** On a clean install the support-bundle Save dialog first shows a "Location is not available" box saying `…\.zcode-graph-engineering\home\Desktop is unavailable` (the dialog's start folder is the Desktop of Graph's private profile home, which does not exist yet) and then opens on `C:\Windows\System32`. A destination chosen by hand **is honored** and the file lands exactly there. The automated runs saw the same box, and after empty `Desktop`, `Documents`, `Downloads` folders were created under the private home the automation reported the default folder and name instead of the typed path; that last part is therefore an automation artifact (the harness reads the path the app reports and records the difference), not an app behavior. **Open decision for the operator:** the error box is a first-run UX defect of the app, not of the installer; no fix was attempted because only installer defects are authorized for change here.
 3. The main window title is `ZCode` while `app.getName()` is `ZCode Graph` (cosmetic, noted only).
 
 ### 9.3 What was not changed
@@ -131,9 +131,9 @@ No product code, installer script, version or package was changed; no candidate 
 
 ## 10. Operator click-through still needed (OPERATOR-PENDING)
 
-The per-case configs run unattended and power the guest off, so they are not suitable for hand work. Open an interactive guest from the staged `z8-4-i1.wsb` (it only runs the isolation preflight), copy `C:\i1-input` to a guest-local folder as its logon command does, install Candidate 3 by hand from the hash-verified copy, then:
+Item 1 below was completed; items 2–3 remain. The per-case configs run unattended and power the guest off, so they are not suitable for hand work. Open an interactive guest from the staged `z8-4-i1.wsb` (it only runs the isolation preflight), copy `C:\i1-input` to a guest-local folder as its logon command does, install Candidate 3 by hand from the hash-verified copy, then:
 
-1. **Save As on a clean profile:** Help → Graph support bundle → Save…, _without_ creating any folder first. Record whether "Location is not available" appears, and whether choosing `Documents\x.json` saves exactly there.
+1. ~~Save As on a clean profile~~ — **done by the operator**: the "Location is not available" box appears, and a hand-chosen destination is honored (§9.2). Screenshot kept by the operator, not committed.
 2. **Close/exit behavior:** close the main window, check the tray and Task Manager; then run the registered uninstaller once while the app is still running and record what the uninstaller does.
 3. Optional, outside the tested contract: all-users install (UAC), a non-default install directory, silent install.
 
