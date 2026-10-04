@@ -20,7 +20,7 @@ Installed-payload hashes (`ZCode Graph.exe`, `app.asar`, `zcode.cjs`, `graph-bui
 
 - Windows 11 Education build 26300; `HypervisorPresent = True`; `vmms` is running.
 - `C:\Windows\System32\WindowsSandbox.exe` is **absent**, so the Windows Sandbox optional feature is not enabled. Querying the feature state itself requires elevation, which this session does not have.
-- Hyper-V VMs cannot be enumerated (`Get-VM` is denied; the Hyper-V data directory is access-denied), so no existing disposable VM with a clean checkpoint can be verified. No `.vhdx/.vmdk/.vdi/.wsb` was found under the user profile. No third-party hypervisor CLI was found.
+- Hyper-V VMs cannot be enumerated (`Get-VM` is denied; the Hyper-V data directory is access-denied), so no existing disposable VM with a clean checkpoint can be verified. A search of the user profile (depth 4) found only two `.vhdx` files, both Docker Desktop WSL data disks (`AppData\Local\Docker\wsl\...`), which are not Windows guests and are not used; no `.vmdk`, `.vdi` or `.wsb` was found. No third-party hypervisor CLI was found.
 - No Graph install, Graph profile (`%USERPROFILE%\.zcode-graph-engineering`) or `C:\i1` exists on the host.
 
 ## 3. What was prepared
