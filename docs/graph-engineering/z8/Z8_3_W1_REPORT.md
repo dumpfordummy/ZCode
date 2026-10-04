@@ -225,3 +225,9 @@ The bundled agent is byte-identical to candidate 2's (same SHA-256); the build i
 | S     | Help menu, dialog open after menu closes, 8 categories, preview, Cancel/Save As | PASS: 2545 B displayed = previewed = saved (same SHA-256), 13 needles absent, 0 requests, real `#32770`    |
 
 Evidence: `Z8_3_W1_EVIDENCE/dist-graph-w3__c3-attempt1/` (path-sanitized). The limits of §4, §6 and the header apply unchanged: network observation is not all-egress coverage and not OS confinement; raw sockets, MCP, hooks and tools are outside the claim; the other Feedback entry points were not packaged-clicked; the full 13-case matrix was not rerun; the installer was built but never run. **OP-1 remains OPERATOR-PENDING.**
+
+## 11. Operator-reported acceptance (appended 2026-10-04, after merge of PR #16)
+
+The operator reported in chat that all ten OP-1 checks (§10) were OK on Candidate 3 (`3.14.3-z8.303`). This is an operator report; no screenshots or logs were attached to it. The automated evidence, the original **OPERATOR-PENDING** wording above and the limits of §4, §6 and §9 are retained unchanged: the click-through ran on an unpacked copy, the installer itself was built but never run in W1, and the narrower statements about network observation still apply. OP-1 is therefore **PASS (operator-reported)**.
+
+Credential-at-rest redesign is **deferred by the operator's decision** for initial internal use, citing their model endpoint's IP allowlist. This is an operator-reported control and an accepted deferral, not independently verified protection. It does not change what this report claims about the credential store (not characterized as OS-protected), and no credential work is done in Z8.4-I1.
