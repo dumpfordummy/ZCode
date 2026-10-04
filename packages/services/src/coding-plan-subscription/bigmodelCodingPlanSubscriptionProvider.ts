@@ -66,6 +66,9 @@ import {
   DEFAULT_ZCODE_MODEL_CONTEXT_BUDGET_STRATEGY,
   createDynamicWorkflowClientConfig,
   normalizeDynamicWorkflowMode,
+  resolveAutomaticNetworkPolicy,
+  ZCODE_PRODUCT_FLAVOR,
+  type AutomaticNetworkPolicy,
   resolveDynamicWorkflowClientConfig,
   DEFAULT_DYNAMIC_WORKFLOW_MODE,
   ZCODE_DYNAMIC_WORKFLOW_MODE_ENV,
@@ -125,6 +128,8 @@ interface BigModelCodingPlanSubscriptionProviderOptions {
   apiClient: ApiClient;
   credentialService: Pick<ICredentialService, "load">;
   resolveOffPeakModelSelectionView?: () => Promise<ModelSelectionView>;
+  /** 仅供测试覆盖；运行时使用编译期产品身份对应的策略。 */
+  automaticNetworkPolicy?: AutomaticNetworkPolicy;
 }
 
 interface TeamPlanProjectApiKeyPrewarmStatus {
@@ -158,8 +163,17 @@ export class BigModelCodingPlanSubscriptionProvider {
   private clientConfigSnapshot: ZCodeClientConfigEnvelope | null = null;
   private clientConfigSnapshotExpiresAt = 0;
   private clientConfigRequest: Promise<ZCodeClientConfigEnvelope> | null = null;
+  /**
+   * Z8.3-W1：灰度类（Off-Peak / 动态工作流）读取是 Host 启动时的自动 client/configs 请求，
+   * 与 IClientConfigService 的非强制读取同属 `clientConfig` 类，Graph 策略拒绝。
+   * 设置页读取套餐/预览（getStaticTeamProducts 等）是用户进入页面的显式读取，不受影响。
+   */
+  private readonly automaticClientConfigAllowed: boolean;
 
   constructor(options: BigModelCodingPlanSubscriptionProviderOptions) {
+    this.automaticClientConfigAllowed = (
+      options.automaticNetworkPolicy ?? resolveAutomaticNetworkPolicy(ZCODE_PRODUCT_FLAVOR)
+    ).clientConfig;
     this.apiClient = options.apiClient;
     this.credentialService = options.credentialService;
     this.resolveOffPeakModelSelectionView = options.resolveOffPeakModelSelectionView;
@@ -229,7 +243,11 @@ export class BigModelCodingPlanSubscriptionProvider {
       this.clientConfigSnapshot = null;
       this.clientConfigSnapshotExpiresAt = 0;
     }
-    const payload = await this.getClientConfigs();
+    // 自动读取被策略拒绝时用空远端配置（与上面 mock 分支同一函数），不发请求；forceRefresh 是用户进入 Automations 的显式补拉。
+    const payload =
+      this.automaticClientConfigAllowed || options?.forceRefresh
+        ? await this.getClientConfigs()
+        : ({} as ZCodeClientConfigEnvelope);
     const modelSelectionView = await this.resolveOffPeakModelSelectionView?.();
     return resolveOffPeakClientConfig(payload, process.env, modelSelectionView);
   }
@@ -254,6 +272,9 @@ export class BigModelCodingPlanSubscriptionProvider {
       this.clientConfigSnapshot = null;
       this.clientConfigSnapshotExpiresAt = 0;
     }
+    // 自动读取被策略拒绝（Graph）：返回默认（关闭）配置，不发请求；forceRefresh 保持显式路径。
+    if (!this.automaticClientConfigAllowed && !options?.forceRefresh)
+      return createDynamicWorkflowClientConfig(DEFAULT_DYNAMIC_WORKFLOW_MODE, "default");
     try {
       const payload = await this.getClientConfigs();
       return resolveDynamicWorkflowClientConfig({
