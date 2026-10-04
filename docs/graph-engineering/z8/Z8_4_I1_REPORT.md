@@ -140,7 +140,7 @@ The per-case configs run unattended and power the guest off, so they are not sui
 ## 11. Static checks, tests and CI
 
 - `pnpm typecheck`: **exit 0**. `pnpm lint`: **0 errors**, 75 warnings (pre-existing). `pnpm architecture:check --changed`: **OK, 0 violations**. `oxfmt --check` on every changed or new `.mjs` file: pass (repo-wide `pnpm fmt:check` flags about 4400 files on this Windows checkout — line-ending noise unrelated to this change). `node --test` on the new guard test and `acceptance-paths.test.mjs`: pass. `z8-3-a-windows-asar-integrity.test.mjs` fails (`builder["resources/app.asar"]` undefined) **identically in the unrelated W1 worktree**, so it is pre-existing and not caused by this change. PowerShell scripts parse cleanly (no PowerShell linter is configured in the repo).
-- GitHub CI: see the PR (`PR_STATUS` below is filled in after the push).
+- GitHub CI (PR #17, workflow "Graph cloud PR checks"): commit `a60a712` — `typecheck`, `static-checks`, `graph-tests` and `graph-cloud-required` all **success**. The first push of the results (`446d471`) had `static-checks` **fail** at "Format check of changed files only": the guest-exported evidence sat outside the byte-preserved evidence directory that CI's format check excludes by design. The evidence was moved to `docs/graph-engineering/z8/evidence/z8-4-i1/` (unchanged bytes) and the check passed. No auto-merge was enabled and the PR was not merged.
 
 ## 12. Evidence index
 
