@@ -174,6 +174,9 @@ export async function readArtifact(window, run, attempt, selector) {
   assert.ok(ref, `Exact attempt lacks ${selector} artifact.`);
   const artifact = run.artifacts.find((item) => item.id === ref.artifactId);
   await selectAttempt(window, attempt);
+  // 原因：U1 把非空工件放入外层按需披露；先通过真实控件展开，再保留原有字节与归属断言。
+  const list = window.getByTestId("graph-artifact-list");
+  if ((await list.getAttribute("open")) === null) await list.locator(":scope > summary").click();
   const button = window.getByTestId(`graph-artifact-open-${artifact.id}`);
   const details = button.locator("xpath=ancestor::details[1]");
   if ((await details.getAttribute("open")) === null)
