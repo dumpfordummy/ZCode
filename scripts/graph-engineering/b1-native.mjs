@@ -43,7 +43,8 @@ async function openQuick() {
   await T(window, "graph-template-parameter-request").fill(
     "B1: preserve this request and verify real arithmetic tests",
   );
-  await addByKeyboard(window, "Notes", "instructions");
+  // Q1 已独立验证键盘上下文保留；原生执行用例不重复窗口焦点场景。
+  if (mode === "save-only") await addByKeyboard(window, "Notes", "instructions");
   const draft = await draftView(window);
   await T(window, "graph-template-setup-checks").click();
   await T(window, "graph-quick-scan").click();
