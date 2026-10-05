@@ -84,13 +84,23 @@ async function reviewAndRun(label, fail) {
     await allowU2Permission(window);
   }
   const run = await waitU2Run(isolation, runId, (r) => ["Completed", "Failed"].includes(r.status));
-  const proof = await verifyB1Result(isolation, window, run, preview, fail);
+  let result;
+  try {
+    const proof = await verifyB1Result(isolation, window, run, preview, fail);
+    result = { name: label, status: "PASS", ...proof };
+  } catch (error) {
+    if (label !== "B1-Q3-fail") throw error;
+    // 原因：真实失败报告可能暴露新的解析缺陷；保留严格断言失败，只继续收集恢复运行，不能改写为通过。
+    result = { name: label, status: "FAIL", runId: run.id, error: error.stack ?? String(error) };
+  }
+  const after = await readGraphRecord(isolation);
+  assert.deepEqual(after.runs.slice(0, baseline.runs.length), baseline.runs);
   assert.equal(modelCount(isolation), 0);
   await T(window, "graph-run-close-details")
     .click()
     .catch(() => {});
   await shot(isolation, window, summary, label + "-result", [1600, 900]);
-  summary.cases.push({ name: label, status: "PASS", ...proof });
+  summary.cases.push(result);
   await writeFile(path.join(isolation.home, "b1-summary.json"), JSON.stringify(summary, null, 2));
   return run;
 }
@@ -169,7 +179,8 @@ try {
       );
     }
   }
-  summary.status = "PASS";
+  summary.status = summary.cases.some((entry) => entry.status === "FAIL") ? "FAIL" : "PASS";
+  if (summary.status === "FAIL") process.exitCode = 1;
 } catch (error) {
   summary.status = "FAIL";
   summary.error = error.stack ?? String(error);

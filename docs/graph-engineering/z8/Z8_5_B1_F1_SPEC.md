@@ -44,3 +44,7 @@ sequenceDiagram
 New immutable .305 only after regressions/preflight. Q1, Q2, Q3 fail/recovery, representative U1/Chat and complete post-test hashes are required. Each source mutation gets fresh Build/Test; no prior report borrowing. Human approval remains pending. Stage only exact tested installer/checksum/draft notes if all gates pass. No tag, upload, release, merge, installer execution or .303 replacement.
 
 Derived fixture: packages/services/src/graph-engineering/app/fixtures/b1-xunit-derived.trx, canonical UTF-8/LF SHA-256 c446411e249290c99559674701d8046c0b32ba18fff0b5d1ddba1139f1ba4e60. This is distinct from the original native report. Focused parser/capture/evidence tests: 109 passed, 2 optional manifest-dependent skips, zero failures. New portable regression: 10 passed, zero skips; reinstated old guard fails the positive case; restored fix passes. Original-byte replay with captured scope/window yields three passed observations without changing history.
+
+## Failed-assertion evidence collection
+
+If the strict Q3 failing-evidence assertion rejects a completed native run, retain that case as FAIL and keep the entire harness result failing. Continue only to restore the owned fixture exactly and execute a fresh reviewed recovery run through the same permissions. This is collection of independent recovery evidence, not acceptance of the rejected report. Assert all previous run records are unchanged after each new run. No packaged behavior or proof assertion changes.
