@@ -330,7 +330,13 @@ export function GraphEditorSurface({
             ) : null}
           </GraphTabPanel>
           <GraphTabPanel value="technical">
-            {runSummary ? <GraphRunTechnicalPanel summary={runSummary} /> : null}
+            {runSummary ? (
+              <GraphRunTechnicalPanel
+                summary={runSummary}
+                run={selectedRun}
+                evidenceActions={graph}
+              />
+            ) : null}
           </GraphTabPanel>
         </GraphTabs>
       ) : (

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { acceptancePaths } from "./acceptance-paths.mjs";
-import { readArtifactUi } from "./z4-native-helpers.mjs";
+import { openManifestUi, readArtifactUi } from "./z4-native-helpers.mjs";
 import { captureU3, ledger, modelCount } from "./pre-z8-u3-common.mjs";
 import { withU4ArtifactFault } from "./pre-z8-u4-artifact-fault.mjs";
 import { assertU4Summary, selectU4Run } from "./pre-z8-u4-ui.mjs";
@@ -46,7 +46,7 @@ export async function verifyU4ArtifactErrors(isolation, window, summary, run) {
     );
     assert.equal(await window.getByTestId("graph-artifact-read-error").count(), 0);
   }
-  await window.getByTestId("graph-export-manifest").click();
+  await openManifestUi(window);
   // ReadState renders an intentionally empty (zero-size) <div data-state="ready"> when the
   // manifest read completes, so a visibility wait can never succeed. The [data-state="ready"]
   // attribute selector itself excludes loading/error; "attached" only confirms the element is

@@ -17,8 +17,10 @@ import { u1Run } from "./u1-runs.mjs";
 import { interactionScenario } from "./u1-interactions.mjs";
 import { baselineSource } from "./u1-baseline.mjs";
 import { assertAgentLedVerification } from "./pre-z8-u1-ui.mjs";
+import { densityScenario } from "./u1-density.mjs";
 
 const baseline = process.env.U1_BASELINE === "1";
+const densityBefore = process.env.U1_DENSITY_BEFORE === "1";
 const sizes = [
   { width: 1366, height: 768 },
   { width: 1600, height: 900 },
@@ -160,11 +162,18 @@ const newRunScenario = {
 };
 await runUxBrowserSuite({
   suite: baseline ? "Z8.5-U1 before" : "Z8.5-U1 after",
-  sourceRoot: baseline ? await baselineSource() : undefined,
+  sourceRoot: densityBefore
+    ? await baselineSource("65ca1b6b04d2dd1f8e98c7b4c769e1b893d50802")
+    : baseline
+      ? await baselineSource()
+      : undefined,
   scenarios: [
     graphScenario,
     statesScenario,
     newRunScenario,
     ...(!baseline ? [interactionScenario({ boot: bootWithSidebar, capture })] : []),
+    ...(!baseline
+      ? [densityScenario({ boot: bootWithSidebar, capture, before: densityBefore })]
+      : []),
   ],
 });

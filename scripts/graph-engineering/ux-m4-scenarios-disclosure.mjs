@@ -27,6 +27,7 @@ const disclosure = {
     await page.setViewportSize(SIZES[0]);
     await page.locator('[data-testid="graph-run"][data-run-id="run-approval"]').first().click();
     await T(page, "graph-run-summary").waitFor();
+    await T(page, "graph-run-tab-technical").click();
     for (const theme of ["zai-dark", "zai-light"]) {
       await setState(page, { theme });
       await flush(page);
@@ -57,11 +58,11 @@ const disclosure = {
       const focused = await style(page, "graph-routing-iterations");
       assert.notEqual(focused.border, rest.border, `${theme}: focus border`);
       assert.notEqual(focused.background, rest.background, `${theme}: focus fill`);
-      // expanded: aligned facts first, the raw record is a nested disclosure that stays closed
+      // expanded: aligned facts; the raw record remains a separate collapsed disclosure
       const body = T(page, "graph-routing-iterations");
       assert.ok((await body.locator("dl dt").count()) >= 3, "known facts are label/value rows");
       assert.match(await body.innerText(), /Steps visited/);
-      const raw = body.locator("details", { hasText: "Raw record (JSON)" });
+      const raw = T(page, "graph-routing-iterations-raw");
       assert.equal(await raw.evaluate((node) => node.open), false);
       await raw.locator(":scope > summary").click();
       assert.match(await raw.locator("pre").innerText(), /"visitedNodeIds"/);
@@ -84,10 +85,11 @@ const disclosure = {
     await setState(page, { locale: "zh-CN" });
     await page.locator('[data-testid="graph-run"][data-run-id="run-approval"]').first().click();
     await T(page, "graph-run-summary").waitFor();
+    await T(page, "graph-run-tab-technical").click();
     await summaryOf(page, "graph-routing-iterations").click();
     const zh = await T(page, "graph-routing-iterations").innerText();
     assert.match(zh, /已访问的步骤/);
-    assert.match(zh, /原始记录（JSON）/);
+    assert.match(await T(page, "graph-routing-iterations-raw").innerText(), /原始记录（JSON）/);
     assert.match(
       await summaryOf(page, "graph-routing-iterations").innerText(),
       /已记录 \d+ 轮迭代/,

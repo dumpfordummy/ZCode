@@ -30,6 +30,13 @@ const messages: Record<string, [string, string]> = {
   selectedRun: ["Selected run", "所选运行"],
   execution: ["Execution", "执行"],
   evidence: ["Test evidence", "测试证据"],
+  repairProgress: [
+    "Repair progress · {count} iterations recorded",
+    "修复进度 · 已记录 {count} 轮迭代",
+  ],
+  repairProgressOne: ["Repair progress · 1 iteration recorded", "修复进度 · 已记录 1 轮迭代"],
+  artifactsCount: ["{count} captured artifacts", "已捕获 {count} 个工件"],
+  artifactsCountOne: ["1 captured artifact", "已捕获 1 个工件"],
   human: ["Human decision", "人工决定"],
   "evidence.no-tests": ["No configured Tests", "未配置测试"],
   "evidence.not-run": ["Required Tests have not run", "必需测试尚未运行"],

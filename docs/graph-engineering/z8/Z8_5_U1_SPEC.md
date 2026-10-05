@@ -52,6 +52,47 @@ sequenceDiagram
 
 ## Acceptance
 
+### Final bounded operator-view cleanup (PR #18, after 65ca1b6)
+
+The accepted graph width, Fit/Focus, history collapse, viewport retention,
+historical attempt selection, Step details and named tabs retain their behavior.
+The remaining change is presentation of routing and retained artifacts:
+
+- The ordinary Steps inspector omits routine routing records. Stop reasons and
+  unresolved resume checkpoints stay visible, with the existing Continue guard
+  and exact checkpoint identity. Multiple iterations, feedback or a failure
+  fingerprint permit a compact repair summary and literal feedback preview.
+- The Technical details tab owns routing admissions, deadline, repair budget,
+  full iteration/feedback/fingerprint records and checkpoint diagnostics. Explicit
+  repair-region inspection also reaches those records. No checkpoint section is
+  rendered when there are zero checkpoints, even in Technical details. Raw JSON
+  has its own collapsed row alongside facts, preserving one-level disclosures.
+- The step's existing exact run/node/attempt artifact selection stays unchanged.
+  Zero artifacts renders no Captured artifacts heading/list. Nonempty artifacts
+  show a count in one collapsed inspection disclosure; individual records and
+  content remain available on demand. Artifact-read errors stay explicit.
+- Export metadata manifest moves to Technical details, including runs with zero
+  artifacts. Its existing read-only hook, scope invalidation and error handling
+  remain; changing run/workspace cannot show an old manifest as current.
+- Test failure/missing evidence, permission/question actions, unknown/stale
+  execution, reviewer failure/rejection, human gates and stop reasons retain
+  their existing default visibility. No Host, protocol, evidence, permission,
+  admission, stored-record or recovery semantics change.
+
+The Host remains the record and execution owner; existing UI hooks perform all
+reads/actions. Disclosures are local presentation state. There are no new writes
+on opening details/tabs/artifacts or exporting a manifest.
+
+Extend the existing U1 rendered suite with ordinary running, permission, final
+approval, failed Test and multi-iteration repair fixtures. Capture only those
+five representative before/after states at the same viewport and selection,
+using 65ca1b6 UI as the before snapshot. Assert semantic evidence/action states,
+hidden default diagnostics, reachable Technical details/export/artifact reads,
+zero empty checkpoint sections, exact resume identity, read-only record equality,
+keyboard access, English/Chinese and a narrow viewport. Keep the native
+agent-reported verification assertion. Acceptance judges relevance to the
+operator's status/verification/action questions, not word counts.
+
 Use the existing Vite/Chromium real-component harness with synthetic Host records,
 no paid calls, company files or credentials. Capture identical sequential and
 branch/repair records before and after at 1366×768, 1600×900, 1920×1080 and an

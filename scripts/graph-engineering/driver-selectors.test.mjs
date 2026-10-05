@@ -21,6 +21,8 @@ export const DRIVERS = [
   "z6-native-library.mjs",
   "pre-z8-u1-native.mjs",
   "pre-z8-u1-ui.mjs",
+  "z4-native-helpers.mjs",
+  "pre-z8-u4-artifact-ui.mjs",
   "pre-z8-u5-native.mjs",
   "ux-m3-native-library.mjs",
 ];

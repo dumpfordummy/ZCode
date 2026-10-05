@@ -197,6 +197,30 @@ export async function createUxM1Host() {
         },
       );
     },
+    // 只读合成工件边界：用于验证真实读取 hook 和 UI 入口，不代表原生证据读取。
+    async artifact({ target, runId, action, artifactId }) {
+      if (action !== "read" && action !== "manifest")
+        throw new Error("Unsupported fixture artifact action");
+      const workspace = idOf(target);
+      return op(`graph.artifact.${action}`, { workspace, runId, artifactId }, async () => {
+        const run = graph[workspace]?.runs.find((item) => item.id === runId);
+        if (!run) throw new Error("Unknown fixture run");
+        if (action === "manifest")
+          return {
+            kind: "manifest",
+            text: JSON.stringify({ runId, artifacts: run.artifacts ?? [] }),
+          };
+        const artifact = run.artifacts?.find(
+          (item) => item.id === artifactId && item.runId === runId,
+        );
+        if (!artifact) throw new Error("Unknown fixture artifact");
+        return {
+          kind: "content",
+          artifact: structuredClone(artifact),
+          content: `Synthetic retained content for ${artifactId}`,
+        };
+      });
+    },
     ...libraryFixture.bridge,
     async instantiate({ target, id: templateId, version, expectedRevision, parameters, bindings }) {
       const id = idOf(target);

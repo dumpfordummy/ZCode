@@ -107,13 +107,14 @@ const scenario = (locale) => ({
     await T(page, "graph-approval-request").waitFor();
     await frames(page, shotsDir, "m4-approval-inspect", locale, undefined, 100000);
     // 披露区：运行检查器里的技术性披露栈（逐个展开，结构化事实在前，原始记录在其下）
-    await page.locator('[data-testid="graph-run-tab-steps"]').click();
+    await page.locator('[data-testid="graph-run-tab-technical"]').click();
     for (const id of [
       "graph-routing-iterations",
       "graph-routing-checkpoints",
       "graph-frozen-provenance",
     ])
       if (await T(page, id).count()) await T(page, id).locator(":scope > summary").click();
+    await page.locator('[data-testid="graph-run-tab-steps"]').click();
     await page.locator('[data-testid="graph-select-node-task"]').first().click();
     await page
       .locator("summary", { hasText: /Technical identities|技术标识/ })

@@ -38,6 +38,7 @@ export function GraphRunPanel({
       {selectedRun.version === 5 ? (
         <GraphRoutingInspector
           run={selectedRun}
+          diagnostics={regionSelected}
           disabled={disabled}
           onContinue={(runId, checkpointId, digest) =>
             void graph.continueRouting(runId, checkpointId, digest)

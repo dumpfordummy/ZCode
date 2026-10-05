@@ -104,3 +104,37 @@ export function u1Run(kind = "sequential", state = "running") {
   }
   return run;
 }
+
+/** Paired operator-view fixtures; captured records only, never native execution evidence. */
+export function u1DensityRuns() {
+  const runs = ["running", "permission", "approval", "failed"].map((state) =>
+    u1Run("sequential", state),
+  );
+  const repair = u1Run("branch");
+  repair.id = "u1-density-repair";
+  repair.status = "AwaitingContinuation";
+  repair.nodeAttempts[1].status = "Pending";
+  const current = repair.routing.iterations[0];
+  const previous = { ...structuredClone(current), id: "iteration-previous", index: 0 };
+  previous.attemptIds.task = "task-previous";
+  current.index = 1;
+  current.feedback = {
+    text: "The parser still drops empty input. Repair the branch handling before retrying.",
+    digest: "f".repeat(64),
+    artifactIds: [],
+    previousIterationId: previous.id,
+  };
+  current.failureFingerprint = "synthetic-empty-input-failure";
+  repair.routing.iterations.unshift(previous);
+  repair.routing.cursorNodeId = "repair";
+  repair.routing.checkpoints.push({
+    id: "repair-resume",
+    digest: "c".repeat(64),
+    decisionId: "repair-decision",
+    iterationId: current.id,
+    successorNodeId: "repair",
+    createdAt: repair.updatedAt,
+    resumeRequired: true,
+  });
+  return [...runs, repair];
+}

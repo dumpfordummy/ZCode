@@ -90,7 +90,11 @@ export async function allowTool(window) {
   await showGraph(window);
 }
 export async function readArtifactUi(window, run, artifact) {
+  await window.getByTestId("graph-run-tab-steps").click();
   await selectNode(window, artifact.nodeId);
+  // U1 将非空工件列表放进按需披露区；先展开列表，再检查同一工件的内容。
+  const list = window.getByTestId("graph-artifact-list");
+  if ((await list.getAttribute("open")) === null) await list.locator(":scope > summary").click();
   const button = window.getByTestId(`graph-artifact-open-${artifact.id}`);
   const details = button.locator("xpath=ancestor::details[1]");
   if ((await details.getAttribute("open")) === null)
@@ -112,7 +116,7 @@ export async function readArtifactUi(window, run, artifact) {
   return content;
 }
 export async function verifyManifestUi(window, isolation, run, summary) {
-  await window.getByTestId("graph-export-manifest").click();
+  await openManifestUi(window);
   const field = window.getByTestId("graph-artifact-manifest");
   await field.waitFor();
   const text = await field.inputValue();
@@ -136,6 +140,12 @@ export async function verifyManifestUi(window, isolation, run, summary) {
       assert.equal(artifact[forbidden], undefined);
   }
   summary.exportedManifest = manifest;
+}
+
+export async function openManifestUi(window) {
+  // 元数据导出属于明确的技术入口，不再占用默认步骤视图。
+  await window.getByTestId("graph-run-tab-technical").click();
+  await window.getByTestId("graph-export-manifest").click();
 }
 export async function waitReadyReceipt(isolation, name = "native-ready.json") {
   const deadline = Date.now() + 30000;

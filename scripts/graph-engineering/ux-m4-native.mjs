@@ -210,12 +210,7 @@ async function statesJourney() {
             await window.locator('[data-testid="graph-run"]').first().click();
             await T(window, "graph-run-tab-steps").click();
             await window.locator('[data-testid^="graph-select-node-"]').first().click();
-            for (const id of [
-              "graph-routing-iterations",
-              "graph-routing-checkpoints",
-              "graph-frozen-provenance",
-            ])
-              await open(id);
+            await open("graph-frozen-provenance");
             const technical = window
               .locator("summary", { hasText: "Technical identities and captured facts" })
               .first();
@@ -233,6 +228,9 @@ async function statesJourney() {
               );
             }
             // 披露行是我们自己的行：没有浏览器默认三角，行高不小于 36px
+            await T(window, "graph-run-tab-technical").click();
+            for (const id of ["graph-routing-iterations", "graph-routing-checkpoints"])
+              await open(id);
             const rows = await window
               .locator('[data-testid="graph-routing-iterations"] > summary')
               .evaluate((node) => {

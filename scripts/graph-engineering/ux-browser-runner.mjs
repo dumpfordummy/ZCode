@@ -20,6 +20,7 @@ export async function runUxBrowserSuite({ suite, scenarios, sourceRoot }) {
     "validateDefinition",
     "recipes",
     "run",
+    "artifact",
     "list",
     "mutate",
     "preview",
