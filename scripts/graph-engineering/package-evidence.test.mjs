@@ -128,6 +128,7 @@ test("B1 placeholder exception is exact and does not hide seeded checkout or use
   for (const file of [
     "app.asar/out/renderer/assets/IntlProvider-CVTNn1Pi.js",
     "app.asar/out/renderer/assets/IntlProvider-DyoQwIj1.js",
+    "app.asar/out/renderer/assets/IntlProvider-CNp1QlUN.js",
   ]) {
     const text = "192.168.1.100 192.168.1.100";
     const rules = allRules({

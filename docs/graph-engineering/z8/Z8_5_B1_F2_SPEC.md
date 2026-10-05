@@ -53,3 +53,7 @@ sequenceDiagram
   G->>G: source, Build and operation checks
   G-->>G: immutable receipt and verification
 ```
+
+## .306 external scan classification
+
+The built archive contains exactly two previously reviewed ssh.hostPlaceholder literals (192.168.1.100, English and Chinese) in app.asar/out/renderer/assets/IntlProvider-CNp1QlUN.js. Add only that exact artifact/literal/count classification and exercise existing extra-count, wrong-address, wrong-asset and planted-path controls. Preserve initial scan and external manifest; re-finalize only external .306 records and prove installer/component hashes unchanged. No binary edit or rebuild.
