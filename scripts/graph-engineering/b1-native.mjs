@@ -64,7 +64,11 @@ async function reviewAndRun(label, fail) {
   assert.ok(
     preview.recipes.every((r) => r.executable === "dotnet" && r.args.includes("--no-restore")),
   );
-  const baseline = await readGraphRecord(isolation);
+  // 原因：首次 Save 只写检查配置；未执行前没有 Graph 历史文件，缺失只表示零历史，不能伪造记录。
+  const baseline = await readGraphRecord(isolation).catch((error) => {
+    if (error.code === "ENOENT") return { runs: [] };
+    throw error;
+  });
   await shot(isolation, window, summary, label + "-review", [1600, 900]);
   const runId = await confirmU2Review(isolation, window, baseline, preview);
   for (const node of preview.definition.nodes.filter((n) => n.type === "tool")) {
