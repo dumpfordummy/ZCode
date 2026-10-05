@@ -125,12 +125,17 @@ try {
     window = await isolation.launch();
     await showGraph(window);
     await T(window, "graph-view-setup").click();
-    await window.locator('[data-testid="graph-recipe-read-state"][data-state="ready"]').waitFor();
+    // 原因：Quick 将内部读取状态放在折叠的 Advanced 中；等待附着，再独立验证可见的已保存检查行。
+    await window
+      .locator('[data-testid="graph-recipe-read-state"][data-state="ready"]')
+      .waitFor({ state: "attached" });
     assert.equal(
       await readFile(path.join(isolation.workspace, ".zcode/config.json"), "utf8"),
       configuration,
     );
-    assert.match(await T(window, "graph-project-recipes").innerText(), /B1/);
+    await window
+      .getByRole("cell", { name: "Tests/B1.Tests.csproj (net8.0)", exact: true })
+      .waitFor();
     summary.afterReopen = await noExecution();
     await shot(isolation, window, summary, "b1-q1-reopened", [1600, 900]);
     summary.cases.push({
