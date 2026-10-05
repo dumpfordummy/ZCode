@@ -1,0 +1,180 @@
+{
+  "suite": "UX-M1",
+  "environment": {
+    "kind": "chromium-component-harness",
+    "windowsNativeAcceptance": "PENDING",
+    "node": "v24.14.0",
+    "platform": "win32-x64",
+    "chromium": "154.0.4258.53",
+    "real": [
+      "GraphEditor, GraphRunsDestination, GraphLibrary, GraphTemplateBindings, Context picker, checks editor, inline review, Needs-you, draft store, view store, i18n",
+      "useGraphEngineering (the real hook, including its single-flight, retained-submission and admission guards)",
+      "Graph Host code over real temp workspaces: instantiateTemplate, validateReadiness, recipe store (.zcode/config.json, digest conflicts, schema), project-setup reference validation"
+    ],
+    "fixtures": [
+      "Graph engineering service: workspace view, run list, definition revision counter, run admission, change events",
+      "Graph workflow service: only the preflight (`prepare`, built from the real reference validation and recipe store, fixture native environment). The library operations list/mutate/preview/instantiate are the REAL GraphWorkflowService over an in-memory GraphLibraryStore (same revision rule and schema validation as the file store)",
+      "run records: the UI tests' summaryRun() (unit-only captured records), not native runs",
+      "file search, platform.selectFile/saveFile and fileService.stat/readFileRange (real temp files; no OS dialogs), transport (Playwright bridge instead of RPC)"
+    ],
+    "stubs": [
+      "GraphConfiguration (composer model/mode configuration hook)",
+      "GraphDesignPanel body (Workflows editor)",
+      "useSettings"
+    ]
+  },
+  "passed": 30,
+  "failed": 0,
+  "results": [
+    {
+      "name": "draft while a run waits for a native permission: the form is editable and every admission action is refused",
+      "ok": true,
+      "ms": 985
+    },
+    {
+      "name": "draft while a run waits for a native question: the form is editable and every admission action is refused",
+      "ok": true,
+      "ms": 868
+    },
+    {
+      "name": "draft while a run waits for the final human approval: the form is editable and every admission action is refused",
+      "ok": true,
+      "ms": 893
+    },
+    {
+      "name": "no path reaches admission while a run is unresolved: DOM bypass, keyboard, and the real hook called without any button",
+      "ok": true,
+      "ms": 941
+    },
+    {
+      "name": "the draft survives the current run, Workflows, Checks and a workspace switch, and returns exactly",
+      "ok": true,
+      "ms": 1320
+    },
+    {
+      "name": "when the current run resolves nothing starts: no instantiate, preflight or Start; Review is explicit and needs a fresh, unacknowledged review",
+      "ok": true,
+      "ms": 1617
+    },
+    {
+      "name": "drafting does not change the captured run: its request, evidence and definition are identical afterwards",
+      "ok": true,
+      "ms": 867
+    },
+    {
+      "name": "screenshots: draft prepared while a run waits (1280x720 and 1920x1080, dark and light)",
+      "ok": true,
+      "ms": 112
+    },
+    {
+      "name": "the New-run pane shows the checks the chosen workflow will use, apart from the project-wide count",
+      "ok": true,
+      "ms": 561
+    },
+    {
+      "name": "Edit check opens that check in the one editor, keeps Back in view, and returns the identical draft",
+      "ok": true,
+      "ms": 1102
+    },
+    {
+      "name": "missing, incompatible and unselected steps are explicit, block Review, and are never replaced",
+      "ok": true,
+      "ms": 1291
+    },
+    {
+      "name": "instantiate and preflight use exactly the checks shown, and the review lists the same checks",
+      "ok": true,
+      "ms": 1178
+    },
+    {
+      "name": "a rename keeps the selection; a removal turns it unresolved and is not replaced (real saves through the real recipe store)",
+      "ok": true,
+      "ms": 1306
+    },
+    {
+      "name": "cancel, a failed save and a digest conflict leave the request, workflow, references and check choices untouched",
+      "ok": true,
+      "ms": 1274
+    },
+    {
+      "name": "while a run is unresolved the draft and the checks editor stay usable, but saving checks is refused on every path",
+      "ok": true,
+      "ms": 1308
+    },
+    {
+      "name": "a saved-checks reply that arrives after a workspace switch does not change the other workspace or any draft",
+      "ok": true,
+      "ms": 1551
+    },
+    {
+      "name": "Simplified Chinese: new labels are localized; check names, ids and paths are not translated",
+      "ok": true,
+      "ms": 752
+    },
+    {
+      "name": "prepare, inspect the current run and return using only the keyboard; focus lands where it should and is visibly marked",
+      "ok": true,
+      "ms": 510
+    },
+    {
+      "name": "a preflight reply that arrives after the user left the review is discarded",
+      "ok": true,
+      "ms": 1583
+    },
+    {
+      "name": "Needs-you states its scope and still reaches a waiting run that the selected history page does not list",
+      "ok": true,
+      "ms": 518
+    },
+    {
+      "name": "English: permission, question, approval, failed Test, invalid evidence, malformed reviewer output and valid reviewer decisions are told apart",
+      "ok": true,
+      "ms": 649
+    },
+    {
+      "name": "Simplified Chinese: permission, question, approval, failed Test, invalid evidence, malformed reviewer output and valid reviewer decisions are told apart",
+      "ok": true,
+      "ms": 782
+    },
+    {
+      "name": "Simplified Chinese: the unresolved-fields list, step preview and Context 'used by' use the same localized names as the form (values and ids stay raw)",
+      "ok": true,
+      "ms": 985
+    },
+    {
+      "name": "each blocked state shows its reason beside the primary action with a route to fix it: missing required context, invalid check, preflight error, ready to review",
+      "ok": true,
+      "ms": 1371
+    },
+    {
+      "name": "while a run occupies the workspace, picker Enter selects context only and Escape only closes; neither submits, and focus returns to the picker's control",
+      "ok": true,
+      "ms": 999
+    },
+    {
+      "name": "screenshots: selected checks, the checks editor with its return bar, and an unresolved check (dark and light, 1280x720 and 1920x1080)",
+      "ok": true,
+      "ms": 111
+    },
+    {
+      "name": "screenshots: Simplified Chinese with an occupying run (1280x720, dark)",
+      "ok": true,
+      "ms": 106
+    },
+    {
+      "name": "screenshots: missing required context, preflight error and ready to review (1280x720 and 1920x1080, dark and light)",
+      "ok": true,
+      "ms": 108
+    },
+    {
+      "name": "screenshots: Needs-you scope with the waiting run off the history page, the focused run summary, and Chinese (1280x720)",
+      "ok": true,
+      "ms": 109
+    },
+    {
+      "name": "screenshots: failed Test, malformed reviewer output and a valid reviewer decision (1280x720, English and Chinese)",
+      "ok": true,
+      "ms": 110
+    }
+  ]
+}

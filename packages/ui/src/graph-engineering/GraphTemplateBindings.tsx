@@ -13,6 +13,7 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useGraphDraftStore, type GraphTemplateFormDraft } from "@/store/graphDraftStore.js";
 import { useGraphEngineeringViewStore } from "@/store/graphEngineeringViewStore.js";
 import { GraphTemplateRecipeBindings } from "./GraphTemplateRecipeBindings.js";
+import { defaultGraphCheckBindings } from "./graphCheckDefaults.js";
 import { useGraphRecipeChanges } from "./GraphRecipeChangeSummary.js";
 import { GraphRecipeReadStatus } from "./GraphRecipeReadStatus.js";
 import type { GraphRecipeReadState } from "./graphRecipeRead.js";
@@ -116,6 +117,14 @@ export function GraphTemplateBindings({
   const tools = template.graph.nodes.filter((node) => node.type === "tool");
   const hasTools = tools.length > 0;
   const recipes = recipeReadState.status === "ready" ? recipeReadState.snapshot : null;
+  useEffect(() => {
+    if (!recipes || disabled) return;
+    const store = useGraphDraftStore.getState();
+    const draft = store.workspaces[workspaceKey]?.templates[templateKey] ?? initial;
+    const next = defaultGraphCheckBindings(template, draft.bindings, recipes);
+    if (next !== draft.bindings)
+      store.setTemplateDraft(workspaceKey, templateKey, { ...draft, bindings: next });
+  }, [recipes, disabled, template, workspaceKey, templateKey, initial]);
   const errors = templateBindingErrors(template, parameters, bindings, recipes);
   const readBlocked = hasTools && recipeReadState.status !== "ready";
   const recipeChanges = useGraphRecipeChanges(workspaceKey);

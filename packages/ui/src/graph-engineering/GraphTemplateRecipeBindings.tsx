@@ -11,6 +11,7 @@ import { GraphSelect } from "./GraphSelect.js";
 import { GraphSelectedChecks } from "./GraphSelectedChecks.js";
 import { GraphWarningNote } from "./GraphWarningNote.js";
 import { useGraphM2Text } from "./GraphM2Text.js";
+import { useGraphM4Text } from "./GraphM4Text.js";
 import type { GraphRecipeChanges } from "./graphRecipeChanges.js";
 import { graphCheckSelection } from "./graphCheckSelection.js";
 import { useGraphTemplateText } from "./graphTemplateText.js";
@@ -45,6 +46,7 @@ export function GraphTemplateRecipeBindings({
   const t = useGraphSetupText();
   const display = useGraphTemplateText();
   const m2 = useGraphM2Text();
+  const m4 = useGraphM4Text();
   const tools = template.graph.nodes.filter((node) => node.type === "tool");
   const steps = graphCheckSelection(template, bindings, snapshot);
   const buildSlots = tools.filter((node) =>
@@ -113,27 +115,39 @@ export function GraphTemplateRecipeBindings({
             ) : null}
             {isTest ? (
               <>
-                <GraphSelect
-                  label={t("mappedBuild")}
-                  testId={`graph-template-build-${node.id}`}
-                  disabled={disabled}
-                  value={buildSlots.some((slot) => slot.id === mapped) ? mapped : "unbound"}
-                  options={[
-                    { value: "unbound", label: t("chooseBuild") },
-                    ...buildSlots
-                      .filter((slot) => slot.id !== node.id)
-                      .map((slot) => ({ value: slot.id, label: slot.name })),
-                  ]}
-                  onChange={(value) =>
-                    onChange((current) => ({
-                      ...current,
-                      buildMappings: {
-                        ...current.buildMappings,
-                        [node.id]: value === "unbound" ? "" : value,
-                      },
-                    }))
-                  }
-                />
+                {buildSlots.some((slot) => slot.id === mapped) ? (
+                  <p className="text-ui-sm text-foreground-subtle">
+                    {m4("quickMapped", {
+                      name: buildSlots.find((slot) => slot.id === mapped)!.name,
+                    })}
+                  </p>
+                ) : null}
+                <details open={!buildSlots.some((slot) => slot.id === mapped) || undefined}>
+                  <summary className="min-h-7 cursor-pointer text-ui-sm">
+                    {m4("quickAdvanced")}
+                  </summary>
+                  <GraphSelect
+                    label={t("mappedBuild")}
+                    testId={`graph-template-build-${node.id}`}
+                    disabled={disabled}
+                    value={buildSlots.some((slot) => slot.id === mapped) ? mapped : "unbound"}
+                    options={[
+                      { value: "unbound", label: t("chooseBuild") },
+                      ...buildSlots
+                        .filter((slot) => slot.id !== node.id)
+                        .map((slot) => ({ value: slot.id, label: slot.name })),
+                    ]}
+                    onChange={(value) =>
+                      onChange((current) => ({
+                        ...current,
+                        buildMappings: {
+                          ...current.buildMappings,
+                          [node.id]: value === "unbound" ? "" : value,
+                        },
+                      }))
+                    }
+                  />
+                </details>
                 <details
                   className="space-y-2 text-ui-sm"
                   data-testid={`graph-template-tests-${node.id}`}

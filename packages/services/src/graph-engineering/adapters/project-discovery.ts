@@ -6,6 +6,7 @@ import type { GraphWorkspaceTarget } from "../contract.js";
 import { workspaceKey } from "../domain/definition.js";
 import { readDeclaredFile } from "./artifact-files.js";
 import { projectMetadata } from "../domain/project-metadata.js";
+import { addQuickProjectMetadata } from "../domain/project-quick.js";
 
 const excludedNames = new Set([
   ".git",
@@ -173,6 +174,7 @@ export function createProjectDiscovery(limits: { maximumFiles?: number } = {}) {
             file.content,
             sources.slice(0, result.limits.sourceFiles).sort(),
           );
+          addQuickProjectMetadata(candidate, file.content);
           if (result.status === "limited" || result.issues.length) {
             candidate.coverage = "unsupported";
             candidate.issues.push(...result.issues);
@@ -183,6 +185,20 @@ export function createProjectDiscovery(limits: { maximumFiles?: number } = {}) {
               candidate.issues.push(`Referenced project was not safely discovered: ${reference}.`);
             }
           result.candidates.push(candidate);
+        }
+        // 目录级导入可能改变输出和源清单；不执行求值，也不把默认路径冒充已知事实。
+        const sharedMetadata = metadata.filter((file) => /(?:^|\/)Directory\./i.test(file.path));
+        for (const candidate of result.candidates) {
+          if (candidate.coverage === "unsupported" || sharedMetadata.length) {
+            delete candidate.quick;
+            candidate.quickIssues = [
+              ...(candidate.quickIssues ?? []),
+              ...candidate.issues,
+              ...sharedMetadata.map(
+                (file) => `${file.path}: imported defaults require Advanced review.`,
+              ),
+            ];
+          }
         }
         if (job.cancelled) result.status = "cancelled";
         result.digest = digest(

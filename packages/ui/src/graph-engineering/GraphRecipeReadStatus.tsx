@@ -54,7 +54,7 @@ export function GraphRecipeReadStatus({
             onClick={onSetup}
             data-testid="graph-template-setup-checks"
           >
-            {t("setupChecks")}
+            {intl.formatMessage({ id: "graph.m4.quickSetup" })}
           </Button>
         ) : null}
       </div>

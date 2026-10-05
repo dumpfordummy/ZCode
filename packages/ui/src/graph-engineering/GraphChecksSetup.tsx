@@ -18,6 +18,8 @@ import {
   recheckGraphChecksPreview,
 } from "./graphChecksView.js";
 import { graphRunIsUnresolved } from "./graphEditing.js";
+import { associatedQuickChecks } from "./graphQuickDotnetModel.js";
+import { useGraphM4Text } from "./GraphM4Text.js";
 
 const empty: Extract<Selection, { kind: "recipes" }> = {
   kind: "recipes",
@@ -39,6 +41,9 @@ export function GraphChecksSetup({
   clean,
   disabled,
   onRun,
+  advanced = true,
+  requestedReview,
+  onReviewRequested,
 }: {
   workspaceKey: string;
   workspacePath: string;
@@ -49,11 +54,18 @@ export function GraphChecksSetup({
   clean: boolean;
   disabled: boolean;
   onRun(runId: string): void;
+  advanced?: boolean;
+  requestedReview?: string;
+  onReviewRequested?(): void;
 }) {
   const t = useGraphSetupText();
+  const m4 = useGraphM4Text();
   const draft = useGraphDraftStore((state) => state.workspaces[workspaceKey]?.setup);
   const mode = draft?.checksMode ?? "recipes";
-  const selection = mode === "recipes" ? (draft?.checks ?? empty) : (draft?.probe ?? probe);
+  const selection =
+    mode === "recipes"
+      ? (draft?.checks ?? associatedQuickChecks(snapshot?.recipes ?? []) ?? empty)
+      : (draft?.probe ?? probe);
   const update = useGraphDraftStore((state) => state.updateSetup);
   const revision = graph.view?.definition.revision ?? 0;
   const key = graphChecksReviewKey({ text, digest: snapshot?.digest ?? "", revision, selection });
@@ -96,86 +108,106 @@ export function GraphChecksSetup({
     );
     return result?.kind === "checks-preview" ? result : undefined;
   };
+  useEffect(() => {
+    // 保存回执和草稿接受先完成，再消费一次性审阅意图；不触发运行或权限。
+    if (!requestedReview || snapshot?.digest !== requestedReview) return;
+    onReviewRequested?.();
+    if (!canPrepare) {
+      setError(t("saveFirst"));
+      return;
+    }
+    setError("");
+    void prepare().then((preview) => {
+      if (preview) {
+        setInvalidated(false);
+        setReview({ key, preview });
+      }
+    });
+  }, [requestedReview, snapshot?.digest, clean]);
   return (
     <section className="space-y-3" data-testid="graph-checks-setup">
-      <h3 className="text-ui-base font-medium">{t("checks")}</h3>
-      <GraphSelect
-        label={t("checks")}
-        value={mode}
-        disabled={disabled}
-        testId="graph-check-mode"
-        options={[
-          { value: "recipes", label: t("recipes") },
-          { value: "dotnet-probe", label: t("probe") },
-        ]}
-        onChange={(value) => update(workspaceKey, { checksMode: value as Selection["kind"] })}
-      />
-      <GraphChecksSelection
-        selection={selection}
-        recipes={snapshot?.recipes ?? []}
-        disabled={disabled}
-        onChange={(value) =>
-          update(workspaceKey, value.kind === "recipes" ? { checks: value } : { probe: value })
-        }
-      />
-      <p className="text-ui-sm text-foreground-subtle">{t("availabilityHelp")}</p>
-      <Button
-        size="sm"
-        variant="outline"
-        disabled={!setup.supported || !chosen || availability.status === "loading"}
-        data-testid="graph-check-availability"
-        onClick={() =>
-          void setup.invoke(
-            { action: "availability", selection },
-            key,
-            () => current.current === key,
-          )
-        }
-      >
-        {t("availability")}
-      </Button>
-      <div
-        className="text-ui-sm"
-        data-testid="graph-check-availability-state"
-        data-state={availability.status}
-      >
-        {availability.status === "ready" && availability.result.kind === "availability" ? (
-          <>
-            {availability.result.environment.executables.map((item) => (
-              <p key={item.executable} className="break-all">
-                {item.executable}: {item.status}
-                {item.path ? ` · ${item.path}` : ""}
-              </p>
-            ))}
-            {availability.result.unknowns.map((item, index) => (
-              <p key={index} className="text-warning">
-                {item}
-              </p>
-            ))}
-          </>
-        ) : availability.status === "error" ? (
-          <p role="alert">{availability.error}</p>
-        ) : (
-          <p>{t(availability.status === "loading" ? "loading" : "idle")}</p>
-        )}
+      <div hidden={!advanced} className="space-y-3">
+        <h3 className="text-ui-base font-medium">{t("checks")}</h3>
+        <GraphSelect
+          label={t("checks")}
+          value={mode}
+          disabled={disabled}
+          testId="graph-check-mode"
+          options={[
+            { value: "recipes", label: t("recipes") },
+            { value: "dotnet-probe", label: t("probe") },
+          ]}
+          onChange={(value) => update(workspaceKey, { checksMode: value as Selection["kind"] })}
+        />
+        <GraphChecksSelection
+          selection={selection}
+          recipes={snapshot?.recipes ?? []}
+          disabled={disabled}
+          onChange={(value) =>
+            update(workspaceKey, value.kind === "recipes" ? { checks: value } : { probe: value })
+          }
+        />
+        <p className="text-ui-sm text-foreground-subtle">{t("availabilityHelp")}</p>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!setup.supported || !chosen || availability.status === "loading"}
+          data-testid="graph-check-availability"
+          onClick={() =>
+            void setup.invoke(
+              { action: "availability", selection },
+              key,
+              () => current.current === key,
+            )
+          }
+        >
+          {t("availability")}
+        </Button>
+        <div
+          className="text-ui-sm"
+          data-testid="graph-check-availability-state"
+          data-state={availability.status}
+        >
+          {availability.status === "ready" && availability.result.kind === "availability" ? (
+            <>
+              {availability.result.environment.executables.map((item) => (
+                <p key={item.executable} className="break-all">
+                  {item.executable}: {item.status}
+                  {item.path ? ` · ${item.path}` : ""}
+                </p>
+              ))}
+              {availability.result.unknowns.map((item, index) => (
+                <p key={index} className="text-warning">
+                  {item}
+                </p>
+              ))}
+            </>
+          ) : availability.status === "error" ? (
+            <p role="alert">{availability.error}</p>
+          ) : (
+            <p>{t(availability.status === "loading" ? "loading" : "idle")}</p>
+          )}
+        </div>
       </div>
-      <Button
-        size="sm"
-        data-testid="graph-check-prepare"
-        disabled={!canPrepare}
-        onClick={() => {
-          setError("");
-          void prepare().then((preview) => {
-            if (preview) {
-              setInvalidated(false);
-              setReview({ key, preview });
-            }
-          });
-        }}
-      >
-        {t("prepare")}
-      </Button>
-      {!canPrepare ? (
+      {advanced || snapshot?.recipes.length ? (
+        <Button
+          size="sm"
+          data-testid="graph-check-prepare"
+          disabled={!canPrepare}
+          onClick={() => {
+            setError("");
+            void prepare().then((preview) => {
+              if (preview) {
+                setInvalidated(false);
+                setReview({ key, preview });
+              }
+            });
+          }}
+        >
+          {advanced ? t("prepare") : m4("quickRun")}
+        </Button>
+      ) : null}
+      {!canPrepare && (advanced || Boolean(snapshot?.recipes.length)) ? (
         <p className="text-ui-sm text-warning" role="status">
           {!setup.supported
             ? t("unavailable")
@@ -186,6 +218,11 @@ export function GraphChecksSetup({
                 : active
                   ? t("unresolvedRun")
                   : t("busy")}
+        </p>
+      ) : null}
+      {error && !review ? (
+        <p role="alert" className="text-ui-sm text-destructive">
+          {error}
         </p>
       ) : null}
       {preparing.status === "error" ? (
