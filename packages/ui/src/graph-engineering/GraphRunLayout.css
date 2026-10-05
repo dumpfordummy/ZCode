@@ -1,0 +1,51 @@
+/* 容器宽度包含应用侧栏/历史列表的影响，不能再用 1600px 视口把画布放进步骤窄列。 */
+.graph-runs-layout {
+  container: graph-runs / inline-size;
+}
+
+.graph-runs-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem 1.5rem;
+}
+
+@container graph-runs (min-width: 54rem) {
+  .graph-runs-columns:not([data-history-collapsed="true"]) {
+    grid-template-columns: clamp(13rem, 20cqw, 16rem) minmax(0, 1fr);
+  }
+}
+
+@container graph-runs (max-width: 53.999rem) {
+  #graph-runs-history-pane > nav {
+    position: static;
+    max-height: 12rem;
+    overflow: auto;
+  }
+}
+
+.graph-run-detail-surface {
+  container: graph-run-detail / inline-size;
+}
+
+.graph-run-steps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+@container graph-run-detail (min-width: 58rem) {
+  .graph-run-steps:not([data-graph-view="true"]) {
+    grid-template-columns: minmax(14rem, 22rem) minmax(0, 1fr);
+  }
+}
+
+.graph-run-canvas-frame {
+  height: clamp(20rem, 60vh, 42rem);
+  min-width: 0;
+}
+
+.graph-run-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.5rem 1rem;
+}

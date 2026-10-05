@@ -20,6 +20,8 @@ import { useGraphM3Text } from "./GraphM3Text.js";
 import { designPin, libraryGates, versionRows } from "./graphLibraryView.js";
 import { latestCompatibleTemplateVersion } from "./graphWorkflowView.js";
 import type { GraphRecipeReadState } from "./graphRecipeRead.js";
+import { GraphDisclosure } from "./GraphDisclosure.js";
+import { useGraphM4Text } from "./GraphM4Text.js";
 
 export function GraphLibrary({
   workspacePath,
@@ -78,6 +80,7 @@ export function GraphLibrary({
   const u = (key: string, values?: Record<string, string | number>) =>
     intl.formatMessage({ id: `graph.preZ8.${key}` }, values);
   const m3 = useGraphM3Text();
+  const m4 = useGraphM4Text();
   const target = useMemo(
     () => ({ workspacePath, ...(workspaceIdentity ? { workspaceIdentity } : {}) }),
     [workspacePath, workspaceIdentity],
@@ -219,7 +222,9 @@ export function GraphLibrary({
     <div className="space-y-5">
       <div className="space-y-2">
         {picker}
-        {description}
+        {description ? (
+          <GraphDisclosure title={m4("workflowDetails")}>{description}</GraphDisclosure>
+        ) : null}
       </div>
       {entry && version ? (
         <GraphRunWorkflowVersion
@@ -243,7 +248,6 @@ export function GraphLibrary({
             <h3 className="text-ui-xl font-semibold">
               {intl.formatMessage({ id: "graph.run.newRun" })}
             </h3>
-            <p className="text-ui-base text-foreground-subtle">{u("workflowHelp")}</p>
           </header>
           {inlineContent}
         </section>

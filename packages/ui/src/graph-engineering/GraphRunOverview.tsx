@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import type { GraphRun } from "@zcode/services";
 import { graphRunSummary } from "./graphRunSummary.js";
 import { useGraphRunText } from "./GraphRunText.js";
@@ -43,7 +42,6 @@ export function GraphRunOverview({
 }) {
   const u = useGraphRunText();
   const m4 = useGraphM4Text();
-  const { intl } = useZCodeIntl();
   const summary = useMemo(() => graphRunSummary(run), [run]);
   const evidenceLabels = graphEvidenceLabels(summary.evidence);
   const outputs = graphRunOutputs(run).filter((output) => output.state !== "invalid");
@@ -73,7 +71,7 @@ export function GraphRunOverview({
     <section
       // 「查看运行」的落点：可被程序聚焦，并使用 Graph 的边框式焦点标记。
       tabIndex={-1}
-      className="shrink-0 space-y-4 rounded-lg border border-transparent focus-visible:border-brand"
+      className="shrink-0 space-y-3 rounded-lg border border-transparent focus-visible:border-brand"
       data-testid="graph-run-summary"
       data-run-id={run.id}
     >
@@ -82,8 +80,9 @@ export function GraphRunOverview({
         <p
           className="break-all text-ui-sm text-foreground-subtle"
           data-testid="graph-run-workspace"
+          title={summary.target.workspacePath}
         >
-          {run.definition.name} · {u("workspace")}: {summary.target.workspacePath}
+          {run.definition.name} · {m4("capturedRun")}
         </p>
       </header>
       <GraphRunBanner
@@ -119,7 +118,7 @@ export function GraphRunOverview({
           onSelect={(nodeId, attemptId) => onInspect({ kind: "node", nodeId, attemptId })}
         />
       ) : null}
-      <dl className="divide-y divide-border rounded-lg border border-border bg-card px-4">
+      <dl className="graph-run-facts border-y border-border py-2">
         <Fact
           testId="graph-run-execution"
           label={u("execution")}
@@ -159,18 +158,33 @@ export function GraphRunOverview({
             data-testid="graph-run-current-step"
             data-node-id={step.nodeId}
             data-attempt-id={step.attemptId ?? ""}
-            className="flex flex-wrap gap-x-4 py-2 text-ui-base"
+            className="space-y-1 text-ui-base"
           >
-            <dt className="w-40 shrink-0 text-foreground-subtle">{u("currentStep")}</dt>
-            <dd className="min-w-0 flex-1">{step.name}</dd>
+            <dt className="text-foreground-subtle">{u("currentStep")}</dt>
+            <dd>{step.name}</dd>
           </div>
         ) : null}
+        {summary.sourceChanges.length ? (
+          <Fact
+            testId="graph-run-change-count"
+            label={u("changes")}
+            state="captured"
+            value={String(
+              summary.sourceChanges.reduce(
+                (count, entry) => count + entry.snapshot.files.length,
+                0,
+              ),
+            )}
+            quiet
+          />
+        ) : null}
       </dl>
-      <p className="text-ui-sm text-foreground-subtle">{u("capturedMeaning")}</p>
-      {run.version !== undefined && !run.definition.nodes.some((node) => node.type === "tool") ? (
-        <p className="text-ui-sm text-foreground-subtle" data-testid="graph-run-verification">
-          {intl.formatMessage({ id: "graph.preZ8.agentLed" })}
-        </p>
+      {summary.result.kind === "text" && summary.result.text ? (
+        <div className="space-y-1 text-ui-base" data-testid="graph-run-result-preview">
+          <p className="text-foreground-subtle">{u("result")}</p>
+          {/* 直接预览捕获原文；完整请求和输出仍在“请求与结果”标签，不生成摘要。 */}
+          <p className="line-clamp-2 whitespace-pre-wrap break-words">{summary.result.text}</p>
+        </div>
       ) : null}
     </section>
   );
@@ -210,13 +224,9 @@ function Fact({
   quiet?: boolean;
 }) {
   return (
-    <div
-      className="flex flex-wrap gap-x-4 gap-y-0.5 py-2 text-ui-base"
-      data-testid={testId}
-      data-state={state}
-    >
-      <dt className="w-40 shrink-0 text-foreground-subtle">{label}</dt>
-      <dd className={`min-w-0 flex-1 ${quiet ? "text-foreground-subtle" : "font-medium"}`}>
+    <div className="min-w-0 space-y-1 text-ui-base" data-testid={testId} data-state={state}>
+      <dt className="text-foreground-subtle">{label}</dt>
+      <dd className={quiet ? "text-foreground-subtle" : "font-medium"}>
         {value}
         {note ? (
           <span className="block text-ui-sm font-normal text-foreground-subtle">{note}</span>

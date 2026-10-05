@@ -1,0 +1,120 @@
+{
+  "suite": "UX-M2",
+  "environment": {
+    "kind": "chromium-component-harness",
+    "windowsNativeAcceptance": "PENDING",
+    "node": "v24.14.0",
+    "platform": "win32-x64",
+    "chromium": "154.0.8037.95",
+    "real": [
+      "GraphEditor, GraphRunsDestination, GraphLibrary, GraphTemplateBindings, Context picker, checks editor, inline review, Needs-you, draft store, view store, i18n",
+      "useGraphEngineering (the real hook, including its single-flight, retained-submission and admission guards)",
+      "Graph Host code over real temp workspaces: instantiateTemplate, validateReadiness, recipe store (.zcode/config.json, digest conflicts, schema), project-setup reference validation"
+    ],
+    "fixtures": [
+      "Graph engineering service: workspace view, run list, definition revision counter, run admission, change events",
+      "Graph workflow service: only the preflight (`prepare`, built from the real reference validation and recipe store, fixture native environment). The library operations list/mutate/preview/instantiate are the REAL GraphWorkflowService over an in-memory GraphLibraryStore (same revision rule and schema validation as the file store)",
+      "run records: the UI tests' summaryRun() (unit-only captured records), not native runs",
+      "file search, platform.selectFile/saveFile and fileService.stat/readFileRange (real temp files; no OS dialogs), transport (Playwright bridge instead of RPC)"
+    ],
+    "stubs": [
+      "GraphConfiguration (composer model/mode configuration hook)",
+      "GraphDesignPanel body (Workflows editor)",
+      "useSettings"
+    ]
+  },
+  "passed": 18,
+  "failed": 0,
+  "results": [
+    {
+      "name": "history is newest first by creation order: page 1 holds the newest runs; Newer/Older match the order in English and Chinese",
+      "ok": true,
+      "ms": 1263
+    },
+    {
+      "name": "Start with more than one page of history, while an older page is shown, opens the admitted run on page 1, selected and visible",
+      "ok": true,
+      "ms": 2159
+    },
+    {
+      "name": "Go to run and View current run reveal the run's page, also when it was already selected and the user browsed away",
+      "ok": true,
+      "ms": 1273
+    },
+    {
+      "name": "a Host event, a status change and a newer run arriving leave the page, the selected run and keyboard focus where they were",
+      "ok": true,
+      "ms": 1064
+    },
+    {
+      "name": "history timestamps use the app locale, and a run without a valid time says so instead of inventing a date",
+      "ok": true,
+      "ms": 637
+    },
+    {
+      "name": "Edit check, then Back: Back is immediate, New run keeps showing the saved check and marks it, and Review's preflight uses the saved check",
+      "ok": true,
+      "ms": 1730
+    },
+    {
+      "name": "Save summarizes the whole list by stable id, including edits retained from an earlier visit, and saves exactly that list",
+      "ok": true,
+      "ms": 1650
+    },
+    {
+      "name": "Discard names the whole list and needs confirmation; Keep editing changes nothing; confirming restores the saved checks",
+      "ok": true,
+      "ms": 1630
+    },
+    {
+      "name": "an invalid raw list cannot be summarized: the UI says so, Save is not newly enabled and still refuses, New run claims no per-row marker",
+      "ok": true,
+      "ms": 2214
+    },
+    {
+      "name": "while a run is unresolved Save stays refused, but the summary, editing and a confirmed Discard still work",
+      "ok": true,
+      "ms": 1490
+    },
+    {
+      "name": "Chinese: the summary, markers and Discard are localized; check names and ids stay verbatim",
+      "ok": true,
+      "ms": 1600
+    },
+    {
+      "name": "a chosen file that fails the Host check is framed; 'previous selection kept' appears only when there was one; the diagnostic is verbatim",
+      "ok": true,
+      "ms": 1529
+    },
+    {
+      "name": "the native chooser: a rejected path is named and framed, a cancel shows nothing and clears the old failure, a chooser error is framed",
+      "ok": true,
+      "ms": 932
+    },
+    {
+      "name": "a failed Save checks is framed once near Save (not repeated by the generic alert) and never shown beside Review and run",
+      "ok": true,
+      "ms": 1270
+    },
+    {
+      "name": "the New-run bar frames a failed preflight (nothing started, draft kept) and the review bar frames a failed Start without claiming nothing started",
+      "ok": true,
+      "ms": 1443
+    },
+    {
+      "name": "Chinese: the framing is localized while file names and Host diagnostics stay verbatim",
+      "ok": true,
+      "ms": 867
+    },
+    {
+      "name": "screenshots (en-US): history, unsaved-check disclosure, Save summary, Discard and failure framing",
+      "ok": true,
+      "ms": 120
+    },
+    {
+      "name": "screenshots (zh-CN): history, unsaved-check disclosure, Save summary, Discard and failure framing",
+      "ok": true,
+      "ms": 135
+    }
+  ]
+}

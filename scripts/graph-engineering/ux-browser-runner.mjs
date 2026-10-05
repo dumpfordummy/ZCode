@@ -10,7 +10,7 @@ import { createUxM1Host } from "./ux-m1-host.mjs";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const harnessDir = path.join(here, "ux-m1-browser");
 
-export async function runUxBrowserSuite({ suite, scenarios }) {
+export async function runUxBrowserSuite({ suite, scenarios, sourceRoot }) {
   const args = parseArgs();
   const host = await createUxM1Host();
 
@@ -48,6 +48,16 @@ export async function runUxBrowserSuite({ suite, scenarios }) {
         find: "@/hooks/useSettingService.js",
         replacement: path.join(harnessDir, "stubs/useSettingService.ts"),
       },
+      // Optional immutable source snapshot for paired before/after captures with identical fixtures.
+      ...(sourceRoot
+        ? [
+            {
+              find: "../../../packages/ui/src/styles.css",
+              replacement: path.join(sourceRoot, "styles.css"),
+            },
+            { find: "@", replacement: sourceRoot },
+          ]
+        : []),
     ],
     args,
     scenarios,
@@ -72,7 +82,7 @@ export async function runUxBrowserSuite({ suite, scenarios }) {
   await writeSummary(args, {
     suite,
     environment: {
-      kind: "cloud-linux-chromium-harness",
+      kind: "chromium-component-harness",
       windowsNativeAcceptance: "PENDING",
       node: process.version,
       platform: `${process.platform}-${process.arch}`,

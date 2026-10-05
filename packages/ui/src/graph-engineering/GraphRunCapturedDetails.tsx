@@ -149,8 +149,13 @@ export function GraphRunEvidencePanel({
 }
 
 export function GraphRunTechnicalPanel({ summary }: { summary: GraphRunSummary }) {
+  const u = useGraphRunText();
   return (
-    <section data-testid="graph-run-technical-details">
+    <section className="space-y-3" data-testid="graph-run-technical-details">
+      <p className="text-ui-sm text-foreground-subtle">{u("capturedMeaning")}</p>
+      <p className="break-all text-ui-base">
+        {u("workspace")}: {summary.target.workspacePath}
+      </p>
       <pre
         data-testid="graph-run-summary-snapshot"
         className="max-h-[32rem] overflow-auto whitespace-pre-wrap break-all font-mono text-ui-sm"

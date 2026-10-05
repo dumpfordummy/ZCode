@@ -35,24 +35,26 @@ export function GraphEditorNavigation({
   const showingRuns = destination === "runs" && runSelected;
   return (
     <nav aria-label={t("title")} className="border-b border-border">
-      <p
-        className="flex flex-wrap items-baseline gap-x-2 pb-2 text-ui-sm"
-        data-testid="graph-workflow-header"
-      >
-        <span className="text-ui-lg font-semibold">{name}</span>
-        <span role="status" className="text-foreground-subtle" data-testid="graph-workflow-state">
-          {showingRuns
-            ? t("frozenRun")
-            : conflicted
-              ? t("conflict")
-              : dirty
-                ? t("unsaved")
-                : t("saved")}
-        </span>
-        {!showingRuns && destination !== "runs" ? (
-          <span className="text-foreground-subtle">{t("designHelp")}</span>
-        ) : null}
-      </p>
+      {!showingRuns ? (
+        <p
+          className="flex flex-wrap items-baseline gap-x-2 pb-2 text-ui-sm"
+          data-testid="graph-workflow-header"
+        >
+          <span className="text-ui-lg font-semibold">{name}</span>
+          <span role="status" className="text-foreground-subtle" data-testid="graph-workflow-state">
+            {showingRuns
+              ? t("frozenRun")
+              : conflicted
+                ? t("conflict")
+                : dirty
+                  ? t("unsaved")
+                  : t("saved")}
+          </span>
+          {!showingRuns && destination !== "runs" ? (
+            <span className="text-foreground-subtle">{t("designHelp")}</span>
+          ) : null}
+        </p>
+      ) : null}
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-1">
         <div className="-mb-px flex items-end gap-1">
           {destinations.map((mode) => {
@@ -75,7 +77,7 @@ export function GraphEditorNavigation({
             );
           })}
         </div>
-        {context}
+        {!showingRuns ? context : null}
       </div>
     </nav>
   );

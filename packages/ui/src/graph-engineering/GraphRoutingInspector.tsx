@@ -40,17 +40,6 @@ export function GraphRoutingInspector({
       data-stop-reason={routing.stopReason?.kind ?? ""}
     >
       <h3 className="font-medium">{config.region?.name ?? t("routingRun")}</h3>
-      <GraphFacts
-        facts={[
-          {
-            label: t("admissions"),
-            value: `${routing.admissions} / ${config.limits.maxNodeAdmissions}`,
-          },
-          { label: t("deadline"), value: time(routing.deadlineAt) },
-          { label: t("maxRepairIterations"), value: config.region?.maxRepairIterations ?? 0 },
-          { label: t("usage"), value: t("usageUnknown") },
-        ]}
-      />
       {routing.stopReason ? (
         <p role="status" data-testid="graph-routing-stop" className="text-warning">
           {routing.stopReason.kind}: {routing.stopReason.message}
@@ -66,6 +55,18 @@ export function GraphRoutingInspector({
               : m4("iterationsMeta", { count: routing.iterations.length })
           }
         >
+          {/* 准入计数/截止时间属于诊断，不应挤占默认步骤视图；停止原因和继续操作仍保持可见。 */}
+          <GraphFacts
+            facts={[
+              {
+                label: t("admissions"),
+                value: `${routing.admissions} / ${config.limits.maxNodeAdmissions}`,
+              },
+              { label: t("deadline"), value: time(routing.deadlineAt) },
+              { label: t("maxRepairIterations"), value: config.region?.maxRepairIterations ?? 0 },
+              { label: t("usage"), value: t("usageUnknown") },
+            ]}
+          />
           {routing.iterations.map((iteration) => (
             <GraphFacts
               key={iteration.id}

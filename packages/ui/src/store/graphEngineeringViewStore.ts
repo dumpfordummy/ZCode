@@ -29,6 +29,8 @@ interface GraphViewSelection {
   edgeKey?: string;
   /** Runs destination: show the read-only graph of the frozen run definition. */
   runGraph?: boolean;
+  /** Renderer-only Runs layout preference, scoped to the existing workspace identity. */
+  runHistoryCollapsed?: boolean;
   /**
    * UX-M2.1: incremented by every explicit navigation to a run (`selectRun`), so the history shows
    * that run's page even when it was already selected. Refreshes never change it. Navigation only.

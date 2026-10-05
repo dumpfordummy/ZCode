@@ -83,7 +83,6 @@ export function GraphRunInspector({
             ? t(`node.${node.type}`)
             : t("selectNode")}
       </h3>
-      <p className="text-ui-sm text-foreground-subtle">{t("frozenHelp")}</p>
       {run.version === 5 && choices.length ? (
         <GraphSelect
           label={t("z5.iterationAttempt")}
@@ -180,11 +179,13 @@ export function GraphRunInspector({
               />
             </GraphDisclosure>
           </GraphDisclosureStack>
-          <TextEvidence
-            title={t("resolvedInstructions")}
-            text={attempt.resolvedInstructions ?? t("notSubmitted")}
-          />
           <GraphDisclosureStack>
+            {/* 已提交提示词不是执行状态；保留全文在既有披露区，避免默认占据步骤检查器。 */}
+            <GraphDisclosure title={t("resolvedInstructions")} testId="graph-resolved-instructions">
+              <p className="max-h-80 overflow-auto whitespace-pre-wrap break-words">
+                {attempt.resolvedInstructions ?? t("notSubmitted")}
+              </p>
+            </GraphDisclosure>
             <GraphDisclosure title={t("instructionTemplate")}>
               <p className="whitespace-pre-wrap break-words">{node.instructions}</p>
             </GraphDisclosure>
