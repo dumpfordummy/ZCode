@@ -3,6 +3,8 @@ import { parseTrxXml, type TrxXmlElement } from "./trx-xml.js";
 import { trxAttribute, trxChild, trxChildren, trxFail, validateTrxShape } from "./trx-shape.js";
 import { trxAssemblyComparator, trxDuration, trxGuid, trxTime, trxWindow } from "./trx-values.js";
 
+import { validateTrxRunInfos } from "./trx-runinfo.js";
+
 const NAMESPACE = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010";
 const UNIT_TEST = "13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b";
 const get = (node: TrxXmlElement, key: string) => trxAttribute(node, key);
@@ -199,12 +201,7 @@ export function parseGraphTrxReport(input: GraphTrxParseInput): GraphTrxReport {
   });
   const summary = trxChild(root, "ResultSummary")!;
   validateCounters(summary, tests);
-  for (const info of children(summary, "RunInfos", "RunInfo")) {
-    if (tests.length || get(info, "outcome") !== "Warning")
-      trxFail("run diagnostics cannot establish complete assertions.");
-    trxWindow(trxTime(get(info, "timestamp")), times.startedAt, times.finishedAt);
-    trxChild(info, "Text");
-  }
+  validateTrxRunInfos(children(summary, "RunInfos", "RunInfo"), results, definitions, times);
   tests.sort((left, right) => (left.name < right.name ? -1 : left.name > right.name ? 1 : 0));
   return { parserVersion: "dotnet-vstest-trx-v1", reportId, ...times, tests };
 }

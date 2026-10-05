@@ -18,6 +18,7 @@ export async function verifyB1Result(isolation, window, run, preview, fail) {
   assert.ok(test.operation.startedAt >= build.operation.completedAt);
   assert.equal(test.verification.acceptancePassed, !fail);
   assert.equal(test.verification.observationValid, true);
+  assert.equal(test.verification.outcome, fail ? "fail" : "pass");
   assert.equal(test.operation.result.exitCode, fail ? 1 : 0);
   assert.equal(run.status, fail ? "Failed" : "Completed");
   const report = path.join(isolation.workspace, test.resolvedReportPath);
@@ -62,6 +63,8 @@ export async function verifyB1Result(isolation, window, run, preview, fail) {
   assert.equal(normalized.validation, "valid");
   const value = JSON.parse(await readArtifactUi(window, run, normalized));
   assert.equal(value.tests.length, 3);
+  assert.equal(value.tests.filter((t) => t.status === "passed").length, fail ? 2 : 3);
+  assert.equal(value.tests.filter((t) => t.status === "failed").length, fail ? 1 : 0);
   return {
     runId: run.id,
     buildOperation: build.operationId,

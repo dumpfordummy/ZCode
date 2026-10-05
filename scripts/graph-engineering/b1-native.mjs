@@ -16,10 +16,15 @@ import {
   waitU2Run,
 } from "./pre-z8-u2-boundaries.mjs";
 const mode = process.argv.includes("--save-only") ? "save-only" : "native";
-assert.ok(process.env.Z1_PACKAGED_EXE, "Only a hash-verified detached package is accepted.");
+const sourceMode = process.argv.includes("--source");
+assert.ok(
+  sourceMode !== Boolean(process.env.Z1_PACKAGED_EXE),
+  "Choose explicit source mode or a hash-verified detached package, exclusively.",
+);
 const isolation = await createIsolation();
 const summary = {
   mode,
+  executionPath: sourceMode ? "compiled-source-isolated-bootstrap" : "detached-package",
   home: isolation.home,
   cases: [],
   screenshots: [],
