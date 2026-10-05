@@ -67,3 +67,36 @@ actionable check/file details reachable. Typecheck, lint, focused tests, changed
 formatting and architecture checks are required; existing required PR CI and its
 selector/aggregator remain unchanged. Browser harness success is not native
 execution evidence or company-PC/operator acceptance.
+
+## PR #18 CI compatibility and fixture lifetime
+
+The historical native U1 driver must keep proving that completed agent-led work
+without configured Test evidence is unverified. Its assertion reads the visible
+`graph-run-evidence` fact's `agent-reported` state, within `graph-run-summary` for
+the exact completed run. Completion and human approval cannot substitute for
+Test evidence. Missing/hidden facts, another run, or any other evidence state
+fail the assertion. The removed `graph-run-verification` explanatory paragraph
+stays removed; the selector guard explicitly rejects its obsolete identifier.
+Exercise the native assertion with negative controls and the current rendered
+U1 components in English and Chinese. This does not claim a fresh native build.
+
+The reviewer-request fixture owns its temporary directory and must await the
+existing service's `disposeAndWait` through its fixture disposer before removing
+that directory, including assertion-failure paths. The service remains the sole
+owner of in-flight artifact writes; no sleep, swallowed error, runtime change,
+or weakened reviewer-request assertion is permitted.
+
+```mermaid
+sequenceDiagram
+  participant Test as Reviewer-request test cleanup
+  participant Fixture as Existing fixture disposer
+  participant Service as Graph service and in-flight writes
+  participant Disk as Temporary fixture directory
+  Test->>Fixture: Dispose and wait
+  Fixture->>Service: disposeAndWait
+  Service-->>Fixture: In-flight writes drained
+  Fixture-->>Test: Disposal complete
+  Test->>Disk: Remove directory
+```
+
+Required PR checks, CI selection, aggregation and skip counts remain unchanged.

@@ -16,6 +16,7 @@ import {
 import { u1Run } from "./u1-runs.mjs";
 import { interactionScenario } from "./u1-interactions.mjs";
 import { baselineSource } from "./u1-baseline.mjs";
+import { assertAgentLedVerification } from "./pre-z8-u1-ui.mjs";
 
 const baseline = process.env.U1_BASELINE === "1";
 const sizes = [
@@ -131,10 +132,7 @@ const statesScenario = {
           await capture(page, shotsDir, `${run.id}-${locale}-${size.width}x${size.height}`);
         }
         if (run.status === "Completed") {
-          assert.equal(
-            await T(page, "graph-run-evidence").getAttribute("data-state"),
-            "agent-reported",
-          );
+          await assertAgentLedVerification(page, run.id);
           assert.notEqual(await T(page, "graph-run-human").getAttribute("data-state"), "approved");
         }
       }

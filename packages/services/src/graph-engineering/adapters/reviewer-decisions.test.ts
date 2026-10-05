@@ -135,7 +135,10 @@ test("scenario 5: genuine failing Test stops the workflow before the reviewer ru
 
 test("reviewer request contains original task, current verification, permitted artifact refs, and strict output contract", async (t) => {
   const root = await mkdtemp(join(tmpdir(), "zcode-repro-req-"));
+  let disposeFixture: (() => Promise<void>) | undefined;
   t.after(async () => {
+    // 此清理钩子先注册：先等待在途证据写入结束，再删除目录，避免与后注册的服务清理竞争。
+    await disposeFixture?.();
     await rm(root, { recursive: true, force: true });
   });
   await prepareWorkspace(root);
@@ -146,6 +149,7 @@ test("reviewer request contains original task, current verification, permitted a
     reviewerOutput,
     modifyFile: true,
   });
+  disposeFixture = f.dispose;
 
   await runGeneric(f, definition);
 
