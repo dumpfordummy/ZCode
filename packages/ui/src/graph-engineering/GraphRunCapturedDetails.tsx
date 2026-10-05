@@ -5,6 +5,8 @@ import type { GraphRunInspection } from "./GraphRunActions.js";
 import { useGraphRunText } from "./GraphRunText.js";
 import { useGraphTime } from "./GraphM2Text.js";
 import type { GraphRun } from "@zcode/services";
+import { GraphRoutingInspector } from "./GraphRoutingInspector.js";
+import { GraphArtifactManifest, type GraphEvidenceActions } from "./GraphArtifactInspector.js";
 
 /**
  * UX-M4: the secondary detail of a run is reached through named tabs (one level, no nested
@@ -148,9 +150,26 @@ export function GraphRunEvidencePanel({
   );
 }
 
-export function GraphRunTechnicalPanel({ summary }: { summary: GraphRunSummary }) {
+export function GraphRunTechnicalPanel({
+  summary,
+  run,
+  evidenceActions,
+}: {
+  summary: GraphRunSummary;
+  run: GraphRun;
+  evidenceActions: GraphEvidenceActions;
+}) {
+  const u = useGraphRunText();
   return (
-    <section data-testid="graph-run-technical-details">
+    <section className="space-y-3" data-testid="graph-run-technical-details">
+      {run.version === 5 ? <GraphRoutingInspector run={run} diagnostics disabled /> : null}
+      {run.version !== undefined && run.version >= 4 ? (
+        <GraphArtifactManifest key={run.id} run={run} actions={evidenceActions} />
+      ) : null}
+      <p className="text-ui-sm text-foreground-subtle">{u("capturedMeaning")}</p>
+      <p className="break-all text-ui-base">
+        {u("workspace")}: {summary.target.workspacePath}
+      </p>
       <pre
         data-testid="graph-run-summary-snapshot"
         className="max-h-[32rem] overflow-auto whitespace-pre-wrap break-all font-mono text-ui-sm"

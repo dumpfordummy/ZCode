@@ -7,20 +7,25 @@ import { useGraphTime } from "./GraphM2Text.js";
 import { useGraphM4Text } from "./GraphM4Text.js";
 import { GraphDisclosure, GraphDisclosureStack } from "./GraphDisclosure.js";
 import { GraphFacts } from "./GraphFacts.js";
+import { useGraphRunText } from "./GraphRunText.js";
 
 export function GraphRoutingInspector({
   run,
   disabled,
   onContinue,
+  diagnostics = false,
 }: {
   run: GraphSequentialRun;
   disabled: boolean;
-  onContinue(runId: string, checkpointId: string, checkpointDigest: string): void;
+  onContinue?(runId: string, checkpointId: string, checkpointDigest: string): void;
+  /** Explicit Technical details / repair-region inspection only. */
+  diagnostics?: boolean;
 }) {
   const { intl } = useZCodeIntl(),
     t = (key: string) => intl.formatMessage({ id: `graph.z5.${key}` });
   const time = useGraphTime();
   const m4 = useGraphM4Text();
+  const u = useGraphRunText();
   const g = (key: string) => intl.formatMessage({ id: `graph.${key}` });
   const label = (nodeId: string) => {
     const node = run.definition.nodes.find((item) => item.id === nodeId);
@@ -30,6 +35,12 @@ export function GraphRoutingInspector({
     config = run.definition.routing;
   if (!routing || !config) return null;
   const checkpoint = routing.checkpoints.find((item) => item.resumeRequired && !item.consumedAt);
+  const repair =
+    routing.iterations.length > 1 ||
+    routing.iterations.some((iteration) => iteration.feedback || iteration.failureFingerprint);
+  const feedback = routing.iterations.findLast((iteration) => iteration.feedback)?.feedback;
+  // 普通单轮路由不是操作员任务；原始记录由技术标签和明确的区域检查承载。
+  if (!diagnostics && !routing.stopReason && !checkpoint && !repair) return null;
   return (
     <section
       tabIndex={-1}
@@ -39,99 +50,137 @@ export function GraphRoutingInspector({
       data-admissions={routing.admissions}
       data-stop-reason={routing.stopReason?.kind ?? ""}
     >
-      <h3 className="font-medium">{config.region?.name ?? t("routingRun")}</h3>
-      <GraphFacts
-        facts={[
-          {
-            label: t("admissions"),
-            value: `${routing.admissions} / ${config.limits.maxNodeAdmissions}`,
-          },
-          { label: t("deadline"), value: time(routing.deadlineAt) },
-          { label: t("maxRepairIterations"), value: config.region?.maxRepairIterations ?? 0 },
-          { label: t("usage"), value: t("usageUnknown") },
-        ]}
-      />
+      {diagnostics ? (
+        <h3 className="font-medium">{config.region?.name ?? t("routingRun")}</h3>
+      ) : null}
       {routing.stopReason ? (
         <p role="status" data-testid="graph-routing-stop" className="text-warning">
           {routing.stopReason.kind}: {routing.stopReason.message}
         </p>
       ) : null}
-      <GraphDisclosureStack>
-        <GraphDisclosure
-          testId="graph-routing-iterations"
-          title={t("iterations")}
-          meta={
-            routing.iterations.length === 1
-              ? m4("iterationsMetaOne")
-              : m4("iterationsMeta", { count: routing.iterations.length })
-          }
-        >
-          {routing.iterations.map((iteration) => (
+      {!diagnostics && repair ? (
+        <div className="space-y-1" data-testid="graph-routing-progress">
+          <p className="font-medium">
+            {u(routing.iterations.length === 1 ? "repairProgressOne" : "repairProgress", {
+              count: routing.iterations.length,
+            })}
+          </p>
+          {feedback ? (
+            <p className="line-clamp-3 whitespace-pre-wrap break-words text-foreground-subtle">
+              {feedback.text}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+      {diagnostics ? (
+        <GraphDisclosureStack>
+          <GraphDisclosure
+            testId="graph-routing-iterations"
+            title={t("iterations")}
+            meta={
+              routing.iterations.length === 1
+                ? m4("iterationsMetaOne")
+                : m4("iterationsMeta", { count: routing.iterations.length })
+            }
+          >
+            {/* 准入计数/截止时间属于诊断，不应挤占默认步骤视图；停止原因和继续操作仍保持可见。 */}
             <GraphFacts
-              key={iteration.id}
               facts={[
                 {
-                  label: m4("iterationLabel", { n: iteration.index }),
-                  value: time(iteration.createdAt),
+                  label: t("admissions"),
+                  value: `${routing.admissions} / ${config.limits.maxNodeAdmissions}`,
                 },
-                {
-                  label: m4("stepsVisited"),
-                  value: iteration.visitedNodeIds.map(label).join(" › ") || m4("noneRecorded"),
-                },
-                { label: m4("attemptsCount"), value: Object.keys(iteration.attemptIds).length },
-                ...(iteration.feedback
-                  ? [{ label: m4("feedbackText"), value: iteration.feedback.text }]
-                  : []),
-                ...(iteration.failureFingerprint
-                  ? [{ label: m4("fingerprint"), value: iteration.failureFingerprint, mono: true }]
-                  : []),
+                { label: t("deadline"), value: time(routing.deadlineAt) },
+                { label: t("maxRepairIterations"), value: config.region?.maxRepairIterations ?? 0 },
+                { label: t("usage"), value: t("usageUnknown") },
               ]}
             />
-          ))}
-          <GraphDisclosure title={m4("rawRecord")}>
+            {routing.iterations.map((iteration) => (
+              <GraphFacts
+                key={iteration.id}
+                facts={[
+                  {
+                    label: m4("iterationLabel", { n: iteration.index }),
+                    value: time(iteration.createdAt),
+                  },
+                  {
+                    label: m4("stepsVisited"),
+                    value: iteration.visitedNodeIds.map(label).join(" › ") || m4("noneRecorded"),
+                  },
+                  { label: m4("attemptsCount"), value: Object.keys(iteration.attemptIds).length },
+                  ...(iteration.feedback
+                    ? [{ label: m4("feedbackText"), value: iteration.feedback.text }]
+                    : []),
+                  ...(iteration.failureFingerprint
+                    ? [
+                        {
+                          label: m4("fingerprint"),
+                          value: iteration.failureFingerprint,
+                          mono: true,
+                        },
+                      ]
+                    : []),
+                ]}
+              />
+            ))}
+          </GraphDisclosure>
+          {/* 原始记录与摘要并列披露，避免技术标签形成多层嵌套。 */}
+          <GraphDisclosure
+            testId="graph-routing-iterations-raw"
+            title={m4("rawRecord")}
+            meta={t("iterations")}
+          >
             <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-sm">
               {JSON.stringify(routing.iterations, null, 2)}
             </pre>
           </GraphDisclosure>
-        </GraphDisclosure>
-        <GraphDisclosure
-          testId="graph-routing-checkpoints"
-          title={t("checkpoints")}
-          meta={
-            routing.checkpoints.length === 1
-              ? m4("checkpointsMetaOne")
-              : m4("checkpointsMeta", { count: routing.checkpoints.length })
-          }
-        >
-          {routing.checkpoints.map((item) => (
-            <GraphFacts
-              key={item.id}
-              facts={[
-                { label: m4("checkpointId"), value: item.id, mono: true },
-                { label: m4("nextStep"), value: label(item.successorNodeId) },
-                {
-                  label: m4("checkpointState"),
-                  value:
-                    item.resumeRequired && !item.consumedAt
-                      ? m4("checkpointWaiting")
-                      : item.consumedAt
-                        ? m4("checkpointConsumed", { time: time(item.consumedAt) })
-                        : m4("checkpointRecorded"),
-                },
-                { label: m4("createdAt"), value: time(item.createdAt) },
-                { label: m4("decisionId"), value: item.decisionId, mono: true },
-                { label: m4("digestLabel"), value: item.digest, mono: true },
-              ]}
-            />
-          ))}
-          <GraphDisclosure title={m4("rawRecord")}>
-            <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-sm">
-              {JSON.stringify(routing.checkpoints, null, 2)}
-            </pre>
-          </GraphDisclosure>
-        </GraphDisclosure>
-      </GraphDisclosureStack>
-      {checkpoint ? (
+          {routing.checkpoints.length ? (
+            <GraphDisclosure
+              testId="graph-routing-checkpoints"
+              title={t("checkpoints")}
+              meta={
+                routing.checkpoints.length === 1
+                  ? m4("checkpointsMetaOne")
+                  : m4("checkpointsMeta", { count: routing.checkpoints.length })
+              }
+            >
+              {routing.checkpoints.map((item) => (
+                <GraphFacts
+                  key={item.id}
+                  facts={[
+                    { label: m4("checkpointId"), value: item.id, mono: true },
+                    { label: m4("nextStep"), value: label(item.successorNodeId) },
+                    {
+                      label: m4("checkpointState"),
+                      value:
+                        item.resumeRequired && !item.consumedAt
+                          ? m4("checkpointWaiting")
+                          : item.consumedAt
+                            ? m4("checkpointConsumed", { time: time(item.consumedAt) })
+                            : m4("checkpointRecorded"),
+                    },
+                    { label: m4("createdAt"), value: time(item.createdAt) },
+                    { label: m4("decisionId"), value: item.decisionId, mono: true },
+                    { label: m4("digestLabel"), value: item.digest, mono: true },
+                  ]}
+                />
+              ))}
+            </GraphDisclosure>
+          ) : null}
+          {routing.checkpoints.length ? (
+            <GraphDisclosure
+              testId="graph-routing-checkpoints-raw"
+              title={m4("rawRecord")}
+              meta={t("checkpoints")}
+            >
+              <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-sm">
+                {JSON.stringify(routing.checkpoints, null, 2)}
+              </pre>
+            </GraphDisclosure>
+          ) : null}
+        </GraphDisclosureStack>
+      ) : null}
+      {checkpoint && onContinue ? (
         <div className="space-y-2">
           <p className="text-foreground-subtle">{t("continueHelp")}</p>
           <Button

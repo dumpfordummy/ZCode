@@ -6,6 +6,8 @@ import { useGraphInspectionRead } from "@/hooks/useGraphInspectionRead.js";
 import { useGraphRunText } from "./GraphRunText.js";
 import type { GraphInspectionState } from "./graphInspectionRead.js";
 import { graphInspectionArtifacts } from "./graphRunPresentation.js";
+import { GraphDisclosure } from "./GraphDisclosure.js";
+import { graphArtifactReadIds } from "./graphArtifact.test-ids.js";
 
 export interface GraphEvidenceActions {
   readArtifact(runId: string, artifactId: string): Promise<GraphArtifactContent | undefined>;
@@ -33,58 +35,88 @@ export function GraphArtifactInspector({
     attemptId,
   ]);
   const content = useGraphInspectionRead<GraphArtifactContent>(scope, actions.readArtifact);
-  const manifest = useGraphInspectionRead<string>(scope, actions.exportManifest);
   const artifacts = graphInspectionArtifacts(run, nodeId, attemptId);
+  // 空列表不提供可检查证据；运行级元数据导出由明确的技术详情入口承载。
+  if (!artifacts.length) return null;
   return (
-    <div className="space-y-3" data-testid="graph-artifact-inspector">
-      <h4 className="text-ui-sm font-medium">{t("artifacts")}</h4>
-      {artifacts.map((artifact) => (
-        <details key={artifact.id} className="space-y-2 text-ui-sm">
-          <summary className="cursor-pointer break-all">
-            {artifact.type} · {artifact.sourcePath ?? artifact.id} · {artifact.validation}
-          </summary>
-          <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-xs">
-            {JSON.stringify(artifact, null, 2)}
-          </pre>
-          {artifact.issue ? <p className="text-warning">{artifact.issue}</p> : null}
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={content.state.status === "loading" && content.state.key === artifact.id}
-            data-testid={`graph-artifact-open-${artifact.id}`}
-            onClick={() =>
-              void content.load(
-                artifact.id,
-                async () => {
-                  const value = await actions.readArtifact(run.id, artifact.id);
-                  if (
-                    value &&
-                    (value.artifact.id !== artifact.id || value.artifact.runId !== run.id)
-                  )
-                    throw new Error(u("readMismatch"));
-                  return value;
-                },
-                u("readMissing"),
-              )
-            }
-          >
-            {t("inspectContent")}
-          </Button>
-        </details>
-      ))}
-      <ReadState state={content.state} testId="graph-artifact" />
-      {content.state.status === "ready" ? (
-        <div>
-          <p className="text-ui-sm text-foreground-subtle">{t("contentMeaning")}</p>
-          <pre
-            data-testid="graph-artifact-content"
-            data-artifact-id={content.state.value.artifact.id}
-            className="max-h-80 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-sm"
-          >
-            {content.state.value.content}
-          </pre>
-        </div>
-      ) : null}
+    <div data-testid="graph-artifact-inspector" data-count={artifacts.length}>
+      <GraphDisclosure
+        testId="graph-artifact-list"
+        title={u(artifacts.length === 1 ? "artifactsCountOne" : "artifactsCount", {
+          count: artifacts.length,
+        })}
+      >
+        {artifacts.map((artifact) => (
+          <details key={artifact.id} className="space-y-2 text-ui-sm">
+            <summary className="cursor-pointer break-all">
+              {artifact.type} · {artifact.sourcePath ?? artifact.id} · {artifact.validation}
+            </summary>
+            <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-xs">
+              {JSON.stringify(artifact, null, 2)}
+            </pre>
+            {artifact.issue ? <p className="text-warning">{artifact.issue}</p> : null}
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={content.state.status === "loading" && content.state.key === artifact.id}
+              data-testid={`graph-artifact-open-${artifact.id}`}
+              onClick={() =>
+                void content.load(
+                  artifact.id,
+                  async () => {
+                    const value = await actions.readArtifact(run.id, artifact.id);
+                    if (
+                      value &&
+                      (value.artifact.id !== artifact.id || value.artifact.runId !== run.id)
+                    )
+                      throw new Error(u("readMismatch"));
+                    return value;
+                  },
+                  u("readMissing"),
+                )
+              }
+            >
+              {t("inspectContent")}
+            </Button>
+          </details>
+        ))}
+        <ReadState state={content.state} testId="graph-artifact" />
+        {content.state.status === "ready" ? (
+          <div>
+            <p className="text-ui-sm text-foreground-subtle">{t("contentMeaning")}</p>
+            <pre
+              data-testid="graph-artifact-content"
+              data-artifact-id={content.state.value.artifact.id}
+              className="max-h-80 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-sm"
+            >
+              {content.state.value.content}
+            </pre>
+          </div>
+        ) : null}
+      </GraphDisclosure>
+    </div>
+  );
+}
+
+/** Run-wide diagnostic export, reached through the Technical details tab. */
+export function GraphArtifactManifest({
+  run,
+  actions,
+}: {
+  run: GraphSequentialRun;
+  actions: GraphEvidenceActions;
+}) {
+  const { intl } = useZCodeIntl();
+  const t = (id: string) => intl.formatMessage({ id: `graph.z4.${id}` });
+  const u = useGraphRunText();
+  const scope = JSON.stringify([
+    run.target.workspaceIdentity?.trim() || run.target.workspacePath,
+    run.target.workspacePath,
+    run.id,
+  ]);
+  const manifest = useGraphInspectionRead<string>(scope, actions.exportManifest);
+  return (
+    <div className="space-y-3">
       <Button
         size="sm"
         variant="outline"
@@ -115,18 +147,24 @@ export function GraphArtifactInspector({
   );
 }
 
-function ReadState({ state, testId }: { state: GraphInspectionState<unknown>; testId: string }) {
+function ReadState({
+  state,
+  testId,
+}: {
+  state: GraphInspectionState<unknown>;
+  testId: keyof typeof graphArtifactReadIds;
+}) {
   const u = useGraphRunText();
   return (
     <div
       role="status"
-      data-testid={`${testId}-read-state`}
+      data-testid={graphArtifactReadIds[testId].state}
       data-state={state.status}
       className="text-ui-sm"
     >
       {state.status === "loading" ? <p>{u("reading")}</p> : null}
       {state.status === "error" ? (
-        <div data-testid={`${testId}-read-error`} className="space-y-1 text-warning">
+        <div data-testid={graphArtifactReadIds[testId].error} className="space-y-1 text-warning">
           <p>{u("readFailed")}</p>
           <p className="break-words">{state.error}</p>
         </div>

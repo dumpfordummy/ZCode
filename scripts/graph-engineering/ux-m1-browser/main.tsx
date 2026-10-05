@@ -83,6 +83,7 @@ const graphEngineeringService = guard("graphEngineeringService", {
   validateDefinition: ux("validateDefinition"),
   recipes: ux("recipes"),
   run: ux("run"),
+  artifact: ux("artifact"),
   onDidChange: (listener: (event: { workspaceKey: string }) => void) => {
     listeners.add(listener);
     return { dispose: () => listeners.delete(listener) };

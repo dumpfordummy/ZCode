@@ -65,6 +65,14 @@ The harness owns only its disposable profile/provider and evidence summary. Grap
 
 ## Provider and driver negatives
 
+Z8.5-U1 compatibility: the completed-run assertion now targets the visible
+verification fact (`graph-run-evidence`, state `agent-reported`) scoped to the
+exact run summary and its Completed execution state. It no longer requires the
+removed explanatory paragraph's English wording. Existing zero Tool/test-artifact,
+source-integrity, human-approval and restart/no-replay assertions remain required.
+The selector guard must reject the removed `graph-run-verification` identifier;
+negative driver tests must reject missing/hidden facts and verified-Test states.
+
 Pure fixture tests must fail closed for unknown task headers, absent native tools, missing/duplicate predecessor output, incorrect Read source, wrong question answer, an absent/unknown/unsuccessful Edit result or one referring to another file, and review of unchanged source. Non-native metadata/model-title calls may return a neutral fixture label and never tool calls. Tests validate the controlled provider contract; they are not substitutes for the native run.
 
 The driver must report FAIL on unexpected terminal state, absent required controls, wrong selected session, timed-out state, missing/changed evidence or unexpected provider error. Selector changes must be reconciled with the UI owner without deleting semantic assertions. It must not silently skip an unavailable acceptance path. Only specifically declared U6/user-operated cases may remain NOT RUN.

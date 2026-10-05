@@ -10,6 +10,15 @@ const messages: Record<string, [string, string]> = {
   tabRequest: ["Request and result", "请求与结果"],
   tabEvidence: ["Evidence", "证据"],
   tabTechnical: ["Technical details", "技术详情"],
+  showHistory: ["Show run history", "显示运行历史"],
+  hideHistory: ["Hide run history", "收起运行历史"],
+  stepDetails: ["Step details", "步骤详情"],
+  closeStepDetails: ["Close step details", "收起步骤详情"],
+  fitGraph: ["Fit graph", "适应全图"],
+  focusStep: ["Focus selected step", "定位所选步骤"],
+  capturedRun: ["Captured · Read only", "已捕获 · 只读"],
+  workflowDetails: ["Workflow details", "工作流详情"],
+  resultDetails: ["Result details", "结果详情"],
   // 资料库对话框的页脚：载入设计这一操作自己的阻止原因，不使用新建运行的“审阅”措辞。
   libraryFieldsNeedUse: [
     "{count} required fields need configuration in Use",

@@ -24,11 +24,7 @@ export function GraphRunPermissionBlock({ items }: { items: GraphPermissionInfo[
                 {item.configuredCommand}
               </code>
             </div>
-          ) : (
-            <p className="text-ui-sm text-foreground-subtle">
-              {u("permissionDetailsInConversation")}
-            </p>
-          )}
+          ) : null}
         </div>
       ))}
     </div>

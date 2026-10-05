@@ -1,0 +1,140 @@
+{
+  "suite": "UX-M4",
+  "environment": {
+    "kind": "chromium-component-harness",
+    "windowsNativeAcceptance": "PENDING",
+    "node": "v24.14.0",
+    "platform": "win32-x64",
+    "chromium": "154.0.8037.95",
+    "real": [
+      "GraphEditor, GraphRunsDestination, GraphLibrary, GraphTemplateBindings, Context picker, checks editor, inline review, Needs-you, draft store, view store, i18n",
+      "useGraphEngineering (the real hook, including its single-flight, retained-submission and admission guards)",
+      "Graph Host code over real temp workspaces: instantiateTemplate, validateReadiness, recipe store (.zcode/config.json, digest conflicts, schema), project-setup reference validation"
+    ],
+    "fixtures": [
+      "Graph engineering service: workspace view, run list, definition revision counter, run admission, change events",
+      "Graph workflow service: only the preflight (`prepare`, built from the real reference validation and recipe store, fixture native environment). The library operations list/mutate/preview/instantiate are the REAL GraphWorkflowService over an in-memory GraphLibraryStore (same revision rule and schema validation as the file store)",
+      "run records: the UI tests' summaryRun() (unit-only captured records), not native runs",
+      "file search, platform.selectFile/saveFile and fileService.stat/readFileRange (real temp files; no OS dialogs), transport (Playwright bridge instead of RPC)"
+    ],
+    "stubs": [
+      "GraphConfiguration (composer model/mode configuration hook)",
+      "GraphDesignPanel body (Workflows editor)",
+      "useSettings"
+    ]
+  },
+  "passed": 22,
+  "failed": 0,
+  "results": [
+    {
+      "name": "library footer: browsing Versions never shows New-run review language; a blocked Load into design is framed as that operation, with Open Use",
+      "ok": true,
+      "ms": 1436
+    },
+    {
+      "name": "Needs-you: a quiet pointer when the waiting run is the open run (no second action, no second primary), the full strip when attention is elsewhere",
+      "ok": true,
+      "ms": 865
+    },
+    {
+      "name": "a Test failure that never reached approval reads Stopped after Test failure in the facts and the list, in English and Chinese, with the stored facts untouched",
+      "ok": true,
+      "ms": 1232
+    },
+    {
+      "name": "one header: a single tab row with aria-current and the next-run context (model, mode, saved checks) on every destination",
+      "ok": true,
+      "ms": 726
+    },
+    {
+      "name": "New run: one action bar; ready text only when Review is possible; an occupied workspace shows a blocked Review, View current run and keeps the draft",
+      "ok": true,
+      "ms": 1564
+    },
+    {
+      "name": "a permission wait: the banner states the permission once, owns the one primary action, and the facts stay present but quiet",
+      "ok": true,
+      "ms": 477
+    },
+    {
+      "name": "a failed Test: the banner is the failure treatment, names the next action and never implies an approval is pending",
+      "ok": true,
+      "ms": 573
+    },
+    {
+      "name": "a final approval: the banner's primary action opens the inspector in the Steps tab from any tab, and Approve and Reject live in one bar with their reason",
+      "ok": true,
+      "ms": 636
+    },
+    {
+      "name": "run detail has one level of named tabs with the tab pattern (arrow keys), and the former disclosures are panels",
+      "ok": true,
+      "ms": 649
+    },
+    {
+      "name": "the step strip lists the visited steps in order, marks the current one, and opens a step in the Steps tab",
+      "ok": true,
+      "ms": 632
+    },
+    {
+      "name": "library: a failure renders beside the tabs with Refresh, a previous success is gone, and drafts survive a tab change",
+      "ok": true,
+      "ms": 992
+    },
+    {
+      "name": "layout: no horizontal overflow, the New run column keeps at least 30rem at 1280px, the rail stays within 17rem, and Graph tokens do not leak",
+      "ok": true,
+      "ms": 1426
+    },
+    {
+      "name": "a question wait and a completed run get their own banner tones without a permission sentence",
+      "ok": true,
+      "ms": 601
+    },
+    {
+      "name": "contrast: text, semantic colours, buttons and control boundaries meet their floors on the implemented Graph surfaces, in both themes",
+      "ok": true,
+      "ms": 449
+    },
+    {
+      "name": "disclosure pattern: collapsed, expanded, Enter/Space, focus, long title, summary line, both themes, English and Chinese",
+      "ok": true,
+      "ms": 1012
+    },
+    {
+      "name": "frozen provenance: the disclosure header owns the title once; the content is unchanged",
+      "ok": true,
+      "ms": 600
+    },
+    {
+      "name": "captures (en-US): new run ready to review",
+      "ok": true,
+      "ms": 147
+    },
+    {
+      "name": "captures (en-US): new run occupied, permission wait, failed Test, final approval, library",
+      "ok": true,
+      "ms": 164
+    },
+    {
+      "name": "captures (en-US): long names and request, several context slots and checks, missing required values",
+      "ok": true,
+      "ms": 188
+    },
+    {
+      "name": "captures (zh-CN): new run ready to review",
+      "ok": true,
+      "ms": 147
+    },
+    {
+      "name": "captures (zh-CN): new run occupied, permission wait, failed Test, final approval, library",
+      "ok": true,
+      "ms": 142
+    },
+    {
+      "name": "captures (zh-CN): long names and request, several context slots and checks, missing required values",
+      "ok": true,
+      "ms": 150
+    }
+  ]
+}

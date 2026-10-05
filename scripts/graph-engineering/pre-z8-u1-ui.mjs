@@ -12,6 +12,19 @@ import {
 
 const VERIFIED_REQUEST =
   "Retain this verified-workflow task while configuring missing project checks.";
+
+export async function assertAgentLedVerification(window, runId) {
+  // U1 删除了重复说明段落；按当前运行的可见事实断言，完成或人工批准都不能冒充测试证据。
+  const summary = window.getByTestId("graph-run-summary");
+  assert.equal(await summary.getAttribute("data-run-id"), runId);
+  const execution = summary.getByTestId("graph-run-execution");
+  const evidence = summary.getByTestId("graph-run-evidence");
+  assert.equal(await execution.isVisible(), true);
+  assert.equal(await execution.getAttribute("data-state"), "Completed");
+  assert.equal(await evidence.isVisible(), true);
+  assert.equal(await evidence.getAttribute("data-state"), "agent-reported");
+}
+
 const COMMAND_RECIPE = {
   id: "u1-command",
   name: "Fixture command only",

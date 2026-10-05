@@ -21,6 +21,7 @@ import {
 import { startU1Fixture } from "./pre-z8-u1-provider.mjs";
 import { QUESTION_OPTION } from "./pre-z8-u1-responses.mjs";
 import {
+  assertAgentLedVerification,
   assertNoNativeWork,
   captureU1,
   instantiateU1,
@@ -155,10 +156,8 @@ try {
     await window.locator("body").innerText(),
     /^\s*(?:tests passed|verified engineering success)\s*$/im,
   );
-  assert.equal(
-    (await window.getByTestId("graph-run-verification").innerText()).trim(),
-    "Agent-led review; configured test evidence not included",
-  );
+  await window.locator('[data-testid="graph-run-execution"][data-state="Completed"]').waitFor();
+  await assertAgentLedVerification(window, run.id);
   await captureU1(isolation, window, summary, "pre-z8-u1-completed-agent-led");
   summary.assertions.push(
     "Three exact fresh native task sessions consumed captured handoffs; actual question/Edit permission remained separate from the required final Graph gate. Native source changed, no configured test artifact or command was created.",

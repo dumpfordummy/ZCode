@@ -1,5 +1,7 @@
 import type { GraphRunResult } from "./graphRunResult.js";
 import { useGraphRunText } from "./GraphRunText.js";
+import { GraphDisclosure } from "./GraphDisclosure.js";
+import { useGraphM4Text } from "./GraphM4Text.js";
 
 /**
  * A stopped or failed run states what was rejected, why (the persisted diagnostic), and what is
@@ -8,6 +10,7 @@ import { useGraphRunText } from "./GraphRunText.js";
  */
 export function GraphRunResultBlock({ result }: { result: GraphRunResult }) {
   const u = useGraphRunText();
+  const m4 = useGraphM4Text();
   if (result.kind === "none") return null;
   const still = [
     ...(result.stillTrue.passedChecks.length
@@ -54,14 +57,15 @@ export function GraphRunResultBlock({ result }: { result: GraphRunResult }) {
       ) : (
         <p className={headline}>{result.message || u("stoppedHeadline")}</p>
       )}
-      <div>
+      {result.stillTrue.approvalNotRequested ? <p>{u("stillNoApproval")}</p> : null}
+      <GraphDisclosure title={m4("resultDetails")} testId="graph-run-result-details">
         <p className="text-ui-sm font-medium text-foreground-subtle">{u("stillTrue")}</p>
         <ul className="mt-1 list-disc space-y-0.5 pl-5">
           {still.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
-      </div>
+      </GraphDisclosure>
     </div>
   );
 }

@@ -18,6 +18,8 @@ const ALLOWED_OPS = new Set([
   "graph.recipes.save",
   "validate",
   "graph.run",
+  "graph.artifact.read",
+  "graph.artifact.manifest",
   "wf.list",
   "wf.mutate",
   "wf.preview",

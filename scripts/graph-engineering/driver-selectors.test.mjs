@@ -13,7 +13,7 @@ const uiSources = ["ui", "shared", "desktop"].map((name) =>
   path.resolve(here, `../../packages/${name}/src`),
 );
 // 已被 UX 审计移除的 id：模板前缀（graph-view-${mode}）会让它们看起来仍然存在。
-const REMOVED = new Set(["graph-view-workflows"]);
+const REMOVED = new Set(["graph-view-workflows", "graph-run-verification"]);
 
 export const DRIVERS = [
   "z6-native-smoke.mjs",
@@ -21,6 +21,8 @@ export const DRIVERS = [
   "z6-native-library.mjs",
   "pre-z8-u1-native.mjs",
   "pre-z8-u1-ui.mjs",
+  "z4-native-helpers.mjs",
+  "pre-z8-u4-artifact-ui.mjs",
   "pre-z8-u5-native.mjs",
   "ux-m3-native-library.mjs",
 ];
@@ -88,11 +90,15 @@ export function driverIds(source) {
   return { exact, prefixes };
 }
 
+function knownUiId(id, { literals, prefixes }) {
+  return (
+    !REMOVED.has(id) && (literals.has(id) || [...prefixes].some((prefix) => id.startsWith(prefix)))
+  );
+}
+
 test("the restored drivers only use test ids that exist in the UI source", async () => {
-  const { literals, prefixes: uiPrefixes } = await uiIds();
-  const known = (id) =>
-    !REMOVED.has(id) &&
-    (literals.has(id) || [...uiPrefixes].some((prefix) => id.startsWith(prefix)));
+  const ids = await uiIds();
+  const { literals, prefixes: uiPrefixes } = ids;
   const stale = [];
   for (const driver of DRIVERS) {
     let source;
@@ -102,7 +108,7 @@ test("the restored drivers only use test ids that exist in the UI source", async
       continue; // 尚未创建的辅助文件
     }
     const { exact, prefixes } = driverIds(source);
-    for (const id of exact) if (!known(id)) stale.push(`${driver}: ${id}`);
+    for (const id of exact) if (!knownUiId(id, ids)) stale.push(`${driver}: ${id}`);
     for (const prefix of prefixes)
       if (
         ![...literals].some((id) => id.startsWith(prefix)) &&
@@ -111,6 +117,12 @@ test("the restored drivers only use test ids that exist in the UI source", async
         stale.push(`${driver}: ${prefix}\${...}`);
   }
   assert.deepEqual(stale, [], "driver test ids that no longer exist in the UI");
+});
+
+test("removed U1 verification copy stays rejected even under a matching template prefix", () => {
+  const ids = { literals: new Set(["graph-run-evidence"]), prefixes: new Set(["graph-run-"]) };
+  assert.equal(knownUiId("graph-run-evidence", ids), true);
+  assert.equal(knownUiId("graph-run-verification", ids), false);
 });
 
 test("the extraction understands the id forms the drivers use", () => {

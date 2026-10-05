@@ -276,7 +276,7 @@ export function GraphRunActions({
           </Button>
         ) : null}
       </div>
-      {cancellable || summary.execution.stopRequested || run.status === "Cancelled" ? (
+      {summary.execution.stopRequested || run.status === "Cancelled" ? (
         <p className="text-ui-sm text-foreground-subtle">{u("stopMeaning")}</p>
       ) : null}
     </section>

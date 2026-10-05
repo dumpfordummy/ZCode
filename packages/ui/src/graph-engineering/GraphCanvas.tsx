@@ -1,10 +1,11 @@
-import { memo, useMemo, useEffect } from "react";
+import { memo, useMemo, useEffect, useRef, useCallback } from "react";
 import {
   Background,
   Controls,
   Handle,
   MarkerType,
   Position,
+  Panel,
   ReactFlow,
   useUpdateNodeInternals,
   useInternalNode,
@@ -25,6 +26,8 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { graphSelectedAttempt } from "./graphRoutingView.js";
 import { connectGraphNodes } from "./graphEditing.js";
 import { graphEdgeKey } from "./graphEditorGuidance.js";
+import { Button } from "@/components/ui/button.js";
+import { useGraphM4Text } from "./GraphM4Text.js";
 import "@xyflow/react/dist/style.css";
 import "./GraphCanvas.css";
 
@@ -93,13 +96,15 @@ const GraphNode = memo(function GraphNode({ id, data, selected }: NodeProps<Canv
 const nodeTypes = { graph: GraphNode };
 
 function SelectedNodeFocus({ id }: { id?: string }) {
+  const m4 = useGraphM4Text();
+  const focusedId = useRef<string | undefined>(undefined);
   const selected = useInternalNode(id ?? "");
   const nodeWidth = selected?.measured?.width;
   const nodeHeight = selected?.measured?.height;
   const width = useStore((state) => state.width);
   const height = useStore((state) => state.height);
-  const { getInternalNode, getZoom, setCenter, viewportInitialized } = useReactFlow();
-  useEffect(() => {
+  const { getInternalNode, getZoom, setCenter, fitView, viewportInitialized } = useReactFlow();
+  const focusSelected = useCallback(() => {
     const node =
       id && nodeWidth && nodeHeight && viewportInitialized && width && height
         ? getInternalNode(id)
@@ -123,7 +128,42 @@ function SelectedNodeFocus({ id }: { id?: string }) {
     getZoom,
     setCenter,
   ]);
-  return null;
+  useEffect(() => {
+    // 只在新选择已测量后定位一次；刷新状态、切换标签和调整容器尺寸不得覆盖用户的平移/缩放。
+    if (
+      !id ||
+      focusedId.current === id ||
+      !nodeWidth ||
+      !nodeHeight ||
+      !width ||
+      !height ||
+      !viewportInitialized
+    )
+      return;
+    focusedId.current = id;
+    focusSelected();
+  }, [id, nodeWidth, nodeHeight, width, height, viewportInitialized, focusSelected]);
+  return (
+    <Panel position="top-left" className="flex flex-wrap gap-1">
+      <Button
+        size="sm"
+        variant="secondary"
+        data-testid="graph-fit"
+        onClick={() => void fitView({ minZoom: 0.01, maxZoom: 1, padding: 0.15 })}
+      >
+        {m4("fitGraph")}
+      </Button>
+      <Button
+        size="sm"
+        variant="secondary"
+        disabled={!id}
+        data-testid="graph-focus-selected"
+        onClick={focusSelected}
+      >
+        {m4("focusStep")}
+      </Button>
+    </Panel>
+  );
 }
 
 export function GraphCanvas({
@@ -284,8 +324,9 @@ export function GraphCanvas({
         edgesReconnectable={editable}
         deleteKeyCode={null}
         fitView
-        minZoom={0.85}
-        fitViewOptions={{ minZoom: 0.85, maxZoom: 1, padding: 0.15 }}
+        // 85% 是阅读所选节点的下限，不是全图适配下限；否则宽图永远无法完整显示。
+        minZoom={0.01}
+        fitViewOptions={{ minZoom: 0.01, maxZoom: 1, padding: 0.15 }}
         maxZoom={1.5}
         proOptions={{ hideAttribution: false }}
         onNodeClick={(_, node) => selectCanvasNode(node.id)}
@@ -352,8 +393,10 @@ export function GraphCanvas({
         }}
       >
         <Background color="var(--color-border)" />
-        <SelectedNodeFocus id={selectedId} />
-        <Controls showInteractive={false} />
+        <SelectedNodeFocus
+          id={selectedRegionId ? `repair-group:${selectedRegionId}` : selectedId}
+        />
+        <Controls showInteractive={false} showFitView={false} />
       </ReactFlow>
     </div>
   );

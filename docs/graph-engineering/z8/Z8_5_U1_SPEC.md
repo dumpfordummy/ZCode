@@ -1,0 +1,143 @@
+# Z8.5-U1 implementation contract
+
+Base: `1df2770c9d01e66df627d752a5b1fc6df92e3a96`, integration
+`claude/zcde-graph-ux-audit-be80d8`. UI-only pilot; stop at PR review.
+
+The operator reports that the installed pilot connects to the intended LLM. This
+is operator-reported connectivity, not independent workflow or test evidence.
+W1 and Z8.4-I1 remain accepted in their recorded scopes. Build/Test setup,
+credentials, Sandbox/Task Manager and other accepted gaps remain deferred.
+
+## Rules and owners
+
+- Runs graph mode uses the full available detail column, without a prose maximum
+  width or the trail column's 22rem cap. History stays available with a collapse
+  control. The graph has a responsive, minimum 20rem height.
+- Step details are explicitly opened in graph mode, below the graph. Closing them
+  returns focus to their trigger. Trail mode keeps its existing inspector.
+- Fit graph fits all captured nodes, including branches and repair groups.
+  Selecting a node (or Focus selected step) returns to at least 85% zoom. Panning,
+  zooming and polling do not change captured positions, edges or evidence.
+- The view store remains the sole owner of workspace/run/node/attempt selection.
+  History visibility and inspector visibility are UI-local, scoped to workspace
+  and run respectively. React Flow owns its transient viewport; no Host writes.
+- A run's captured definition remains the only source for its canvas, inspector,
+  positions and connections. Today's workflow is never substituted.
+- Keep request title, status, current step, distinct execution/test/reviewer/human
+  facts, relevant result and next action visible. No completion implies tests or
+  approval. Keep blocked reasons, stale/missing evidence, permission waits,
+  recovery warnings and required acknowledgments visible at their action.
+- Remove duplicate routine explanations and workspace paths. Existing Request
+  and result, Evidence, Technical details and prompt disclosures keep exact text,
+  diagnostics and provenance accessible. No generated summaries or font reduction.
+- New run simplification removes routine explanatory copy only, preserving every
+  field, readiness rule, check binding, preflight and explicit Start requirement.
+- English and Chinese use the existing localization system. No runtime, protocol,
+  permission, acceptance, installer, dependency or historical-evidence changes.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant View as Renderer view store
+  participant Canvas as React Flow viewport
+  participant Host as Existing Graph Host
+  User->>View: Select run / node / attempt
+  View->>Canvas: Captured run definition and selection
+  User->>Canvas: Fit / pan / zoom / resize
+  Note over Canvas: Viewport only; no save or admission
+  Host-->>View: Existing read-only refresh
+  View->>Canvas: Updated captured status, same selection
+  Note over Canvas: Refresh does not reset viewport
+```
+
+## Acceptance
+
+### Final bounded operator-view cleanup (PR #18, after 65ca1b6)
+
+The accepted graph width, Fit/Focus, history collapse, viewport retention,
+historical attempt selection, Step details and named tabs retain their behavior.
+The remaining change is presentation of routing and retained artifacts:
+
+- The ordinary Steps inspector omits routine routing records. Stop reasons and
+  unresolved resume checkpoints stay visible, with the existing Continue guard
+  and exact checkpoint identity. Multiple iterations, feedback or a failure
+  fingerprint permit a compact repair summary and literal feedback preview.
+- The Technical details tab owns routing admissions, deadline, repair budget,
+  full iteration/feedback/fingerprint records and checkpoint diagnostics. Explicit
+  repair-region inspection also reaches those records. No checkpoint section is
+  rendered when there are zero checkpoints, even in Technical details. Raw JSON
+  has its own collapsed row alongside facts, preserving one-level disclosures.
+- The step's existing exact run/node/attempt artifact selection stays unchanged.
+  Zero artifacts renders no Captured artifacts heading/list. Nonempty artifacts
+  show a count in one collapsed inspection disclosure; individual records and
+  content remain available on demand. Artifact-read errors stay explicit.
+- Export metadata manifest moves to Technical details, including runs with zero
+  artifacts. Its existing read-only hook, scope invalidation and error handling
+  remain; changing run/workspace cannot show an old manifest as current.
+- Test failure/missing evidence, permission/question actions, unknown/stale
+  execution, reviewer failure/rejection, human gates and stop reasons retain
+  their existing default visibility. No Host, protocol, evidence, permission,
+  admission, stored-record or recovery semantics change.
+
+The Host remains the record and execution owner; existing UI hooks perform all
+reads/actions. Disclosures are local presentation state. There are no new writes
+on opening details/tabs/artifacts or exporting a manifest.
+
+Extend the existing U1 rendered suite with ordinary running, permission, final
+approval, failed Test and multi-iteration repair fixtures. Capture only those
+five representative before/after states at the same viewport and selection,
+using 65ca1b6 UI as the before snapshot. Assert semantic evidence/action states,
+hidden default diagnostics, reachable Technical details/export/artifact reads,
+zero empty checkpoint sections, exact resume identity, read-only record equality,
+keyboard access, English/Chinese and a narrow viewport. Keep the native
+agent-reported verification assertion. Acceptance judges relevance to the
+operator's status/verification/action questions, not word counts.
+
+Use the existing Vite/Chromium real-component harness with synthetic Host records,
+no paid calls, company files or credentials. Capture identical sequential and
+branch/repair records before and after at 1366×768, 1600×900, 1920×1080 and an
+explicitly labelled reduced CSS viewport with the existing 268px app sidebar.
+Record viewport, content and canvas dimensions, DPR and canvas zoom.
+
+Rendered tests must cover Fit, pan/zoom, readable node selection, resize, first
+reveal, graph hide/show, run/attempt switching, history collapse, keyboard and
+focus return. Compare captured records and Host mutation logs. Capture running,
+permission, failed, completed without tests and final approval screens; assert
+their independent evidence and approval states. Keep full request/output and
+actionable check/file details reachable. Typecheck, lint, focused tests, changed
+formatting and architecture checks are required; existing required PR CI and its
+selector/aggregator remain unchanged. Browser harness success is not native
+execution evidence or company-PC/operator acceptance.
+
+## PR #18 CI compatibility and fixture lifetime
+
+The historical native U1 driver must keep proving that completed agent-led work
+without configured Test evidence is unverified. Its assertion reads the visible
+`graph-run-evidence` fact's `agent-reported` state, within `graph-run-summary` for
+the exact completed run. Completion and human approval cannot substitute for
+Test evidence. Missing/hidden facts, another run, or any other evidence state
+fail the assertion. The removed `graph-run-verification` explanatory paragraph
+stays removed; the selector guard explicitly rejects its obsolete identifier.
+Exercise the native assertion with negative controls and the current rendered
+U1 components in English and Chinese. This does not claim a fresh native build.
+
+The reviewer-request fixture owns its temporary directory and must await the
+existing service's `disposeAndWait` through its fixture disposer before removing
+that directory, including assertion-failure paths. The service remains the sole
+owner of in-flight artifact writes; no sleep, swallowed error, runtime change,
+or weakened reviewer-request assertion is permitted.
+
+```mermaid
+sequenceDiagram
+  participant Test as Reviewer-request test cleanup
+  participant Fixture as Existing fixture disposer
+  participant Service as Graph service and in-flight writes
+  participant Disk as Temporary fixture directory
+  Test->>Fixture: Dispose and wait
+  Fixture->>Service: disposeAndWait
+  Service-->>Fixture: In-flight writes drained
+  Fixture-->>Test: Disposal complete
+  Test->>Disk: Remove directory
+```
+
+Required PR checks, CI selection, aggregation and skip counts remain unchanged.
