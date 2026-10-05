@@ -125,24 +125,28 @@ test("B1 placeholder exception is exact and does not hide seeded checkout or use
     ),
   );
   const entries = validateExceptions(data.exceptions);
-  const file = "app.asar/out/renderer/assets/IntlProvider-CVTNn1Pi.js";
-  const text = "192.168.1.100 192.168.1.100";
-  const rules = allRules({
-    checkoutRoot: "C:\\Users\\SyntheticBuilder\\checkout",
-    userName: "SyntheticBuilder",
-  });
-  assert.equal(classifyHits(scanText(file, text, rules), entries).unexplained.length, 0);
-  for (const [name, body] of [
-    [file, text + " 192.168.1.100"],
-    [file, text + " 192.168.1.101"],
-    [file + "-other", text],
-    [file, text + " C:\\Users\\SyntheticBuilder\\checkout\\private.txt"],
-    [
-      "app.asar/node_modules/ssh2/lib/protocol/crypto/build/sshcrypto.vcxproj",
-      "C:\\Users\\SyntheticBuilder\\checkout",
-    ],
-  ])
-    assert.ok(classifyHits(scanText(name, body, rules), entries).unexplained.length > 0);
+  for (const file of [
+    "app.asar/out/renderer/assets/IntlProvider-CVTNn1Pi.js",
+    "app.asar/out/renderer/assets/IntlProvider-DyoQwIj1.js",
+  ]) {
+    const text = "192.168.1.100 192.168.1.100";
+    const rules = allRules({
+      checkoutRoot: "C:\\Users\\SyntheticBuilder\\checkout",
+      userName: "SyntheticBuilder",
+    });
+    assert.equal(classifyHits(scanText(file, text, rules), entries).unexplained.length, 0);
+    for (const [name, body] of [
+      [file, text + " 192.168.1.100"],
+      [file, text + " 192.168.1.101"],
+      [file + "-other", text],
+      [file, text + " C:\\Users\\SyntheticBuilder\\checkout\\private.txt"],
+      [
+        "app.asar/node_modules/ssh2/lib/protocol/crypto/build/sshcrypto.vcxproj",
+        "C:\\Users\\SyntheticBuilder\\checkout",
+      ],
+    ])
+      assert.ok(classifyHits(scanText(name, body, rules), entries).unexplained.length > 0);
+  }
   for (const locale of ["en-US", "zh-CN"]) {
     const source = await readFile(
       path.join(root, "packages/ui/src/i18n/locales", locale + ".ts"),
