@@ -69,7 +69,7 @@ test("B1 independent timing retains report/native chronology and identity checks
       '<Execution id="3d7d171b-c4e9-4b2a-b856-9d86938e6d08"',
       '<Execution id="11111111-1111-1111-1111-111111111111"',
     ],
-  ]) {
+  ] as const) {
     assert.ok(xml.includes(from));
     assert.throws(() => parseGraphTrxReport(input(xml.replace(from, to))), /TRX/);
   }
