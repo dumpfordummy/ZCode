@@ -1,0 +1,35 @@
+{
+  "suite": "Z8.5-U2 Quick .NET checks",
+  "environment": {
+    "kind": "chromium-component-harness",
+    "windowsNativeAcceptance": "PENDING",
+    "node": "v24.14.0",
+    "platform": "win32-x64",
+    "chromium": "154.0.4258.53",
+    "real": [
+      "GraphEditor, GraphRunsDestination, GraphLibrary, GraphTemplateBindings, Context picker, checks editor, inline review, Needs-you, draft store, view store, i18n",
+      "useGraphEngineering (the real hook, including its single-flight, retained-submission and admission guards)",
+      "Graph Host code over real temp workspaces: instantiateTemplate, validateReadiness, recipe store (.zcode/config.json, digest conflicts, schema), project-setup reference validation"
+    ],
+    "fixtures": [
+      "Graph engineering service: workspace view, run list, definition revision counter, run admission, change events",
+      "Graph workflow service: only the preflight (`prepare`, built from the real reference validation and recipe store, fixture native environment). The library operations list/mutate/preview/instantiate are the REAL GraphWorkflowService over an in-memory GraphLibraryStore (same revision rule and schema validation as the file store)",
+      "run records: the UI tests' summaryRun() (unit-only captured records), not native runs",
+      "file search, platform.selectFile/saveFile and fileService.stat/readFileRange (real temp files; no OS dialogs), transport (Playwright bridge instead of RPC)"
+    ],
+    "stubs": [
+      "GraphConfiguration (composer model/mode configuration hook)",
+      "GraphDesignPanel body (Workflows editor)",
+      "useSettings"
+    ]
+  },
+  "passed": 1,
+  "failed": 0,
+  "results": [
+    {
+      "name": "simple solution: compact targets, save only, return with draft and sole checks selected",
+      "ok": true,
+      "ms": 842
+    }
+  ]
+}

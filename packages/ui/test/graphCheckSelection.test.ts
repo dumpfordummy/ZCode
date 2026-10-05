@@ -7,6 +7,7 @@ import type {
   GraphTemplateBindings,
 } from "@zcode/services";
 import { graphCheckSelection } from "../src/graph-engineering/graphCheckSelection.js";
+import { defaultGraphCheckBindings } from "../src/graph-engineering/graphCheckDefaults.js";
 import { templateBindingErrors } from "../src/graph-engineering/graphWorkflowView.js";
 
 const position = { x: 0, y: 0 };
@@ -75,6 +76,33 @@ const bind = (recipes: Record<string, string>, extra = {}): GraphTemplateBinding
 });
 const step = (steps: ReturnType<typeof graphCheckSelection>, nodeId: string) =>
   steps.find((item) => item.nodeId === nodeId)!;
+
+test("sole compatible Build and Test default only never-selected slots", () => {
+  const initial = bind({});
+  const saved = snapshot(build("b1"), testRecipe("t1"));
+  assert.deepEqual(defaultGraphCheckBindings(template, initial, saved).recipes, {
+    build: "b1",
+    test: "t1",
+  });
+  assert.deepEqual(initial.recipes, {});
+  for (const recipes of [
+    { build: "gone", test: "wrong" },
+    { build: "", test: "" },
+    { build: "b1", test: "t1" },
+  ]) {
+    const explicit = bind(recipes);
+    assert.equal(defaultGraphCheckBindings(template, explicit, saved), explicit);
+  }
+  assert.deepEqual(
+    defaultGraphCheckBindings(
+      template,
+      initial,
+      snapshot(build("b1"), build("b2"), testRecipe("t1"), testRecipe("t2")),
+    ).recipes,
+    {},
+  );
+  assert.equal(defaultGraphCheckBindings(template, initial, null), initial);
+});
 
 test("selected checks resolve by stable id to name, kind and saved state", () => {
   const steps = graphCheckSelection(

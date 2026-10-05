@@ -1,5 +1,10 @@
 # Graph Engineering
 
+Z8.5-U2 adds optional static `quick`/`quickIssues` discovery hints for a conservative
+SDK allowlist. They are read-only proposals; neither schema nor evidence authority
+changes. See `docs/graph-engineering/z8/Z8_5_U2_SPEC.md`. Unknown/imported metadata
+requires Advanced review. Existing recipe compilation, save and calibration own all writes.
+
 U4 exposes `graphRequiredRecipeKind` as the same pure declaration projection used by compatibility and editor context. It does not prove recipe availability or successful evidence. Run summaries remain read-only Renderer projections of captured/current-iteration facts, with separate execution, evidence and human decision axes. Artifact/manifest reads use the existing service and target through scoped hooks; they neither serialize execution commands in the UI nor change historical acceptance after a read error. Existing native/gate/recovery command ownership remains unchanged. See `pre-z8/U4_RUN_SPEC.md`.
 
 U3 adds pure editor projections and immutable transforms through `workflow-contract.ts`, specified in `pre-z8/U3_EDITOR_SPEC.md`. They never admit work. The canonical renderer draft is shared between Guided and Advanced; retained invalid text is only an editor buffer. Read-only reference catalog/validation use the existing `projectSetup` port, existing-only native metadata and bounded link-safe file reads. Explicit `native-aware-v1` reference bindings add frozen delivery provenance; absent policy preserves historical prompt and digest semantics. Native session and Graph execution ownership are unchanged.

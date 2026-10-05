@@ -70,7 +70,6 @@ export class GraphSequencer {
       observer.dispose();
     else this.state.observers.set(attemptId, observer);
   }
-
   async dispatch(target: GraphWorkspaceTarget, runId: string): Promise<void> {
     let run = structuredClone(await this.state.get(target, runId));
     if (isConfirmedTerminal(run) || !this.state.liveRuns.has(runId)) return;
@@ -256,7 +255,6 @@ export class GraphSequencer {
     run.updatedAt = this.state.options.now();
     await this.state.put(run);
   }
-
   async acceptFact(
     target: GraphWorkspaceTarget,
     runId: string,
@@ -348,7 +346,6 @@ export class GraphSequencer {
       }
     }
   }
-
   private finishNode(run: GraphSequentialRun, status: string, now: number): void {
     if (run.cancelRequestedAt !== undefined) {
       run.status = "Cancelled";

@@ -4,6 +4,49 @@
  * 只包含 UI 自有的标签与解释。工作流名称与描述（Host 提供）、用户输入、存储的 id、摘要与 Host 诊断保持原文。
  */
 const messages: Record<string, [string, string]> = {
+  quickTitle: ["Project checks", "项目检查"],
+  quickDetected: [".NET project detected", "已检测到 .NET 项目"],
+  quickScan: ["Detect .NET project", "检测 .NET 项目"],
+  quickHelp: [
+    "Choose what to build and which tests to run. Detection only reads project files.",
+    "选择构建目标与测试。检测只读取项目文件。",
+  ],
+  quickBuild: ["Build", "构建"],
+  quickTests: ["Tests · selection order is run order", "测试 · 按选择顺序运行"],
+  quickChoose: ["Choose a target", "选择目标"],
+  quickChooseTargets: [
+    "Select a Build target and at least one Test scope to continue.",
+    "请选择构建目标和至少一个测试范围。",
+  ],
+  quickAmbiguous: [
+    "Several targets were found. Choose the Build target and Test scopes you want.",
+    "发现多个目标。请选择构建目标和测试范围。",
+  ],
+  quickUnavailable: [
+    "Quick setup unavailable for this selection. Use Advanced to review the details.",
+    "此选择无法使用快速设置。请在高级设置中审阅详情。",
+  ],
+  quickNoRunner: [
+    "No supported VSTest scope with a known assembly path was established.",
+    "未确定具有已知程序集路径的受支持 VSTest 范围。",
+  ],
+  quickSave: ["Save checks", "保存检查"],
+  quickSaveRun: ["Save and run checks", "保存并运行检查"],
+  quickRun: ["Run saved checks", "运行已保存检查"],
+  quickAdvanced: ["Advanced / custom checks", "高级 / 自定义检查"],
+  quickCustom: [
+    "Saved configuration is retained. Edit it in Advanced, or explicitly add new checks.",
+    "保留已保存的配置。可在高级设置中编辑，或明确添加新检查。",
+  ],
+  quickAdd: ["Add .NET checks", "添加 .NET 检查"],
+  quickCancel: ["Cancel", "取消"],
+  quickDefaults: [
+    "Debug · Saving does not run checks. Running first opens command and environment review, then asks for native Tool permission.",
+    "Debug · 保存不会运行检查。运行前会打开命令与环境审阅，随后请求原生工具权限。",
+  ],
+  quickSaved: ["Saved · not run by this save", "已保存 · 此次保存未运行检查"],
+  quickSetup: ["Set up project checks", "设置项目检查"],
+  quickMapped: ["Build relationship: {name}", "关联构建：{name}"],
   // 运行详情的单层标签：次要信息一键可达，决定所需的内容始终在横幅或操作栏里。
   runTabs: ["Run details", "运行详情"],
   tabSteps: ["Steps", "步骤"],

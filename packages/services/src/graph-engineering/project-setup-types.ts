@@ -16,6 +16,9 @@ export interface GraphProjectCandidate {
   sourcePaths: string[];
   coverage: "review-required" | "unsupported";
   issues: string[];
+  /** Optional static SDK hints, never proof of execution or package readiness. */
+  quick?: { configuration: "Debug"; assemblies: Record<string, string> };
+  quickIssues?: string[];
 }
 export interface GraphProjectDiscovery {
   kind: "discovery";

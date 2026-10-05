@@ -21,7 +21,12 @@ export function inspectGraphReferences(
   return service.projectSetup({ action: "reference-catalog", target });
 }
 
-/** Discovery reads bounded metadata only; it does not save or execute project checks. */
+/**
+ * Discovery reads bounded metadata only; it does not save or execute project checks.
+ * A project candidate may expose `quick.assemblies[framework]` for literal Debug
+ * SDK outputs. Absent hints or nonempty `quickIssues` require Advanced review;
+ * callers must never fill the gap using a Test-like filename. Hints are not evidence.
+ */
 export async function discoverProjectChecks(
   service: IGraphWorkflowService,
   target: GraphWorkspaceTarget,
