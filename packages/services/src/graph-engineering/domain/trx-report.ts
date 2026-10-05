@@ -180,9 +180,9 @@ export function parseGraphTrxReport(input: GraphTrxParseInput): GraphTrxReport {
     const finishedAt = trxTime(get(result, "endTime"));
     trxWindow(startedAt, times.startedAt, times.finishedAt);
     trxWindow(finishedAt, startedAt, times.finishedAt);
-    // TRX 有 100 ns 精度、JS 时间窗为毫秒；只允许取整造成的不足 1 ms 差异。
-    if (Math.abs(trxDuration(get(result, "duration")) - (finishedAt - startedAt)) >= 1)
-      trxFail("test duration does not match result times.");
+    // B1-F1：xUnit 2.5.3 独立填写 Duration，VSTest 的起止时间可来自构造时的两次 UtcNow。
+    // 因此不能用时间戳差值校验耗时；仍校验耗时格式/范围和上方的完整时间窗。
+    trxDuration(get(result, "duration"));
     const outcome = get(result, "outcome");
     if (!["Passed", "Failed", "NotExecuted"].includes(outcome))
       trxFail("unsupported or nonterminal test outcome.");

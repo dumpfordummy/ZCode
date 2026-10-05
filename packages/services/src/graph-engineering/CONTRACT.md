@@ -1,3 +1,7 @@
+# B1-F1 TRX timing correction
+
+Duration remains syntax/range validated independently of ordered, bounded result timestamps. The xUnit/VSTest producer does not guarantee equality. Existing dotnet-vstest-trx-v1 receipt shape, correlated authority and immutable history remain unchanged; no historical reparsing or migration. See docs/graph-engineering/z8/Z8_5_B1_F1_SPEC.md.
+
 # Graph Engineering
 
 Z8.5-U2 adds optional static `quick`/`quickIssues` discovery hints for a conservative

@@ -318,8 +318,8 @@ test("every report and test time is inside the exact native command window", () 
     xml.replace(/startTime="[^"]+"/, 'startTime="2020-01-01T00:00:00Z"'),
     xml.replace(/endTime="[^"]+"/, 'endTime="2030-01-01T00:00:00Z"'),
     xml.replace(/finish="[^"]+"/, 'finish="2026-02-30T00:00:00Z"'),
-    xml.replace(/duration="[^"]+"/, 'duration="00:00:42.0000000"'),
-    xml.replace(/duration="[^"]+"/, 'duration="00:00:00.0010000"'),
+    xml.replace(/duration="[^"]+"/, 'duration="-00:00:42.0000000"'),
+    xml.replace(/duration="[^"]+"/, 'duration="10000.00:00:00"'),
     xml.replace(/finish="[^"]+"/, 'finish="2026-09-27T03:27:03"'),
   ])
     rejected(changed);
