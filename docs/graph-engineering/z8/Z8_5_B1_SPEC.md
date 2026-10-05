@@ -8,7 +8,7 @@ Candidate: 3.14.3-z8.304. No product changes are authorized.
 - B1-Q1: fresh synthetic profile, literal SDK solution/library/VSTest project; Detect and Save through Quick UI; no execution/model evidence; retain request/context and sole check bindings; reopen.
 - B1-Q2: second fresh profile; Quick Save and run, exact command/environment review, individual native permissions; genuine Build then three real xUnit assertions; correlate original TRX, accepted normalization receipt, source/build and visible Test evidence.
 - B1-Q3: change exactly one assertion; reuse saved checks through a fresh review; require genuine failed assertion and visible failing Test evidence; restore and require a fresh accepted pass.
-- B1-U1: same immutable detached package; actual run graph at 1600x900 and 1093x614; Fit, Focus, selection, history and details navigation; no execution from viewing. Leave the final workflow approval pending.
+- B1-U1: same immutable detached package; actual run graph at 1600x900 and 1093x640 (native minimum height); Fit, Focus, selection, history and details navigation; no execution from viewing. Leave the final workflow approval pending.
 
 ```mermaid
 sequenceDiagram

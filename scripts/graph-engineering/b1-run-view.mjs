@@ -16,7 +16,7 @@ export async function verifyB1RunView(isolation, window, summary, run) {
   summary.b1RunView = [];
   for (const size of [
     [1600, 900],
-    [1093, 614],
+    [1093, 640],
   ]) {
     const bw = await isolation.app.browserWindow(window);
     await bw.evaluate((w, s) => {
@@ -86,4 +86,3 @@ export async function verifyB1RunView(isolation, window, summary, run) {
     "B1-U1: native pending-approval run; wide/reduced width, Fit, Focus, details, tab viewport and history controls preserve authoritative records and model count.",
   );
 }
-
