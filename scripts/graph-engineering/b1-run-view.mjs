@@ -43,7 +43,9 @@ export async function verifyB1RunView(isolation, window, summary, run) {
       });
     });
     const canvas = await t("graph-canvas").boundingBox();
-    assert.ok(canvas.width > (size[0] === 1600 ? 1000 : 600));
+    // U1 的验收依据是占满实际详情列；全局侧栏和历史列使固定像素阈值不可靠。
+    const detail = await t("graph-runs-detail").boundingBox();
+    assert.ok(Math.abs(canvas.width - detail.width) <= 2, "graph uses available detail width");
     await shot(isolation, window, receipt, "b1-u1-fit-" + size[0], size);
     await t("graph-focus-selected").click();
     await window.waitForFunction(
@@ -69,6 +71,7 @@ export async function verifyB1RunView(isolation, window, summary, run) {
     summary.b1RunView.push({
       size,
       canvasWidth: canvas.width,
+      detailWidth: detail.width,
       fit: true,
       focus: true,
       details: true,
@@ -83,3 +86,4 @@ export async function verifyB1RunView(isolation, window, summary, run) {
     "B1-U1: native pending-approval run; wide/reduced width, Fit, Focus, details, tab viewport and history controls preserve authoritative records and model count.",
   );
 }
+
