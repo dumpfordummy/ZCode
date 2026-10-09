@@ -137,6 +137,10 @@ try {
         : `negative-${scenario}-output-validation`,
       "graph-run-summary",
     );
+  if (packaged && process.env.B1_VERIFY_RUN_VIEW === "1") {
+    const { verifyB1RunView } = await import("./b1-run-view.mjs");
+    await verifyB1RunView(isolation, window, summary, run);
+  }
   summary.uiText = await window.locator("body").innerText();
 } catch (error) {
   failure = error;

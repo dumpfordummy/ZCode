@@ -84,3 +84,75 @@ test("package hash verification passes on the manifest's own bytes and fails whe
     await rm(dist, { recursive: true, force: true });
   }
 });
+
+test("B1 controlled build preflight rejects each ssh2 metadata class without touching runtime files", async () => {
+  const { mkdir, access } = await import("node:fs/promises");
+  const { assertCleanSsh2BuildMetadata } = await import("./windows-build-preflight.mjs");
+  const owned = await mkdtemp(path.join(tmpdir(), "b1-preflight-"));
+  try {
+    const build = path.join(owned, "lib/protocol/crypto/build");
+    await mkdir(build, { recursive: true });
+    const runtime = path.join(build, "sshcrypto.node");
+    await writeFile(runtime, "synthetic runtime binary retained");
+    assert.equal((await assertCleanSsh2BuildMetadata(owned)).status, "PASS");
+    for (const name of [
+      "sshcrypto.node.recipe",
+      "Cl.items.tlog",
+      "link.secondary.1.tlog",
+      "sshcrypto.lastbuildstate",
+      "sshcrypto.vcxproj",
+      "sshcrypto.vcxproj.filters",
+    ]) {
+      const file = path.join(build, name);
+      await writeFile(file, "synthetic unwanted metadata");
+      await assert.rejects(assertCleanSsh2BuildMetadata(owned), /Unintended ssh2 build metadata/);
+      await access(file);
+      await access(runtime);
+      await rm(file);
+    }
+  } finally {
+    await rm(owned, { recursive: true, force: true });
+  }
+});
+
+test("B1 placeholder exception is exact and does not hide seeded checkout or user paths", async () => {
+  const { allRules, scanText, classifyHits, validateExceptions } =
+    await import("./package-inspect.mjs");
+  const data = JSON.parse(
+    await readFile(
+      path.join(root, "scripts/graph-engineering/package-scan-exceptions.json"),
+      "utf8",
+    ),
+  );
+  const entries = validateExceptions(data.exceptions);
+  for (const file of [
+    "app.asar/out/renderer/assets/IntlProvider-CVTNn1Pi.js",
+    "app.asar/out/renderer/assets/IntlProvider-DyoQwIj1.js",
+    "app.asar/out/renderer/assets/IntlProvider-CNp1QlUN.js",
+  ]) {
+    const text = "192.168.1.100 192.168.1.100";
+    const rules = allRules({
+      checkoutRoot: "C:\\Users\\SyntheticBuilder\\checkout",
+      userName: "SyntheticBuilder",
+    });
+    assert.equal(classifyHits(scanText(file, text, rules), entries).unexplained.length, 0);
+    for (const [name, body] of [
+      [file, text + " 192.168.1.100"],
+      [file, text + " 192.168.1.101"],
+      [file + "-other", text],
+      [file, text + " C:\\Users\\SyntheticBuilder\\checkout\\private.txt"],
+      [
+        "app.asar/node_modules/ssh2/lib/protocol/crypto/build/sshcrypto.vcxproj",
+        "C:\\Users\\SyntheticBuilder\\checkout",
+      ],
+    ])
+      assert.ok(classifyHits(scanText(name, body, rules), entries).unexplained.length > 0);
+  }
+  for (const locale of ["en-US", "zh-CN"]) {
+    const source = await readFile(
+      path.join(root, "packages/ui/src/i18n/locales", locale + ".ts"),
+      "utf8",
+    );
+    assert.match(source, /"ssh\.hostPlaceholder": "[^"]*192\.168\.1\.100"/);
+  }
+});

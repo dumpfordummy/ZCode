@@ -3,6 +3,8 @@ import { parseTrxXml, type TrxXmlElement } from "./trx-xml.js";
 import { trxAttribute, trxChild, trxChildren, trxFail, validateTrxShape } from "./trx-shape.js";
 import { trxAssemblyComparator, trxDuration, trxGuid, trxTime, trxWindow } from "./trx-values.js";
 
+import { validateTrxRunInfos } from "./trx-runinfo.js";
+
 const NAMESPACE = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010";
 const UNIT_TEST = "13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b";
 const get = (node: TrxXmlElement, key: string) => trxAttribute(node, key);
@@ -180,9 +182,9 @@ export function parseGraphTrxReport(input: GraphTrxParseInput): GraphTrxReport {
     const finishedAt = trxTime(get(result, "endTime"));
     trxWindow(startedAt, times.startedAt, times.finishedAt);
     trxWindow(finishedAt, startedAt, times.finishedAt);
-    // TRX 有 100 ns 精度、JS 时间窗为毫秒；只允许取整造成的不足 1 ms 差异。
-    if (Math.abs(trxDuration(get(result, "duration")) - (finishedAt - startedAt)) >= 1)
-      trxFail("test duration does not match result times.");
+    // B1-F1：xUnit 2.5.3 独立填写 Duration，VSTest 的起止时间可来自构造时的两次 UtcNow。
+    // 因此不能用时间戳差值校验耗时；仍校验耗时格式/范围和上方的完整时间窗。
+    trxDuration(get(result, "duration"));
     const outcome = get(result, "outcome");
     if (!["Passed", "Failed", "NotExecuted"].includes(outcome))
       trxFail("unsupported or nonterminal test outcome.");
@@ -199,12 +201,7 @@ export function parseGraphTrxReport(input: GraphTrxParseInput): GraphTrxReport {
   });
   const summary = trxChild(root, "ResultSummary")!;
   validateCounters(summary, tests);
-  for (const info of children(summary, "RunInfos", "RunInfo")) {
-    if (tests.length || get(info, "outcome") !== "Warning")
-      trxFail("run diagnostics cannot establish complete assertions.");
-    trxWindow(trxTime(get(info, "timestamp")), times.startedAt, times.finishedAt);
-    trxChild(info, "Text");
-  }
+  validateTrxRunInfos(children(summary, "RunInfos", "RunInfo"), results, definitions, times);
   tests.sort((left, right) => (left.name < right.name ? -1 : left.name > right.name ? 1 : 0));
   return { parserVersion: "dotnet-vstest-trx-v1", reportId, ...times, tests };
 }

@@ -1,0 +1,429 @@
+{
+  "schema": "zcode-b1-reviewed-receipt/1",
+  "representation": "Reviewed field allowlist from disposable synthetic profiles; this JSON is not the original TRX or raw ledger",
+  "buildSource": "c92740c5430322a08702bb4801c5abbe93671516",
+  "harness": {
+    "Q1": "592558367d060486bb7eb5e1dd4d1d51033bdc3b",
+    "Q2": "d3b9239f51b64e109d0e23e0e62d335c16a3e3c6",
+    "U1": "3e50de09f7ac0655c4490c2f8641d36133250c5e"
+  },
+  "Q1": {
+    "status": "PASS",
+    "case": {
+      "name": "B1-Q1",
+      "status": "PASS",
+      "draftBefore": {
+        "request": "B1: preserve this request and verify real arithmetic tests",
+        "instructions": "docs/Notes.md",
+        "build": [],
+        "test": []
+      },
+      "draftAfter": {
+        "request": "B1: preserve this request and verify real arithmetic tests",
+        "instructions": "docs/Notes.md",
+        "build": [
+          {
+            "id": "dotnet-build",
+            "state": "resolved",
+            "text": "Build .NET checks Build · Saved · not run Edit check"
+          }
+        ],
+        "test": [
+          {
+            "id": "dotnet-test-1",
+            "state": "resolved",
+            "text": "Tests/B1.Tests.csproj (net8.0) Test · Saved · not run Edit check"
+          }
+        ]
+      },
+      "recipes": [
+        {
+          "id": "dotnet-build",
+          "name": "Build .NET checks",
+          "executable": "dotnet",
+          "args": [
+            "build",
+            "B1.sln",
+            "--configuration",
+            "Debug",
+            "--no-restore",
+            "--no-incremental",
+            "-t:Rebuild",
+            "--disable-build-servers",
+            "-p:UseSharedCompilation=false"
+          ],
+          "cwd": ".",
+          "timeoutMs": 120000,
+          "sourcePaths": [
+            "B1.sln",
+            "Library/Arithmetic.cs",
+            "Library/B1.Library.csproj",
+            "Tests/ArithmeticTests.cs",
+            "Tests/B1.Tests.csproj",
+            "global.json"
+          ],
+          "expectedOutputs": [
+            "Tests/bin/Debug/net8.0/B1.Tests.dll"
+          ],
+          "verifier": {
+            "kind": "build",
+            "dotnet": {
+              "project": "B1.sln",
+              "configuration": "Debug",
+              "restore": "disabled"
+            }
+          }
+        },
+        {
+          "id": "dotnet-test-1",
+          "name": "Tests/B1.Tests.csproj (net8.0)",
+          "executable": "dotnet",
+          "args": [
+            "test",
+            "Tests/B1.Tests.csproj",
+            "--configuration",
+            "Debug",
+            "--framework",
+            "net8.0",
+            "--no-build",
+            "--no-restore",
+            "--logger",
+            "trx;LogFileName=results.trx",
+            "--results-directory",
+            ".zcode/graph-results/{operationId}"
+          ],
+          "cwd": ".",
+          "timeoutMs": 120000,
+          "sourcePaths": [
+            "B1.sln",
+            "Library/Arithmetic.cs",
+            "Library/B1.Library.csproj",
+            "Tests/ArithmeticTests.cs",
+            "Tests/B1.Tests.csproj",
+            "global.json"
+          ],
+          "expectedOutputs": [],
+          "verifier": {
+            "kind": "test",
+            "reportPath": ".zcode/graph-results/{operationId}/results.trx",
+            "minimumTests": 1,
+            "requiredTests": [],
+            "buildNodeId": "build",
+            "format": "dotnet-vstest-trx-v1",
+            "target": {
+              "project": "Tests/B1.Tests.csproj",
+              "configuration": "Debug",
+              "framework": "net8.0",
+              "assembly": "Tests/bin/Debug/net8.0/B1.Tests.dll"
+            }
+          }
+        }
+      ]
+    },
+    "models": 0,
+    "beforeSave": {
+      "runs": 0,
+      "models": 0,
+      "nativeLedger": []
+    },
+    "afterSave": {
+      "runs": 0,
+      "models": 0,
+      "nativeLedger": []
+    },
+    "afterReopen": {
+      "runs": 0,
+      "models": 0,
+      "nativeLedger": []
+    }
+  },
+  "Q2": {
+    "status": "FAIL",
+    "runId": "9ab2f332-a363-4d25-9885-fbf2ecd28790",
+    "runStatus": "Failed",
+    "models": 0,
+    "bootstrap": {
+      "sdk": "8.0.425",
+      "git": "git version 2.56.0.windows.1",
+      "restore": {
+        "exitCode": 0,
+        "source": "existing local public NuGet package cache",
+        "network": false
+      }
+    },
+    "attempts": [
+      {
+        "nodeId": "check-1",
+        "operationId": "feeead71-75a2-48da-839a-f7e1866a2b5b",
+        "status": "Completed",
+        "exitCode": 0,
+        "startedAt": 1791204211361,
+        "completedAt": 1791204214237,
+        "sourceDigest": "e59e58d2ffd195b88c4aea49c5d2a9ad38ef316434a0bbbe3027b9136b8717f5",
+        "outputDigest": "6001d8286ea35b40042a7f9e76f6b5844603b9b0f77505bbab9b6ee0515faee6",
+        "acceptancePassed": true,
+        "reportParsed": false
+      },
+      {
+        "nodeId": "check-2",
+        "operationId": "8930abe1-29e4-46b9-9f22-8499e97b1508",
+        "status": "Failed",
+        "exitCode": 0,
+        "startedAt": 1791204215102,
+        "completedAt": 1791204216095,
+        "sourceDigest": "e59e58d2ffd195b88c4aea49c5d2a9ad38ef316434a0bbbe3027b9136b8717f5",
+        "buildDigest": "6001d8286ea35b40042a7f9e76f6b5844603b9b0f77505bbab9b6ee0515faee6",
+        "acceptancePassed": false,
+        "reportParsed": false
+      }
+    ],
+    "genuineTrx": {
+      "sha256": "535dd4c20bea3ee2b7bc09705370200c9a7e4879edb4ba7244e38eb22ccccc8b",
+      "hashRepresentation": "Original unmodified local native TRX bytes; file not published",
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "testNames": [
+        "B1.Tests.ArithmeticTests.AddNegative",
+        "B1.Tests.ArithmeticTests.AddPositive",
+        "B1.Tests.ArithmeticTests.AddZero"
+      ],
+      "durationConflict": {
+        "test": "AddNegative",
+        "durationMilliseconds": 3.5573,
+        "start": "2026-10-05T20:43:35.9949992+08:00",
+        "end": "2026-10-05T20:43:35.9950067+08:00"
+      }
+    },
+    "rejection": "TRX report: test duration does not match result times.",
+    "acceptedNormalizationReceipt": false,
+    "originalByteParserReplay": "same rejection on two read-only replays"
+  },
+  "Q3": {
+    "status": "BLOCKED",
+    "reason": "Q2 supported-project normalization defect; no assertion mutation or recovery performed"
+  },
+  "U1": {
+    "status": "PASS",
+    "runId": "ba0eb232-04e5-483c-af30-337d1730290d",
+    "finalStatus": "WaitingForApproval",
+    "proof": {
+      "runStatus": "WaitingForApproval",
+      "sourceEdit": {
+        "file": "zz-demo.txt",
+        "content": "after"
+      },
+      "build": {
+        "operationId": "1f8bcc37-8195-49f8-ae5b-9a0cdffd56cc",
+        "status": "Completed",
+        "exitCode": 0,
+        "sourceDigest": "faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2",
+        "outputDigest": "e65a4d792ae24e79b872dfcdcd6744dcf877637c00321b9e6904253bf1f3aea9"
+      },
+      "test": {
+        "operationId": "29800bf8-f2d2-4062-8406-97c3d4d04d31",
+        "status": "Completed",
+        "exitCode": 0,
+        "sourceDigest": "faee973b2cc33732ed0404cb2e10507d1d02dd5285828b3dcdc4ffa96e1804d2",
+        "buildDigest": "e65a4d792ae24e79b872dfcdcd6744dcf877637c00321b9e6904253bf1f3aea9",
+        "testCount": 1,
+        "acceptancePassed": true,
+        "passingAssertions": [
+          "zz-demo contains after"
+        ]
+      },
+      "matchingEvidence": {
+        "testSourceEqualsBuildSource": true,
+        "testBuildEqualsBuildOutput": true,
+        "reportMatchesOperation": true,
+        "verificationArtifactId": "0d0352b7-fe27-4b22-95eb-160f76439677",
+        "reportArtifactId": "0e99327d-ba81-4535-9965-5cb4c6b79bd6"
+      },
+      "reviewer": {
+        "status": "Completed",
+        "outputValidation": "valid",
+        "outcome": "pass",
+        "evidenceReferences": [
+          "0d0352b7-fe27-4b22-95eb-160f76439677"
+        ],
+        "boundArtifactIds": [
+          "0d0352b7-fe27-4b22-95eb-160f76439677"
+        ]
+      },
+      "finalGate": {
+        "status": "WaitingForApproval",
+        "decisionRecorded": false
+      },
+      "nativeAgentInputs": 3,
+      "nativeToolOperations": 2,
+      "modelRequests": 9
+    },
+    "view": [
+      {
+        "size": [
+          1600,
+          900
+        ],
+        "canvasWidth": 999.203125,
+        "detailWidth": 999.203125,
+        "fit": true,
+        "focus": true,
+        "details": true,
+        "tabViewportRetained": true,
+        "historyCollapse": true
+      },
+      {
+        "size": [
+          1093,
+          640
+        ],
+        "canvasWidth": 772,
+        "detailWidth": 772,
+        "fit": true,
+        "focus": true,
+        "details": true,
+        "tabViewportRetained": true,
+        "historyCollapse": true
+      }
+    ],
+    "assertions": [
+      "Uninstrumented packaged ZCode Graph (isPackaged) uses its own home and Electron profile; test-environment overrides are explicit and this is not production network-egress acceptance",
+      "Built-in generic v2; genuine native Analyze/Edit/Build/Test; ignored untracked source; accepted current machine report; strict reviewer decision/validation; no automatic human approval.",
+      "B1-U1: native pending-approval run; wide/reduced width, Fit, Focus, details, tab viewport and history controls preserve authoritative records and model count."
+    ]
+  },
+  "Chat": {
+    "status": "PASS",
+    "scope": "ordinary chat with loopback fixture and native read/edit/test; no live paid model"
+  },
+  "package": {
+    "hashesBefore": {
+      "checkedAt": "2026-10-05T12:38:05.802Z",
+      "version": "3.14.3-z8.304",
+      "manifestSha256": "2ef66ab8b557cffb95aee9cb1d5a1c1440d90bff9fabf09f8b62dccea9d06e3c",
+      "installer": {
+        "path": "ZCode Graph-3.14.3-z8.304-win-x64.exe",
+        "sha256": "3eed32c399364f3d26e780bdd3b4a0dc95b6ddbcf9afac9904f9c544a0f6500b"
+      },
+      "ok": true,
+      "mismatches": [],
+      "componentsChecked": 8,
+      "unpackedFilesChecked": 87,
+      "observed": {
+        "ZCode Graph.exe": {
+          "sha256": "c19c0111eead9256e85aa42410e5427b3577e5873da1e1afd48c60b5718a8379"
+        },
+        "resources/app.asar": {
+          "sha256": "ee213c31003001cba756b489f71e96a5bd99fd10c2a086cea83fdbe7db87baec"
+        },
+        "resources/graph-build-identity.json": {
+          "sha256": "4a4c3a9ba52c315bcb3b3768b7411c79b2f79dbe2f90335b9b13284cb87d506d"
+        },
+        "resources/THIRD-PARTY-NOTICES.md": {
+          "sha256": "874bf7c10bdcadd0df0b50fc782f39f077669c6e41bbdbccd868409cd714dec3"
+        },
+        "resources/config/default.json": {
+          "sha256": "71e4ed4ab9fab16d6643f674272bef3557d7a0fa4133e2dd08d116117af6d723"
+        },
+        "resources/config/provider/zcode-builtin.json": {
+          "sha256": "c239da43e00e3e212ca874fe48a13ebbb3896ebc59ebeb28e003bd29856e38f9"
+        },
+        "resources/glm/": {
+          "treeDigest": "dfdb6e079b72deede8c89a2809d47ac3c0f4e673dccc162e633322fa6f74adbb",
+          "files": 32
+        },
+        "resources/tools/": {
+          "treeDigest": "64defa546d9426ecf5d0be9d1ded4796e87dade03fb3076900cd115bf460ba49",
+          "files": 8
+        }
+      }
+    },
+    "hashesAfter": {
+      "checkedAt": "2026-10-05T12:53:29.27Z",
+      "version": "3.14.3-z8.304",
+      "manifestSha256": "2ef66ab8b557cffb95aee9cb1d5a1c1440d90bff9fabf09f8b62dccea9d06e3c",
+      "installer": {
+        "path": "ZCode Graph-3.14.3-z8.304-win-x64.exe",
+        "sha256": "3eed32c399364f3d26e780bdd3b4a0dc95b6ddbcf9afac9904f9c544a0f6500b"
+      },
+      "ok": true,
+      "mismatches": [],
+      "componentsChecked": 8,
+      "unpackedFilesChecked": 87,
+      "observed": {
+        "ZCode Graph.exe": {
+          "sha256": "c19c0111eead9256e85aa42410e5427b3577e5873da1e1afd48c60b5718a8379"
+        },
+        "resources/app.asar": {
+          "sha256": "ee213c31003001cba756b489f71e96a5bd99fd10c2a086cea83fdbe7db87baec"
+        },
+        "resources/graph-build-identity.json": {
+          "sha256": "4a4c3a9ba52c315bcb3b3768b7411c79b2f79dbe2f90335b9b13284cb87d506d"
+        },
+        "resources/THIRD-PARTY-NOTICES.md": {
+          "sha256": "874bf7c10bdcadd0df0b50fc782f39f077669c6e41bbdbccd868409cd714dec3"
+        },
+        "resources/config/default.json": {
+          "sha256": "71e4ed4ab9fab16d6643f674272bef3557d7a0fa4133e2dd08d116117af6d723"
+        },
+        "resources/config/provider/zcode-builtin.json": {
+          "sha256": "c239da43e00e3e212ca874fe48a13ebbb3896ebc59ebeb28e003bd29856e38f9"
+        },
+        "resources/glm/": {
+          "treeDigest": "dfdb6e079b72deede8c89a2809d47ac3c0f4e673dccc162e633322fa6f74adbb",
+          "files": 32
+        },
+        "resources/tools/": {
+          "treeDigest": "64defa546d9426ecf5d0be9d1ded4796e87dade03fb3076900cd115bf460ba49",
+          "files": 8
+        }
+      }
+    },
+    "integrity": {
+      "directory": "<win-unpacked>",
+      "checkedAt": "2026-10-05T12:53:29.492Z",
+      "records": [
+        {
+          "file": "resources\\app.asar",
+          "recorded": "fc5de03e64f64f639ba1cbf91d130e61d5f3b122dbc0f0ce09665056990d2e53",
+          "actual": "fc5de03e64f64f639ba1cbf91d130e61d5f3b122dbc0f0ce09665056990d2e53"
+        }
+      ],
+      "fuses": {
+        "RunAsNode": "1",
+        "EnableCookieEncryption": "0",
+        "EnableNodeOptionsEnvironmentVariable": "1",
+        "EnableNodeCliInspectArguments": "1",
+        "EnableEmbeddedAsarIntegrityValidation": "1",
+        "OnlyLoadAppFromAsar": "0",
+        "LoadBrowserProcessSpecificV8Snapshot": "0",
+        "GrantFileProtocolExtraPrivileges": "1",
+        "fuse8": "1"
+      },
+      "fuseWireVersion": 1,
+      "recordMatchesHeader": true,
+      "integrityFuseOn": true,
+      "runAsNodeState": "1",
+      "status": "PASS",
+      "components": {
+        "ZCode Graph.exe": "c19c0111eead9256e85aa42410e5427b3577e5873da1e1afd48c60b5718a8379",
+        "resources/app.asar": "ee213c31003001cba756b489f71e96a5bd99fd10c2a086cea83fdbe7db87baec",
+        "resources/glm/zcode.cjs": "875a139d88a940d55731bca799acb8deaf9b433f454058cd16ecdc570af3967b",
+        "resources/graph-build-identity.json": "4a4c3a9ba52c315bcb3b3768b7411c79b2f79dbe2f90335b9b13284cb87d506d"
+      }
+    },
+    "detachedAfter": {
+      "status": "PASS",
+      "files": 87,
+      "treeDigest": "c88767cea2434e87e665f0bb1cd5be069f8b418c4fbfcfd0a6c0e8b0a1e1bc84"
+    },
+    "contentScan": {
+      "status": "FAIL",
+      "pathHits": 124,
+      "pathFiles": 6,
+      "benignPlaceholderHits": 2,
+      "exceptionsChanged": false
+    }
+  }
+}

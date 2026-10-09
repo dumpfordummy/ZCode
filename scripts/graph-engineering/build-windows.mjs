@@ -22,6 +22,7 @@ import {
   resolvePackagePolicies,
 } from "./release-manifest.mjs";
 import { finalizeRelease } from "./finalize-release.mjs";
+import { checkWindowsBuildDependencies } from "./windows-build-preflight.mjs";
 
 if (process.platform !== "win32" || process.arch !== "x64") {
   throw new Error("This release entry requires Windows x64.");
@@ -66,6 +67,7 @@ async function pnpmVersion() {
 }
 
 // 先记录源码身份与工具链：脏工作区仍可构建，但会被如实写入内嵌身份与清单。
+await checkWindowsBuildDependencies(root);
 const reference = await readUpstreamReference(root);
 const source = await collectSourceIdentity(root, reference);
 if (source.dirty)
@@ -77,6 +79,7 @@ await run(["--filter", "@zcode/desktop", "prepare:runtime-assets"]);
 await run(["--filter", "@zcode/desktop", "build:no-runtime-assets"]);
 
 // 内嵌构建身份在打包前写入（作为 extraResource）；它不含安装包自身哈希或构建机路径。
+await checkWindowsBuildDependencies(root);
 const policies = await resolvePackagePolicies(root);
 const protocol = await protocolVersions(root);
 const rootPackage = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
