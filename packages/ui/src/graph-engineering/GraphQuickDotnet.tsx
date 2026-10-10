@@ -246,6 +246,12 @@ export function GraphQuickDotnet({
                       ? "quickDetected"
                       : "quickNoRunner",
                 )}
+                {discovery.status !== "complete" && discovery.issues[0] ? (
+                  <span className="mt-1 block break-words text-ui-sm font-normal">
+                    {discovery.issues[0].slice(0, 240)}
+                    {discovery.issues[0].length > 240 ? "…" : ""}
+                  </span>
+                ) : null}
               </p>
               {prepared?.prepared ? (
                 <p className="text-ui-sm">
