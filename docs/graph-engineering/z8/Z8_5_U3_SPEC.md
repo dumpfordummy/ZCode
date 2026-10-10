@@ -1,6 +1,6 @@
 # Z8.5-U3: bounded large .NET repositories
 
-Status: implementation specification; acceptance is pending measurement and proof.
+Status: implemented contract; measured acceptance and limitations are in [the report](Z8_5_U3_REPORT.md).
 Base: `90eebe6d34ab8dea2ffce14db590aff7b7573f39`.
 Authorization read through `END OF Z8.5-U3 AUTHORIZATION`.
 

@@ -164,7 +164,8 @@ function validateQuickSolution(item: GraphProjectCandidate, content: string) {
     for (const match of content.matchAll(
       /^Project\("([^"]+)"\)\s*=\s*"[^"]*",\s*"([^"]+)",\s*"([^"]+)"/gm,
     )) {
-      if (match[1]!.toLowerCase() === "{66a26720-8fb5-11d2-aa7e-00c04f688dde}") continue;
+      // 解决方案文件夹只组织项目；不能把标准文件夹误报为不支持的可构建项目。
+      if (match[1]!.toLowerCase() === "{2150e333-8fdc-42a3-9474-1a3956d46de8}") continue;
       if (!/\.csproj$/i.test(match[2]!))
         throw Error("Solution contains a project shape outside the C# contract.");
       count++;
