@@ -17,6 +17,10 @@ const discovery: GraphProjectDiscovery = {
   issues: [],
   excluded: [],
   limits: { files: 2048, depth: 8, metadataBytes: 524288, sourceFiles: 32 },
+  prepared: {
+    scope: { version: 1, project: "Demo.sln", sourceCount: 2, membershipDigest: "a".repeat(64) },
+    sourcePaths: ["Demo.sln", "Tests.csproj"],
+  },
   candidates: [
     {
       path: "Demo.sln",

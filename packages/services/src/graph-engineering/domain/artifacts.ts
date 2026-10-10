@@ -12,9 +12,20 @@ const assertKey = (key: string): void => {
 };
 
 /** JSON.parse remains the decoder; this bounded lexical pass rejects silent duplicate-key loss. */
-export function parseBoundedGraphJson(text: string): GraphJsonValue {
-  if (typeof text !== "string" || new TextEncoder().encode(text).length > GRAPH_ARTIFACT_BYTES)
-    throw new Error("JSON exceeds the 256 KiB byte limit.");
+export function parseBoundedGraphJson(
+  text: string,
+  limits = { bytes: GRAPH_ARTIFACT_BYTES, members: MAX_MEMBERS },
+): GraphJsonValue {
+  if (
+    typeof text !== "string" ||
+    text.length > limits.bytes ||
+    new TextEncoder().encode(text).length > limits.bytes
+  )
+    throw new Error(
+      limits.bytes === GRAPH_ARTIFACT_BYTES
+        ? "JSON exceeds the 256 KiB byte limit."
+        : `JSON exceeds the ${limits.bytes}-byte limit.`,
+    );
   let offset = 0,
     members = 0;
   const whitespace = () => {
@@ -31,7 +42,8 @@ export function parseBoundedGraphJson(text: string): GraphJsonValue {
   };
   const item = (depth: number): void => {
     if (depth > MAX_DEPTH) throw new Error("JSON exceeds the 16-level depth limit.");
-    if (++members > MAX_MEMBERS) throw new Error("JSON exceeds the 4096-member limit.");
+    if (++members > limits.members)
+      throw new Error(`JSON exceeds the ${limits.members}-member limit.`);
     whitespace();
     const char = text[offset];
     if (char === '"') {

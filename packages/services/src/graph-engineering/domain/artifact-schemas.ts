@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { GraphRecipe } from "../artifact-types.js";
 import { GRAPH_ARTIFACT_BYTES } from "./artifacts.js";
 import { dotnetRecipeIssues } from "./dotnet-command.js";
+import { PROJECT_SCOPE_BUDGET } from "./project-budgets.js";
 
 const hasControl = (value: string) => Array.from(value).some((char) => char.charCodeAt(0) < 32);
 
@@ -51,6 +52,21 @@ const paths = z
   .array(relativePath)
   .max(32)
   .refine((value) => new Set(value).size === value.length, "Duplicate declared paths.");
+const sourcePaths = z
+  .array(relativePath)
+  .max(PROJECT_SCOPE_BUDGET.sourceFiles)
+  .refine(
+    (value) => new Set(value.map((path) => path.toLowerCase())).size === value.length,
+    "Duplicate/case-aliased source paths.",
+  );
+const sourceScope = z
+  .object({
+    version: z.literal(1),
+    project: relativePath,
+    membershipDigest: z.string().regex(/^[a-f0-9]{64}$/),
+    sourceCount: z.number().int().min(1).max(PROJECT_SCOPE_BUDGET.sourceFiles),
+  })
+  .strict();
 const dotnetScope = {
   project: relativePath,
   configuration: z.string().regex(/^[A-Za-z0-9_.-]{1,80}$/),
@@ -133,7 +149,8 @@ export const graphRecipeSchema = z
       .max(64),
     cwd,
     timeoutMs: z.number().int().min(100).max(600000),
-    sourcePaths: paths,
+    sourcePaths,
+    sourceScope: sourceScope.optional(),
     expectedOutputs: paths,
     redactEnvironmentVariables: z
       .array(z.string().regex(/^[A-Za-z_][A-Za-z0-9_]{0,127}$/))
@@ -161,6 +178,16 @@ export const graphRecipeSchema = z
   .superRefine((value, ctx) => {
     for (const message of dotnetRecipeIssues(value)) ctx.addIssue({ code: "custom", message });
     if (
+      value.sourceScope &&
+      (value.verifier.kind === "command" ||
+        (value.verifier.kind === "build" &&
+          value.verifier.dotnet?.project !== value.sourceScope.project))
+    )
+      ctx.addIssue({
+        code: "custom",
+        message: "Versioned selected scope must match the supported .NET Build target.",
+      });
+    if (
       value.expectedOutputs.some((path) => ["command", "test"].includes(path)) ||
       (value.verifier.kind === "test" &&
         (["command", "test"].includes(value.verifier.reportPath) ||
@@ -173,7 +200,7 @@ export const graphRecipeSchema = z
       });
     if (
       value.verifier.kind !== "command" &&
-      (!value.sourcePaths.length ||
+      ((!value.sourcePaths.length && !value.sourceScope) ||
         (value.verifier.kind === "build" && !value.expectedOutputs.length))
     )
       ctx.addIssue({

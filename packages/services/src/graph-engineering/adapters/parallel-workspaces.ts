@@ -125,7 +125,12 @@ export function createGraphParallelPort(options: {
         throw new Error(
           "Select an existing Build recipe and independent Test recipe tied to node build.",
         );
-      for (const recipe of [build, test]) await recipes.fingerprint(target, recipe.sourcePaths);
+      for (const recipe of [build, test])
+        await recipes.fingerprint(
+          target,
+          recipe.sourcePaths,
+          recipe.sourceScope ? [recipe.sourceScope] : undefined,
+        );
       for (const branch of selected)
         for (const path of branch.files) {
           if (!base.trackedPaths.includes(path) && !branch.additions.includes(path))

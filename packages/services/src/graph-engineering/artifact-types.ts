@@ -107,6 +107,7 @@ export interface GraphRecipe {
   cwd: string;
   timeoutMs: number;
   sourcePaths: string[];
+  sourceScope?: import("./domain/project-budgets.js").GraphSourceScope;
   expectedOutputs: string[];
   redactEnvironmentVariables?: string[];
   verifier: GraphRecipeVerifier;
@@ -130,6 +131,10 @@ export interface GraphRecipeStore {
     recipes: GraphRecipe[],
     expectedDigest: string,
   ): Promise<GraphRecipeSnapshot>;
-  fingerprint(target: GraphWorkspaceTarget, paths: string[]): Promise<GraphFileFingerprint>;
+  fingerprint(
+    target: GraphWorkspaceTarget,
+    paths: string[],
+    scopes?: import("./domain/project-budgets.js").GraphSourceScope[],
+  ): Promise<GraphFileFingerprint>;
   observeFiles(target: GraphWorkspaceTarget, paths: string[]): Promise<GraphFileObservation[]>;
 }

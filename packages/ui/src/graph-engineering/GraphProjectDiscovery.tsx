@@ -1,9 +1,10 @@
 import { useState } from "react";
-import type { GraphProjectCandidate } from "@zcode/services";
+import type { GraphProjectCandidate, GraphDotnetPreset } from "@zcode/services";
 import type { useGraphProjectSetup } from "@/hooks/useGraphProjectSetup.js";
 import { Button } from "@/components/ui/button.js";
 import { GraphSelect } from "./GraphSelect.js";
 import { useGraphSetupText } from "./GraphSetupFields.js";
+import { useGraphM4Text } from "./GraphM4Text.js";
 
 export function GraphProjectDiscovery({
   setup,
@@ -15,10 +16,12 @@ export function GraphProjectDiscovery({
   setup: ReturnType<typeof useGraphProjectSetup>;
   disabled: boolean;
   testLimitReached: boolean;
-  onBuild(candidate: GraphProjectCandidate): void;
+  onBuild(candidate: GraphProjectCandidate, scope?: GraphDotnetPreset["sourceScope"]): void;
   onTest(candidate: GraphProjectCandidate, framework: string): void;
 }) {
   const t = useGraphSetupText();
+  const m = useGraphM4Text();
+  const [page, setPage] = useState(0);
   const [requestId, setRequestId] = useState("");
   const [frameworks, setFrameworks] = useState<Record<string, string>>({});
   const state = setup.state("scan", requestId);
@@ -39,6 +42,7 @@ export function GraphProjectDiscovery({
           onClick={() => {
             const id = crypto.randomUUID();
             setRequestId(id);
+            setPage(0);
             void setup.invoke({ action: "scan", requestId: id }, id);
           }}
         >
@@ -67,15 +71,18 @@ export function GraphProjectDiscovery({
                     : "notScanned",
             )}
       </p>
-      {result?.issues.map((issue, index) => (
-        <p key={index} className="text-ui-sm text-warning">
-          {issue}
-        </p>
-      ))}
+      {result?.issues.length ? (
+        <details className="text-ui-sm text-warning">
+          <summary>{result.issues[0]}</summary>
+          {result.issues.slice(1, 21).map((issue) => (
+            <p key={issue}>{issue}</p>
+          ))}
+        </details>
+      ) : null}
       {result && !result.candidates.length ? (
         <p className="text-ui-sm">{t("noCandidates")}</p>
       ) : null}
-      {result?.candidates.map((candidate) => (
+      {result?.candidates.slice(page * 20, (page + 1) * 20).map((candidate) => (
         <article
           key={candidate.path}
           className="space-y-2 rounded-lg border border-border p-3 text-ui-sm"
@@ -101,10 +108,18 @@ export function GraphProjectDiscovery({
               size="sm"
               variant="outline"
               data-testid="graph-project-use-build"
-              disabled={
-                disabled || result.status !== "complete" || candidate.coverage === "unsupported"
-              }
-              onClick={() => onBuild(candidate)}
+              disabled={disabled || candidate.coverage === "unsupported"}
+              onClick={async () => {
+                const id = crypto.randomUUID();
+                setRequestId(id);
+                setPage(0);
+                const prepared = await setup.invoke(
+                  { action: "scan", requestId: id, selectedProject: candidate.path },
+                  id,
+                );
+                if (prepared?.kind === "discovery" && prepared.prepared)
+                  onBuild(candidate, prepared.prepared.scope);
+              }}
             >
               {t("useBuild")}
             </Button>
@@ -144,6 +159,26 @@ export function GraphProjectDiscovery({
           {testLimitReached ? <p className="text-warning">{t("presetLimit")}</p> : null}
         </article>
       ))}
+      {result && result.candidates.length > 20 ? (
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={!page}
+            onClick={() => setPage((value) => value - 1)}
+          >
+            {m("quickPrevious")}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={(page + 1) * 20 >= result.candidates.length}
+            onClick={() => setPage((value) => value + 1)}
+          >
+            {m("quickNext")}
+          </Button>
+        </div>
+      ) : null}
       {result ? (
         <details className="text-ui-sm">
           <summary>{t("metadata")}</summary>

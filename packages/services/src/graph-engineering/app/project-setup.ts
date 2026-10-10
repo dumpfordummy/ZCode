@@ -9,6 +9,11 @@ import { localTarget } from "../domain/definition.js";
 import { validateGraphRecipes } from "../domain/artifact-schemas.js";
 import { compileDotnetRecipes } from "../domain/dotnet-recipes.js";
 import { compileChecksDefinition } from "../domain/project-checks.js";
+import {
+  RECIPE_CONFIGURATION_BYTES,
+  RECIPE_CONFIGURATION_MEMBERS,
+} from "../domain/project-budgets.js";
+import { parseBoundedGraphJson } from "../domain/artifacts.js";
 
 export const projectEnvironmentUnknowns = [
   "Executable lookup does not establish SDK version or installed package readiness.",
@@ -34,20 +39,25 @@ export async function projectSetup(
     try {
       if (
         input.action === "validate" &&
-        (typeof input.json !== "string" || input.json.length > 256000)
+        (typeof input.json !== "string" || input.json.length > RECIPE_CONFIGURATION_BYTES)
       )
-        throw new Error("Recipe JSON exceeds its 256 KB limit.");
+        throw new Error("Recipe JSON exceeds its 32 MiB limit.");
       result.recipes =
         input.action === "validate"
-          ? validateGraphRecipes(JSON.parse(input.json))
+          ? validateGraphRecipes(
+              parseBoundedGraphJson(input.json, {
+                bytes: RECIPE_CONFIGURATION_BYTES,
+                members: RECIPE_CONFIGURATION_MEMBERS,
+              }),
+            )
           : compileDotnetRecipes(input.preset);
     } catch (error) {
       const details = (error as { issues?: Array<{ path: PropertyKey[]; message: string }> })
         .issues;
       result.diagnostics = details
-        ? details.map((issue) => ({
+        ? details.slice(0, 128).map((issue) => ({
             path: issue.path.map(String).join("."),
-            message: issue.message,
+            message: issue.message.slice(0, 1000),
           }))
         : [
             {
@@ -78,10 +88,18 @@ export async function projectSetup(
     };
   }
   if (input.action === "validate-reference") return port.validateReference(target, input.path);
-  if (input.action === "scan" || input.action === "cancel-scan") {
+  if (
+    input.action === "scan" ||
+    input.action === "cancel-scan" ||
+    input.action === "scan-progress"
+  ) {
     if (!input.requestId?.trim() || input.requestId.length > 200)
       throw new Error("A bounded scan request ID is required.");
-    if (input.action === "scan") return port.scan(target, input.requestId);
+    if (input.action === "scan-progress") {
+      if (!port.progress) throw Error("Scan progress is unavailable.");
+      return port.progress(target, input.requestId);
+    }
+    if (input.action === "scan") return port.scan(target, input.requestId, input);
     port.cancelScan(target, input.requestId);
     return { kind: "scan-cancelled", requestId: input.requestId };
   }

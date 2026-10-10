@@ -63,6 +63,21 @@ export function GraphSetupList({
   max?: number;
 }) {
   const t = useGraphSetupText();
+  if (name === "sourcePaths" && values.length > 100)
+    return (
+      <label className="block space-y-1 text-ui-sm">
+        <span>
+          {t(name)} ({values.length})
+        </span>
+        <Textarea
+          rows={8}
+          disabled={disabled}
+          data-testid={testId}
+          value={values.join("\n")}
+          onChange={(event) => onChange(event.target.value.split("\n"))}
+        />
+      </label>
+    );
   return (
     <fieldset className="space-y-2 text-ui-sm" disabled={disabled}>
       <legend>{t(name)}</legend>

@@ -4,6 +4,7 @@ import type { GraphRecipe } from "./artifact-types.js";
 import type { GraphSequentialDefinition } from "./contract.js";
 import type { GraphDotnetTestTarget } from "./dotnet-types.js";
 import type { GraphChecksReceipt, GraphChecksSelection } from "./checks-types.js";
+import type { GraphSourceScope } from "./domain/project-budgets.js";
 export type * from "./checks-types.js";
 
 export interface GraphProjectCandidate {
@@ -30,6 +31,16 @@ export interface GraphProjectDiscovery {
   issues: string[];
   excluded: string[];
   limits: { files: number; depth: number; metadataBytes: number; sourceFiles: number };
+  scanRoot?: string;
+  prepared?: { scope: GraphSourceScope; sourcePaths: string[] };
+}
+export interface GraphProjectProgress {
+  kind: "scan-progress";
+  requestId: string;
+  stage: "inventory" | "metadata" | "sources" | "complete" | "cancelled" | "limited";
+  entries: number;
+  metadata: number;
+  bytes: number;
 }
 export interface GraphRecipeDiagnostic {
   path: string;
@@ -51,6 +62,7 @@ export interface GraphDotnetPreset {
   framework?: string;
   runtime?: string;
   sourcePaths: string[];
+  sourceScope?: GraphSourceScope;
   expectedOutputs: string[];
   reviewedManifest: boolean;
   tests: Array<
@@ -82,7 +94,8 @@ export interface GraphReferenceValidation {
 export type GraphProjectSetupRequest = { target: GraphWorkspaceTarget } & (
   | { action: "reference-catalog" }
   | { action: "validate-reference"; path: string }
-  | { action: "scan"; requestId: string }
+  | { action: "scan"; requestId: string; scanRoot?: string; selectedProject?: string }
+  | { action: "scan-progress"; requestId: string }
   | { action: "cancel-scan"; requestId: string }
   | { action: "validate"; json: string }
   | { action: "dotnet-preset"; preset: GraphDotnetPreset }
@@ -98,6 +111,7 @@ export type GraphProjectSetupResult =
   | GraphReferenceCatalog
   | GraphReferenceValidation
   | GraphProjectDiscovery
+  | GraphProjectProgress
   | { kind: "scan-cancelled"; requestId: string }
   | GraphRecipeValidation
   | { kind: "availability"; environment: ZCodeExecutionEnvironmentPreview; unknowns: string[] }

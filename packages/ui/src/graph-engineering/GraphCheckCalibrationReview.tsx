@@ -66,6 +66,7 @@ export function GraphCheckCalibrationReview({
                 {JSON.stringify(
                   {
                     sourcePaths: recipe.sourcePaths,
+                    sourceScope: recipe.sourceScope,
                     expectedOutputs: recipe.expectedOutputs,
                     verifier: recipe.verifier,
                   },
@@ -98,7 +99,8 @@ export function GraphCheckCalibrationReview({
             {JSON.stringify(preview, null, 2)}
           </pre>
         </details>
-        {!current || error ? (
+        {/* U3：校验期间的临时禁用不是内容漂移，完成后才展示过期提示。 */}
+        {(!current && !pending) || error ? (
           <p
             role="alert"
             className="text-ui-sm text-destructive"

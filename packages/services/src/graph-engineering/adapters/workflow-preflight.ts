@@ -162,7 +162,11 @@ export function createWorkflowPreflight(options: {
           const compatibility = graphRecipeCompatibility(definition, node.id, savedRecipe);
           if (!compatibility.compatible) throw new Error(compatibility.issues.join("\n"));
           const recipe = effectiveGraphRecipe(definition, node.id, savedRecipe);
-          await recipes.fingerprint(target, recipe.sourcePaths);
+          await recipes.fingerprint(
+            target,
+            recipe.sourcePaths,
+            recipe.sourceScope ? [recipe.sourceScope] : undefined,
+          );
           result.recipes.push({
             nodeId: node.id,
             id: recipe.id,
@@ -174,7 +178,16 @@ export function createWorkflowPreflight(options: {
       }
       const region = definition.routing?.region;
       if (region) {
-        await recipes.fingerprint(target, region.sourcePaths);
+        const scopes = definition.nodes
+          .filter((node) => node.type === "tool" && region.bodyNodeIds.includes(node.id))
+          .flatMap((node) => {
+            const recipe =
+              node.type === "tool"
+                ? configured.recipes.find((item) => item.id === node.recipeId)
+                : undefined;
+            return recipe?.sourceScope ? [recipe.sourceScope] : [];
+          });
+        await recipes.fingerprint(target, region.sourcePaths, scopes);
         for (const node of definition.nodes) {
           if (node.type !== "tool" || !region.bodyNodeIds.includes(node.id)) continue;
           const recipe = configured.recipes.find((r) => r.id === node.recipeId)!;

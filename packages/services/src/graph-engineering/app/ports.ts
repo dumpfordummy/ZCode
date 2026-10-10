@@ -34,6 +34,7 @@ export interface GraphRecipePort {
   fingerprint(
     target: GraphWorkspaceTarget,
     paths: string[],
+    scopes?: import("../domain/project-budgets.js").GraphSourceScope[],
   ): Promise<{ digest: string; files: Array<{ path: string; bytes: number; digest: string }> }>;
   validatePaths(target: GraphWorkspaceTarget, paths: string[]): Promise<void>;
   observeFiles(target: GraphWorkspaceTarget, paths: string[]): Promise<GraphFileObservation[]>;

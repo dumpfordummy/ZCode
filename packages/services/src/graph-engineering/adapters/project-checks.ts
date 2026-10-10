@@ -69,7 +69,11 @@ export function createProjectSetupPort(options: {
           : [],
       );
       const sourcePaths = [...new Set(recipes.flatMap((r) => r.sourcePaths))].sort();
-      const fingerprint = await store.fingerprint(target, sourcePaths);
+      const fingerprint = await store.fingerprint(
+        target,
+        sourcePaths,
+        recipes.flatMap((recipe) => (recipe.sourceScope ? [recipe.sourceScope] : [])),
+      );
       const environment = await port.environment(target, recipes);
       if (environment.status !== "available")
         throw new Error(

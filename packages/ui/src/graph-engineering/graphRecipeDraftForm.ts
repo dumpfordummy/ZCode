@@ -5,25 +5,15 @@ const strings = (value: unknown) =>
   Array.isArray(value) && value.every((item) => typeof item === "string");
 const extras = (value: GraphRecipeDraftObject, keys: string[]) =>
   Object.keys(value).some((key) => !keys.includes(key));
-const invalidStrings = (
-  value: GraphRecipeDraftObject,
-  keys: readonly string[],
-) =>
-  keys.some(
-    (key) => value[key] !== undefined && typeof value[key] !== "string",
-  );
+const invalidStrings = (value: GraphRecipeDraftObject, keys: readonly string[]) =>
+  keys.some((key) => value[key] !== undefined && typeof value[key] !== "string");
 const invalidNumbers = (value: GraphRecipeDraftObject, keys: string[]) =>
   keys.some(
-    (key) =>
-      value[key] !== undefined &&
-      value[key] !== "" &&
-      typeof value[key] !== "number",
+    (key) => value[key] !== undefined && value[key] !== "" && typeof value[key] !== "number",
   );
 export function graphRecipeDraft(
   text: string,
-):
-  | { kind: "ready"; recipes: GraphRecipeDraftObject[] }
-  | { kind: "invalid"; error: string } {
+): { kind: "ready"; recipes: GraphRecipeDraftObject[] } | { kind: "invalid"; error: string } {
   try {
     const recipes: unknown = JSON.parse(text);
     if (!Array.isArray(recipes) || !recipes.every(object))
@@ -54,6 +44,7 @@ export function graphRecipeGuidedIssue(
       "cwd",
       "timeoutMs",
       "sourcePaths",
+      "sourceScope",
       "expectedOutputs",
       "redactEnvironmentVariables",
       "verifier",
@@ -61,6 +52,15 @@ export function graphRecipeGuidedIssue(
   )
     return "unknownFields";
   const verifier = recipe.verifier;
+  if (
+    recipe.sourceScope !== undefined &&
+    (!object(recipe.sourceScope) ||
+      recipe.sourceScope.version !== 1 ||
+      typeof recipe.sourceScope.project !== "string" ||
+      typeof recipe.sourceScope.membershipDigest !== "string" ||
+      typeof recipe.sourceScope.sourceCount !== "number")
+  )
+    return "invalidShape";
   if (!object(verifier)) return "invalidShape";
   if (
     invalidStrings(recipe, ["id", "name", "executable", "cwd"]) ||
@@ -69,8 +69,7 @@ export function graphRecipeGuidedIssue(
     invalidNumbers(verifier, ["minimumTests", "expectedTests"])
   )
     return "invalidShape";
-  if (!["command", "build", "test"].includes(String(verifier.kind)))
-    return "unsupportedVerifier";
+  if (!["command", "build", "test"].includes(String(verifier.kind))) return "unsupportedVerifier";
   const fields =
     verifier.kind === "command"
       ? ["kind"]
@@ -92,38 +91,21 @@ export function graphRecipeGuidedIssue(
     !["zcode-json-v1", "dotnet-vstest-trx-v1"].includes(String(verifier.format))
   )
     return "unsupportedVerifier";
-  for (const field of [
-    "args",
-    "sourcePaths",
-    "expectedOutputs",
-    "redactEnvironmentVariables",
-  ]) {
-    if (recipe[field] !== undefined && !strings(recipe[field]))
-      return "invalidShape";
+  for (const field of ["args", "sourcePaths", "expectedOutputs", "redactEnvironmentVariables"]) {
+    if (recipe[field] !== undefined && !strings(recipe[field])) return "invalidShape";
   }
   if (verifier.requiredTests !== undefined && !strings(verifier.requiredTests))
     return "invalidShape";
   for (const [field, keys] of [
     ["dotnet", ["project", "configuration", "framework", "runtime", "restore"]],
-    [
-      "target",
-      [
-        "project",
-        "configuration",
-        "framework",
-        "runtime",
-        "filter",
-        "assembly",
-      ],
-    ],
+    ["target", ["project", "configuration", "framework", "runtime", "filter", "assembly"]],
   ] as const) {
     if (
       verifier[field] !== undefined &&
       (!object(verifier[field]) || extras(verifier[field], [...keys]))
     )
       return "unknownFields";
-    if (object(verifier[field]) && invalidStrings(verifier[field], keys))
-      return "invalidShape";
+    if (object(verifier[field]) && invalidStrings(verifier[field], keys)) return "invalidShape";
   }
 }
 export function updateGraphRecipeField(
@@ -137,18 +119,12 @@ export function updateGraphRecipeField(
   const recipe = parsed.recipes[index];
   if (!recipe || graphRecipeGuidedIssue(recipe))
     throw Error("This recipe requires Advanced editing.");
-  if (
-    !path.length ||
-    path.some((part) =>
-      ["__proto__", "prototype", "constructor"].includes(part),
-    )
-  )
+  if (!path.length || path.some((part) => ["__proto__", "prototype", "constructor"].includes(part)))
     throw Error("Invalid field path.");
   let parent = recipe;
   for (const part of path.slice(0, -1)) {
     const entry = parent[part];
-    if (entry !== undefined && !object(entry))
-      throw Error("Invalid field parent.");
+    if (entry !== undefined && !object(entry)) throw Error("Invalid field parent.");
     parent[part] = entry ?? {};
     parent = parent[part] as GraphRecipeDraftObject;
   }
@@ -164,9 +140,7 @@ export function appendGraphRecipes(text: string, additions: unknown[]): string {
   const ids = new Set(parsed.recipes.map((recipe) => recipe.id));
   for (const recipe of additions) {
     if (!object(recipe) || typeof recipe.id !== "string" || ids.has(recipe.id))
-      throw Error(
-        "Duplicate or invalid recipe identity; choose a different ID prefix.",
-      );
+      throw Error("Duplicate or invalid recipe identity; choose a different ID prefix.");
     ids.add(recipe.id);
   }
   return JSON.stringify([...parsed.recipes, ...additions], null, 2);

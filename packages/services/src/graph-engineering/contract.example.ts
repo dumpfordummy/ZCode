@@ -35,6 +35,16 @@ export async function discoverProjectChecks(
   return service.projectSetup({ action: "scan", target, requestId });
 }
 
+/** A separate bounded scope job establishes membership, never Build/Test execution evidence. */
+export function prepareSelectedProject(
+  service: IGraphWorkflowService,
+  target: GraphWorkspaceTarget,
+  requestId: string,
+  selectedProject: string,
+) {
+  return service.projectSetup({ action: "scan", target, requestId, selectedProject });
+}
+
 /** Static compatibility neither probes tools nor executes a saved project check. */
 export function compatibleCheck(
   definition: import("./contract.js").GraphSequentialDefinition,

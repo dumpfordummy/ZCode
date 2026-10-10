@@ -9,7 +9,11 @@ import type {
 } from "../contract.js";
 import { runFingerprint } from "./attempts.js";
 import type { GraphOptions } from "./state.js";
-import { appendIteration, frozenRoutingConfiguration } from "./routing-plan.js";
+import {
+  appendIteration,
+  frozenRoutingConfiguration,
+  routingSourceScopes,
+} from "./routing-plan.js";
 import { routingTopology } from "../domain/routing-topology.js";
 import { noProjectRecipes, usesProjectRecipes } from "../domain/recipe-dependency.js";
 import { effectiveGraphRecipe } from "../domain/effective-recipe.js";
@@ -180,7 +184,9 @@ export async function createRunPlan(
         };
         const iteration = appendIteration(run, options);
         if (region)
-          iteration.sourceDigest = (await recipes!.fingerprint(target, region.sourcePaths)).digest;
+          iteration.sourceDigest = (
+            await recipes!.fingerprint(target, region.sourcePaths, routingSourceScopes(run))
+          ).digest;
         run.routing.configurationDigest = options.evidence!.digest(
           runFingerprint(frozenRoutingConfiguration(run)),
         );

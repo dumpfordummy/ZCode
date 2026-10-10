@@ -3,6 +3,8 @@ import type { GraphProjectDiscovery, GraphRecipe } from "@zcode/services";
 import type { useGraphProjectSetup } from "@/hooks/useGraphProjectSetup.js";
 import { Button } from "@/components/ui/button.js";
 import { Checkbox } from "@/components/ui/checkbox.js";
+import { Input } from "@/components/ui/input.js";
+import { GraphQuickDiagnostics } from "./GraphQuickDiagnostics.js";
 import { GraphSelect } from "./GraphSelect.js";
 import { useGraphM4Text } from "./GraphM4Text.js";
 import { quickDotnetChoices, quickDotnetPreset } from "./graphQuickDotnetModel.js";
@@ -22,6 +24,10 @@ export function GraphQuickDotnet({
   const t = useGraphM4Text();
   const [adding, setAdding] = useState(false);
   const [discovery, setDiscovery] = useState<GraphProjectDiscovery>();
+  const [prepared, setPrepared] = useState<GraphProjectDiscovery>();
+  const [scanRoot, setScanRoot] = useState("");
+  const [progress, setProgress] = useState("");
+  const [testPage, setTestPage] = useState(0);
   const [build, setBuild] = useState("");
   const [scopes, setScopes] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -30,7 +36,14 @@ export function GraphQuickDotnet({
   const alive = useRef(true);
   const generation = useRef(0);
   const flight = useRef(false);
-  const key = JSON.stringify({ text, build, scopes, adding, discovery });
+  const key = JSON.stringify({
+    text,
+    build,
+    scopes,
+    adding,
+    discovery: discovery?.digest,
+    prepared: prepared?.digest,
+  });
   const current = useRef(key);
   current.current = key;
   useEffect(() => {
@@ -40,23 +53,74 @@ export function GraphQuickDotnet({
       generation.current++;
     };
   }, []);
+  useEffect(() => {
+    generation.current++;
+    setDiscovery(undefined);
+    setPrepared(undefined);
+    setBusy(false);
+  }, [setup.invoke]);
+  useEffect(
+    () => () => {
+      if (request && !flight.current)
+        void setup.invoke({ action: "cancel-scan", requestId: request }, request);
+    },
+    [request, setup.invoke],
+  );
+  useEffect(() => {
+    if (!busy || !request || flight.current) return;
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const poll = async () => {
+      const result = await setup.invoke(
+        { action: "scan-progress", requestId: request },
+        request,
+        () => !stopped,
+      );
+      if (stopped) return;
+      if (result?.kind === "scan-progress")
+        setProgress(`${result.stage}: ${result.entries} / ${result.metadata}`);
+      timer = setTimeout(() => void poll(), 250);
+    };
+    void poll();
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+    };
+  }, [busy, request, setup.invoke]);
   const existing = text.trim() !== "[]";
-  const choices = discovery ? quickDotnetChoices(discovery) : undefined;
+  const choices = discovery
+    ? {
+        ...quickDotnetChoices(discovery),
+        scopes: quickDotnetChoices(prepared?.prepared ? prepared : discovery).scopes,
+      }
+    : undefined;
+  const diagnostics = [
+    ...new Set([
+      ...(discovery?.issues ?? []),
+      ...(prepared?.issues ?? []),
+      ...(discovery?.candidates ?? []).flatMap((item) =>
+        [...(item.quickIssues ?? []), ...item.issues].map((issue) => `${item.path}: ${issue}`),
+      ),
+    ]),
+  ].slice(0, 128);
   let issue = "";
   try {
-    if (discovery) quickDotnetPreset(discovery, build, scopes, text);
+    if (discovery) quickDotnetPreset(prepared ?? discovery, build, scopes, text);
   } catch (cause) {
     issue = cause instanceof Error ? cause.message : String(cause);
   }
-  const scan = async () => {
+  const scan = async (selectedProject?: string) => {
     const version = ++generation.current;
     const id = crypto.randomUUID();
     setRequest(id);
     setBusy(true);
     setError("");
-    setDiscovery(undefined);
+    setProgress("");
+    setPrepared(undefined);
+    setTestPage(0);
+    if (!selectedProject) setDiscovery(undefined);
     const result = await setup.invoke(
-      { action: "scan", requestId: id },
+      { action: "scan", requestId: id, ...(selectedProject ? { selectedProject } : { scanRoot }) },
       id,
       () => alive.current && generation.current === version,
     );
@@ -64,13 +128,20 @@ export function GraphQuickDotnet({
     setBusy(false);
     if (result?.kind === "discovery") {
       const found = quickDotnetChoices(result);
-      setDiscovery(result);
-      setBuild(found.builds.length === 1 ? found.builds[0]!.path : "");
-      setScopes(found.scopes.length === 1 ? [found.scopes[0]!.id] : []);
+      if (selectedProject) {
+        setPrepared(result);
+        setScopes(found.scopes.length === 1 ? [found.scopes[0]!.id] : []);
+      } else {
+        setDiscovery(result);
+        const selected = found.builds.length === 1 ? found.builds[0]!.path : "";
+        setBuild(selected);
+        setScopes([]);
+        if (selected) await scan(selected);
+      }
     }
   };
   const save = async (run: boolean) => {
-    if (disabled || busy || flight.current || !discovery || issue) return;
+    if (disabled || busy || flight.current || !prepared || issue) return;
     flight.current = true;
     setBusy(true);
     setError("");
@@ -78,7 +149,7 @@ export function GraphQuickDotnet({
     const isCurrent = () =>
       alive.current && generation.current === version && current.current === key;
     try {
-      const preset = quickDotnetPreset(discovery, build, scopes, text);
+      const preset = quickDotnetPreset(prepared, build, scopes, text);
       const result = await setup.invoke({ action: "dotnet-preset", preset }, key, isCurrent);
       if (!isCurrent()) return;
       if (result?.kind !== "validation") return;
@@ -118,6 +189,21 @@ export function GraphQuickDotnet({
       ) : (
         <>
           <p className="text-ui-sm text-foreground-subtle">{t("quickHelp")}</p>
+          <label className="block space-y-1 text-ui-sm">
+            <span>{t("quickScanRoot")}</span>
+            <Input
+              value={scanRoot}
+              disabled={busy || disabled}
+              placeholder="."
+              data-testid="graph-quick-scan-root"
+              onChange={(event) => setScanRoot(event.target.value)}
+            />
+          </label>
+          {busy ? (
+            <p role="status" className="text-ui-sm">
+              {t("quickProgress")} {progress}
+            </p>
+          ) : null}
           <div className="flex flex-wrap gap-2">
             <Button
               size="sm"
@@ -139,6 +225,7 @@ export function GraphQuickDotnet({
                   setBusy(false);
                   setAdding(false);
                   setDiscovery(undefined);
+                  setPrepared(undefined);
                   setError("");
                   if (busy)
                     void setup.invoke({ action: "cancel-scan", requestId: request }, request);
@@ -151,13 +238,38 @@ export function GraphQuickDotnet({
           {discovery && choices ? (
             <div className="space-y-3" data-testid="graph-quick-proposal">
               <p className="text-ui-base font-medium">
-                {t(discovery.candidates.length ? "quickDetected" : "quickNoRunner")}
+                {t(
+                  discovery.status !== "complete"
+                    ? "quickPartial"
+                    : discovery.candidates.length
+                      ? "quickDetected"
+                      : "quickNoRunner",
+                )}
+                {discovery.status !== "complete" && discovery.issues[0] ? (
+                  <span className="mt-1 block break-words text-ui-sm font-normal">
+                    {discovery.issues[0].slice(0, 240)}
+                    {discovery.issues[0].length > 240 ? "…" : ""}
+                  </span>
+                ) : null}
               </p>
-              {discovery.issues.map((issue, index) => (
-                <p key={index} className="text-ui-sm text-warning">
-                  {issue}
+              {prepared?.prepared ? (
+                <p className="text-ui-sm">
+                  {t("quickPrepared", { count: prepared.prepared.scope.sourceCount })}
                 </p>
-              ))}
+              ) : null}
+              {prepared?.issues[0] ? (
+                <p role="status" className="text-ui-sm text-warning">
+                  {prepared.issues[0]}
+                </p>
+              ) : null}
+              <GraphQuickDiagnostics
+                diagnostics={diagnostics}
+                affected={
+                  discovery.candidates.filter(
+                    (item) => item.coverage === "unsupported" || item.quickIssues?.length,
+                  ).length
+                }
+              />
               {choices.builds.length > 1 || choices.scopes.length > 1 ? (
                 <p className="text-ui-sm text-warning">{t("quickAmbiguous")}</p>
               ) : null}
@@ -170,17 +282,22 @@ export function GraphQuickDotnet({
                   { value: "none", label: t("quickChoose") },
                   ...choices.builds.map((item) => ({ value: item.path, label: item.path })),
                 ]}
-                onChange={(value) => setBuild(value === "none" ? "" : value)}
+                onChange={(value) => {
+                  setBuild(value === "none" ? "" : value);
+                  setPrepared(undefined);
+                  setScopes([]);
+                  if (value !== "none") void scan(value);
+                }}
               />
               <p className="text-ui-sm font-medium">{t("quickTests")}</p>
-              {choices.scopes.map((scope, index) => (
+              {choices.scopes.slice(testPage * 20, (testPage + 1) * 20).map((scope, index) => (
                 <label className="flex min-h-7 items-center gap-2 text-ui-sm" key={scope.id}>
                   <Checkbox
                     checked={scopes.includes(scope.id)}
                     disabled={
                       disabled || busy || (scopes.length >= 7 && !scopes.includes(scope.id))
                     }
-                    data-testid={`graph-quick-test-${index}`}
+                    data-testid={`graph-quick-test-${testPage * 20 + index}`}
                     onCheckedChange={(checked) =>
                       setScopes((old) =>
                         checked === true ? [...old, scope.id] : old.filter((id) => id !== scope.id),
@@ -193,22 +310,34 @@ export function GraphQuickDotnet({
                   </span>
                 </label>
               ))}
-              {!choices.scopes.length ? (
-                <p className="text-ui-sm text-warning">{t("quickNoRunner")}</p>
+              {choices.scopes.length > 20 ? (
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={!testPage}
+                    onClick={() => setTestPage((page) => page - 1)}
+                  >
+                    {t("quickPrevious")}
+                  </Button>
+                  <span className="text-ui-sm">
+                    {testPage + 1} / {Math.ceil(choices.scopes.length / 20)}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={(testPage + 1) * 20 >= choices.scopes.length}
+                    onClick={() => setTestPage((page) => page + 1)}
+                  >
+                    {t("quickNext")}
+                  </Button>
+                </div>
               ) : null}
-              {discovery.candidates
-                .filter(
-                  (item) =>
-                    item.coverage === "unsupported" ||
-                    item.quickIssues?.length ||
-                    (item.kind === "project" && !item.quick),
-                )
-                .map((item) => (
-                  <p className="text-ui-sm text-warning" key={item.path}>
-                    {item.path}:{" "}
-                    {[...new Set([...(item.quickIssues ?? []), ...item.issues])].join(" ")}
-                  </p>
-                ))}
+              {!choices.scopes.length ? (
+                <p className="text-ui-sm text-warning">
+                  {t(prepared?.prepared ? "quickNoRunner" : "quickTestsIncomplete")}
+                </p>
+              ) : null}
               {issue ? (
                 <p role="status" className="text-ui-sm text-warning">
                   {!build || (!scopes.length && choices.scopes.length) ? (

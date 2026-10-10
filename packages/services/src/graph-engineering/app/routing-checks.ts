@@ -2,7 +2,7 @@ import type { GraphSequentialRun, GraphRoutingState } from "../contract.js";
 import { currentIteration } from "../domain/routing.js";
 import { GraphState } from "./state.js";
 import { runFingerprint, skipPending } from "./attempts.js";
-import { frozenRoutingConfiguration } from "./routing-plan.js";
+import { frozenRoutingConfiguration, routingSourceScopes } from "./routing-plan.js";
 import { noProjectRecipes, usesProjectRecipes } from "../domain/recipe-dependency.js";
 import { assertReviewedChecks } from "./checks-preflight.js";
 
@@ -14,7 +14,13 @@ export class GraphRoutingChecks {
   async source(run: GraphSequentialRun): Promise<string | undefined> {
     const region = run.definition.routing?.region;
     return region
-      ? (await this.state.options.recipes!.fingerprint(run.target, region.sourcePaths)).digest
+      ? (
+          await this.state.options.recipes!.fingerprint(
+            run.target,
+            region.sourcePaths,
+            routingSourceScopes(run),
+          )
+        ).digest
       : undefined;
   }
   async verify(run: GraphSequentialRun, reserve = false): Promise<boolean> {

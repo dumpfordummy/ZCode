@@ -4,6 +4,26 @@
  * 只包含 UI 自有的标签与解释。工作流名称与描述（Host 提供）、用户输入、存储的 id、摘要与 Host 诊断保持原文。
  */
 const messages: Record<string, [string, string]> = {
+  quickScanRoot: ["Solution, project or subfolder (optional)", "解决方案、项目或子目录（可选）"],
+  quickProgress: ["Scanning — stage: entries / metadata files", "扫描中 — 阶段：条目 / 元数据文件"],
+  quickPartial: [
+    "Scan incomplete. Choose a target to prepare its own scope, or narrow the scan.",
+    "扫描不完整。请选择目标以单独准备其范围，或缩小扫描范围。",
+  ],
+  quickPrepared: [
+    "Selected scope prepared: {count} input files. Execution is still unverified.",
+    "已准备所选范围：{count} 个输入文件。尚未验证执行。",
+  ],
+  quickDetails: [
+    "Details — {count} detected targets need review",
+    "详细信息 — {count} 个已检测目标需要检查",
+  ],
+  quickTestsIncomplete: [
+    "Test detection is incomplete until the selected scope is prepared.",
+    "准备所选范围之前，测试检测尚未完成。",
+  ],
+  quickPrevious: ["Previous", "上一页"],
+  quickNext: ["Next", "下一页"],
   quickTitle: ["Project checks", "项目检查"],
   quickDetected: [".NET project detected", "已检测到 .NET 项目"],
   quickScan: ["Detect .NET project", "检测 .NET 项目"],

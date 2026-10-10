@@ -61,7 +61,14 @@ export function useGraphProjectSetup(target: GraphWorkspaceTarget) {
   const invoke = useCallback(
     async (operation: Operation, key: string, inputCurrent: () => boolean = () => true) => {
       if (!service || current.current !== scope) return;
-      const lane = operation.action === "cancel-scan" ? "scan" : operation.action;
+      // 旧请求的清理取消不能作废已经开始的新扫描；仅失效同一请求的读取。
+      if (
+        operation.action === "cancel-scan" &&
+        scan.current?.scope === scope &&
+        scan.current.requestId === operation.requestId
+      )
+        scope.sequences.scan = (scope.sequences.scan ?? 0) + 1;
+      const lane = operation.action;
       if (operation.action === "scan") scan.current = { scope, requestId: operation.requestId };
       const result = await readGraphProjectSetup({
         scope,
@@ -76,7 +83,7 @@ export function useGraphProjectSetup(target: GraphWorkspaceTarget) {
           })),
       });
       if (
-        lane === "scan" &&
+        (lane === "scan" || lane === "cancel-scan") &&
         scan.current?.scope === scope &&
         "requestId" in operation &&
         scan.current.requestId === operation.requestId

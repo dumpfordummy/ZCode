@@ -27,7 +27,13 @@ export class GraphToolEvidence {
       ...recipe.expectedOutputs,
       ...(reportPath ? [reportPath] : []),
     ]);
-    attempt.sourceDigest = (await recipes.fingerprint(run.target, recipe.sourcePaths)).digest;
+    attempt.sourceDigest = (
+      await recipes.fingerprint(
+        run.target,
+        recipe.sourcePaths,
+        recipe.sourceScope ? [recipe.sourceScope] : undefined,
+      )
+    ).digest;
     if (recipe.verifier.kind === "build")
       attempt.outputsBefore = await recipes.observeFiles(run.target, recipe.expectedOutputs);
     if (recipe.verifier.kind === "test") {
@@ -111,8 +117,13 @@ export class GraphToolEvidence {
     const commandIssueCount = issues.length;
     try {
       if (
-        (await this.state.options.recipes!.fingerprint(run.target, recipe.sourcePaths)).digest !==
-        attempt.sourceDigest
+        (
+          await this.state.options.recipes!.fingerprint(
+            run.target,
+            recipe.sourcePaths,
+            recipe.sourceScope ? [recipe.sourceScope] : undefined,
+          )
+        ).digest !== attempt.sourceDigest
       )
         issues.push("Declared source changed during command execution.");
       if (recipe.verifier.kind === "build") {

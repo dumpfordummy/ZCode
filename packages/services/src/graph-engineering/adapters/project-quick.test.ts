@@ -46,10 +46,12 @@ test("Quick refuses custom outputs, runtime, unknown properties, misleading runn
     );
     await writeFile(join(root, "Tests.csproj"), project());
     await writeFile(join(root, "Directory.Build.props"), "<Project />");
-    const candidate = (await createProjectDiscovery().scan({ workspacePath: root }, "props"))
-      .candidates[0]!;
-    assert.equal(candidate.quick, undefined);
-    assert.match(candidate.quickIssues!.join(" "), /Directory.Build.props/);
+    const selected = await createProjectDiscovery().scan({ workspacePath: root }, "props", {
+      selectedProject: "Tests.csproj",
+    });
+    assert.equal(selected.status, "limited");
+    assert.equal(selected.prepared, undefined);
+    assert.match(selected.issues.join(" "), /Directory.Build.props/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
