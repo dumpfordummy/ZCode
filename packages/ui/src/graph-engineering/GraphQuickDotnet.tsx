@@ -4,6 +4,7 @@ import type { useGraphProjectSetup } from "@/hooks/useGraphProjectSetup.js";
 import { Button } from "@/components/ui/button.js";
 import { Checkbox } from "@/components/ui/checkbox.js";
 import { Input } from "@/components/ui/input.js";
+import { GraphQuickDiagnostics } from "./GraphQuickDiagnostics.js";
 import { GraphSelect } from "./GraphSelect.js";
 import { useGraphM4Text } from "./GraphM4Text.js";
 import { quickDotnetChoices, quickDotnetPreset } from "./graphQuickDotnetModel.js";
@@ -26,7 +27,6 @@ export function GraphQuickDotnet({
   const [prepared, setPrepared] = useState<GraphProjectDiscovery>();
   const [scanRoot, setScanRoot] = useState("");
   const [progress, setProgress] = useState("");
-  const [detailPage, setDetailPage] = useState(0);
   const [testPage, setTestPage] = useState(0);
   const [build, setBuild] = useState("");
   const [scopes, setScopes] = useState<string[]>([]);
@@ -117,7 +117,6 @@ export function GraphQuickDotnet({
     setError("");
     setProgress("");
     setPrepared(undefined);
-    setDetailPage(0);
     setTestPage(0);
     if (!selectedProject) setDiscovery(undefined);
     const result = await setup.invoke(
@@ -263,42 +262,14 @@ export function GraphQuickDotnet({
                   {prepared.issues[0]}
                 </p>
               ) : null}
-              {diagnostics.length ? (
-                <details className="text-ui-sm" data-testid="graph-quick-details">
-                  <summary>
-                    {t("quickDetails", {
-                      count: discovery.candidates.filter(
-                        (item) => item.coverage === "unsupported" || item.quickIssues?.length,
-                      ).length,
-                    })}
-                  </summary>
-                  <ul className="max-h-64 overflow-auto break-words">
-                    {diagnostics.slice(detailPage * 20, (detailPage + 1) * 20).map((line) => (
-                      <li key={line}>{line}</li>
-                    ))}
-                  </ul>
-                  {diagnostics.length > 20 ? (
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        disabled={!detailPage}
-                        onClick={() => setDetailPage((page) => page - 1)}
-                      >
-                        {t("quickPrevious")}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        disabled={(detailPage + 1) * 20 >= diagnostics.length}
-                        onClick={() => setDetailPage((page) => page + 1)}
-                      >
-                        {t("quickNext")}
-                      </Button>
-                    </div>
-                  ) : null}
-                </details>
-              ) : null}
+              <GraphQuickDiagnostics
+                diagnostics={diagnostics}
+                affected={
+                  discovery.candidates.filter(
+                    (item) => item.coverage === "unsupported" || item.quickIssues?.length,
+                  ).length
+                }
+              />
               {choices.builds.length > 1 || choices.scopes.length > 1 ? (
                 <p className="text-ui-sm text-warning">{t("quickAmbiguous")}</p>
               ) : null}
