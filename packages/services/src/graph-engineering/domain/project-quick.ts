@@ -1,12 +1,24 @@
 import type { GraphProjectCandidate } from "../project-setup-types.js";
-import { parseTrxXml } from "./trx-xml.js";
+import { parseProjectXml } from "./project-xml.js";
+import { metadataReference } from "./project-metadata.js";
 
 /** 静态白名单只生成设置建议；复用无解析器/IO 的 XML 读取器，不执行 MSBuild。 */
 export function addQuickProjectMetadata(item: GraphProjectCandidate, content: string): void {
   item.quickIssues = [...item.issues];
+  if (item.kind === "solution") {
+    try {
+      validateQuickSolution(item, content);
+    } catch (error) {
+      item.coverage = "unsupported";
+      item.quickIssues.push(
+        error instanceof Error ? error.message : "Unsupported solution metadata.",
+      );
+    }
+    return;
+  }
   if (item.kind !== "project" || item.coverage === "unsupported") return;
   try {
-    const root = parseTrxXml(new TextEncoder().encode(content));
+    const root = parseProjectXml(new TextEncoder().encode(content));
     const fail = (reason: string): never => {
       throw new Error(reason);
     };
@@ -19,6 +31,7 @@ export function addQuickProjectMetadata(item: GraphProjectCandidate, content: st
       fail("Quick requires a literal Microsoft.NET.Sdk project with default imports.");
     const properties = new Map<string, string>();
     const packages: string[] = [];
+    const projects: string[] = [];
     const allowedProperties = new Set([
       "TargetFramework",
       "TargetFrameworks",
@@ -70,6 +83,11 @@ export function addQuickProjectMetadata(item: GraphProjectCandidate, content: st
           )
             fail(`Quick cannot derive source scope for ${entry.name}.`);
           if (entry.name === "PackageReference") packages.push(entry.attributes.Include!);
+          if (entry.name === "ProjectReference") {
+            const reference = metadataReference(item.path, entry.attributes.Include!);
+            if (!reference || entry.children.length) fail("Unsupported literal ProjectReference.");
+            projects.push(reference!);
+          }
         }
       }
     }
@@ -94,7 +112,69 @@ export function addQuickProjectMetadata(item: GraphProjectCandidate, content: st
         ]),
       ),
     };
+    // 以解析后的 XML 属性建立闭包，避免单引号引用被提示扫描漏掉。
+    item.projects = [...new Set(projects)];
   } catch (error) {
     item.quickIssues.push(error instanceof Error ? error.message : "Unsupported project metadata.");
+  }
+}
+
+/** 解决方案映射也影响实际构建配置，不能据项目文件猜测 Debug 测试程序集。 */
+function validateQuickSolution(item: GraphProjectCandidate, content: string) {
+  if (/\.slnx$/i.test(item.path)) {
+    const root = parseProjectXml(new TextEncoder().encode(content));
+    const projects: string[] = [];
+    const visit = (node: typeof root, depth = 0): void => {
+      if (depth > 16 || node.text.trim()) throw Error("Unsupported solution XML structure.");
+      const allowed =
+        node === root
+          ? []
+          : node.name === "Folder"
+            ? ["Name"]
+            : node.name === "Project"
+              ? ["Path"]
+              : undefined;
+      if (
+        !allowed ||
+        Object.keys(node.attributes).some((key) => !allowed.includes(key)) ||
+        (node.name === "Project" && node.children.length)
+      )
+        throw Error("Solution configuration/custom project metadata requires review.");
+      if (node.name === "Project") {
+        const reference = metadataReference(item.path, node.attributes.Path ?? "");
+        if (!reference || !/\.csproj$/i.test(reference))
+          throw Error("Unsupported solution project reference.");
+        projects.push(reference);
+      }
+      node.children.forEach((child) => visit(child, depth + 1));
+    };
+    if (root.name !== "Solution") throw Error("Malformed solution XML.");
+    visit(root);
+    item.projects = [...new Set(projects)];
+  } else {
+    if (!/^\uFEFF?Microsoft Visual Studio Solution File, Format Version 12\.00\r?$/m.test(content))
+      throw Error("Unsupported or malformed solution header.");
+    const lines = new Set<string>();
+    let lineCount = 0;
+    for (const match of content.matchAll(/[^\r\n]+/g)) {
+      if (++lineCount > 65536) throw Error("Solution line structure budget exceeded (65536).");
+      lines.add(match[0].trim());
+    }
+    let count = 0;
+    for (const match of content.matchAll(
+      /^Project\("([^"]+)"\)\s*=\s*"[^"]*",\s*"([^"]+)",\s*"([^"]+)"/gm,
+    )) {
+      if (match[1]!.toLowerCase() === "{66a26720-8fb5-11d2-aa7e-00c04f688dde}") continue;
+      if (!/\.csproj$/i.test(match[2]!))
+        throw Error("Solution contains a project shape outside the C# contract.");
+      count++;
+      const guid = match[3]!;
+      for (const mapping of ["ActiveCfg", "Build.0"]) {
+        const expected = `${guid}.Debug|Any CPU.${mapping} = Debug|Any CPU`;
+        if (!lines.has(expected))
+          throw Error(`Solution Debug build mapping is unresolved for ${match[2]}.`);
+      }
+    }
+    if (!count) throw Error("Solution has no supported projects.");
   }
 }

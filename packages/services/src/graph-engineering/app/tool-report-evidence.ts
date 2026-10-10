@@ -83,8 +83,13 @@ export async function captureToolReport(
   const build = currentToolAttempt(run, verifier.buildNodeId);
   // 解析/持久化也跨异步边界；不能把捕获前的来源摘要与捕获后的报告混为一次有效证明。
   if (
-    (await state.options.recipes!.fingerprint(run.target, attempt.recipe.sourcePaths)).digest !==
-    attempt.sourceDigest
+    (
+      await state.options.recipes!.fingerprint(
+        run.target,
+        attempt.recipe.sourcePaths,
+        attempt.recipe.sourceScope ? [attempt.recipe.sourceScope] : undefined,
+      )
+    ).digest !== attempt.sourceDigest
   )
     issues.push("Declared source changed while capturing the genuine test report.");
   if (

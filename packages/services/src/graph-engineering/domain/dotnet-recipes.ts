@@ -26,7 +26,10 @@ export function compileDotnetRecipes(input: GraphDotnetPreset): GraphRecipe[] {
     executable: input.executable,
     cwd: input.cwd,
     timeoutMs: input.timeoutMs,
-    sourcePaths: [...input.sourcePaths],
+    sourcePaths: input.sourceScope
+      ? [...new Set([input.buildProject, ...input.tests.map((test) => test.project)])].sort()
+      : [...input.sourcePaths],
+    ...(input.sourceScope ? { sourceScope: structuredClone(input.sourceScope) } : {}),
   };
   const recipes: GraphRecipe[] = [
     {

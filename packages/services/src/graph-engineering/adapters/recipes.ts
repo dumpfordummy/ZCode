@@ -5,10 +5,14 @@ import { acquireFileLock } from "@zcode/shared/node";
 import type { GraphWorkspaceTarget } from "../contract.js";
 import type { GraphRecipeStore } from "../artifact-types.js";
 import { validateGraphRecipes } from "../domain/artifact-schemas.js";
-import { GRAPH_ARTIFACT_BYTES, parseBoundedGraphJson } from "../domain/artifacts.js";
+import { parseBoundedGraphJson } from "../domain/artifacts.js";
+import {
+  RECIPE_CONFIGURATION_BYTES,
+  RECIPE_CONFIGURATION_MEMBERS,
+} from "../domain/project-budgets.js";
+import { fingerprintRecipeSources } from "./recipe-sources.js";
 import {
   assertWorkspaceFilePath,
-  fingerprintDeclaredFiles,
   observeDeclaredFiles,
   readDeclaredFile,
 } from "./artifact-files.js";
@@ -20,9 +24,12 @@ async function readConfig(target: GraphWorkspaceTarget) {
   const checked = await assertWorkspaceFilePath(target, SOURCE_PATH, true);
   if (!checked.exists)
     return { raw: {} as Record<string, unknown>, digest: digest("missing"), recipes: [] };
-  const bytes = await readDeclaredFile(target, SOURCE_PATH, GRAPH_ARTIFACT_BYTES);
+  const bytes = await readDeclaredFile(target, SOURCE_PATH, RECIPE_CONFIGURATION_BYTES);
   const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes),
-    raw = parseBoundedGraphJson(text);
+    raw = parseBoundedGraphJson(text, {
+      bytes: RECIPE_CONFIGURATION_BYTES,
+      members: RECIPE_CONFIGURATION_MEMBERS,
+    });
   if (!raw || typeof raw !== "object" || Array.isArray(raw))
     throw new Error("Project configuration must be a JSON object.");
   const recipes = validateGraphRecipes(raw.graphRecipes ?? []);
@@ -46,8 +53,12 @@ export function createGraphRecipeStore(): GraphRecipeStore {
           throw new Error("Project recipe configuration changed; reload before saving.");
         const value = { ...current.raw, graphRecipes: validated },
           text = `${JSON.stringify(value, null, 2)}\n`;
-        if (Buffer.byteLength(text) > GRAPH_ARTIFACT_BYTES)
-          throw new Error("Project configuration exceeds the 256 KiB limit.");
+        if (Buffer.byteLength(text) > RECIPE_CONFIGURATION_BYTES)
+          throw new Error("Project configuration exceeds the 32 MiB limit.");
+        parseBoundedGraphJson(text, {
+          bytes: RECIPE_CONFIGURATION_BYTES,
+          members: RECIPE_CONFIGURATION_MEMBERS,
+        });
         const temporary = `${path}.${randomUUID()}.tmp`;
         let handle: Awaited<ReturnType<typeof open>> | undefined;
         try {
@@ -72,7 +83,7 @@ export function createGraphRecipeStore(): GraphRecipeStore {
         await release();
       }
     },
-    fingerprint: fingerprintDeclaredFiles,
+    fingerprint: fingerprintRecipeSources,
     observeFiles: observeDeclaredFiles,
   };
 }

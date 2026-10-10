@@ -2,6 +2,14 @@ import type { GraphIteration, GraphSequentialRun } from "../contract.js";
 import type { GraphOptions } from "./state.js";
 import { skipPending } from "./attempts.js";
 
+/** U3：修复区域使用工具冻结的完整范围，不能只校验紧凑描述中的元数据路径。 */
+export function routingSourceScopes(run: GraphSequentialRun) {
+  const body = run.definition.routing?.region?.bodyNodeIds ?? [];
+  return (run.toolAttempts ?? [])
+    .filter((attempt) => (attempt.iteration ?? 0) === 0 && body.includes(attempt.nodeId))
+    .flatMap((attempt) => (attempt.recipe.sourceScope ? [attempt.recipe.sourceScope] : []));
+}
+
 export function frozenRoutingConfiguration(run: GraphSequentialRun) {
   return {
     definition: run.definition,

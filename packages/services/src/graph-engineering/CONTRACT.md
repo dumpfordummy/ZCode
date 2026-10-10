@@ -4,6 +4,16 @@ Duration remains syntax/range validated independently of ordered, bounded result
 
 # Graph Engineering
 
+Z8.5-U3 separates inventory from direct selected-scope preparation on the same
+`projectSetup` command/port. `scanRoot` narrows discovery without changing workspace
+identity; `selectedProject` starts its own bounded dependency/input job, and
+`scan-progress` reads only counters for the matching request. Inventory candidates
+carry no repeated source list. New recipes may carry a version-1 `sourceScope`
+membership commitment: the existing recipe fingerprint owner re-enumerates it at
+preview and execution evidence boundaries. This is an additive recipe format,
+not execution proof or migration of historical receipts. The .306 strict schema
+cannot read that field. See `docs/graph-engineering/z8/Z8_5_U3_SPEC.md`.
+
 Z8.5-U2 adds optional static `quick`/`quickIssues` discovery hints for a conservative
 SDK allowlist. They are read-only proposals; neither schema nor evidence authority
 changes. See `docs/graph-engineering/z8/Z8_5_U2_SPEC.md`. Unknown/imported metadata

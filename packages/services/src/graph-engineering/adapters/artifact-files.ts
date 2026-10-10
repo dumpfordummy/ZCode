@@ -4,6 +4,7 @@ import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import type { GraphWorkspaceTarget } from "../contract.js";
 import type { GraphFileFingerprint, GraphFileObservation } from "../artifact-types.js";
 import { validateGraphRelativePath } from "../domain/artifact-schemas.js";
+import { PROJECT_SCOPE_BUDGET } from "../domain/project-budgets.js";
 
 const samePath = (left: string, right: string) =>
   process.platform === "win32" ? left.toLowerCase() === right.toLowerCase() : left === right;
@@ -58,10 +59,14 @@ async function streamDeclaredFile(
   path: string,
   maximum: number,
   retain: boolean,
+  deadline = Infinity,
 ): Promise<{ bytes: number; digest: string; modifiedAt: number; content?: Buffer }> {
   const beforePath = await assertWorkspaceFilePath(target, path);
   const before = await lstat(beforePath.absolutePath);
-  if (before.size > maximum) throw new Error(`Declared file exceeds the ${maximum}-byte limit.`);
+  if (before.size > maximum)
+    throw new Error(
+      `Declared file is ${(before.size / 1048576).toFixed(2)} MiB (${before.size} bytes) and exceeds the ${(maximum / 1048576).toFixed(2)} MiB (${maximum}-byte) limit.`,
+    );
   const handle = await open(beforePath.absolutePath, "r"),
     chunks: Buffer[] = [],
     hash = createHash("sha256");
@@ -78,6 +83,7 @@ async function streamDeclaredFile(
       throw new Error("Declared file changed before capture.");
     const buffer = Buffer.alloc(64 * 1024);
     for (;;) {
+      if (Date.now() > deadline) throw new Error("Fingerprint elapsed-time budget exceeded.");
       const result = await handle.read(
         buffer,
         0,
@@ -134,32 +140,74 @@ export async function fingerprintDeclaredFiles(
   target: GraphWorkspaceTarget,
   paths: string[],
 ): Promise<GraphFileFingerprint> {
+  return fingerprintDeclaredFilesWithin(target, paths, Date.now() + PROJECT_SCOPE_BUDGET.elapsedMs);
+}
+export async function fingerprintDeclaredFilesWithin(
+  target: GraphWorkspaceTarget,
+  paths: string[],
+  deadline = Date.now() + PROJECT_SCOPE_BUDGET.elapsedMs,
+): Promise<GraphFileFingerprint> {
   validateFingerprintPaths(paths);
   const files: GraphFileFingerprint["files"] = [];
-  for (const path of [...paths].sort()) {
-    const { bytes, digest, modifiedAt } = await streamDeclaredFile(
-      target,
-      path,
-      32 * 1024 * 1024,
-      false,
-    );
-    files.push({ path, bytes, digest, modifiedAt });
-  }
+  let remaining = PROJECT_SCOPE_BUDGET.sourceBytes;
+  const ordered = [...paths].sort();
+  let cursor = 0;
+  let failure: unknown;
+  const worker = async () => {
+    while (cursor < ordered.length && !failure) {
+      const index = cursor++,
+        path = ordered[index]!;
+      try {
+        if (Date.now() > deadline) throw new Error("Fingerprint elapsed-time budget exceeded.");
+        const checked = await assertWorkspaceFilePath(target, path);
+        const size = (await lstat(checked.absolutePath)).size;
+        if (size > PROJECT_SCOPE_BUDGET.sourceFileBytes)
+          throw new Error(
+            `Source per-file byte budget exceeded (${PROJECT_SCOPE_BUDGET.sourceFileBytes} bytes): ${path} (${size} bytes).`,
+          );
+        if (size > remaining)
+          throw new Error(
+            `Source byte budget exceeded: ${path} (${size} bytes; ${remaining} remaining).`,
+          );
+        remaining -= size;
+        const { bytes, digest, modifiedAt } = await streamDeclaredFile(
+          target,
+          path,
+          size,
+          false,
+          deadline,
+        );
+        files[index] = { path, bytes, digest, modifiedAt };
+      } catch (error) {
+        failure = error;
+      }
+    }
+  };
+  await Promise.all(
+    Array.from({ length: Math.min(PROJECT_SCOPE_BUDGET.concurrency, ordered.length) }, worker),
+  );
+  if (failure) throw failure;
   // 时间属于新鲜度证据而非字节身份；同内容重建必须保留相同的来源摘要。
   const content = files.map(({ path, bytes, digest }) => ({ path, bytes, digest }));
   return { files, digest: createHash("sha256").update(JSON.stringify(content)).digest("hex") };
 }
 
-function validateFingerprintPaths(paths: string[]): void {
-  if (paths.length > 32 || new Set(paths).size !== paths.length)
-    throw new Error("Declare at most 32 unique fingerprint paths.");
+function validateFingerprintPaths(
+  paths: string[],
+  maximum: number = PROJECT_SCOPE_BUDGET.sourceFiles,
+): void {
+  if (
+    paths.length > maximum ||
+    new Set(paths.map((path) => path.toLowerCase())).size !== paths.length
+  )
+    throw new Error(`Declare at most ${maximum} unique, non-aliased fingerprint paths.`);
 }
 
 export async function observeDeclaredFiles(
   target: GraphWorkspaceTarget,
   paths: string[],
 ): Promise<GraphFileObservation[]> {
-  validateFingerprintPaths(paths);
+  validateFingerprintPaths(paths, 32);
   const result: GraphFileObservation[] = [];
   for (const path of [...paths].sort()) {
     const checked = await assertWorkspaceFilePath(target, path, true);

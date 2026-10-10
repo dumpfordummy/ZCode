@@ -36,7 +36,11 @@ test("discovery lists every literal scope and uncertainty without executing proj
     assert.equal(tests.runner, "vstest");
     assert.equal(tests.coverage, "unsupported");
     assert.match(tests.issues.join(" "), /custom|Target/i);
-    assert.ok(tests.sourcePaths.includes("tests/Cases.cs"));
+    assert.deepEqual(
+      tests.sourcePaths,
+      [],
+      "inventory does not duplicate workspace inputs into candidates",
+    );
     assert.equal(result.candidates.find((c) => c.path === "Mtp.csproj")!.runner, "mtp");
     assert.ok(result.excluded.includes("obj"));
   } finally {

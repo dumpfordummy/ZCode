@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, readdir } from "node:fs/promises";
+import { mkdir, readFile, readdir, open } from "node:fs/promises";
 import { join } from "node:path";
 import { recordSchema } from "../domain/record.js";
 import { FROZEN_INSTRUCTIONS_MISMATCH } from "../domain/routing-record.js";
@@ -17,6 +17,39 @@ import type { GraphWorkspaceTarget } from "../contract.js";
 import type { GraphRecord, GraphRepository } from "../app/ports.js";
 import type { GraphRecordInventory, GraphRecordInventoryEntry } from "../app/support-bundle.js";
 import { validateDefinition, workspaceKey } from "../domain/definition.js";
+import { GRAPH_RECORD_FILE_BYTES } from "../domain/project-budgets.js";
+
+/** Persisted record IO is separate from 256 KiB evidence artifacts. Never accept a partial record. */
+async function readRecordFile(path: string): Promise<Buffer> {
+  const handle = await open(path, "r");
+  try {
+    const before = await handle.stat();
+    if (!before.isFile() || before.size > GRAPH_RECORD_FILE_BYTES)
+      throw Error("Graph record exceeds the 64 MiB file budget; retained bytes were not modified.");
+    const chunks: Buffer[] = [];
+    let length = 0;
+    for (;;) {
+      const buffer = Buffer.alloc(Math.min(64 * 1024, GRAPH_RECORD_FILE_BYTES + 1 - length));
+      const { bytesRead } = await handle.read(buffer);
+      if (!bytesRead) break;
+      length += bytesRead;
+      if (length > GRAPH_RECORD_FILE_BYTES)
+        throw Error("Graph record grew beyond the 64 MiB file budget.");
+      chunks.push(buffer.subarray(0, bytesRead));
+    }
+    const after = await handle.stat();
+    if (
+      length !== before.size ||
+      after.size !== before.size ||
+      after.mtimeMs !== before.mtimeMs ||
+      after.ctimeMs !== before.ctimeMs
+    )
+      throw Error("Graph record changed during read.");
+    return Buffer.concat(chunks, length);
+  } finally {
+    await handle.close();
+  }
+}
 
 /**
  * 把磁盘上的记录字节解析并校验为 GraphRecord。read 与恢复工具共用同一个解析器：
@@ -187,7 +220,7 @@ export function createGraphRepository(
       }
       const entries: GraphRecordInventoryEntry[] = [];
       for (const name of names.filter((item) => RECORD_FILE.test(item)).sort()) {
-        const bytes = await readFile(join(directory, name));
+        const bytes = await readRecordFile(join(directory, name));
         entries.push({
           hash: name.slice(0, -".json".length),
           bytes: bytes.byteLength,
@@ -199,7 +232,7 @@ export function createGraphRepository(
     async read(target): Promise<GraphRecord | null> {
       let bytes: Buffer;
       try {
-        bytes = await readFile(pathFor(target));
+        bytes = await readRecordFile(pathFor(target));
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code === "ENOENT") {
           lastRead.delete(workspaceKey(target));
@@ -251,7 +284,10 @@ export function createGraphRepository(
           ...record,
         });
         // Windows 短暂读取占用已在原生运行及独立测试复现；复用既有有限原子替换重试，持有原 owner 锁且绝不重放命令。
-        await atomicWritePrivateTextFile(pathFor(target), JSON.stringify(value, null, 2));
+        const serialized = JSON.stringify(value, null, 2);
+        if (Buffer.byteLength(serialized) > GRAPH_RECORD_FILE_BYTES)
+          throw Error("Graph record exceeds the 64 MiB file budget; no write was performed.");
+        await atomicWritePrivateTextFile(pathFor(target), serialized);
         lastRead.delete(workspaceKey(target)); // 磁盘字节已变；下一次对账必须先重新 read
       })();
       writes.add(operation);
