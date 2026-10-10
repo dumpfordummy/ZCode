@@ -32,8 +32,12 @@ export function quickDotnetPreset(
   scopeIds: string[],
   text: string,
 ): GraphDotnetPreset {
-  if (discovery.status !== "complete" || discovery.issues.length)
-    throw Error("Quick needs a complete, safe project scan.");
+  if (
+    discovery.status !== "complete" ||
+    !discovery.prepared ||
+    discovery.prepared.scope.project !== buildPath
+  )
+    throw Error("Prepare the selected Build target to establish its complete input scope.");
   const { scopes } = quickDotnetChoices(discovery);
   const build = discovery.candidates.find((item) => item.path === buildPath);
   if (!build || build.coverage === "unsupported") throw Error("Choose a supported Build target.");
@@ -81,7 +85,8 @@ export function quickDotnetPreset(
     timeoutMs: 120000,
     buildProject: buildPath,
     configuration: "Debug",
-    sourcePaths: [...build.sourcePaths],
+    sourcePaths: [],
+    sourceScope: discovery.prepared.scope,
     expectedOutputs: [...new Set(tests.map((test) => test.assembly))],
     reviewedManifest: true,
     tests,
@@ -109,6 +114,7 @@ export function associatedQuickChecks(
         test.verifier.format === "dotnet-vstest-trx-v1" &&
         build.expectedOutputs.includes(test.verifier.target.assembly) &&
         test.cwd === build.cwd &&
+        JSON.stringify(test.sourceScope) === JSON.stringify(build.sourceScope) &&
         JSON.stringify(test.sourcePaths) === JSON.stringify(build.sourcePaths),
     )
   )

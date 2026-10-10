@@ -268,10 +268,11 @@ export function GraphContextSection({
       <p className="sr-only" role="status" aria-live="polite" data-testid="graph-context-live">
         {announcement}
       </p>
+      {/* U3：后续工作流区域已有顶边，只保留 Advanced 顶边，避免叠加分隔线。 */}
       <GraphDisclosure
         testId="graph-context-advanced"
         title={editor("advanced")}
-        className="border-y border-border"
+        className="border-t border-border"
       >
         <div className="space-y-2">
           <p className="text-foreground-subtle">{t("advancedHelp")}</p>

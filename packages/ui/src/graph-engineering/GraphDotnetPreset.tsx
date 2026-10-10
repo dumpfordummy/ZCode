@@ -56,15 +56,16 @@ export function GraphDotnetPreset({
         setup={setup}
         disabled={disabled}
         testLimitReached={preset.tests.length >= 7}
-        onBuild={(candidate) =>
+        onBuild={(candidate, sourceScope) =>
           change({
             buildProject: candidate.path,
-            sourcePaths: [...new Set([...preset.sourcePaths, ...candidate.sourcePaths])],
+            sourcePaths: [candidate.path],
+            sourceScope,
           })
         }
         onTest={(candidate, framework) =>
           change({
-            sourcePaths: [...new Set([...preset.sourcePaths, ...candidate.sourcePaths])],
+            sourcePaths: [...new Set([...preset.sourcePaths, candidate.path])],
             tests: [
               ...preset.tests,
               {

@@ -66,6 +66,14 @@ export function GraphRecipeForm({
                   </p>
                 ) : (
                   <>
+                    {recipe.sourceScope ? (
+                      <details>
+                        <summary>{t("sourcePaths")}</summary>
+                        <pre className="max-h-32 overflow-auto whitespace-pre-wrap break-all text-ui-xs">
+                          {JSON.stringify(recipe.sourceScope, null, 2)}
+                        </pre>
+                      </details>
+                    ) : null}
                     <div className="grid gap-3 sm:grid-cols-2">
                       {["name", "executable", "cwd", "timeoutMs"].map((field) => (
                         <GraphSetupField
@@ -102,7 +110,7 @@ export function GraphRecipeForm({
                           values={(recipe[field] ?? []) as string[]}
                           disabled={disabled}
                           testId={`graph-recipe-field-${index}-${field}`}
-                          max={field === "args" ? 64 : 32}
+                          max={field === "args" ? 64 : field === "sourcePaths" ? 20000 : 32}
                           onChange={(value) =>
                             onChange(updateGraphRecipeField(text, index, [field], value))
                           }

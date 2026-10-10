@@ -1,3 +1,4 @@
+import { literalSolution } from "../../packages/services/src/graph-engineering/adapters/project-large.fixture.ts";
 // Actual components + real bounded discovery/compiler/store/preview, fixture native environment.
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
@@ -33,16 +34,10 @@ const project =
 async function fixture(host, extra = false) {
   const root = host.workspaces.A;
   await fs.rm(path.join(root, "Other.sln"), { force: true });
-  await fs.writeFile(
-    path.join(root, "Demo.sln"),
-    'Project("x") = "Tests", "Tests.csproj", "x"\nEndProject',
-  );
+  await fs.writeFile(path.join(root, "Demo.sln"), literalSolution());
   await fs.writeFile(path.join(root, "Tests.csproj"), project);
   if (extra) {
-    await fs.writeFile(
-      path.join(root, "Other.sln"),
-      'Project("x") = "Tests", "Tests.csproj", "x"\nEndProject',
-    );
+    await fs.writeFile(path.join(root, "Other.sln"), literalSolution());
     await fs.writeFile(
       path.join(root, "Tests.csproj"),
       project.replace(
@@ -138,7 +133,7 @@ const scenarios = [
       }
       await T(page, "graph-quick-scan").click();
       await T(page, "graph-quick-proposal").waitFor();
-      assert.equal(await T(page, "graph-quick-save").isEnabled(), true);
+      await until(() => T(page, "graph-quick-save").isEnabled(), "selected scope preparation");
       assert.equal(await T(page, "graph-dotnet-assembly").count(), 0);
       assert.equal(await T(page, "graph-recipes-json").isVisible(), false);
       await captures(page, shotsDir, "quick-proposal");
@@ -171,7 +166,10 @@ const scenarios = [
             await selectValue(page, "graph-quick-build", "Demo.sln");
             await T(page, "graph-quick-test-1").click();
             await T(page, "graph-quick-test-0").click();
-            assert.equal(await T(page, "graph-quick-save").isEnabled(), true);
+            await until(
+              () => T(page, "graph-quick-save").isEnabled(),
+              "selected scope preparation",
+            );
             await T(page, "graph-quick-cancel").click();
             assert.equal((await host.readRecipes("A")).recipes.length, 0);
             assert.equal(started(host, "graph.recipes.save").length, 0);
@@ -181,7 +179,9 @@ const scenarios = [
           name: "custom configuration is retained byte-for-byte by viewing Quick and Advanced",
           async run({ page, host, url, shotsDir }) {
             const port = await fixture(host);
-            const discovery = await port.scan({ workspacePath: host.workspaces.A }, "custom");
+            const discovery = await port.scan({ workspacePath: host.workspaces.A }, "custom", {
+              selectedProject: "Demo.sln",
+            });
             const preset = quickDotnetPreset(discovery, "Demo.sln", ["Tests.csproj|net8.0"], "[]");
             preset.timeoutMs = 234567;
             preset.tests[0].filter = "Category=Unit";
@@ -288,7 +288,10 @@ const scenarios = [
             await T(page, "graph-quick-scan").click();
             await T(page, "graph-quick-proposal").waitFor();
             await captures(page, shotsDir, "quick-chinese-light");
-            assert.equal(await T(page, "graph-quick-save").isEnabled(), true);
+            await until(
+              () => T(page, "graph-quick-save").isEnabled(),
+              "selected scope preparation",
+            );
           },
         },
       ]
