@@ -2,34 +2,48 @@ import { useEffect, useRef, useState } from "react";
 import type { GraphProjectDiscovery, GraphRecipe } from "@zcode/services";
 import type { useGraphProjectSetup } from "@/hooks/useGraphProjectSetup.js";
 import { Button } from "@/components/ui/button.js";
-import { Checkbox } from "@/components/ui/checkbox.js";
+import { GraphQuickTestChoices } from "./GraphQuickTestChoices.js";
+import { GraphQuickSave } from "./GraphQuickSave.js";
+import { useGraphQuickDraft } from "@/hooks/useGraphQuickDraft.js";
 import { Input } from "@/components/ui/input.js";
 import { GraphQuickDiagnostics } from "./GraphQuickDiagnostics.js";
+import { GraphQuickContinuation } from "./GraphQuickContinuation.js";
 import { GraphSelect } from "./GraphSelect.js";
 import { useGraphM4Text } from "./GraphM4Text.js";
 import { quickDotnetChoices, quickDotnetPreset } from "./graphQuickDotnetModel.js";
 
 /** Composition of the existing scan/compiler/save path; no executable or persisted authority here. */
 export function GraphQuickDotnet({
+  workspaceKey,
   setup,
   text,
   disabled,
+  disabledReason,
   onSave,
 }: {
+  workspaceKey: string;
   setup: ReturnType<typeof useGraphProjectSetup>;
   text: string;
   disabled: boolean;
+  disabledReason: string;
   onSave(recipes: GraphRecipe[], run: boolean): Promise<boolean>;
 }) {
   const t = useGraphM4Text();
+  const {
+    scanRoot,
+    setScanRoot,
+    build,
+    setBuild,
+    configuration,
+    setConfiguration,
+    scopes,
+    setScopes,
+  } = useGraphQuickDraft(workspaceKey);
   const [adding, setAdding] = useState(false);
   const [discovery, setDiscovery] = useState<GraphProjectDiscovery>();
   const [prepared, setPrepared] = useState<GraphProjectDiscovery>();
-  const [scanRoot, setScanRoot] = useState("");
   const [progress, setProgress] = useState("");
-  const [testPage, setTestPage] = useState(0);
-  const [build, setBuild] = useState("");
-  const [scopes, setScopes] = useState<string[]>([]);
+  const [preparation, setPreparation] = useState("not-started");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [request, setRequest] = useState("");
@@ -39,6 +53,7 @@ export function GraphQuickDotnet({
   const key = JSON.stringify({
     text,
     build,
+    configuration,
     scopes,
     adding,
     discovery: discovery?.digest,
@@ -103,13 +118,15 @@ export function GraphQuickDotnet({
       ),
     ]),
   ].slice(0, 128);
+  const scanState = setup.state("scan", request);
   let issue = "";
   try {
     if (discovery) quickDotnetPreset(prepared ?? discovery, build, scopes, text);
   } catch (cause) {
     issue = cause instanceof Error ? cause.message : String(cause);
   }
-  const scan = async (selectedProject?: string) => {
+  if (preparation === "failed" && scanState.status === "error") issue = scanState.error;
+  const scan = async (selectedProject?: string, selectedConfiguration = configuration) => {
     const version = ++generation.current;
     const id = crypto.randomUUID();
     setRequest(id);
@@ -117,10 +134,15 @@ export function GraphQuickDotnet({
     setError("");
     setProgress("");
     setPrepared(undefined);
-    setTestPage(0);
+    setPreparation(selectedProject ? "preparing" : "not-started");
     if (!selectedProject) setDiscovery(undefined);
     const result = await setup.invoke(
-      { action: "scan", requestId: id, ...(selectedProject ? { selectedProject } : { scanRoot }) },
+      {
+        action: "scan",
+        requestId: id,
+        configuration: selectedConfiguration,
+        ...(selectedProject ? { selectedProject } : { scanRoot }),
+      },
       id,
       () => alive.current && generation.current === version,
     );
@@ -130,15 +152,27 @@ export function GraphQuickDotnet({
       const found = quickDotnetChoices(result);
       if (selectedProject) {
         setPrepared(result);
-        setScopes(found.scopes.length === 1 ? [found.scopes[0]!.id] : []);
+        setPreparation(
+          result.prepared
+            ? "ready"
+            : result.status === "cancelled"
+              ? "cancelled"
+              : result.candidates.some(
+                    (item) => item.coverage === "unsupported" || item.quickIssues?.length,
+                  )
+                ? "unsupported"
+                : "failed",
+        );
+        setScopes((old) =>
+          old.length ? old : found.scopes.length === 1 ? [found.scopes[0]!.id] : [],
+        );
       } else {
         setDiscovery(result);
-        const selected = found.builds.length === 1 ? found.builds[0]!.path : "";
+        const selected = build || (found.builds.length === 1 ? found.builds[0]!.path : "");
         setBuild(selected);
-        setScopes([]);
-        if (selected) await scan(selected);
+        if (selected) await scan(selected, selectedConfiguration);
       }
-    }
+    } else if (selectedProject) setPreparation("failed");
   };
   const save = async (run: boolean) => {
     if (disabled || busy || flight.current || !prepared || issue) return;
@@ -168,10 +202,9 @@ export function GraphQuickDotnet({
       if (alive.current) setBusy(false);
     }
   };
-  const scanState = setup.state("scan", request);
   const compileState = setup.state("dotnet-preset", key);
   return (
-    <section className="space-y-3" data-testid="graph-quick-dotnet">
+    <section className="space-y-3" data-testid="graph-quick-dotnet" data-preparation={preparation}>
       <h3 className="text-ui-base font-semibold">{t("quickTitle")}</h3>
       {existing && !adding ? (
         <>
@@ -226,6 +259,7 @@ export function GraphQuickDotnet({
                   setAdding(false);
                   setDiscovery(undefined);
                   setPrepared(undefined);
+                  setPreparation("cancelled");
                   setError("");
                   if (busy)
                     void setup.invoke({ action: "cancel-scan", requestId: request }, request);
@@ -257,9 +291,16 @@ export function GraphQuickDotnet({
                   {t("quickPrepared", { count: prepared.prepared.scope.sourceCount })}
                 </p>
               ) : null}
-              {prepared?.issues[0] ? (
+              {issue ? (
                 <p role="status" className="text-ui-sm text-warning">
-                  {prepared.issues[0]}
+                  {!build ||
+                  (!prepared?.issues.length && !scopes.length && choices.scopes.length) ? (
+                    t("quickChooseTargets")
+                  ) : (
+                    <>
+                      {t("quickUnavailable")} {issue.slice(0, 400)}
+                    </>
+                  )}
                 </p>
               ) : null}
               <GraphQuickDiagnostics
@@ -280,95 +321,64 @@ export function GraphQuickDotnet({
                 testId="graph-quick-build"
                 options={[
                   { value: "none", label: t("quickChoose") },
+                  ...(build && !choices.builds.some((item) => item.path === build)
+                    ? [{ value: build, label: `${build} (${t("quickUnresolved")})` }]
+                    : []),
                   ...choices.builds.map((item) => ({ value: item.path, label: item.path })),
                 ]}
                 onChange={(value) => {
                   setBuild(value === "none" ? "" : value);
                   setPrepared(undefined);
-                  setScopes([]);
+                  setPreparation("not-started");
                   if (value !== "none") void scan(value);
                 }}
               />
+              <GraphSelect
+                label={t("quickConfiguration")}
+                value={configuration}
+                disabled={disabled || busy}
+                testId="graph-quick-configuration"
+                options={["Debug", "Release"].map((value) => ({ value, label: value }))}
+                onChange={(value) => {
+                  setConfiguration(value);
+                  if (build) void scan(build, value);
+                }}
+              />
               <p className="text-ui-sm font-medium">{t("quickTests")}</p>
-              {choices.scopes.slice(testPage * 20, (testPage + 1) * 20).map((scope, index) => (
-                <label className="flex min-h-7 items-center gap-2 text-ui-sm" key={scope.id}>
-                  <Checkbox
-                    checked={scopes.includes(scope.id)}
-                    disabled={
-                      disabled || busy || (scopes.length >= 7 && !scopes.includes(scope.id))
-                    }
-                    data-testid={`graph-quick-test-${testPage * 20 + index}`}
-                    onCheckedChange={(checked) =>
-                      setScopes((old) =>
-                        checked === true ? [...old, scope.id] : old.filter((id) => id !== scope.id),
-                      )
-                    }
-                  />
-                  <span className="break-all">
-                    {scope.project} · {scope.framework}
-                    {scopes.includes(scope.id) ? ` · ${scopes.indexOf(scope.id) + 1}` : ""}
-                  </span>
-                </label>
-              ))}
-              {choices.scopes.length > 20 ? (
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={!testPage}
-                    onClick={() => setTestPage((page) => page - 1)}
-                  >
-                    {t("quickPrevious")}
-                  </Button>
-                  <span className="text-ui-sm">
-                    {testPage + 1} / {Math.ceil(choices.scopes.length / 20)}
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={(testPage + 1) * 20 >= choices.scopes.length}
-                    onClick={() => setTestPage((page) => page + 1)}
-                  >
-                    {t("quickNext")}
-                  </Button>
-                </div>
+              {!prepared?.prepared ? (
+                <p className="text-ui-sm text-warning">{t("quickTestsIncomplete")}</p>
               ) : null}
-              {!choices.scopes.length ? (
-                <p className="text-ui-sm text-warning">
-                  {t(prepared?.prepared ? "quickNoRunner" : "quickTestsIncomplete")}
-                </p>
-              ) : null}
-              {issue ? (
-                <p role="status" className="text-ui-sm text-warning">
-                  {!build || (!scopes.length && choices.scopes.length) ? (
-                    t("quickChooseTargets")
-                  ) : (
-                    <>
-                      {t("quickUnavailable")} {issue}
-                    </>
-                  )}
-                </p>
+              <GraphQuickTestChoices
+                choices={choices.scopes}
+                scopes={scopes}
+                setScopes={setScopes}
+                disabled={disabled}
+                busy={busy}
+              />
+              {issue && build && !busy ? (
+                <GraphQuickContinuation
+                  workspaceKey={workspaceKey}
+                  build={build}
+                  configuration={configuration}
+                  scopes={scopes}
+                  blocker={issue}
+                />
               ) : null}
               <p className="text-ui-sm text-foreground-subtle">{t("quickDefaults")}</p>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  size="sm"
-                  disabled={disabled || busy || Boolean(issue)}
-                  data-testid="graph-quick-save"
-                  onClick={() => void save(false)}
-                >
-                  {t("quickSave")}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={disabled || busy || Boolean(issue)}
-                  data-testid="graph-quick-save-run"
-                  onClick={() => void save(true)}
-                >
-                  {t("quickSaveRun")}
-                </Button>
-              </div>
+              <GraphQuickSave
+                reason={
+                  disabled
+                    ? disabledReason
+                    : busy
+                      ? t("quickWorking")
+                      : issue
+                        ? t("quickResolveBlocker")
+                        : !prepared?.prepared
+                          ? t("quickTestsIncomplete")
+                          : ""
+                }
+                onSave={(run) => void save(run)}
+              />
             </div>
           ) : null}
         </>

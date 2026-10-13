@@ -44,6 +44,11 @@ export function dotnetRecipeIssues(recipe: GraphRecipe): string[] {
     verifier.kind === "test" && verifier.format === "dotnet-vstest-trx-v1" ? verifier : undefined;
   if (!build && !test) return [];
   const issues: string[] = [];
+  if (
+    recipe.sourceScope?.version === 2 &&
+    (build ?? test!.target).configuration !== recipe.sourceScope.configuration
+  )
+    issues.push("The selected scope configuration must match the exact Build/Test command.");
   if (!isDotnetExecutable(recipe.executable))
     issues.push("The .NET profile requires an explicit dotnet executable.");
   // 声明与实际命令必须同源；附加框架、属性或 logger 会使目标证据失真，因此不能默许。

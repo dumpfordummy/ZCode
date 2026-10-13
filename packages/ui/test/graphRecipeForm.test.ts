@@ -74,3 +74,40 @@ test("adding generated checks preserves unrelated recipes and refuses identity c
   assert.throws(() => appendGraphRecipes(text, [recipe]), /duplicate/i);
   assert.throws(() => updateGraphRecipeField(text, 0, ["__proto__", "bad"], true));
 });
+
+test("v2 scopes remain editable without changing manual filter, timeout, outputs or required tests", () => {
+  const custom = {
+    ...recipe,
+    sourceScope: {
+      version: 2,
+      configuration: "Release",
+      project: "a.csproj",
+      sourceCount: 5003,
+      membershipDigest: "a".repeat(64),
+    },
+    verifier: {
+      kind: "test",
+      format: "dotnet-vstest-trx-v1",
+      reportPath: "results.trx",
+      minimumTests: 2,
+      requiredTests: ["A", "B"],
+      target: {
+        project: "a.csproj",
+        configuration: "Release",
+        framework: "net8.0",
+        assembly: "bin/a.dll",
+        filter: "Category=Unit",
+      },
+    },
+  };
+  const text = JSON.stringify([custom]);
+  assert.equal(graphRecipeGuidedIssue(custom), undefined);
+  assert.equal(updateGraphRecipeField(text, 0, ["name"], "Build"), text);
+  assert.deepEqual(JSON.parse(updateGraphRecipeField(text, 0, ["name"], "Reviewed")), [
+    { ...custom, name: "Reviewed" },
+  ]);
+  assert.equal(
+    graphRecipeGuidedIssue({ ...custom, sourceScope: { ...custom.sourceScope, version: 3 } }),
+    "invalidShape",
+  );
+});

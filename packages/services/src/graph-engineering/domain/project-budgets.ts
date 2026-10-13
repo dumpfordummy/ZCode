@@ -24,9 +24,8 @@ export const RECIPE_CONFIGURATION_MEMBERS = 700000;
 export const GRAPH_RECORD_FILE_BYTES = 64 * 1024 * 1024;
 
 /** Versioned, immutable membership commitment; contents are freshly hashed at evidence boundaries. */
-export interface GraphSourceScope {
-  version: 1;
+export type GraphSourceScope = {
   project: string;
   membershipDigest: string;
   sourceCount: number;
-}
+} & ({ version: 1 } | { version: 2; configuration: string });

@@ -3,11 +3,15 @@ import { parseProjectXml } from "./project-xml.js";
 import { metadataReference } from "./project-metadata.js";
 
 /** 静态白名单只生成设置建议；复用无解析器/IO 的 XML 读取器，不执行 MSBuild。 */
-export function addQuickProjectMetadata(item: GraphProjectCandidate, content: string): void {
+export function addQuickProjectMetadata(
+  item: GraphProjectCandidate,
+  content: string,
+  configuration = "Debug",
+): void {
   item.quickIssues = [...item.issues];
   if (item.kind === "solution") {
     try {
-      validateQuickSolution(item, content);
+      validateQuickSolution(item, content, configuration);
     } catch (error) {
       item.coverage = "unsupported";
       item.quickIssues.push(
@@ -120,7 +124,11 @@ export function addQuickProjectMetadata(item: GraphProjectCandidate, content: st
 }
 
 /** 解决方案映射也影响实际构建配置，不能据项目文件猜测 Debug 测试程序集。 */
-function validateQuickSolution(item: GraphProjectCandidate, content: string) {
+function validateQuickSolution(
+  item: GraphProjectCandidate,
+  content: string,
+  configuration: string,
+) {
   if (/\.slnx$/i.test(item.path)) {
     const root = parseProjectXml(new TextEncoder().encode(content));
     const projects: string[] = [];
@@ -171,9 +179,9 @@ function validateQuickSolution(item: GraphProjectCandidate, content: string) {
       count++;
       const guid = match[3]!;
       for (const mapping of ["ActiveCfg", "Build.0"]) {
-        const expected = `${guid}.Debug|Any CPU.${mapping} = Debug|Any CPU`;
+        const expected = `${guid}.${configuration}|Any CPU.${mapping} = ${configuration}|Any CPU`;
         if (!lines.has(expected))
-          throw Error(`Solution Debug build mapping is unresolved for ${match[2]}.`);
+          throw Error(`Solution ${configuration} build mapping is unresolved for ${match[2]}.`);
       }
     }
     if (!count) throw Error("Solution has no supported projects.");

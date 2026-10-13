@@ -18,7 +18,7 @@ export interface GraphProjectCandidate {
   coverage: "review-required" | "unsupported";
   issues: string[];
   /** Optional static SDK hints, never proof of execution or package readiness. */
-  quick?: { configuration: "Debug"; assemblies: Record<string, string> };
+  quick?: { configuration: string; assemblies: Record<string, string> };
   quickIssues?: string[];
 }
 export interface GraphProjectDiscovery {
@@ -94,7 +94,13 @@ export interface GraphReferenceValidation {
 export type GraphProjectSetupRequest = { target: GraphWorkspaceTarget } & (
   | { action: "reference-catalog" }
   | { action: "validate-reference"; path: string }
-  | { action: "scan"; requestId: string; scanRoot?: string; selectedProject?: string }
+  | {
+      action: "scan";
+      requestId: string;
+      scanRoot?: string;
+      selectedProject?: string;
+      configuration?: string;
+    }
   | { action: "scan-progress"; requestId: string }
   | { action: "cancel-scan"; requestId: string }
   | { action: "validate"; json: string }

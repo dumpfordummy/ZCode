@@ -21,7 +21,7 @@ export interface GraphProjectPort extends GraphChecksPort {
   scan(
     target: GraphWorkspaceTarget,
     requestId: string,
-    options?: { scanRoot?: string; selectedProject?: string },
+    options?: { scanRoot?: string; selectedProject?: string; configuration?: string },
   ): Promise<GraphProjectDiscovery>;
   progress?(target: GraphWorkspaceTarget, requestId: string): GraphProjectProgress;
   cancelScan(target: GraphWorkspaceTarget, requestId: string): void;

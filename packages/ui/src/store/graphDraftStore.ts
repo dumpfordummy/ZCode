@@ -43,6 +43,13 @@ export interface GraphRecipeFormDraft {
   digest: string;
 }
 export interface GraphProjectSetupDraft {
+  quick?: {
+    build: string;
+    configuration: string;
+    scopes: string[];
+    scanRoot: string;
+    notes?: string;
+  };
   preset?: GraphDotnetPreset;
   checks?: Extract<GraphChecksSelection, { kind: "recipes" }>;
   probe?: Extract<GraphChecksSelection, { kind: "dotnet-probe" }>;

@@ -145,9 +145,24 @@ export function GraphProjectRecipes({
         />
       ) : null}
       <GraphQuickDotnet
+        key={workspaceKey}
+        workspaceKey={workspaceKey}
         setup={setup}
         text={text}
         disabled={saveBlocked || graph.pending || dirty}
+        disabledReason={
+          disabled
+            ? u("creationLocked")
+            : occupied
+              ? m1("recipeSaveBlockedByRun")
+              : dirty
+                ? m4("quickUnsavedChanges")
+                : conflict
+                  ? m4("quickConflict")
+                  : !setup.supported
+                    ? m4("quickSetupUnavailable")
+                    : m4("quickLoading")
+        }
         onSave={async (recipes, run) => {
           if (saveBlocked || !form || dirty) return false;
           setError("");

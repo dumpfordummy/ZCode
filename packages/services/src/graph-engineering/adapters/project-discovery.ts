@@ -30,12 +30,18 @@ export function createProjectDiscovery(limits: { maximumFiles?: number } = {}) {
     async scan(
       target: GraphWorkspaceTarget,
       requestId: string,
-      options: { scanRoot?: string; selectedProject?: string } = {},
+      options: { scanRoot?: string; selectedProject?: string; configuration?: string } = {},
     ) {
       const key = workspaceKey(target);
       const previous = jobs.get(key);
       if (previous) previous.cancelled = true;
-      const job = new ProjectScanJob(target, requestId, limits.maximumFiles);
+      const job = new ProjectScanJob(
+        target,
+        requestId,
+        limits.maximumFiles,
+        2,
+        options.configuration,
+      );
       jobs.set(key, job);
       try {
         const root = await job.directory("");

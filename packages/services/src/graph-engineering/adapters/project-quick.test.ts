@@ -41,11 +41,15 @@ test("Quick refuses custom outputs, runtime, unknown properties, misleading runn
       project().replace('Include="Microsoft.NET.Test.Sdk"', 'Include="NotMicrosoft.NET.Test.Sdk"'),
     );
     assert.equal(
-      (await createProjectDiscovery().scan({ workspacePath: root }, "runner")).candidates[0]?.quick,
-      undefined,
+      (await createProjectDiscovery().scan({ workspacePath: root }, "runner")).candidates[0]
+        ?.runner,
+      "unknown",
     );
     await writeFile(join(root, "Tests.csproj"), project());
-    await writeFile(join(root, "Directory.Build.props"), "<Project />");
+    await writeFile(
+      join(root, "Directory.Build.props"),
+      '<Project><Target Name="Custom" /></Project>',
+    );
     const selected = await createProjectDiscovery().scan({ workspacePath: root }, "props", {
       selectedProject: "Tests.csproj",
     });
