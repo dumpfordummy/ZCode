@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { createProjectDiscovery } from "./project-discovery.js";
@@ -29,7 +29,7 @@ async function fixture(t: { after(fn: () => Promise<void>): void }) {
   return { root, write, target, prepare };
 }
 test("Content/None, shared inputs, import-relative items, chosen configuration and freshness", async (t) => {
-  const { write, target, prepare } = await fixture(t);
+  const { root, write, target, prepare } = await fixture(t);
   await write(
     "Tests/Tests.csproj",
     xml(
@@ -71,6 +71,13 @@ test("Content/None, shared inputs, import-relative items, chosen configuration a
   const initial = await fingerprint();
   await write("Tests/data/value.txt", "changed");
   assert.notEqual((await fingerprint()).digest, initial.digest);
+  const beforeShared = await fingerprint();
+  await write("shared/Shared.cs", "// changed shared input");
+  assert.notEqual((await fingerprint()).digest, beforeShared.digest);
+  const importBytes = await readFile(join(root, "meta/items.props"), "utf8");
+  await write("meta/items.props", importBytes + "\n");
+  await assert.rejects(fingerprint, /membership or metadata changed/);
+  await write("meta/items.props", importBytes);
   await write("Tests/data/new.txt", "new member");
   await assert.rejects(fingerprint, /membership or metadata changed/);
 });

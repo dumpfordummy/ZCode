@@ -56,7 +56,8 @@ export function graphRecipeGuidedIssue(
     recipe.sourceScope !== undefined &&
     (!object(recipe.sourceScope) ||
       (recipe.sourceScope.version !== 1 && recipe.sourceScope.version !== 2) ||
-      (recipe.sourceScope.version === 2 && !["Debug", "Release"].includes(String(recipe.sourceScope.configuration))) ||
+      (recipe.sourceScope.version === 2 &&
+        !["Debug", "Release"].includes(String(recipe.sourceScope.configuration))) ||
       typeof recipe.sourceScope.project !== "string" ||
       typeof recipe.sourceScope.membershipDigest !== "string" ||
       typeof recipe.sourceScope.sourceCount !== "number")
