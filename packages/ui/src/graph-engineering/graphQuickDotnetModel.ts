@@ -14,13 +14,13 @@ export function quickDotnetChoices(discovery: GraphProjectDiscovery) {
       ? solutions
       : candidates;
   const scopes = projects
-    .filter((item) => item.runner === "vstest" && item.quick)
+    .filter((item) => item.runner === "vstest")
     .flatMap((item) =>
       item.frameworks.map((framework) => ({
         id: `${item.path}|${framework}`,
         project: item.path,
         framework,
-        assembly: item.quick!.assemblies[framework]!,
+        assembly: item.quick?.assemblies[framework] ?? "",
       })),
     );
   return { builds, scopes };
@@ -37,7 +37,12 @@ export function quickDotnetPreset(
     !discovery.prepared ||
     discovery.prepared.scope.project !== buildPath
   )
-    throw Error("Prepare the selected Build target to establish its complete input scope.");
+    throw Error(
+      discovery.issues[0] ??
+        (discovery.status === "cancelled"
+          ? "Preparation was cancelled. Prepare the selected target again."
+          : "Prepare the selected Build target to establish its complete input scope."),
+    );
   const { scopes } = quickDotnetChoices(discovery);
   const build = discovery.candidates.find((item) => item.path === buildPath);
   if (!build || build.coverage === "unsupported") throw Error("Choose a supported Build target.");
@@ -58,14 +63,18 @@ export function quickDotnetPreset(
     item.projects.forEach(visit);
   };
   visit(buildPath);
+  const configuration =
+    discovery.prepared.scope.version === 2 ? discovery.prepared.scope.configuration : "Debug";
   if (!scopeIds.length || scopeIds.length > 7 || new Set(scopeIds).size !== scopeIds.length)
     throw Error("Choose one to seven ordered Test scopes.");
   const tests = scopeIds.map((id) => {
     const scope = scopes.find((item) => item.id === id);
     if (!scope || !reachable.has(scope.project))
-      throw Error("Every selected Test must be built by the selected Build target.");
+      throw Error(
+        "This test project is not built by the selected target. Select its project or a solution that includes it.",
+      );
     const { id: _id, ...target } = scope;
-    return { ...target, configuration: "Debug", minimumTests: 1, requiredTests: [] };
+    return { ...target, configuration, minimumTests: 1, requiredTests: [] };
   });
   const existing: unknown = JSON.parse(text);
   if (!Array.isArray(existing))
@@ -84,7 +93,7 @@ export function quickDotnetPreset(
     cwd: ".",
     timeoutMs: 120000,
     buildProject: buildPath,
-    configuration: "Debug",
+    configuration,
     sourcePaths: [],
     sourceScope: discovery.prepared.scope,
     expectedOutputs: [...new Set(tests.map((test) => test.assembly))],

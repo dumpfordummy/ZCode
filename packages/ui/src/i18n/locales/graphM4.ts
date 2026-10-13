@@ -4,6 +4,47 @@
  * 只包含 UI 自有的标签与解释。工作流名称与描述（Host 提供）、用户输入、存储的 id、摘要与 Host 诊断保持原文。
  */
 const messages: Record<string, [string, string]> = {
+  quickUnresolved: ["unresolved", "未确认"],
+  quickWorking: ["Wait for the current setup operation to finish.", "请等待当前设置操作完成。"],
+  quickResolveBlocker: [
+    "Resolve the selected target's issue above before saving.",
+    "保存前请先解决上方所选目标的问题。",
+  ],
+  quickUnsavedChanges: [
+    "Save or discard the existing custom edits before adding checks.",
+    "添加检查前请保存或放弃现有自定义修改。",
+  ],
+  quickConflict: [
+    "Reload the changed check configuration before saving.",
+    "保存前请重新加载已更改的检查配置。",
+  ],
+  quickSetupUnavailable: [
+    "Project setup is unavailable on this connection.",
+    "当前连接不支持项目设置。",
+  ],
+  quickLoading: [
+    "Wait for the check configuration operation to finish.",
+    "请等待检查配置操作完成。",
+  ],
+  quickConfiguration: ["Configuration", "配置"],
+  quickContinue: ["Continue guided setup", "继续引导设置"],
+  quickCloseGuided: ["Close guided draft", "关闭引导草稿"],
+  quickDraftOnly: [
+    "Incomplete setup draft — cannot save or run verified checks.",
+    "设置草稿尚未完成，无法保存或运行已验证检查。",
+  ],
+  quickGuidedAction: [
+    "Keep these choices. Resolve the selected target's issue, or choose a supported Build target above, then Detect again. Existing custom checks remain available in Advanced.",
+    "保留这些选择。解决所选目标的问题，或在上方选择受支持的构建目标，然后重新检测。现有自定义检查仍可在高级设置中使用。",
+  ],
+  quickUnresolvedNotes: [
+    "Unresolved input details (local draft notes)",
+    "未解决的输入详情（本地草稿备注）",
+  ],
+  quickInspectionUnavailable: [
+    "MSBuild inspection is not available through this setup's native permission contract. Notes or a review checkbox cannot verify unknown inputs.",
+    "此设置的原生权限接口尚不支持 MSBuild 检查。备注或确认复选框不能验证未知输入。",
+  ],
   quickScanRoot: ["Solution, project or subfolder (optional)", "解决方案、项目或子目录（可选）"],
   quickProgress: ["Scanning — stage: entries / metadata files", "扫描中 — 阶段：条目 / 元数据文件"],
   quickPartial: [
@@ -61,8 +102,8 @@ const messages: Record<string, [string, string]> = {
   quickAdd: ["Add .NET checks", "添加 .NET 检查"],
   quickCancel: ["Cancel", "取消"],
   quickDefaults: [
-    "Debug · Saving does not run checks. Running first opens command and environment review, then asks for native Tool permission.",
-    "Debug · 保存不会运行检查。运行前会打开命令与环境审阅，随后请求原生工具权限。",
+    "Conservative inputs include project and shared subtrees. Save does not execute. Run opens exact command review, then native permission.",
+    "输入保守覆盖项目及共享子目录。保存不会执行命令；运行先显示准确命令，再请求原生权限。",
   ],
   quickSaved: ["Saved · not run by this save", "已保存 · 此次保存未运行检查"],
   quickSetup: ["Set up project checks", "设置项目检查"],

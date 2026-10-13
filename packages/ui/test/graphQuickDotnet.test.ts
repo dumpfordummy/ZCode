@@ -105,3 +105,33 @@ test("ambiguity, incomplete scan, unknown metadata and unsupported runner cannot
   unsupported.candidates[1]!.runner = "mtp";
   assert.deepEqual(quickDotnetChoices(unsupported).scopes, []);
 });
+
+test("v2 configuration stays bound to output and commands; selected failure precedes generic guidance", () => {
+  const ready = structuredClone(discovery);
+  ready.prepared!.scope = { ...ready.prepared!.scope, version: 2, configuration: "Release" };
+  ready.candidates[1]!.quick = {
+    configuration: "Release",
+    assemblies: { "net8.0": "bin/Release/net8.0/Tests.dll" },
+  };
+  ready.candidates[1]!.frameworks = ["net8.0"];
+  const preset = quickDotnetPreset(ready, "Demo.sln", ["Tests.csproj|net8.0"], "[]");
+  assert.equal(preset.configuration, "Release");
+  const recipes = compileDotnetRecipes(preset);
+  assert.ok(recipes.every((recipe) => recipe.args.includes("Release")));
+  assert.throws(() => compileDotnetRecipes({ ...preset, configuration: "Debug" }), /configuration/);
+  assert.throws(
+    () =>
+      quickDotnetPreset(
+        {
+          ...ready,
+          prepared: undefined,
+          status: "limited",
+          issues: ["Selected import is external"],
+        },
+        "Demo.sln",
+        [],
+        "[]",
+      ),
+    /Selected import is external/,
+  );
+});
