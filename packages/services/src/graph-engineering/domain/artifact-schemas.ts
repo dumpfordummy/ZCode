@@ -59,14 +59,17 @@ const sourcePaths = z
     (value) => new Set(value.map((path) => path.toLowerCase())).size === value.length,
     "Duplicate/case-aliased source paths.",
   );
-const sourceScope = z
-  .object({
-    version: z.literal(1),
-    project: relativePath,
-    membershipDigest: z.string().regex(/^[a-f0-9]{64}$/),
-    sourceCount: z.number().int().min(1).max(PROJECT_SCOPE_BUDGET.sourceFiles),
-  })
-  .strict();
+const scopeFields = {
+  project: relativePath,
+  membershipDigest: z.string().regex(/^[a-f0-9]{64}$/),
+  sourceCount: z.number().int().min(1).max(PROJECT_SCOPE_BUDGET.sourceFiles),
+};
+const sourceScope = z.discriminatedUnion("version", [
+  z.object({ ...scopeFields, version: z.literal(1) }).strict(),
+  z
+    .object({ ...scopeFields, version: z.literal(2), configuration: z.enum(["Debug", "Release"]) })
+    .strict(),
+]);
 const dotnetScope = {
   project: relativePath,
   configuration: z.string().regex(/^[A-Za-z0-9_.-]{1,80}$/),

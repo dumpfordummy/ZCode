@@ -15,6 +15,9 @@ import { projectMetadata } from "../domain/project-metadata.js";
 import { addQuickProjectMetadata } from "../domain/project-quick.js";
 import { validateGraphRelativePath } from "../domain/artifact-schemas.js";
 import { readDeclaredFile } from "./artifact-files.js";
+import { loadDeclarativeProject } from "./project-declarative-load.js";
+import type { DeclarativeProject } from "../domain/project-declarative.js";
+import { projectPatternMayEnter, projectPatternExcludesTree } from "../domain/project-items.js";
 
 export const metadataName =
   /(?:\.(?:sln|slnx|csproj)$|^(?:global\.json|Directory\.(?:Build\.(?:props|targets|rsp)|Solution\.(?:props|targets)|Packages\.props)|(?:before|after)\..*\.slnx?\.targets|NuGet\.Config|\.editorconfig)$)/i;
@@ -36,6 +39,7 @@ export class ProjectScanJob {
   readonly contents = new Map<string, string>();
   readonly candidates = new Map<string, GraphProjectCandidate>();
   readonly identities = new Map<string, string>();
+  readonly declarations = new Map<string, DeclarativeProject>();
   private readonly diagnostics = new Set<string>();
   private edges = 0;
   private metadataAttempts = 0;
@@ -48,6 +52,8 @@ export class ProjectScanJob {
     readonly target: GraphWorkspaceTarget,
     requestId: string,
     maximumFiles?: number,
+    readonly policyVersion: 1 | 2 = 2,
+    readonly configuration = "Debug",
   ) {
     this.limits = { ...defaults, entries: maximumFiles ?? defaults.entries };
     this.progress = {
@@ -143,8 +149,20 @@ export class ProjectScanJob {
       );
     this.result.metadata.push(record);
     if (!/\.(?:sln|slnx|csproj)$/i.test(path)) return;
-    const candidate = projectMetadata(path, content, []);
-    addQuickProjectMetadata(candidate, content);
+    let candidate = projectMetadata(path, content, []);
+    if (this.policyVersion === 2 && candidate.kind === "project") {
+      try {
+        const declaration = await loadDeclarativeProject(this, path);
+        this.declarations.set(key, declaration);
+        candidate = declaration.candidate;
+      } catch (error) {
+        const issue = error instanceof Error ? error.message : "Unsupported declarative project.";
+        candidate.coverage = "unsupported";
+        candidate.issues = [issue];
+        candidate.quickIssues = [issue];
+        delete candidate.quick;
+      }
+    } else addQuickProjectMetadata(candidate, content, this.configuration);
     this.edges += candidate.projects.length;
     if (this.edges > this.limits.referenceEdges)
       throw new ProjectJobStopped(
@@ -184,6 +202,21 @@ export class ProjectScanJob {
             this.issue(`Skipped link/reparse entry: ${path}.`);
           } else if (entry.isDirectory()) {
             if (excludedNames.has(entry.name.toLowerCase())) {
+              if (strict && this.policyVersion === 2)
+                for (const declaration of this.declarations.values())
+                  for (const operation of declaration.operations) {
+                    if (operation.action === "Remove") continue;
+                    const crosses = operation.patterns.some((pattern) =>
+                      projectPatternMayEnter(pattern, path),
+                    );
+                    const excludes = operation.excludes.some((pattern) =>
+                      projectPatternExcludesTree(pattern, path),
+                    );
+                    if (crosses && !excludes)
+                      throw Error(
+                        `Declared ${operation.kind} glob may include excluded state/output directory: ${path}. Add an explicit Exclude or narrow the pattern.`,
+                      );
+                  }
               if (this.result.excluded.length < 128) this.result.excluded.push(path);
               continue;
             }

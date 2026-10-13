@@ -62,6 +62,16 @@ The explicit Z4 assignment extends this same owner with version-4 immutable run 
 
 # Z5 extension
 
+## U4 project setup scope policy
+
+The existing ProjectScanJob owns bounded passive project preparation. New sourceScope v2
+descriptors bind Debug/Release configuration and the declarative file/import policy in
+`docs/graph-engineering/z8/Z8_5_U4_SPEC.md`; v1 reconstruction and receipt semantics remain
+unchanged. The schema/compiler require selected configuration to agree with commands.
+Renderer Quick drafts persist choices and unresolved notes only, never prepared authority.
+Save and verification reconstruct scope through the same recipe/source owners. Setup has
+no execution-capable MSBuild inspection contract; unsupported shapes remain non-runnable.
+
 `docs/graph-engineering/Z5_SPEC.md` defines explicit version-5 typed Conditions, exclusive branches and one bounded repair region. `routing-types.ts` carries declarative predicates, finite limits, immutable iterations, exact attempt maps and persisted route checkpoints. The same serialized Host owns cursor advancement, admission reservations and deadline cancellation. Each repair gets fresh native sessions; historical attempts and artifacts remain immutable. Trusted native Test verification observations distinguish failed assertions from invalid provenance without relaxing Z4 artifact acceptance. Decisions persist before successors. Cold checkpoints require explicit `run({action: "continue", ...})`; uncertain creation/submission is never replayed. Every End route requires the final Human Approval. Renderer iteration selection is only a projection and never changes execution ownership.
 
 ## Native runtime compatibility (Z8.3-R1)

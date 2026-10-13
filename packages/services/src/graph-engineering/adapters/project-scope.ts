@@ -6,6 +6,7 @@ import { PROJECT_SCOPE_BUDGET } from "../domain/project-budgets.js";
 import { validateGraphRelativePath } from "../domain/artifact-schemas.js";
 import { assertWorkspaceFilePath, readDeclaredFile } from "./artifact-files.js";
 import { ProjectScanJob, pathKey, projectDigest } from "./project-scan-job.js";
+import { evaluateFileItems } from "../domain/project-items.js";
 
 const ancestorNames = [
   "Directory.Build.props",
@@ -172,9 +173,29 @@ export async function prepareProjectScope(job: ProjectScanJob, project: string) 
         )
           throw Error(`${path}: external/custom SDK resolution requires Advanced review.`);
       }
-      if (/^Directory\./i.test(name))
+      if (
+        /^Directory\./i.test(name) &&
+        !(
+          job.policyVersion === 2 &&
+          /^Directory\.(Build\.(props|targets)|Packages\.props)$/.test(name)
+        )
+      )
         throw Error(`${path}: applicable imported defaults require Advanced review.`);
     }
+  if (job.policyVersion === 2) {
+    for (const metadata of job.result.metadata) await add(metadata.path);
+    for (const declaration of job.declarations.values())
+      for (const operation of declaration.operations)
+        for (const pattern of operation.patterns) {
+          // 导入项目相对共享输入与空 glob 的未来成员都要覆盖，不能只收集当前匹配项。
+          const parts = pattern.split("/");
+          const wildcard = parts.findIndex((part) => /[*?]/.test(part));
+          let folder = parts.slice(0, wildcard < 0 ? -1 : wildcard).join("/");
+          while (folder && !(await exists(join(job.target.workspacePath, folder))))
+            folder = folder.includes("/") ? folder.slice(0, folder.lastIndexOf("/")) : "";
+          folders.add(folder);
+        }
+  }
   job.progress.stage = "sources";
   const roots = [...folders]
     .sort()
@@ -183,6 +204,24 @@ export async function prepareProjectScope(job: ProjectScanJob, project: string) 
         !all.some((other) => other !== folder && (other === "" || folder.startsWith(`${other}/`))),
     );
   for (const folder of roots) await job.walk(folder, add, true);
+  if (job.policyVersion === 2)
+    for (const [project, declaration] of job.declarations)
+      for (const item of evaluateFileItems(
+        declaration.candidate.path || project,
+        [...paths.values()],
+        declaration.operations,
+        declaration.defaults,
+      )) {
+        if (item.kind === "EmbeddedResource" && /\.resx$/i.test(item.path)) {
+          await job.metadata(item.path);
+          if (
+            /ResXFileRef|BinaryFormatter|SoapFormatter/i.test(job.contents.get(pathKey(item.path))!)
+          )
+            throw Error(
+              `${item.path}: indirect or serialized resource inputs require explicit review.`,
+            );
+        }
+      }
   // 元数据读取与源枚举间发生变化时拒绝发布，不把不同时刻的闭包拼成授权。
   let recheckRemaining = PROJECT_SCOPE_BUDGET.metadataRecheckBytes;
   for (const metadata of job.result.metadata) {
@@ -196,11 +235,15 @@ export async function prepareProjectScope(job: ProjectScanJob, project: string) 
   await job.verifyDirectories();
   const sourcePaths = [...paths.values()].sort();
   const metadata = [...job.result.metadata].sort((a, b) => (a.path < b.path ? -1 : 1));
+  const policy =
+    job.policyVersion === 1
+      ? { version: 1 as const }
+      : { version: 2 as const, configuration: job.configuration };
   const scope: GraphSourceScope = {
-    version: 1,
+    ...policy,
     project,
     sourceCount: sourcePaths.length,
-    membershipDigest: projectDigest({ version: 1, project, sourcePaths, metadata }),
+    membershipDigest: projectDigest({ ...policy, project, sourcePaths, metadata }),
   };
   job.result.prepared = { scope, sourcePaths };
   if (Buffer.byteLength(JSON.stringify(job.result)) > PROJECT_SCOPE_BUDGET.serializedBytes) {
@@ -216,7 +259,13 @@ export async function revalidateProjectScope(
   expected: GraphSourceScope,
   deadline = Date.now() + PROJECT_SCOPE_BUDGET.elapsedMs,
 ) {
-  const job = new ProjectScanJob(target, "freshness");
+  const job = new ProjectScanJob(
+    target,
+    "freshness",
+    undefined,
+    expected.version,
+    expected.version === 2 ? expected.configuration : "Debug",
+  );
   job.limits.elapsedMs = Math.max(0, deadline - Date.now());
   await prepareProjectScope(job, expected.project);
   const prepared = job.finish().prepared!;

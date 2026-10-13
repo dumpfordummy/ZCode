@@ -98,11 +98,14 @@ test("local unreadable/oversized metadata does not stop independent inventory or
   const prepared = await scanner.scan(target, "selected", { selectedProject: "good/App.csproj" });
   assert.equal(prepared.status, "complete", prepared.issues.join(" "));
   assert.equal(prepared.prepared!.sourcePaths.length, 2);
-  await writeFile(join(root, "Directory.Build.props"), "<Project />");
+  await writeFile(
+    join(root, "Directory.Build.props"),
+    '<Project><Target Name="Custom" /></Project>',
+  );
   const imported = await scanner.scan(target, "ancestor", { selectedProject: "good/App.csproj" });
   assert.equal(imported.status, "limited");
   assert.equal(imported.prepared, undefined);
-  assert.match(imported.issues.join(" "), /applicable imported/);
+  assert.match(imported.issues.join(" "), /unsupported Target/);
 });
 
 test("source and output limits are independent; aliases and oversized files fail closed", async (t) => {
