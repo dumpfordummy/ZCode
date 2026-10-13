@@ -17,6 +17,8 @@ const sizes = [
 async function capture(page, directory, name, size) {
   if (!directory) return;
   await page.setViewportSize({ width: size[0], height: size[1] });
+  if (name.startsWith("guided-draft"))
+    await T(page, "graph-quick-continuation").scrollIntoViewIfNeeded();
   await page.screenshot({ path: path.join(directory, `${name}-${size.join("x")}.png`) });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
 }

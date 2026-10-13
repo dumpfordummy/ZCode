@@ -29,7 +29,8 @@ are bounded to 64 documents / depth 16.
 Unsupported shapes remain actionable, non-runnable drafts: conditional imports;
 arbitrary conditions/property functions/unknown properties; custom SDKs, targets,
 tasks, output paths and generators; escaped item syntax and transforms; external
-paths/reparse aliases; indirect or serialized resx inputs; repeated/cyclic imports;
+paths/reparse aliases; typed, indirect, serialized, schema-bearing or custom-reader
+resx inputs (only plain string resx is accepted); repeated/cyclic imports;
 unknown metadata; file items before SDK defaults; unresolved multi-framework
 conditions. Explicit declarations intersecting excluded state/output trees require
 a provable subtree Exclude or a narrower pattern. This is not universal MSBuild
@@ -72,6 +73,8 @@ MSBuild calls in the oracle are explicit synthetic test actions only.
   closure behavior. No limits or exclusions were weakened.
 - Unchanged F2 RunInfo evidence regressions: 2 passed. The portable genuine-fixture
   tests requiring a separate owned receipt retain their two normal skips.
+- Additional v2/manual-form round-trip tests: 8 passed; content/shared/import
+  freshness checks passed after the final test additions.
 - Full portable selector on Windows: 993 tests, 989 passed, 2 failed, 2 skipped.
   Failures are the unchanged Windows ASAR-header hash assertion and absolute-path
   ESM config import. The Linux suite also expects four skips, while Windows runs
@@ -88,7 +91,9 @@ MSBuild calls in the oracle are explicit synthetic test actions only.
   failure, retained guided notes after cancellation and a Chinese view.
 - Installed oracle: .NET SDK 8.0.425, MSBuild 17.11.48.46605. Debug/Release output
   identity, copied Content/None and embedded-resource metadata agree with the
-  installed engine. See [oracle receipt](evidence/u4/oracle.json).
+  installed engine. Only net8.0 has native Build/Test proof; parsing other literal
+  framework names does not establish local toolchain/adapter readiness. Ordered lists, question wildcards, local Exclude, existing-only
+  Update, Remove and empty matches also agree. See [oracle receipt](evidence/u4/oracle.json).
 
 Local Node was 24.11.1 rather than the repository's 24.14.0 pin; pnpm was the
 locked 10.33.2. No dependency/SDK upgrade or retargeting was performed.
@@ -107,8 +112,41 @@ rebases already-restored artifacts onto complete copies of existing cached publi
 packages; no restore/feed request is performed. The next run's approved Build
 passed (4,358 ms native command), and Build acceptance was true, but the Test
 successor did not reach its permission boundary before the existing harness
-deadline. That attempt does not establish Test success. A separate retry is being
-recorded; final native outcome and review identity are supplied in the PR handoff.
+deadline. That attempt does not establish Test success.
+
+The separate retry **passed the complete 5,013-input sequence** through the real
+UI/native permission owners:
+
+| Case              | Native result and evidence                                                                                                                                |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pass              | Build exit 0, Test exit 0; 3/3 real tests passed; accepted original-byte TRX and operation-bound normalization receipt                                    |
+| Assertion failure | Same configuration, changed assertion, fresh Build exit 0 and Test exit 1; 2 passed / 1 failed; valid FAIL observation, not parser/infrastructure failure |
+| Recovery          | Restore assertion; fresh approved Build/Test exit 0; 3/3 passing evidence accepted                                                                        |
+| Stale Content     | Modify copied content after review; confirmation rejected, zero new runs/models                                                                           |
+
+The tests consume copied literal Content, copied None Update, an embedded resource
+and a linked shared source. No F2 parser, normalization, permission, admission or
+evidence-acceptance rule changed. See the sanitized [native receipt](evidence/u4/native.json).
+
+Native command durations were Build 4,408 / 5,100 / 5,652 ms and Test 1,665 / 1,446 /
+1,193 ms. End-to-end overhead is still substantial: admission-to-Build-start was
+65,029–73,226 ms, and Build-exit-to-Test-start was 117,280–141,190 ms. These intervals
+include repeated required source verification, harness UI work and native permission
+interaction, not just command execution. No product deadline was increased and no
+freshness boundary was skipped. Independent native reviews then passed all four
+stale-input rejection probes: Content bytes, shared source bytes, imported metadata
+bytes and a new file matching SDK default-item membership. Each rejected confirmation
+created zero new runs/models at 5,013 inputs. See the [freshness receipt](evidence/u4/freshness.json).
+An initial helper attempt stopped after the content case because two Close buttons
+matched its selector; the corrected helper passed all four cases.
+
+## Review delivery
+
+One [draft PR #22](https://github.com/dumpfordummy/ZCode/pull/22) targets integration;
+auto-merge is off. The initial head passed Linux typecheck and graph-tests; static
+checks correctly rejected formatting in the spec-first commit. The spec is formatted
+and the final-head check state and full head/base/tested-merge SHAs are recorded in
+the PR description and final handoff. Earlier green jobs do not certify a later head.
 
 ## Small rendered gallery
 

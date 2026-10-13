@@ -27,6 +27,7 @@ try {
     ];
     const start = performance.now();
     const result = await runDotnet(isolation, args);
+    const evaluationMs = performance.now() - start;
     assert.equal(result.exitCode, 0, result.stderr);
     assert.ok(Buffer.byteLength(result.stdout) < 512 * 1024, "bounded allowlisted oracle output");
     const value = JSON.parse(result.stdout);
@@ -53,6 +54,8 @@ try {
       args,
       assembly,
       elapsedMs: performance.now() - start,
+      evaluationMs,
+      prepareMs: performance.now() - start - evaluationMs,
       content: true,
       none: true,
       resource: true,

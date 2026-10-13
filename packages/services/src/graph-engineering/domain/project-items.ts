@@ -1,7 +1,39 @@
 import { validateGraphRelativePath } from "./artifact-schemas.js";
-import type { ProjectXmlElement } from "./project-xml.js";
+import { parseProjectXml, type ProjectXmlElement } from "./project-xml.js";
 
 export const fileItemNames = new Set(["Compile", "Content", "None", "EmbeddedResource"]);
+/** 资源类型可隐藏文件读取；先解析实体，再只接受无类型的字符串资源。 */
+export function assertLiteralResource(text: string): void {
+  const root = parseProjectXml(new TextEncoder().encode(text));
+  if (root.name !== "root" || root.text.trim() || Object.keys(root.attributes).length)
+    throw Error("Only plain string resx resources are supported.");
+  for (const entry of root.children) {
+    if (
+      !["data", "resheader"].includes(entry.name) ||
+      entry.text.trim() ||
+      !entry.attributes.name ||
+      Object.keys(entry.attributes).some((key) => !["name", "xml:space"].includes(key)) ||
+      entry.children.some(
+        (child) =>
+          !["value", "comment"].includes(child.name) ||
+          child.children.length ||
+          Object.keys(child.attributes).length,
+      )
+    )
+      throw Error(
+        "Typed, indirect, serialized or schema-bearing resx resources require explicit review.",
+      );
+    if (entry.name === "resheader") {
+      const value = entry.children.find((child) => child.name === "value")?.text;
+      const allowed: Record<string, string> = {
+        resmimetype: "text/microsoft-resx",
+        version: "2.0",
+      };
+      if (value !== allowed[entry.attributes.name])
+        throw Error("Custom resx reader/writer metadata requires explicit review.");
+    }
+  }
+}
 const excluded = new Set(["bin", "obj", ".git", ".zcode"]);
 export interface ProjectFileOperation {
   kind: string;
@@ -49,6 +81,7 @@ export function projectPattern(pattern: string): RegExp {
 }
 export function projectPatternMayEnter(pattern: string, directory: string): boolean {
   const segments = pattern.split("/");
+  if (segments.at(-1) === "**" && projectPattern(pattern).test(directory)) return true;
   return segments.some(
     (_, index) =>
       index < segments.length - 1 &&

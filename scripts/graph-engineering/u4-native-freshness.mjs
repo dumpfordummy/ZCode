@@ -58,6 +58,6 @@ export async function verifyU4Freshness(isolation, window, summary) {
       if (original === undefined) await unlink(target);
       else await writeFile(target, original);
     }
-    await panel.getByRole("button", { name: "Close", exact: true }).click();
+    await panel.getByRole("button", { name: "Close", exact: true }).first().click();
   }
 }

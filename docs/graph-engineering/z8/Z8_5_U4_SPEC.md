@@ -11,16 +11,16 @@ Detection, preparation, Save, tab changes and fingerprinting never run MSBuild,
 restore, a shell, a model or a provider. A configuration is a proposal, not test
 evidence. Existing native review, permission, admission and TRX owners remain intact.
 
-| Construct | Intended passive policy |
-| --- | --- |
-| SDK | Literal Microsoft.NET.Sdk; established default output layout |
-| File items | Compile, Content, None, EmbeddedResource; ordered Include/Exclude, Update, Remove; finite lists and bounded `*`, `?`, `**` |
-| Metadata | Literal CopyToOutputDirectory/CopyToPublishDirectory (Never, Always, PreserveNewest, IfDifferent), safe Link/TargetPath, LogicalName and DependentUpon; no transforms/generators |
-| Paths | Project-relative, including imported item declarations; shared inputs may leave the project directory but must remain inside the workspace |
-| Properties/conditions | Explicitly supported literal properties; Configuration/TargetFramework/Platform equality or inequality; no property functions, item expressions or unknown environment properties |
-| Imports | Bounded literal contained imports and nearest applicable Directory.Build.props/targets and Directory.Packages.props, interpreted in evaluation order; cycles and unknown execution rejected |
-| Execution | Explicit selected configuration agrees with commands, output identity, closure and saved scope; default platform AnyCPU only until other platforms have modeled command identity |
-| Unsupported | Custom SDK/output paths, generated inputs, tasks/targets, external imports, arbitrary conditions/properties/metadata, escaping whose semantics are not established |
+| Construct             | Intended passive policy                                                                                                                                                                     |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SDK                   | Literal Microsoft.NET.Sdk; established default output layout                                                                                                                                |
+| File items            | Compile, Content, None, EmbeddedResource; ordered Include/Exclude, Update, Remove; finite lists and bounded `*`, `?`, `**`                                                                  |
+| Metadata              | Literal CopyToOutputDirectory/CopyToPublishDirectory (Never, Always, PreserveNewest, IfDifferent), safe Link/TargetPath, LogicalName and DependentUpon; no transforms/generators            |
+| Paths                 | Project-relative, including imported item declarations; shared inputs may leave the project directory but must remain inside the workspace                                                  |
+| Properties/conditions | Explicitly supported literal properties; Configuration/TargetFramework/Platform equality or inequality; no property functions, item expressions or unknown environment properties           |
+| Imports               | Bounded literal contained imports and nearest applicable Directory.Build.props/targets and Directory.Packages.props, interpreted in evaluation order; cycles and unknown execution rejected |
+| Execution             | Explicit selected configuration agrees with commands, output identity, closure and saved scope; default platform AnyCPU only until other platforms have modeled command identity            |
+| Unsupported           | Custom SDK/output paths, generated inputs, tasks/targets, external imports, arbitrary conditions/properties/metadata, escaping whose semantics are not established                          |
 
 Conservative source coverage includes all regular files in the selected project
 subtrees and required shared input roots, even files removed from an item list.

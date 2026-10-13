@@ -291,6 +291,18 @@ export function GraphQuickDotnet({
                   {t("quickPrepared", { count: prepared.prepared.scope.sourceCount })}
                 </p>
               ) : null}
+              {issue ? (
+                <p role="status" className="text-ui-sm text-warning">
+                  {!build ||
+                  (!prepared?.issues.length && !scopes.length && choices.scopes.length) ? (
+                    t("quickChooseTargets")
+                  ) : (
+                    <>
+                      {t("quickUnavailable")} {issue.slice(0, 400)}
+                    </>
+                  )}
+                </p>
+              ) : null}
               <GraphQuickDiagnostics
                 diagnostics={diagnostics}
                 affected={
@@ -343,18 +355,6 @@ export function GraphQuickDotnet({
                 disabled={disabled}
                 busy={busy}
               />
-              {issue ? (
-                <p role="status" className="text-ui-sm text-warning">
-                  {!build ||
-                  (!prepared?.issues.length && !scopes.length && choices.scopes.length) ? (
-                    t("quickChooseTargets")
-                  ) : (
-                    <>
-                      {t("quickUnavailable")} {issue}
-                    </>
-                  )}
-                </p>
-              ) : null}
               {issue && build && !busy ? (
                 <GraphQuickContinuation
                   workspaceKey={workspaceKey}

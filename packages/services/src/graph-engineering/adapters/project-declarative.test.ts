@@ -144,6 +144,7 @@ test("duplicate lists, excluded glob intersections, resource indirection and exp
   for (const declaration of [
     '<Content Include="data/value.txt;data/value.txt"/>',
     '<Content Include="dat*/**/*.txt"/>',
+    '<Content Include="data/**"/>',
     '<Content Include="data/**/*.txt" Exclude="data/obj/input.txt;data/obj/nested/input.cs"/>',
     '<Content Include="data/value.txt" UnknownMetadata="value"/>',
   ]) {
@@ -160,6 +161,16 @@ test("duplicate lists, excluded glob intersections, resource indirection and exp
     '<root><data type="System.Resources.ResXFileRef"><value>../../outside.txt</value></data></root>',
   );
   assert.match((await prepare()).issues.join(" "), /resource|ResX/i);
+  await write(
+    "Tests/resource.resx",
+    '<root><data name="outside" type="System.Resources.ResXFile&#82;ef"><value>../../outside.txt</value></data></root>',
+  );
+  assert.equal((await prepare()).prepared, undefined);
+  await write(
+    "Tests/resource.resx",
+    '<root><data name="literal"><value>safe string</value></data></root>',
+  );
+  assert.equal((await prepare()).status, "complete");
   const d = declarativeProject(
     "Tests/Tests.csproj",
     new Map([

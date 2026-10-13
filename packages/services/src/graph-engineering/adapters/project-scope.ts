@@ -6,7 +6,7 @@ import { PROJECT_SCOPE_BUDGET } from "../domain/project-budgets.js";
 import { validateGraphRelativePath } from "../domain/artifact-schemas.js";
 import { assertWorkspaceFilePath, readDeclaredFile } from "./artifact-files.js";
 import { ProjectScanJob, pathKey, projectDigest } from "./project-scan-job.js";
-import { evaluateFileItems } from "../domain/project-items.js";
+import { evaluateFileItems, assertLiteralResource } from "../domain/project-items.js";
 
 const ancestorNames = [
   "Directory.Build.props",
@@ -214,12 +214,13 @@ export async function prepareProjectScope(job: ProjectScanJob, project: string) 
       )) {
         if (item.kind === "EmbeddedResource" && /\.resx$/i.test(item.path)) {
           await job.metadata(item.path);
-          if (
-            /ResXFileRef|BinaryFormatter|SoapFormatter/i.test(job.contents.get(pathKey(item.path))!)
-          )
+          try {
+            assertLiteralResource(job.contents.get(pathKey(item.path))!);
+          } catch (error) {
             throw Error(
-              `${item.path}: indirect or serialized resource inputs require explicit review.`,
+              `${item.path}: ${error instanceof Error ? error.message : "Unsupported resource"}`,
             );
+          }
         }
       }
   // 元数据读取与源枚举间发生变化时拒绝发布，不把不同时刻的闭包拼成授权。
