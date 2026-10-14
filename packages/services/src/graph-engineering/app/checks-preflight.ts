@@ -8,12 +8,15 @@ export async function assertReviewedChecks(
 ): Promise<void> {
   if (!run.purpose) return;
   const preview = run.purpose.preview;
+  state.trace(run.id, "review-recheck-start");
   const current = await state.options.checks?.capture(
     run.target,
     preview.revision,
     preview.selection,
     preview.recipeDigest,
+    (phase) => state.trace(run.id, `review-recheck:${phase}`),
   );
+  state.trace(run.id, "review-recheck-end");
   if (!current || current.digest !== preview.digest)
     throw new Error(
       "Reviewed checks/source/native configuration changed before dispatch. Prepare a new calibration; no command was retried.",

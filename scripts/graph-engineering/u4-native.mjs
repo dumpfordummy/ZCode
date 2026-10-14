@@ -4,6 +4,7 @@ import path from "node:path";
 import { createIsolation } from "./isolation.mjs";
 import { TEST_SOURCE, FAIL_SOURCE } from "./u4-native-fixture.mjs";
 import { prepareU4Fixture } from "./u4-native-fixture.mjs";
+import { prepareF1InstalledFixture, prepareF1Continuation } from "./f1-installed-fixture.mjs";
 import { prepareU5Fixture } from "./u5-native-fixture.mjs";
 import { verifyU4Freshness } from "./u4-native-freshness.mjs";
 import { verifyB1Result } from "./b1-native-proof.mjs";
@@ -25,14 +26,27 @@ const mode = process.argv.includes("--freshness-only")
     ? "save-only"
     : "native";
 const sourceMode = process.argv.includes("--source");
+const f1Installed = process.argv.includes("--f1-installed");
+const observed = (phase, detail = {}) => {
+  if (f1Installed) {
+    const row = { phase, clock: "observer-monotonic", timeMs: performance.now(), ...detail };
+    summary.phases.push(row);
+    console.log("[f1-observer]" + JSON.stringify(row));
+  }
+};
 const u5Roots = process.argv.includes("--u5-roots");
 assert.ok(
   sourceMode !== Boolean(process.env.Z1_PACKAGED_EXE),
   "Choose explicit source mode or a hash-verified detached package, exclusively.",
 );
-const isolation = await createIsolation();
+const f1Continuation = f1Installed && process.argv.includes("--continue-f1-fixture");
+assert.ok(!f1Continuation || process.env.F1_CONTINUE_WORKSPACE, "Explicit F1 workspace required");
+const isolation = await createIsolation(
+  f1Continuation ? { adoptWorkspace: process.env.F1_CONTINUE_WORKSPACE } : {},
+);
 const summary = {
   mode,
+  phases: [],
   executionPath: sourceMode ? "compiled-source-isolated-bootstrap" : "detached-package",
   home: isolation.home,
   cases: [],
@@ -77,7 +91,7 @@ async function openQuick() {
 }
 async function reviewAndRun(label, fail) {
   const panel = T(window, "graph-check-preview");
-  await panel.waitFor();
+  await panel.waitFor({ timeout: f1Installed ? 900000 : 30000 });
   const preview = JSON.parse(await T(window, "graph-check-preview-snapshot").textContent());
   assert.equal(preview.recipes.length, 2);
   assert.ok(preview.recipes.every((recipe) => recipe.sourceScope?.sourceCount === 5013));
@@ -95,8 +109,9 @@ async function reviewAndRun(label, fail) {
     JSON.stringify(preview, null, 2),
   );
   let runId;
-  window.setDefaultTimeout(180000);
+  window.setDefaultTimeout(f1Installed ? 900000 : 180000);
   try {
+    observed("user-confirmation", { label });
     runId = await confirmU2Review(isolation, window, baseline, preview);
   } catch (error) {
     if (await T(window, "graph-check-preview-error").isVisible()) {
@@ -113,19 +128,38 @@ async function reviewAndRun(label, fail) {
   } finally {
     window.setDefaultTimeout(30000);
   }
+  observed("host-admission-persisted", { label, runId });
   for (const node of preview.definition.nodes.filter((n) => n.type === "tool")) {
-    await openU2Permission(
+    const attempt = await openU2Permission(
       isolation,
       window,
       summary,
       runId,
       node.id,
       label + "-" + node.id + "-permission",
-      u5Roots ? 300000 : undefined,
+      f1Installed ? 900000 : u5Roots ? 300000 : undefined,
     );
+    observed("permission-observed", {
+      label,
+      runId,
+      operationId: attempt.operationId,
+      nodeId: node.id,
+    });
     await allowU2Permission(window);
+    observed("permission-response-sent", {
+      label,
+      runId,
+      operationId: attempt.operationId,
+      nodeId: node.id,
+    });
   }
-  const run = await waitU2Run(isolation, runId, (r) => ["Completed", "Failed"].includes(r.status));
+  const run = await waitU2Run(
+    isolation,
+    runId,
+    (r) => ["Completed", "Failed"].includes(r.status),
+    f1Installed ? 900000 : undefined,
+  );
+  observed("terminal-persisted", { label, runId });
   let result;
   try {
     const proof = await verifyB1Result(isolation, window, run, preview, fail);
@@ -143,17 +177,26 @@ async function reviewAndRun(label, fail) {
   await shot(isolation, window, summary, label + "-result", [1600, 900]);
   summary.cases.push(result);
   await writeFile(
-    path.join(isolation.home, "u4-native-summary.json"),
+    path.join(isolation.home, f1Installed ? "f1-native-summary.json" : "u4-native-summary.json"),
     JSON.stringify(summary, null, 2),
   );
   return run;
 }
 try {
-  summary.bootstrap = await (u5Roots ? prepareU5Fixture : prepareU4Fixture)(isolation);
+  summary.bootstrap = await (
+    f1Continuation
+      ? prepareF1Continuation
+      : f1Installed
+        ? prepareF1InstalledFixture
+        : u5Roots
+          ? prepareU5Fixture
+          : prepareU4Fixture
+  )(isolation);
+  observed("fixture-ready", { sdk: summary.bootstrap.sdk, home: isolation.home });
   await ensureShellFolders(isolation);
   window = await isolation.launch();
   if (mode === "native") await initializeU2NativeWorkspace(isolation, window, summary);
-  const draft = await openQuick();
+  const draft = f1Continuation ? undefined : await openQuick();
   summary.beforeSave = await noExecution();
   if (mode === "freshness-only") {
     await verifyU4Freshness(isolation, window, summary);
@@ -208,8 +251,10 @@ try {
       recipes,
     });
   } else {
-    await T(window, "graph-quick-save-run").click();
-    await reviewAndRun("B1-Q2", false);
+    if (!f1Continuation) {
+      await T(window, "graph-quick-save-run").click();
+      await reviewAndRun("B1-Q2", false);
+    }
     const config = await readFile(path.join(isolation.workspace, ".zcode/config.json"), "utf8");
     for (const [label, source, fail] of [
       ["B1-Q3-fail", FAIL_SOURCE, true],
@@ -228,7 +273,7 @@ try {
     await showGraph(window);
     await T(window, "graph-view-setup").click();
     await T(window, "graph-check-prepare").click();
-    await T(window, "graph-check-preview").waitFor();
+    await T(window, "graph-check-preview").waitFor({ timeout: f1Installed ? 900000 : 30000 });
     const prior = await readGraphRecord(isolation);
     const changed = path.join(isolation.workspace, "Tests/data/content.txt");
     const original = await readFile(changed, "utf8");
@@ -250,7 +295,7 @@ try {
           );
         },
         undefined,
-        { timeout: 180000 },
+        { timeout: f1Installed ? 900000 : 180000 },
       );
       assert.deepEqual((await readGraphRecord(isolation)).runs, prior.runs);
       assert.equal(modelCount(isolation), 0);
@@ -282,7 +327,7 @@ try {
   summary.nativeLedger = await ledger(isolation).catch(() => undefined);
   summary.models = modelCount(isolation);
   await writeFile(
-    path.join(isolation.home, "u4-native-summary.json"),
+    path.join(isolation.home, f1Installed ? "f1-native-summary.json" : "u4-native-summary.json"),
     JSON.stringify(summary, null, 2),
   );
   console.log(

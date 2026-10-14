@@ -215,3 +215,99 @@ This is an external diagnostic allowance, not a product timeout or performance f
 Permission is still accepted individually through the existing native UI. No
 retry or overlapping invocation is allowed. Source content, resource and application
 assertions must PASS, deliberately FAIL, then PASS after exact source restoration.
+
+### Phase observation completion
+
+The opt-in diagnostic path also observes existing review rechecks, persistence and
+the actual native permission broker request/response. Run IDs identify Host record
+and review intervals; operation IDs identify native attempts. Host and native
+monotonic clocks are separate domains. A review interval contains membership and
+byte hashing: those nested durations must never be added as independent costs.
+Diagnostics contain only IDs, named phases and monotonic times, are bounded to
+4,096 entries per owner, and cannot alter admission, authorization or replay.
+
+## Bounded Web profile implementation design (not yet enabled)
+
+The proposed first profile is `web-static-net8-win-x64-v1`: installed SDK 8.0.426,
+MSBuild 17.11.69, net8.0, Debug/Release, one ordinary Microsoft.NET.Sdk.Web service
+and one Microsoft.NET.Sdk VSTest project referencing it. No RID, publishing,
+Razor/Blazor files, Protobuf/Grpc.Tools, custom targets/tasks, custom SDKs, custom
+generators, unknown property functions or external project imports are admitted.
+The installed bundled-versions file selects reference packs 8.0.32; this must be
+verified against installed bytes and effective observations, never inferred from
+the SDK version's spelling. The profile remains unavailable until its oracle and
+end-to-end Save/reopen/Build/Test evidence pass.
+
+### Inputs and actual SDK effects
+
+Web is not parsed as an alias of Microsoft.NET.Sdk. Its installed Server props and
+targets import .NET, Razor, Web.ProjectSystem and Publish. The profile must account
+for implicit JSON/configuration/wwwroot Content, generated global usings and
+assembly attributes, the SDK's request-delegate/configuration-binding generators,
+and build/development static-web-asset manifests. In 8.0.426,
+ResolveProjectStaticWebAssets discovers Content during targets, and
+GenerateStaticWebAssetsManifest consumes the resulting assets and discovery
+patterns. An empty evaluated StaticWebAsset list is therefore not completeness.
+
+The existing bounded declarative parser may be reused for project-local syntax,
+conditions, literal imports and file operations, but a Web candidate must not receive
+guessed assembly paths from that parser. Two separately reviewed, permission-owned
+queries establish actual Web and Test TargetPath/configuration/framework identities.
+Only the completed matching reference closure can produce selectable native tests.
+An unrelated test project cannot join that closure through a UI choice.
+
+Generated output exclusions must be exact SDK-owned project output/intermediate
+roots, with restored project.assets.json and generated NuGet import metadata still
+included as inputs. A nested directory named bin/obj is not automatically excluded.
+Applicable project/Directory metadata, imported bytes, editor configuration and
+future file membership are reconstructed before/after content hashing. Dynamic
+additions, removals and renames invalidate the appropriate membership commitment.
+
+### Toolchain and environment boundary
+
+The read scope must identify the exact dotnet executable, SDK, selected reference
+packs, selected runtime/host components and each known public package directory;
+it may not enumerate an entire user profile or package cache. Imported package
+props/targets/analyzers and package integrity metadata require explicit coverage.
+An assets file alone cannot establish these inputs. Public cached packages may be
+copied for synthetic fixture preparation; product setup never restores or installs.
+
+SourceLink/Git queries and user MSBuild extension imports are additional installed
+SDK effects. A supported profile must either cover those inputs completely or use
+explicit, fixed, reviewed profile controls that disable those effects. Such controls
+must apply consistently to the profile query and Build/Test, and must not silently
+modify project files. The existing ExecutionPort empty-base environment overlay is
+the only allowed process path if a fixed profile environment is needed. No arbitrary
+caller environment or shell switches may be introduced. Its effective identity must
+be checked before Save, preview confirmation and native execution, including after
+permission, without exporting environment values.
+
+### Versioning and authority
+
+New executable configurations use sourceScope version 3 and a named profile policy;
+literal/v1/v2 configuration and history retain their existing readers and meaning.
+Old native runtimes must reject the distinct profile capability, and .308 must not
+be described as able to execute a v3 configuration. Inspection observations retain
+scopeComplete=false; only the separate complete-profile preparation owner can issue
+a bounded v3 membership/provenance receipt. Inspection success itself remains no
+Build/Test evidence, approval or automatic run.
+
+The GraphState workspace lease serializes preparation/Save against active inspection
+and Graph mutations. The recipe store must reconstruct profile provenance at Save,
+and the existing recipe fingerprint owner must do so at every preview/Build/Test
+boundary. The native process owner additionally checks the exact fixed environment
+and capability before execution. The same ordinary recipe permission, TRX parser,
+source/Build association and genuine assertion requirements remain in force.
+Saved profile data is immutable and local; source/toolchain/environment drift stales
+future use rather than migrating or rewriting historical observations.
+
+### Installed-engine oracle bootstrap
+
+A separate disposable synthetic Web fixture may generate its own restore metadata
+from already retained public package directories, with NuGet sources cleared and
+audit disabled. This is a development-fixture bootstrap, never an inspection or
+product setup operation. No package download, feed access or SDK installation is
+permitted. Its commands and resulting inputs are recorded separately. Product
+inspection retains its exact fixed no-target query and never performs Restore.
+The oracle first proves actual output paths, static-asset manifests and application
+assertions using installed SDK bytes before any profile can become executable.

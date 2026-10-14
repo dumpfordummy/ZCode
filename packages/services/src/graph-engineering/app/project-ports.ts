@@ -14,6 +14,7 @@ export interface GraphChecksPort {
     revision: number,
     selection: GraphChecksSelection,
     expectedDigest: string,
+    diagnosticPhase?: (phase: string) => void,
   ): Promise<GraphChecksPreview>;
 }
 export interface GraphProjectPort extends GraphChecksPort {

@@ -321,3 +321,91 @@ Primary semantic references checked:
 ## Final fixed-argument boundary correction
 
 Final review identified that a leading `@` project argument can be interpreted by MSBuild as an explicit response file despite `-noAutoResponse`. Inspection selection now rejects leading `@`, switch prefixes and leading whitespace before native admission. The eight Host/query tests pass after this correction; no target execution was attempted. Root typecheck passes. This is an additional source correction after the UI/diagnostics commit, and the actual final-head CI identity is recorded in the PR handoff.
+
+## Continued implementation checkpoint — native gates now observed
+
+This continuation supersedes the earlier unfinished status only where fresh evidence
+below establishes a result. All earlier failures, observer expiries and disconnected
+operations remain preserved. This is an implementation checkpoint, not final-head
+acceptance or a completed Web product profile.
+
+Commits `cb29816` and `f531324` add the Windows hard process-count owner and explicit
+permission-conversation navigation/read-only recovery. The native adapter uses an
+atomic Windows Job assignment at suspended process creation, maximum one active
+process, no breakaway and kill-on-owner-close. It reuses ExecutionPort and existing
+permission ownership; no helper process runner is introduced. Unsupported native
+runtimes lack the additional capability and fail clearly. Ordinary Build/Test remain
+unchanged. Native child-creation, cancellation, timeout and owner-loss tests passed,
+including survival of an unrelated process.
+
+Actual source-app inspection UI completed ordinary denial, successful owned MSBuild
+inspection and reopen with no replay. No Graph runs or model calls were created.
+The successful query observed SDK 8.0.426 / MSBuild 17.11.69 / net8.0 and implicit
+JSON/static Content, with `scopeComplete=false`. Its operation was
+`b86b439b-f977-4a80-bcdf-7a0f19c5b518`; the denied operation was
+`3705ff0c-2ce1-4b9b-b5ea-669b154c8d5f`. The first harness screenshot failure occurred
+before start, leaving only an unreserved review-ready record; it is retained.
+
+### 5,013-input native sequence
+
+A new isolated synthetic fixture used installed SDK **8.0.426**, net8.0 and the
+retained public package cache. No Restore, package download or model call occurred.
+The historical 8.0.425 fixtures were not retargeted or overwritten. Three real tests
+consume copied Content, a copied settings file, an embedded resource and application
+code. The exact original assertion source was restored by byte hash.
+
+| Outcome        | Run ID                                 | Genuine results    | Build process | Test process |
+| -------------- | -------------------------------------- | ------------------ | ------------: | -----------: |
+| PASS           | `804ae077-d972-47e6-8c71-53d5c07e3575` | 3 passed, 0 failed |      4,796 ms |     2,139 ms |
+| Assertion FAIL | `00d4aa19-fe55-446d-a7f1-2d2f378a7885` | 2 passed, 1 failed |      4,712 ms |     1,689 ms |
+| Restored PASS  | `46650c88-f259-429c-aa1e-db1377258190` | 3 passed, 0 failed |      5,658 ms |     1,442 ms |
+
+All three have `observationValid=true`; acceptance is respectively true, false,
+true. All owned process exits were observed. Restoration SHA-256 is
+`d4e6ff93ca7e5a06c33f019e77db465247056c262d196c4d59ad9d750f563f90`.
+Native bundle SHA-256 is
+`9e1be6d05c523ea0f13ceecea8942cefc142e89ec761d946494de03e40580676`.
+The source snapshot was `f531324`; later changes require their own final validation.
+
+Host verification before Build measured 30.780 / 29.284 / 47.221 seconds; before Test
+122.525 / 34.869 / 34.512 seconds. Post-exit evidence work measured Build
+18.591 / 16.851 / 17.358 seconds and Test 76.813 / 58.185 / 34.389 seconds.
+Nested membership/hash intervals are included in these owner intervals, not added
+to them. Host, native and observer clocks are separate monotonic domains. The first
+Test permission was requested about 279 seconds after Build permission: the observed
+delay includes real freshness verification, not just native process execution or
+human interaction. No prior fingerprint was reused across a freshness boundary.
+
+After the first PASS, the initial harness's inherited 30-second preview observer
+expired before another run was admitted. The prior run was terminal and its owned
+processes stopped before explicit continuation in a fresh app profile using the same
+fixture. A single 900-second external observer then completed FAIL/recovery and a
+copied-Content stale-preview rejection. This observer allowance is not a product
+timeout change or a claimed performance fix. The preserved original U5 timeouts and
+disconnect still do not prove a U5 regression.
+
+### Web work still in progress
+
+A separate installed-engine oracle now proves plain Web + referencing VSTest Build
+and three genuine net8.0 tests: application result, implicit JSON copying and static
+asset runtime-manifest content. Its separate fixture bootstrap generated restore
+metadata from retained public cached packages with sources cleared and audit off;
+product setup and inspection did not Restore. An earlier oracle disabled SDK-wide
+wildcard imports and failed with missing VSTest target. Inspection of installed
+`Microsoft.TestPlatform.ImportAfter.targets` identified why. The corrected oracle
+keeps SDK-owned imports and disables user-extension imports only; both records remain.
+
+New syntax and workspace membership work remains non-authoritative (`scopeComplete=false`).
+It preserves v1/v2 behavior, rejects unknown generators/imports, includes nested
+directories named bin/obj, and excludes only the two projects' exact SDK output roots
+while retaining prior restore assets/import metadata. Nine targeted tests pass for
+late source bytes, JSON/static Content, future membership, import/configuration and
+unsupported effects; root typecheck passes. The existing 5,003-input v2 regression
+also passed. Complete package/toolchain/environment provenance and product
+Inspect/prepare/Save/reopen/Build/Test wiring are still being implemented. This
+checkpoint does not claim Web Save support or release readiness.
+
+Evidence: [large native sequence and phase timings](evidence/u5-f1/large-native-continuation.json),
+[actual inspection UI outcomes](evidence/u5-f1/inspection-native-continuation.json).
+Installed `.308`, prior assets, old receipts and all failed/interrupted records remain
+untouched. No merge, installer, tag, release workflow or publication occurred.

@@ -46,7 +46,7 @@ export function createProjectSetupPort(options: {
       ];
       return options.agentService.previewExecutionEnvironment({ ...target, executables });
     },
-    async capture(target, revision, selection, expectedDigest) {
+    async capture(target, revision, selection, expectedDigest, diagnosticPhase) {
       const configured =
         selection.kind === "dotnet-probe"
           ? { recipes: [], digest: workflowDigest(noProjectRecipes) }
@@ -73,6 +73,7 @@ export function createProjectSetupPort(options: {
         target,
         sourcePaths,
         recipes.flatMap((recipe) => (recipe.sourceScope ? [recipe.sourceScope] : [])),
+        diagnosticPhase,
       );
       const environment = await port.environment(target, recipes);
       if (environment.status !== "available")

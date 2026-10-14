@@ -145,10 +145,12 @@ export class GraphState {
   }
   async put(run: GraphRun): Promise<void> {
     const record = await this.load(run.target);
+    this.trace(run.id, "record-persistence-start");
     await this.commit(run.target, {
       ...record,
       runs: record.runs.map((r) => (r.id === run.id ? run : r)),
     });
+    this.trace(run.id, "record-persistence-end");
   }
   async get(target: GraphWorkspaceTarget, id: string): Promise<GraphRun> {
     const run = (await this.load(target)).runs.find((r) => r.id === id);
