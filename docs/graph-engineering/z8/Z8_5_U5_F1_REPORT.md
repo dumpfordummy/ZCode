@@ -1,3 +1,149 @@
+# Z8.5-U5-F1 implementation follow-up — incomplete acceptance
+
+The independent Host/native inspection boundary is implemented on the existing U5
+branch and draft PR #23. F1 as a whole is **not complete or release-ready**. There
+is no supported executable Web profile, no Web Save/reopen proof and no new
+5,000+ input native Build/Test PASS → assertion FAIL → restoration PASS sequence.
+The historical recovery-only report is retained below, explicitly superseded for
+implementation status; its failed/interrupted native records remain unchanged.
+
+## Source and authority
+
+- Owner/capability commit: `ac25cadec5648cae5246d1e558b73670ff21965b`.
+- UI/diagnostics code head: `54098e1fd80e8879410ec54128b6781610d39ac8`.
+- Reviewed base remains `f7279c79824e518abc6f4fdeb2c6cf66b86bac31`; no integration
+  modification, merge, installer, .309, tag, publication or installed .308 change.
+- The spec preceded implementation. The final evidence-only commit and its actual
+  CI/tested-merge identities are recorded in the PR handoff after checks finish.
+
+`GraphInspections` is a helper of the existing GraphState serial/lease owner. The
+setup facade sends explicit review/start/status/cancel commands to that owner;
+it never calls `startRecipe` directly. A separately versioned, private, bounded
+sidecar holds at most 16 observations and never alters Graph run or v1/v2 source
+scope schemas. An immutable reviewed request, workspace, selected configuration,
+framework, runtime identity and native environment commitment bind admission.
+The Host consumes a one-use exact-request dispatch authorization. Active Graph
+work and inspection exclude each other; uncertain executor outcomes retain the
+original reservation and cannot replay. Cold status reads do not resume work.
+
+Native advertises the additive `project.configurationInspection.v1` feature and
+review method. Missing/old capability fails without command fallback; ordinary
+runtime requirements are unchanged. Start/inspect/cancel reuse the existing
+NativeRecipeOperations, GraphRecipe tool, always-ask permission and ExecutionPort.
+No second product process runner was added. The diagnostic oracle is explicitly
+separate from product/native acceptance.
+
+The query is fixed to installed MSBuild.dll, a reviewed relative csproj,
+Debug/Release, net8.0/net10.0 and demonstrated SDK versions; no target, Restore,
+Build, getTargetResult, arbitrary switch or custom environment injection is
+accepted. Evaluation can cause filesystem/network/system side effects; both UI
+review and native permission warn about this. Review lasts five minutes; the
+process timeout is 30 seconds, output is bounded, and raw stdout/stderr/environment
+values are withheld from inspection records. Strict property/item projection
+rejects malformed, oversized and unexpected fields and mismatched effective SDK,
+configuration or framework. Every accepted projection has `scopeComplete=false`.
+
+## What remains blocked
+
+The precise Web blocker is the installed SDK's target-generated static-asset and
+Razor pipeline: `ResolveStaticWebAssetsInputs`, `GenerateStaticWebAssetsManifest`,
+computed assets and referenced-project/package contributions are not represented
+by evaluation's empty StaticWebAsset/DiscoveryPattern lists. MSBuildAllProjects
+does not prove complete imports. Reference-pack, implicit generator, dynamic
+import and effective environment provenance are not closed by this inspection.
+No claim is made that a repository-wide observation or restored assets file proves
+arbitrary build input completeness. Custom generators/imports remain unsupported.
+No company project was read, diagnosed, retargeted or changed.
+
+The existing ExecutionPort owns one launched process tree and `-maxCpuCount:1`
+limits MSBuild workers. It does **not** provide the requested hard descendant
+process-count constraint. That runtime invariant remains open; the capability is
+source-review work, not full lifecycle acceptance. A production native UI proof
+is also still open: the UI exposes the owned session ID but has not demonstrated
+the complete permission-conversation/reopen/recovery navigation. The controlled
+gallery cannot substitute for that gate. There is no valid supported-profile or
+Web Save/reopen screenshot because those states were not achieved.
+
+Installed .308 lacks the new inspection capability and cannot inspect. Existing
+literal/v1/v2 configurations and historical receipts retain their original
+semantics. The new private sidecar is not a downgrade execution permission and
+cannot be converted into a legacy recipe or approval.
+
+## Verification and evidence
+
+All new commands used Node **24.14.0** and pnpm **10.33.2**. No SDK/feed/browser
+installation or package restore occurred. Edge already installed on the machine
+was used after the default Playwright browser binary was found absent.
+
+| Check                                   | Result                                                                                       |
+| --------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Root typecheck                          | Passed                                                                                       |
+| Root lint                               | Passed: 75 warnings, 0 errors                                                                |
+| Architecture                            | Passed: 0 baseline/new violations; policy unchanged                                          |
+| CI selector/aggregator tests            | 18 passed; exclusions/gates unchanged                                                        |
+| Focused final tests                     | 38 passed: 7 Host/query, 10 native recipe, 4 capability, 17 network-policy tests             |
+| Affected native bootstrap typecheck     | Passed using installed TypeScript directly                                                   |
+| CLI aggregate typecheck/lint entrypoint | Cannot run: local turbo binary missing; nothing installed                                    |
+| Direct bootstrap lint                   | Existing broad max-lines failures; changed native recipe/inspection files reported no errors |
+| Full Windows selected suite             | 1,008 tests: 1,003 passed, 3 failed, 2 platform skips                                        |
+| Real-component controlled gallery       | English and Chinese: 2 passed, 6 screenshots                                                 |
+
+The Windows failures are two pre-existing ASAR platform failures and the
+network-consumer positive control's timing failure under the full concurrent
+suite. That entire 17-test network file passes in the final isolated focused run.
+The first F1 full run also caught the old exact capability-list assertion; it was
+updated to assert both additive features and passes. No assertion was disabled.
+The Linux CI result for the actual delivered head must be read separately.
+
+Native regression fixtures prove denial/cancellation and mutations after permission
+review prevent process start. Mutations include input 39, new implicit content,
+Directory.Build.props and SDK engine bytes. Host tests prove runtime/configuration
+change, expiry, immutable requests, one-use admission, executor-loss quarantine,
+no Graph evidence, and no Save authority. These are structural/native-adapter
+tests, not a successful installed-engine app UI acceptance sequence.
+
+The installed SDK observation initially failed closed at a 32 MiB/file limit.
+The SDK's FSharp.Compiler.Service.dll is 40,359,720 bytes; the explicitly revised
+cap is 64 MiB/file while the aggregate remains 512 MiB. The successful read-only
+review observed **3,508 files / 405,626,873 bytes in 10,978.05 ms**, with no MSBuild
+execution. A separate new synthetic SDK 8.0.426 / MSBuild 17.11.69 / net8.0 query
+parsed five projected items in **274.44 ms**. Installed FrameworkReference `Pack`
+metadata was explicitly allowlisted after an initial strict rejection. The query
+ran no Build/Test/Restore and does not establish scope completeness or net10 Test.
+
+See [implementation evidence](evidence/u5-f1/implementation.json) and the labelled
+[gallery](evidence/u5-f1/gallery/README.md). Earlier `recovery.json`, `oracle.json`
+and the original U5 report remain separate.
+
+## Large-scope diagnosis and limits
+
+No new 5,013-input native run was launched. The retained fixture still pins absent
+SDK 8.0.425 with roll-forward disabled and was not retargeted. That does not block
+the independent implementation above. Its three retained records were hash-checked
+again unchanged; two observer expiries and one executor disconnect remain distinct.
+The 53-input native PASS/FAIL/recovery proof remains valid only for its scope.
+
+The earlier full 5,013-input byte observation measured 27.72 s: membership before
+8.66 s, bytes 12.01 s, membership after 7.05 s. This supports legitimate verification
+cost, not a conclusive cause of the old admission stalls or a U5 regression claim.
+The existing owner now emits optional bounded monotonic phase events keyed by
+operation ID (`ZCODE_GRAPH_DIAGNOSTICS=1`), including membership, hashing, Host
+dispatch/reply, native process result, evidence verification and successor scheduling.
+Nested intervals overlap and must not be summed as independent costs; Host and
+native clocks are separately labelled. Tool dispatch is not falsely labelled as
+the exact broker permission request/response. Those broker timestamps, confirmation
+and all persistence boundaries still need a complete instrumented native sequence.
+
+The app publishes source-verification progress before native admission. No old
+fingerprint reuse, timestamp/Git-status shortcut, auto-permission or product timeout
+increase was introduced. Instrumentation is not a performance fix. A single future
+owned observer must first reconcile the original process and use the existing
+status/cancel APIs; no overlapping retry or replay is authorized by this report.
+
+---
+
+## Historical recovery-only report (before the implementation continuation)
+
 # Z8.5-U5-F1 recovery investigation — incomplete
 
 F1 is **not implemented or accepted**. This follow-up recovers the existing U5
