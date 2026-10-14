@@ -367,3 +367,37 @@ test("native revalidates cwd after permission and preserves existing agent tool 
     await f.close();
   }
 });
+
+test("inspection review never executes; denial and post-permission mutation are non-evidence", async () => {
+  for (const action of ["deny", "mutate", "cancel", "late-source", "import", "toolchain"] as const) {
+    const f = await fixture();
+    try {
+      const executable = join(f.cwd, "dotnet.exe");
+      await mkdir(join(f.cwd,"sdk","8.0.426"),{recursive:true});
+      await writeFile(executable,"synthetic non-executable engine identity");
+      await writeFile(join(f.cwd,"sdk","8.0.426","MSBuild.dll"),"synthetic engine bytes");
+      await writeFile(join(f.cwd,"Web.csproj"),'<Project Sdk="Microsoft.NET.Sdk.Web"/>');
+      for (let index=0;index<40;index++) await writeFile(join(f.cwd,"Input"+String(index).padStart(2,"0")+".cs"),"original");
+      await writeFile(join(f.cwd,"Directory.Build.props"),"<Project/>");
+      const request = await f.operations.reviewInspection({sessionId:"z4-native-fixture",operationId:crypto.randomUUID(),executable,project:"Web.csproj",configuration:"Debug",framework:"net8.0",sdkVersion:"8.0.426"});
+      assert.equal(f.requests.length,0);
+      await f.operations.start(request);
+      await f.until(()=>f.requests.length===1);
+      if(action==="mutate") {
+        await writeFile(join(f.cwd,"late-content.json"),"changed after review");
+        f.answer("allow");
+      } else if (["late-source","import","toolchain"].includes(action)) {
+        const file = action === "late-source" ? "Input39.cs" : action === "import" ? "Directory.Build.props" : "sdk/8.0.426/MSBuild.dll";
+        await writeFile(join(f.cwd,file),"changed after review"); f.answer("allow");
+      } else if(action==="cancel") f.operations.cancel(request.operationId);
+      else f.answer("deny");
+      const result = await f.finish(request.operationId);
+      assert.equal(result.processStarted,false);
+      assert.equal(result.inspectionOutcome,action==="deny"?"denied":action==="cancel"?"cancelled":"source-changed");
+      assert.equal(result.inspectionProjection,undefined);
+      assert.equal(result.result,undefined);
+      assert.equal((await f.operations.start(request)).completedAt,result.completedAt);
+      assert.equal(f.requests.length,1);
+    } finally { await f.close(); }
+  }
+});

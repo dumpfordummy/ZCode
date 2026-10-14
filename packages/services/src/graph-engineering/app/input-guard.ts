@@ -6,6 +6,7 @@ export async function assertGraphInputAllowed(
   state: GraphState,
   params: GraphInputGuardRequest,
 ): Promise<void> {
+  await state.inspections.guard(params);
   for (const run of await parallelGuardedRuns(state, params)) {
     const tool =
       run.version !== undefined && run.version >= 4

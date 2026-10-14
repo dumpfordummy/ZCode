@@ -28,6 +28,9 @@ import {
   zcodeRecipeSnapshotSchema,
 } from "../native-recipe.js";
 export * from "../native-recipe.js";
+export * from "../project-inspection.js";
+import { inspectionReviewParamsSchema } from "../project-inspection.js";
+import { zcodeRecipeRequestSchema } from "../native-recipe.js";
 export * from "../native-runtime-contract.js";
 export * from "../process-diagnostic.js";
 import { errorAttributionSchema } from "../zcode-protocol-v4/snapshot.js";
@@ -3590,6 +3593,7 @@ export type ZCodeOffPeakListProtocolResult = z.infer<typeof zcodeOffPeakListResu
 
 export const zcodeProtocolMethods = {
   sessionRecipeStart: "session/recipe/start",
+  sessionRecipeInspectionReview: "session/recipe/inspectionReview",
   sessionRecipeInspect: "session/recipe/inspect",
   sessionRecipeCancel: "session/recipe/cancel",
   runtimeCapabilities: "runtime/capabilities",
@@ -3705,6 +3709,10 @@ export const zcodeProtocolEmptyResultSchema = z.object({}).strict();
 // 最新 V4 主链已不再依赖旧版全量方法表；这里仅保留仍被兼容测试和 browser broker
 // 消费的最小契约集合，避免重新引入已移除的 legacy 方法。
 export const zcodeProtocolSessionMethodContracts = {
+  [zcodeProtocolMethods.sessionRecipeInspectionReview]: {
+    params: inspectionReviewParamsSchema,
+    result: zcodeRecipeRequestSchema,
+  },
   [zcodeProtocolMethods.sessionRecipeStart]: {
     params: zcodeRecipeStartParamsSchema,
     result: zcodeRecipeSnapshotSchema,

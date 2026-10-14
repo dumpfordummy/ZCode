@@ -88,6 +88,7 @@ export class GraphParallelService implements IGraphParallelService {
     // 关闭策略下仍允许保存未启用的计划（等价于关闭它）；启用计划属于新的并行准入。
     if (plan.enabled) this.assertAdmissionsAllowed("enable a parallel plan");
     return this.state.serial(target, async () => {
+      await this.state.inspections.assertIdle(target);
       const record = await this.state.load(target);
       if ((record.parallel?.plan?.revision ?? 0) !== params.expectedRevision)
         throw new Error("Parallel plan revision changed; reload.");
@@ -122,6 +123,7 @@ export class GraphParallelService implements IGraphParallelService {
     const target = localTarget(params.target);
     requireId(params.requestId);
     return this.state.serial(target, async () => {
+      await this.state.inspections.assertIdle(target);
       const record = await this.state.load(target),
         fingerprint = this.owner.digest(params);
       if (record.parallelParent)

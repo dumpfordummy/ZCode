@@ -59,7 +59,7 @@ test("the server reports the declaration next to the existing plan capability", 
 });
 
 test("interaction.protectedSessions is real: protected Graph questions (and their children) are never auto-answered", async (t) => {
-  assert.deepEqual([...NATIVE_CONTRACT_FEATURES], [zcodeNativeContractFeatures.interactionProtectedSessions]);
+  assert.deepEqual([...NATIVE_CONTRACT_FEATURES], [zcodeNativeContractFeatures.interactionProtectedSessions, zcodeNativeContractFeatures.projectConfigurationInspection]);
   t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: 1 });
   const registry = new V4InteractionRegistry({ hiddenGraceMs: 5, autoResolutionMs: 20 });
   await registry.setAskUserQuestionAutoResolutionEnabled(true, ["graph"]);

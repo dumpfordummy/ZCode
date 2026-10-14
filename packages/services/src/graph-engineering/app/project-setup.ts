@@ -24,12 +24,21 @@ export const projectEnvironmentUnknowns = [
 export async function projectSetup(
   input: GraphProjectSetupRequest,
   options: {
-    graph: Pick<IGraphEngineeringService, "recipes" | "getWorkspace">;
+    graph: Pick<IGraphEngineeringService, "recipes" | "getWorkspace"> & {
+      inspectProject?: (
+        command: import("../inspection-types.js").GraphInspectionCommand,
+      ) => Promise<import("../inspection-types.js").GraphInspection>;
+    };
     project?: GraphProjectPort;
     digest(value: string): string;
   },
 ): Promise<GraphProjectSetupResult> {
   const target = localTarget(input.target);
+  if (input.action === "inspection") {
+    if (!options.graph.inspectProject)
+      throw Error("Project inspection is unavailable on this Host.");
+    return options.graph.inspectProject({ ...input.command, target });
+  }
   if (input.action === "validate" || input.action === "dotnet-preset") {
     const result: GraphRecipeValidation = {
       kind: "validation",

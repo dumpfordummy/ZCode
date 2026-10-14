@@ -24,6 +24,7 @@ export {
 } from "./memoryDiagnostics.js";
 
 // Accessor
+export type { GraphInspection, GraphInspectionSetupCommand } from "./graph-engineering/contract.js";
 export { IGraphEngineeringService } from "./graph-engineering/contract.js";
 export * from "./graph-engineering/workflow-contract.js";
 export * from "./graph-engineering/parallel-contract.js";

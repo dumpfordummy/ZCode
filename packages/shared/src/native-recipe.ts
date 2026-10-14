@@ -1,4 +1,12 @@
 import { z } from "zod";
+import {
+  inspectionBindingSchema,
+  inspectionOutcomeSchema,
+  inspectionProjectionSchema,
+  inspectionArguments,
+  INSPECTION_PURPOSE,
+  INSPECTION_TIMEOUT_MS,
+} from "./project-inspection.js";
 
 export const zcodeRecipeSchema = z
   .object({
@@ -24,8 +32,23 @@ export const zcodeRecipeRequestSchema = z
   .object({
     operationId: z.string().uuid(),
     recipe: zcodeRecipeSchema,
+    inspection: inspectionBindingSchema.optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    if (
+      value.inspection &&
+      (value.recipe.id !== INSPECTION_PURPOSE ||
+        value.recipe.cwdRelative !== "." ||
+        value.recipe.timeoutMs !== INSPECTION_TIMEOUT_MS ||
+        value.recipe.redactEnvironmentVariables !== undefined ||
+        JSON.stringify(value.recipe.args) !== JSON.stringify(inspectionArguments(value.inspection)))
+    )
+      ctx.addIssue({
+        code: "custom",
+        message: "Inspection accepts only its fixed evaluation query.",
+      });
+  });
 export type ZCodeRecipeRequest = z.infer<typeof zcodeRecipeRequestSchema>;
 
 const outputSchema = z
@@ -70,6 +93,9 @@ export const zcodeRecipeSnapshotSchema = z
     completedAt: z.number().optional(),
     result: zcodeRecipeResultSchema.optional(),
     error: z.string().max(4096).optional(),
+    inspectionVerifying: z.boolean().optional(),
+    inspectionOutcome: inspectionOutcomeSchema.optional(),
+    inspectionProjection: inspectionProjectionSchema.optional(),
   })
   .strict();
 export type ZCodeRecipeSnapshot = z.infer<typeof zcodeRecipeSnapshotSchema>;

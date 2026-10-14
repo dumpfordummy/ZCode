@@ -5,6 +5,26 @@ import {
   type IGraphWorkflowService,
 } from "./workflow-contract.js";
 
+/** Explicit evaluation review only; this never creates Build/Test evidence or saves recipes. */
+export function reviewProjectConfiguration(
+  service: IGraphWorkflowService,
+  target: GraphWorkspaceTarget,
+) {
+  return service.projectSetup({
+    target,
+    action: "inspection",
+    command: {
+      action: "review",
+      selection: {
+        project: "Synthetic.Web.csproj",
+        configuration: "Debug",
+        framework: "net8.0",
+        sdkVersion: "8.0.426",
+      },
+    },
+  });
+}
+
 /** The required role is a declaration, never evidence that a Test ran or passed. */
 export function declaredCheckRole(
   definition: import("./contract.js").GraphSequentialDefinition,

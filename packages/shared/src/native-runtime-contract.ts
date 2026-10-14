@@ -11,6 +11,7 @@ export const ZCODE_NATIVE_CONTRACT_KEY = "nativeContract" as const;
 export const zcodeNativeContractFeatures = {
   /** `workspace/updateInteractionPreferences.protectedSessionIds` 会真正排除受保护 session 的自动应答。 */
   interactionProtectedSessions: "interaction.protectedSessions",
+  projectConfigurationInspection: "project.configurationInspection.v1",
 } as const;
 
 const MAX_ENTRIES = 256;

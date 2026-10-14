@@ -92,6 +92,7 @@ export interface GraphReferenceValidation {
   issues: string[];
 }
 export type GraphProjectSetupRequest = { target: GraphWorkspaceTarget } & (
+  | { action: "inspection"; command: import("./inspection-types.js").GraphInspectionSetupCommand }
   | { action: "reference-catalog" }
   | { action: "validate-reference"; path: string }
   | {
@@ -114,6 +115,7 @@ export type GraphProjectSetupRequest = { target: GraphWorkspaceTarget } & (
     }
 );
 export type GraphProjectSetupResult =
+  | import("./inspection-types.js").GraphInspection
   | GraphReferenceCatalog
   | GraphReferenceValidation
   | GraphProjectDiscovery

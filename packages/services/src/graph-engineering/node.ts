@@ -26,6 +26,7 @@ import { createWorkflowPreflight, workflowDigest } from "./adapters/workflow-pre
 import { createWorkflowStore } from "./adapters/workflow-store.js";
 import { GraphWorkflowService } from "./app/workflow-service.js";
 import { createGraphParallelPort } from "./adapters/parallel-workspaces.js";
+import { createGraphInspectionPort } from "./adapters/project-inspection.js";
 import { createProjectSetupPort } from "./adapters/project-checks.js";
 import { createGraphReportCapture } from "./adapters/trx-capture.js";
 
@@ -40,6 +41,19 @@ export function createGraphEngineeringService(options: {
   /** 仅供测试覆盖；运行时由编译期身份与显式开发 opt-in 决定。 */
   parallelPolicy?: () => GraphParallelPolicy;
 }) {
+  let diagnosticEntries = 0;
+  const diagnosticPhase = (operationId: string, phase: string) => {
+    if (process.env.ZCODE_GRAPH_DIAGNOSTICS === "1" && diagnosticEntries++ < 4096)
+      console.error(
+        "[graph-phase]" +
+          JSON.stringify({
+            operationId,
+            phase,
+            clock: "host-monotonic",
+            timeMs: performance.now(),
+          }),
+      );
+  };
   const preflight = createWorkflowPreflight(options);
   const project = createProjectSetupPort(options);
   const repository = createGraphRepository(options.directory);
@@ -50,6 +64,9 @@ export function createGraphEngineeringService(options: {
     parallel: createGraphParallelPort(options),
     preflight,
     checks: project,
+    inspection: createGraphInspectionPort(options),
+    monotonic: () => performance.now(),
+    diagnosticPhase,
     repository,
     native: createGraphNativePort(options),
     runtime: createGraphRuntimeGate(options),

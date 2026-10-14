@@ -1,15 +1,19 @@
 import { createHash } from "node:crypto";
 import {
   zcodeRecipeRequestSchema,
+  inspectionReviewParamsSchema, projectInspectionOutput,
   type ZCodeRecipeRequest,
   type ZCodeRecipeSnapshot,
 } from "@zcode/shared";
+import { CoreErrorType } from "@zcode/contracts";
+import { prepareProjectInspection, validateProjectInspection } from "./native-project-inspection.js";
 import type { AgentRuntime } from "@zcode/core";
 import type { ExecutionResult, SessionId, ToolCall, TraceContext } from "@zcode/contracts";
 import { resolveRecipeCwd } from "./native-recipe-path.js";
 import { createRecipeTool, recipeRedactor, recipeResult } from "./native-recipe-tool.js";
 
 export interface NativeRecipeOperations {
+  reviewInspection(request: unknown): Promise<ZCodeRecipeRequest>;
   start(request: ZCodeRecipeRequest): Promise<ZCodeRecipeSnapshot>;
   inspect(operationId: string): ZCodeRecipeSnapshot;
   cancel(operationId: string): ZCodeRecipeSnapshot;
@@ -37,6 +41,11 @@ export function createNativeRecipeOperations(deps: {
     { snapshot: ZCodeRecipeSnapshot; abort: AbortController; completion?: Promise<void> }
   >();
   let closed = false;
+  let diagnosticEntries = 0;
+  const mark = (operationId: string, phase: string) => {
+    if (deps.env.ZCODE_GRAPH_DIAGNOSTICS === "1" && diagnosticEntries++ < 4096)
+      console.error("[graph-phase]" + JSON.stringify({operationId,phase,clock:"native-monotonic",timeMs:performance.now()}));
+  };
   const inspect = (operationId: string): ZCodeRecipeSnapshot =>
     structuredClone(
       operations.get(operationId)?.snapshot ?? {
@@ -48,9 +57,14 @@ export function createNativeRecipeOperations(deps: {
     );
   return {
     inspect,
+    async reviewInspection(raw) {
+      if (closed) throw Error("Native recipe owner closed");
+      return prepareProjectInspection(inspectionReviewParamsSchema.parse(raw), deps.workingDirectory, deps.env);
+    },
     async start(raw) {
       if (closed) throw new Error("Native recipe owner closed");
       const request = zcodeRecipeRequestSchema.parse(raw);
+      mark(request.operationId,"native-admission");
       const requestDigest = createHash("sha256").update(JSON.stringify(request)).digest("hex");
       const prior = operations.get(request.operationId);
       if (prior) {
@@ -84,6 +98,7 @@ export function createNativeRecipeOperations(deps: {
         args: request.recipe.args.map(redact),
         cwd,
         timeoutMs: request.recipe.timeoutMs,
+        ...(request.inspection ? { purpose: request.inspection.purpose, warning: "Evaluation can execute project processing and cause filesystem, network or system side effects. This is not Build/Test evidence.", readScope: [deps.workingDirectory, request.inspection.sdkDirectory, request.recipe.executable] } : {}),
       };
       const snapshot: ZCodeRecipeSnapshot = {
         operationId: request.operationId,
@@ -92,6 +107,7 @@ export function createNativeRecipeOperations(deps: {
         recipeId: request.recipe.id,
         cwd,
         status: "awaiting_permission",
+        ...(request.inspection ? { inspectionVerifying: true } : {}),
         processStarted: false,
       };
       const entry = {
@@ -107,7 +123,10 @@ export function createNativeRecipeOperations(deps: {
           cwd,
           workspaceRoot: deps.workingDirectory,
           preview,
+          validateInspection: () => validateProjectInspection(request, deps.workingDirectory, deps.env, entry.abort.signal),
+          onInspectionChanged: () => { snapshot.inspectionOutcome = Date.now() >= (request.inspection?.expiresAt ?? Infinity) ? "expired" : "source-changed"; },
           onStarted: (startedAt) => {
+            mark(request.operationId,"process-start");
             snapshot.processStarted = true;
             snapshot.startedAt = startedAt;
             snapshot.status = "running";
@@ -121,17 +140,29 @@ export function createNativeRecipeOperations(deps: {
       entry.completion = deps.runtime.trackResidencyBlockingWork(
         (async () => {
           let toolsSucceeded = false;
+          const expiry = request.inspection ? setTimeout(() => {
+            snapshot.inspectionOutcome = "expired"; entry.abort.abort();
+          }, Math.max(0, request.inspection.expiresAt - Date.now())) : undefined;
           try {
+            if (request.inspection) {
+              try { await validateProjectInspection(request, deps.workingDirectory, deps.env, entry.abort.signal); }
+              catch (error) { snapshot.inspectionOutcome = Date.now() >= request.inspection.expiresAt ? "expired" : "source-changed"; throw error; }
+              entry.abort.signal.throwIfAborted();
+              snapshot.inspectionVerifying = false;
+            }
             await deps.runtime.ensureSessionPersistedForExternalActivity(
               `Recipe: ${request.recipe.id}`,
               { traceContext: deps.traceContext },
             );
+            mark(request.operationId,"permission-tool-dispatch");
             const schedule = await deps.runtime.scheduleTools([call]);
             const outcome = await deps.runtime.executeTools([call], schedule, {
               signal: entry.abort.signal,
               traceContext: deps.traceContext,
             });
             toolsSucceeded = outcome.results.every((item) => item.success);
+            if (request.inspection && outcome.results.some(item => item.error?.type === CoreErrorType.PermissionDenied))
+              snapshot.inspectionOutcome ??= "denied";
           } catch (error) {
             snapshot.error = redact(error instanceof Error ? error.message : String(error)).slice(
               0,
@@ -140,12 +171,40 @@ export function createNativeRecipeOperations(deps: {
           }
           // ToolExecutor 的取消竞速可早于子进程收口；必须等待同一个 ExecutionPort 的结果，不能把取消请求当成退出事实。
           try {
-            if (nativeExecution) snapshot.result = recipeResult(await nativeExecution, redact);
+            if (nativeExecution) {
+              const rawResult = await nativeExecution;
+              mark(request.operationId,"process-exit-result");
+              if (request.inspection) {
+                snapshot.result = recipeResult({ ...rawResult, stdout: { ...rawResult.stdout, text: "" }, stderr: { ...rawResult.stderr, text: "" } }, redact);
+                if (rawResult.status === "completed" && rawResult.exitCode === 0 && rawResult.processExitObserved && !rawResult.stdout.truncated && !rawResult.stderr.truncated) {
+                  try {
+                    snapshot.inspectionProjection = projectInspectionOutput(rawResult.stdout.text);
+                    const effective = snapshot.inspectionProjection.properties;
+                    if (effective.NETCoreSdkVersion !== request.inspection.sdkVersion || effective.Configuration !== request.inspection.configuration || effective.TargetFramework !== request.inspection.framework) throw Error("Effective inspection identity mismatch.");
+                    try { await validateProjectInspection(request, deps.workingDirectory, deps.env, entry.abort.signal); }
+                    catch { snapshot.inspectionOutcome ??= Date.now() >= request.inspection!.expiresAt ? "expired" : "source-changed"; }
+                    snapshot.inspectionOutcome ??= "succeeded";
+                    if (snapshot.inspectionOutcome !== "succeeded") delete snapshot.inspectionProjection;
+                  } catch {
+                    snapshot.inspectionOutcome ??= "invalid-output";
+                    delete snapshot.inspectionProjection;
+                  }
+                }
+              } else snapshot.result = recipeResult(rawResult, redact);
+            }
           } catch (error) {
             snapshot.error = redact(error instanceof Error ? error.message : String(error)).slice(
               0,
               4096,
             );
+          }
+          if (expiry) clearTimeout(expiry);
+          if (request.inspection) snapshot.inspectionVerifying = false;
+          if (request.inspection) {
+            snapshot.inspectionOutcome = entry.abort.signal.aborted && snapshot.inspectionOutcome !== "expired"
+              ? "cancelled" : snapshot.inspectionOutcome ?? "failed";
+            // 检查的原始输出和异常不能进入公开命令诊断；只保留有界枚举与白名单投影。
+            snapshot.error = snapshot.inspectionOutcome === "succeeded" ? undefined : "Project inspection did not produce a valid observation.";
           }
           const result = snapshot.result;
           snapshot.status =

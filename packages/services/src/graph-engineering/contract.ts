@@ -224,6 +224,8 @@ export interface GraphWorkspaceView {
   readOnly?: boolean;
 }
 
+export type * from "./inspection-types.js";
+
 export interface IGraphEngineeringService {
   recipes(
     params:

@@ -4,6 +4,15 @@ Duration remains syntax/range validated independently of ordered, bounded result
 
 # Graph Engineering
 
+F1 adds an explicit non-evidence project-inspection purpose under GraphState's existing
+serial workspace lease. The private version-1 inspection sidecar does not alter run
+or sourceScope v1/v2 history. Review/start/status/cancel preserve one immutable request,
+native identity and ordinary always-ask permission; absent native capability fails closed.
+Passive Detect/Save/navigation never start evaluation. An observation is explicitly
+scopeComplete=false and cannot authorize Save, Build, Test or approval. Pending/lost
+operations reserve the workspace until exact native inactivity; no cold replay.
+See docs/graph-engineering/z8/Z8_5_U5_F1_SPEC.md.
+
 Z8.5-U5 adds structural equivalence for the standard MSBuild namespace and exact
 first/last Microsoft.NET.Sdk imports within the same v2 declarative policy. Every
 interior item/property/import still passes U4 validation. Root-specific diagnostics

@@ -59,6 +59,8 @@ export function createRecipeTool(input: {
   preview: Record<string, unknown>;
   onStarted: (time: number) => void;
   onExecution: (work: Promise<ExecutionResult>) => void;
+  validateInspection?: () => Promise<void>;
+  onInspectionChanged?: () => void;
 }): ToolEntry {
   const { request, preview } = input;
   let invoked = false;
@@ -84,6 +86,8 @@ export function createRecipeTool(input: {
         args: { type: "array", items: { type: "string" } },
         cwd: { type: "string" },
         timeoutMs: { type: "number" },
+        purpose: { type: "string" }, warning: { type: "string" },
+        readScope: { type: "array", items: { type: "string" } },
       },
       additionalProperties: false,
       required: ["operationId", "recipeId", "executable", "args", "cwd", "timeoutMs"],
@@ -132,6 +136,11 @@ export function createRecipeTool(input: {
       if ((await resolveRecipeCwd(input.workspaceRoot, request.recipe)) !== input.cwd)
         throw new Error("Recipe cwd changed while awaiting permission");
       context.abortSignal.throwIfAborted();
+      if (request.inspection) {
+        try { await input.validateInspection?.(); }
+        catch (error) { input.onInspectionChanged?.(); throw error; }
+        context.abortSignal.throwIfAborted();
+      }
       const execution = context.executionPort.run(
         {
           command: { mode: "argv", file: request.recipe.executable, args: request.recipe.args },

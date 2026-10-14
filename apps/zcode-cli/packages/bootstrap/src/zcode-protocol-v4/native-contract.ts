@@ -15,6 +15,7 @@ export const NATIVE_CONTRACT_METHODS = [
   zcodeProtocolMethods.runtimeCapabilities,
   zcodeProtocolMethods.sessionCreate,
   zcodeProtocolMethods.sessionRecipeStart,
+  zcodeProtocolMethods.sessionRecipeInspectionReview,
   zcodeProtocolMethods.sessionRecipeInspect,
   zcodeProtocolMethods.sessionRecipeCancel,
   zcodeProtocolMethods.workspaceUpdateInteractionPreferences,
@@ -25,6 +26,7 @@ export const NATIVE_CONTRACT_METHODS = [
 /** 不是协议方法的具名行为；每一项都必须有真实实现上的测试。 */
 export const NATIVE_CONTRACT_FEATURES = [
   zcodeNativeContractFeatures.interactionProtectedSessions,
+  zcodeNativeContractFeatures.projectConfigurationInspection,
 ] as const;
 
 export function buildNativeContract(commandTypes: Iterable<string>): ZCodeNativeContract {

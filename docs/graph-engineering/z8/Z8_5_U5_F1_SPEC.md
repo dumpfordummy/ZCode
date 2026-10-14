@@ -115,6 +115,27 @@ Use Node 24.14.0/pnpm 10.33.2. Recovery inventory found installed SDKs 8.0.426,
 SDK 10 does not establish net10 Test execution. No installer, .309, merge, tag,
 publication, employer data or credential search is authorized.
 
+## Independent implementation slice (authorized continuation)
+
+Implement inspection separately from the still-blocked complete Web profile. The GraphState
+owner reserves the workspace under the existing lease; a version-1 private inspection sidecar
+does not alter Graph run/v1/v2 schemas. Status reads never dispatch or reconstruct permission.
+Cold unresolved intents become executor-lost and retain a quarantine reservation until exact
+native inactivity is observed. No old runtime fallback. Native review is a read-only protocol
+operation; start/observe/cancel reuse the existing recipe owner and ExecutionPort. The strict
+inspection purpose accepts only a fixed query profile for demonstrated SDKs 8.0.425, 8.0.426
+and 10.0.401, Debug/Release, net8.0/net10.0. No targets or arbitrary switches.
+
+Native observation hashes bounded workspace files (excluding Git/app state), the exact
+reviewed SDK directory, executable and native environment commitment. Limits: 20,000 files,
+512 MiB aggregate, 64 MiB/file, depth 32, 120 seconds per observation. These observations
+are explicitly incomplete Build scope; external reference packs, custom dynamic effects and
+additional imported roots are not upgraded to supported Web provenance. Raw environment and
+command output are never stored in the inspection receipt. Only allowlisted properties/items
+are retained. Review expires after five minutes; process execution is capped at 30 seconds.
+One request/owned process tree and one MSBuild worker are allowed; this is not an OS-wide
+child-process-count guarantee. Unsupported effects cannot enable Save.
+
 ## Primary references
 
 - https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference
@@ -122,3 +143,5 @@ publication, employer data or credential search is authorized.
 - https://learn.microsoft.com/en-us/aspnet/core/razor-pages/web-sdk
 
 References describe semantics; installed synthetic evidence bounds actual support.
+
+Installed 8.0.426 evidence justifies the 64 MiB per-file cap: FSharp.Compiler.Service.dll is 40,359,720 bytes. The original 32 MiB attempt failed closed. Query projection also recognizes the installed FrameworkReference Pack metadata; arbitrary extra fields still fail closed.

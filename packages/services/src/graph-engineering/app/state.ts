@@ -12,7 +12,11 @@ import { resumableGate } from "../domain/approvals.js";
 import { routeCheckpoint } from "../domain/routing.js";
 import type { GraphPreflightPort } from "./workflow-ports.js";
 
+import { GraphInspections } from "./inspections.js";
 export interface GraphOptions extends GraphArtifactOptions {
+  inspection?: import("./inspection-ports.js").GraphInspectionPort;
+  monotonic?(): number;
+  diagnosticPhase?(operationId: string, phase: string): void;
   /** 并行能力的唯一策略来源；缺省按关闭处理（fail closed）。 */
   parallelPolicy?: () => import("@zcode/shared").GraphParallelPolicy;
   parallel?: import("./parallel-ports.js").GraphParallelPort;
@@ -43,8 +47,18 @@ export class GraphState {
   private readonly flights = new Map<string, Promise<unknown>>();
   disposed = false;
   private shutdown?: Promise<void>;
-  constructor(readonly options: GraphOptions) {}
+  readonly inspections: GraphInspections;
+  constructor(readonly options: GraphOptions) {
+    this.inspections = new GraphInspections(this);
+  }
 
+  trace(operationId: string, phase: string) {
+    try {
+      this.options.diagnosticPhase?.(operationId, phase);
+    } catch {
+      /* Diagnostics cannot change admission. */
+    }
+  }
   serial<T>(target: GraphWorkspaceTarget, action: () => Promise<T>): Promise<T> {
     const key = workspaceKey(target);
     const next = (this.flights.get(key) ?? Promise.resolve())
