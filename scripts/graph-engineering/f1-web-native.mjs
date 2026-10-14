@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { mkdir, readFile, writeFile, readdir, cp } from "node:fs/promises";
 import path from "node:path";
-import { setTimeout as wait } from "node:timers/promises";
+import { createWebObserver } from "./f1-web-observer.mjs";
 import { createHash } from "node:crypto";
 import { createIsolation } from "./isolation.mjs";
 import { configureDotnetEnvironment, runDotnet } from "./z4-fixture.mjs";
@@ -76,35 +76,7 @@ async function history() {
     throw e;
   }
 }
-// One bounded external observer, used serially. Never restarts or overlaps native operations.
-async function until(predicate, label) {
-  const deadline = performance.now() + 900000;
-  let lastObservation = 0;
-  while (performance.now() < deadline) {
-    if (await predicate()) return;
-    if (window && performance.now() - lastObservation > 10000) {
-      lastObservation = performance.now();
-      const alerts = await window.getByRole("alert").allTextContents();
-      await writeFile(
-        path.join(isolation.home, "f1-web-native-live.json"),
-        JSON.stringify(
-          {
-            label,
-            elapsedMs: performance.now() - start,
-            alerts,
-            body: (await window.locator("body").innerText()).slice(-20000),
-          },
-          null,
-          2,
-        ),
-      );
-      if (label === "Save complete" && alerts.length)
-        throw Error("Save failed: " + alerts.join("; "));
-    }
-    await wait(250);
-  }
-  throw Error("Bounded Web observer expired: " + label);
-}
+const until = createWebObserver({ getWindow: () => window, home: isolation.home, start });
 async function noEvidence() {
   assert.equal((await record()).runs.length, 0);
   assert.equal(modelCount(isolation), 0);

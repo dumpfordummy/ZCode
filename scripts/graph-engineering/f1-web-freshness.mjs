@@ -15,6 +15,8 @@ import {
 } from "../../packages/services/src/graph-engineering/app/web-content-evidence.ts";
 import { buildNativeContract } from "../../apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/native-contract.ts";
 import policy from "../../packages/shared/src/web-profile-policy.json" with { type: "json" };
+const diagnosticId = Date.now();
+const summaryName = `f1-web-freshness-${diagnosticId}.json`;
 const home = process.env.F1_WEB_NATIVE_HOME;
 assert.ok(home, "Explicit completed synthetic native fixture required");
 const native = JSON.parse(
@@ -78,6 +80,11 @@ async function stale(name) {
     mark(name, { outcome: "changed byte digest" });
   } catch (e) {
     if (e.code === "ERR_ASSERTION") throw e;
+    assert.match(
+      e.message,
+      /Web profile input membership or metadata changed|Web profile requires exact installed SDK/,
+      "Unexpected failure is not freshness evidence",
+    );
     mark(name, { outcome: "rejected", reason: e.message });
   }
 }
@@ -85,7 +92,9 @@ async function mutate(relative, change, name) {
   const file = path.join(workspace, relative),
     original = await readFile(file);
   try {
-    await writeFile(file, change(original));
+    const changed = change(original);
+    assert.notEqual(sha(changed), sha(original), "Mutation must change bytes");
+    await writeFile(file, changed);
     await stale(name);
   } finally {
     await writeFile(file, original);
@@ -120,8 +129,8 @@ try {
       b
         .toString()
         .replace(
-          "</Project>",
-          "<PropertyGroup><Nullable>enable</Nullable></PropertyGroup></Project>",
+          /<Project\s*\/>/,
+          "<Project><PropertyGroup><Nullable>enable</Nullable></PropertyGroup></Project>",
         ),
     "applicable import",
   );
@@ -176,7 +185,7 @@ try {
     associated.digest,
   );
   // Never mutate the installed SDK or retained shared public cache. Copy only the already reviewed exact roots.
-  const copyRoot = path.join(home, "freshness-toolchain-copy"),
+  const copyRoot = path.join(home, `freshness-toolchain-copy-${diagnosticId}`),
     dotnet = path.join(copyRoot, "dotnet"),
     packages = path.join(copyRoot, "packages");
   await mkdir(dotnet, { recursive: true });
@@ -254,11 +263,13 @@ try {
   summary.error = e.stack;
   process.exitCode = 1;
 } finally {
-  await writeFile(
-    path.join(home, "f1-web-freshness-summary.json"),
-    JSON.stringify(summary, null, 2),
-  );
+  await writeFile(path.join(home, summaryName), JSON.stringify(summary, null, 2));
   console.log(
-    JSON.stringify({ status: summary.status, cases: summary.cases.length, error: summary.error }),
+    JSON.stringify({
+      status: summary.status,
+      summaryName,
+      cases: summary.cases.length,
+      error: summary.error,
+    }),
   );
 }

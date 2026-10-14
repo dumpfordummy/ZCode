@@ -393,3 +393,19 @@ The guided recipe reader explicitly recognizes v3 as configured and immutable, d
 Retained attempt `1791985226523-d0e144` completed two owned inspections, 60-input preparation, Save and reopen. Its actual Build exited successfully, but evidence correctly rejected the two copied appsettings.json outputs because MSBuild preserves source modification times. No Test ran. The failed run and its receipts remain intact.
 
 The new v3 scope explicitly separates bounded `copiedContent` source/output pairs from freshly generated `expectedOutputs`. Actual evaluated Content metadata and observed assembly directories determine these immutable pairs. Generated assemblies/manifests retain every existing timestamp, baseline, exit and byte requirement. Copies instead must equal their freshly read source bytes after Build, before Test and after Test; their output bytes join the Build output digest and Test association. They are never claimed to have been freshly generated. Missing/stale/altered copies fail independently, and the combined output count stays at 32. Ordinary literal/v1/v2 evidence and raw TRX semantics are unchanged.
+
+### Final TRX boundary and retained-profile diagnostic continuation
+
+The copied Content association is checked again during final TRX normalization,
+including after the immutable raw report is captured. A mutation during that
+capture invalidates the observation; a genuine passing TRX cannot override stale
+Build association. The native attempt 4 record remains invalid even though its
+three assertions passed. New execution must use a fresh preview and ordinary
+Build/Test permissions; a source correction never upgrades historical evidence.
+
+A diagnostic may reopen an explicitly named retained synthetic profile only after
+read-only verification that every earlier operation is terminal. It preserves the
+old summary, logs, fixtures and immutable private preparation, checks configuration
+bytes unchanged, and writes a uniquely named continuation summary/log. It performs
+no automatic inspection or restore. The same single serial bounded observer owns
+the new diagnostic; this is not a product retry/resume path.

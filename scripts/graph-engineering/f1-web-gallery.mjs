@@ -27,6 +27,8 @@ const membership = await prepareWebProfileInputs(
     configuration: proof.scope.configuration,
   },
 );
+assert.equal(membership.membershipDigest, proof.scope.membershipDigest);
+assert.equal(membership.sourcePaths.length, proof.scope.sourceCount);
 const runtime = proof.scope.runtimeProfile;
 const substitutions = [
   [workspace, "C:/Synthetic/Web"],
@@ -132,6 +134,7 @@ await runUxBrowserSuite({
           };
         return original.setup(input);
       };
+      await page.setViewportSize({ width: 1366, height: 1400 });
       await boot(page, host, url, { locale, theme: "zai-light" });
       await chooseGeneric(page);
       await T(page, "graph-template-setup-checks").click();
@@ -157,6 +160,8 @@ await runUxBrowserSuite({
         0,
       );
       await page.locator('[role="option"][data-value="Tests/Tests.csproj"]').click();
+      const openReview = panel.locator("details[open]").first();
+      if (await openReview.count()) await openReview.locator(":scope > summary").click();
       await capture("matching-test-exclusion");
       let inspection = panel.getByTestId("graph-project-inspection");
       await until(
@@ -175,6 +180,10 @@ await runUxBrowserSuite({
       await until(
         async () => (await inspection.getAttribute("data-status")) === "verifying-sources",
         "verification progress",
+      );
+      assert.equal(
+        await inspection.getByTestId("graph-inspection-permission-instruction").count(),
+        0,
       );
       await capture("source-verification-progress");
       verificationHeld = false;

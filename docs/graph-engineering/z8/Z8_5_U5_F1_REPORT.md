@@ -1,3 +1,184 @@
+# Z8.5-U5-F1 — final source follow-up
+
+The existing U5 branch and draft PR #23 now contain an owned non-evidence MSBuild
+inspection operation and one deliberately narrow executable Web profile. The
+5,013-input native sequence completed with genuine PASS, assertion FAIL, and exact
+restoration PASS. The Web path completed actual source-app inspection, complete
+preparation, Save, reopen, and a fresh accepted native Build/Test run. These are
+separate evidence claims; successful inspection itself never creates check evidence.
+
+## Authority and supported path
+
+Setup's typed facade delegates review/start/status/cancel to GraphInspections under
+the existing GraphState workspace lease. NativeRecipeOperations, GraphRecipe,
+ordinary always-ask permission and ExecutionPort remain the sole process owners.
+The immutable request binds workspace, target/configuration/framework, exact
+executable/arguments, runtime identity, capability, duration/output/process limits
+and filesystem scope. Passive actions execute nothing. Denial, cancellation,
+expiry, missing capability, crash, source change and uncertain executor loss remain
+distinct; no automatic replay or cold resumption occurs. Windows inspection uses
+atomic Job assignment with a one-process limit, no breakaway and owner-only kill.
+Evaluation is execution-capable and can cause side effects despite having no targets.
+
+`web-static-net8-win-x64-v1` supports a plain literal Microsoft.NET.Sdk.Web project
+and a pure-SDK VSTest project that references it. The installed engine is SDK
+8.0.426 / MSBuild 17.11.69, net8.0, Windows x64, with exact selected reference/runtime
+8.0.32 and hostfxr 10.0.12 bytes. Its known packages are Microsoft.NET.Test.Sdk 17.8.0,
+xunit 2.5.3 and xunit.runner.visualstudio 2.5.3, including their exact 88-package
+closure. The reviewed external scope contains 7,713 files / 949,303,459 bytes across
+96 exact roots. This policy is intentionally byte-pinned, not general SDK-version
+compatibility. A changed installation or cache requires a separately established
+policy; setup never downloads or silently adapts it.
+
+Two separately permission-owned fixed query operations observe Web and Test
+configuration and actual TargetPath values. Strict syntax, applicable import and
+prior-restore metadata validation, full workspace membership, installed provenance
+and fixed empty-base environment establish completeness separately. Prior assets
+alone do not. Implicit JSON and static Content are included; generated manifests
+are accounted for by the known SDK pipeline and checked output association. Exact
+project bin/obj roots and root app/Git state are excluded by this policy; nested
+directories merely named bin/obj remain inputs, and the six restore metadata inputs
+are explicitly included. Future additions, removals and renames are re-enumerated.
+
+The real Build target is Tests/Tests.csproj, reaching Web/Web.csproj. Assembly and
+manifest outputs come from the engine observations. Implicit copied JSON outputs
+must equal fresh source bytes and join the Build-to-Test digest through final TRX
+normalization; they are not falsely claimed to have fresh modification times.
+Generated outputs retain the existing freshness checks. The three genuine tests
+exercise the application result, copied JSON configuration and static-asset content.
+
+Razor/Blazor publishing, Protobuf/Grpc.Tools, custom SDKs/generators, unknown imports
+or property functions, arbitrary packages, explicit copy remapping and other
+unmodeled effects remain blocked. No employer source was inspected or diagnosed.
+SDK 10 query success is evaluation evidence only; native Test proof here is net8.0.
+
+## Native acceptance and timing
+
+The accepted 60-input Debug Web run is
+`9f8d09d1-9647-44d9-b843-4c86bbc0db89`: Build
+`1e61bb66-896d-461b-beed-64a97bcf12fa`, Test
+`c5b85ad1-4826-40df-bfe2-18dabd48c47c`. Test reports 3 passed / 0 failed / 0 skipped,
+observationValid=true and acceptancePassed=true. Build and Test process spans were
+3.250 s and 1.095 s. Host source verification was 71.120 s / 67.251 s; post-exit
+verification was 33.719 s / 68.374 s. Fresh continuation elapsed 720.842 s; Build
+permission was answered at 365.165 s and Test permission at 636.906 s. The earlier
+source-app setup saved at 272.078 s and reopened at 278.771 s in its own observer
+clock. See [web-native.json](evidence/u5-f1/web-native.json) for binary hashes,
+actual outputs, source/provenance digests, operation IDs and all bounded phases.
+No inspection was replayed when the retained saved profile was reopened.
+
+[Installed-engine Debug and Release oracles](evidence/u5-f1/web-oracle-profiles.json)
+each passed the three real assertions and observed the correct configuration-specific
+outputs. Release is oracle proof, not a separate source-app/native-permission run.
+Only fixture bootstrap used an explicit offline restore from the retained public
+cache with sources cleared and audit disabled; product setup never restored.
+
+The 5,013-input v2 fixture's exact sequence is retained in
+[large-native-continuation.json](evidence/u5-f1/large-native-continuation.json).
+
+| Outcome       | Assertions         | Build process | Test process | Build Host source / post-exit | Test Host source / post-exit |
+| ------------- | ------------------ | ------------- | ------------ | ----------------------------- | ---------------------------- |
+| PASS          | 3 passed           | 4.796 s       | 2.139 s      | 30.780 / 18.591 s             | 122.525 / 76.813 s           |
+| Genuine FAIL  | 2 passed, 1 failed | 4.712 s       | 1.689 s      | 29.284 / 16.851 s             | 34.869 / 58.185 s            |
+| Restored PASS | 3 passed           | 5.658 s       | 1.442 s      | 47.221 / 17.358 s             | 34.512 / 34.389 s            |
+
+All three Test observations are valid; only the deliberate assertion failure has
+acceptancePassed=false. Restoration is byte-exact. These intervals are distinct
+observations, with nested membership/hash intervals overlapping Host verification;
+do not add them as independent costs or subtract across clock domains. First Test
+permission appeared about 279 seconds after Build permission. No hash reuse, product
+timeout increase, automatic permission grant or speed claim was introduced.
+
+The observed delay is substantial fresh verification, not a pending Test prompt
+before one exists. The original U5 outcomes remain two observer expiries and one
+executor disconnect, separately from its valid 53-input proof. A new continuation
+also retained an early 30-second preview observer expiry before another run was
+admitted. A single documented 900-second external observer then completed the
+sequence serially after checking inactivity. This extends observation, not product
+performance. No evidence establishes a new U5 fingerprint regression versus its
+unchanged integration implementation. Current UI distinguishes source verification
+from an actual permission request.
+
+## Freshness, UI and compatibility
+
+[The no-run freshness diagnostic](evidence/u5-f1/web-freshness.json) passed 15
+cases in 193.847 s. Changes beyond the old first-32 boundary, implicit copied JSON
+and static Content changed source and preview digests. Applicable import metadata,
+effective SDK selection, future glob additions/renames and source removal rejected
+the saved scope. Copied-output mutation rejected Build-to-Test byte association.
+A private exact 7,713-file toolchain copy then rejected changed SDK import bytes and
+changed environment identity. Workspace and copied-toolchain restoration were
+exact; the persisted Graph record remained byte-for-byte unchanged and no new run
+occurred. The diagnostic replays only the previously observed environment through
+the real preview owner; it is not a new native environment-discovery claim.
+
+CI-selected regressions cover immutable/private proof, Save expiry and byte drift,
+canonical scope selection, missing/old runtime capabilities, unsupported effects,
+full membership, copied-output association and mutation during final TRX capture.
+Existing permission, v1/v2, U3/U4/U5, TRX F2/RunInfo, output-association and selection
+gates remain enabled. Native process ownership tests are separately labelled.
+
+The [bilingual gallery](evidence/u5-f1/gallery-complete/README.md) shows unsupported
+passive Web, exact inspection review, denial, supported proposal, unrelated Test
+exclusion, source verification and saved/reopened checks. It uses real components
+with explicitly controlled observations and synthetic paths; native acceptance is
+recorded separately. No employer screenshots or raw private paths are published.
+
+New sourceScope v3 requires an immutable private workspace-bound preparation and
+exact recipes. Save has a 300-second review window with fresh checks before and
+after verification. Reopen does not require an expired invocation to replay;
+preview, admission and evidence still revalidate current bytes and provenance.
+Private proof is bounded and cannot be forged through Advanced JSON. Literal/v1/v2
+configuration and historical receipts keep their existing meanings. Installed .308
+cannot read/execute the new v3 profile or inspection purposes; there is no automatic
+downgrade conversion or migration. Its installation and existing assets are untouched.
+
+## Validation and source identities
+
+Node 24.14.0 and pnpm 10.33.2 were used. Local root typecheck and source desktop/
+native development builds passed. Root lint recorded its existing 75 warnings and
+zero errors; architecture against the integration base recorded zero violations.
+The normalization-focused run passed 52 tests with one expected genuine-TRX replay
+skip. Native process tests passed 20 with one expected non-Windows skip. Both
+bilingual component suites passed both languages; the final visual refinement also
+asserts that source verification shows no permission-response instruction.
+
+The unchanged Linux CI manifest run on Windows recorded two existing ASAR/platform
+failures and one background-sync timing failure, plus the platform skip-count
+mismatch; this local run is not called green. The isolated background-sync suite
+then passed 17/17. No exclusions, assertions or gates were disabled.
+
+At 156237b, CI run 38576181562 passed all four required jobs: 1,034 passed, four
+expected skips, zero failures; tested merge 9c8f1b2ded8a2a1133b7294dd794feac2716008e.
+At 20c3348, run 38579651611 passed typecheck and graph-tests (1,035 passed, four
+expected skips, zero failures; merge 3f46da6d2ac1e666b571197493dc70e3529c414b) but
+static-checks correctly failed on the expanded diagnostic's 400-line limit and
+report formatting. The final delivery extracts the same bounded observer into a
+small helper and formats the report; it does not relax either gate.
+
+The final delivery commit's exact four-job CI and tested merge are recorded in the
+PR handoff after that commit is pushed. Cloud green is not native acceptance.
+Native binary identities are separately recorded because evidence spans staged
+source commits: the 5,013 sequence and general inspection used f531324; Web query,
+preparation and Save used 156237b6c0704d847b6d17ef89c96e76ed26c335; the accepted fresh
+Web execution used 20c33487aecc4990226b2c1f9df753fbb6137924. The later delivery changes
+are diagnostic/evidence/documentation plus a UI-only correction that shows the
+permission-response instruction only for an actual pending permission. Execution
+semantics and the accepted native owners are unchanged. Base remains
+f7279c79824e518abc6f4fdeb2c6cf66b86bac31. No merge, auto-merge, installer, .309, tag,
+release workflow, publication, SDK/feed installation or paid model call occurred.
+
+The previous Web attempts remain intact: rejected extra projection metadata;
+canonical membership mismatch at Save; copied JSON timestamp rejection after
+successful Build; and genuine 3/3 passing tests rejected at final normalization
+because the old path omitted copied outputs. None is upgraded into success. The
+fresh corrected run provides new evidence. All prior interrupted/failed records
+below are historical checkpoints, not the current feature status.
+
+---
+
+## Historical checkpoints (preserved; superseded by the final status above)
+
 # Z8.5-U5-F1 implementation follow-up — incomplete acceptance
 
 The independent Host/native inspection boundary is implemented on the existing U5
@@ -423,7 +604,6 @@ Both explicit queries succeeded in isolated profile `z1-native-1791984477667-fe5
 Retained attempt `1791985226523-d0e144` completed two owned inspections, 60-input preparation, Save and reopen. Its actual Build exited successfully, but evidence correctly rejected the two copied appsettings.json outputs because MSBuild preserves source modification times. No Test ran. The failed run and its receipts remain intact.
 
 The new v3 scope explicitly separates bounded `copiedContent` source/output pairs from freshly generated `expectedOutputs`. Actual evaluated Content metadata and observed assembly directories determine these immutable pairs. Generated assemblies/manifests retain every existing timestamp, baseline, exit and byte requirement. Copies instead must equal their freshly read source bytes after Build, before Test and after Test; their output bytes join the Build output digest and Test association. They are never claimed to have been freshly generated. Missing/stale/altered copies fail independently, and the combined output count stays at 32. Ordinary literal/v1/v2 evidence and raw TRX semantics are unchanged.
-
 
 ### Web native attempt 4: genuine tests passed, normalization rejected
 

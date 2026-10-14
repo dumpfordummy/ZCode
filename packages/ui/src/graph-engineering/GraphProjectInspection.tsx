@@ -199,8 +199,8 @@ export function GraphProjectInspection({
               {t("inspectionStart")}
             </Button>
           ) : null}
-          {record.reserved ? (
-            <p className="text-ui-sm">
+          {record.status === "awaiting-permission" ? (
+            <p className="text-ui-sm" data-testid="graph-inspection-permission-instruction">
               {t("inspectionPermission")} <span className="font-mono">{record.sessionId}</span>
             </p>
           ) : null}

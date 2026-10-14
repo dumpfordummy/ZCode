@@ -16,6 +16,7 @@ await runUxBrowserSuite({
         path.join(host.workspaces.A, "Api/Api.csproj"),
         '<Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup></Project>',
       );
+      await page.setViewportSize({ width: 1366, height: 1400 });
       await boot(page, host, url, { locale, theme: "zai-light" });
       await chooseGeneric(page);
       await T(page, "graph-template-setup-checks").click();
