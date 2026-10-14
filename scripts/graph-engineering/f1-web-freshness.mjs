@@ -8,10 +8,21 @@ import {
   captureWebProfileRuntime,
   revalidateWebProfileRuntime,
 } from "../../packages/shared/src/node/webProfileProvenance.ts";
+import { createProjectSetupPort } from "../../packages/services/src/graph-engineering/adapters/project-checks.ts";
+import {
+  associatedBuildPaths,
+  assertCopiedContent,
+} from "../../packages/services/src/graph-engineering/app/web-content-evidence.ts";
+import { buildNativeContract } from "../../apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/native-contract.ts";
 import policy from "../../packages/shared/src/web-profile-policy.json" with { type: "json" };
 const home = process.env.F1_WEB_NATIVE_HOME;
 assert.ok(home, "Explicit completed synthetic native fixture required");
-const native = JSON.parse(await readFile(path.join(home, "f1-web-native-summary.json"), "utf8"));
+const native = JSON.parse(
+  await readFile(
+    path.join(home, process.env.F1_WEB_NATIVE_SUMMARY ?? "f1-web-native-summary.json"),
+    "utf8",
+  ),
+);
 assert.equal(native.status, "PASS");
 const workspace = path.join(home, "workspace"),
   directory = path.join(home, "data/.zcode/v2/graph-engineering");
@@ -23,9 +34,20 @@ const target = { workspacePath: workspace, workspaceIdentity: proof.workspace };
 const store = createGraphRecipeStore(directory),
   configured = await store.read(target),
   scope = configured.recipes[0].sourceScope;
-const paths = configured.recipes[0].sourcePaths;
+const nativePreview = native.record.runs.at(-1).purpose.preview;
+// Real source/receipt/preview owner, with the already observed environment replayed only for this non-executing diagnostic.
+const previewOwner = createProjectSetupPort({
+  directory,
+  agentService: {
+    previewExecutionEnvironment: async () => structuredClone(nativePreview.environment),
+    readRuntimeCapabilities: async () => ({
+      supported: true,
+      capabilities: { nativeContract: buildNativeContract([]) },
+    }),
+  },
+});
 const summary = {
-  kind: "native-fixture freshness owner probes; no new execution",
+  kind: "real saved-profile source and preview capture; recorded environment replay; no new execution",
   status: "RUNNING",
   cases: [],
   sourceCount: scope.sourceCount,
@@ -37,13 +59,22 @@ const mark = (name, detail = {}) => {
   console.error(JSON.stringify(row));
 };
 const sha = (b) => createHash("sha256").update(b).digest("hex");
-const fingerprint = () => store.fingerprint(target, paths, [scope]);
+const fingerprint = async () => {
+  const captured = await previewOwner.capture(
+    target,
+    nativePreview.revision,
+    nativePreview.selection,
+    configured.digest,
+  );
+  return { digest: captured.sourceDigest, previewDigest: captured.digest };
+};
 const baseline = await fingerprint();
 mark("saved native profile fresh", { digest: baseline.digest });
 async function stale(name) {
   try {
     const fresh = await fingerprint();
     assert.notEqual(fresh.digest, baseline.digest, name);
+    assert.notEqual(fresh.previewDigest, baseline.previewDigest, name);
     mark(name, { outcome: "changed byte digest" });
   } catch (e) {
     if (e.code === "ERR_ASSERTION") throw e;
@@ -124,6 +155,26 @@ try {
   }
   assert.equal((await fingerprint()).digest, baseline.digest);
   mark("exact workspace restoration", { digest: baseline.digest });
+  const build = configured.recipes.find((recipe) => recipe.verifier.kind === "build");
+  const associated = await store.fingerprint(target, associatedBuildPaths(build));
+  const copyPath = path.join(workspace, scope.copiedContent[0].output),
+    copyBytes = await readFile(copyPath);
+  try {
+    await writeFile(copyPath, Buffer.concat([copyBytes, Buffer.from(" stale copy")]));
+    await assert.rejects(() => assertCopiedContent(store, target, build), /differs/);
+    assert.notEqual(
+      (await store.fingerprint(target, associatedBuildPaths(build))).digest,
+      associated.digest,
+    );
+    mark("copied output mutation rejects Build-to-Test byte association");
+  } finally {
+    await writeFile(copyPath, copyBytes);
+  }
+  await assertCopiedContent(store, target, build);
+  assert.equal(
+    (await store.fingerprint(target, associatedBuildPaths(build))).digest,
+    associated.digest,
+  );
   // Never mutate the installed SDK or retained shared public cache. Copy only the already reviewed exact roots.
   const copyRoot = path.join(home, "freshness-toolchain-copy"),
     dotnet = path.join(copyRoot, "dotnet"),
@@ -196,7 +247,7 @@ try {
   assert.deepEqual(await revalidateWebProfileRuntime(workspace, copied), copied);
   mark("exact copied toolchain restoration");
   assert.equal((await store.read(target)).digest, configured.digest);
-  assert.equal(native.record.runs.length, 1);
+  assert.ok(native.record.runs.length >= 1);
   summary.status = "PASS";
 } catch (e) {
   summary.status = "FAIL";

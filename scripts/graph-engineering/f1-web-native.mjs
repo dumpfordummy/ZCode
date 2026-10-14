@@ -23,7 +23,29 @@ assert.ok(process.argv.includes("--source") && !process.env.Z1_PACKAGED_EXE);
 const source = process.env.F1_WEB_ORACLE_WORKSPACE,
   cache = process.env.F1_PUBLIC_PACKAGE_CACHE;
 assert.ok(source && cache, "Explicit retained synthetic source and public cache required");
-const isolation = await createIsolation({ extraEnv: { ZCODE_GRAPH_DIAGNOSTICS: "1" } });
+const resume = process.env.F1_WEB_RESUME_PROFILE;
+const retained = resume
+  ? JSON.parse(await readFile(path.join(resume, "f1-web-native-summary.json"), "utf8"))
+  : undefined;
+if (resume) {
+  const current = await readGraphRecord({
+    home: resume,
+    workspace: path.join(resume, "workspace"),
+  });
+  assert.ok(
+    current.runs.length &&
+      current.runs.every((run) =>
+        ["Completed", "Failed", "Cancelled", "Rejected"].includes(run.status),
+      ),
+    "Existing operation must be terminal before any diagnostic profile write",
+  );
+}
+const prefix = resume ? `resume-${Date.now()}-` : "";
+const summaryName = resume ? prefix + "summary.json" : "f1-web-native-summary.json";
+const isolation = await createIsolation({
+  extraEnv: { ZCODE_GRAPH_DIAGNOSTICS: "1" },
+  ...(resume ? { profile: resume, resumeNativeProfile: true } : {}),
+});
 const start = performance.now(),
   summary = {
     home: isolation.home,
@@ -168,111 +190,143 @@ async function inspectProfile(role) {
   mark(role + "-inspection-complete");
 }
 try {
-  await configureDotnetEnvironment(isolation);
-  for (const name of ["Web", "Tests"])
-    await cp(path.join(source, name), path.join(isolation.workspace, name), {
-      recursive: true,
-      filter: (file) =>
-        !file.split(path.sep).some((part) => ["bin", "obj", ".zcode", ".git"].includes(part)),
-    });
-  for (const name of ["global.json", "NuGet.Config", "Directory.Build.props"])
-    await cp(path.join(source, name), path.join(isolation.workspace, name));
-  await mkdir(path.join(isolation.workspace, "Other"));
-  await writeFile(
-    path.join(isolation.workspace, "Other/Other.csproj"),
-    '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net8.0</TargetFramework><IsTestProject>true</IsTestProject></PropertyGroup></Project>',
-  );
-  for (let i = 0; i < 40; i++)
+  if (!resume) {
+    await configureDotnetEnvironment(isolation);
+    for (const name of ["Web", "Tests"])
+      await cp(path.join(source, name), path.join(isolation.workspace, name), {
+        recursive: true,
+        filter: (file) =>
+          !file.split(path.sep).some((part) => ["bin", "obj", ".zcode", ".git"].includes(part)),
+      });
+    for (const name of ["global.json", "NuGet.Config", "Directory.Build.props"])
+      await cp(path.join(source, name), path.join(isolation.workspace, name));
+    await mkdir(path.join(isolation.workspace, "Other"));
     await writeFile(
-      path.join(isolation.workspace, `Web/Source${String(i).padStart(2, "0")}.cs`),
-      "// synthetic source " + i,
+      path.join(isolation.workspace, "Other/Other.csproj"),
+      '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net8.0</TargetFramework><IsTestProject>true</IsTestProject></PropertyGroup></Project>',
     );
-  const env = webProfileEnvironment(isolation.workspace, {
-    executable: "C:\\Program Files\\dotnet\\dotnet.exe",
-    packageRoot: cache,
-    systemRoot: process.env.SystemRoot,
-  });
-  for (const key of [
-    "HOME",
-    "APPDATA",
-    "LOCALAPPDATA",
-    "TEMP",
-    "DOTNET_CLI_HOME",
-    "MSBuildUserExtensionsPath",
-    "PROGRAMFILES",
-    "PROGRAMDATA",
-  ])
-    await mkdir(env[key], { recursive: true });
-  const bootstrap = await runDotnet({ ...isolation, env }, [
-    "restore",
-    "Tests/Tests.csproj",
-    "--configfile",
-    "NuGet.Config",
-    "--packages",
-    cache,
-    "-p:NuGetAudit=false",
-    "--disable-parallel",
-    ...WEB_PROFILE_CONTROLS,
-  ]);
-  assert.equal(bootstrap.exitCode, 0, bootstrap.stdout + bootstrap.stderr);
-  summary.bootstrap = { ...bootstrap, productSetupRestore: false, offlineCachedFixtureOnly: true };
-  mark("fixture-ready");
-  await ensureShellFolders(isolation);
-  window = await isolation.launch();
-  window.setDefaultTimeout(900000);
-  await initializeU2NativeWorkspace(isolation, window, summary);
-  await openNewRun(window);
-  await T(window, "graph-library-entry").click();
-  await window.locator('[role="option"][data-value="generic"]').click();
-  await T(window, "graph-template-parameter-request").fill("Synthetic Web profile checks");
-  await T(window, "graph-template-setup-checks").click();
-  await inspectProfile("web");
-  await inspectProfile("test");
-  const panel = await findProfile();
-  await panel.getByTestId("graph-web-prepare").click();
-  await until(async () => {
-    const alerts = await panel.getByRole("alert").allTextContents();
-    if (alerts.length) throw Error(alerts.join("\n"));
-    return await panel.getByTestId("graph-web-proposal").count();
-  }, "complete profile proposal");
-  await shot(isolation, window, summary, "web-proposal", [1600, 1000]);
-  await noEvidence();
-  mark("proposal-ready");
-  await panel.getByTestId("graph-web-save").click();
-  const configPath = path.join(isolation.workspace, ".zcode/config.json");
-  await until(async () => {
-    try {
-      return JSON.parse(await readFile(configPath, "utf8")).graphRecipes?.length === 2;
-    } catch (e) {
-      if (e.code === "ENOENT") return false;
-      throw e;
-    }
-  }, "Save complete");
-  const configuration = await readFile(configPath, "utf8"),
-    recipes = JSON.parse(configuration).graphRecipes;
-  assert.ok(recipes.every((r) => r.sourceScope.version === 3));
-  assert.ok(
-    recipes.every(
-      (r) => r.verifier.kind !== "build" || r.verifier.dotnet.project === "Tests/Tests.csproj",
-    ),
-  );
-  assert.ok(recipes[0].sourceScope.sourceCount > 40);
-  await noEvidence();
-  summary.cases.push({
-    name: "profile-save",
-    status: "PASS",
-    sourceCount: recipes[0].sourceScope.sourceCount,
-    scope: recipes[0].sourceScope,
-  });
-  mark("configuration-saved");
-  await isolation.stopApp();
-  window = await isolation.launch();
-  window.setDefaultTimeout(900000);
-  await setup();
-  assert.equal(await readFile(configPath, "utf8"), configuration);
-  await noEvidence();
-  await shot(isolation, window, summary, "web-reopened", [1600, 1000]);
-  mark("reopened-no-replay");
+    for (let i = 0; i < 40; i++)
+      await writeFile(
+        path.join(isolation.workspace, `Web/Source${String(i).padStart(2, "0")}.cs`),
+        "// synthetic source " + i,
+      );
+    const env = webProfileEnvironment(isolation.workspace, {
+      executable: "C:\\Program Files\\dotnet\\dotnet.exe",
+      packageRoot: cache,
+      systemRoot: process.env.SystemRoot,
+    });
+    for (const key of [
+      "HOME",
+      "APPDATA",
+      "LOCALAPPDATA",
+      "TEMP",
+      "DOTNET_CLI_HOME",
+      "MSBuildUserExtensionsPath",
+      "PROGRAMFILES",
+      "PROGRAMDATA",
+    ])
+      await mkdir(env[key], { recursive: true });
+    const bootstrap = await runDotnet({ ...isolation, env }, [
+      "restore",
+      "Tests/Tests.csproj",
+      "--configfile",
+      "NuGet.Config",
+      "--packages",
+      cache,
+      "-p:NuGetAudit=false",
+      "--disable-parallel",
+      ...WEB_PROFILE_CONTROLS,
+    ]);
+    assert.equal(bootstrap.exitCode, 0, bootstrap.stdout + bootstrap.stderr);
+    summary.bootstrap = {
+      ...bootstrap,
+      productSetupRestore: false,
+      offlineCachedFixtureOnly: true,
+    };
+    mark("fixture-ready");
+    await ensureShellFolders(isolation);
+    window = await isolation.launch();
+    window.setDefaultTimeout(900000);
+    await initializeU2NativeWorkspace(isolation, window, summary);
+    await openNewRun(window);
+    await T(window, "graph-library-entry").click();
+    await window.locator('[role="option"][data-value="generic"]').click();
+    await T(window, "graph-template-parameter-request").fill("Synthetic Web profile checks");
+    await T(window, "graph-template-setup-checks").click();
+    await inspectProfile("web");
+    await inspectProfile("test");
+    const panel = await findProfile();
+    await panel.getByTestId("graph-web-prepare").click();
+    await until(async () => {
+      const alerts = await panel.getByRole("alert").allTextContents();
+      if (alerts.length) throw Error(alerts.join("\n"));
+      return await panel.getByTestId("graph-web-proposal").count();
+    }, "complete profile proposal");
+    await shot(isolation, window, summary, "web-proposal", [1600, 1000]);
+    await noEvidence();
+    mark("proposal-ready");
+    await panel.getByTestId("graph-web-save").click();
+    const configPath = path.join(isolation.workspace, ".zcode/config.json");
+    await until(async () => {
+      try {
+        return JSON.parse(await readFile(configPath, "utf8")).graphRecipes?.length === 2;
+      } catch (e) {
+        if (e.code === "ENOENT") return false;
+        throw e;
+      }
+    }, "Save complete");
+    const configuration = await readFile(configPath, "utf8"),
+      recipes = JSON.parse(configuration).graphRecipes;
+    assert.ok(recipes.every((r) => r.sourceScope.version === 3));
+    assert.ok(
+      recipes.every(
+        (r) => r.verifier.kind !== "build" || r.verifier.dotnet.project === "Tests/Tests.csproj",
+      ),
+    );
+    assert.ok(recipes[0].sourceScope.sourceCount > 40);
+    await noEvidence();
+    summary.cases.push({
+      name: "profile-save",
+      status: "PASS",
+      sourceCount: recipes[0].sourceScope.sourceCount,
+      scope: recipes[0].sourceScope,
+    });
+    mark("configuration-saved");
+    await isolation.stopApp();
+    window = await isolation.launch();
+    window.setDefaultTimeout(900000);
+    await setup();
+    assert.equal(await readFile(configPath, "utf8"), configuration);
+    await noEvidence();
+    await shot(isolation, window, summary, "web-reopened", [1600, 1000]);
+    mark("reopened-no-replay");
+  } else {
+    assert.equal(retained.status, "FAIL");
+    const before = await record();
+    assert.ok(
+      before.runs.every((run) =>
+        ["Completed", "Failed", "Cancelled", "Rejected"].includes(run.status),
+      ),
+    );
+    summary.cases.push(...retained.cases);
+    summary.previousEvidence = {
+      file: "f1-web-native-summary.json",
+      status: retained.status,
+      phases: retained.phases,
+      runIds: before.runs.map((run) => run.id),
+    };
+    const configPath = path.join(isolation.workspace, ".zcode/config.json"),
+      configuration = await readFile(configPath, "utf8");
+    window = await isolation.launch();
+    window.setDefaultTimeout(900000);
+    await window.getByTestId("task-new-button").click();
+    await window.getByTestId("v4-composer-input").waitFor();
+    await setup();
+    assert.equal(await readFile(configPath, "utf8"), configuration);
+    assert.equal(modelCount(isolation), 0);
+    await shot(isolation, window, summary, prefix + "reopened", [1600, 1000]);
+    mark("existing-saved-profile-reopened-no-inspection-replay");
+  }
   await T(window, "graph-check-prepare").click();
   await T(window, "graph-check-preview").waitFor();
   const preview = JSON.parse(await T(window, "graph-check-preview-snapshot").textContent());
@@ -289,7 +343,15 @@ try {
     return !!runId;
   }, "run admission");
   for (const node of preview.definition.nodes.filter((n) => n.type === "tool")) {
-    await openU2Permission(isolation, window, summary, runId, node.id, "web-" + node.id, 900000);
+    await openU2Permission(
+      isolation,
+      window,
+      summary,
+      runId,
+      node.id,
+      prefix + "web-" + node.id,
+      900000,
+    );
     await allowU2Permission(window);
     mark(node.id + "-allowed");
   }
@@ -337,20 +399,18 @@ try {
     ?.locator("body")
     .innerText()
     .catch(() => "unavailable");
-  if (window) await shot(isolation, window, summary, "web-failure").catch(() => {});
+  if (window) await shot(isolation, window, summary, prefix + "web-failure").catch(() => {});
 } finally {
   summary.history = await history();
   summary.record = await record();
   summary.models = modelCount(isolation);
   summary.nativeLedger = await ledger(isolation).catch(() => undefined);
-  await writeFile(
-    path.join(isolation.home, "f1-web-native-summary.json"),
-    JSON.stringify(summary, null, 2),
-  );
+  await writeFile(path.join(isolation.home, summaryName), JSON.stringify(summary, null, 2));
   console.log(
     JSON.stringify({
       status: summary.status,
       home: isolation.home,
+      summaryName,
       error: summary.error,
       cases: summary.cases.map((c) => ({ name: c.name, status: c.status })),
     }),

@@ -146,7 +146,11 @@ export function GraphWebProfile({
                 onClick={() => setRole(value)}
               >
                 {value === "web" ? t("webService") : t("webTests")} ·{" "}
-                {value === "web" ? (web?.status ?? "—") : (test?.status ?? "—")}
+                {t(
+                  (value === "web" ? web : test)?.status === "succeeded"
+                    ? "webObserved"
+                    : "webUnobserved",
+                )}
               </Button>
             ))}
           </div>

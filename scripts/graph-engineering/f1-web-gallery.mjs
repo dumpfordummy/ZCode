@@ -7,7 +7,12 @@ import { boot, chooseGeneric, T, until } from "./ux-m1-helpers.mjs";
 import { prepareWebProfileInputs } from "../../packages/services/src/graph-engineering/adapters/web-profile-inputs.ts";
 const home = process.env.F1_WEB_NATIVE_HOME;
 assert.ok(home, "Explicit successful synthetic native fixture required");
-const source = JSON.parse(await readFile(path.join(home, "f1-web-native-summary.json"), "utf8"));
+const source = JSON.parse(
+  await readFile(
+    path.join(home, process.env.F1_WEB_NATIVE_SUMMARY ?? "f1-web-native-summary.json"),
+    "utf8",
+  ),
+);
 assert.equal(source.status, "PASS");
 const workspace = path.join(home, "workspace");
 const root = path.join(home, "data/.zcode/v2/graph-engineering/graph-web-profile-v1");

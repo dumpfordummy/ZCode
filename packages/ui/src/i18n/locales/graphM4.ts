@@ -108,6 +108,8 @@ const messages: Record<string, [string, string]> = {
     "仅可选择已完成输入闭包验证的匹配项目。",
   ],
   webBuildTarget: ["Actual Build target and reference", "实际构建目标与引用"],
+  webObserved: ["Observed", "已观察"],
+  webUnobserved: ["Not yet observed", "尚未观察"],
   webService: ["Web inspection", "Web 检查"],
   webTests: ["Test inspection", "测试项目检查"],
   webPrepare: ["Prepare complete Web profile", "准备完整 Web 配置"],
@@ -144,8 +146,8 @@ const messages: Record<string, [string, string]> = {
   inspectionFramework: ["Select the actual target framework", "选择实际目标框架"],
   inspectionReview: ["Inspect with installed MSBuild", "使用已安装 MSBuild 检查"],
   inspectionVerifying: [
-    "Verifying current source and toolchain bytes; no permission request yet.",
-    "正在验证当前源码和工具链字节，尚未发起权限请求。",
+    "Verifying current source and toolchain bytes; no permission response is currently needed.",
+    "正在验证当前源码和工具链字节，当前无需回应权限请求。",
   ],
   inspectionCommand: ["Exact executable and ordered arguments", "确切可执行文件及有序参数"],
   inspectionScope: [
@@ -165,14 +167,14 @@ const messages: Record<string, [string, string]> = {
   inspectionCancel: ["Cancel inspection", "取消检查"],
   "inspectionState.review-ready": ["Ready for command review", "命令可供审核"],
   "inspectionState.verifying-sources": [
-    "Verifying source bytes; no permission request yet",
-    "正在验证源码字节，尚未发起权限请求",
+    "Verifying source bytes; no permission response is currently needed",
+    "正在验证源码字节，当前无需回应权限请求",
   ],
   "inspectionState.awaiting-permission": ["Waiting for native permission", "等待原生权限"],
   "inspectionState.running": ["Evaluating installed MSBuild", "正在使用已安装 MSBuild 求值"],
   "inspectionState.succeeded": [
-    "Configuration observed; scope remains unsupported",
-    "已观察配置，输入范围仍不受支持",
+    "Configuration observed; inspection alone does not establish complete scope",
+    "已观察配置；仅检查不能证明范围完整",
   ],
   "inspectionState.denied": ["Native permission denied", "原生权限已拒绝"],
   "inspectionState.cancelled": ["Inspection cancelled", "检查已取消"],

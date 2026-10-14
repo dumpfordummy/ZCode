@@ -9,6 +9,7 @@ import {
 } from "../../packages/shared/src/node/webProfileProvenance.ts";
 import { WEB_PROFILE_CONTROLS } from "../../packages/shared/src/web-profile.ts";
 
+const configuration = process.argv.includes("--release") ? "Release" : "Debug";
 const root = process.cwd();
 const home = path.join(root, ".tmp", `f1-web-oracle-${Date.now()}-${randomUUID().slice(0, 6)}`);
 const workspace = path.join(home, "workspace");
@@ -90,6 +91,7 @@ for (const [name, text] of Object.entries(files)) {
 }
 const summary = {
   home,
+  configuration,
   commands: [],
   status: "RUNNING",
   productSetupRestore: false,
@@ -126,7 +128,7 @@ try {
       "-noAutoResponse",
       "-maxCpuCount:1",
       "-nodeReuse:false",
-      "-p:Configuration=Debug",
+      `-p:Configuration=${configuration}`,
       "-p:TargetFramework=net8.0",
       ...controls,
       "-getProperty:NETCoreSdkVersion,MSBuildVersion,TargetPath,TargetFramework,Configuration,UsingMicrosoftNETSdkWeb,ProjectAssetsFile,BaseOutputPath,BaseIntermediateOutputPath,TargetingPackRoot,NetCoreRoot,RuntimeFrameworkVersion,MSBuildAllProjects,EnableRequestDelegateGenerator,EnableConfigurationBindingGenerator,StaticWebAssetsEnabled",
@@ -137,6 +139,8 @@ try {
   await run([
     "build",
     "Tests/Tests.csproj",
+    "--configuration",
+    configuration,
     "--no-restore",
     "--no-incremental",
     "--disable-build-servers",
@@ -146,6 +150,8 @@ try {
   await run([
     "test",
     "Tests/Tests.csproj",
+    "--configuration",
+    configuration,
     "--no-restore",
     "--no-build",
     "--logger",
@@ -156,7 +162,10 @@ try {
   ]);
   summary.cases.push({ name: "plain-web-content-application", status: "PASS", tests: 3 });
   const manifest = JSON.parse(
-    await readFile(path.join(workspace, "Web/obj/Debug/net8.0/staticwebassets.build.json"), "utf8"),
+    await readFile(
+      path.join(workspace, `Web/obj/${configuration}/net8.0/staticwebassets.build.json`),
+      "utf8",
+    ),
   );
   assert.equal(manifest.Assets.length, 1);
   assert.equal(manifest.Assets[0].RelativePath, "site.txt");
@@ -168,7 +177,7 @@ try {
   }));
   const runtime = JSON.parse(
     await readFile(
-      path.join(workspace, "Tests/bin/Debug/net8.0/Web.staticwebassets.runtime.json"),
+      path.join(workspace, `Tests/bin/${configuration}/net8.0/Web.staticwebassets.runtime.json`),
       "utf8",
     ),
   );
