@@ -11,11 +11,13 @@ export function GraphProjectInspection({
   project,
   configuration,
   disabled,
+  onOpenConversation,
 }: {
   setup: ReturnType<typeof useGraphProjectSetup>;
   project: string;
   configuration: string;
   disabled: boolean;
+  onOpenConversation?: (path: string, session: string, identity?: string) => void;
 }) {
   const t = useGraphM4Text();
   const [sdk, setSdk] = useState("");
@@ -31,7 +33,9 @@ export function GraphProjectInspection({
     setBusy(false);
     return () => {
       generation.current++;
-      if (owned.current) void setup.cancelInspection(owned.current);
+      // 仅明确进入原权限会话的导航可保留操作；普通卸载和根/选择变更仍取消。
+      if (owned.current && setup.shouldCancelInspection(owned.current))
+        void setup.cancelInspection(owned.current);
       owned.current = undefined;
     };
   }, [key, setup.cancelInspection]);
@@ -137,8 +141,8 @@ export function GraphProjectInspection({
                 {record.request.inspection?.sdkDirectory}
               </dd>
               <dd>
-                {record.request.inspection?.observedFiles} {t("inspectionFiles")}; 30s / 64KiB;{" "}
-                {t("inspectionExpiry")}{" "}
+                {record.request.inspection?.observedFiles} {t("inspectionFiles")}; 30s / 64KiB / 1
+                process; {t("inspectionExpiry")}{" "}
                 {new Date(record.request.inspection!.expiresAt).toISOString()}
               </dd>
             </dl>
@@ -163,6 +167,24 @@ export function GraphProjectInspection({
             <p className="text-ui-sm">
               {t("inspectionPermission")} <span className="font-mono">{record.sessionId}</span>
             </p>
+          ) : null}
+          {record.sessionId && onOpenConversation ? (
+            <Button
+              size="sm"
+              variant="outline"
+              data-testid="graph-inspection-conversation"
+              disabled={busy}
+              onClick={() => {
+                setup.preserveInspectionOnNavigation(record.id);
+                onOpenConversation(
+                  record.target.workspacePath,
+                  record.sessionId!,
+                  record.target.workspaceIdentity,
+                );
+              }}
+            >
+              {t("inspectionConversation")}
+            </Button>
           ) : null}
           <div className="flex flex-wrap gap-2">
             <Button

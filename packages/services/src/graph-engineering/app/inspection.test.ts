@@ -294,3 +294,25 @@ test("inspection project argument cannot become an MSBuild response file or swit
   }
   assert.equal(f.counts(), 0);
 });
+
+test("history and cold reconciliation preserve original identity without replay", async () => {
+  const f = fixture(),
+    row = await f.review();
+  await f.start(row);
+  const cold = f.make();
+  const records = structuredClone(await cold.inspections.history(target));
+  assert.equal(records.length, 1);
+  assert.equal(records[0]!.id, row.id);
+  assert.equal(records[0]!.status, "executor-lost");
+  assert.equal(records[0]!.reserved, true);
+  assert.equal(f.counts(), 1);
+  records[0]!.reserved = false;
+  await assert.rejects(cold.inspections.assertIdle(target), /owns this workspace/);
+  const observed = await cold.inspections.command({ target, action: "status", id: row.id });
+  assert.equal(observed.id, row.id);
+  assert.equal(observed.sessionId, "owned");
+  assert.equal(f.counts(), 1);
+  await cold.inspections.command({ target, action: "cancel", id: row.id });
+  await cold.inspections.assertIdle(target);
+  assert.equal(f.counts(), 1);
+});

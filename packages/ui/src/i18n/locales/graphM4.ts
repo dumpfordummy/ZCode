@@ -118,6 +118,8 @@ const messages: Record<string, [string, string]> = {
     "Use the ordinary permission prompt in this owned conversation:",
     "请在此受管会话中使用普通权限提示：",
   ],
+  inspectionHistory: ["Inspection history and recovery", "检查记录与恢复"],
+  inspectionConversation: ["Open permission conversation", "打开权限会话"],
   inspectionRefresh: ["Check original operation", "查看原操作"],
   inspectionCancel: ["Cancel inspection", "取消检查"],
   "inspectionState.review-ready": ["Ready for command review", "命令可供审核"],

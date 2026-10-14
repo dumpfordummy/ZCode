@@ -51,6 +51,12 @@ export class GraphEngineeringService implements IGraphEngineeringService {
     this.onDidChange = this.state.changed.event;
     this.parallelService = new GraphParallelService(this.state, this);
   }
+  async readProjectInspections(value: GraphWorkspaceTarget) {
+    const target = localTarget(value);
+    return this.state.serial(target, async () =>
+      structuredClone(await this.state.inspections.history(target)),
+    );
+  }
   async inspectProject(params: import("../inspection-types.js").GraphInspectionCommand) {
     const target = localTarget(params.target);
     return this.state.serial(target, () => this.state.inspections.command({ ...params, target }));

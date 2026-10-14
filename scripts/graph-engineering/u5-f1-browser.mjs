@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { randomUUID } from "node:crypto";
 import { runUxBrowserSuite } from "./ux-browser-runner.mjs";
 import { boot, chooseGeneric, T, until } from "./ux-m1-helpers.mjs";
 import { inspectionArguments } from "../../packages/shared/src/project-inspection.ts";
@@ -27,7 +28,10 @@ await runUxBrowserSuite({
       const original = host.bridge.projectSetup;
       const calls = [];
       let row;
+      let denyNext = true;
       host.bridge.projectSetup = async (input) => {
+        if (input.action === "inspection-history")
+          return { kind: "inspection-history", records: row ? [structuredClone(row)] : [] };
         if (input.action !== "inspection") return original(input);
         calls.push(input.command.action);
         if (input.command.action === "review") {
@@ -40,10 +44,12 @@ await runUxBrowserSuite({
             observedBytes: 405626873,
             expiresAt: Date.now() + 300000,
           };
+          const id = randomUUID();
           row = {
             version: 1,
             kind: "project-inspection",
-            id: "11111111-1111-4111-8111-111111111111",
+            id,
+            sessionId: "synthetic-inspection-session",
             target: { workspacePath: "C:/Synthetic/Web" },
             selection: input.command.selection,
             status: "review-ready",
@@ -53,7 +59,7 @@ await runUxBrowserSuite({
             message: "Controlled UI fixture",
             requestDigest: "b".repeat(64),
             request: {
-              operationId: "11111111-1111-4111-8111-111111111111",
+              operationId: id,
               inspection: binding,
               recipe: {
                 id: binding.purpose,
@@ -64,9 +70,14 @@ await runUxBrowserSuite({
               },
             },
           };
-        } else if (input.command.action === "start")
-          row = { ...row, status: "denied", reserved: false };
-        else if (input.command.action === "cancel")
+        } else if (input.command.action === "start") {
+          row = {
+            ...row,
+            status: denyNext ? "denied" : "awaiting-permission",
+            reserved: !denyNext,
+          };
+          denyNext = false;
+        } else if (input.command.action === "cancel")
           row = { ...row, status: "cancelled", reserved: false };
         return structuredClone(row);
       };
@@ -112,6 +123,67 @@ await runUxBrowserSuite({
       assert.equal(await T(page, "graph-quick-save").isEnabled(), false);
       await shot("controlled-denied-en");
       assert.equal(calls.filter((c) => c === "start").length, 1);
+      // Separate reviewed operation, now pending ordinary permission. The controlled callback
+      // records navigation; locale remount exercises the same unmount/reopen component boundary.
+      await panel
+        .getByRole("button")
+        .filter({
+          hasText:
+            locale === "en-US" ? /^Inspect with installed MSBuild$/ : /^使用已安装 MSBuild 检查$/,
+        })
+        .click();
+      await until(
+        async () => (await panel.getAttribute("data-status")) === "review-ready",
+        "second review",
+      );
+      await panel
+        .getByRole("button")
+        .filter({
+          hasText:
+            locale === "en-US"
+              ? /^Confirm inspection and request native permission$/
+              : /^确认检查并请求原生权限$/,
+        })
+        .click();
+      await until(
+        async () => (await panel.getAttribute("data-status")) === "awaiting-permission",
+        "owned permission wait",
+      );
+      const cancelledBefore = calls.filter((c) => c === "cancel").length;
+      await T(page, "graph-inspection-conversation").click();
+      await page.evaluate(
+        (next) => window.__harness.set({ locale: next }),
+        locale === "en-US" ? "zh-CN" : "en-US",
+      );
+      await until(
+        async () => await T(page, "graph-inspection-recovery").count(),
+        "recovery after navigation remount",
+      );
+      const recovery = T(page, "graph-inspection-recovery");
+      await recovery.locator("summary").click();
+      await until(
+        async () => await recovery.locator(`[data-operation-id="${row.id}"]`).count(),
+        "retained operation",
+      );
+      assert.equal(calls.filter((c) => c === "start").length, 2);
+      assert.equal(
+        calls.filter((c) => c === "cancel").length,
+        cancelledBefore,
+        "conversation navigation must not cancel owned permission",
+      );
+      const retained = recovery.locator(`[data-operation-id="${row.id}"]`);
+      await retained.getByRole("button").nth(0).click();
+      assert.equal(calls.filter((c) => c === "start").length, 2, "status cannot replay");
+      await retained.getByRole("button").nth(1).click();
+      await until(
+        async () => (await retained.getAttribute("data-status")) === "cancelled",
+        "explicit original-operation cancellation",
+      );
+      if (shotsDir)
+        await page.screenshot({
+          path: path.join(shotsDir, `recovery-navigation-${locale}.png`),
+          fullPage: true,
+        });
     },
   })),
 });

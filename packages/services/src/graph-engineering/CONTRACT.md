@@ -11,6 +11,13 @@ native identity and ordinary always-ask permission; absent native capability fai
 Passive Detect/Save/navigation never start evaluation. An observation is explicitly
 scopeComplete=false and cannot authorize Save, Build, Test or approval. Pending/lost
 operations reserve the workspace until exact native inactivity; no cold replay.
+Windows inspection additionally requires the hard-process-limit capability. The
+existing execution adapter atomically creates its one process in a private Windows
+Job with no descendants or breakaway and kill-on-owner-close. Other runtimes fail
+closed; ordinary Build/Test execution is unchanged. Read-only inspection history
+and explicit status/cancel expose retained operation identities without replay.
+The permission-conversation link navigates to the original owned session; ordinary
+selection/root changes still cancel the prior proposal.
 See docs/graph-engineering/z8/Z8_5_U5_F1_SPEC.md.
 
 Z8.5-U5 adds structural equivalence for the standard MSBuild namespace and exact

@@ -2,13 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import type { GraphProjectDiscovery, GraphRecipe } from "@zcode/services";
 import type { useGraphProjectSetup } from "@/hooks/useGraphProjectSetup.js";
 import { Button } from "@/components/ui/button.js";
-import { GraphQuickTestChoices } from "./GraphQuickTestChoices.js";
+import { GraphQuickTestChoices, GraphQuickTestAlternatives } from "./GraphQuickTestChoices.js";
 import { GraphQuickSave } from "./GraphQuickSave.js";
 import { useGraphQuickDraft } from "@/hooks/useGraphQuickDraft.js";
 import { Input } from "@/components/ui/input.js";
-import { GraphProjectInspection } from "./GraphProjectInspection.js";
+import { GraphQuickUnresolved } from "./GraphQuickUnresolved.js";
 import { GraphQuickSummary } from "./GraphQuickSummary.js";
-import { GraphQuickContinuation } from "./GraphQuickContinuation.js";
 import { GraphSelect } from "./GraphSelect.js";
 import { useGraphM4Text } from "./GraphM4Text.js";
 import {
@@ -26,6 +25,7 @@ export function GraphQuickDotnet({
   disabledReason,
   onSave,
   onOpenAdvanced,
+  onOpenConversation,
 }: {
   workspaceKey: string;
   setup: ReturnType<typeof useGraphProjectSetup>;
@@ -34,6 +34,7 @@ export function GraphQuickDotnet({
   disabledReason: string;
   onSave(recipes: GraphRecipe[], run: boolean): Promise<boolean>;
   onOpenAdvanced?(): void;
+  onOpenConversation?: (path: string, session: string, identity?: string) => void;
 }) {
   const t = useGraphM4Text();
   const {
@@ -337,36 +338,25 @@ export function GraphQuickDotnet({
                 busy={busy}
               />
               {build && !busy && !choices.scopes.length ? (
-                <div className="space-y-1" data-testid="graph-quick-test-alternatives">
-                  <p className="text-ui-sm">{t("quickNoLinkedTests")}</p>
-                  {[...new Set(choices.alternatives.map((scope) => scope.project))]
-                    .slice(0, 5)
-                    .map((project) => (
-                      <Button
-                        key={project}
-                        size="sm"
-                        variant="ghost"
-                        disabled={disabled}
-                        onClick={() => selectBuild(project)}
-                      >
-                        {t("quickPrepareTestBuild")} {project}
-                      </Button>
-                    ))}
-                </div>
-              ) : null}
-              {issue && build && !busy ? (
-                <GraphQuickContinuation
-                  {...{ workspaceKey, build, configuration, scopes }}
-                  blocker={issue}
-                  onOpenAdvanced={onOpenAdvanced}
+                <GraphQuickTestAlternatives
+                  projects={choices.alternatives.map((scope) => scope.project)}
+                  disabled={disabled}
+                  onChoose={selectBuild}
                 />
               ) : null}
-              {issue && build.toLowerCase().endsWith(".csproj") && !busy ? (
-                <GraphProjectInspection
-                  setup={setup}
-                  project={build}
-                  configuration={configuration}
-                  disabled={disabled}
+              {issue && build && !busy ? (
+                <GraphQuickUnresolved
+                  {...{
+                    workspaceKey,
+                    build,
+                    configuration,
+                    scopes,
+                    setup,
+                    disabled,
+                    onOpenAdvanced,
+                    onOpenConversation,
+                  }}
+                  blocker={issue}
                 />
               ) : null}
               <p className="text-ui-sm text-foreground-subtle">{t("quickDefaults")}</p>

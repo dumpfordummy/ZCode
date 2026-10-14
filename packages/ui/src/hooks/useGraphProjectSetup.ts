@@ -35,6 +35,14 @@ export function useGraphProjectSetup(target: GraphWorkspaceTarget) {
     () => ({ sequences: {} as Record<string, number> }),
     [service, target.workspacePath, target.workspaceIdentity],
   );
+  const navigation = useMemo(() => new Set<string>(), [scope]);
+  const preserveInspectionOnNavigation = useCallback(
+    (id: string) => {
+      navigation.add(id);
+    },
+    [navigation],
+  );
+  const shouldCancelInspection = useCallback((id: string) => !navigation.delete(id), [navigation]);
   const current = useRef<object>(scope);
   current.current = scope;
   const scan = useRef<{ scope: object; requestId: string } | undefined>(undefined);
@@ -112,5 +120,12 @@ export function useGraphProjectSetup(target: GraphWorkspaceTarget) {
     },
     [service, workspace],
   );
-  return { supported: Boolean(service), invoke, state, cancelInspection };
+  return {
+    supported: Boolean(service),
+    invoke,
+    state,
+    cancelInspection,
+    preserveInspectionOnNavigation,
+    shouldCancelInspection,
+  };
 }
