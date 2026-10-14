@@ -108,7 +108,7 @@ meaning. Saved configuration is not execution proof.
   failures are existing Windows ASAR-header and absolute-ESM-path failures. The
   Linux selector expects four skips; Windows runs its two platform-specific cases.
   The additional 41-input regression was added afterward and passed separately.
-  Existing U3/U4 5,000+ input, 20,000-file/byte budget, v1/v2, negative-receipt and
+  Existing U3/U4 5,000+ input, 20,000-file/512-MiB budget, v1/v2, negative-receipt and
   native-F2 unit regressions passed within that suite; CI selector regressions passed
   18/18. Baselines, exclusions and acceptance assertions are unchanged.
 
@@ -117,7 +117,38 @@ acceptance true, then exceeded the existing 150-second observer deadline while T
 admission was pending. Neither attempt establishes Test proof. A U5-only retry uses
 a 300-second permission-observer window; the U2/U4 default, product command timeout,
 permissions, source checks and all native acceptance assertions are unchanged.
-Native/final CI outcomes are recorded below before handoff.
+That third attempt was interrupted by a desktop executor disconnect: the known
+harness processes disappeared, with no final summary and no Test execution in the
+last retained record. It also does not establish Test proof. These are unresolved
+large-scope native admission/performance limits on this machine, not a passing
+5,013-input sequence. No product scheduling or freshness shortcut was introduced.
+
+The separately labeled `scripts/graph-engineering/u5-native.mjs --source` fixture
+retains 40 scale sources (53 total inputs), the same exact SDK roots, cached public
+packages, copied Content/None, embedded resource and linked source. It uses the
+unchanged native permission flow and `verifyB1Result` genuine-TRX assertions. It
+passed the complete sequence on SDK 8.0.425 / net8.0:
+
+| Case                                    | Native result                                                                                |
+| --------------------------------------- | -------------------------------------------------------------------------------------------- |
+| PASS                                    | Build exit 0; Test exit 0; 3 passed; genuine operation-bound TRX accepted                    |
+| Actual assertion FAIL                   | Fresh Build exit 0; Test exit 1; 2 passed / 1 failed; observation valid and acceptance false |
+| Fresh PASS                              | Restored assertion; new approved Build/Test exit 0; 3 passed and accepted                    |
+| Content bytes changed after review      | Confirmation rejected; zero new runs/models                                                  |
+| New matching source member after review | Confirmation rejected; zero new runs/models                                                  |
+
+No model requests, restore, SDK installation or private-feed access occurred.
+The 53-input proof does not substitute for the failed/interrupted 5,013-input
+native attempts. See the sanitized [native receipt](evidence/u5/native.json).
+
+Linux CI on source commit `1b154bc3464ad8a2e2201bf886dde48c24315127` passed all
+four required jobs: `typecheck`, `static-checks`, `graph-tests` and
+`graph-cloud-required`. The complete selected suite ran 1,001 tests: 997 passed,
+four expected skips, zero failures. The report/standalone-native-harness follow-up
+is verified again on its final PR head; exact head, integration base, tested merge
+and final job links are recorded in the [draft PR handoff](https://github.com/dumpfordummy/ZCode/pull/23).
+The PR remains draft and auto-merge is off. See [validation evidence](evidence/u5/validation.json)
+and the [English/Chinese gallery](evidence/u5/README.md).
 
 The first sandbox suite could not execute some Git/filesystem fixtures; browser
 startup first lacked a downloaded Chromium, then hit sandbox Edge restrictions.
@@ -131,5 +162,17 @@ The new root check is linear in bounded root attributes/children. Display deriva
 uses maps/sets for metadata digest groups and prepared graph reachability, bounded
 by existing inventory/edge budgets; no extra source walk or SDK execution is added.
 Full source enumeration/fingerprinting costs remain material. No new cache or
-freshness shortcut was introduced. Final timings and native acceptance below must
-not be inferred from a saved/prepared scope.
+freshness shortcut was introduced. For 53 inputs, native Build durations were
+3,470 / 2,696 / 2,714 ms and Test durations were 1,045 / 966 / 951 ms.
+Admission-to-Build-start was 2,275–2,551 ms; Build-exit-to-Test-start was
+2,413–2,440 ms, including harness/UI permission work. The 5,013-input Build commands
+also finished in about five seconds, but successor admission did not complete
+within the first two observer deadlines. General large-repository execution
+readiness and Web SDK support are not claimed.
+
+Reproduction uses installed tools and retained synthetic cached dependencies:
+`node --import tsx scripts/graph-engineering/u5-oracle.mjs`,
+`node --import tsx scripts/graph-engineering/u5-browser.mjs --chromium=<installed-browser>`,
+and `node --import tsx scripts/graph-engineering/u5-native.mjs --source` with
+`U3_RESTORED_FIXTURE` naming only a retained public synthetic B1 fixture.
+The original large sequence remains available as `u4-native.mjs --source --u5-roots`.
