@@ -18,7 +18,7 @@ export const inspectionSelectionSchema = z
       .string()
       .min(1)
       .max(4096)
-      .regex(/^[^\r\n]*\.csproj$/i),
+      .regex(/^(?![\s@-])[^\r\n]*\.csproj$/i),
     configuration: z.enum(["Debug", "Release"]),
     framework: z.string().regex(/^net(?:8|10)\.0$/),
     sdkVersion: z.enum(["8.0.425", "8.0.426", "10.0.401"]),

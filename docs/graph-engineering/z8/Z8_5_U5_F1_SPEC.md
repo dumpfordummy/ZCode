@@ -145,3 +145,7 @@ child-process-count guarantee. Unsupported effects cannot enable Save.
 References describe semantics; installed synthetic evidence bounds actual support.
 
 Installed 8.0.426 evidence justifies the 64 MiB per-file cap: FSharp.Compiler.Service.dll is 40,359,720 bytes. The original 32 MiB attempt failed closed. Query projection also recognizes the installed FrameworkReference Pack metadata; arbitrary extra fields still fail closed.
+
+## Final fixed-argument boundary correction
+
+Final review identified that a leading `@` project argument can be interpreted by MSBuild as an explicit response file despite `-noAutoResponse`. Inspection selection now rejects leading `@`, switch prefixes and leading whitespace before native admission. The eight Host/query tests pass after this correction; no target execution was attempted. Root typecheck passes. This is an additional source correction after the UI/diagnostics commit, and the actual final-head CI identity is recorded in the PR handoff.

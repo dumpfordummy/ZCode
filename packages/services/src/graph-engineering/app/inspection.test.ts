@@ -284,3 +284,13 @@ test("frozen query cannot acquire Build targets, custom switches, or environment
   assert.equal(zcodeRecipeRequestSchema.safeParse(request).success, false);
   assert.equal(f.counts(), 0);
 });
+
+test("inspection project argument cannot become an MSBuild response file or switch", async () => {
+  const f = fixture();
+  for (const project of ["@commands.csproj", "-switch.csproj", " @commands.csproj"]) {
+    await assert.rejects(
+      f.command({ target, action: "review", selection: { ...selection, project } }),
+    );
+  }
+  assert.equal(f.counts(), 0);
+});

@@ -317,3 +317,7 @@ Primary semantic references checked:
 [MSBuild queries](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference),
 [properties](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-properties),
 [Web SDK](https://learn.microsoft.com/en-us/aspnet/core/razor-pages/web-sdk).
+
+## Final fixed-argument boundary correction
+
+Final review identified that a leading `@` project argument can be interpreted by MSBuild as an explicit response file despite `-noAutoResponse`. Inspection selection now rejects leading `@`, switch prefixes and leading whitespace before native admission. The eight Host/query tests pass after this correction; no target execution was attempted. Root typecheck passes. This is an additional source correction after the UI/diagnostics commit, and the actual final-head CI identity is recorded in the PR handoff.
