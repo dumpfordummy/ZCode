@@ -82,13 +82,14 @@ export async function confirmU2Review(isolation, window, baseline, preview) {
   throw new Error("Confirmed checks run was not persisted.");
 }
 
-export async function openU2Permission(isolation, window, summary, runId, nodeId, name) {
+export async function openU2Permission(isolation, window, summary, runId, nodeId, name, timeout) {
   const run = await waitU2Run(
     isolation,
     runId,
     (value) =>
       value.toolAttempts.find((attempt) => attempt.nodeId === nodeId)?.operation?.status ===
       "awaiting_permission",
+    timeout,
   );
   const attempt = run.toolAttempts.find((entry) => entry.nodeId === nodeId);
   assert.equal(attempt.operation.processStarted, false);

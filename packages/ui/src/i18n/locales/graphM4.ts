@@ -4,6 +4,29 @@
  * 只包含 UI 自有的标签与解释。工作流名称与描述（Host 提供）、用户输入、存储的 id、摘要与 Host 诊断保持原文。
  */
 const messages: Record<string, [string, string]> = {
+  quickInventoryCount: [
+    "Inventory: {count} targets; {visible} shown in Build choices.",
+    "清单：{count} 个目标；构建选项显示 {visible} 个。",
+  ],
+  quickGroupCopies: ["Group identical project files", "合并显示内容相同的项目文件"],
+  quickShowCopies: ["Show every project file", "显示全部项目文件"],
+  quickCopyHelp: [
+    "Identical project bytes may be copies; provenance and build behavior are not inferred. Grouping only changes this list. Narrow the scan to a solution, project or folder if useful.",
+    "项目文件内容相同可能意味着副本，但不代表来源或构建行为相同。合并只影响列表显示；也可将扫描范围缩小到解决方案、项目或目录。",
+  ],
+  quickTestLink: [
+    "Build must produce each selected Test assembly. Only tests in its prepared dependency closure can be selected. Framework labels (including net10.0) do not verify installed SDKs or adapters.",
+    "构建必须生成所选测试程序集。只能选择已准备依赖范围内的测试。框架标签（包括 net10.0）不证明已安装 SDK 或适配器。",
+  ],
+  quickNoLinkedTests: [
+    "No selectable linked Test scope yet. Prepare the test project itself or a solution containing it; all dependencies must be supported. Quick requires at least one Test.",
+    "尚无可选择的关联测试范围。请准备测试项目本身或包含它的解决方案；所有依赖必须受支持。快速设置至少需要一个测试。",
+  ],
+  quickPrepareTestBuild: ["Prepare Build:", "准备构建："],
+  quickManualFields: [
+    "Advanced / custom checks below accepts reviewed recipes. Declare executable, working directory, timeout and every source input; then actual Build outputs and each VSTest project, framework, assembly and required tests. Associate Test with the Build that produces that assembly. Keep unknown fields unresolved: no output path is inferred for this fallback. Review exact commands and native permissions before running.",
+    "下方“高级 / 自定义检查”可编辑已审阅配方。需声明可执行文件、工作目录、超时、全部源输入，以及实际构建输出、各 VSTest 项目、框架、程序集和必需测试。将测试关联到生成该程序集的构建。未知字段应保持未解决，此路径不会推测输出路径。运行前审阅准确命令并通过原生权限。",
+  ],
   quickUnresolved: ["unresolved", "未确认"],
   quickWorking: ["Wait for the current setup operation to finish.", "请等待当前设置操作完成。"],
   quickResolveBlocker: [
@@ -30,8 +53,8 @@ const messages: Record<string, [string, string]> = {
   quickContinue: ["Continue guided setup", "继续引导设置"],
   quickCloseGuided: ["Close guided draft", "关闭引导草稿"],
   quickDraftOnly: [
-    "Incomplete setup draft — cannot save or run verified checks.",
-    "设置草稿尚未完成，无法保存或运行已验证检查。",
+    "Incomplete setup draft — cannot save or run executable checks from these notes.",
+    "设置草稿尚未完成，不能根据这些备注保存或运行可执行检查。",
   ],
   quickGuidedAction: [
     "Keep these choices. Resolve the selected target's issue, or choose a supported Build target above, then Detect again. Existing custom checks remain available in Advanced.",

@@ -32,6 +32,12 @@ export function quickDotnetPreset(
   scopeIds: string[],
   text: string,
 ): GraphDotnetPreset {
+  const selected = discovery.candidates.find((item) => item.path === buildPath);
+  const selectedIssue = selected?.quickIssues?.[0] ?? selected?.issues[0];
+  if (selectedIssue)
+    throw Error(
+      selectedIssue.startsWith(`${buildPath}:`) ? selectedIssue : `${buildPath}: ${selectedIssue}`,
+    );
   if (
     discovery.status !== "complete" ||
     !discovery.prepared ||
@@ -99,6 +105,53 @@ export function quickDotnetPreset(
     expectedOutputs: [...new Set(tests.map((test) => test.assembly))],
     reviewedManifest: true,
     tests,
+  };
+}
+
+/** Display is a projection of prepared closure; inventory hints are not selectable evidence. */
+export function quickDotnetSelection(
+  inventory: GraphProjectDiscovery,
+  prepared: GraphProjectDiscovery | undefined,
+  build: string,
+  groupCopies = false,
+) {
+  const byPath = new Map(prepared?.candidates.map((item) => [item.path, item]));
+  const reachable = new Set<string>();
+  const pending = [build];
+  while (pending.length) {
+    const path = pending.pop()!;
+    if (reachable.has(path)) continue;
+    const candidate = byPath.get(path);
+    if (!candidate) continue;
+    reachable.add(path);
+    pending.push(...candidate.projects);
+  }
+  const scopes =
+    prepared?.status === "complete" && prepared.prepared?.scope.project === build
+      ? quickDotnetChoices(prepared).scopes.filter((scope) => reachable.has(scope.project))
+      : [];
+  const metadata = new Map(inventory.metadata.map((item) => [item.path, item.digest]));
+  const groups = new Map<string, string[]>();
+  for (const candidate of inventory.candidates) {
+    const digest = metadata.get(candidate.path);
+    if (candidate.kind !== "project" || !digest) continue;
+    const paths = groups.get(digest) ?? [];
+    paths.push(candidate.path);
+    groups.set(digest, paths);
+  }
+  const copies = [...groups.values()].filter((paths) => paths.length > 1);
+  const hidden = new Set(
+    groupCopies ? copies.flatMap((paths) => paths.slice(1).filter((p) => p !== build)) : [],
+  );
+  return {
+    builds: inventory.candidates.filter((item) => !hidden.has(item.path)),
+    scopes,
+    copies,
+    hidden: hidden.size,
+    // This suggests the actual test project, never an inferred app/test relationship.
+    alternatives: quickDotnetChoices(inventory).scopes.filter(
+      (scope) => !reachable.has(scope.project),
+    ),
   };
 }
 

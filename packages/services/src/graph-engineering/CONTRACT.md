@@ -4,6 +4,15 @@ Duration remains syntax/range validated independently of ordered, bounded result
 
 # Graph Engineering
 
+Z8.5-U5 adds structural equivalence for the standard MSBuild namespace and exact
+first/last Microsoft.NET.Sdk imports within the same v2 declarative policy. Every
+interior item/property/import still passes U4 validation. Root-specific diagnostics
+do not resolve SDKs; Web/custom/dynamic SDKs and execution-affecting root attributes
+remain unsupported. Quick derives selectable Test scopes from a complete matching
+prepared Build closure. Identical-metadata grouping affects display only, never
+source membership or provenance. Setup still has no permission-owned MSBuild
+inspection result contract. See `docs/graph-engineering/z8/Z8_5_U5_SPEC.md`.
+
 Z8.5-U3 separates inventory from direct selected-scope preparation on the same
 `projectSetup` command/port. `scanRoot` narrows discovery without changing workspace
 identity; `selectedProject` starts its own bounded dependency/input job, and

@@ -148,6 +148,13 @@ export function GraphProjectRecipes({
         key={workspaceKey}
         workspaceKey={workspaceKey}
         setup={setup}
+        onOpenAdvanced={() => {
+          setAdvanced(true);
+          requestAnimationFrame(() => {
+            formRef.current?.scrollIntoView({ block: "start" });
+            formRef.current?.focus();
+          });
+        }}
         text={text}
         disabled={saveBlocked || graph.pending || dirty}
         disabledReason={

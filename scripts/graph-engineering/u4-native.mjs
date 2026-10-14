@@ -4,6 +4,7 @@ import path from "node:path";
 import { createIsolation } from "./isolation.mjs";
 import { TEST_SOURCE, FAIL_SOURCE } from "./u4-native-fixture.mjs";
 import { prepareU4Fixture } from "./u4-native-fixture.mjs";
+import { prepareU5Fixture } from "./u5-native-fixture.mjs";
 import { verifyU4Freshness } from "./u4-native-freshness.mjs";
 import { verifyB1Result } from "./b1-native-proof.mjs";
 import { ensureShellFolders } from "./ux-m2-native-common.mjs";
@@ -24,6 +25,7 @@ const mode = process.argv.includes("--freshness-only")
     ? "save-only"
     : "native";
 const sourceMode = process.argv.includes("--source");
+const u5Roots = process.argv.includes("--u5-roots");
 assert.ok(
   sourceMode !== Boolean(process.env.Z1_PACKAGED_EXE),
   "Choose explicit source mode or a hash-verified detached package, exclusively.",
@@ -119,6 +121,7 @@ async function reviewAndRun(label, fail) {
       runId,
       node.id,
       label + "-" + node.id + "-permission",
+      u5Roots ? 300000 : undefined,
     );
     await allowU2Permission(window);
   }
@@ -146,7 +149,7 @@ async function reviewAndRun(label, fail) {
   return run;
 }
 try {
-  summary.bootstrap = await prepareU4Fixture(isolation);
+  summary.bootstrap = await (u5Roots ? prepareU5Fixture : prepareU4Fixture)(isolation);
   await ensureShellFolders(isolation);
   window = await isolation.launch();
   if (mode === "native") await initializeU2NativeWorkspace(isolation, window, summary);

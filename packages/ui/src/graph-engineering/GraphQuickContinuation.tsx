@@ -11,12 +11,14 @@ export function GraphQuickContinuation({
   configuration,
   scopes,
   blocker,
+  onOpenAdvanced,
 }: {
   workspaceKey: string;
   build: string;
   configuration: string;
   scopes: string[];
   blocker: string;
+  onOpenAdvanced?(): void;
 }) {
   const t = useGraphM4Text();
   const [open, setOpen] = useState(false);
@@ -52,6 +54,17 @@ export function GraphQuickContinuation({
           </dl>
           <p className="text-ui-sm">{blocker}</p>
           <p className="text-ui-sm text-foreground-subtle">{t("quickGuidedAction")}</p>
+          <p className="text-ui-sm">{t("quickManualFields")}</p>
+          {onOpenAdvanced ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onOpenAdvanced}
+              data-testid="graph-quick-open-advanced"
+            >
+              {t("quickAdvanced")}
+            </Button>
+          ) : null}
           <label className="block space-y-1 text-ui-sm">
             <span>{t("quickUnresolvedNotes")}</span>
             <Textarea

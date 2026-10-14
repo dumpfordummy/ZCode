@@ -6,11 +6,15 @@ import { GraphQuickTestChoices } from "./GraphQuickTestChoices.js";
 import { GraphQuickSave } from "./GraphQuickSave.js";
 import { useGraphQuickDraft } from "@/hooks/useGraphQuickDraft.js";
 import { Input } from "@/components/ui/input.js";
-import { GraphQuickDiagnostics } from "./GraphQuickDiagnostics.js";
+import { GraphQuickSummary } from "./GraphQuickSummary.js";
 import { GraphQuickContinuation } from "./GraphQuickContinuation.js";
 import { GraphSelect } from "./GraphSelect.js";
 import { useGraphM4Text } from "./GraphM4Text.js";
-import { quickDotnetChoices, quickDotnetPreset } from "./graphQuickDotnetModel.js";
+import {
+  quickDotnetChoices,
+  quickDotnetPreset,
+  quickDotnetSelection,
+} from "./graphQuickDotnetModel.js";
 
 /** Composition of the existing scan/compiler/save path; no executable or persisted authority here. */
 export function GraphQuickDotnet({
@@ -20,6 +24,7 @@ export function GraphQuickDotnet({
   disabled,
   disabledReason,
   onSave,
+  onOpenAdvanced,
 }: {
   workspaceKey: string;
   setup: ReturnType<typeof useGraphProjectSetup>;
@@ -27,6 +32,7 @@ export function GraphQuickDotnet({
   disabled: boolean;
   disabledReason: string;
   onSave(recipes: GraphRecipe[], run: boolean): Promise<boolean>;
+  onOpenAdvanced?(): void;
 }) {
   const t = useGraphM4Text();
   const {
@@ -47,6 +53,7 @@ export function GraphQuickDotnet({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [request, setRequest] = useState("");
+  const [groupCopies, setGroupCopies] = useState(false);
   const alive = useRef(true);
   const generation = useRef(0);
   const flight = useRef(false);
@@ -104,20 +111,8 @@ export function GraphQuickDotnet({
   }, [busy, request, setup.invoke]);
   const existing = text.trim() !== "[]";
   const choices = discovery
-    ? {
-        ...quickDotnetChoices(discovery),
-        scopes: quickDotnetChoices(prepared?.prepared ? prepared : discovery).scopes,
-      }
+    ? quickDotnetSelection(discovery, prepared, build, groupCopies)
     : undefined;
-  const diagnostics = [
-    ...new Set([
-      ...(discovery?.issues ?? []),
-      ...(prepared?.issues ?? []),
-      ...(discovery?.candidates ?? []).flatMap((item) =>
-        [...(item.quickIssues ?? []), ...item.issues].map((issue) => `${item.path}: ${issue}`),
-      ),
-    ]),
-  ].slice(0, 128);
   const scanState = setup.state("scan", request);
   let issue = "";
   try {
@@ -163,12 +158,13 @@ export function GraphQuickDotnet({
                 ? "unsupported"
                 : "failed",
         );
-        setScopes((old) =>
-          old.length ? old : found.scopes.length === 1 ? [found.scopes[0]!.id] : [],
-        );
+        const linked = quickDotnetSelection(result, result, selectedProject).scopes;
+        setScopes((old) => (old.length ? old : linked.length === 1 ? [linked[0]!.id] : []));
       } else {
         setDiscovery(result);
-        const selected = build || (found.builds.length === 1 ? found.builds[0]!.path : "");
+        const retained = result.candidates.some((item) => item.path === build) ? build : "";
+        const selected = retained || (found.builds.length === 1 ? found.builds[0]!.path : "");
+        if (selected !== build) setScopes([]);
         setBuild(selected);
         if (selected) await scan(selected, selectedConfiguration);
       }
@@ -203,6 +199,15 @@ export function GraphQuickDotnet({
     }
   };
   const compileState = setup.state("dotnet-preset", key);
+  const selectBuild = (value: string) => {
+    generation.current++;
+    setBuild(value);
+    // 构建改变后旧测试选择不能继承为新闭包的事实。
+    setScopes([]);
+    setPrepared(undefined);
+    setPreparation("not-started");
+    if (value) void scan(value);
+  };
   return (
     <section className="space-y-3" data-testid="graph-quick-dotnet" data-preparation={preparation}>
       <h3 className="text-ui-base font-semibold">{t("quickTitle")}</h3>
@@ -229,7 +234,15 @@ export function GraphQuickDotnet({
               disabled={busy || disabled}
               placeholder="."
               data-testid="graph-quick-scan-root"
-              onChange={(event) => setScanRoot(event.target.value)}
+              onChange={(event) => {
+                generation.current++;
+                setScanRoot(event.target.value);
+                setDiscovery(undefined);
+                setPrepared(undefined);
+                setBuild("");
+                setScopes([]);
+                setPreparation("not-started");
+              }}
             />
           </label>
           {busy ? (
@@ -271,45 +284,15 @@ export function GraphQuickDotnet({
           </div>
           {discovery && choices ? (
             <div className="space-y-3" data-testid="graph-quick-proposal">
-              <p className="text-ui-base font-medium">
-                {t(
-                  discovery.status !== "complete"
-                    ? "quickPartial"
-                    : discovery.candidates.length
-                      ? "quickDetected"
-                      : "quickNoRunner",
-                )}
-                {discovery.status !== "complete" && discovery.issues[0] ? (
-                  <span className="mt-1 block break-words text-ui-sm font-normal">
-                    {discovery.issues[0].slice(0, 240)}
-                    {discovery.issues[0].length > 240 ? "…" : ""}
-                  </span>
-                ) : null}
-              </p>
-              {prepared?.prepared ? (
-                <p className="text-ui-sm">
-                  {t("quickPrepared", { count: prepared.prepared.scope.sourceCount })}
-                </p>
-              ) : null}
-              {issue ? (
-                <p role="status" className="text-ui-sm text-warning">
-                  {!build ||
-                  (!prepared?.issues.length && !scopes.length && choices.scopes.length) ? (
-                    t("quickChooseTargets")
-                  ) : (
-                    <>
-                      {t("quickUnavailable")} {issue.slice(0, 400)}
-                    </>
-                  )}
-                </p>
-              ) : null}
-              <GraphQuickDiagnostics
-                diagnostics={diagnostics}
-                affected={
-                  discovery.candidates.filter(
-                    (item) => item.coverage === "unsupported" || item.quickIssues?.length,
-                  ).length
-                }
+              <GraphQuickSummary
+                discovery={discovery}
+                prepared={prepared}
+                issue={issue}
+                build={build}
+                visible={choices.builds.length}
+                hasCopies={choices.copies.length > 0}
+                groupCopies={groupCopies}
+                toggleCopies={() => setGroupCopies(!groupCopies)}
               />
               {choices.builds.length > 1 || choices.scopes.length > 1 ? (
                 <p className="text-ui-sm text-warning">{t("quickAmbiguous")}</p>
@@ -326,12 +309,7 @@ export function GraphQuickDotnet({
                     : []),
                   ...choices.builds.map((item) => ({ value: item.path, label: item.path })),
                 ]}
-                onChange={(value) => {
-                  setBuild(value === "none" ? "" : value);
-                  setPrepared(undefined);
-                  setPreparation("not-started");
-                  if (value !== "none") void scan(value);
-                }}
+                onChange={(value) => selectBuild(value === "none" ? "" : value)}
               />
               <GraphSelect
                 label={t("quickConfiguration")}
@@ -345,16 +323,36 @@ export function GraphQuickDotnet({
                 }}
               />
               <p className="text-ui-sm font-medium">{t("quickTests")}</p>
-              {!prepared?.prepared ? (
+              <p className="text-ui-sm text-foreground-subtle">{t("quickTestLink")}</p>
+              {!prepared?.prepared && !issue ? (
                 <p className="text-ui-sm text-warning">{t("quickTestsIncomplete")}</p>
               ) : null}
               <GraphQuickTestChoices
+                key={`${build}|${configuration}|${prepared?.digest ?? ""}`}
                 choices={choices.scopes}
                 scopes={scopes}
                 setScopes={setScopes}
                 disabled={disabled}
                 busy={busy}
               />
+              {build && !busy && !choices.scopes.length ? (
+                <div className="space-y-1" data-testid="graph-quick-test-alternatives">
+                  <p className="text-ui-sm">{t("quickNoLinkedTests")}</p>
+                  {[...new Set(choices.alternatives.map((scope) => scope.project))]
+                    .slice(0, 5)
+                    .map((project) => (
+                      <Button
+                        key={project}
+                        size="sm"
+                        variant="ghost"
+                        disabled={disabled}
+                        onClick={() => selectBuild(project)}
+                      >
+                        {t("quickPrepareTestBuild")} {project}
+                      </Button>
+                    ))}
+                </div>
+              ) : null}
               {issue && build && !busy ? (
                 <GraphQuickContinuation
                   workspaceKey={workspaceKey}
@@ -362,6 +360,7 @@ export function GraphQuickDotnet({
                   configuration={configuration}
                   scopes={scopes}
                   blocker={issue}
+                  onOpenAdvanced={onOpenAdvanced}
                 />
               ) : null}
               <p className="text-ui-sm text-foreground-subtle">{t("quickDefaults")}</p>

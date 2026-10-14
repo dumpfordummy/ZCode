@@ -1,6 +1,7 @@
 import type { GraphProjectCandidate } from "../project-setup-types.js";
 import { parseProjectXml, type ProjectXmlElement } from "./project-xml.js";
 import { metadataReference } from "./project-metadata.js";
+import { projectRootChildren } from "./project-root.js";
 import { fileItemNames, readFileOperation, type ProjectFileOperation } from "./project-items.js";
 
 export class ProjectImportRequired extends Error {
@@ -94,19 +95,10 @@ export function declarativeProject(
     const content = documents.get(key);
     if (content === undefined) throw new ProjectImportRequired(file);
     const root = parseProjectXml(new TextEncoder().encode(content));
-    if (
-      root.name !== "Project" ||
-      root.text.trim() ||
-      (rootProject
-        ? root.attributes.Sdk !== "Microsoft.NET.Sdk" || Object.keys(root.attributes).length !== 1
-        : Object.keys(root.attributes).length !== 0)
-    )
-      throw Error(
-        `${file}: external/dynamic SDK or unsupported root; requires a literal Microsoft.NET.Sdk project or declarative import.`,
-      );
+    const children = projectRootChildren(root, file, rootProject);
     active.add(key);
     visited.add(key);
-    for (const group of root.children) {
+    for (const group of children) {
       if (group.name === "Import") {
         if (group.attributes.Condition !== undefined)
           throw Error(
