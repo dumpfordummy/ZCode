@@ -409,3 +409,17 @@ Evidence: [large native sequence and phase timings](evidence/u5-f1/large-native-
 [actual inspection UI outcomes](evidence/u5-f1/inspection-native-continuation.json).
 Installed `.308`, prior assets, old receipts and all failed/interrupted records remain
 untouched. No merge, installer, tag, release workflow or publication occurred.
+
+### Web source-app first native attempt (retained)
+
+The first explicit named-profile Web query succeeded (operation `5dd29e8d-42f9-4d0d-8a35-4f0976ca3ca5`). The referencing Test query `58046677-6969-4b22-9905-9bedef4ba065` ended `invalid-output`; no Save, Build, Test or model call occurred. Installed MSBuild 17.11.69 emits `OutputItemType=""`, `ReferenceSourceTarget="ProjectReference"`, and `Targets=""` on ProjectReference items, verified against the retained engine oracle. The follow-up parser admits only those exact values in the new profile, keeps the old inspection parser unchanged, and rejects any nonempty target override. Private evidence remains in `z1-native-1791983956861-b6f792`; this failed attempt is not a product-readiness pass.
+
+### Web source-app second native attempt (retained)
+
+Both explicit queries succeeded in isolated profile `z1-native-1791984477667-fe5a26`: Web `0d1426ce-d90a-41c5-b706-82bbf6317e8d` and Test `885f9677-a273-4904-99d3-eca9a5130c2a`. Complete preparation produced a 60-input proposal and private receipt `d576c795-9aa5-4dd6-b3f9-3711fcd60e94`. Save failed closed because preparation hashed a selection object containing an extra policy field while revalidation used the canonical three selection fields. No configuration, Build/Test run or model call was created. This is a representation bug, not an observed source mutation. A regression now requires identical membership commitments for canonical and inspected selections. The idle observer was stopped only after confirming both inspections were terminal/unreserved; its private failure JSON, screenshots and app RPC error remain retained. The bounded observer now records current UI diagnostics and stops on an explicit Save error instead of waiting for its external deadline.
+
+### Copied-content evidence correction from native attempt 3
+
+Retained attempt `1791985226523-d0e144` completed two owned inspections, 60-input preparation, Save and reopen. Its actual Build exited successfully, but evidence correctly rejected the two copied appsettings.json outputs because MSBuild preserves source modification times. No Test ran. The failed run and its receipts remain intact.
+
+The new v3 scope explicitly separates bounded `copiedContent` source/output pairs from freshly generated `expectedOutputs`. Actual evaluated Content metadata and observed assembly directories determine these immutable pairs. Generated assemblies/manifests retain every existing timestamp, baseline, exit and byte requirement. Copies instead must equal their freshly read source bytes after Build, before Test and after Test; their output bytes join the Build output digest and Test association. They are never claimed to have been freshly generated. Missing/stale/altered copies fail independently, and the combined output count stays at 32. Ordinary literal/v1/v2 evidence and raw TRX semantics are unchanged.

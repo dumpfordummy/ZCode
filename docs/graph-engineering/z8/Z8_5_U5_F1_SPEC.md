@@ -311,3 +311,85 @@ permitted. Its commands and resulting inputs are recorded separately. Product
 inspection retains its exact fixed no-target query and never performs Restore.
 The oracle first proves actual output paths, static-asset manifests and application
 assertions using installed SDK bytes before any profile can become executable.
+
+### Exact external provenance reader and fixed profile effects
+
+The Node-only shared bounded tree reader owns byte/identity traversal for exact
+reviewed roots. It has no process, permission, filesystem write, saved receipt or
+input-completeness authority. Callers must provide a typed profile's canonical
+resolved SDK/reference/runtime/package roots, never arbitrary UI filesystem paths.
+It bounds count, aggregate/per-file bytes, depth, elapsed time and cancellation;
+streams every file, rejects links/aliases, rechecks opened identity and directory
+membership, and returns only a digest/count/byte total. Content is not cached across
+freshness boundaries. Example: `{ roots: [{ path: resolvedSdk, label: "$SDK" }],
+limits, signal }` returns a private provenance commitment, not a successful check.
+
+The proposed Web policy pins installed SDK 8.0.426, its selected 8.0.32 reference and
+runtime packs, the actual host/fxr selection and the known public VSTest package
+closure. Exact content commitments are independently reconstructed at Save, preview,
+Build/Test and native permission boundaries. New version directories that could
+affect resolver selection invalidate the identity. SDK internal import wildcards
+remain enabled because VSTest is imported there; those directory bytes/membership
+are covered. User-extension imports, workload resolver and SourceLink/Git queries
+are disabled by fixed reviewed profile controls. No arbitrary switches are accepted.
+
+A profile execution uses ExecutionPort's existing empty-base environment overlay,
+with the resolved executable/package roots and a private workspace-owned state/temp
+directory, plus the required Windows system root. Effective environment identity is
+the fixed overlay, not an unreviewed ambient shell environment. General inspection
+v1 keeps its current semantics; the eventual profile query needs a separately
+versioned capability and fixed argument contract. No v1 record is reinterpreted.
+
+### Closed prior-restore metadata model
+
+Prior restore assets and generated NuGet props/targets are validated against the
+installed-engine oracle's exact known dependency/target structure, with only the
+selected project/workspace/package/SDK path identities normalized. The templates
+retain package versions, archive/content identities, imports, conditions and all
+other fields. Unknown fields, packages, targets, property functions or imports fail
+closed; arbitrary generated NuGet metadata is not trusted because it exists under
+obj. This first profile requires the observed prior offline restore shape and
+default project assembly names. Setup never regenerates it. The UI must describe
+this limitation, not retarget or edit a project to make it eligible.
+
+The full package directories are byte-bound in addition to assets/import metadata.
+NuGet's signature-independent content hash and signed archive hash are separate
+facts (NuGet/Home's Nupkg Metadata File design). Cached provenance is not presented
+as a newly verified certificate chain. One retained Newtonsoft.Json package records
+the installed Microsoft SDK cache origin; other recorded origins are nuget.org.
+Both remain explicit public-fixture provenance, not employer feeds.
+
+### Profile query protocol discrimination
+
+`project-web-profile-inspection-v1` is a distinct non-evidence purpose requiring
+`project.webProfileInspection.v1`. Its selection binds both literal Web/Test project
+paths, SDK 8.0.426, net8.0 and configuration. Its immutable request also contains
+the bounded exact runtime provenance descriptor. General inspection-v1 arguments,
+ambient-environment observation, result shape and historical records stay unchanged.
+The profile query adds only fixed controls and four bounded output-path/runtime
+properties; no targets, Restore or arbitrary arguments are accepted. Both purposes
+use the same Host admission, native session/process/permission owner and one-process
+limit. A separate execution capability will be required for v3 Build/Test recipes.
+
+Only after ordinary permission may the existing native recipe handler create its
+private `.zcode/web-profile-v1` environment directories and invoke ExecutionPort
+with an empty-base overlay. Review and passive reads create no directories or
+processes. The workspace observation excludes only root Git/app state for this new
+purpose and remains explicitly non-complete; the separate profile preparation
+validates known source/output/import semantics. Inspection history preserves its
+purpose discriminator; old readers fail clearly on the new purpose rather than
+reinterpreting it. No existing successful receipt is migrated or re-evaluated.
+
+### Web preparation review lifetime and readers
+
+The existing 300-second inspection invocation window and 30-second process timeout remain unchanged. Both successful observations must still be current and unexpired when complete preparation finishes. The immutable private preparation then starts its own 300-second Save review window. Save rechecks the original runtime/request identities and current source/toolchain bytes, requires the exact privately stored recipes, and checks the preparation expiry again after verification. It does not execute or renew the original inspection. Reopening saved v3 checks reads the private immutable preparation without requiring an old invocation window to remain open; fresh membership/content/toolchain checks still occur at preview and evidence boundaries. Missing private state or older readers fail closed, including installed .308. Existing v1/v2 histories are not reinterpreted.
+
+The first Web profile rejects explicit CopyToOutputDirectory/Link/TargetPath mappings. It supports the known SDK's implicit JSON/static Content. Evaluated Content copy metadata plus actual observed assembly directories determines copied JSON output paths, including the known ProjectReference transitive copy into Test output. Those paths join the Build output association alongside actual assemblies, deps/runtime configuration and static asset manifests. Static asset source bytes remain in complete input membership. The unchanged 32-output limit fails explicitly when this small profile would exceed it.
+
+The guided recipe reader explicitly recognizes v3 as configured and immutable, displaying re-preparation guidance rather than offering field edits that would violate its private proof. The advanced JSON surface remains literal, while Host validation rejects any v3 recipe differing from the private preparation. The v1/v2 guided editor remains unchanged.
+
+### Copied-content evidence correction from native attempt 3
+
+Retained attempt `1791985226523-d0e144` completed two owned inspections, 60-input preparation, Save and reopen. Its actual Build exited successfully, but evidence correctly rejected the two copied appsettings.json outputs because MSBuild preserves source modification times. No Test ran. The failed run and its receipts remain intact.
+
+The new v3 scope explicitly separates bounded `copiedContent` source/output pairs from freshly generated `expectedOutputs`. Actual evaluated Content metadata and observed assembly directories determine these immutable pairs. Generated assemblies/manifests retain every existing timestamp, baseline, exit and byte requirement. Copies instead must equal their freshly read source bytes after Build, before Test and after Test; their output bytes join the Build output digest and Test association. They are never claimed to have been freshly generated. Missing/stale/altered copies fail independently, and the combined output count stays at 32. Ordinary literal/v1/v2 evidence and raw TRX semantics are unchanged.

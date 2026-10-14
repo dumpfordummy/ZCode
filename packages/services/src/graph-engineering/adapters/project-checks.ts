@@ -1,3 +1,4 @@
+import { requireWebExecution } from "./web-profile-capability.js";
 import { isAbsolute, resolve } from "node:path";
 import type { IZCodeAgentService } from "../../index.js";
 import type { GraphProjectPort } from "../app/project-ports.js";
@@ -13,9 +14,11 @@ import { noProjectRecipes } from "../domain/recipe-dependency.js";
 import { readProjectReference, nativeReferenceDelivery } from "./project-references.js";
 
 export function createProjectSetupPort(options: {
-  agentService: Pick<IZCodeAgentService, "previewExecutionEnvironment">;
+  directory?: string;
+  agentService: Pick<IZCodeAgentService, "previewExecutionEnvironment"> &
+    Partial<Pick<IZCodeAgentService, "readRuntimeCapabilities">>;
 }): GraphProjectPort {
-  const store = createGraphRecipeStore();
+  const store = createGraphRecipeStore(options.directory);
   const discovery = createProjectDiscovery();
   const port: GraphProjectPort = {
     ...discovery,
@@ -35,6 +38,8 @@ export function createProjectSetupPort(options: {
       };
     },
     async environment(target, recipes) {
+      if (recipes.some((recipe) => recipe.sourceScope?.version === 3))
+        await requireWebExecution(options.agentService, target);
       const executables = [
         ...new Set(
           recipes.map((recipe) =>

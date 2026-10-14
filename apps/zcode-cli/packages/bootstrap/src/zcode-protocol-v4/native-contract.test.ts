@@ -62,7 +62,7 @@ test("interaction.protectedSessions is real: protected Graph questions (and thei
       zcodeNativeContractFeatures.interactionProtectedSessions,
       zcodeNativeContractFeatures.projectConfigurationInspection,
       ...(process.platform === "win32"
-        ? [zcodeNativeContractFeatures.projectInspectionHardProcessLimit]
+        ? [zcodeNativeContractFeatures.projectInspectionHardProcessLimit, ...(process.arch === "x64" ? [zcodeNativeContractFeatures.projectWebProfileInspection, zcodeNativeContractFeatures.projectWebProfileExecution] : [])]
         : []),
     ],
   );

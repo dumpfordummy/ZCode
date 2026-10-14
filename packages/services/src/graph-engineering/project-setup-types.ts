@@ -94,6 +94,13 @@ export interface GraphReferenceValidation {
 export type GraphProjectSetupRequest = { target: GraphWorkspaceTarget } & (
   | { action: "inspection"; command: import("./inspection-types.js").GraphInspectionSetupCommand }
   | { action: "inspection-history" }
+  | {
+      action: "web-profile-choices";
+      webProject: string;
+      configuration: "Debug" | "Release";
+      candidates: string[];
+    }
+  | { action: "prepare-web-profile"; inspectionIds: [string, string] }
   | { action: "reference-catalog" }
   | { action: "validate-reference"; path: string }
   | {
@@ -116,6 +123,8 @@ export type GraphProjectSetupRequest = { target: GraphWorkspaceTarget } & (
     }
 );
 export type GraphProjectSetupResult =
+  | { kind: "web-profile-choices"; tests: string[]; issues: string[] }
+  | import("./web-profile-types.js").GraphWebProfileProposal
   | import("./inspection-types.js").GraphInspection
   | { kind: "inspection-history"; records: import("./inspection-types.js").GraphInspection[] }
   | GraphReferenceCatalog

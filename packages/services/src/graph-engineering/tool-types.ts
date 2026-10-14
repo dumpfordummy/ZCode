@@ -28,6 +28,7 @@ export interface GraphToolOperation {
   cwd?: string;
   status: "awaiting_permission" | "running" | "completed" | "failed" | "cancelled" | "unknown";
   processStarted: boolean;
+  sourceVerifying?: boolean;
   startedAt?: number;
   completedAt?: number;
   result?: GraphCommandResult;

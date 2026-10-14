@@ -134,7 +134,7 @@ export class GraphInspections {
         return this.terminal(
           record,
           "succeeded",
-          "Configuration observed. Complete Web input provenance is unsupported; Save remains blocked. No Build or Test ran.",
+          "Configuration observed. Inspection alone is not a complete source scope; prepare the supported profile before Save. No Build or Test ran.",
         );
       }
       return this.terminal(
@@ -143,10 +143,10 @@ export class GraphInspections {
         "Inspection ended without a current valid configuration observation.",
       );
     }
-    const status = result.processStarted
-      ? "running"
-      : result.inspectionVerifying
-        ? "verifying-sources"
+    const status = result.inspectionVerifying
+      ? "verifying-sources"
+      : result.processStarted
+        ? "running"
         : "awaiting-permission";
     if (record.status !== status)
       this.mark(
@@ -155,7 +155,7 @@ export class GraphInspections {
       );
     record.status = status;
     record.message = result.inspectionVerifying
-      ? "Native owner is verifying sources; no permission request exists yet."
+      ? "Native owner is verifying sources; no permission response is currently needed."
       : result.processStarted
         ? "Installed MSBuild is evaluating the reviewed project."
         : "Respond to the ordinary native permission request in the owned conversation.";

@@ -356,6 +356,10 @@ export function GraphQuickDotnet({
                     onOpenAdvanced,
                     onOpenConversation,
                   }}
+                  onSave={onSave}
+                  candidates={discovery?.candidates
+                    .filter((item) => item.kind === "project")
+                    .map((item) => item.path)}
                   blocker={issue}
                 />
               ) : null}

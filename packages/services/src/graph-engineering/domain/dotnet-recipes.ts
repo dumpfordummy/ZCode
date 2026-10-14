@@ -36,7 +36,7 @@ export function compileDotnetRecipes(input: GraphDotnetPreset): GraphRecipe[] {
       ...common,
       id: `${input.idPrefix}-build`,
       name: "Build .NET checks",
-      args: dotnetBuildArgs(target),
+      args: dotnetBuildArgs(target, input.sourceScope?.version === 3),
       expectedOutputs: [...input.expectedOutputs],
       verifier: { kind: "build", dotnet: target },
     },
@@ -55,7 +55,7 @@ export function compileDotnetRecipes(input: GraphDotnetPreset): GraphRecipe[] {
       ...common,
       id: `${input.idPrefix}-test-${index + 1}`,
       name: `${scope.project} (${scope.framework})`,
-      args: dotnetTestArgs(scope),
+      args: dotnetTestArgs(scope, input.sourceScope?.version === 3),
       expectedOutputs: [],
       verifier: {
         kind: "test",

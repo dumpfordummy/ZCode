@@ -1,3 +1,6 @@
+import { requireWebExecution } from "./adapters/web-profile-capability.js";
+import { findWebProfileChoices } from "./adapters/web-profile-choices.js";
+import { prepareWebProfile } from "./adapters/web-profile-preparation.js";
 import { randomUUID } from "node:crypto";
 import {
   resolveGraphParallelPolicy,
@@ -65,6 +68,13 @@ export function createGraphEngineeringService(options: {
     preflight,
     checks: project,
     inspection: createGraphInspectionPort(options),
+    webProfile: {
+      choices: findWebProfileChoices,
+      prepare: async (target, rows) => {
+        await requireWebExecution(options.agentService, target);
+        return prepareWebProfile(options.directory, target, rows);
+      },
+    },
     monotonic: () => performance.now(),
     diagnosticPhase,
     repository,
@@ -74,7 +84,7 @@ export function createGraphEngineeringService(options: {
     artifacts: createGraphArtifactStore(options.directory),
     reports: createGraphReportCapture(),
     recipes: {
-      ...createGraphRecipeStore(),
+      ...createGraphRecipeStore(options.directory),
       async validatePaths(target, paths) {
         for (const path of paths) await assertWorkspaceFilePath(target, path, true);
       },

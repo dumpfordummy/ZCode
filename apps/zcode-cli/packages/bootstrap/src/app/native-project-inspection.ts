@@ -1,9 +1,11 @@
+import { prepareNativeWebInspection } from "./native-web-inspection.js";
 import { createHash } from "node:crypto";
 import { lstat, open, readdir, realpath } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import {
   zcodeRecipeRequestSchema,
   INSPECTION_PURPOSE,
+  WEB_PROFILE_INSPECTION_PURPOSE,
   INSPECTION_REVIEW_MS,
   INSPECTION_TIMEOUT_MS,
   inspectionArguments,
@@ -137,9 +139,12 @@ export async function prepareProjectInspection(
   const sdkDirectory = join(dirname(executable), "sdk", selected.sdkVersion);
   const engine = await lstat(join(sdkDirectory, "MSBuild.dll"));
   if (!engine.isFile()) throw Error("Selected installed MSBuild engine is unavailable.");
-  const captured = await observation(root, executable, sdkDirectory, env, signal);
+  const captured = selected.webProfile
+    ? await prepareNativeWebInspection(selected,root,executable,env,signal)
+    : await observation(root, executable, sdkDirectory, env, signal);
   const inspection = {
-    purpose: INSPECTION_PURPOSE,
+    purpose: selected.webProfile ? WEB_PROFILE_INSPECTION_PURPOSE : INSPECTION_PURPOSE,
+    ...(selected.webProfile ? {webProfile:selected.webProfile} : {}),
     project: selected.project,
     configuration: selected.configuration,
     framework: selected.framework,
@@ -152,7 +157,7 @@ export async function prepareProjectInspection(
     operationId: selected.operationId,
     inspection,
     recipe: {
-      id: INSPECTION_PURPOSE,
+      id: inspection.purpose,
       executable,
       cwdRelative: ".",
       timeoutMs: INSPECTION_TIMEOUT_MS,
@@ -179,6 +184,7 @@ export async function validateProjectInspection(
       configuration: binding.configuration,
       framework: binding.framework,
       sdkVersion: binding.sdkVersion,
+      ...(binding.webProfile ? {webProfile:binding.webProfile} : {}),
       expiresAt: binding.expiresAt,
     },
     workspace,

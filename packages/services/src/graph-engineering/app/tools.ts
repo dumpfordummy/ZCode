@@ -206,9 +206,14 @@ export class GraphTools {
           ? "Unknown"
           : run.cancelRequestedAt !== undefined
             ? "CancelRequested"
-            : operation.status === "awaiting_permission"
-              ? "WaitingForPermission"
-              : "Running";
+            : operation.sourceVerifying
+              ? "Running"
+              : operation.status === "awaiting_permission"
+                ? "WaitingForPermission"
+                : "Running";
+      if (operation.sourceVerifying)
+        attempt.message =
+          "Verifying reviewed Web profile sources and toolchain; no permission response is currently needed.";
       run.status = attempt.status;
       if (operation.status === "unknown") this.state.liveRuns.delete(run.id);
       await this.state.put(run);

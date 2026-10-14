@@ -1,3 +1,4 @@
+import { graphToolRequest } from "../domain/tool-request.js";
 import type { GraphState } from "./state.js";
 import type { GraphInputGuardRequest } from "./ports.js";
 import { parallelGuardedRuns } from "./parallel-guard.js";
@@ -13,19 +14,7 @@ export async function assertGraphInputAllowed(
         ? run.toolAttempts?.find((t) => t.sessionId === params.sessionId)
         : undefined;
     if (tool) {
-      const expected = {
-        operationId: tool.operationId,
-        recipe: {
-          id: tool.recipe.id,
-          executable: tool.recipe.executable,
-          args: tool.resolvedArgs,
-          cwdRelative: tool.recipe.cwd,
-          timeoutMs: tool.recipe.timeoutMs,
-          ...(tool.recipe.redactEnvironmentVariables
-            ? { redactEnvironmentVariables: tool.recipe.redactEnvironmentVariables }
-            : {}),
-        },
-      };
+      const expected = graphToolRequest(tool);
       if (
         !(
           tool.dispatchPhase === "sending" &&

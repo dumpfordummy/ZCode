@@ -1,7 +1,8 @@
+import { revalidateWebProfileRuntime } from "@zcode/shared/node";
 import { createHash } from "node:crypto";
 import {
   zcodeRecipeRequestSchema,
-  inspectionReviewParamsSchema, projectInspectionOutput,
+  inspectionReviewParamsSchema, projectInspectionOutput, webProfileReadScope,
   type ZCodeRecipeRequest,
   type ZCodeRecipeSnapshot,
 } from "@zcode/shared";
@@ -98,7 +99,8 @@ export function createNativeRecipeOperations(deps: {
         args: request.recipe.args.map(redact),
         cwd,
         timeoutMs: request.recipe.timeoutMs,
-        ...(request.inspection ? { purpose: request.inspection.purpose, warning: "Evaluation can execute project processing and cause filesystem, network or system side effects. This is not Build/Test evidence.", readScope: [deps.workingDirectory, request.inspection.sdkDirectory, request.recipe.executable] } : {}),
+        ...(request.webProfile ? {purpose:request.webProfile.policy,warning:"Known Web profile Build/Test executes repository code with its fixed empty-base environment; restore is disabled.",readScope:[deps.workingDirectory,...webProfileReadScope(request.webProfile.runtimeProfile)]} : {}),
+        ...(request.inspection ? { purpose: request.inspection.purpose, warning: "Evaluation can execute project processing and cause filesystem, network or system side effects. This is not Build/Test evidence.", readScope: [deps.workingDirectory, ...(request.inspection.runtimeProfile ? webProfileReadScope(request.inspection.runtimeProfile) : [request.inspection.sdkDirectory, request.recipe.executable])] } : {}),
       };
       const snapshot: ZCodeRecipeSnapshot = {
         operationId: request.operationId,
@@ -108,6 +110,7 @@ export function createNativeRecipeOperations(deps: {
         cwd,
         status: "awaiting_permission",
         ...(request.inspection ? { inspectionVerifying: true } : {}),
+        ...(request.webProfile ? { sourceVerifying: true } : {}),
         processStarted: false,
       };
       const entry = {
@@ -123,10 +126,13 @@ export function createNativeRecipeOperations(deps: {
           cwd,
           workspaceRoot: deps.workingDirectory,
           preview,
-          validateInspection: () => validateProjectInspection(request, deps.workingDirectory, deps.env, entry.abort.signal),
+          validateInspection: () => { snapshot.inspectionVerifying = true; return validateProjectInspection(request, deps.workingDirectory, deps.env, entry.abort.signal); },
+          validateWebProfile: async () => { if(request.webProfile) { snapshot.sourceVerifying = true; await revalidateWebProfileRuntime(deps.workingDirectory,request.webProfile.runtimeProfile,entry.abort.signal); } },
           onInspectionChanged: () => { snapshot.inspectionOutcome = Date.now() >= (request.inspection?.expiresAt ?? Infinity) ? "expired" : "source-changed"; },
           onStarted: (startedAt) => {
             mark(request.operationId,"process-start");
+            snapshot.sourceVerifying = false;
+            if(request.inspection) snapshot.inspectionVerifying = false;
             snapshot.processStarted = true;
             snapshot.startedAt = startedAt;
             snapshot.status = "running";
@@ -150,10 +156,15 @@ export function createNativeRecipeOperations(deps: {
               entry.abort.signal.throwIfAborted();
               snapshot.inspectionVerifying = false;
             }
+            if(request.webProfile) {
+              await revalidateWebProfileRuntime(deps.workingDirectory,request.webProfile.runtimeProfile,entry.abort.signal);
+              entry.abort.signal.throwIfAborted();
+            }
             await deps.runtime.ensureSessionPersistedForExternalActivity(
               `Recipe: ${request.recipe.id}`,
               { traceContext: deps.traceContext },
             );
+            if(request.webProfile) snapshot.sourceVerifying = false;
             mark(request.operationId,"permission-tool-dispatch");
             const schedule = await deps.runtime.scheduleTools([call]);
             const outcome = await deps.runtime.executeTools([call], schedule, {
@@ -178,10 +189,10 @@ export function createNativeRecipeOperations(deps: {
                 snapshot.result = recipeResult({ ...rawResult, stdout: { ...rawResult.stdout, text: "" }, stderr: { ...rawResult.stderr, text: "" } }, redact);
                 if (rawResult.status === "completed" && rawResult.exitCode === 0 && rawResult.processExitObserved && !rawResult.stdout.truncated && !rawResult.stderr.truncated) {
                   try {
-                    snapshot.inspectionProjection = projectInspectionOutput(rawResult.stdout.text);
+                    snapshot.inspectionProjection = projectInspectionOutput(rawResult.stdout.text,!!request.inspection.webProfile);
                     const effective = snapshot.inspectionProjection.properties;
                     if (effective.NETCoreSdkVersion !== request.inspection.sdkVersion || effective.Configuration !== request.inspection.configuration || effective.TargetFramework !== request.inspection.framework) throw Error("Effective inspection identity mismatch.");
-                    try { await validateProjectInspection(request, deps.workingDirectory, deps.env, entry.abort.signal); }
+                    try { snapshot.inspectionVerifying = true; await validateProjectInspection(request, deps.workingDirectory, deps.env, entry.abort.signal); }
                     catch { snapshot.inspectionOutcome ??= Date.now() >= request.inspection!.expiresAt ? "expired" : "source-changed"; }
                     snapshot.inspectionOutcome ??= "succeeded";
                     if (snapshot.inspectionOutcome !== "succeeded") delete snapshot.inspectionProjection;
@@ -222,6 +233,7 @@ export function createNativeRecipeOperations(deps: {
           if (!result && !snapshot.error)
             snapshot.error =
               "Native command did not produce an execution result (permission denied, cancelled, or tool failure).";
+          if(request.webProfile) snapshot.sourceVerifying = false;
           snapshot.completedAt = Date.now();
           registry.unregister("GraphRecipe");
         })(),

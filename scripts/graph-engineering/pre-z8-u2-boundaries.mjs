@@ -88,7 +88,9 @@ export async function openU2Permission(isolation, window, summary, runId, nodeId
     runId,
     (value) =>
       value.toolAttempts.find((attempt) => attempt.nodeId === nodeId)?.operation?.status ===
-      "awaiting_permission",
+        "awaiting_permission" &&
+      value.toolAttempts.find((attempt) => attempt.nodeId === nodeId)?.operation
+        ?.sourceVerifying !== true,
     timeout,
   );
   const attempt = run.toolAttempts.find((entry) => entry.nodeId === nodeId);

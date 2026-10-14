@@ -51,6 +51,8 @@ function relativeDirectory(from: string, to: string) {
 }
 export interface DeclarativeProject {
   candidate: GraphProjectCandidate;
+  sdk: "Microsoft.NET.Sdk" | "Microsoft.NET.Sdk.Web";
+  packageReferences: Array<{ name: string; version?: string }>;
   operations: ProjectFileOperation[];
   defaults: { all: boolean; compile: boolean; resource: boolean; none: boolean };
 }
@@ -61,6 +63,7 @@ export function declarativeProject(
   configuration = "Debug",
   before: string[] = [],
   after: string[] = [],
+  webSyntaxOnly = false,
 ): DeclarativeProject {
   if (!["Debug", "Release"].includes(configuration))
     throw Error("Supported configurations are Debug and Release.");
@@ -68,6 +71,8 @@ export function declarativeProject(
     ["configuration", configuration],
     ["platform", "AnyCPU"],
   ]);
+  const identity: { sdk: DeclarativeProject["sdk"] } = { sdk: "Microsoft.NET.Sdk" };
+  const packageReferences: DeclarativeProject["packageReferences"] = [];
   const declared = new Set<string>();
   const active = new Set<string>(),
     visited = new Set<string>();
@@ -95,7 +100,9 @@ export function declarativeProject(
     const content = documents.get(key);
     if (content === undefined) throw new ProjectImportRequired(file);
     const root = parseProjectXml(new TextEncoder().encode(content));
-    const children = projectRootChildren(root, file, rootProject);
+    const children = projectRootChildren(root, file, rootProject, webSyntaxOnly);
+    if (rootProject && root.attributes.Sdk === "Microsoft.NET.Sdk.Web")
+      identity.sdk = "Microsoft.NET.Sdk.Web";
     active.add(key);
     visited.add(key);
     for (const group of children) {
@@ -236,7 +243,13 @@ export function declarativeProject(
       if (!reference || entry.children.length || !/\.csproj$/i.test(reference))
         throw Error(`${file}: unsupported ProjectReference.`);
       projects.push(reference);
-    } else if (entry.name === "PackageReference") packages.push(attributes.Include);
+    } else if (entry.name === "PackageReference") {
+      packages.push(attributes.Include);
+      packageReferences.push({
+        name: attributes.Include,
+        ...(attributes.Version ? { version: attributes.Version } : {}),
+      });
+    }
   }
   if (packages.some((name) => /Microsoft\.Testing\.Platform/i.test(name)))
     throw Error("Microsoft.Testing.Platform requires a separate runner contract.");
@@ -251,6 +264,8 @@ export function declarativeProject(
   };
   const folder = project.slice(0, project.lastIndexOf("/") + 1);
   return {
+    sdk: identity.sdk,
+    packageReferences,
     candidate: {
       path: project,
       kind: "project",
@@ -268,15 +283,18 @@ export function declarativeProject(
       evidence: [
         "Declarative proposal; installed toolchain and runner readiness remain unverified. Conservative source coverage includes project/shared subtrees.",
       ],
-      quick: {
-        configuration,
-        assemblies: Object.fromEntries(
-          frameworks.map((framework) => [
-            framework,
-            `${folder}bin/${configuration}/${framework}/${name}.dll`,
-          ]),
-        ),
-      },
+      quick:
+        identity.sdk === "Microsoft.NET.Sdk.Web"
+          ? undefined
+          : {
+              configuration,
+              assemblies: Object.fromEntries(
+                frameworks.map((framework) => [
+                  framework,
+                  `${folder}bin/${configuration}/${framework}/${name}.dll`,
+                ]),
+              ),
+            },
     },
     operations,
     defaults: {

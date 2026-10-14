@@ -1,3 +1,4 @@
+import { ensureWebProfileState } from "@zcode/shared/node";
 import { redactFeedbackText, type ZCodeRecipeRequest, type ZCodeRecipeResult } from "@zcode/shared";
 import type { ExecutionResult, ExecutionStreamResult } from "@zcode/contracts";
 import type { ToolEntry } from "@zcode/core";
@@ -60,6 +61,7 @@ export function createRecipeTool(input: {
   onStarted: (time: number) => void;
   onExecution: (work: Promise<ExecutionResult>) => void;
   validateInspection?: () => Promise<void>;
+  validateWebProfile?: () => Promise<void>;
   onInspectionChanged?: () => void;
 }): ToolEntry {
   const { request, preview } = input;
@@ -146,10 +148,19 @@ export function createRecipeTool(input: {
         }
         context.abortSignal.throwIfAborted();
       }
+      if(request.webProfile) {
+        if(!input.validateWebProfile) throw Error("Web profile validation owner unavailable.");
+        await input.validateWebProfile();
+        context.abortSignal.throwIfAborted();
+      }
+      const profile=request.inspection?.runtimeProfile ?? request.webProfile?.runtimeProfile;
+      const profileEnvironment=profile ? await ensureWebProfileState(input.workspaceRoot,profile) : undefined;
+      context.abortSignal.throwIfAborted();
       const execution = context.executionPort.run(
         {
           command: { mode: "argv", file: request.recipe.executable, args: request.recipe.args },
           cwd: input.cwd,
+          ...(profileEnvironment ? {env:{base:"empty" as const,set:profileEnvironment}} : {}),
           timeoutMs: request.recipe.timeoutMs,
           outputLimit: { maxInlineBytes: 65536, maxBufferBytes: 131072, persistOutput: "none" },
           ...(request.inspection ? { processLimit: { maxActiveProcesses: 1 as const } } : {}),

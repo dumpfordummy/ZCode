@@ -5,7 +5,12 @@ const fallback =
   "Use Advanced with reviewed complete inputs, actual outputs and runner, or select a supported project.";
 
 /** Structural equivalence only: never resolves an SDK or evaluates project code. */
-export function projectRootChildren(root: ProjectXmlElement, file: string, project: boolean) {
+export function projectRootChildren(
+  root: ProjectXmlElement,
+  file: string,
+  project: boolean,
+  webSyntaxOnly = false,
+) {
   const fail = (message: string): never => {
     throw Error(`${file}: ${message}`);
   };
@@ -19,7 +24,12 @@ export function projectRootChildren(root: ProjectXmlElement, file: string, proje
     );
   }
   const sdk = root.attributes.Sdk;
-  if (project && sdk !== undefined && sdk !== "Microsoft.NET.Sdk") {
+  if (
+    project &&
+    sdk !== undefined &&
+    sdk !== "Microsoft.NET.Sdk" &&
+    !(webSyntaxOnly && sdk === "Microsoft.NET.Sdk.Web")
+  ) {
     if (/[$@%]/.test(sdk)) fail(`Unresolved dynamic SDK "${sdk.slice(0, 160)}". ${fallback}`);
     if (sdk === "Microsoft.NET.Sdk.Web")
       fail(

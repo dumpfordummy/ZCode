@@ -28,7 +28,7 @@ export const NATIVE_CONTRACT_FEATURES = [
   zcodeNativeContractFeatures.interactionProtectedSessions,
   zcodeNativeContractFeatures.projectConfigurationInspection,
   ...(process.platform === "win32"
-    ? [zcodeNativeContractFeatures.projectInspectionHardProcessLimit]
+    ? [zcodeNativeContractFeatures.projectInspectionHardProcessLimit, ...(process.arch === "x64" ? [zcodeNativeContractFeatures.projectWebProfileInspection, zcodeNativeContractFeatures.projectWebProfileExecution] : [])]
     : []),
 ] as const;
 

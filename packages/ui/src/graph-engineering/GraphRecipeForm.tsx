@@ -1,3 +1,4 @@
+import { useGraphM4Text } from "./GraphM4Text.js";
 import { Button } from "@/components/ui/button.js";
 import { GraphSetupField, GraphSetupList, useGraphSetupText } from "./GraphSetupFields.js";
 import { GraphRecipeVerifierForm } from "./GraphRecipeVerifierForm.js";
@@ -22,6 +23,7 @@ export function GraphRecipeForm({
   openIndex?: number;
 }) {
   const t = useGraphSetupText();
+  const m4 = useGraphM4Text();
   const parsed = graphRecipeDraft(text);
   // 收集所有 Build 检查供 Test 配方的 buildNodeId 映射选择，避免手填原始 ID。
   // Radix Select 不允许 Select.Item 的 value 为空字符串，需过滤无 ID 的 Build。
@@ -62,7 +64,7 @@ export function GraphRecipeForm({
                 <h5 className="font-medium">{String(recipe.name ?? recipe.id ?? index + 1)}</h5>
                 {issue ? (
                   <p className="text-warning" role="status">
-                    {t("advancedOnly")}
+                    {issue === "inspectedProfile" ? m4("webImmutable") : t("advancedOnly")}
                   </p>
                 ) : (
                   <>

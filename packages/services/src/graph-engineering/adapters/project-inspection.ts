@@ -83,7 +83,9 @@ export function createGraphInspectionPort(options: {
         ) ||
         !parsed.data.features.includes(
           zcodeNativeContractFeatures.projectInspectionHardProcessLimit,
-        )
+        ) ||
+        (row.selection.webProfile &&
+          !parsed.data.features.includes(zcodeNativeContractFeatures.projectWebProfileInspection))
       )
         throw Error("Native inspection capability unavailable; no command fallback.");
       const before = await agent.getWorkspaceRuntimeIdentity(row.target);

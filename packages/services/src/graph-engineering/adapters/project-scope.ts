@@ -260,6 +260,8 @@ export async function revalidateProjectScope(
   expected: GraphSourceScope,
   deadline = Date.now() + PROJECT_SCOPE_BUDGET.elapsedMs,
 ) {
+  if (expected.version === 3)
+    throw Error("Web profile freshness requires its private preparation owner.");
   const job = new ProjectScanJob(
     target,
     "freshness",

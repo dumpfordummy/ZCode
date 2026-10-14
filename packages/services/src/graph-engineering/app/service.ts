@@ -1,3 +1,5 @@
+import { projectRecipes } from "./project-recipes.js";
+import { prepareOwnedWebProfile, findOwnedWebChoices } from "./web-profile.js";
 import { assertGraphInputAllowed } from "./input-guard.js";
 import { armRoutingDeadline } from "./routing-deadline.js";
 import { modelSelectionSchema } from "@zcode/shared";
@@ -23,7 +25,6 @@ import { GraphState, MetadataOwnedElsewhere, type GraphOptions } from "./state.j
 import type { GraphRuntimeGate } from "./runtime-ports.js";
 import { GraphApprovals } from "./approvals.js";
 import { GraphParallelService } from "./parallel-service.js";
-import { parallelUnresolved } from "../domain/parallel.js";
 import { assertParallelAdmission, parallelGuardedRuns } from "./parallel-guard.js";
 
 import type { GraphInputGuardRequest } from "./ports.js";
@@ -50,6 +51,20 @@ export class GraphEngineeringService implements IGraphEngineeringService {
     this.recovery = new GraphRecovery(this.state, this.sequencer);
     this.onDidChange = this.state.changed.event;
     this.parallelService = new GraphParallelService(this.state, this);
+  }
+  async findWebProfileChoices(value: Parameters<typeof findOwnedWebChoices>[1]) {
+    const target = localTarget(value.target);
+    return this.state.serial(target, () => findOwnedWebChoices(this.state, { ...value, target }));
+  }
+
+  async prepareWebProfile(value: {
+    target: GraphWorkspaceTarget;
+    inspectionIds: [string, string];
+  }) {
+    const target = localTarget(value.target);
+    return this.state.serial(target, () =>
+      prepareOwnedWebProfile(this.state, target, value.inspectionIds),
+    );
   }
   async readProjectInspections(value: GraphWorkspaceTarget) {
     const target = localTarget(value);
@@ -287,19 +302,7 @@ export class GraphEngineeringService implements IGraphEngineeringService {
     return this.state.serial(target, () => this.recovery.cancel(target, params.runId));
   }
   async recipes(params: Parameters<IGraphEngineeringService["recipes"]>[0]) {
-    const target = localTarget(params.target);
-    return this.state.serial(target, async () => {
-      const port = this.state.options.recipes;
-      if (!port) throw new Error("Project recipes are unavailable.");
-      const record = await this.state.load(target);
-      if (params.action === "read") return port.read(target);
-      await this.state.inspections.assertIdle(target);
-      if (record.runs.some((r) => !isConfirmedTerminal(r)))
-        throw new Error("Project recipe edits are blocked while a graph is unresolved.");
-      if (record.parallel?.runs.some(parallelUnresolved))
-        throw new Error("Project recipes are frozen while Fork/Join is unresolved.");
-      return port.save(target, params.recipes, params.expectedDigest);
-    });
+    return projectRecipes(this.state, params);
   }
   async artifact(params: Parameters<IGraphEngineeringService["artifact"]>[0]) {
     const target = localTarget(params.target);

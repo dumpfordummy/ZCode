@@ -182,7 +182,12 @@ export class ProjectScanJob {
     this.result.candidates.push(candidate);
     return candidate;
   }
-  async walk(root: string, file: (path: string) => Promise<void>, strict: boolean) {
+  async walk(
+    root: string,
+    file: (path: string) => Promise<void>,
+    strict: boolean,
+    exactExcludedDirectories?: ReadonlySet<string>,
+  ) {
     const queue = [{ path: root, depth: 0 }];
     for (let index = 0; index < queue.length; index++) {
       this.check();
@@ -201,8 +206,12 @@ export class ProjectScanJob {
             if (strict) throw Error(`Unsafe link/reparse input: ${path}.`);
             this.issue(`Skipped link/reparse entry: ${path}.`);
           } else if (entry.isDirectory()) {
-            if (excludedNames.has(entry.name.toLowerCase())) {
-              if (strict && this.policyVersion === 2)
+            if (
+              exactExcludedDirectories
+                ? exactExcludedDirectories.has(pathKey(path))
+                : excludedNames.has(entry.name.toLowerCase())
+            ) {
+              if (strict && this.policyVersion === 2 && !exactExcludedDirectories)
                 for (const declaration of this.declarations.values())
                   for (const operation of declaration.operations) {
                     if (operation.action === "Remove") continue;

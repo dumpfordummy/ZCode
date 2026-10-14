@@ -1,4 +1,10 @@
 import { z } from "zod";
+import {
+  webProfileSelectionSchema,
+  webProfileRuntimeSchema,
+  WEB_PROFILE_CONTROLS,
+  WEB_PROFILE_INSPECTION_PURPOSE,
+} from "./web-profile.js";
 
 export const INSPECTION_PURPOSE = "project-configuration-inspection-v1" as const;
 export const INSPECTION_TIMEOUT_MS = 30_000;
@@ -22,18 +28,35 @@ export const inspectionSelectionSchema = z
     configuration: z.enum(["Debug", "Release"]),
     framework: z.string().regex(/^net(?:8|10)\.0$/),
     sdkVersion: z.enum(["8.0.425", "8.0.426", "10.0.401"]),
+    webProfile: webProfileSelectionSchema.optional(),
   })
   .strict();
 export const inspectionBindingSchema = inspectionSelectionSchema
   .extend({
-    purpose: z.literal(INSPECTION_PURPOSE),
+    purpose: z.enum([INSPECTION_PURPOSE, WEB_PROFILE_INSPECTION_PURPOSE]),
+    runtimeProfile: webProfileRuntimeSchema.optional(),
     sdkDirectory: z.string().min(1).max(4096),
     observationDigest: z.string().regex(/^[a-f0-9]{64}$/),
     expiresAt: z.number().int().positive(),
     observedFiles: z.number().int().min(1).max(20_000),
     observedBytes: z.number().int().nonnegative().max(536_870_912),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    const profile = !!value.webProfile;
+    if (
+      profile !== !!value.runtimeProfile ||
+      value.purpose !== (profile ? WEB_PROFILE_INSPECTION_PURPOSE : INSPECTION_PURPOSE) ||
+      (profile &&
+        (value.sdkVersion !== "8.0.426" ||
+          value.framework !== "net8.0" ||
+          ![value.webProfile!.webProject, value.webProfile!.testProject].includes(value.project)))
+    )
+      ctx.addIssue({
+        code: "custom",
+        message: "Profile inspection purpose, selection and runtime binding must agree.",
+      });
+  });
 export const inspectionReviewParamsSchema = inspectionSelectionSchema
   .extend({
     sessionId: z.string().min(1),
@@ -58,6 +81,13 @@ export const INSPECTION_PROPERTIES = [
   "MSBuildAllProjects",
   "ProjectAssetsFile",
 ] as const;
+export const WEB_INSPECTION_PROPERTIES = [
+  ...INSPECTION_PROPERTIES,
+  "AssemblyName",
+  "BaseOutputPath",
+  "BaseIntermediateOutputPath",
+  "MSBuildRuntimeVersion",
+] as const;
 export const INSPECTION_ITEMS = [
   "Content",
   "ProjectReference",
@@ -67,7 +97,10 @@ export const INSPECTION_ITEMS = [
 ] as const;
 /** Fixed evaluation query; never accepts caller-supplied targets or switches. */
 export function inspectionArguments(
-  binding: Pick<InspectionBinding, "sdkDirectory" | "project" | "configuration" | "framework">,
+  binding: Pick<
+    InspectionBinding,
+    "sdkDirectory" | "project" | "configuration" | "framework" | "webProfile"
+  >,
 ): string[] {
   return [
     `${binding.sdkDirectory.replaceAll("\\", "/")}/MSBuild.dll`,
@@ -78,13 +111,17 @@ export function inspectionArguments(
     "-nodeReuse:false",
     `-p:Configuration=${binding.configuration}`,
     `-p:TargetFramework=${binding.framework}`,
-    `-getProperty:${INSPECTION_PROPERTIES.join(",")}`,
+    ...(binding.webProfile ? WEB_PROFILE_CONTROLS : []),
+    `-getProperty:${(binding.webProfile ? WEB_INSPECTION_PROPERTIES : INSPECTION_PROPERTIES).join(",")}`,
     `-getItem:${INSPECTION_ITEMS.join(",")}`,
   ];
 }
 const text = z.string().max(8192);
 const properties = z
   .object(Object.fromEntries(INSPECTION_PROPERTIES.map((key) => [key, text])))
+  .strict();
+const profileProperties = z
+  .object(Object.fromEntries(WEB_INSPECTION_PROPERTIES.map((key) => [key, text])))
   .strict();
 const item = z
   .object({
@@ -120,9 +157,32 @@ const rawProjection = z
       .strict(),
   })
   .strict();
+// Installed 17.11.69 ProjectReference evaluation metadata: only the observed empty target overrides.
+const profileReference = item
+  .extend({
+    OutputItemType: z.literal(""),
+    ReferenceSourceTarget: z.literal("ProjectReference"),
+    Targets: z.literal(""),
+  })
+  .strict();
+const rawProfileProjection = rawProjection
+  .extend({
+    Properties: profileProperties,
+    Items: z
+      .object(
+        Object.fromEntries(
+          INSPECTION_ITEMS.map((key) => [
+            key,
+            z.array(key === "ProjectReference" ? profileReference : item).max(256),
+          ]),
+        ),
+      )
+      .strict(),
+  })
+  .strict();
 export const inspectionProjectionSchema = z
   .object({
-    properties,
+    properties: z.union([properties, profileProperties]),
     items: z
       .array(
         z
@@ -140,9 +200,9 @@ export const inspectionProjectionSchema = z
   .strict();
 export type InspectionProjection = z.infer<typeof inspectionProjectionSchema>;
 /** A small allowlisted observation, never a complete input manifest or test evidence. */
-export function projectInspectionOutput(value: string): InspectionProjection {
+export function projectInspectionOutput(value: string, webProfile = false): InspectionProjection {
   if (value.length > 65_536) throw Error("Inspection output limit exceeded.");
-  const parsed = rawProjection.parse(JSON.parse(value));
+  const parsed = (webProfile ? rawProfileProjection : rawProjection).parse(JSON.parse(value));
   return inspectionProjectionSchema.parse({
     properties: parsed.Properties,
     items: Object.entries(parsed.Items).flatMap(([kind, entries]) =>

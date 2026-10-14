@@ -12,6 +12,8 @@ export const zcodeNativeContractFeatures = {
   /** `workspace/updateInteractionPreferences.protectedSessionIds` 会真正排除受保护 session 的自动应答。 */
   interactionProtectedSessions: "interaction.protectedSessions",
   projectConfigurationInspection: "project.configurationInspection.v1",
+  projectWebProfileExecution: "project.webProfileExecution.v1",
+  projectWebProfileInspection: "project.webProfileInspection.v1",
   projectInspectionHardProcessLimit: "project.configurationInspection.hardProcessLimit.v1",
 } as const;
 

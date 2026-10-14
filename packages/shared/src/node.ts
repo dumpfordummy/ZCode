@@ -21,3 +21,16 @@ export {
   type NodeSelfResourceSampler,
   type NodeSelfResourceSamplerOptions,
 } from "./node/nodeSelfResourceTelemetry.js";
+
+export {
+  fingerprintBoundedTrees,
+  type BoundedTreeLimits,
+  type BoundedTreeRoot,
+} from "./node/boundedTreeFingerprint.js";
+
+export {
+  captureWebProfileRuntime,
+  revalidateWebProfileRuntime,
+  webProfileEnvironment,
+  ensureWebProfileState,
+} from "./node/webProfileProvenance.js";

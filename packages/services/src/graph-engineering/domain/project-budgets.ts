@@ -28,4 +28,19 @@ export type GraphSourceScope = {
   project: string;
   membershipDigest: string;
   sourceCount: number;
-} & ({ version: 1 } | { version: 2; configuration: string });
+} & (
+  | { version: 1 }
+  | { version: 2; configuration: string }
+  | {
+      version: 3;
+      policy: "web-static-net8-win-x64-v1";
+      configuration: "Debug" | "Release";
+      webProject: string;
+      runtimeProfile: import("@zcode/shared").WebProfileRuntime;
+      assemblies: { web: string; test: string };
+      copiedContent: Array<{ source: string; output: string }>;
+      preparationId: string;
+      inspectionIds: [string, string];
+    }
+);
+export type GraphWebProfileScope = Extract<GraphSourceScope, { version: 3 }>;

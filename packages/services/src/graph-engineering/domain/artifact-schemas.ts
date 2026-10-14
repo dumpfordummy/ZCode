@@ -1,3 +1,4 @@
+import { webProfileRuntimeSchema, WEB_PROFILE_POLICY } from "@zcode/shared";
 import { z } from "zod";
 import type { GraphRecipe } from "../artifact-types.js";
 import { GRAPH_ARTIFACT_BYTES } from "./artifacts.js";
@@ -64,7 +65,28 @@ const scopeFields = {
   membershipDigest: z.string().regex(/^[a-f0-9]{64}$/),
   sourceCount: z.number().int().min(1).max(PROJECT_SCOPE_BUDGET.sourceFiles),
 };
+export const webProfileScopeSchema = z
+  .object({
+    ...scopeFields,
+    version: z.literal(3),
+    policy: z.literal(WEB_PROFILE_POLICY),
+    configuration: z.enum(["Debug", "Release"]),
+    webProject: relativePath,
+    runtimeProfile: webProfileRuntimeSchema,
+    assemblies: z.object({ web: relativePath, test: relativePath }).strict(),
+    copiedContent: z
+      .array(z.object({ source: relativePath, output: relativePath }).strict())
+      .max(32)
+      .refine(
+        (rows) => new Set(rows.map((row) => row.output.toLowerCase())).size === rows.length,
+        "Duplicate copied Content outputs.",
+      ),
+    preparationId: z.string().uuid(),
+    inspectionIds: z.tuple([z.string().uuid(), z.string().uuid()]),
+  })
+  .strict();
 const sourceScope = z.discriminatedUnion("version", [
+  webProfileScopeSchema,
   z.object({ ...scopeFields, version: z.literal(1) }).strict(),
   z
     .object({ ...scopeFields, version: z.literal(2), configuration: z.enum(["Debug", "Release"]) })

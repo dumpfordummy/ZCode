@@ -8,6 +8,7 @@ import {
   projectInspectionOutput,
   INSPECTION_PROPERTIES,
   INSPECTION_ITEMS,
+  WEB_INSPECTION_PROPERTIES,
 } from "@zcode/shared";
 import type { ZCodeRecipeSnapshot } from "@zcode/shared";
 import type { GraphInspection } from "../inspection-types.js";
@@ -315,4 +316,29 @@ test("history and cold reconciliation preserve original identity without replay"
   await cold.inspections.command({ target, action: "cancel", id: row.id });
   await cold.inspections.assertIdle(target);
   assert.equal(f.counts(), 1);
+});
+
+test("named Web query accepts only the installed ProjectReference metadata and rejects target overrides", () => {
+  const value = {
+    Properties: Object.fromEntries(WEB_INSPECTION_PROPERTIES.map((key) => [key, ""])),
+    Items: {
+      ...output().Items,
+      ProjectReference: [
+        {
+          Identity: "../Web/Web.csproj",
+          OutputItemType: "",
+          ReferenceSourceTarget: "ProjectReference",
+          Targets: "",
+        },
+      ],
+    },
+  };
+  const projected = projectInspectionOutput(JSON.stringify(value), true);
+  assert.equal(projected.items.length, 1);
+  assert.equal(projected.scopeComplete, false);
+  assert.throws(() => projectInspectionOutput(JSON.stringify(value)), /unrecognized/i);
+  for (const Targets of ["Build", "Restore", "Custom"]) {
+    value.Items.ProjectReference[0]!.Targets = Targets;
+    assert.throws(() => projectInspectionOutput(JSON.stringify(value), true));
+  }
 });

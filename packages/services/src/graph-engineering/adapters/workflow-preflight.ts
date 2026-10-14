@@ -27,10 +27,11 @@ function destination(value: string | null | undefined): string {
   }
 }
 export function createWorkflowPreflight(options: {
+  directory?: string;
   agentService: IZCodeAgentService;
   modelSelectionService: IModelSelectionService;
 }): GraphPreflightPort {
-  const recipes = createGraphRecipeStore();
+  const recipes = createGraphRecipeStore(options.directory);
   return {
     async capture(value, definition, inputSettings) {
       const target = localTarget(value),

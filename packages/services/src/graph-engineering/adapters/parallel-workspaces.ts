@@ -19,13 +19,14 @@ import { workflowToolQueries, checkWorkflowTools } from "./workflow-tools.js";
 import type { GitGraphWorkspace } from "@zcode/shared";
 
 export function createGraphParallelPort(options: {
+  directory?: string;
   cleanupWorkspace?: (workspace: GitGraphWorkspace) => Promise<GitGraphWorkspace>;
   gitService: IGitService;
   agentService: IZCodeAgentService;
   sessionService: IZCodeSessionService;
   modelSelectionService: IModelSelectionService;
 }): GraphParallelPort {
-  const recipes = createGraphRecipeStore();
+  const recipes = createGraphRecipeStore(options.directory);
   async function inventory(
     target: GraphWorkspaceTarget,
     settings: GraphNativeSettings,

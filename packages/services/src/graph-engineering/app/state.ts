@@ -14,6 +14,21 @@ import type { GraphPreflightPort } from "./workflow-ports.js";
 
 import { GraphInspections } from "./inspections.js";
 export interface GraphOptions extends GraphArtifactOptions {
+  webProfile?: {
+    choices(
+      target: GraphWorkspaceTarget,
+      webProject: string,
+      configuration: "Debug" | "Release",
+      candidates: string[],
+    ): Promise<{ kind: "web-profile-choices"; tests: string[]; issues: string[] }>;
+    prepare(
+      target: GraphWorkspaceTarget,
+      rows: [
+        import("../inspection-types.js").GraphInspection,
+        import("../inspection-types.js").GraphInspection,
+      ],
+    ): Promise<import("../web-profile-types.js").GraphWebProfileProposal>;
+  };
   inspection?: import("./inspection-ports.js").GraphInspectionPort;
   monotonic?(): number;
   diagnosticPhase?(operationId: string, phase: string): void;

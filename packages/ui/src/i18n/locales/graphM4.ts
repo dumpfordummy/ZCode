@@ -88,6 +88,47 @@ const messages: Record<string, [string, string]> = {
   ],
   quickPrevious: ["Previous", "上一页"],
   quickNext: ["Next", "下一页"],
+  inspectionObservationOnly: [
+    "This observation alone does not establish complete inputs. Prepare a supported profile separately; no Build or Test evidence is created.",
+    "此观察本身不能证明输入范围完整。需单独准备受支持的配置；不会生成构建或测试证据。",
+  ],
+  inspectionObserved: ["Observed configuration details", "已观察的配置详情"],
+  webImmutable: [
+    "This inspected profile is immutable. Prepare a new profile to change its targets or inputs; JSON edits cannot replace its private receipt.",
+    "此检查配置不可变。更改目标或输入需重新准备配置；编辑 JSON 不能替代其私有凭据。",
+  ],
+  webTitle: ["Plain Web service with VSTest", "普通 Web 服务与 VSTest"],
+  webLimits: [
+    "Installed SDK 8.0.426 / net8.0 only. Plain static content and the known cached xUnit packages; no Razor, Blazor or custom generators.",
+    "仅支持已安装的 SDK 8.0.426 / net8.0。普通静态内容和已知缓存的 xUnit 包；不支持 Razor、Blazor 或自定义生成器。",
+  ],
+  webFind: ["Find matching test projects", "查找匹配的测试项目"],
+  webMatching: [
+    "Only completed matching input closures are selectable.",
+    "仅可选择已完成输入闭包验证的匹配项目。",
+  ],
+  webBuildTarget: ["Actual Build target and reference", "实际构建目标与引用"],
+  webService: ["Web inspection", "Web 检查"],
+  webTests: ["Test inspection", "测试项目检查"],
+  webPrepare: ["Prepare complete Web profile", "准备完整 Web 配置"],
+  webVerifying: [
+    "Verifying source bytes, membership and installed provenance. No permission response is currently needed.",
+    "正在验证源文件字节、成员关系和已安装工具来源。当前无需回应权限请求。",
+  ],
+  webPrepared: [
+    "Profile complete; review before Save. No Build or Test has run.",
+    "配置范围完整；保存前请审阅。尚未执行构建或测试。",
+  ],
+  webSources: ["Review all source inputs", "审阅全部源输入"],
+  webExcluded: ["Exact output roots excluded", "排除的确切输出目录"],
+  webReadScope: [
+    "Review exact installed and cached package read roots",
+    "审阅确切的工具和缓存包读取目录",
+  ],
+  webSaved: [
+    "Configuration saved. Running checks still requires preview and native permissions.",
+    "配置已保存。执行检查仍需预览和原生权限确认。",
+  ],
   inspectionWarning: [
     "MSBuild evaluation can execute project processing and cause filesystem, network or system side effects. Ordinary native permission is required.",
     "MSBuild 求值可执行项目处理并影响文件、网络或系统，必须经过原生权限确认。",

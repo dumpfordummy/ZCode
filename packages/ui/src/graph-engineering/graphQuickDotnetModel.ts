@@ -70,7 +70,7 @@ export function quickDotnetPreset(
   };
   visit(buildPath);
   const configuration =
-    discovery.prepared.scope.version === 2 ? discovery.prepared.scope.configuration : "Debug";
+    discovery.prepared.scope.version !== 1 ? discovery.prepared.scope.configuration : "Debug";
   if (!scopeIds.length || scopeIds.length > 7 || new Set(scopeIds).size !== scopeIds.length)
     throw Error("Choose one to seven ordered Test scopes.");
   const tests = scopeIds.map((id) => {

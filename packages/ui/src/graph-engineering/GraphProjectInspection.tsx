@@ -1,3 +1,4 @@
+import { webProfileReadScope, type InspectionSelection } from "@zcode/shared";
 import { useEffect, useRef, useState } from "react";
 import type { GraphInspection, GraphInspectionSetupCommand } from "@zcode/services";
 import type { useGraphProjectSetup } from "@/hooks/useGraphProjectSetup.js";
@@ -12,7 +13,13 @@ export function GraphProjectInspection({
   configuration,
   disabled,
   onOpenConversation,
+  fixedSelection,
+  initialRecord,
+  onRecord,
 }: {
+  fixedSelection?: InspectionSelection;
+  initialRecord?: GraphInspection;
+  onRecord?: (record: GraphInspection) => void;
   setup: ReturnType<typeof useGraphProjectSetup>;
   project: string;
   configuration: string;
@@ -20,16 +27,20 @@ export function GraphProjectInspection({
   onOpenConversation?: (path: string, session: string, identity?: string) => void;
 }) {
   const t = useGraphM4Text();
-  const [sdk, setSdk] = useState("");
-  const [framework, setFramework] = useState("");
+  const [sdk, setSdk] = useState(fixedSelection?.sdkVersion ?? "");
+  const [framework, setFramework] = useState(fixedSelection?.framework ?? "");
   const [record, setRecord] = useState<GraphInspection>();
   const [busy, setBusy] = useState(false);
   const owned = useRef<string | undefined>(undefined);
   const generation = useRef(0);
-  const key = JSON.stringify({ project, configuration, sdk, framework });
+  const key = JSON.stringify({ project, configuration, sdk, framework, fixedSelection });
   useEffect(() => {
     generation.current++;
-    setRecord(undefined);
+    setRecord(initialRecord);
+    owned.current =
+      initialRecord?.reserved || initialRecord?.status === "review-ready"
+        ? initialRecord.id
+        : undefined;
     setBusy(false);
     return () => {
       generation.current++;
@@ -39,6 +50,15 @@ export function GraphProjectInspection({
       owned.current = undefined;
     };
   }, [key, setup.cancelInspection]);
+  useEffect(() => {
+    if (initialRecord && !record) {
+      setRecord(initialRecord);
+      owned.current =
+        initialRecord.reserved || initialRecord.status === "review-ready"
+          ? initialRecord.id
+          : undefined;
+    }
+  }, [initialRecord, record]);
   const invoke = async (command: GraphInspectionSetupCommand) => {
     const version = generation.current;
     setBusy(true);
@@ -47,7 +67,8 @@ export function GraphProjectInspection({
       if (version !== generation.current) {
         void setup.cancelInspection(result.id);
       } else {
-        owned.current = result.id;
+        owned.current = result.reserved || result.status === "review-ready" ? result.id : undefined;
+        onRecord?.(result);
         setRecord(result);
       }
     }
@@ -67,20 +88,20 @@ export function GraphProjectInspection({
       data-status={record?.status ?? "unsupported"}
     >
       <p className="text-ui-sm text-warning">{t("inspectionWarning")}</p>
-      <p className="text-ui-sm text-foreground-subtle">{t("inspectionUnsupported")}</p>
+      <p className="text-ui-sm text-foreground-subtle">{t("inspectionObservationOnly")}</p>
       <GraphSelect
         label={t("inspectionSdk")}
         value={sdk}
         onChange={setSdk}
         options={options(["8.0.425", "8.0.426", "10.0.401"])}
-        disabled={busy || record?.reserved || disabled}
+        disabled={!!fixedSelection || busy || record?.reserved || disabled}
       />
       <GraphSelect
         label={t("inspectionFramework")}
         value={framework}
         onChange={setFramework}
         options={options(["net8.0", "net10.0"])}
-        disabled={busy || record?.reserved || disabled}
+        disabled={!!fixedSelection || busy || record?.reserved || disabled}
       />
       <Button
         size="sm"
@@ -96,7 +117,7 @@ export function GraphProjectInspection({
         onClick={() =>
           void invoke({
             action: "review",
-            selection: {
+            selection: fixedSelection ?? {
               project,
               configuration: configuration as "Debug" | "Release",
               framework,
@@ -122,30 +143,45 @@ export function GraphProjectInspection({
             {t(`inspectionState.${record.status}`)}
           </p>
           {record.request ? (
-            <dl className="space-y-1 break-all text-ui-sm">
-              <dt>{t("inspectionCommand")}</dt>
-              <dd className="font-mono">{record.request.recipe.executable}</dd>
-              <dd>
-                <ol>
-                  {record.request.recipe.args.map((argument, index) => (
-                    <li className="font-mono" key={index}>
-                      {argument}
-                    </li>
-                  ))}
-                </ol>
-              </dd>
-              <dt>{t("inspectionScope")}</dt>
-              <dd className="font-mono">
-                {record.target.workspacePath}
-                <br />
-                {record.request.inspection?.sdkDirectory}
-              </dd>
-              <dd>
-                {record.request.inspection?.observedFiles} {t("inspectionFiles")}; 30s / 64KiB / 1
-                process; {t("inspectionExpiry")}{" "}
-                {new Date(record.request.inspection!.expiresAt).toISOString()}
-              </dd>
-            </dl>
+            <details open={record.status === "review-ready"}>
+              <summary className="text-ui-sm">{t("inspectionCommand")}</summary>
+              <dl className="space-y-1 break-all text-ui-sm">
+                <dt>{t("inspectionCommand")}</dt>
+                <dd className="font-mono">{record.request.recipe.executable}</dd>
+                <dd>
+                  <ol>
+                    {record.request.recipe.args.map((argument, index) => (
+                      <li className="font-mono" key={index}>
+                        {argument}
+                      </li>
+                    ))}
+                  </ol>
+                </dd>
+                <dt>{t("inspectionScope")}</dt>
+                <dd className="font-mono">
+                  {record.target.workspacePath}
+                  <br />
+                  {record.request.inspection?.sdkDirectory}
+                  {record.request.inspection?.runtimeProfile ? (
+                    <details>
+                      <summary>{t("webReadScope")}</summary>
+                      <ul>
+                        {webProfileReadScope(record.request.inspection.runtimeProfile).map(
+                          (path) => (
+                            <li key={path}>{path}</li>
+                          ),
+                        )}
+                      </ul>
+                    </details>
+                  ) : null}
+                </dd>
+                <dd>
+                  {record.request.inspection?.observedFiles} {t("inspectionFiles")}; 30s / 64KiB / 1
+                  process; {t("inspectionExpiry")}{" "}
+                  {new Date(record.request.inspection!.expiresAt).toISOString()}
+                </dd>
+              </dl>
+            </details>
           ) : null}
           {record.status === "review-ready" ? (
             <Button
@@ -205,9 +241,12 @@ export function GraphProjectInspection({
             </Button>
           </div>
           {record.projection ? (
-            <pre className="whitespace-pre-wrap break-all text-ui-sm">
-              {JSON.stringify(record.projection, null, 2)}
-            </pre>
+            <details>
+              <summary className="text-ui-sm">{t("inspectionObserved")}</summary>
+              <pre className="max-h-72 overflow-auto whitespace-pre-wrap break-all text-ui-sm">
+                {JSON.stringify(record.projection, null, 2)}
+              </pre>
+            </details>
           ) : null}
         </>
       ) : null}

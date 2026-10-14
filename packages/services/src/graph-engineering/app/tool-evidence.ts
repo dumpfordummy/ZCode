@@ -6,6 +6,7 @@ import { currentToolAttempt } from "../domain/routing.js";
 import { assertReviewedChecks } from "./checks-preflight.js";
 import { captureToolCommand, toolArtifactBase } from "./tool-command-evidence.js";
 import { captureToolReport } from "./tool-report-evidence.js";
+import { associatedBuildPaths, assertCopiedContent } from "./web-content-evidence.js";
 
 /** Observes declared files; it never executes recipes or reads paths from agent output. */
 export class GraphToolEvidence {
@@ -24,7 +25,7 @@ export class GraphToolEvidence {
     if (recipe.verifier.kind === "test" && recipe.verifier.format === "dotnet-vstest-trx-v1")
       attempt.resolvedReportPath = reportPath;
     await recipes.validatePaths(run.target, [
-      ...recipe.expectedOutputs,
+      ...associatedBuildPaths(recipe),
       ...(reportPath ? [reportPath] : []),
     ]);
     attempt.sourceDigest = (
@@ -48,8 +49,9 @@ export class GraphToolEvidence {
         build.sourceDigest !== attempt.sourceDigest
       )
         throw new Error("Test requires this run's successful build of the exact declared source.");
+      await assertCopiedContent(recipes, run.target, recipe);
       attempt.buildDigest = (
-        await recipes.fingerprint(run.target, build.recipe.expectedOutputs)
+        await recipes.fingerprint(run.target, associatedBuildPaths(build.recipe))
       ).digest;
       if (attempt.buildDigest !== build.outputDigest)
         throw new Error("Build outputs changed before this test invocation.");
@@ -127,10 +129,11 @@ export class GraphToolEvidence {
         ).digest !== attempt.sourceDigest
       )
         issues.push("Declared source changed during command execution.");
+      await assertCopiedContent(this.state.options.recipes!, run.target, recipe);
       if (recipe.verifier.kind === "build") {
         const fingerprint = await this.state.options.recipes!.fingerprint(
           run.target,
-          recipe.expectedOutputs,
+          associatedBuildPaths(recipe),
         );
         attempt.outputDigest = fingerprint.digest;
         const after = await this.state.options.recipes!.observeFiles(
@@ -139,7 +142,7 @@ export class GraphToolEvidence {
         );
         // 新鲜度与内容摘要来自不同读取时，必须核对同一组字节，不能混用文件替换前后的证据。
         if (
-          fingerprint.files.length !== recipe.expectedOutputs.length ||
+          fingerprint.files.length !== associatedBuildPaths(recipe).length ||
           after.length !== recipe.expectedOutputs.length ||
           recipe.expectedOutputs.some((path) => {
             const captured = fingerprint.files.find((file) => file.path === path);
@@ -170,8 +173,12 @@ export class GraphToolEvidence {
         const verifier = recipe.verifier;
         const build = currentToolAttempt(run, verifier.buildNodeId)!;
         if (
-          (await this.state.options.recipes!.fingerprint(run.target, build.recipe.expectedOutputs))
-            .digest !== attempt.buildDigest
+          (
+            await this.state.options.recipes!.fingerprint(
+              run.target,
+              associatedBuildPaths(build.recipe),
+            )
+          ).digest !== attempt.buildDigest
         )
           issues.push("Build outputs changed during the test.");
         const authoritative =
@@ -244,7 +251,9 @@ export class GraphToolEvidence {
         });
         this.artifacts.add(run, test, "test");
       }
-      for (const path of recipe.expectedOutputs) {
+      for (const path of recipe.verifier.kind === "build"
+        ? associatedBuildPaths(recipe)
+        : recipe.expectedOutputs) {
         const output = await store.captureFile({
           ...base,
           artifactId: this.state.options.id(),
