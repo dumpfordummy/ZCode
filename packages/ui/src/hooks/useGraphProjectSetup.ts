@@ -100,5 +100,17 @@ export function useGraphProjectSetup(target: GraphWorkspaceTarget) {
     const value = stored.scope === scope ? stored.lanes[lane] : undefined;
     return value && value.status !== "idle" && value.key === key ? value : { status: "idle" };
   };
-  return { supported: Boolean(service), invoke, state };
+  const cancelInspection = useCallback(
+    async (id: string) => {
+      await service
+        ?.projectSetup({
+          target: workspace,
+          action: "inspection",
+          command: { action: "cancel", id },
+        })
+        .catch(() => undefined);
+    },
+    [service, workspace],
+  );
+  return { supported: Boolean(service), invoke, state, cancelInspection };
 }

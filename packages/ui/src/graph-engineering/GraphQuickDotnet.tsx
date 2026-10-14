@@ -6,6 +6,7 @@ import { GraphQuickTestChoices } from "./GraphQuickTestChoices.js";
 import { GraphQuickSave } from "./GraphQuickSave.js";
 import { useGraphQuickDraft } from "@/hooks/useGraphQuickDraft.js";
 import { Input } from "@/components/ui/input.js";
+import { GraphProjectInspection } from "./GraphProjectInspection.js";
 import { GraphQuickSummary } from "./GraphQuickSummary.js";
 import { GraphQuickContinuation } from "./GraphQuickContinuation.js";
 import { GraphSelect } from "./GraphSelect.js";
@@ -355,12 +356,17 @@ export function GraphQuickDotnet({
               ) : null}
               {issue && build && !busy ? (
                 <GraphQuickContinuation
-                  workspaceKey={workspaceKey}
-                  build={build}
-                  configuration={configuration}
-                  scopes={scopes}
+                  {...{ workspaceKey, build, configuration, scopes }}
                   blocker={issue}
                   onOpenAdvanced={onOpenAdvanced}
+                />
+              ) : null}
+              {issue && build.toLowerCase().endsWith(".csproj") && !busy ? (
+                <GraphProjectInspection
+                  setup={setup}
+                  project={build}
+                  configuration={configuration}
+                  disabled={disabled}
                 />
               ) : null}
               <p className="text-ui-sm text-foreground-subtle">{t("quickDefaults")}</p>

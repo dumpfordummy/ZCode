@@ -32,6 +32,7 @@ export class GraphToolEvidence {
         run.target,
         recipe.sourcePaths,
         recipe.sourceScope ? [recipe.sourceScope] : undefined,
+        (phase) => this.state.trace(attempt.operationId, phase),
       )
     ).digest;
     if (recipe.verifier.kind === "build")
