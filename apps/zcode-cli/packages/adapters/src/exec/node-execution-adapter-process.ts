@@ -1,4 +1,5 @@
 import { spawn, type ChildProcess, type StdioOptions } from "node:child_process";
+import { terminateLimitedChild } from "./windows-limited-child.js";
 import { applyBashSourcesToExecutionRequest } from "./bash-startup-script.js";
 import { createBashResourceTelemetry } from "./bash-resource-telemetry.js";
 import { createCwdCapturePlan } from "./cwd-capture.js";
@@ -144,6 +145,7 @@ export class NodeExecutionAdapterProcess extends NodeExecutionAdapterResults {
   }
 
   protected terminateProcessTree(child: ChildProcess, useBashProcessTreeStop: boolean): void {
+    if (terminateLimitedChild(child)) return;
     if (!child.pid) {
       child.kill("SIGTERM");
       return;

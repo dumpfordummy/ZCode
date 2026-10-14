@@ -27,6 +27,9 @@ export const NATIVE_CONTRACT_METHODS = [
 export const NATIVE_CONTRACT_FEATURES = [
   zcodeNativeContractFeatures.interactionProtectedSessions,
   zcodeNativeContractFeatures.projectConfigurationInspection,
+  ...(process.platform === "win32"
+    ? [zcodeNativeContractFeatures.projectInspectionHardProcessLimit]
+    : []),
 ] as const;
 
 export function buildNativeContract(commandTypes: Iterable<string>): ZCodeNativeContract {

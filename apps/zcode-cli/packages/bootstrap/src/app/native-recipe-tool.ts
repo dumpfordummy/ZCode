@@ -86,7 +86,8 @@ export function createRecipeTool(input: {
         args: { type: "array", items: { type: "string" } },
         cwd: { type: "string" },
         timeoutMs: { type: "number" },
-        purpose: { type: "string" }, warning: { type: "string" },
+        purpose: { type: "string" },
+        warning: { type: "string" },
         readScope: { type: "array", items: { type: "string" } },
       },
       additionalProperties: false,
@@ -137,8 +138,12 @@ export function createRecipeTool(input: {
         throw new Error("Recipe cwd changed while awaiting permission");
       context.abortSignal.throwIfAborted();
       if (request.inspection) {
-        try { await input.validateInspection?.(); }
-        catch (error) { input.onInspectionChanged?.(); throw error; }
+        try {
+          await input.validateInspection?.();
+        } catch (error) {
+          input.onInspectionChanged?.();
+          throw error;
+        }
         context.abortSignal.throwIfAborted();
       }
       const execution = context.executionPort.run(
@@ -147,6 +152,7 @@ export function createRecipeTool(input: {
           cwd: input.cwd,
           timeoutMs: request.recipe.timeoutMs,
           outputLimit: { maxInlineBytes: 65536, maxBufferBytes: 131072, persistOutput: "none" },
+          ...(request.inspection ? { processLimit: { maxActiveProcesses: 1 as const } } : {}),
           trace: context.traceContext,
         },
         {

@@ -149,3 +149,69 @@ Installed 8.0.426 evidence justifies the 64 MiB per-file cap: FSharp.Compiler.Se
 ## Final fixed-argument boundary correction
 
 Final review identified that a leading `@` project argument can be interpreted by MSBuild as an explicit response file despite `-noAutoResponse`. Inspection selection now rejects leading `@`, switch prefixes and leading whitespace before native admission. The eight Host/query tests pass after this correction; no target execution was attempted. Root typecheck passes. This is an additional source correction after the UI/diagnostics commit, and the actual final-head CI identity is recorded in the PR handoff.
+
+## F1 continuation: hard native process bound
+
+The existing NodeExecutionAdapter remains the sole execution owner. Its new optional
+`processLimit: { maxActiveProcesses: 1 }` request is internal, argv-only and fail-closed.
+On Windows the adapter uses the already installed Koffi binding to create the exact
+reviewed executable suspended, atomically assign it at creation (PROC_THREAD_ATTRIBUTE_JOB_LIST) to a private unnamed Job Object with
+ACTIVE_PROCESS=1 and KILL_ON_JOB_CLOSE, and only then resume the primary thread.
+No breakaway flag is allowed. No wrapper shell, helper executable, second runner,
+or post-start PID-enumeration race is introduced. An explicit inherited handle list
+contains only owned stdio pipes; the job handle cannot be inherited. Inspection has
+no stdin. All handles and output remain owned by the same adapter cancellation and
+timeout lifecycle. Non-Windows or unavailable native enforcement fails before start;
+ordinary Build/Test execution without this option is unchanged.
+
+```mermaid
+sequenceDiagram
+  participant Permission
+  participant Adapter as Existing ExecutionPort adapter
+  participant OS as Windows Job Object
+  Permission->>Adapter: approved exact argv + processLimit=1
+  Adapter->>OS: create private bounded job and suspended process
+  Adapter->>OS: atomic job assignment during process creation
+  Adapter->>OS: resume only after successful assignment
+  OS-->>Adapter: bounded stdout/stderr and actual process exit
+  Adapter->>OS: close job / kill owned descendants on cancellation or shutdown
+```
+
+Tests must prove argv/Unicode handling, successful output and actual exit, immediate
+child creation denied before its marker can be written, cancellation, timeout,
+parent-executor loss, repeated cleanup and unrelated-process survival. No capability
+claim or native acceptance is made until these tests execute. API references:
+https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw
+https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_basic_limit_information
+
+## F1 continuation: permission navigation and read-only recovery
+
+Inspection records remain owned by GraphState, with a bounded `inspection-history`
+setup read returning copies of its private receipts. This read never dispatches,
+replays, approves or re-evaluates. Setup displays retained operations even when its
+previous passive discovery is no longer mounted. Explicit Check original operation
+reconciles only the original session/runtime; uncertainty retains the reservation.
+An explicit Open permission conversation action uses the existing Graph conversation
+navigation callback. A renderer-only navigation token suppresses cancellation caused
+by this specific unmount; it contains no execution authority. Ordinary root/selection
+changes still cancel the previous owned inspection. Reopen reads Host history and
+never reconstructs a start command. Expired/stale historical observations cannot Save.
+Permission responses remain in the ordinary native conversation. No automatic answer,
+retry, or recovery dispatch is introduced.
+
+Windows 10+ job-list creation attributes remove the create/assign crash gap. Unsupported
+OS/binding enforcement fails before execution; the separately advertised hard-limit
+capability is required in addition to the original inspection feature.
+
+### Fresh installed-SDK large-scope diagnostic
+
+The F1-only harness creates a new disposable fixture from the retained synthetic
+public-package fixture. It pins installed SDK 8.0.426 explicitly, preserves net8.0,
+copies only declared cached packages and rebases generated restore metadata in the
+new copy. It never changes the old 8.0.425 fixture or invokes Restore. Existing
+U4/U5 harness defaults remain unchanged. A single observer permits up to 900 seconds
+per native boundary, with operation identities and monotonic observer timestamps.
+This is an external diagnostic allowance, not a product timeout or performance fix.
+Permission is still accepted individually through the existing native UI. No
+retry or overlapping invocation is allowed. Source content, resource and application
+assertions must PASS, deliberately FAIL, then PASS after exact source restoration.
