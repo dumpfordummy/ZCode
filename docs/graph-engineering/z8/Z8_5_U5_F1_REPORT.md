@@ -112,9 +112,16 @@ exact; the persisted Graph record remained byte-for-byte unchanged and no new ru
 occurred. The diagnostic replays only the previously observed environment through
 the real preview owner; it is not a new native environment-discovery claim.
 
-CI-selected regressions cover immutable/private proof, Save expiry and byte drift,
-canonical scope selection, missing/old runtime capabilities, unsupported effects,
+At the original reviewed head a277735, CI-selected regressions covered immutable/private
+proof, canonical scope selection, missing/old runtime capabilities, unsupported effects,
 full membership, copied-output association and mutation during final TRX capture.
+The previous claim of direct Save expiry and prepared-byte-drift coverage was overstated:
+`web-profile-proof.test.ts` did not call Save. F1-R1 adds prospective direct coverage in
+`web-profile-save.test.ts`: fresh Save, expired-before-verification (existing and absent
+configuration), expiry during verification, actual Content byte drift, and cold reopen
+after expiry. These real-store tests control only the instance clock and installed
+provenance observation; they are separate from preparation/inspection expiry tests and
+historical native evidence. See [F1-R1 report](Z8_5_U5_F1_R1_REPORT.md).
 Existing permission, v1/v2, U3/U4/U5, TRX F2/RunInfo, output-association and selection
 gates remain enabled. Native process ownership tests are separately labelled.
 

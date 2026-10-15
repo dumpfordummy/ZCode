@@ -42,8 +42,15 @@ async function readConfig(target: GraphWorkspaceTarget, directory?: string) {
     }
   return { raw: raw as Record<string, unknown>, digest: digest(bytes.toString("utf8")), recipes };
 }
-export function createGraphRecipeStore(directory?: string): GraphRecipeStore {
-  const fingerprint = createRecipeSourceFingerprint(directory);
+export function createGraphRecipeStore(
+  directory?: string,
+  dependencies: {
+    now?: () => number;
+    webProvenance?: Parameters<typeof createRecipeSourceFingerprint>[1];
+  } = {},
+): GraphRecipeStore {
+  const now = dependencies.now ?? Date.now;
+  const fingerprint = createRecipeSourceFingerprint(directory, dependencies.webProvenance);
   return {
     async read(target) {
       const result = await readConfig(target, directory);
@@ -70,7 +77,7 @@ export function createGraphRecipeStore(directory?: string): GraphRecipeStore {
         ];
         for (const scope of scopes) {
           const proof = await readWebProfileProof(directory, target, scope);
-          if (Date.now() >= proof.expiresAt)
+          if (now() >= proof.expiresAt)
             throw Error("Web proposal review expired; prepare again before Save.");
           const selected = validated.filter(
             (recipe) =>
@@ -87,7 +94,7 @@ export function createGraphRecipeStore(directory?: string): GraphRecipeStore {
             throw Error("Web source bytes changed after preparation; prepare again before Save.");
         }
         for (const scope of scopes)
-          if (Date.now() >= (await readWebProfileProof(directory, target, scope)).expiresAt)
+          if (now() >= (await readWebProfileProof(directory, target, scope)).expiresAt)
             throw Error("Web proposal expired during Save verification.");
         const value = { ...current.raw, graphRecipes: validated },
           text = `${JSON.stringify(value, null, 2)}\n`;

@@ -9,6 +9,7 @@ export async function revalidateWebProfileScope(
   target: GraphWorkspaceTarget,
   scope: GraphWebProfileScope,
   deadline: number,
+  observeProvenance = observeInstalledWebProfileProvenance,
 ) {
   await readWebProfileProof(directory, target, scope);
   const selection = {
@@ -22,6 +23,21 @@ export async function revalidateWebProfileScope(
     membership.sourcePaths.length !== scope.sourceCount
   )
     throw Error("Web profile input membership or metadata changed; prepare again.");
+  await observeProvenance(target, scope, deadline);
+  return membership.sourcePaths;
+}
+
+/** Adapter-local seam for costly installed provenance; workspace validation stays above. */
+async function observeInstalledWebProfileProvenance(
+  target: GraphWorkspaceTarget,
+  scope: GraphWebProfileScope,
+  deadline: number,
+) {
+  const selection = {
+    webProject: scope.webProject,
+    testProject: scope.project,
+    configuration: scope.configuration,
+  };
   const restored = await readWebProfileRestore(target, selection, scope.runtimeProfile.executable);
   if (restored.packageRoot !== scope.runtimeProfile.packageRoot)
     throw Error("Web package root changed.");
@@ -31,5 +47,4 @@ export async function revalidateWebProfileScope(
     undefined,
     deadline,
   );
-  return membership.sourcePaths;
 }

@@ -6,7 +6,10 @@ import { revalidateProjectScope } from "./project-scope.js";
 import { PROJECT_SCOPE_BUDGET } from "../domain/project-budgets.js";
 
 /** Existing fingerprint owner, with additive membership validation for new versioned scopes. */
-export function createRecipeSourceFingerprint(directory?: string): GraphRecipeStore["fingerprint"] {
+export function createRecipeSourceFingerprint(
+  directory?: string,
+  webProvenance?: Parameters<typeof revalidateWebProfileScope>[4],
+): GraphRecipeStore["fingerprint"] {
   return async (target, paths, scopes = [], diagnosticPhase) => {
     const mark = (phase: string) => {
       try {
@@ -24,7 +27,7 @@ export function createRecipeSourceFingerprint(directory?: string): GraphRecipeSt
     const deadline = Date.now() + PROJECT_SCOPE_BUDGET.elapsedMs;
     const revalidate = (scope: (typeof unique)[number]) =>
       scope.version === 3
-        ? revalidateWebProfileScope(directory, target, scope, deadline)
+        ? revalidateWebProfileScope(directory, target, scope, deadline, webProvenance)
         : revalidateProjectScope(target, scope, deadline);
     const inventory = new Set<string>();
     for (const scope of unique)
