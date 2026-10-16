@@ -101,9 +101,9 @@ native driver could see:
 
 ## Dependency notes for the owner / Codex
 
-1. **Shared Button focus style (global primitive, not changed):** a focused primary Button renders a
-   dark fill with a low-contrast label (see `after/inspection-focus-1366.png`). Proposed: adjust the
-   primary `focus-visible` colours in `packages/ui/src/components/ui/button.tsx`.
+1. **Focused primary Button contrast: fixed in UX-P1-F1 (see the last section).** The first
+   observation attributed it to the shared Button; the cascade showed the owner is the Graph-scoped
+   `graphFocusClass`.
 2. **Rendered-suite harness gap (`ux-m1-helpers.mjs`):** add `inspection-history` to `ALLOWED_OPS`
    to clear 13 pre-existing failures; separately make the ux-m2 recipes-JSON selector unambiguous.
 3. **History pager and Needs-you scope note:** both noisy at 1093×614 with a single run, but both are
@@ -117,3 +117,83 @@ triggers only for PRs targeting integration); nothing here is green by CI, and n
 claimed as child CI. After the owner merges #23: merge the integration branch into this branch
 (non-rewriting), retarget to integration, and verify a supported PR event runs final-head CI. No
 merge, auto-merge, installer, tag or publication was performed.
+
+---
+
+# UX-P1-F1: focused primary-button readability (follow-up)
+
+Scope: only the focus-visible readability defect reported in this report ("Dependency notes" 1).
+The Checks/inspection simplification, run view, New run, history pager and Needs-you semantics are
+unchanged.
+
+## Reproduced cause
+
+Real keyboard Tab to the Confirm button in `zai-dark` and `zai-light` (computed colours, composited
+over the ancestors, with matched CSS rules from DevTools). Not the Button primitive: it defines no
+focus-visible fill for `default`. The owner is the Graph-scoped selector `graphFocusClass`
+(`packages/ui/src/graph-engineering/graphFocus.ts`, applied to the Graph panel roots, the context
+dialog and the session-pane Graph strip). Its `[&_button:focus-visible]:bg-accent` and `:border-brand`
+are written on an _ancestor_, so they match every descendant button and out-specify the Button's own
+classes (and the global `outline/box-shadow: none !important` already removed the native ring). Inside
+`.graph-ui` the accent is `#243553` (dark) / `#e1eafb` (light) while a filled variant's label stays
+`--color-primary-foreground` (`#0a1322` / `#ffffff`): one half of the foreground/background pair was
+replaced. The same rule also broke `destructive` and `warning`.
+
+## Smallest fix
+
+`graphFocusClass` only: filled variants (`data-variant` default / destructive / warning, an attribute
+the Button already emits) keep their own fill, pinned to full strength so hover's `/80` cannot weaken
+a focused control, and mark keyboard focus with a `border-foreground` border. Every other control
+keeps the existing accent tint plus brand border. No `!important`, no theme token, no `button.tsx`
+change, no handler, disabled, permission, store or contract change. Focus indication is not removed.
+
+## Measured (WCAG 1.4.3 label ≥ 4.5:1; indicator vs page ≥ 3:1)
+
+| Theme | State               | Before label | After label          | After indicator (border on page) |
+| ----- | ------------------- | ------------ | -------------------- | -------------------------------- |
+| dark  | normal              | 7.70         | 7.70                 |                                  |
+| dark  | hover (mouse only)  | 5.44         | 5.44                 |                                  |
+| dark  | focus-visible (Tab) | **1.51**     | 7.70                 | `#ececf0` on `#1b1c20` 14.45     |
+| dark  | focus-visible+hover | **1.51**     | 7.70                 | 14.45                            |
+| light | normal              | 5.70         | 5.70                 |                                  |
+| light | hover (mouse only)  | **3.98**     | **3.98** (unchanged) |                                  |
+| light | focus-visible (Tab) | **1.21**     | 5.70                 | `#15161a` on `#f5f5f8` 16.61     |
+| light | focus-visible+hover | **1.21**     | 5.70                 | 16.61                            |
+
+Matrix inside the Graph scope (focused label, before → after): destructive 1.58 → 8.20 (dark) and
+1.21 → 6.54 (light); warning 1.50 → 10.00 and 1.21 → 5.93; outline/secondary/ghost unchanged (≥ 10.4).
+All outside-scope controls are byte-identical in computed style before and after. Disabled stays at
+`opacity: 0.5`, is skipped by Tab and never activates.
+
+## Tests
+
+| Check                                                                                                                           | Result                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `ux-p1-focus.mjs` (real Tab, both themes, reduced viewport, 7-variant matrix in/out of scope, Tab order, Enter/Space, disabled) | 6/6 pass; **0/6 on the pre-fix checkout** with the reported 1.51 / 1.21            |
+| New `graphFocus.test.ts` (rule structure)                                                                                       | 3/3                                                                                |
+| UI unit tests, CI environment                                                                                                   | 257 passed, 0 failed, 0 skipped                                                    |
+| Existing 14 UX-P1 behaviours                                                                                                    | 14/14                                                                              |
+| Existing ux-m1 keyboard-focus scenario, ux-m4 contrast scenario                                                                 | both pass                                                                          |
+| `pnpm typecheck`                                                                                                                | exit 0                                                                             |
+| `pnpm lint`                                                                                                                     | 0 errors, 75 warnings (= baseline; one transient new warning in my test was fixed) |
+| `architecture:check --changed`, `oxfmt --check` (changed files)                                                                 | OK / clean                                                                         |
+
+Not rerun: the full historical browser suites (Codex owns their inherited harness repairs). Not
+claimed: Windows, Electron, native, company-PC or whole-app accessibility acceptance.
+
+## Findings left for the owner (measured, not changed)
+
+1. **Mouse hover on a light-theme primary is 3.98:1** (shared Button `hover:bg-primary/80` over the
+   Graph light primary `#1e5fd8`). Alpha 0.90 would give 4.77:1 (dark stays 6.51). It is a shared
+   Button change affecting every theme, so it is not folded into this focus fix.
+2. **Outside the Graph scope a focused default / outline / secondary / ghost Button shows no focus
+   indicator at all** (visible in the matrix's lower block): the global
+   `*:focus-visible { outline/box-shadow: none !important }` removes the ring and the primitive adds
+   none for those variants. Pre-existing and app-wide; needs an owner decision, not a Graph patch.
+
+## Ownership handoff
+
+Changed by F1: `packages/ui/src/graph-engineering/graphFocus.ts` (production),
+`packages/ui/test/graphFocus.test.ts`, `scripts/graph-engineering/ux-p1-focus.mjs`, this report,
+the spec note and `evidence/ux-p1/focus-f1/`. Codex-owned files (`ux-m1-helpers.mjs`, inherited
+UX-M2/context-picker/U3 harness repairs, ENG-P1 scripts) were not touched.

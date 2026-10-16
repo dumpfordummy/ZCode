@@ -102,3 +102,11 @@ less text but a hidden failure or an unclear next action fails.
 No service/shared/CLI change, no lockfile/root package change, no global design-system
 primitive change, no workflow/CI change, no native or installer run, no new engine support
 (.NET 10, gRPC, unapproved packages remain unsupported).
+
+## F1: keyboard focus on filled Buttons
+
+Inside the Graph focus scope a filled Button (`data-variant` default / destructive / warning) keeps
+its own readable fill and label (label contrast at least 4.5:1) and marks keyboard focus with a
+foreground-colour border (at least 3:1 against the page); other controls keep the accent tint plus
+brand border. The ancestor focus selector must never recolour a filled Button's fill alone. Focus
+indication is never removed, and handlers, disabled semantics and permissions are untouched.
