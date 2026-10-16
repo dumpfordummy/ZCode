@@ -182,19 +182,24 @@ export async function openChecks(page, host, url, withTests = true, patch) {
 const unsupportedScenario = {
   name: "UX-P1 checks: unsupported selected Web project",
   async run({ page, host, url, shotsDir }) {
-    await openChecks(page, host, url);
-    await T(page, "graph-quick-build").waitFor();
-    await selectValue(page, "graph-quick-build", "Api/Api.csproj");
-    await until(
-      async () =>
-        (await T(page, "graph-quick-dotnet").getAttribute("data-preparation")) === "unsupported",
-      "Web rejection",
-    );
-    assert.equal(await T(page, "graph-quick-save").isEnabled(), false);
-    await eachVariant(page, shotsDir, "checks-unsupported", {
-      scrollTo: "graph-quick-dotnet",
-    });
-    assert.equal(admissionCalls(host).length, 0);
+    // Locale/theme changes remount the page (by design), so each variant runs the whole flow.
+    for (const variant of variants) {
+      await page.setViewportSize({ width: variant.width, height: variant.height });
+      await openChecks(page, host, url, true, { locale: variant.locale, theme: variant.theme });
+      await T(page, "graph-quick-build").waitFor();
+      await selectValue(page, "graph-quick-build", "Api/Api.csproj");
+      await until(
+        async () =>
+          (await T(page, "graph-quick-dotnet").getAttribute("data-preparation")) === "unsupported",
+        "Web rejection",
+      );
+      assert.equal(await T(page, "graph-quick-save").isEnabled(), false);
+      const facts = await capture(page, shotsDir, `checks-unsupported-${variant.tag}`, {
+        scrollTo: "graph-quick-dotnet",
+      });
+      assert.equal(facts.horizontalOverflow, false, `unsupported ${variant.tag} overflows`);
+      assert.equal(admissionCalls(host).length, 0);
+    }
   },
 };
 

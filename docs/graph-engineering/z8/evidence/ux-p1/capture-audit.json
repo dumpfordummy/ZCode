@@ -1,0 +1,28 @@
+{
+  "suite": "Z8.5-UX-P1 rendered operator view",
+  "kind": "synthetic real-component render (Vite bundle of the repository's own Graph components and hooks, Playwright, fixture Host); NOT packaged Electron, NOT native execution, NOT company-PC validation",
+  "browser": "Chromium 141.0.7390.37 headless, Linux x64, DPR 1, browser zoom 100%",
+  "runtime": "Node 24.14.0, pnpm 10.33.2",
+  "sources": {
+    "before": "67e570228aa8a48f96fdbbe6c89eb54023879745 (common post-R1 commit) in a separate pristine git worktree with its own install; no source change",
+    "after": "claude/z8-5-ux-p1-operator-view; UI source identical to commit 55fe9a122a669edce484e584ba328558b3f0ea49 (the capture harness was edited afterwards only to run the unsupported-project flow once per locale)"
+  },
+  "sameRecords": "Both sides ran the identical harness file (scripts/graph-engineering/ux-p1-browser.mjs) over identical synthetic run records (u1Run/ux-m1-runs fixtures, not re-id'd) and identical controlled inspection records. Records contain inert synthetic paths such as C:/Synthetic.",
+  "viewports": [
+    { "tag": "1366", "css": "1366x768", "locale": "en-US", "theme": "zai-dark" },
+    { "tag": "1600", "css": "1600x900", "locale": "en-US", "theme": "zai-light" },
+    { "tag": "1093-zh", "css": "1093x614", "locale": "zh-CN", "theme": "zai-light" }
+  ],
+  "harnessNotes": [
+    "A 268px application sidebar is reserved on both sides, as in the U1 density gallery.",
+    "Transitions are disabled before capture so colours are settled.",
+    "Locale/theme changes remount the page by design; flows that hold transient state (unsupported project, inspection) therefore re-run the whole flow per variant.",
+    "Inspection records are controlled UI fixtures: they exercise the real GraphProjectInspection against a stand-in Host; they are not permission, verification or Build/Test evidence."
+  ],
+  "commands": [
+    "node --import tsx scripts/graph-engineering/ux-p1-browser.mjs --chromium=<chromium> --shots=<dir>   (UXP1_CAPTURE_ONLY=1 on the unchanged tree)",
+    "node --import tsx scripts/graph-engineering/ux-p1-behavior.mjs --chromium=<chromium>"
+  ],
+  "counts": { "captures": { "after": 42, "before": 40, "note": "keyboard focus captures are after-only" }, "changedVisibleText": 18, "identicalVisibleText": 24, "afterCapturesWithHorizontalOverflow": 0, "galleryPngs": 15 },
+  "limits": "Only the 1366x768 English/dark, 1600x900 English/light and 1093x614 Chinese/light combinations were rendered; not every locale x theme x size cell. Chromium here is Linux, not the Windows Chrome used by earlier galleries."
+}
