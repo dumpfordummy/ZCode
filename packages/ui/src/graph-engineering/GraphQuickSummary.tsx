@@ -35,6 +35,9 @@ export function GraphQuickSummary({
       ),
     ]),
   ].slice(0, 128);
+  const inventory = t("quickInventoryCount", { count: discovery.candidates.length, visible });
+  // 有目标未出现在构建选项里（例如合并了相同副本）时，数量差必须留在默认视图，不能静默隐藏。
+  const hiddenTargets = visible !== discovery.candidates.length;
   return (
     <>
       <p className="text-ui-base font-medium">
@@ -57,15 +60,17 @@ export function GraphQuickSummary({
         </p>
       ) : null}
       {issue ? (
-        <p role="status" className="text-ui-sm text-warning break-words">
-          {!build ? (
-            t("quickChooseTargets")
-          ) : (
-            <>
-              {t("quickUnavailable")} {issue.slice(0, 1000)}
-            </>
-          )}
-        </p>
+        <div
+          role="status"
+          className="space-y-0.5 break-words border-l-2 border-warning pl-3 text-ui-sm"
+          data-testid="graph-quick-blocker"
+        >
+          <p className="font-medium text-warning">
+            {build ? t("quickBlocked", { build }) : t("quickChooseTargets")}
+          </p>
+          {/* 服务端诊断以路径开头；标题已点名目标，去掉重复前缀，原因与下一步原文保留。 */}
+          {build ? <p>{issue.slice(0, 1000).replace(`${build}: `, "")}</p> : null}
+        </div>
       ) : null}
       <GraphQuickDiagnostics
         diagnostics={diagnostics}
@@ -74,10 +79,9 @@ export function GraphQuickSummary({
             (item) => item.coverage === "unsupported" || item.quickIssues?.length,
           ).length
         }
+        notes={[...(hiddenTargets ? [] : [inventory]), t("quickTestLink"), t("quickInputScope")]}
       />
-      <p className="text-ui-sm">
-        {t("quickInventoryCount", { count: discovery.candidates.length, visible })}
-      </p>
+      {hiddenTargets ? <p className="text-ui-sm">{inventory}</p> : null}
       {hasCopies ? (
         <div className="space-y-1">
           <Button

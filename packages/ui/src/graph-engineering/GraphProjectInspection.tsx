@@ -4,7 +4,9 @@ import type { GraphInspection, GraphInspectionSetupCommand } from "@zcode/servic
 import type { useGraphProjectSetup } from "@/hooks/useGraphProjectSetup.js";
 import { Button } from "@/components/ui/button.js";
 import { GraphSelect } from "./GraphSelect.js";
+import { GraphDisclosure } from "./GraphDisclosure.js";
 import { useGraphM4Text } from "./GraphM4Text.js";
+import { graphInspectionView } from "./graphInspectionView.js";
 
 /** Observation only: intentionally has no proposal, Save or run callback. */
 export function GraphProjectInspection({
@@ -33,7 +35,13 @@ export function GraphProjectInspection({
   const [busy, setBusy] = useState(false);
   const owned = useRef<string | undefined>(undefined);
   const generation = useRef(0);
-  const key = JSON.stringify({ project, configuration, sdk, framework, fixedSelection });
+  const key = JSON.stringify({
+    project,
+    configuration,
+    sdk,
+    framework,
+    fixedSelection,
+  });
   useEffect(() => {
     generation.current++;
     setRecord(initialRecord);
@@ -81,72 +89,162 @@ export function GraphProjectInspection({
   }, [record, busy]);
   const lane = setup.state("inspection", key);
   const options = (values: string[]) => values.map((value) => ({ value, label: value }));
+  const status = record?.status;
+  const view = graphInspectionView({
+    status,
+    reserved: record?.reserved,
+    fixedSelection: !!fixedSelection,
+    busy,
+    hasSession: Boolean(record?.sessionId && onOpenConversation),
+  });
+  const stage = busy
+    ? t(record && status !== "review-ready" ? "inspectionChecking" : "inspectionVerifying")
+    : record
+      ? t(`inspectionState.${record.status}`)
+      : "";
   return (
     <section
       className="space-y-2"
       data-testid="graph-project-inspection"
       data-status={record?.status ?? "unsupported"}
     >
-      <p className="text-ui-sm text-warning">{t("inspectionWarning")}</p>
-      <p className="text-ui-sm text-foreground-subtle">{t("inspectionObservationOnly")}</p>
-      <GraphSelect
-        label={t("inspectionSdk")}
-        value={sdk}
-        onChange={setSdk}
-        options={options(["8.0.425", "8.0.426", "10.0.401"])}
-        disabled={!!fixedSelection || busy || record?.reserved || disabled}
-      />
-      <GraphSelect
-        label={t("inspectionFramework")}
-        value={framework}
-        onChange={setFramework}
-        options={options(["net8.0", "net10.0"])}
-        disabled={!!fixedSelection || busy || record?.reserved || disabled}
-      />
-      <Button
-        size="sm"
-        variant="outline"
-        disabled={
-          disabled ||
-          busy ||
-          record?.reserved ||
-          !sdk ||
-          !framework ||
-          !["Debug", "Release"].includes(configuration)
-        }
-        onClick={() =>
-          void invoke({
-            action: "review",
-            selection: fixedSelection ?? {
-              project,
-              configuration: configuration as "Debug" | "Release",
-              framework,
-              sdkVersion: sdk as "8.0.425" | "8.0.426" | "10.0.401",
-            },
-          })
-        }
-      >
-        {t("inspectionReview")}
-      </Button>
-      {busy ? (
-        <p role="status" className="text-ui-sm">
-          {t(
-            record && record.status !== "review-ready"
-              ? "inspectionChecking"
-              : "inspectionVerifying",
-          )}
+      {/* 执行前披露（副作用与“仅观察”）：授权前保留；操作已提交后由阶段行取代。 */}
+      {view.notice ? <p className="text-ui-sm text-warning">{t("inspectionNotice")}</p> : null}
+      {view.locked ? (
+        <p
+          className="break-all text-ui-sm text-foreground-subtle"
+          data-testid="graph-inspection-selection"
+        >
+          {fixedSelection?.project ?? project} · {sdk} · {framework} · {configuration}
         </p>
+      ) : (
+        <div className="grid gap-2 sm:grid-cols-2">
+          <GraphSelect
+            label={t("inspectionSdk")}
+            value={sdk}
+            onChange={setSdk}
+            options={options(["8.0.425", "8.0.426", "10.0.401"])}
+            disabled={busy || disabled}
+          />
+          <GraphSelect
+            label={t("inspectionFramework")}
+            value={framework}
+            onChange={setFramework}
+            options={options(["net8.0", "net10.0"])}
+            disabled={busy || disabled}
+          />
+        </div>
+      )}
+      {record ? (
+        <div className="space-y-1">
+          <p
+            role="status"
+            className={`text-ui-sm font-medium ${view.attention ? "text-warning" : ""}`}
+            data-testid="graph-inspection-stage"
+          >
+            {stage}
+          </p>
+          {view.permissionInstruction ? (
+            <p
+              className="text-ui-sm text-foreground-subtle"
+              data-testid="graph-inspection-permission-instruction"
+            >
+              {t("inspectionPermission")}
+            </p>
+          ) : null}
+        </div>
       ) : null}
+      <div className="flex flex-wrap items-center gap-2">
+        {record && view.start ? (
+          <Button
+            size="sm"
+            disabled={busy || disabled}
+            onClick={() =>
+              void invoke({
+                action: "start",
+                id: record.id,
+                requestDigest: record.requestDigest!,
+                selection: record.selection,
+              })
+            }
+          >
+            {t("inspectionStart")}
+          </Button>
+        ) : null}
+        {view.review ? (
+          <Button
+            size="sm"
+            variant={view.reviewIsPrimary ? "default" : "outline"}
+            disabled={
+              disabled ||
+              busy ||
+              record?.reserved ||
+              !sdk ||
+              !framework ||
+              !["Debug", "Release"].includes(configuration)
+            }
+            onClick={() =>
+              void invoke({
+                action: "review",
+                selection: fixedSelection ?? {
+                  project,
+                  configuration: configuration as "Debug" | "Release",
+                  framework,
+                  sdkVersion: sdk as "8.0.425" | "8.0.426" | "10.0.401",
+                },
+              })
+            }
+          >
+            {t("inspectionReview")}
+          </Button>
+        ) : null}
+        {record?.sessionId && onOpenConversation && view.conversation ? (
+          <Button
+            size="sm"
+            data-testid="graph-inspection-conversation"
+            disabled={busy}
+            onClick={() => {
+              setup.preserveInspectionOnNavigation(record.id);
+              onOpenConversation(
+                record.target.workspacePath,
+                record.sessionId!,
+                record.target.workspaceIdentity,
+              );
+            }}
+          >
+            {t("inspectionConversation")}
+          </Button>
+        ) : null}
+        {record && view.refresh ? (
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={busy}
+            onClick={() => void invoke({ action: "status", id: record.id })}
+          >
+            {t("inspectionRefresh")}
+          </Button>
+        ) : null}
+        {record && view.cancel ? (
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={busy}
+            onClick={() => void invoke({ action: "cancel", id: record.id })}
+          >
+            {t("inspectionCancel")}
+          </Button>
+        ) : null}
+      </div>
       {record ? (
         <>
-          <p role="status" className="text-ui-sm">
-            {t(`inspectionState.${record.status}`)}
-          </p>
           {record.request ? (
-            <details open={record.status === "review-ready"}>
-              <summary className="text-ui-sm">{t("inspectionCommand")}</summary>
+            <GraphDisclosure
+              testId="graph-inspection-command"
+              title={t("inspectionCommand")}
+              defaultOpen={record.status === "review-ready"}
+            >
               <dl className="space-y-1 break-all text-ui-sm">
-                <dt>{t("inspectionCommand")}</dt>
                 <dd className="font-mono">{record.request.recipe.executable}</dd>
                 <dd>
                   <ol>
@@ -163,8 +261,7 @@ export function GraphProjectInspection({
                   <br />
                   {record.request.inspection?.sdkDirectory}
                   {record.request.inspection?.runtimeProfile ? (
-                    <details>
-                      <summary>{t("webReadScope")}</summary>
+                    <GraphDisclosure testId="graph-inspection-read-scope" title={t("webReadScope")}>
                       <ul>
                         {webProfileReadScope(record.request.inspection.runtimeProfile).map(
                           (path) => (
@@ -172,7 +269,7 @@ export function GraphProjectInspection({
                           ),
                         )}
                       </ul>
-                    </details>
+                    </GraphDisclosure>
                   ) : null}
                 </dd>
                 <dd>
@@ -180,73 +277,21 @@ export function GraphProjectInspection({
                   process; {t("inspectionExpiry")}{" "}
                   {new Date(record.request.inspection!.expiresAt).toISOString()}
                 </dd>
+                {record.sessionId ? (
+                  <>
+                    <dt>{t("inspectionSession")}</dt>
+                    <dd className="font-mono">{record.sessionId}</dd>
+                  </>
+                ) : null}
               </dl>
-            </details>
+            </GraphDisclosure>
           ) : null}
-          {record.status === "review-ready" ? (
-            <Button
-              size="sm"
-              disabled={busy || disabled}
-              onClick={() =>
-                void invoke({
-                  action: "start",
-                  id: record.id,
-                  requestDigest: record.requestDigest!,
-                  selection: record.selection,
-                })
-              }
-            >
-              {t("inspectionStart")}
-            </Button>
-          ) : null}
-          {record.status === "awaiting-permission" ? (
-            <p className="text-ui-sm" data-testid="graph-inspection-permission-instruction">
-              {t("inspectionPermission")} <span className="font-mono">{record.sessionId}</span>
-            </p>
-          ) : null}
-          {record.sessionId && onOpenConversation ? (
-            <Button
-              size="sm"
-              variant="outline"
-              data-testid="graph-inspection-conversation"
-              disabled={busy}
-              onClick={() => {
-                setup.preserveInspectionOnNavigation(record.id);
-                onOpenConversation(
-                  record.target.workspacePath,
-                  record.sessionId!,
-                  record.target.workspaceIdentity,
-                );
-              }}
-            >
-              {t("inspectionConversation")}
-            </Button>
-          ) : null}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={busy}
-              onClick={() => void invoke({ action: "status", id: record.id })}
-            >
-              {t("inspectionRefresh")}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={busy}
-              onClick={() => void invoke({ action: "cancel", id: record.id })}
-            >
-              {t("inspectionCancel")}
-            </Button>
-          </div>
           {record.projection ? (
-            <details>
-              <summary className="text-ui-sm">{t("inspectionObserved")}</summary>
+            <GraphDisclosure testId="graph-inspection-observed" title={t("inspectionObserved")}>
               <pre className="max-h-72 overflow-auto whitespace-pre-wrap break-all text-ui-sm">
                 {JSON.stringify(record.projection, null, 2)}
               </pre>
-            </details>
+            </GraphDisclosure>
           ) : null}
         </>
       ) : null}
