@@ -28,8 +28,8 @@ const messages: Record<string, [string, string]> = {
   openChecks: ["Open Checks", "打开检查"],
   openChecksFor: ["Open Checks for {id}", "为 {id} 打开检查"],
   returnKept: [
-    "Your request, context and check choices are kept. A check choice stays selected only if that saved check still exists and fits its step.",
-    "请求、上下文和检查选择都会保留。只有该已保存检查仍然存在且适用于对应步骤时，选择才会保持。",
+    "Your request, context and check choices are kept. A choice that no longer fits is flagged.",
+    "请求、上下文和检查选择都会保留。不再适用的选择会被标出。",
   ],
   // UX-M1.3：主操作旁的原因与去处、Needs-you 的范围说明。
   fieldsNeedAttention: [
