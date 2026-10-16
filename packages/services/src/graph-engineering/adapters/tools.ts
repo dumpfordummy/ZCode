@@ -1,3 +1,5 @@
+import { requireWebExecution } from "./web-profile-capability.js";
+import { graphToolRequest } from "../domain/tool-request.js";
 import type { IZCodeAgentService, IZCodeSessionService } from "../../index.js";
 import type { GraphToolPort } from "../app/ports.js";
 import type { GraphToolAttempt, GraphWorkspaceTarget } from "../contract.js";
@@ -6,7 +8,8 @@ export function createGraphToolPort(options: {
   agentService: Pick<
     IZCodeAgentService,
     "getWorkspaceRuntimeIdentity" | "startRecipe" | "inspectRecipe" | "cancelRecipe"
-  >;
+  > &
+    Partial<Pick<IZCodeAgentService, "readRuntimeCapabilities">>;
   sessionService: Pick<IZCodeSessionService, "initializeWorkspace" | "createSession">;
 }): GraphToolPort {
   const target = (workspace: GraphWorkspaceTarget, attempt: GraphToolAttempt) => {
@@ -42,22 +45,12 @@ export function createGraphToolPort(options: {
       return { sessionId: snapshot.session.sessionId, runtimeIdentity: after.identity };
     },
     async start(workspace, attempt) {
+      if (attempt.recipe.sourceScope?.version === 3)
+        await requireWebExecution(options.agentService, workspace);
       if (!attempt.resolvedArgs) throw new Error("Frozen recipe arguments are missing.");
       return options.agentService.startRecipe({
         ...target(workspace, attempt),
-        request: {
-          operationId: attempt.operationId,
-          recipe: {
-            id: attempt.recipe.id,
-            executable: attempt.recipe.executable,
-            args: attempt.resolvedArgs,
-            cwdRelative: attempt.recipe.cwd,
-            timeoutMs: attempt.recipe.timeoutMs,
-            ...(attempt.recipe.redactEnvironmentVariables
-              ? { redactEnvironmentVariables: attempt.recipe.redactEnvironmentVariables }
-              : {}),
-          },
-        },
+        request: graphToolRequest(attempt),
       });
     },
     inspect(workspace, attempt) {

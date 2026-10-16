@@ -24,12 +24,50 @@ export const projectEnvironmentUnknowns = [
 export async function projectSetup(
   input: GraphProjectSetupRequest,
   options: {
-    graph: Pick<IGraphEngineeringService, "recipes" | "getWorkspace">;
+    graph: Pick<IGraphEngineeringService, "recipes" | "getWorkspace"> & {
+      findWebProfileChoices?: (input: {
+        target: import("../approval-types.js").GraphWorkspaceTarget;
+        webProject: string;
+        configuration: "Debug" | "Release";
+        candidates: string[];
+      }) => Promise<{ kind: "web-profile-choices"; tests: string[]; issues: string[] }>;
+      prepareWebProfile?: (input: {
+        target: import("../approval-types.js").GraphWorkspaceTarget;
+        inspectionIds: [string, string];
+      }) => Promise<import("../web-profile-types.js").GraphWebProfileProposal>;
+      readProjectInspections?: (
+        target: import("../approval-types.js").GraphWorkspaceTarget,
+      ) => Promise<import("../inspection-types.js").GraphInspection[]>;
+      inspectProject?: (
+        command: import("../inspection-types.js").GraphInspectionCommand,
+      ) => Promise<import("../inspection-types.js").GraphInspection>;
+    };
     project?: GraphProjectPort;
     digest(value: string): string;
   },
 ): Promise<GraphProjectSetupResult> {
   const target = localTarget(input.target);
+  if (input.action === "web-profile-choices") {
+    if (!options.graph.findWebProfileChoices) throw Error("Web profile preparation unavailable.");
+    if (!["Debug", "Release"].includes(input.configuration))
+      throw Error("Unsupported Web configuration.");
+    return options.graph.findWebProfileChoices({ ...input, target });
+  }
+  if (input.action === "prepare-web-profile") {
+    if (!options.graph.prepareWebProfile) throw Error("Web profile preparation unavailable.");
+    return options.graph.prepareWebProfile({ target, inspectionIds: input.inspectionIds });
+  }
+  if (input.action === "inspection-history") {
+    return {
+      kind: "inspection-history",
+      records: (await options.graph.readProjectInspections?.(target)) ?? [],
+    };
+  }
+  if (input.action === "inspection") {
+    if (!options.graph.inspectProject)
+      throw Error("Project inspection is unavailable on this Host.");
+    return options.graph.inspectProject({ ...input.command, target });
+  }
   if (input.action === "validate" || input.action === "dotnet-preset") {
     const result: GraphRecipeValidation = {
       kind: "validation",

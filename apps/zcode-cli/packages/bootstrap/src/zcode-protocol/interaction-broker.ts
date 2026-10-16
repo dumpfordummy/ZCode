@@ -1,3 +1,4 @@
+import { observeRecipePermission } from "./recipe-phase-observation.js";
 import { raceClientRequestWithV4Interaction } from "./interaction-response-race.js";
 import {
   ASK_USER_QUESTION_TOOL_NAME,
@@ -67,6 +68,8 @@ async function requestPermission(
     ...request,
     optionsPolicy: toLegacyPermissionOptionsPolicy(request.optionsPolicy),
   });
+  const phaseEnabled = context.deps.env?.ZCODE_GRAPH_DIAGNOSTICS === "1";
+  observeRecipePermission(phaseEnabled, request, "permission-request");
   const response = await raceClientRequestWithV4Interaction(
     context,
     request.requestId,
@@ -122,6 +125,7 @@ async function requestPermission(
         : {}),
     },
   );
+  observeRecipePermission(phaseEnabled, request, "permission-response");
   return {
     ...response,
     // 兼容原因：legacy 客户端允许省略 reason；普通用户拒绝仍需向模型明确工具未执行，

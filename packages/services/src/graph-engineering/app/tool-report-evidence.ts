@@ -7,6 +7,7 @@ import type { GraphState } from "./state.js";
 import type { GraphArtifacts } from "./artifacts.js";
 import { toolArtifactBase } from "./tool-command-evidence.js";
 import { verifyToolReport } from "../domain/tool-verification.js";
+import { associatedBuildPaths, assertCopiedContent } from "./web-content-evidence.js";
 import { currentToolAttempt } from "../domain/routing.js";
 
 /** Raw preview is never an authority source. Original bytes are parsed by the injected trusted capture. */
@@ -94,10 +95,11 @@ export async function captureToolReport(
     issues.push("Declared source changed while capturing the genuine test report.");
   if (
     !build ||
-    (await state.options.recipes!.fingerprint(run.target, build.recipe.expectedOutputs)).digest !==
-      attempt.buildDigest
+    (await state.options.recipes!.fingerprint(run.target, associatedBuildPaths(build.recipe)))
+      .digest !== attempt.buildDigest
   )
     issues.push("Captured Build outputs changed while normalizing the genuine test report.");
+  await assertCopiedContent(state.options.recipes!, run.target, attempt.recipe);
   const matchesExit =
     checked.outcome === "pass"
       ? result.exitCode === 0

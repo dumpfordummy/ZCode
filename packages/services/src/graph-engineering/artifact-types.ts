@@ -135,6 +135,7 @@ export interface GraphRecipeStore {
     target: GraphWorkspaceTarget,
     paths: string[],
     scopes?: import("./domain/project-budgets.js").GraphSourceScope[],
+    diagnosticPhase?: (phase: string) => void,
   ): Promise<GraphFileFingerprint>;
   observeFiles(target: GraphWorkspaceTarget, paths: string[]): Promise<GraphFileObservation[]>;
 }

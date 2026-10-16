@@ -324,3 +324,5 @@ export {
   type GraphParallelPolicyMode,
   type GraphParallelPolicySource,
 } from "./graph-capabilities.js";
+
+export * from "./web-profile.js";

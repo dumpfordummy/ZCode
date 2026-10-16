@@ -42,7 +42,12 @@ export class GraphTools {
         this.state.options.evidence!.digest(runFingerprint(attempt.recipe)) !== attempt.recipeDigest
       )
         throw new Error("Frozen recipe digest changed.");
+      attempt.message =
+        "Verifying source membership and content bytes before native admission; no permission request exists yet.";
+      await this.state.put(run);
+      this.state.trace(attempt.operationId, "source-verification-start");
       await this.evidence.prepare(run, attempt);
+      this.state.trace(attempt.operationId, "source-verification-end");
     } catch (error) {
       attempt.status = "Failed";
       attempt.message = error instanceof Error ? error.message : "Tool preflight failed.";
@@ -60,6 +65,7 @@ export class GraphTools {
     attempt.updatedAt = run.updatedAt = this.state.options.now();
     await this.state.put(run);
     try {
+      this.state.trace(attempt.operationId, "native-session-admission-start");
       Object.assign(attempt, await port.create(run.target));
       if (!attempt.sessionId || !attempt.runtimeIdentity)
         throw new Error("Native Tool creation returned no exact session/runtime.");
@@ -73,7 +79,9 @@ export class GraphTools {
       this.state.dispatching.add(attempt.operationId);
       let operation: GraphToolOperation;
       try {
+        this.state.trace(attempt.operationId, "native-start-dispatch");
         operation = await port.start(run.target, attempt);
+        this.state.trace(attempt.operationId, "native-start-reply");
       } finally {
         this.state.dispatching.delete(attempt.operationId);
       }
@@ -152,10 +160,14 @@ export class GraphTools {
     // 终态标签不能替代真实退出证据；矛盾回执必须继续占有工作区，防止仍运行的进程被误判为空闲。
     if (terminal(operation) && operation.processStarted && !operation.result?.processExitObserved)
       operation = { ...operation, status: "unknown", error: "Process exit was not observed." };
+    this.state.trace(attempt.operationId, `native-observed:${operation.status}`);
+    attempt.message = undefined;
     attempt.operation = operation;
     attempt.updatedAt = run.updatedAt = this.state.options.now();
     if (terminal(operation)) {
+      this.state.trace(attempt.operationId, "exit-evidence-verification-start");
       await this.evidence.finish(run, attempt);
+      this.state.trace(attempt.operationId, "exit-evidence-verification-end");
       if (run.version === 5) await this.routing.completed(run, attempt.nodeId, attempt.status);
       else {
         run.status =
@@ -177,7 +189,10 @@ export class GraphTools {
         run.cancelRequestedAt === undefined
       )
         void this.state
-          .serial(run.target, () => this.dispatch(run.target, run.id))
+          .serial(run.target, () => {
+            this.state.trace(attempt.operationId, "successor-scheduling");
+            return this.dispatch(run.target, run.id);
+          })
           .catch(() =>
             this.state.interrupt(
               run.target,
@@ -191,9 +206,14 @@ export class GraphTools {
           ? "Unknown"
           : run.cancelRequestedAt !== undefined
             ? "CancelRequested"
-            : operation.status === "awaiting_permission"
-              ? "WaitingForPermission"
-              : "Running";
+            : operation.sourceVerifying
+              ? "Running"
+              : operation.status === "awaiting_permission"
+                ? "WaitingForPermission"
+                : "Running";
+      if (operation.sourceVerifying)
+        attempt.message =
+          "Verifying reviewed Web profile sources and toolchain; no permission response is currently needed.";
       run.status = attempt.status;
       if (operation.status === "unknown") this.state.liveRuns.delete(run.id);
       await this.state.put(run);

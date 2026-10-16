@@ -362,6 +362,7 @@ export function GraphEditor({
       ) : null}
       {showingSetup ? (
         <GraphSetupPanel
+          onOpenConversation={onOpenConversation}
           graph={graph}
           workspaceKey={workspaceKey}
           workspacePath={workspacePath}

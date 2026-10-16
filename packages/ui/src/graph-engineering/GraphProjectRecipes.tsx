@@ -11,6 +11,7 @@ import { GraphRecipeList } from "./GraphRecipeList.js";
 import { GraphFailureText } from "./GraphFailureText.js";
 import { GraphDotnetPreset } from "./GraphDotnetPreset.js";
 import { GraphChecksSetup } from "./GraphChecksSetup.js";
+import { GraphInspectionRecovery } from "./GraphInspectionRecovery.js";
 import { GraphQuickDotnet } from "./GraphQuickDotnet.js";
 import { useGraphM4Text } from "./GraphM4Text.js";
 import { associatedQuickChecks } from "./graphQuickDotnetModel.js";
@@ -33,6 +34,7 @@ export function GraphProjectRecipes({
   workspaceIdentity,
   checkId,
   onRun,
+  onOpenConversation,
 }: {
   graph: ReturnType<typeof useGraphEngineering>;
   workspaceKey: string;
@@ -42,6 +44,7 @@ export function GraphProjectRecipes({
   /** UX-M1.2: the saved check to open on arrival (stable id); navigation only. */
   checkId?: string;
   onRun(runId: string): void;
+  onOpenConversation?: (path: string, session: string, identity?: string) => void;
 }) {
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `graph.z4.${id}` });
@@ -144,10 +147,23 @@ export function GraphProjectRecipes({
           }}
         />
       ) : null}
+      <GraphInspectionRecovery
+        key={workspaceKey + ":inspection-history"}
+        setup={setup}
+        onOpenConversation={onOpenConversation}
+      />
       <GraphQuickDotnet
+        onOpenConversation={onOpenConversation}
         key={workspaceKey}
         workspaceKey={workspaceKey}
         setup={setup}
+        onOpenAdvanced={() => {
+          setAdvanced(true);
+          requestAnimationFrame(() => {
+            formRef.current?.scrollIntoView({ block: "start" });
+            formRef.current?.focus();
+          });
+        }}
         text={text}
         disabled={saveBlocked || graph.pending || dirty}
         disabledReason={

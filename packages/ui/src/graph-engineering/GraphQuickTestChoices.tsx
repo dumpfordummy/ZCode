@@ -77,3 +77,31 @@ export function GraphQuickTestChoices({
     </>
   );
 }
+
+export function GraphQuickTestAlternatives({
+  projects,
+  disabled,
+  onChoose,
+}: {
+  projects: string[];
+  disabled: boolean;
+  onChoose(project: string): void;
+}) {
+  const t = useGraphM4Text();
+  return (
+    <div className="space-y-1" data-testid="graph-quick-test-alternatives">
+      <p className="text-ui-sm">{t("quickNoLinkedTests")}</p>
+      {[...new Set(projects)].slice(0, 5).map((project) => (
+        <Button
+          key={project}
+          size="sm"
+          variant="ghost"
+          disabled={disabled}
+          onClick={() => onChoose(project)}
+        >
+          {t("quickPrepareTestBuild")} {project}
+        </Button>
+      ))}
+    </div>
+  );
+}

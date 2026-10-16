@@ -16,6 +16,7 @@ export async function createIsolation({
   manual = false,
   noProvider = false,
   profile,
+  resumeNativeProfile = false,
   fixtureFactory = startFixture,
   extraEnv = {},
   // Z8.2 升级矩阵：采用一个已存在的合成工作区路径（记录的身份就是这个路径），
@@ -48,16 +49,36 @@ export async function createIsolation({
     const expectedParent = await realpath(path.join(root, ".tmp"));
     const actualHome = await realpath(home);
     if (
-      !manual ||
+      (!manual && !resumeNativeProfile) ||
       path.dirname(actualHome) !== expectedParent ||
-      !/^z1-manual-\d+-[a-f0-9]{6}$/.test(path.basename(actualHome))
+      !(resumeNativeProfile ? /^z1-native-\d+-[a-f0-9]{6}$/ : /^z1-manual-\d+-[a-f0-9]{6}$/).test(
+        path.basename(actualHome),
+      )
     )
       throw new Error(
         "Only an existing isolated Z1 manual profile below this checkout's .tmp can be reopened.",
       );
-    const marker = JSON.parse(await readFile(path.join(home, "profile.json"), "utf8"));
-    if (marker.kind !== "z1-isolated-manual" || marker.version !== 1)
-      throw new Error("Unrecognized manual profile.");
+    if (resumeNativeProfile) {
+      const retained = JSON.parse(
+        await readFile(path.join(home, "f1-web-native-summary.json"), "utf8"),
+      );
+      if (
+        retained.home !== home ||
+        retained.status !== "FAIL" ||
+        retained.models !== 0 ||
+        !retained.record?.runs?.length ||
+        retained.record.runs.some(
+          (run) => !["Completed", "Failed", "Cancelled", "Rejected"].includes(run.status),
+        )
+      )
+        throw Error(
+          "Only the explicitly selected terminal synthetic Web acceptance profile can continue.",
+        );
+    } else {
+      const marker = JSON.parse(await readFile(path.join(home, "profile.json"), "utf8"));
+      if (marker.kind !== "z1-isolated-manual" || marker.version !== 1)
+        throw new Error("Unrecognized manual profile.");
+    }
   }
   const workspace = adoptWorkspace ? path.resolve(adoptWorkspace) : path.join(home, "workspace");
   if (!profile) {
@@ -191,6 +212,7 @@ export async function createIsolation({
     await promisify(execFile)("git", ["-c", "init.templateDir=", "init", "--quiet", workspace], {
       env,
     });
+  const evidenceSuffix = resumeNativeProfile ? `-resume-${Date.now()}` : "";
   const lines = [];
   let app;
   const launch = async ({ bootstrapEntry } = {}) => {
@@ -270,9 +292,9 @@ export async function createIsolation({
     },
     async close() {
       if (!manual) {
-        await writeFile(path.join(home, "native.log"), lines.join(""));
+        await writeFile(path.join(home, `native${evidenceSuffix}.log`), lines.join(""));
         await writeFile(
-          path.join(home, "requests.json"),
+          path.join(home, `requests${evidenceSuffix}.json`),
           JSON.stringify(fixture.requests, null, 2),
         );
       }

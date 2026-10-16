@@ -13,6 +13,7 @@ export async function loadDeclarativeProject(
     metadata(path: string): Promise<unknown>;
   },
   project: string,
+  webSyntaxOnly = false,
 ) {
   const nearest = async (name: string) => {
     const parts = project.split("/").slice(0, -1);
@@ -41,6 +42,7 @@ export async function loadDeclarativeProject(
         job.configuration,
         [props, packages].filter((p): p is string => !!p),
         targets ? [targets] : [],
+        webSyntaxOnly,
       );
     } catch (error) {
       if (!(error instanceof ProjectImportRequired)) throw error;

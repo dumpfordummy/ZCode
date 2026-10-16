@@ -30,6 +30,7 @@ export const toolOperationSchema = z
       "unknown",
     ]),
     processStarted: z.boolean(),
+    sourceVerifying: z.boolean().optional(),
     startedAt: time.optional(),
     completedAt: time.optional(),
     result: z

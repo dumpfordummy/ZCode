@@ -71,7 +71,7 @@ export function GraphRecipeList({
                   {s(recipeVerifierKind(recipe))}
                 </td>
                 <td className="px-3 py-2">
-                  {issue ? (
+                  {issue && issue !== "inspectedProfile" ? (
                     <span className="text-warning">{s("checkNeedsAttention")}</span>
                   ) : (
                     <span className="text-foreground-subtle">{s("checkConfigured")}</span>

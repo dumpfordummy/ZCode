@@ -23,6 +23,7 @@ export function GraphSetupPanel({
   checkId,
   onReturn,
   onRun,
+  onOpenConversation,
 }: {
   graph: GraphHook;
   workspaceKey: string;
@@ -34,6 +35,7 @@ export function GraphSetupPanel({
   checkId?: string;
   onReturn: () => void;
   onRun: (runId: string) => void;
+  onOpenConversation?: (path: string, session: string, identity?: string) => void;
 }) {
   const { intl } = useZCodeIntl();
   const u = (id: string) => intl.formatMessage({ id: `graph.preZ8.${id}` });
@@ -73,6 +75,7 @@ export function GraphSetupPanel({
         </div>
       ) : null}
       <GraphProjectRecipes
+        onOpenConversation={onOpenConversation}
         graph={graph}
         workspaceKey={workspaceKey}
         workspacePath={workspacePath}

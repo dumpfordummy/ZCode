@@ -1,5 +1,5 @@
 import {
-  zcodeRecipeStartParamsSchema,
+  zcodeRecipeStartParamsSchema, inspectionReviewParamsSchema, type ZCodeRecipeRequest,
   zcodeRecipeTargetSchema,
   type ZCodeRecipeSnapshot,
 } from "@zcode/shared";
@@ -8,6 +8,13 @@ import {
   requireSession,
   type ZCodeProtocolAgentServerContext,
 } from "./server-types.js";
+
+export async function reviewNativeInspection(context: ZCodeProtocolAgentServerContext, raw: unknown): Promise<ZCodeRecipeRequest> {
+  const params = parseParams(inspectionReviewParamsSchema, raw);
+  const record = requireSession(context, params.sessionId, { operation: "recipe/inspectionReview" });
+  if (!record.app.nativeRecipes) throw Error("Native inspection capability unavailable");
+  return record.app.nativeRecipes.reviewInspection(params);
+}
 
 export async function startNativeRecipe(
   context: ZCodeProtocolAgentServerContext,

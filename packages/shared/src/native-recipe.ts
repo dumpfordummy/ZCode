@@ -1,4 +1,12 @@
+import { webProfileExecutionSchema, webProfileExecutionArguments } from "./web-profile.js";
 import { z } from "zod";
+import {
+  inspectionBindingSchema,
+  inspectionOutcomeSchema,
+  inspectionProjectionSchema,
+  inspectionArguments,
+  INSPECTION_TIMEOUT_MS,
+} from "./project-inspection.js";
 
 export const zcodeRecipeSchema = z
   .object({
@@ -24,8 +32,37 @@ export const zcodeRecipeRequestSchema = z
   .object({
     operationId: z.string().uuid(),
     recipe: zcodeRecipeSchema,
+    inspection: inspectionBindingSchema.optional(),
+    webProfile: webProfileExecutionSchema.optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    if (
+      value.webProfile &&
+      (value.inspection ||
+        value.recipe.executable !== value.webProfile.runtimeProfile.executable ||
+        value.recipe.cwdRelative !== "." ||
+        value.recipe.redactEnvironmentVariables !== undefined ||
+        JSON.stringify(value.recipe.args) !==
+          JSON.stringify(webProfileExecutionArguments(value.webProfile, value.operationId)))
+    )
+      ctx.addIssue({
+        code: "custom",
+        message: "Web profile accepts only its exact fixed Build/Test command and runtime binding.",
+      });
+    if (
+      value.inspection &&
+      (value.recipe.id !== value.inspection.purpose ||
+        value.recipe.cwdRelative !== "." ||
+        value.recipe.timeoutMs !== INSPECTION_TIMEOUT_MS ||
+        value.recipe.redactEnvironmentVariables !== undefined ||
+        JSON.stringify(value.recipe.args) !== JSON.stringify(inspectionArguments(value.inspection)))
+    )
+      ctx.addIssue({
+        code: "custom",
+        message: "Inspection accepts only its fixed evaluation query.",
+      });
+  });
 export type ZCodeRecipeRequest = z.infer<typeof zcodeRecipeRequestSchema>;
 
 const outputSchema = z
@@ -66,10 +103,14 @@ export const zcodeRecipeSnapshotSchema = z
       "unknown",
     ]),
     processStarted: z.boolean(),
+    sourceVerifying: z.boolean().optional(),
     startedAt: z.number().optional(),
     completedAt: z.number().optional(),
     result: zcodeRecipeResultSchema.optional(),
     error: z.string().max(4096).optional(),
+    inspectionVerifying: z.boolean().optional(),
+    inspectionOutcome: inspectionOutcomeSchema.optional(),
+    inspectionProjection: inspectionProjectionSchema.optional(),
   })
   .strict();
 export type ZCodeRecipeSnapshot = z.infer<typeof zcodeRecipeSnapshotSchema>;

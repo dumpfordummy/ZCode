@@ -1,6 +1,6 @@
 import { querySessionDebug } from "./session-debug.js";
 import { previewExecutionEnvironment } from "./execution-environment.js";
-import { startNativeRecipe, readNativeRecipe } from "./native-recipe.js";
+import { startNativeRecipe, reviewNativeInspection, readNativeRecipe } from "./native-recipe.js";
 import { NATIVE_HANDLERS } from "../zcode-protocol-v4/commands/handlers/index.js";
 import { buildNativeContract } from "../zcode-protocol-v4/native-contract.js";
 import {
@@ -573,6 +573,8 @@ export class ZCodeProtocolAgentServer {
         return this.requireV4Gateway().queryCommands(request.params);
       case zcodeProtocolMethods.sessionCreate:
         return await createSession(this.context, request.params, request.trace);
+      case zcodeProtocolMethods.sessionRecipeInspectionReview:
+        return await reviewNativeInspection(this.context, request.params);
       case zcodeProtocolMethods.sessionRecipeStart:
         return await startNativeRecipe(this.context, request.params);
       case zcodeProtocolMethods.sessionRecipeInspect:

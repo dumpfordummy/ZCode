@@ -3760,6 +3760,20 @@ export function createZCodeAgentService(
       );
     },
 
+    async reviewProjectInspection(params) {
+      const client = await expectedRuntimeClient(
+        params.expectedRuntimeIdentity,
+        () => processManager.getExistingClient(params),
+        async () => (await processManager.getRuntimeIdentity(params)).identity,
+      );
+      const { zcodeRecipeRequestSchema } = await import("@zcode/shared");
+      return client.request(
+        zcodeProtocolMethods.sessionRecipeInspectionReview,
+        params.request,
+        zcodeRecipeRequestSchema,
+        { lifecycle: "observation" },
+      );
+    },
     async startRecipe(params) {
       await options?.assertInputAllowed?.({
         ...params,

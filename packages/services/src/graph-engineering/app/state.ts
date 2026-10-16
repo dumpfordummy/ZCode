@@ -12,7 +12,26 @@ import { resumableGate } from "../domain/approvals.js";
 import { routeCheckpoint } from "../domain/routing.js";
 import type { GraphPreflightPort } from "./workflow-ports.js";
 
+import { GraphInspections } from "./inspections.js";
 export interface GraphOptions extends GraphArtifactOptions {
+  webProfile?: {
+    choices(
+      target: GraphWorkspaceTarget,
+      webProject: string,
+      configuration: "Debug" | "Release",
+      candidates: string[],
+    ): Promise<{ kind: "web-profile-choices"; tests: string[]; issues: string[] }>;
+    prepare(
+      target: GraphWorkspaceTarget,
+      rows: [
+        import("../inspection-types.js").GraphInspection,
+        import("../inspection-types.js").GraphInspection,
+      ],
+    ): Promise<import("../web-profile-types.js").GraphWebProfileProposal>;
+  };
+  inspection?: import("./inspection-ports.js").GraphInspectionPort;
+  monotonic?(): number;
+  diagnosticPhase?(operationId: string, phase: string): void;
   /** 并行能力的唯一策略来源；缺省按关闭处理（fail closed）。 */
   parallelPolicy?: () => import("@zcode/shared").GraphParallelPolicy;
   parallel?: import("./parallel-ports.js").GraphParallelPort;
@@ -43,8 +62,18 @@ export class GraphState {
   private readonly flights = new Map<string, Promise<unknown>>();
   disposed = false;
   private shutdown?: Promise<void>;
-  constructor(readonly options: GraphOptions) {}
+  readonly inspections: GraphInspections;
+  constructor(readonly options: GraphOptions) {
+    this.inspections = new GraphInspections(this);
+  }
 
+  trace(operationId: string, phase: string) {
+    try {
+      this.options.diagnosticPhase?.(operationId, phase);
+    } catch {
+      /* Diagnostics cannot change admission. */
+    }
+  }
   serial<T>(target: GraphWorkspaceTarget, action: () => Promise<T>): Promise<T> {
     const key = workspaceKey(target);
     const next = (this.flights.get(key) ?? Promise.resolve())
@@ -131,10 +160,12 @@ export class GraphState {
   }
   async put(run: GraphRun): Promise<void> {
     const record = await this.load(run.target);
+    this.trace(run.id, "record-persistence-start");
     await this.commit(run.target, {
       ...record,
       runs: record.runs.map((r) => (r.id === run.id ? run : r)),
     });
+    this.trace(run.id, "record-persistence-end");
   }
   async get(target: GraphWorkspaceTarget, id: string): Promise<GraphRun> {
     const run = (await this.load(target)).runs.find((r) => r.id === id);

@@ -4,6 +4,29 @@
  * 只包含 UI 自有的标签与解释。工作流名称与描述（Host 提供）、用户输入、存储的 id、摘要与 Host 诊断保持原文。
  */
 const messages: Record<string, [string, string]> = {
+  quickInventoryCount: [
+    "Inventory: {count} targets; {visible} shown in Build choices.",
+    "清单：{count} 个目标；构建选项显示 {visible} 个。",
+  ],
+  quickGroupCopies: ["Group identical project files", "合并显示内容相同的项目文件"],
+  quickShowCopies: ["Show every project file", "显示全部项目文件"],
+  quickCopyHelp: [
+    "Identical project bytes may be copies; provenance and build behavior are not inferred. Grouping only changes this list. Narrow the scan to a solution, project or folder if useful.",
+    "项目文件内容相同可能意味着副本，但不代表来源或构建行为相同。合并只影响列表显示；也可将扫描范围缩小到解决方案、项目或目录。",
+  ],
+  quickTestLink: [
+    "Build must produce each selected Test assembly. Only tests in its prepared dependency closure can be selected. Framework labels (including net10.0) do not verify installed SDKs or adapters.",
+    "构建必须生成所选测试程序集。只能选择已准备依赖范围内的测试。框架标签（包括 net10.0）不证明已安装 SDK 或适配器。",
+  ],
+  quickNoLinkedTests: [
+    "No selectable linked Test scope yet. Prepare the test project itself or a solution containing it; all dependencies must be supported. Quick requires at least one Test.",
+    "尚无可选择的关联测试范围。请准备测试项目本身或包含它的解决方案；所有依赖必须受支持。快速设置至少需要一个测试。",
+  ],
+  quickPrepareTestBuild: ["Prepare Build:", "准备构建："],
+  quickManualFields: [
+    "Advanced / custom checks below accepts reviewed recipes. Declare executable, working directory, timeout and every source input; then actual Build outputs and each VSTest project, framework, assembly and required tests. Associate Test with the Build that produces that assembly. Keep unknown fields unresolved: no output path is inferred for this fallback. Review exact commands and native permissions before running.",
+    "下方“高级 / 自定义检查”可编辑已审阅配方。需声明可执行文件、工作目录、超时、全部源输入，以及实际构建输出、各 VSTest 项目、框架、程序集和必需测试。将测试关联到生成该程序集的构建。未知字段应保持未解决，此路径不会推测输出路径。运行前审阅准确命令并通过原生权限。",
+  ],
   quickUnresolved: ["unresolved", "未确认"],
   quickWorking: ["Wait for the current setup operation to finish.", "请等待当前设置操作完成。"],
   quickResolveBlocker: [
@@ -30,8 +53,8 @@ const messages: Record<string, [string, string]> = {
   quickContinue: ["Continue guided setup", "继续引导设置"],
   quickCloseGuided: ["Close guided draft", "关闭引导草稿"],
   quickDraftOnly: [
-    "Incomplete setup draft — cannot save or run verified checks.",
-    "设置草稿尚未完成，无法保存或运行已验证检查。",
+    "Incomplete setup draft — cannot save or run executable checks from these notes.",
+    "设置草稿尚未完成，不能根据这些备注保存或运行可执行检查。",
   ],
   quickGuidedAction: [
     "Keep these choices. Resolve the selected target's issue, or choose a supported Build target above, then Detect again. Existing custom checks remain available in Advanced.",
@@ -65,6 +88,116 @@ const messages: Record<string, [string, string]> = {
   ],
   quickPrevious: ["Previous", "上一页"],
   quickNext: ["Next", "下一页"],
+  inspectionObservationOnly: [
+    "This observation alone does not establish complete inputs. Prepare a supported profile separately; no Build or Test evidence is created.",
+    "此观察本身不能证明输入范围完整。需单独准备受支持的配置；不会生成构建或测试证据。",
+  ],
+  inspectionObserved: ["Observed configuration details", "已观察的配置详情"],
+  webImmutable: [
+    "This inspected profile is immutable. Prepare a new profile to change its targets or inputs; JSON edits cannot replace its private receipt.",
+    "此检查配置不可变。更改目标或输入需重新准备配置；编辑 JSON 不能替代其私有凭据。",
+  ],
+  webTitle: ["Plain Web service with VSTest", "普通 Web 服务与 VSTest"],
+  webLimits: [
+    "Installed SDK 8.0.426 / net8.0 only. Plain static content and the known cached xUnit packages; no Razor, Blazor or custom generators.",
+    "仅支持已安装的 SDK 8.0.426 / net8.0。普通静态内容和已知缓存的 xUnit 包；不支持 Razor、Blazor 或自定义生成器。",
+  ],
+  webFind: ["Find matching test projects", "查找匹配的测试项目"],
+  webMatching: [
+    "Only completed matching input closures are selectable.",
+    "仅可选择已完成输入闭包验证的匹配项目。",
+  ],
+  webBuildTarget: ["Actual Build target and reference", "实际构建目标与引用"],
+  webObserved: ["Observed", "已观察"],
+  webUnobserved: ["Not yet observed", "尚未观察"],
+  webService: ["Web inspection", "Web 检查"],
+  webTests: ["Test inspection", "测试项目检查"],
+  webPrepare: ["Prepare complete Web profile", "准备完整 Web 配置"],
+  webVerifying: [
+    "Verifying source bytes, membership and installed provenance. No permission response is currently needed.",
+    "正在验证源文件字节、成员关系和已安装工具来源。当前无需回应权限请求。",
+  ],
+  webPrepared: [
+    "Profile complete; review before Save. No Build or Test has run.",
+    "配置范围完整；保存前请审阅。尚未执行构建或测试。",
+  ],
+  webSources: ["Review all source inputs", "审阅全部源输入"],
+  webExcluded: ["Exact output roots excluded", "排除的确切输出目录"],
+  webReadScope: [
+    "Review exact installed and cached package read roots",
+    "审阅确切的工具和缓存包读取目录",
+  ],
+  webSaved: [
+    "Configuration saved. Running checks still requires preview and native permissions.",
+    "配置已保存。执行检查仍需预览和原生权限确认。",
+  ],
+  inspectionWarning: [
+    "MSBuild evaluation can execute project processing and cause filesystem, network or system side effects. Ordinary native permission is required.",
+    "MSBuild 求值可执行项目处理并影响文件、网络或系统，必须经过原生权限确认。",
+  ],
+  inspectionUnsupported: [
+    "Configuration observation cannot prove a complete Web input scope. Save remains blocked; no Build or Test evidence is created.",
+    "配置观察不能证明 Web 输入范围完整。保存仍被阻止，不产生 Build 或 Test 证据。",
+  ],
+  inspectionSdk: [
+    "Select an installed SDK (availability will be checked)",
+    "选择已安装 SDK（将检查可用性）",
+  ],
+  inspectionFramework: ["Select the actual target framework", "选择实际目标框架"],
+  inspectionReview: ["Inspect with installed MSBuild", "使用已安装 MSBuild 检查"],
+  inspectionVerifying: [
+    "Verifying current source and toolchain bytes; no permission response is currently needed.",
+    "正在验证当前源码和工具链字节，当前无需回应权限请求。",
+  ],
+  inspectionCommand: ["Exact executable and ordered arguments", "确切可执行文件及有序参数"],
+  inspectionScope: [
+    "Reviewed workspace and installed SDK read scope",
+    "已审核工作区与已安装 SDK 读取范围",
+  ],
+  inspectionFiles: ["observed files", "个已观察文件"],
+  inspectionExpiry: ["Review expires", "审核到期"],
+  inspectionStart: ["Confirm inspection and request native permission", "确认检查并请求原生权限"],
+  inspectionPermission: [
+    "Use the ordinary permission prompt in this owned conversation:",
+    "请在此受管会话中使用普通权限提示：",
+  ],
+  inspectionHistory: ["Inspection history and recovery", "检查记录与恢复"],
+  inspectionConversation: ["Open permission conversation", "打开权限会话"],
+  inspectionRefresh: ["Check original operation", "查看原操作"],
+  inspectionCancel: ["Cancel inspection", "取消检查"],
+  "inspectionState.review-ready": ["Ready for command review", "命令可供审核"],
+  "inspectionState.verifying-sources": [
+    "Verifying source bytes; no permission response is currently needed",
+    "正在验证源码字节，当前无需回应权限请求",
+  ],
+  "inspectionState.awaiting-permission": ["Waiting for native permission", "等待原生权限"],
+  "inspectionState.running": ["Evaluating installed MSBuild", "正在使用已安装 MSBuild 求值"],
+  "inspectionState.succeeded": [
+    "Configuration observed; inspection alone does not establish complete scope",
+    "已观察配置；仅检查不能证明范围完整",
+  ],
+  "inspectionState.denied": ["Native permission denied", "原生权限已拒绝"],
+  "inspectionState.cancelled": ["Inspection cancelled", "检查已取消"],
+  "inspectionState.expired": ["Inspection review expired", "检查审核已到期"],
+  "inspectionState.source-changed": [
+    "Source, toolchain or environment changed; review again",
+    "源码、工具链或环境已变化，请重新审核",
+  ],
+  "inspectionState.runtime-changed": [
+    "Native runtime changed; review again",
+    "原生运行时已变化，请重新审核",
+  ],
+  "inspectionState.invalid-output": ["Inspection output rejected", "检查输出被拒绝"],
+  "inspectionState.failed": ["Inspection failed", "检查失败"],
+  "inspectionState.executor-lost": [
+    "Executor unavailable; no replay. Original workspace ownership retained until exit is confirmed.",
+    "执行器不可用，不会重放。原工作区所有权保留到退出得到确认。",
+  ],
+  "inspectionState.unavailable": [
+    "Inspection unavailable: check installed SDK, native capability and bounded observation limits",
+    "检查不可用：请核实已安装 SDK、原生能力及观察范围限制",
+  ],
+  inspectionChecking: ["Reading original operation status", "正在读取原操作状态"],
   quickTitle: ["Project checks", "项目检查"],
   quickDetected: [".NET project detected", "已检测到 .NET 项目"],
   quickScan: ["Detect .NET project", "检测 .NET 项目"],

@@ -1,4 +1,5 @@
 import { spawn, type ChildProcess } from "node:child_process";
+import { spawnLimitedChild } from "./windows-limited-child.js";
 import { BashFileOutput } from "./bash-file-output.js";
 import { readCapturedCwd } from "./cwd-capture.js";
 import { defaultCwdDialect } from "./execution-command.js";
@@ -202,11 +203,24 @@ export class NodeExecutionAdapterRun extends NodeExecutionAdapterProcess {
         ];
       }
 
-      const spawnedChild = spawn(
-        prepared.command.file,
-        prepared.command.args,
-        prepared.spawnOptions,
-      );
+      if (
+        request.processLimit &&
+        (request.processLimit.maxActiveProcesses !== 1 ||
+          request.command.mode !== "argv" ||
+          request.stdin !== undefined ||
+          file)
+      )
+        throw Error("Unsupported hard process-limit request");
+      const spawnedChild = request.processLimit
+        ? await spawnLimitedChild(
+            prepared.command.file,
+            prepared.command.args,
+            prepared.spawnOptions,
+            this.platform,
+            options.signal,
+            () => stopRequested || Boolean(this.closePromise),
+          )
+        : spawn(prepared.command.file, prepared.command.args, prepared.spawnOptions);
       child = spawnedChild;
       finishResourceTelemetry = this.trackBashResources(spawnedChild, useBashMergedOutput, () => ({
         timedOut,

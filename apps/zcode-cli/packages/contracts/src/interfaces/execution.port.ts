@@ -151,6 +151,8 @@ export interface ExecutionRequest {
   timeoutMs?: number;
   outputLimit?: ExecutionOutputLimit;
   sandbox?: ExecutionSandboxPolicy;
+  /** Internal inspection-only hard bound; unsupported enforcement must fail before start. */
+  processLimit?: { maxActiveProcesses: 1 };
   trace?: TraceContext;
 }
 

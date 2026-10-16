@@ -1,3 +1,4 @@
+import { ensureWebProfileState } from "@zcode/shared/node";
 import { redactFeedbackText, type ZCodeRecipeRequest, type ZCodeRecipeResult } from "@zcode/shared";
 import type { ExecutionResult, ExecutionStreamResult } from "@zcode/contracts";
 import type { ToolEntry } from "@zcode/core";
@@ -59,6 +60,9 @@ export function createRecipeTool(input: {
   preview: Record<string, unknown>;
   onStarted: (time: number) => void;
   onExecution: (work: Promise<ExecutionResult>) => void;
+  validateInspection?: () => Promise<void>;
+  validateWebProfile?: () => Promise<void>;
+  onInspectionChanged?: () => void;
 }): ToolEntry {
   const { request, preview } = input;
   let invoked = false;
@@ -84,6 +88,9 @@ export function createRecipeTool(input: {
         args: { type: "array", items: { type: "string" } },
         cwd: { type: "string" },
         timeoutMs: { type: "number" },
+        purpose: { type: "string" },
+        warning: { type: "string" },
+        readScope: { type: "array", items: { type: "string" } },
       },
       additionalProperties: false,
       required: ["operationId", "recipeId", "executable", "args", "cwd", "timeoutMs"],
@@ -132,12 +139,31 @@ export function createRecipeTool(input: {
       if ((await resolveRecipeCwd(input.workspaceRoot, request.recipe)) !== input.cwd)
         throw new Error("Recipe cwd changed while awaiting permission");
       context.abortSignal.throwIfAborted();
+      if (request.inspection) {
+        try {
+          await input.validateInspection?.();
+        } catch (error) {
+          input.onInspectionChanged?.();
+          throw error;
+        }
+        context.abortSignal.throwIfAborted();
+      }
+      if(request.webProfile) {
+        if(!input.validateWebProfile) throw Error("Web profile validation owner unavailable.");
+        await input.validateWebProfile();
+        context.abortSignal.throwIfAborted();
+      }
+      const profile=request.inspection?.runtimeProfile ?? request.webProfile?.runtimeProfile;
+      const profileEnvironment=profile ? await ensureWebProfileState(input.workspaceRoot,profile) : undefined;
+      context.abortSignal.throwIfAborted();
       const execution = context.executionPort.run(
         {
           command: { mode: "argv", file: request.recipe.executable, args: request.recipe.args },
           cwd: input.cwd,
+          ...(profileEnvironment ? {env:{base:"empty" as const,set:profileEnvironment}} : {}),
           timeoutMs: request.recipe.timeoutMs,
           outputLimit: { maxInlineBytes: 65536, maxBufferBytes: 131072, persistOutput: "none" },
+          ...(request.inspection ? { processLimit: { maxActiveProcesses: 1 as const } } : {}),
           trace: context.traceContext,
         },
         {

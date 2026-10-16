@@ -23,12 +23,10 @@ test("the declaration parses with the shared schema and reports the real protoco
 test("every advertised method has a dispatch case in the protocol server", async () => {
   // The server cannot be constructed under the portable runner (its handler modules need built
   // workspace packages), so the dispatch table is cross-checked as source text.
-  const source = (await readFile(new URL("../zcode-protocol/server.ts", import.meta.url), "utf8")).replace(
-    /\s+/g,
-    " ",
-  );
-  const owner = (name: string) =>
-    name.startsWith("v4/") ? "V4_METHODS" : "zcodeProtocolMethods";
+  const source = (
+    await readFile(new URL("../zcode-protocol/server.ts", import.meta.url), "utf8")
+  ).replace(/\s+/g, " ");
+  const owner = (name: string) => (name.startsWith("v4/") ? "V4_METHODS" : "zcodeProtocolMethods");
   const key = async (name: string) => {
     const shared = await import("@zcode/shared");
     const v4 = await import("@zcode/shared/zcode-protocol-v4");
@@ -48,10 +46,9 @@ test("every advertised method has a dispatch case in the protocol server", async
 });
 
 test("the server reports the declaration next to the existing plan capability", async () => {
-  const source = (await readFile(new URL("../zcode-protocol/server.ts", import.meta.url), "utf8")).replace(
-    /\s+/g,
-    " ",
-  );
+  const source = (
+    await readFile(new URL("../zcode-protocol/server.ts", import.meta.url), "utf8")
+  ).replace(/\s+/g, " ");
   assert.match(
     source,
     /case zcodeProtocolMethods\.runtimeCapabilities: return \{ independentPlanState: true, \[ZCODE_NATIVE_CONTRACT_KEY\]: buildNativeContract\(Object\.keys\(NATIVE_HANDLERS\)\), \};/,
@@ -59,7 +56,16 @@ test("the server reports the declaration next to the existing plan capability", 
 });
 
 test("interaction.protectedSessions is real: protected Graph questions (and their children) are never auto-answered", async (t) => {
-  assert.deepEqual([...NATIVE_CONTRACT_FEATURES], [zcodeNativeContractFeatures.interactionProtectedSessions]);
+  assert.deepEqual(
+    [...NATIVE_CONTRACT_FEATURES],
+    [
+      zcodeNativeContractFeatures.interactionProtectedSessions,
+      zcodeNativeContractFeatures.projectConfigurationInspection,
+      ...(process.platform === "win32"
+        ? [zcodeNativeContractFeatures.projectInspectionHardProcessLimit, ...(process.arch === "x64" ? [zcodeNativeContractFeatures.projectWebProfileInspection, zcodeNativeContractFeatures.projectWebProfileExecution] : [])]
+        : []),
+    ],
+  );
   t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: 1 });
   const registry = new V4InteractionRegistry({ hiddenGraceMs: 5, autoResolutionMs: 20 });
   await registry.setAskUserQuestionAutoResolutionEnabled(true, ["graph"]);

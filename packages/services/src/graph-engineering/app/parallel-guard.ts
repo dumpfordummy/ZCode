@@ -20,6 +20,7 @@ export async function assertParallelAdmission(
   request: { requestId: string; revision: number; settings: GraphNativeSettings },
   live: Set<string>,
 ) {
+  await state.inspections.assertIdle(target);
   if (record.parallel?.runs.some(parallelUnresolved))
     throw new Error("An unresolved Fork/Join run owns this original workspace's Graph admission.");
   if (!record.parallelParent) return;

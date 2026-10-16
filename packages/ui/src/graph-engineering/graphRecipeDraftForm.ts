@@ -1,3 +1,4 @@
+import { WEB_PROFILE_POLICY, webProfileRuntimeSchema } from "@zcode/shared";
 export type GraphRecipeDraftObject = Record<string, unknown>;
 const object = (value: unknown): value is GraphRecipeDraftObject =>
   Boolean(value && typeof value === "object" && !Array.isArray(value));
@@ -34,7 +35,7 @@ export function recipeVerifierKind(recipe: GraphRecipeDraftObject): string {
 }
 export function graphRecipeGuidedIssue(
   recipe: GraphRecipeDraftObject,
-): "unknownFields" | "unsupportedVerifier" | "invalidShape" | undefined {
+): "unknownFields" | "unsupportedVerifier" | "invalidShape" | "inspectedProfile" | undefined {
   if (
     extras(recipe, [
       "id",
@@ -55,14 +56,40 @@ export function graphRecipeGuidedIssue(
   if (
     recipe.sourceScope !== undefined &&
     (!object(recipe.sourceScope) ||
-      (recipe.sourceScope.version !== 1 && recipe.sourceScope.version !== 2) ||
-      (recipe.sourceScope.version === 2 &&
+      (recipe.sourceScope.version !== 1 &&
+        recipe.sourceScope.version !== 2 &&
+        recipe.sourceScope.version !== 3) ||
+      (recipe.sourceScope.version !== 1 &&
         !["Debug", "Release"].includes(String(recipe.sourceScope.configuration))) ||
       typeof recipe.sourceScope.project !== "string" ||
       typeof recipe.sourceScope.membershipDigest !== "string" ||
       typeof recipe.sourceScope.sourceCount !== "number")
   )
     return "invalidShape";
+  if (object(recipe.sourceScope) && recipe.sourceScope.version === 3) {
+    const scope = recipe.sourceScope;
+    if (
+      scope.policy !== WEB_PROFILE_POLICY ||
+      typeof scope.preparationId !== "string" ||
+      !Array.isArray(scope.inspectionIds) ||
+      !strings(scope.inspectionIds) ||
+      scope.inspectionIds.length !== 2 ||
+      typeof scope.webProject !== "string" ||
+      !Array.isArray(scope.copiedContent) ||
+      scope.copiedContent.length > 32 ||
+      scope.copiedContent.some(
+        (row) =>
+          !object(row) ||
+          typeof row.source !== "string" ||
+          typeof row.output !== "string" ||
+          extras(row, ["source", "output"]),
+      ) ||
+      !object(scope.assemblies) ||
+      invalidStrings(scope.assemblies, ["web", "test"]) ||
+      !webProfileRuntimeSchema.safeParse(scope.runtimeProfile).success
+    )
+      return "invalidShape";
+  }
   if (!object(verifier)) return "invalidShape";
   if (
     invalidStrings(recipe, ["id", "name", "executable", "cwd"]) ||
@@ -109,6 +136,9 @@ export function graphRecipeGuidedIssue(
       return "unknownFields";
     if (object(verifier[field]) && invalidStrings(verifier[field], keys)) return "invalidShape";
   }
+  return object(recipe.sourceScope) && recipe.sourceScope.version === 3
+    ? "inspectedProfile"
+    : undefined;
 }
 export function updateGraphRecipeField(
   text: string,

@@ -583,6 +583,12 @@ export interface IZCodeAgentService {
   previewExecutionEnvironment(
     params: ZCodeAgentWorkspaceTarget & { executables?: string[] },
   ): Promise<import("@zcode/shared").ZCodeExecutionEnvironmentPreview>;
+  reviewProjectInspection(
+    params: ZCodeAgentSessionTarget & {
+      expectedRuntimeIdentity: string;
+      request: import("zod").infer<typeof import("@zcode/shared").inspectionReviewParamsSchema>;
+    },
+  ): Promise<import("@zcode/shared").ZCodeRecipeRequest>;
   startRecipe(
     params: ZCodeAgentSessionTarget & {
       expectedRuntimeIdentity: string;

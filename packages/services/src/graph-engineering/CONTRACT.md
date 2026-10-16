@@ -4,6 +4,49 @@ Duration remains syntax/range validated independently of ordered, bounded result
 
 # Graph Engineering
 
+F1 adds an explicit non-evidence project-inspection purpose under GraphState's existing
+serial workspace lease. The private version-1 inspection sidecar does not alter run
+or sourceScope v1/v2 history. Review/start/status/cancel preserve one immutable request,
+native identity and ordinary always-ask permission; absent native capability fails closed.
+Passive Detect/Save/navigation never start evaluation. An observation is explicitly
+scopeComplete=false and cannot authorize Save, Build, Test or approval. Pending/lost
+operations reserve the workspace until exact native inactivity; no cold replay.
+Windows inspection additionally requires the hard-process-limit capability. The
+existing execution adapter atomically creates its one process in a private Windows
+Job with no descendants or breakaway and kill-on-owner-close. Other runtimes fail
+closed; ordinary Build/Test execution is unchanged. Read-only inspection history
+and explicit status/cancel expose retained operation identities without replay.
+The permission-conversation link navigates to the original owned session; ordinary
+selection/root changes still cancel the prior proposal.
+See docs/graph-engineering/z8/Z8_5_U5_F1_SPEC.md.
+
+F1 also adds the separately discriminated `project-web-profile-inspection-v1`
+purpose and `project.webProfileInspection.v1` / `project.webProfileExecution.v1`
+capabilities for `web-static-net8-win-x64-v1`. Two current owned observations,
+strict known syntax/restore shape, complete bounded workspace membership and exact
+installed SDK/runtime/public-package byte provenance are required to prepare it.
+The existing setup/recipe owners save only the exact recipes from a private,
+immutable workspace-bound preparation. New sourceScope v3 binds those identities,
+actual observed assembly paths and copied Content source/output pairs. Readers
+require that private preparation; no v1/v2 receipt is reinterpreted or migrated.
+Save has a bounded review lifetime and fresh byte checks. Reopen does not replay
+inspection; preview and every existing Build/Test evidence boundary revalidate
+membership, bytes, imports, resolver/toolchain and fixed environment identity.
+The SDK's implicit copied JSON must equal current source bytes and joins the
+Build-to-Test digest through final TRX normalization. Freshly generated outputs
+retain the ordinary freshness checks. Inspection success is never test evidence.
+Old runtimes/readers including .308 cannot execute this new profile and fail
+clearly; passive static v1/v2 setup retains its existing short path.
+
+Z8.5-U5 adds structural equivalence for the standard MSBuild namespace and exact
+first/last Microsoft.NET.Sdk imports within the same v2 declarative policy. Every
+interior item/property/import still passes U4 validation. Root-specific diagnostics
+do not resolve SDKs; Web/custom/dynamic SDKs and execution-affecting root attributes
+remain unsupported. Quick derives selectable Test scopes from a complete matching
+prepared Build closure. Identical-metadata grouping affects display only, never
+source membership or provenance. The original U5 static path has no permission-owned MSBuild
+inspection result contract; F1 adds the separate owned path above. See `docs/graph-engineering/z8/Z8_5_U5_SPEC.md`.
+
 Z8.5-U3 separates inventory from direct selected-scope preparation on the same
 `projectSetup` command/port. `scanRoot` narrows discovery without changing workspace
 identity; `selectedProject` starts its own bounded dependency/input job, and
@@ -69,8 +112,9 @@ descriptors bind Debug/Release configuration and the declarative file/import pol
 `docs/graph-engineering/z8/Z8_5_U4_SPEC.md`; v1 reconstruction and receipt semantics remain
 unchanged. The schema/compiler require selected configuration to agree with commands.
 Renderer Quick drafts persist choices and unresolved notes only, never prepared authority.
-Save and verification reconstruct scope through the same recipe/source owners. Setup has
-no execution-capable MSBuild inspection contract; unsupported shapes remain non-runnable.
+Save and verification reconstruct scope through the same recipe/source owners. The U4
+static path has no execution-capable MSBuild inspection; F1 adds a separate owned
+operation and narrow v3 Web profile without broadening v2 semantics.
 
 `docs/graph-engineering/Z5_SPEC.md` defines explicit version-5 typed Conditions, exclusive branches and one bounded repair region. `routing-types.ts` carries declarative predicates, finite limits, immutable iterations, exact attempt maps and persisted route checkpoints. The same serialized Host owns cursor advancement, admission reservations and deadline cancellation. Each repair gets fresh native sessions; historical attempts and artifacts remain immutable. Trusted native Test verification observations distinguish failed assertions from invalid provenance without relaxing Z4 artifact acceptance. Decisions persist before successors. Cold checkpoints require explicit `run({action: "continue", ...})`; uncertain creation/submission is never replayed. Every End route requires the final Human Approval. Renderer iteration selection is only a projection and never changes execution ownership.
 
