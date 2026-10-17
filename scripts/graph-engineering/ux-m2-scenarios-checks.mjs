@@ -31,8 +31,25 @@ const back = async (page) => {
 /** Replace the whole unsaved list through the Advanced raw JSON field, as a user can. */
 async function editRaw(page, update) {
   const field = T(page, "graph-recipes-json");
-  if (!(await field.isVisible()))
-    await page.locator('details:has([data-testid="graph-recipes-json"]) > summary').click();
+  // 只定位直接包含 JSON 字段的 disclosure，避免同时匹配外层 Advanced。
+  const disclosure = page.locator('details:has(> div > [data-testid="graph-recipes-json"])');
+  const summary = disclosure.locator(":scope > summary");
+  assert.equal(await field.count(), 1, "one JSON editor");
+  assert.equal(await disclosure.count(), 1, "one JSON disclosure");
+  assert.equal(await summary.count(), 1, "its own direct summary");
+  if (!(await field.isVisible())) {
+    await summary.focus();
+    await page.keyboard.press("Enter");
+    await field.waitFor({ state: "visible" });
+    assert.equal(await disclosure.getAttribute("open"), "");
+    assert.equal(await summary.evaluate((element) => element === document.activeElement), true);
+    await page.keyboard.press("Space");
+    await field.waitFor({ state: "hidden" });
+    assert.equal(await disclosure.getAttribute("open"), null);
+    await page.keyboard.press("Enter");
+    await field.waitFor({ state: "visible" });
+    assert.equal(await summary.evaluate((element) => element === document.activeElement), true);
+  }
   const current = await field.inputValue();
   await field.fill(
     typeof update === "string" ? update : JSON.stringify(update(JSON.parse(current)), null, 2),

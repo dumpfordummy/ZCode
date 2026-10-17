@@ -304,17 +304,41 @@ export const coreScenarios = [
       await page.setViewportSize(SIZES[0]);
 
       await search(page, "big");
-      await until(async () => (await optionCount(page)) > 0, "results");
-      await T(page, "graph-context-option-0").click();
+      // 等待本次查询的实际结果，不能把上次 empty 的结果当成 big。
       await until(
         async () =>
-          /102400-byte limit/.test(
+          finished(host, "searchWorkspaceFiles").some((call) => call.query === "big") &&
+          /big\.md/.test(await T(page, "graph-context-option-0").innerText()),
+        "big.md search result",
+      );
+      await T(page, "graph-context-option-0").click();
+      const rejection = await until(
+        () =>
+          host.calls.find(
+            (call) =>
+              call.op === "validate-reference" && call.phase === "error" && call.path === "big.md",
+          ),
+        "Host rejected oversized big.md",
+      );
+      assert.equal(
+        rejection.message,
+        "Declared file is 0.10 MiB (103425 bytes) and exceeds the 0.10 MiB (102400-byte) limit.",
+      );
+      await until(
+        async () =>
+          (
             await T(page, "graph-context-validation-error")
               .innerText()
-              .catch(() => ""),
-          ),
-        "size error",
+              .catch(() => "")
+          ).includes(rejection.message),
+        "current Host size error rendered verbatim",
       );
+      assert.match(
+        await T(page, "graph-context-validation-error").innerText(),
+        /Could not use big\.md\. The previous selection docs\/Context\.md was kept\./,
+      );
+      assert.deepEqual((await draft(page)).bindings, stored, "oversized rejection keeps the draft");
+      assertClean(host, 0);
       // 原生选择器：工作区之外的文件由真实 Host 拒绝；取消则完全无变化。
       host.setPickedFile(host.outside);
       await T(page, "graph-context-native-picker").click();
