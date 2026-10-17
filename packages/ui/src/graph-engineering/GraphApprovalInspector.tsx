@@ -96,10 +96,13 @@ export function GraphApprovalInspector({
       {request ? (
         <>
           <dl className="space-y-1 break-all text-ui-sm">
-            <dt className="text-foreground-subtle">{t("commentPolicy")}</dt>
-            <dd>
-              {t(request.commentPolicy === "required" ? "commentRequired" : "commentOptional")}
-            </dd>
+            {/* UX-P2：必填评论要在决定前可见；可选评论与不透明的请求 id 放入下方的“请求标识”披露。 */}
+            {request.commentPolicy === "required" ? (
+              <>
+                <dt className="text-foreground-subtle">{t("commentPolicy")}</dt>
+                <dd>{t("commentRequired")}</dd>
+              </>
+            ) : null}
             <dt className="text-foreground-subtle">{t("workspace")}</dt>
             <dd className="font-mono">{request.target.workspacePath}</dd>
             <dt className="text-foreground-subtle">{t("successor")}</dt>
@@ -110,16 +113,24 @@ export function GraphApprovalInspector({
                   ? intl.formatMessage({ id: `graph.node.${successor.type}` })
                   : t("noSuccessor")}
             </dd>
-            <dt className="text-foreground-subtle">{t("requestIdentity")}</dt>
-            <dd className="font-mono">
-              {request.id} · v{request.version}
-            </dd>
           </dl>
           <p className="text-ui-sm text-foreground-subtle" data-testid="graph-approval-impact">
             {u(successor?.type === "end" ? "approvalTerminal" : "approvalImpact")}
           </p>
-          <details className="text-ui-sm">
+          <details className="text-ui-sm" data-testid="graph-approval-correlation">
             <summary>{t("requestCorrelation")}</summary>
+            <dl className="mt-2 space-y-1 break-all">
+              <dt className="text-foreground-subtle">{t("requestIdentity")}</dt>
+              <dd className="font-mono">
+                {request.id} · v{request.version}
+              </dd>
+              {request.commentPolicy !== "required" ? (
+                <>
+                  <dt className="text-foreground-subtle">{t("commentPolicy")}</dt>
+                  <dd>{t("commentOptional")}</dd>
+                </>
+              ) : null}
+            </dl>
             <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all font-mono text-ui-xs">
               {JSON.stringify(
                 {

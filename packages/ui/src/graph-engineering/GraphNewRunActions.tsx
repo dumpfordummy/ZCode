@@ -20,6 +20,7 @@ export function GraphNewRunActions({
   onSave,
   onViewCurrentRun,
   onGoToFirstField,
+  onSetupChecks,
   fieldsAction = "first-field",
   error,
   errorKind = "review",
@@ -32,6 +33,8 @@ export function GraphNewRunActions({
   onSave(): void;
   onViewCurrentRun?(): void;
   onGoToFirstField?(): void;
+  /** UX-P2: the saved checks were read and there are none; the route is Checks setup. Navigation only. */
+  onSetupChecks?(): void;
   /** UX-M4: in the library dialog off the Use tab the way to the missing fields is "Open Use". */
   fieldsAction?: "first-field" | "open-use";
   /** A failed instantiate/preflight, shown here so it is seen next to the action that caused it. */
@@ -111,7 +114,16 @@ export function GraphNewRunActions({
               {m1("viewCurrentRun")}
             </Button>
           ) : null}
-          {blockedBy === "fields" && onGoToFirstField ? (
+          {/* UX-P2：没有任何已保存检查时，第一个字段是个空下拉框；真正的下一步是去设置检查。 */}
+          {blockedBy === "fields" && onSetupChecks ? (
+            <Button
+              variant="outline"
+              data-testid="graph-new-run-setup-checks"
+              onClick={onSetupChecks}
+            >
+              {m4("quickSetup")}
+            </Button>
+          ) : blockedBy === "fields" && onGoToFirstField ? (
             <Button
               variant="outline"
               data-testid={

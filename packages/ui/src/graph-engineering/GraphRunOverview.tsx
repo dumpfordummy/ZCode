@@ -14,6 +14,8 @@ import { graphRunResult } from "./graphRunResult.js";
 import { GraphRunResultBlock } from "./GraphRunResultBlock.js";
 import { GraphRunPermissionBlock } from "./GraphRunPermissionBlock.js";
 import { graphPermissionInfo } from "./graphPermissionInfo.js";
+import { graphHumanKey, graphIsEndStep, graphRunStage } from "./graphRunStage.js";
+import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 
 /** Facts that say nothing happened or nothing applies read as quiet lines, not as emphasised values. */
 const quietEvidence = new Set(["no-tests", "not-run"]);
@@ -42,7 +44,9 @@ export function GraphRunOverview({
 }) {
   const u = useGraphRunText();
   const m4 = useGraphM4Text();
+  const { intl } = useZCodeIntl();
   const summary = useMemo(() => graphRunSummary(run), [run]);
+  const stage = graphRunStage(summary);
   const evidenceLabels = graphEvidenceLabels(summary.evidence);
   const outputs = graphRunOutputs(run).filter((output) => output.state !== "invalid");
   const result = useMemo(() => graphRunResult(run, summary), [run, summary]);
@@ -65,8 +69,12 @@ export function GraphRunOverview({
               step: gates[0]!.name,
               run: run.definition.name,
             })
-          : u(`execution.${status}`)
+          : stage.kind !== "none"
+            ? u(`stage.${stage.kind}`, { step: stage.step })
+            : u(`execution.${status}`)
       : undefined;
+  // UX-P2：过期证据的横幅要自己说明原因，复用审批检查器已有的说明，不另造一句。
+  const staleStop = result.kind === "none" && status === "StaleEvidence";
   return (
     <section
       // 「查看运行」的落点：可被程序聚焦，并使用 Graph 的边框式焦点标记。
@@ -104,6 +112,16 @@ export function GraphRunOverview({
         }
       >
         {plainTitle ? <p className="text-ui-lg font-semibold">{plainTitle}</p> : null}
+        {plainTitle && stage.kind !== "none" ? (
+          <p className="text-foreground-subtle" data-testid="graph-run-nothing-needed">
+            {u("nothingNeeded")}
+          </p>
+        ) : null}
+        {staleStop ? (
+          <p className="text-foreground-subtle" data-testid="graph-run-stale-explanation">
+            {intl.formatMessage({ id: "graph.approval.staleHelp" })}
+          </p>
+        ) : null}
         <GraphRunPermissionBlock items={permission} />
         <GraphRunResultBlock result={result} />
         {summary.execution.stopRequested ? (
@@ -150,10 +168,11 @@ export function GraphRunOverview({
           testId="graph-run-human"
           label={u("human")}
           state={summary.human.state}
-          value={u(`human.${summary.human.state}`)}
+          value={u(graphHumanKey(summary))}
           quiet={quietHuman.has(summary.human.state)}
         />
-        {step ? (
+        {/* UX-P2：终点 End 节点不是有信息量的“当前步骤”，步骤条已显示它。 */}
+        {step && !graphIsEndStep(summary) ? (
           <div
             data-testid="graph-run-current-step"
             data-node-id={step.nodeId}

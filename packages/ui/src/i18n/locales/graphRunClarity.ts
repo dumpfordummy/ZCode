@@ -133,6 +133,20 @@ const messages: Record<string, [string, string]> = {
   ],
   historyTitle: ["Workflow", "工作流"],
   noActionRequired: ["No action required", "无需操作"],
+  // UX-P2：一个仍在执行、没有等待任何人的运行，横幅说明哪一步在跑以及无需操作。
+  "stage.running-task": ["{step}: agent work is running", "{step}：智能体正在工作"],
+  "stage.running-tool": ["{step}: running the configured check", "{step}：正在运行已配置的检查"],
+  nothingNeeded: ["Nothing is needed from you right now.", "当前无需你操作。"],
+  // UX-P2：运行结果本身未确认且从未请求批准时，人工决定“未确定”，而不是“批准记录不完整”。
+  "human.unconfirmed": [
+    "Undetermined — the run's outcome is unconfirmed",
+    "未确定——运行结果尚未确认",
+  ],
+  evidenceChecks: ["Evidence checks", "证据检查"],
+  testCounts: [
+    "{count} discovered · {passed} passed · {failed} failed · {skipped} skipped",
+    "发现 {count} 个 · 通过 {passed} · 失败 {failed} · 跳过 {skipped}",
+  ],
   historyTime: ["Time", "时间"],
   historyStatus: ["Execution", "执行"],
   historyEvidence: ["Evidence", "证据"],

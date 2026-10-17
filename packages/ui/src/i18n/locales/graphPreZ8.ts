@@ -17,8 +17,8 @@ export const graphPreZ8En: Record<string, string> = {
   "graph.preZ8.notLoaded": "Project checks have not been loaded.",
   "graph.preZ8.loadingChecks": "Loading project checks…",
   "graph.preZ8.noChecks": "No project checks are configured.",
-  "graph.preZ8.checksLoaded":
-    "{count} project checks loaded. Configuration alone does not mean they ran or passed.",
+  // UX-P2：每个所选检查已写明“已保存·未运行”，这里只说明数量，不再重复“配置不等于已执行”。
+  "graph.preZ8.checksLoaded": "{count} saved checks loaded.",
   "graph.preZ8.readFailed":
     "Project checks could not be read. Retry the read to use current configuration.",
   "graph.preZ8.retryRead": "Retry read",
@@ -100,7 +100,7 @@ export const graphPreZ8Zh: Record<string, string> = {
   "graph.preZ8.notLoaded": "尚未加载项目检查。",
   "graph.preZ8.loadingChecks": "正在加载项目检查…",
   "graph.preZ8.noChecks": "尚未配置项目检查。",
-  "graph.preZ8.checksLoaded": "已加载 {count} 个项目检查。配置本身不表示已执行或通过。",
+  "graph.preZ8.checksLoaded": "已加载 {count} 个已保存的检查。",
   "graph.preZ8.readFailed": "无法读取项目检查。请重试读取，以使用当前配置。",
   "graph.preZ8.retryRead": "重试读取",
   "graph.preZ8.refreshChecks": "刷新项目检查",
