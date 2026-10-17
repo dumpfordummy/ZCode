@@ -225,6 +225,12 @@ export function GraphTemplateBindings({
         errors[0] ? (onOpenUse ? onOpenUse : () => focusIssue(errors[0]!)) : undefined
       }
       fieldsAction={onOpenUse ? "open-use" : "first-field"}
+      // UX-P2：已读取且没有任何已保存检查（仅 New run 表单）：下一步是去设置检查，只是导航。
+      onSetupChecks={
+        hasTools && recipes && recipes.recipes.length === 0 && !onOpenUse
+          ? () => onOpenSetup()
+          : undefined
+      }
     />
   );
   return (
