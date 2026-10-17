@@ -296,7 +296,8 @@ export function GraphQuickDotnet({
                 groupCopies={groupCopies}
                 toggleCopies={() => setGroupCopies(!groupCopies)}
               />
-              {choices.builds.length > 1 || choices.scopes.length > 1 ? (
+              {(!build && choices.builds.length > 1) ||
+              (build && !scopes.length && choices.scopes.length > 1) ? (
                 <p className="text-ui-sm text-warning">{t("quickAmbiguous")}</p>
               ) : null}
               <GraphSelect
@@ -325,7 +326,6 @@ export function GraphQuickDotnet({
                 }}
               />
               <p className="text-ui-sm font-medium">{t("quickTests")}</p>
-              <p className="text-ui-sm text-foreground-subtle">{t("quickTestLink")}</p>
               {!prepared?.prepared && !issue ? (
                 <p className="text-ui-sm text-warning">{t("quickTestsIncomplete")}</p>
               ) : null}

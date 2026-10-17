@@ -88,9 +88,9 @@ const messages: Record<string, [string, string]> = {
   ],
   quickPrevious: ["Previous", "上一页"],
   quickNext: ["Next", "下一页"],
-  inspectionObservationOnly: [
-    "This observation alone does not establish complete inputs. Prepare a supported profile separately; no Build or Test evidence is created.",
-    "此观察本身不能证明输入范围完整。需单独准备受支持的配置；不会生成构建或测试证据。",
+  inspectionNotice: [
+    "MSBuild evaluation can run project processing with filesystem, network or system side effects, so it needs native permission. It only observes configuration: it does not prove complete inputs and creates no Build or Test evidence.",
+    "MSBuild 求值可执行项目处理并影响文件、网络或系统，因此必须经过原生权限确认。它只观察配置：不能证明输入范围完整，也不会生成构建或测试证据。",
   ],
   inspectionObserved: ["Observed configuration details", "已观察的配置详情"],
   webImmutable: [
@@ -131,19 +131,13 @@ const messages: Record<string, [string, string]> = {
     "Configuration saved. Running checks still requires preview and native permissions.",
     "配置已保存。执行检查仍需预览和原生权限确认。",
   ],
-  inspectionWarning: [
-    "MSBuild evaluation can execute project processing and cause filesystem, network or system side effects. Ordinary native permission is required.",
-    "MSBuild 求值可执行项目处理并影响文件、网络或系统，必须经过原生权限确认。",
-  ],
   inspectionUnsupported: [
     "Configuration observation cannot prove a complete Web input scope. Save remains blocked; no Build or Test evidence is created.",
     "配置观察不能证明 Web 输入范围完整。保存仍被阻止，不产生 Build 或 Test 证据。",
   ],
-  inspectionSdk: [
-    "Select an installed SDK (availability will be checked)",
-    "选择已安装 SDK（将检查可用性）",
-  ],
-  inspectionFramework: ["Select the actual target framework", "选择实际目标框架"],
+  inspectionSdk: ["Installed SDK", "已安装 SDK"],
+  inspectionFramework: ["Target framework", "目标框架"],
+  inspectionSession: ["Operation session", "操作会话"],
   inspectionReview: ["Inspect with installed MSBuild", "使用已安装 MSBuild 检查"],
   inspectionVerifying: [
     "Verifying current source and toolchain bytes; no permission response is currently needed.",
@@ -158,8 +152,8 @@ const messages: Record<string, [string, string]> = {
   inspectionExpiry: ["Review expires", "审核到期"],
   inspectionStart: ["Confirm inspection and request native permission", "确认检查并请求原生权限"],
   inspectionPermission: [
-    "Use the ordinary permission prompt in this owned conversation:",
-    "请在此受管会话中使用普通权限提示：",
+    "Answer the ordinary permission prompt in this owned conversation. Graph never answers it for you.",
+    "请在此受管会话中回应普通权限提示。Graph 不会替你回应。",
   ],
   inspectionHistory: ["Inspection history and recovery", "检查记录与恢复"],
   inspectionConversation: ["Open permission conversation", "打开权限会话"],
@@ -216,9 +210,11 @@ const messages: Record<string, [string, string]> = {
     "Several targets were found. Choose the Build target and Test scopes you want.",
     "发现多个目标。请选择构建目标和测试范围。",
   ],
-  quickUnavailable: [
-    "Quick setup unavailable for this selection. Use Advanced to review the details.",
-    "此选择无法使用快速设置。请在高级设置中审阅详情。",
+  quickBlocked: ["Quick checks are not available for {build}", "{build} 无法使用快速检查"],
+  quickDetailsGeneral: ["Details", "详情"],
+  quickInputScope: [
+    "Inputs conservatively include the project and its shared subtrees.",
+    "输入保守覆盖项目及其共享子目录。",
   ],
   quickNoRunner: [
     "No supported VSTest scope with a known assembly path was established.",
@@ -235,8 +231,8 @@ const messages: Record<string, [string, string]> = {
   quickAdd: ["Add .NET checks", "添加 .NET 检查"],
   quickCancel: ["Cancel", "取消"],
   quickDefaults: [
-    "Conservative inputs include project and shared subtrees. Save does not execute. Run opens exact command review, then native permission.",
-    "输入保守覆盖项目及共享子目录。保存不会执行命令；运行先显示准确命令，再请求原生权限。",
+    "Saving does not run anything. Running shows the exact command first, then asks for native permission.",
+    "保存不会执行任何命令。运行时先显示准确命令，再请求原生权限。",
   ],
   quickSaved: ["Saved · not run by this save", "已保存 · 此次保存未运行检查"],
   quickSetup: ["Set up project checks", "设置项目检查"],
