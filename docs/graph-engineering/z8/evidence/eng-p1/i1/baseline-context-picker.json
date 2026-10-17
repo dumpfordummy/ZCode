@@ -1,0 +1,94 @@
+{
+  "environment": {
+    "kind": "cloud-linux-chromium-harness",
+    "windowsNativeAcceptance": "PENDING",
+    "node": "v24.14.0",
+    "platform": "win32-x64",
+    "chromium": "148.0.7778.96",
+    "fixtures": [
+      "agentService.previewExecutionEnvironment (native environment preview)",
+      "fileService.searchWorkspaceFiles (directory walk over temp workspaces)",
+      "platform.selectFile",
+      "transport: Playwright bridge instead of RPC"
+    ],
+    "real": [
+      "GraphTemplateBindings, GraphContextSection, GraphContextPicker, hooks, Radix Popover, draft store, i18n",
+      "Graph Host projectSetup facade and createProjectSetupPort (validate-reference) over real temp files"
+    ]
+  },
+  "passed": 13,
+  "failed": 1,
+  "results": [
+    {
+      "name": "keyboard: add a file; nothing is active until the user moves; Enter never starts the workflow",
+      "ok": true,
+      "ms": 686
+    },
+    {
+      "name": "native delivery comes only from the Host: AGENTS.md is native-instructions, unknown stays unknown",
+      "ok": true,
+      "ms": 676
+    },
+    {
+      "name": "skills: identity and enablement from the catalogue; disabled skills are listed but cannot be selected",
+      "ok": true,
+      "ms": 447
+    },
+    {
+      "name": "replace is explicit, touches only that role, and there is never a second chip for a role",
+      "ok": true,
+      "ms": 1041
+    },
+    {
+      "name": "remove: an optional reference is deleted; a required one becomes missing, blocks Review, and is never optional",
+      "ok": true,
+      "ms": 1189
+    },
+    {
+      "name": "escape and cancel restore focus and keep the previous binding; Enter in the picker never submits",
+      "ok": true,
+      "ms": 1317
+    },
+    {
+      "name": "failed validation and cancelled chooser keep the previous binding; the Host error stays beside the slot",
+      "ok": false,
+      "ms": 9166,
+      "error": "Error: Timed out waiting for: size error\n    at until (file:///<ENG_P1_CHECKOUT>/scripts/graph-engineering/context-picker-helpers.mjs:24:38)\n    at async Object.run (file:///<ENG_P1_CHECKOUT>/scripts/graph-engineering/context-picker-scenarios.mjs:309:7)\n    at async runBrowserHarness (<ENG_P1_CHECKOUT>\\scripts\\graph-engineering\\browser-harness-common.mjs:130:9)\n    at async file:///<ENG_P1_CHECKOUT>/scripts/graph-engineering/context-picker-browser.mjs:36:31"
+    },
+    {
+      "name": "late validation replies are ignored after workspace switch, template change, close, slot change or another writer",
+      "ok": true,
+      "ms": 3378
+    },
+    {
+      "name": "late search replies never replace newer results or survive closing the picker",
+      "ok": true,
+      "ms": 1291
+    },
+    {
+      "name": "loading, empty, search error, catalogue error with retry, and unsupported are shown honestly",
+      "ok": true,
+      "ms": 1492
+    },
+    {
+      "name": "advanced route: raw fields keep their ids, drive the same payload, and show every value",
+      "ok": true,
+      "ms": 308
+    },
+    {
+      "name": "disabled while a run is unresolved: no control can change context",
+      "ok": true,
+      "ms": 621
+    },
+    {
+      "name": "Simplified Chinese: UI-owned labels are localized; stored paths, ids and Host text are untouched",
+      "ok": true,
+      "ms": 473
+    },
+    {
+      "name": "screenshots: selected context, search results, required reference removed (1280x720 and 1920x1080)",
+      "ok": true,
+      "ms": 89
+    }
+  ]
+}

@@ -152,6 +152,8 @@ export async function createContextPickerHost() {
     {},
     {
       get(_, name) {
+        // F1 被动浏览的空历史 fixture；仍通过真实 projectSetup 门面组装返回值。
+        if (name === "readProjectInspections") return async () => [];
         throw new Error(`projectSetup reached graph.${String(name)} during a context action`);
       },
     },
