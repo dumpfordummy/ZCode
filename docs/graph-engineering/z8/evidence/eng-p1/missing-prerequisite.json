@@ -1,0 +1,56 @@
+{
+  "status": "FAIL",
+  "mode": "provenance",
+  "node": "24.14.0",
+  "platform": "win32",
+  "clock": "single-process performance.now",
+  "startedAt": "2026-10-16T05:42:59.297Z",
+  "cache": "not flushed; freshly written fixture warms OS cache; repeated reads may be warm",
+  "contention": "no concurrent work launched by this diagnostic; other system workloads uncontrolled",
+  "timings": "phases disjoint; total inclusive; filesystem apiMs overlap and include instrumentation overhead",
+  "ioCoverage": "fs/promises lstat/realpath/readdir/opendir/readFile/stat/open; handle read/stat/close; streamBytes is a subset of readBytes, not additive; internal Dir iteration syscalls excluded; errors include expected ENOENT probes",
+  "memory": "sampled RSS per operation; process maxRSS is lifetime high-water, in KiB",
+  "operations": [
+    {
+      "operationId": "5e211c45-891a-4f32-aa9a-b6b49eaa4a4b",
+      "kind": "exact-installed-provenance",
+      "phases": [
+        {
+          "phase": "overhead",
+          "startedMs": 725.8329,
+          "endedMs": 726.8264,
+          "elapsedMs": 0.99350000000004,
+          "io": {
+            "calls": {
+              "realpath": 2,
+              "lstat": 1
+            },
+            "apiMs": {
+              "realpath": 0.31380000000001473,
+              "lstat": 0.17470000000002983
+            },
+            "readBytes": 0,
+            "streamBytes": 0,
+            "errors": 1,
+            "inFlight": 0,
+            "peakInFlight": 1
+          }
+        }
+      ],
+      "startedMs": 725.7721,
+      "status": "FAIL",
+      "error": {
+        "name": "Error",
+        "code": "ENOENT"
+      },
+      "endedMs": 726.8264,
+      "elapsedMs": 1.054300000000012,
+      "sampledPeakRss": 152125440,
+      "processMaxRssKiB": 148564
+    }
+  ],
+  "error": {
+    "name": "Error",
+    "code": "ENOENT"
+  }
+}
