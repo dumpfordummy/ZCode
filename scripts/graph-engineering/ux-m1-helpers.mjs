@@ -27,6 +27,8 @@ const ALLOWED_OPS = new Set([
   "wf.prepare",
   "reference-catalog",
   "validate-reference",
+  // F1 的历史读取不启动检查；其他 inspection 操作仍必须被拒绝。
+  "inspection-history",
   "searchWorkspaceFiles",
   "selectFile",
   "stat",

@@ -328,7 +328,9 @@ async function withBuiltinRuntime(
     runtime: ReturnType<typeof createNodeProviderConfigRuntime>;
     fetchReleaseCalls: () => number;
     recorder: Recorder;
+    waitForDownload: () => Promise<void>;
   }) => Promise<void>,
+  beforeFetch?: () => Promise<void>,
 ): Promise<void> {
   const recorder = await startRecorder();
   const dir = await mkdtemp(join(tmpdir(), "z83n1-provider-"));
@@ -345,20 +347,53 @@ async function withBuiltinRuntime(
       controlFilePath: join(dir, "control.json"),
       resolveEndpointKey: () => recorder.origin,
       // MOCK fetchRelease that performs a real loopback request, so a restored download shows up in the recorder.
-      fetchRelease: async () => {
+      fetchRelease: async (_endpointKey, signal) => {
         calls += 1;
-        await fetch(`${recorder.origin}/builtin-release`);
+        await beforeFetch?.();
+        const response = await fetch(`${recorder.origin}/builtin-release`, { signal });
+        assert.equal(response.status, 200, "loopback built-in download response");
+        await response.arrayBuffer();
         return null;
       },
     },
   });
+  // G1：只跟踪原 owner 返回的同一 Promise；不为等待而触发第二次刷新。
+  let pendingRefreshes = 0;
+  const refreshErrors: unknown[] = [];
+  const refresh = runtime.refreshZCodeBuiltin.bind(runtime);
+  runtime.refreshZCodeBuiltin = (options) => {
+    const operation = refresh(options);
+    pendingRefreshes += 1;
+    void Promise.allSettled([operation]).then(([result]) => {
+      if (result.status === "rejected") refreshErrors.push(result.reason);
+      pendingRefreshes -= 1;
+    });
+    return operation;
+  };
+  const assertNoRefreshErrors = () => {
+    if (refreshErrors.length) throw new AggregateError(refreshErrors, "built-in refresh failed");
+  };
+  const waitForDownload = async () => {
+    // G1：调用计数先于 HTTP；等待真实记录和刷新完成，避免断言/清理抢先。
+    await waitFor(() => {
+      assertNoRefreshErrors();
+      return recorder.requests.length > 0 && pendingRefreshes === 0;
+    }, "actual built-in HTTP request and refresh completion");
+    assert.deepEqual(recorder.requests, [{ method: "GET", path: "/builtin-release" }]);
+  };
   try {
-    await body({ runtime, fetchReleaseCalls: () => calls, recorder });
+    await body({ runtime, fetchReleaseCalls: () => calls, recorder, waitForDownload });
   } finally {
     mock.timers.reset();
     runtime.dispose();
-    await recorder.close();
-    await rm(dir, { recursive: true, force: true });
+    try {
+      // dispose 取消在途请求；仍须等待原刷新（含 lease IO）结束后才能关闭 fixture。
+      await waitFor(() => pendingRefreshes === 0, "disposed built-in refresh settlement");
+      assertNoRefreshErrors();
+    } finally {
+      await recorder.close();
+      await rm(dir, { recursive: true, force: true });
+    }
   }
 }
 
@@ -395,11 +430,31 @@ test("explicit path stays reachable: refreshZCodeBuiltin({ force: true }) downlo
 });
 
 test("positive control: Production policy built-in sync downloads in the background after start", async () => {
-  await withBuiltinRuntime(PRODUCTION, async ({ runtime, fetchReleaseCalls, recorder }) => {
+  await withBuiltinRuntime(PRODUCTION, async ({ runtime, fetchReleaseCalls, waitForDownload }) => {
     await runtime.start();
-    await waitFor(() => fetchReleaseCalls() >= 1, "the background built-in download");
-    assert.deepEqual(recorder.requests, [{ method: "GET", path: "/builtin-release" }]);
+    await waitForDownload();
+    assert.equal(fetchReleaseCalls(), 1);
   });
+});
+
+test("built-in download observation waits for real HTTP after call-start (deterministic gate)", async () => {
+  const gate = Promise.withResolvers<void>();
+  await withBuiltinRuntime(
+    PRODUCTION,
+    async ({ runtime, fetchReleaseCalls, recorder, waitForDownload }) => {
+      await runtime.start();
+      try {
+        await waitFor(() => fetchReleaseCalls() === 1, "the gated fetchRelease call");
+        // 旧条件此时已满足，但 gate 尚未释放，服务端必然还没有请求。
+        assert.deepEqual(recorder.requests, []);
+      } finally {
+        gate.resolve();
+      }
+      await waitForDownload();
+      assert.equal(fetchReleaseCalls(), 1);
+    },
+    () => gate.promise,
+  );
 });
 
 // ───────────── Z8.3-W1: automatic callers that were labelled as explicit or were never covered ─────────────
