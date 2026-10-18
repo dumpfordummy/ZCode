@@ -17,6 +17,18 @@ const present = async (file) =>
     () => false,
   );
 
+export function cliKoffiExtraResources(targetPlatform) {
+  if (targetPlatform.os !== "win32") return [];
+  // electron-builder 的 FileMatcher 会排除复制根目录的 node_modules；单独从包根复制。
+  return [
+    {
+      from: `bundled-agents/${targetPlatform.os}-${targetPlatform.arch}/glm/node_modules/koffi`,
+      to: "glm/node_modules/koffi",
+      filter: ["**/*", "!**/*.map"],
+    },
+  ];
+}
+
 export async function lockedCliKoffiVersion(repoRoot = sourceRepoRoot) {
   const manifest = await json(resolve(repoRoot, ADAPTERS, "package.json"));
   const version = manifest.dependencies?.koffi;

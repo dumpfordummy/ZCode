@@ -20,7 +20,7 @@ import {
   resolveDesktopArtifactSuffix,
   resolveDesktopProductIdentity,
 } from "./scripts/desktop-product-identity.mjs";
-import { verifyStagedKoffi } from "./scripts/koffi-package-assets.mjs";
+import { cliKoffiExtraResources, verifyStagedKoffi } from "./scripts/koffi-package-assets.mjs";
 import { createGraphWindowsAsarIntegrityLifecycle } from "./scripts/windows-asar-integrity.mjs";
 const ELECTRON_BUILDER_ARCH = {
   1: "x64",
@@ -678,6 +678,7 @@ export default {
       to: "glm",
       filter: ["**/*", "!**/*.map"],
     },
+    ...cliKoffiExtraResources(targetPlatform),
     {
       // agent shell 之前完全依赖宿主系统 PATH，GUI 启动时经常拿不到用户自己装的 rg。
       // 这里把 ripgrep 作为桌面端内置 runtime tool 打进 resources/tools，

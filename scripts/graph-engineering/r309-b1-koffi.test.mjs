@@ -10,7 +10,10 @@ import {
   stageAgentBundle,
   resolveAgentBundlePaths,
 } from "../../packages/desktop/scripts/stage-agent-bundle.mjs";
-import { verifyStagedKoffi } from "../../packages/desktop/scripts/koffi-package-assets.mjs";
+import {
+  cliKoffiExtraResources,
+  verifyStagedKoffi,
+} from "../../packages/desktop/scripts/koffi-package-assets.mjs";
 import { detachedKoffiSmoke } from "./r309-b1-detached-smoke.mjs";
 
 const targetPlatform = { os: "win32", arch: "x64" };
@@ -176,6 +179,7 @@ test("non-Windows CLI staging needs no Windows dependency", async (t) => {
   const f = await fixture(t);
   await rm(f.source, { recursive: true });
   for (const os of ["linux", "darwin"]) {
+    assert.deepEqual(cliKoffiExtraResources({ os, arch: "arm64" }), []);
     await stageAgentBundle({ repoRoot: f.root, platformKey: `${os}-arm64`, log() {} });
     assert.deepEqual(
       await verifyStagedKoffi({
@@ -185,6 +189,38 @@ test("non-Windows CLI staging needs no Windows dependency", async (t) => {
       [],
     );
   }
+});
+
+test("actual electron-builder resource copy excludes root node_modules; explicit Koffi mapping preserves it", async (t) => {
+  const f = await fixture(t);
+  await f.stage();
+  const fromDesktop = createRequire(join(repo, "packages/desktop/package.json"));
+  const fromBuilder = createRequire(fromDesktop.resolve("electron-builder/package.json"));
+  const { FileMatcher, copyFiles } = fromBuilder("app-builder-lib/out/fileMatcher.js");
+  const resourcesDir = join(f.root, "copy/resources");
+  const matcher = (from, to, patterns) => new FileMatcher(from, to, (value) => value, patterns);
+  await copyFiles(
+    [matcher(f.glmDir, join(resourcesDir, "glm"), ["**/*", "!**/*.map"])],
+    null,
+    false,
+  );
+  assert.match((await f.verify({ resourcesDir })).join("\n"), /CLI koffi/);
+  await copyFiles(
+    cliKoffiExtraResources(targetPlatform).map((asset) =>
+      matcher(
+        join(f.root, "packages/desktop", asset.from),
+        join(resourcesDir, asset.to),
+        asset.filter,
+      ),
+    ),
+    null,
+    false,
+  );
+  assert.deepEqual(await f.verify({ resourcesDir }), []);
+  assert.equal(
+    createRequire(join(resourcesDir, "glm/zcode.cjs")).resolve("koffi"),
+    join(resourcesDir, "glm/node_modules/koffi/index.js"),
+  );
 });
 
 test("real exact-lockfile package stages with original bytes and licenses", async (t) => {

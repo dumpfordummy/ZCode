@@ -25,12 +25,19 @@ resolution. No version search, global installation or NODE_PATH fallback is a
 staging input. The installed lookup root is `resources/glm/node_modules/koffi`.
 
 Copy the installed package recursively, including runtime JavaScript, declarations,
-source/vendor license and notice metadata. Exclude nested node*modules and all
-build outputs except `build/koffi/<os>*<arch>`. This avoids a guessed minimal
+source/vendor license and notice metadata. Exclude nested `node_modules` and all
+build outputs except `build/koffi/<os>_<arch>`. This avoids a guessed minimal
 runtime file list. Require index.js, package.json, LICENSE.txt and the target
 addon; validate Windows PE machine type before staging. Record a sorted SHA-256
 inventory of all staged files in `glm/.koffi-runtime.json`. A failed staging pass
 must not leave the previous runtime usable as a successful stage.
+
+The general `glm` extra-resource copy excludes its root `node_modules` in
+electron-builder's real FileMatcher. Add a Windows-only explicit resource mapping
+from the staged Koffi package root to `glm/node_modules/koffi`; both mapping and
+verification live in the existing Koffi helper. Exercise the actual FileMatcher
+copy in regressions, including failure without this mapping. This is asset staging,
+not a distributable build.
 
 The existing verifier must check the CLI root, exact identity/version, native
 machine, complete inventory and hashes. A plugin-only copy cannot satisfy it.
