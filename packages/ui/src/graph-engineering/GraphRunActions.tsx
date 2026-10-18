@@ -7,6 +7,7 @@ import type { GraphPanelProps } from "./graphEngineeringView.js";
 import { useGraphRunText } from "./GraphRunText.js";
 import { graphEvidenceActionLabels } from "./graphRunPresentation.js";
 import type { GraphRunResult } from "./graphRunResult.js";
+import { graphIsEndStep } from "./graphRunStage.js";
 
 export type GraphRunInspection =
   | { kind: "node"; nodeId: string; attemptId?: string }
@@ -60,25 +61,38 @@ export function GraphRunActions({
       ? undefined
       : run.nodeAttempts.find((attempt) => attempt.attemptId === attemptId)?.sessionId;
   const evidenceActionLabels = graphEvidenceActionLabels(summary.evidence);
+  // UX-P2：完成的运行停在 End 节点，“检查 end 步骤”没有可做的事；其他停止状态保留它，
+  // 以免“无需操作”被误显示在一个失败或停止的运行上（End 仍在步骤条与步骤列表中）。
+  const settledAtEnd = run.status === "Completed" && graphIsEndStep(summary);
   const stepButton =
     step &&
+    !settledAtEnd &&
     !gates.length &&
     ![...failedChecks, ...invalidChecks].some((check) => check.nodeId === step.nodeId);
   const canRunAgain = Boolean(onRunAgain) && run.version === 5 && run.definition.template;
   // UX-M4：一次只有一个主操作（强调色）：先是原生会话，再是人工闸门，其次失败的 Test、无效输出与无效证据。
-  const primary = summary.actionableSessions.length
-    ? "native"
-    : gates.length
-      ? "gate"
-      : failedChecks.length
-        ? "failure"
-        : invalidOutputs.length
-          ? "output"
-          : invalidChecks.length
-            ? "invalid"
-            : undefined;
+  // UX-P2：仅仅在运行的会话不在等任何人，打开它是可选的，不应与“需要你”的操作同样醒目；
+  // 权限、问题与不确定归属的会话仍是主操作（第一个需要你的会话）。
+  const runIsRunning = run.status === "Running" || run.status === "Starting";
+  const nativePrimaryIndex = summary.actionableSessions.findIndex(
+    (session) => !(runIsRunning && (session.status === "Running" || session.status === "Starting")),
+  );
+  const primary =
+    nativePrimaryIndex >= 0
+      ? "native"
+      : gates.length
+        ? "gate"
+        : failedChecks.length
+          ? "failure"
+          : invalidOutputs.length
+            ? "output"
+            : invalidChecks.length
+              ? "invalid"
+              : undefined;
   const variantOf = (kind: string, index: number) =>
-    primary === kind && index === 0 ? ("default" as const) : ("outline" as const);
+    primary === kind && index === (kind === "native" ? nativePrimaryIndex : 0)
+      ? ("default" as const)
+      : ("outline" as const);
   const hasActions =
     canRunAgain ||
     summary.actionableSessions.length > 0 ||

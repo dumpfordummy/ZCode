@@ -15,8 +15,9 @@ export function GraphRecipeReadStatus({
   const t = (key: string, values?: Record<string, string | number>) =>
     intl.formatMessage({ id: `graph.preZ8.${key}` }, values);
   return (
+    // UX-P2：状态句与“刷新 / 设置”同一行；读取失败的原因独占一行，保持可见。
     <section
-      className="space-y-2 text-ui-sm"
+      className="flex flex-wrap items-center gap-x-3 gap-y-2 text-ui-sm"
       data-testid="graph-recipe-read-state"
       data-state={state.status}
     >
@@ -35,7 +36,7 @@ export function GraphRecipeReadStatus({
                 : t("noChecks")}
       </p>
       {state.status === "error" ? (
-        <p className="break-words text-destructive">{state.error}</p>
+        <p className="basis-full break-words text-destructive">{state.error}</p>
       ) : null}
       <div className="flex flex-wrap gap-2">
         <Button

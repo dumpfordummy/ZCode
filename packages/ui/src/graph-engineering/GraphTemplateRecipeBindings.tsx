@@ -115,7 +115,8 @@ export function GraphTemplateRecipeBindings({
             ) : null}
             {isTest ? (
               <>
-                {buildSlots.some((slot) => slot.id === mapped) ? (
+                {/* UX-P2：只有绑定了多个构建步骤时，“Test 关联哪个构建”才有判断价值；单一构建不重复。 */}
+                {buildSlots.length > 1 && buildSlots.some((slot) => slot.id === mapped) ? (
                   <p className="text-ui-sm text-foreground-subtle">
                     {m4("quickMapped", {
                       name: buildSlots.find((slot) => slot.id === mapped)!.name,
