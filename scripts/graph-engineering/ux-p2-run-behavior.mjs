@@ -109,8 +109,9 @@ const failedScenario = (variant) => ({
       await T(page, "graph-run-inspect-failure").getAttribute("data-variant"),
       "default",
     );
-    // The terminal End node is not a "current step" (the strip shows it) but the failing step is.
-    assert.equal(await T(page, "graph-run-current-step").count(), 0);
+    // UX-P2-F1: this fixture stopped (NeedsHuman) with its cursor on End. Only a Completed run drops
+    // the End cursor; a stopped run keeps it, because an End cursor is not proof of completion.
+    assert.equal(await T(page, "graph-run-current-step").count(), 1);
     assertPassive(host, "failed test");
   },
 });

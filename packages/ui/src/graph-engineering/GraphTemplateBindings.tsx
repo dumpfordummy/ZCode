@@ -203,13 +203,26 @@ export function GraphTemplateBindings({
     ["sourcePaths", "source-paths", t("sourcePaths")],
   ];
   const issueLabel = (label: string) => fields.find(([name]) => name === label)?.[2] ?? label;
+  // UX-P2-F1：没有任何已保存检查时，构建/测试字段是个没有选项的下拉框，不是可执行的下一步；
+  // 对应的入口是“检查”一行里唯一的“设置项目检查”按钮。这里只移动焦点，不保存、不改字段。
+  const noSavedChecks = hasTools && recipes?.recipes.length === 0;
+  const isCheckIssue = (label: string) => tools.some((node) => node.name === label);
   const focusIssue = (label: string) => {
+    if (noSavedChecks && isCheckIssue(label)) {
+      root.current
+        ?.querySelector<HTMLElement>('[data-testid="graph-template-setup-checks"]')
+        ?.focus();
+      return;
+    }
     const id = fields.find(([name]) => name === label)?.[1];
     const field = id ? document.getElementById(`graph-template-field-${id}`) : null;
     const disclosure = field?.closest("details");
     if (disclosure) disclosure.open = true;
     field?.querySelector<HTMLElement>("input,textarea,button")?.focus();
   };
+  // 第一个“现在就能处理”的未解决字段；没有时（只剩检查）仍由 focusIssue 把焦点交给“设置项目检查”。
+  const firstActionable =
+    errors.find((label) => !(noSavedChecks && isCheckIssue(label))) ?? errors[0];
   const actionBar = (
     <GraphNewRunActions
       allowReview={allowReview}
@@ -222,15 +235,9 @@ export function GraphTemplateBindings({
       error={error}
       errorKind={errorKind}
       onGoToFirstField={
-        errors[0] ? (onOpenUse ? onOpenUse : () => focusIssue(errors[0]!)) : undefined
+        errors[0] ? (onOpenUse ? onOpenUse : () => focusIssue(firstActionable!)) : undefined
       }
       fieldsAction={onOpenUse ? "open-use" : "first-field"}
-      // UX-P2：已读取且没有任何已保存检查（仅 New run 表单）：下一步是去设置检查，只是导航。
-      onSetupChecks={
-        hasTools && recipes && recipes.recipes.length === 0 && !onOpenUse
-          ? () => onOpenSetup()
-          : undefined
-      }
     />
   );
   return (

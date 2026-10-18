@@ -21,6 +21,12 @@ export function GraphToolInspector({
     check = graphRunCheck(run, attempt);
   // 报告只属于 Test 验证器；Build 的 false 默认值不应显示成缺失报告或验证失败。
   const hasTestReport = attempt.recipe.verifier.kind === "test";
+  // UX-P2-F1：只有被接受的证据（通过或失败）的数字才是结果；其他状态下的数字是运行器的原始报告，
+  // 必须标明未被接受，且没有任何数字时整行不显示（不显示一排破折号）。
+  const accepted = check.state === "passed" || check.state === "failed";
+  const reported = [verify?.testCount, verify?.passed, verify?.failed, verify?.skipped].some(
+    (count) => count !== undefined,
+  );
   const facts: [string, boolean | null | undefined][] = [
     ["processStarted", attempt.operation?.processStarted],
     ["processKnown", verify?.processKnown],
@@ -59,9 +65,13 @@ export function GraphToolInspector({
         </p>
       ))}
       {attempt.message ? <p className="text-ui-sm text-warning">{attempt.message}</p> : null}
-      {verify && hasTestReport ? (
-        <p className="text-ui-sm" data-testid="graph-tool-counts">
-          {u("testCounts", {
+      {verify && hasTestReport && (accepted || reported) ? (
+        <p
+          className={accepted ? "text-ui-sm" : "text-ui-sm text-foreground-subtle"}
+          data-testid="graph-tool-counts"
+          data-accepted={accepted}
+        >
+          {u(accepted ? "testCounts" : "testCountsReported", {
             count: verify.testCount ?? "—",
             passed: verify.passed ?? "—",
             failed: verify.failed ?? "—",

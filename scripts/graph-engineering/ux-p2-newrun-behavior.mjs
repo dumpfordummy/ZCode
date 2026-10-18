@@ -129,11 +129,17 @@ const noChecks = (variant) =>
     );
     assert.equal(await T(page, "graph-review-run").isDisabled(), true);
     assert.equal(await T(page, "graph-library-instantiate").isDisabled(), true);
-    // The first field would be an empty select: the route is Checks setup instead.
-    assert.equal(await T(page, "graph-go-to-first-field").count(), 0);
-    const setup = T(page, "graph-new-run-setup-checks");
+    // UX-P2-F1: one setup command, in the Checks row. The footer only locates it: the first field
+    // would be an empty select, so "Go to first field" moves focus to that command instead.
+    assert.equal(await T(page, "graph-new-run-setup-checks").count(), 0);
+    const setup = T(page, "graph-template-setup-checks");
     assert.equal(await setup.isVisible(), true);
     assert.equal(await setup.isEnabled(), true);
+    await T(page, "graph-go-to-first-field").click();
+    await until(
+      async () => (await focused(page)) === "graph-template-setup-checks",
+      "the locator reaches the one setup command",
+    );
     assert.match(await text(T(page, "graph-template-unresolved")), zh ? /构建/ : /Build/);
     assert.deepEqual(await unnamedControls(page), [], "unnamed control");
     // It is navigation only: the draft survives the round trip and nothing is admitted.

@@ -137,6 +137,12 @@ const messages: Record<string, [string, string]> = {
   "stage.running-task": ["{step}: agent work is running", "{step}：智能体正在工作"],
   "stage.running-tool": ["{step}: running the configured check", "{step}：正在运行已配置的检查"],
   nothingNeeded: ["Nothing is needed from you right now.", "当前无需你操作。"],
+  // UX-P2-F1：运行记录说“运行中”，当前尝试却在等待或状态未确认：不能说“无需操作”，也不替用户裁决。
+  "stage.unconfirmed": [
+    "{step}: the native status is “{status}” while the run says Running. Treat it as unconfirmed.",
+    "{step}：原生状态为“{status}”，而运行记录为“运行中”。请视为未确认。",
+  ],
+  attemptStatus: ["Native attempt: {status}", "原生尝试：{status}"],
   // UX-P2：运行结果本身未确认且从未请求批准时，人工决定“未确定”，而不是“批准记录不完整”。
   "human.unconfirmed": [
     "Undetermined — the run's outcome is unconfirmed",
@@ -146,6 +152,11 @@ const messages: Record<string, [string, string]> = {
   testCounts: [
     "{count} discovered · {passed} passed · {failed} failed · {skipped} skipped",
     "发现 {count} 个 · 通过 {passed} · 失败 {failed} · 跳过 {skipped}",
+  ],
+  // UX-P2-F1：未被接受的证据下，运行器报告的数字只是原始报告，不是验证结果。
+  testCountsReported: [
+    "Reported by the test runner, not accepted: {count} discovered · {passed} passed · {failed} failed · {skipped} skipped",
+    "测试运行器的报告，未被接受：发现 {count} 个 · 通过 {passed} · 失败 {failed} · 跳过 {skipped}",
   ],
   historyTime: ["Time", "时间"],
   historyStatus: ["Execution", "执行"],
