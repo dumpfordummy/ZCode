@@ -434,12 +434,19 @@ async function stripPackagedSourcemapReferences(context) {
   });
 }
 
-function assertPackagedNativeResourcePolicy(context) {
+async function assertPackagedNativeResourcePolicy(context) {
   const appAsarPath = resolveAppAsarPath(context);
   const entries = parseAsarListWithPackState(
     runAsarCommandAndReadStdout(["list", "--is-pack", appAsarPath]),
   );
   const violations = findDesktopNativePackageViolations(entries, targetPlatform.key);
+  violations.push(
+    ...(await verifyStagedKoffi({
+      resourcesDir: resolvePackagedResourcesDir(context),
+      targetPlatform,
+      asarEntries: entries,
+    })),
+  );
   if (violations.length > 0) {
     // supportedArchitectures 允许工作区准备多平台依赖，但安装包只能携带目标平台资源。
     // 之前 Canvas 和 node-pty 的其他平台 native 被同时写进 asar/unpacked，包体被放大数百 MiB。
@@ -574,7 +581,7 @@ export default {
     await runTimedAsync("afterPack:stripPackagedSourcemapReferences", () =>
       stripPackagedSourcemapReferences(context),
     );
-    runTimedSync("afterPack:assertPackagedNativeResourcePolicy", () =>
+    await runTimedAsync("afterPack:assertPackagedNativeResourcePolicy", () =>
       assertPackagedNativeResourcePolicy(context),
     );
     runTimedSync("afterPack:assertPackagedNodePtyPrebuild", () =>
