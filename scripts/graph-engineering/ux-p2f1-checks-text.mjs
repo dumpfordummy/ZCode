@@ -20,8 +20,7 @@ const scenario = (variant) => ({
       node.open = true;
     });
     await flush(page);
-    const read = (id) =>
-      T(page, id).evaluate((node) => node.innerText.replace(/\s+/g, " ").trim());
+    const read = (id) => T(page, id).evaluate((node) => node.innerText.replace(/\s+/g, " ").trim());
     const record = {
       locale: variant.locale,
       status: await read("graph-recipe-read-state"),
