@@ -14,6 +14,8 @@ export function GraphRecipeReadStatus({
   const { intl } = useZCodeIntl();
   const t = (key: string, values?: Record<string, string | number>) =>
     intl.formatMessage({ id: `graph.preZ8.${key}` }, values);
+  // UX-P2-F1：没有任何已保存检查时，“设置项目检查”是这一块唯一的下一步，刷新退为次要。
+  const empty = state.status === "ready" && state.snapshot.recipes.length === 0;
   return (
     // UX-P2：状态句与“刷新 / 设置”同一行；读取失败的原因独占一行，保持可见。
     <section
@@ -40,7 +42,7 @@ export function GraphRecipeReadStatus({
       ) : null}
       <div className="flex flex-wrap gap-2">
         <Button
-          variant="outline"
+          variant={empty && onSetup ? "ghost" : "outline"}
           size="sm"
           disabled={state.status === "loading"}
           onClick={onRead}
@@ -50,7 +52,7 @@ export function GraphRecipeReadStatus({
         </Button>
         {onSetup ? (
           <Button
-            variant="ghost"
+            variant={empty ? "outline" : "ghost"}
             size="sm"
             onClick={onSetup}
             data-testid="graph-template-setup-checks"

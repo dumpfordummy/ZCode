@@ -14,7 +14,12 @@ import { graphRunResult } from "./graphRunResult.js";
 import { GraphRunResultBlock } from "./GraphRunResultBlock.js";
 import { GraphRunPermissionBlock } from "./GraphRunPermissionBlock.js";
 import { graphPermissionInfo } from "./graphPermissionInfo.js";
-import { graphHumanKey, graphIsEndStep, graphRunStage } from "./graphRunStage.js";
+import {
+  graphHumanKey,
+  graphRunStage,
+  graphSettledAtEnd,
+  graphStatusMismatch,
+} from "./graphRunStage.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 
 /** Facts that say nothing happened or nothing applies read as quiet lines, not as emphasised values. */
@@ -47,6 +52,7 @@ export function GraphRunOverview({
   const { intl } = useZCodeIntl();
   const summary = useMemo(() => graphRunSummary(run), [run]);
   const stage = graphRunStage(summary);
+  const mismatch = graphStatusMismatch(summary);
   const evidenceLabels = graphEvidenceLabels(summary.evidence);
   const outputs = graphRunOutputs(run).filter((output) => output.state !== "invalid");
   const result = useMemo(() => graphRunResult(run, summary), [run, summary]);
@@ -59,19 +65,33 @@ export function GraphRunOverview({
     ? m4("executionTestFailed")
     : u(`execution.${status}`);
   // 横幅的语气：真正的失败用 danger；需要你处理或结果不确定用 warning；其余是中性/进行中/完成。
-  const { tone, icon } = bannerStyle(result.kind, permission.length > 0, gates.length > 0, status);
+  const { tone, icon } = bannerStyle(
+    result.kind,
+    permission.length > 0,
+    gates.length > 0,
+    status,
+    Boolean(mismatch),
+  );
   const plainTitle =
     result.kind === "none" && permission.length === 0
-      ? status === "WaitingForUser"
-        ? u("needs.question", { step: step?.name ?? "", run: run.definition.name })
+      ? status === "WaitingForUser" || mismatch?.kind === "question"
+        ? u("needs.question", {
+            step: (status === "WaitingForUser" ? step?.name : mismatch?.step) ?? "",
+            run: run.definition.name,
+          })
         : gates.length
           ? u(gates[0]!.canContinue ? "needs.continuation" : "needs.approval", {
               step: gates[0]!.name,
               run: run.definition.name,
             })
-          : stage.kind !== "none"
-            ? u(`stage.${stage.kind}`, { step: stage.step })
-            : u(`execution.${status}`)
+          : mismatch
+            ? u("stage.unconfirmed", {
+                step: mismatch.step,
+                status: u(`stepStatus.${mismatch.status}`),
+              })
+            : stage.kind !== "none"
+              ? u(`stage.${stage.kind}`, { step: stage.step })
+              : u(`execution.${status}`)
       : undefined;
   // UX-P2：过期证据的横幅要自己说明原因，复用审批检查器已有的说明，不另造一句。
   const staleStop = result.kind === "none" && status === "StaleEvidence";
@@ -142,6 +162,12 @@ export function GraphRunOverview({
           label={u("execution")}
           state={status}
           value={executionText}
+          note={
+            mismatch
+              ? u("attemptStatus", { status: u(`stepStatus.${mismatch.status}`) })
+              : undefined
+          }
+          noteTestId="graph-run-attempt-status"
           quiet
         />
         <Fact
@@ -171,8 +197,8 @@ export function GraphRunOverview({
           value={u(graphHumanKey(summary))}
           quiet={quietHuman.has(summary.human.state)}
         />
-        {/* UX-P2：终点 End 节点不是有信息量的“当前步骤”，步骤条已显示它。 */}
-        {step && !graphIsEndStep(summary) ? (
+        {/* UX-P2-F1：仅“已完成”的运行把 End 节点当作无信息的当前步骤；其他状态的 End 游标要如实显示。 */}
+        {step && !graphSettledAtEnd(summary) ? (
           <div
             data-testid="graph-run-current-step"
             data-node-id={step.nodeId}
@@ -214,12 +240,15 @@ function bannerStyle(
   permission: boolean,
   gate: boolean,
   status: string,
+  mismatch: boolean,
 ): { tone: GraphBannerTone; icon: GraphBannerIcon } {
   if (kind === "test-failed") return { tone: "danger", icon: "failure" };
   if (kind !== "none") return { tone: "warning", icon: "alert" };
   if (permission) return { tone: "warning", icon: "shield" };
   if (gate || ["WaitingForUser", "WaitingForPermission", "AwaitingContinuation"].includes(status))
     return { tone: "warning", icon: "alert" };
+  // UX-P2-F1：运行说在运行、尝试却在等待或未确认时，不能显示为进行中的旋转图标。
+  if (mismatch) return { tone: "warning", icon: "alert" };
   if (["Starting", "Running"].includes(status)) return { tone: "progress", icon: "progress" };
   if (status === "Completed") return { tone: "success", icon: "done" };
   if (["Interrupted", "Unknown", "CancelRequested", "StaleEvidence"].includes(status))
@@ -233,6 +262,7 @@ function Fact({
   state,
   value,
   note,
+  noteTestId,
   quiet = false,
 }: {
   testId: string;
@@ -240,6 +270,7 @@ function Fact({
   state: string;
   value: string;
   note?: string;
+  noteTestId?: string;
   quiet?: boolean;
 }) {
   return (
@@ -248,7 +279,12 @@ function Fact({
       <dd className={quiet ? "text-foreground-subtle" : "font-medium"}>
         {value}
         {note ? (
-          <span className="block text-ui-sm font-normal text-foreground-subtle">{note}</span>
+          <span
+            className="block text-ui-sm font-normal text-foreground-subtle"
+            data-testid={noteTestId}
+          >
+            {note}
+          </span>
         ) : null}
       </dd>
     </div>

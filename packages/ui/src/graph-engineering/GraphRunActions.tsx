@@ -7,7 +7,7 @@ import type { GraphPanelProps } from "./graphEngineeringView.js";
 import { useGraphRunText } from "./GraphRunText.js";
 import { graphEvidenceActionLabels } from "./graphRunPresentation.js";
 import type { GraphRunResult } from "./graphRunResult.js";
-import { graphIsEndStep } from "./graphRunStage.js";
+import { graphSettledAtEnd, graphStatusMismatch } from "./graphRunStage.js";
 
 export type GraphRunInspection =
   | { kind: "node"; nodeId: string; attemptId?: string }
@@ -63,7 +63,10 @@ export function GraphRunActions({
   const evidenceActionLabels = graphEvidenceActionLabels(summary.evidence);
   // UX-P2：完成的运行停在 End 节点，“检查 end 步骤”没有可做的事；其他停止状态保留它，
   // 以免“无需操作”被误显示在一个失败或停止的运行上（End 仍在步骤条与步骤列表中）。
-  const settledAtEnd = run.status === "Completed" && graphIsEndStep(summary);
+  // UX-P2-F1：与“当前步骤”事实共用同一个谓词，两处不再各自判断。
+  const settledAtEnd = graphSettledAtEnd(summary);
+  // UX-P2-F1：运行说在运行、尝试却未确认时，也给出“先检查拥有的原生任务”的说明（只是文字，不加恢复操作）。
+  const unconfirmedAttempt = graphStatusMismatch(summary)?.kind === "unconfirmed";
   const stepButton =
     step &&
     !settledAtEnd &&
@@ -145,7 +148,9 @@ export function GraphRunActions({
           ))}
         </div>
       ) : null}
-      {uncertain ? <p className="text-ui-sm text-warning">{u("inspectUnknown")}</p> : null}
+      {uncertain || unconfirmedAttempt ? (
+        <p className="text-ui-sm text-warning">{u("inspectUnknown")}</p>
+      ) : null}
       {evidenceActionLabels.map((key) => (
         <p key={key} className="text-ui-sm text-foreground-subtle">
           {u(key)}

@@ -16,6 +16,9 @@ const keys = [
   "human.unconfirmed",
   "evidenceChecks",
   "testCounts",
+  "stage.unconfirmed",
+  "attemptStatus",
+  "testCountsReported",
 ];
 
 test("every UX-P2 run message exists in English and Simplified Chinese with matching placeholders", () => {
@@ -46,4 +49,45 @@ test("the saved-checks status keeps a count placeholder and states no run claim 
   assert.deepEqual(placeholders(enUS["graph.preZ8.checksLoaded"]!), ["count"]);
   assert.deepEqual(placeholders(zhCN["graph.preZ8.checksLoaded"]!), ["count"]);
   assert.doesNotMatch(enUS["graph.preZ8.checksLoaded"]!, /ran|passed|verified/i);
+});
+
+test("UX-P2-F1: reported counts say they are not accepted; accepted counts keep their form", () => {
+  for (const [messages, notAccepted] of [
+    [enUS, /not accepted/i],
+    [zhCN, /未被接受/],
+  ] as const) {
+    assert.match(messages["graph.run.testCountsReported"]!, notAccepted);
+    assert.doesNotMatch(
+      messages["graph.run.testCounts"]!,
+      notAccepted,
+      "accepted counts unchanged",
+    );
+    assert.deepEqual(
+      placeholders(messages["graph.run.testCountsReported"]!),
+      placeholders(messages["graph.run.testCounts"]!),
+      "the same four counts",
+    );
+  }
+});
+
+test("UX-P2-F1: the disagreement message names the step and the attempt status, and never reassures", () => {
+  for (const messages of [enUS, zhCN]) {
+    assert.deepEqual(placeholders(messages["graph.run.stage.unconfirmed"]!), ["status", "step"]);
+    assert.deepEqual(placeholders(messages["graph.run.attemptStatus"]!), ["status"]);
+    assert.doesNotMatch(messages["graph.run.stage.unconfirmed"]!, /nothing is needed|无需/i);
+  }
+  assert.match(enUS["graph.run.stage.unconfirmed"]!, /unconfirmed/);
+  assert.match(zhCN["graph.run.stage.unconfirmed"]!, /未确认/);
+});
+
+test("UX-P2-F1: every attempt status the disagreement can name has a label in both languages", () => {
+  for (const status of [
+    "WaitingForPermission",
+    "WaitingForUser",
+    "Unknown",
+    "Interrupted",
+    "CancelRequested",
+  ])
+    for (const messages of [enUS, zhCN])
+      assert.ok(messages[`graph.run.stepStatus.${status}`]?.trim(), status);
 });
