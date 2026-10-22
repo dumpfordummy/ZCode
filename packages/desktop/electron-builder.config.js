@@ -20,7 +20,7 @@ import {
   resolveDesktopArtifactSuffix,
   resolveDesktopProductIdentity,
 } from "./scripts/desktop-product-identity.mjs";
-import { verifyStagedKoffi } from "./scripts/koffi-package-assets.mjs";
+import { cliKoffiExtraResources, verifyStagedKoffi } from "./scripts/koffi-package-assets.mjs";
 import { createGraphWindowsAsarIntegrityLifecycle } from "./scripts/windows-asar-integrity.mjs";
 const ELECTRON_BUILDER_ARCH = {
   1: "x64",
@@ -434,12 +434,19 @@ async function stripPackagedSourcemapReferences(context) {
   });
 }
 
-function assertPackagedNativeResourcePolicy(context) {
+async function assertPackagedNativeResourcePolicy(context) {
   const appAsarPath = resolveAppAsarPath(context);
   const entries = parseAsarListWithPackState(
     runAsarCommandAndReadStdout(["list", "--is-pack", appAsarPath]),
   );
   const violations = findDesktopNativePackageViolations(entries, targetPlatform.key);
+  violations.push(
+    ...(await verifyStagedKoffi({
+      resourcesDir: resolvePackagedResourcesDir(context),
+      targetPlatform,
+      asarEntries: entries,
+    })),
+  );
   if (violations.length > 0) {
     // supportedArchitectures 允许工作区准备多平台依赖，但安装包只能携带目标平台资源。
     // 之前 Canvas 和 node-pty 的其他平台 native 被同时写进 asar/unpacked，包体被放大数百 MiB。
@@ -574,7 +581,7 @@ export default {
     await runTimedAsync("afterPack:stripPackagedSourcemapReferences", () =>
       stripPackagedSourcemapReferences(context),
     );
-    runTimedSync("afterPack:assertPackagedNativeResourcePolicy", () =>
+    await runTimedAsync("afterPack:assertPackagedNativeResourcePolicy", () =>
       assertPackagedNativeResourcePolicy(context),
     );
     runTimedSync("afterPack:assertPackagedNodePtyPrebuild", () =>
@@ -671,6 +678,7 @@ export default {
       to: "glm",
       filter: ["**/*", "!**/*.map"],
     },
+    ...cliKoffiExtraResources(targetPlatform),
     {
       // agent shell 之前完全依赖宿主系统 PATH，GUI 启动时经常拿不到用户自己装的 rg。
       // 这里把 ripgrep 作为桌面端内置 runtime tool 打进 resources/tools，
